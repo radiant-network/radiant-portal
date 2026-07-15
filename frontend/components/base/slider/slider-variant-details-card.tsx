@@ -359,6 +359,7 @@ export const PredictionCard = ({
             size="sm"
             href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`}
             target="_blank"
+            mono
           >
             {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
           </AnchorLink>
@@ -385,7 +386,7 @@ export const PredictionCard = ({
         }
       >
         {germline_pc_wgs_affected && germline_pn_wgs_affected && germline_pf_wgs_affected?.toExponential(2) ? (
-          `${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`
+          <span className="font-mono">{`${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`}</span>
         ) : (
           <EmptyField />
         )}
@@ -411,7 +412,7 @@ export const PredictionCard = ({
         {germline_pc_wgs_not_affected &&
         germline_pn_wgs_not_affected &&
         germline_pf_wgs_not_affected?.toExponential(2) ? (
-          `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
+          <span className="font-mono">{`${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`}</span>
         ) : (
           <EmptyField />
         )}
@@ -426,6 +427,7 @@ export const PredictionCard = ({
             size="sm"
             href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
             target="_blank"
+            mono
           >
             {toExponentialNotation(gnomad_v3_af)}
           </AnchorLink>
@@ -443,7 +445,7 @@ export const PredictionCard = ({
   if (cadd_phred) {
     functionalScores.push(
       <DescriptionRow key="cadd-phred" label={t('occurrence_expand.functional_scores.cadd_phred')}>
-        {cadd_phred.toExponential(2)}
+        <span className="font-mono">{cadd_phred.toExponential(2)}</span>
       </DescriptionRow>,
     );
   }
@@ -452,7 +454,7 @@ export const PredictionCard = ({
   if (cadd_score) {
     functionalScores.push(
       <DescriptionRow key="cadd-raw" label={t('occurrence_expand.functional_scores.cadd_raw')}>
-        {cadd_score.toExponential(2)}
+        <span className="font-mono">{cadd_score.toExponential(2)}</span>
       </DescriptionRow>,
     );
   }
@@ -461,7 +463,7 @@ export const PredictionCard = ({
   if (dann_score) {
     functionalScores.push(
       <DescriptionRow key="dann" label={t('occurrence_expand.functional_scores.dann')}>
-        {dann_score}
+        <span className="font-mono">{dann_score}</span>
       </DescriptionRow>,
     );
   }
@@ -470,8 +472,10 @@ export const PredictionCard = ({
   if (lrt_score) {
     functionalScores.push(
       <DescriptionRow key="lrt" label={t('occurrence_expand.functional_scores.lrt')}>
-        {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
-        {lrt_score && ` (${lrt_score})`}
+        <span className="font-mono">
+          {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
+          {lrt_score && ` (${lrt_score})`}
+        </span>
       </DescriptionRow>,
     );
   }
@@ -480,8 +484,10 @@ export const PredictionCard = ({
   if (sift_pred) {
     functionalScores.push(
       <DescriptionRow key="sift" label={t('occurrence_expand.functional_scores.sift')}>
-        {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
-        {sift_score && ` (${sift_score})`}
+        <span className="font-mono">
+          {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
+          {sift_score && ` (${sift_score})`}
+        </span>
       </DescriptionRow>,
     );
   }
@@ -490,8 +496,10 @@ export const PredictionCard = ({
   if (fathmm_pred) {
     functionalScores.push(
       <DescriptionRow key="fathmm" label={t('occurrence_expand.functional_scores.fathmm')}>
-        {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
-        {fathmm_score && ` (${fathmm_score})`}
+        <span className="font-mono">
+          {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
+          {fathmm_score && ` (${fathmm_score})`}
+        </span>
       </DescriptionRow>,
     );
   }
@@ -500,7 +508,7 @@ export const PredictionCard = ({
   if (revel_score) {
     functionalScores.push(
       <DescriptionRow key="revel" label={t('occurrence_expand.functional_scores.revel')}>
-        {revel_score}
+        <span className="font-mono">{revel_score}</span>
       </DescriptionRow>,
     );
   }
@@ -509,8 +517,10 @@ export const PredictionCard = ({
   if (polyphen2_hvar_pred) {
     functionalScores.push(
       <DescriptionRow key="polyphen2-hvar" label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
-        {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
-        {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
+        <span className="font-mono">
+          {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
+          {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
+        </span>
       </DescriptionRow>,
     );
   }
@@ -588,6 +598,7 @@ export const PredictionCard = ({
                   href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
                   target="_blank"
                   size="sm"
+                  mono
                 >
                   {toExponentialNotationAtThreshold(gnomad_pli)}
                 </AnchorLink>
@@ -601,6 +612,7 @@ export const PredictionCard = ({
                   href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
                   target="_blank"
                   size="sm"
+                  mono
                 >
                   {toExponentialNotationAtThreshold(gnomad_loeuf)}
                 </AnchorLink>
@@ -615,12 +627,15 @@ export const PredictionCard = ({
                     href={`https://spliceailookup.broadinstitute.org/#variant=${hgvsg}&hg=38`}
                     target="_blank"
                     size="sm"
+                    mono
                   >
                     {spliceai_ds}
                   </AnchorLink>
 
                   {spliceai_type.map(v => (
-                    <Badge key={v}>{v}</Badge>
+                    <Badge key={v} variant="outline">
+                      {v}
+                    </Badge>
                   ))}
                 </div>
               ) : (
