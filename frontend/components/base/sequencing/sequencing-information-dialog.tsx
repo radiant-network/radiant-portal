@@ -21,8 +21,6 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { sequencingApi } from '@/utils/api';
 
-import EmptyField from '../information/empty-field';
-
 type SequencingInput = {
   seqId: string;
 };
@@ -70,9 +68,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
         {/* Status */}
         <DialogBody className="flex flex-col w-full md:justify-between md:flex-row">
           <div className="flex flex-col gap-2 flex-1">
-            <h2 className="text-sm font-semibold">
-              {t('case_entity.details.sequencing')} {data?.seq_id}
-            </h2>
+            <h2 className="text-sm font-semibold">{t('case_entity.details.sequencing', { seqId: data?.seq_id })}</h2>
 
             <InformationField label={t('case_entity.details.status')}>
               <StatusCell status={data?.status_code as Status} />
@@ -152,21 +148,28 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
           <Separator className="block my-8 md:hidden" />
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
-              {t('case_entity.details.sample')} {data?.sample_id ?? <EmptyField />}
+              {t('case_entity.details.sample_submitter_id', { sampleId: data?.submitter_sample_id })}
             </h2>
 
             {/* Type */}
-            <InformationField label={t('case_entity.details.type')}>{data?.sample_type_code}</InformationField>
+            <InformationField label={t('case_entity.details.type')}>
+              {data?.sample_type_code && (
+                <Badge className="uppercase" variant="secondary">
+                  {data.sample_type_code}
+                </Badge>
+              )}
+            </InformationField>
 
             {/* Tissue site */}
             <InformationField label={t('case_entity.details.tissue_site')}>{data?.tissue_site}</InformationField>
 
             {/* Histology */}
-            <InformationField label={t('case_entity.details.histology_code')}>{data?.histology_code}</InformationField>
-
-            {/* Submitter ID */}
-            <InformationField label={t('case_entity.details.submitter_id')}>
-              {data?.submitter_sample_id}
+            <InformationField label={t('case_entity.details.histology_code')}>
+              {data?.histology_code && (
+                <Badge className="capitalize" variant="outline">
+                  {data.histology_code}
+                </Badge>
+              )}
             </InformationField>
 
             {/* Patient ID */}
