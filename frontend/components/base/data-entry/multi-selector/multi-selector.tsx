@@ -143,28 +143,41 @@ function MultiSelector({
       return;
     }
 
+    // ellipsis with +n when badge are overflowing
     const calculateVisibleBadges = () => {
       const container = badgesContainerRef.current;
       if (!container) return;
 
-      const badges = Array.from(container.children) as HTMLElement[];
-      if (badges.length === 0) return;
+      const children = Array.from(container.children) as HTMLElement[];
+      if (children.length === 0) return;
+
+      const hasOverflowBadge = selected.length > visibleBadgesCount;
+      const renderedBadgeCount = hasOverflowBadge ? Math.max(0, children.length - 2) : Math.max(0, children.length - 1);
+      const renderedBadges = children.slice(0, renderedBadgeCount);
+
+      if (renderedBadges.length === 0) {
+        setVisibleBadgesCount(1);
+        return;
+      }
 
       const containerWidth = container.offsetWidth;
       const gap = 4; // gap-1 = 4px
+      const overflowBadgeWidth = 40; // approx width of the "+N" badge
+      const inputWidth = 20; // reserved width for the input cursor
+
+      // Estimate width for unrendered badges via the average of the rendered ones.
+      const avgWidth = renderedBadges.reduce((sum, b) => sum + b.offsetWidth, 0) / renderedBadges.length;
+
       let totalWidth = 0;
       let count = 0;
-
-      // Reserve space for the "+X" badge and input (approximately 60px)
-      const reservedSpace = 60;
-
-      for (let i = 0; i < badges.length; i++) {
-        const badgeWidth = badges[i].offsetWidth;
+      for (let i = 0; i < selected.length; i++) {
+        const badgeWidth = i < renderedBadges.length ? renderedBadges[i].offsetWidth : avgWidth;
         totalWidth += badgeWidth + (i > 0 ? gap : 0);
 
-        if (totalWidth + reservedSpace > containerWidth) {
-          break;
-        }
+        const isLast = i === selected.length - 1;
+        const reserved = isLast ? inputWidth : overflowBadgeWidth + gap + inputWidth;
+
+        if (totalWidth + reserved > containerWidth) break;
         count++;
       }
 
@@ -477,47 +490,48 @@ function MultiSelector({
               {EmptyItem()}
               {CreatableItem()}
               {!selectFirstItem && <CommandItem value="-" className="hidden" />}
-              {Object.entries(options).map(([key, dropdowns]) => (
-                <CommandGroup key={key} heading={key} className="h-full overflow-auto">
-                  <>
-                    {dropdowns.map(option => {
-                      const isSelected = selected.map(s => s.value)?.includes(option.value);
+              {Object.entries(options).map(([key, dropdowns]) => {
+                const isMaxReached = selected.length >= maxSelected;
 
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          value={option.value}
-                          disabled={option.disable}
-                          onSelect={() => {
-                            if (selected.length >= maxSelected) {
-                              onMaxSelected?.(selected.length);
-                              return;
-                            }
-                            setInputValue('');
-                            // Clear search results by reverting to default options
-                            setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+                return (
+                  <CommandGroup key={key} heading={key} className="h-full overflow-auto">
+                    <>
+                      {dropdowns.map(option => {
+                        const isSelected = selected.some(s => s.value === option.value);
+                        const isDisabled = option.disable || (isMaxReached && !isSelected);
 
-                            let newOptions: MultiSelectorOption[] = [];
+                        return (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            disabled={isDisabled}
+                            onSelect={() => {
+                              if (!isSelected && selected.length >= maxSelected) {
+                                onMaxSelected?.(selected.length);
+                                return;
+                              }
 
-                            if (selected.find(s => s.value === option.value)) {
-                              newOptions = selected.filter(s => s.value !== option.value);
-                            } else {
-                              newOptions = [...selected, option];
-                            }
+                              setInputValue('');
+                              setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
 
-                            setSelected(newOptions);
-                            onChange?.(newOptions.map(o => o.value));
-                          }}
-                          className={cn('cursor-pointer', option.disable && 'cursor-default text-muted-foreground')}
-                        >
-                          <span className="flex-1">{option.label}</span>
-                          {isSelected ? <Check className="w-4" /> : null}
-                        </CommandItem>
-                      );
-                    })}
-                  </>
-                </CommandGroup>
-              ))}
+                              const newOptions = isSelected
+                                ? selected.filter(s => s.value !== option.value)
+                                : [...selected, option];
+
+                              setSelected(newOptions);
+                              onChange?.(newOptions.map(o => o.value));
+                            }}
+                            className={cn('cursor-pointer', isDisabled && 'cursor-default text-muted-foreground')}
+                          >
+                            <span className="flex-1">{option.label}</span>
+                            {isSelected ? <Check className="w-4" /> : null}
+                          </CommandItem>
+                        );
+                      })}
+                    </>
+                  </CommandGroup>
+                );
+              })}
             </>
           )}
         </CommandList>

@@ -61,6 +61,34 @@ export const Default: Story = {
   },
 };
 
+export const WithMaxSelected: Story = {
+  render: () => {
+    const [values, setValues] = useState<string[]>(['Nextjs', 'vite']);
+
+    return (
+      <StorySection title="Max selected = 3 — unselected items are disabled once the cap is reached; deselect one to re-enable them.">
+        <MultiSelector
+          value={values}
+          onChange={newValues => {
+            setValues(newValues);
+            action('onChange')(newValues);
+          }}
+          openOnFocus
+          onMaxSelected={limit => action('onMaxSelected')(limit)}
+          maxSelected={3}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+          commandProps={{
+            className: 'max-w-[300px]',
+          }}
+          defaultOptions={defaultOptions}
+          hidePlaceholderWhenSelected
+        />
+      </StorySection>
+    );
+  },
+};
+
 export const AsyncSearch: Story = {
   render: () => {
     const [values, setValues] = useState<string[]>(['Nextjs']);
