@@ -37,7 +37,7 @@ function ConsequenceIndicator({ consequence, vepImpact, size, className, ...prop
     <div className={styles.base({ className })} {...props}>
       <ImpactIndicator value={vepImpact} size={size} />
       <span className="text-ellipsis overflow-hidden">
-        {t(`common.filters.values.consequence.${sanitize(consequence)}`, {
+        {t(`common.facets.values.consequence.${sanitize(consequence)}`, {
           defaultValue: consequence,
         })}
       </span>

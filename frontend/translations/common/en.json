@@ -443,7 +443,7 @@
       "de": "German",
       "es": "Spanish"
     },
-    "filters": {
+    "facets": {
       "labels": {
         "program": "Program",
         "domain": "Domain",

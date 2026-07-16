@@ -1,7 +1,7 @@
 import { FiltersValue } from '@/api/api';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
-const transmissionModeTranslationKeyPrefix = 'common.filters.values.transmission_mode';
+const transmissionModeTranslationKeyPrefix = 'common.facets.values.transmission_mode';
 
 export default function getItemTransmissionMode(options: FiltersValue[], t: any): IFilterButtonItem[] {
   return options.map(option => ({

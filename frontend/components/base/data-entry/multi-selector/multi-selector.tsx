@@ -311,12 +311,12 @@ function MultiSelector({
   const EmptyItem = useCallback(() => {
     // For async search that showing emptyIndicator
     if (onSearch && !creatable && Object.keys(options).length === 0) {
-      return <div className="p-2 py-4 text-center text-sm">{t('common.filters.no_values_found')}</div>;
+      return <div className="p-2 py-4 text-center text-sm">{t('common.facets.no_values_found')}</div>;
     }
 
     return (
       <CommandEmpty>
-        {emptyIndicator || <div className="text-center text-sm">{t('common.filters.no_values_found')}</div>}
+        {emptyIndicator || <div className="text-center text-sm">{t('common.facets.no_values_found')}</div>}
       </CommandEmpty>
     );
   }, [creatable, emptyIndicator, onSearch, options]);

@@ -302,7 +302,7 @@ function DataTableFilters({
         {/* Additional filters control button - only show if there are hidden options */}
         {hiddenFilterOptions.length > 0 && (
           <FilterButton
-            label={t('common.filters.more', 'More')}
+            label={t('common.facets.more', 'More')}
             options={hiddenFilterOptions}
             selected={changedFilterButtons}
             onSelect={makeFiltersVisible}

@@ -12,7 +12,6 @@ type LabelOperatorQueryPillProps = {
 
 /**
  * Label for a pill
- * @TODO: Change dictionary key from filters to facet
  *
  * The label must match the facet title, so it is resolved from the aggregation's
  * `translation_key` (like the facet does), not the raw sqon field key.
@@ -36,7 +35,7 @@ function LabelOperator({ field, operator }: LabelOperatorQueryPillProps) {
   return (
     <div className="flex items-center">
       <span className="ml-1 mr-0.5 text-xs font-medium">
-        {t(`common.filters.labels.${translationKey}`, { defaultValue: lazyTranslate(field) })}
+        {t(`common.facets.labels.${translationKey}`, { defaultValue: lazyTranslate(field) })}
       </span>
       <span className="ml-1 mr-0.5">{operator}</span>
     </div>

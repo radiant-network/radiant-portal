@@ -156,7 +156,7 @@ function NumericalInterval({ isLoading, field, min, max, decimal }: IntervalProp
   return (
     <div id={`${field}_interval`} className="mb-1">
       <TextMuted size="xs">
-        {t('common.filters.labels.actual_interval', {
+        {t('common.facets.labels.actual_interval', {
           min: min !== undefined ? thousandNumberFormat(min, options) : undefined,
           max: max !== undefined ? thousandNumberFormat(max, options) : undefined,
         })}
@@ -203,33 +203,33 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   const rangeOperators = useMemo(
     () => ({
       [RangeOperators.GreaterThan]: {
-        display: t('common.filters.operators.greater_than'),
-        dropdown: t('common.filters.operators.greater_than'),
+        display: t('common.facets.operators.greater_than'),
+        dropdown: t('common.facets.operators.greater_than'),
         icon: GreaterThanOperatorIcon,
       },
       [RangeOperators.LessThan]: {
-        display: t('common.filters.operators.less_than'),
-        dropdown: t('common.filters.operators.less_than'),
+        display: t('common.facets.operators.less_than'),
+        dropdown: t('common.facets.operators.less_than'),
         icon: LessThanOperatorIcon,
       },
       [RangeOperators.Between]: {
-        display: t('common.filters.operators.between'),
-        dropdown: t('common.filters.operators.between'),
+        display: t('common.facets.operators.between'),
+        dropdown: t('common.facets.operators.between'),
         icon: ElementOperatorIcon,
       },
       [RangeOperators.GreaterThanOrEqualTo]: {
-        display: t('common.filters.operators.greater_than_or_equal'),
-        dropdown: t('common.filters.operators.greater_than_or_equal'),
+        display: t('common.facets.operators.greater_than_or_equal'),
+        dropdown: t('common.facets.operators.greater_than_or_equal'),
         icon: GreaterThanOrEqualOperatorIcon,
       },
       [RangeOperators.LessThanOrEqualTo]: {
-        display: t('common.filters.operators.less_than_or_equal'),
-        dropdown: t('common.filters.operators.less_than_or_equal'),
+        display: t('common.facets.operators.less_than_or_equal'),
+        dropdown: t('common.facets.operators.less_than_or_equal'),
         icon: LessThanOrEqualOperatorIcon,
       },
       [RangeOperators.In]: {
-        display: t('common.filters.operators.in'),
-        dropdown: t('common.filters.operators.in'),
+        display: t('common.facets.operators.in'),
+        dropdown: t('common.facets.operators.in'),
         icon: EqualOperatorIcon,
       },
     }),
@@ -366,8 +366,8 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
             <div id={`${field.key}_operator`}>
               <Select value={selectedRange} onValueChange={handleRangeValueChanged}>
                 <SelectTrigger size="sm">
-                  <SelectValue placeholder={t('common.filters.operators.select_operator')}>
-                    {rangeOperators[selectedRange]?.display || t('common.filters.operators.unknown')}
+                  <SelectValue placeholder={t('common.facets.operators.select_operator')}>
+                    {rangeOperators[selectedRange]?.display || t('common.facets.operators.unknown')}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -452,7 +452,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
           <Button size="2xs" variant="ghost" onClick={reset} disabled={isPristine} id={`${field.key}_clear`}>
-            {t('common.filters.buttons.clear')}
+            {t('common.facets.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
             <Button
@@ -463,7 +463,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
               id={`${field.key}_apply`}
               disabled={isApplyDisabled}
             >
-              {t('common.filters.buttons.apply')}
+              {t('common.facets.buttons.apply')}
             </Button>
           </div>
         </div>

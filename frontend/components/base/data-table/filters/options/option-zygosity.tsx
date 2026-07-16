@@ -1,7 +1,7 @@
 import { FiltersValue } from '@/api/api';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
-const zygosityTranslationKeyPrefix = 'common.filters.values.zygosity';
+const zygosityTranslationKeyPrefix = 'common.facets.values.zygosity';
 
 export default function getItemZygosity(options: FiltersValue[], t: any): IFilterButtonItem[] {
   return options.map(option => ({

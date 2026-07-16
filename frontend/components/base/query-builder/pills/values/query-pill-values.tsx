@@ -47,7 +47,7 @@ function QueryPillValues({ sqon, ...props }: QueryPillValuesProps) {
         values.map((val, index) => (
           <div key={`${val}-${index}`}>
             <span>
-              {t(`common.filters.values.${sqon.content.field}.${sanitize(val)}`, {
+              {t(`common.facets.values.${sqon.content.field}.${sanitize(val)}`, {
                 defaultValue: lazyTranslate(val),
               })}
             </span>
