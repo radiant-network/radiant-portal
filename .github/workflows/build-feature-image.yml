@@ -10,7 +10,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  NAMESPACE: radiant-network
   IMAGE_NAME: radiant-portal
 
 jobs:
@@ -30,8 +29,10 @@ jobs:
           release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
           release=$(echo "$release" | sed 's/^[a-z]*-[0-9]*-//')
+          namespace=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           ts=$(date +%s)
           echo "value=feature-${release}-${GITHUB_SHA:0:7}-${ts}" >> "$GITHUB_OUTPUT"
+          echo "namespace=${namespace}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
@@ -44,4 +45,4 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile.radiant
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
+          tags: ${{ env.REGISTRY }}/${{ steps.tag.outputs.namespace }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
