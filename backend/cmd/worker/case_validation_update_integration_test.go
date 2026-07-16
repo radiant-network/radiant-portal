@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -103,6 +106,91 @@ func Test_ProcessBatch_UpdateCase_ReplacesClinicalData_LeavesSeqExpAndTasks(t *t
 		var tasksAfter int64
 		db.Table("task_context").Where("sequencing_experiment_id = ?", seqExpsBefore[0].SequencingExperimentID).Count(&tasksAfter)
 		assert.Equal(t, tasksBefore, tasksAfter)
+	})
+}
+
+// updateCaseWithSeqAndTask extends the base PUT payload with the base case's sequencing
+// experiment (NA12891 / S13225 / CQGC) and one new output-only task on that aliquot — the
+// merge-if-present path. Same task shape as the PATCH test (single-aliquot, not case-related,
+// no input documents required).
+func updateCaseWithSeqAndTask(submitterCaseId, outURL, outName string, outSize int64) []types.UpdateCaseBatch {
+	u := updateCaseForBase(submitterCaseId)
+	size := outSize
+	u[0].SequencingExperiments = []*types.CaseSequencingExperimentBatch{
+		{Aliquot: "NA12891", SampleOrganizationCode: "CQGC", SubmitterSampleId: "S13225"},
+	}
+	u[0].Tasks = []*types.CaseTaskBatch{
+		{
+			TypeCode:        "alignment_germline_variant_calling",
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "Dragen",
+			PipelineVersion: "4.4.4",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: outName, Size: &size, Url: outURL},
+			},
+		},
+	}
+	return u
+}
+
+// uploadUpdateTaskDocuments stages each task's output document in MinIO and back-fills the
+// worker-computed hash — the UpdateCaseBatch counterpart of uploadPatchTaskDocuments.
+func uploadUpdateTaskDocuments(ctx context.Context, client *minio.Client, updates []types.UpdateCaseBatch) {
+	store, _ := utils.NewS3Store()
+	for _, u := range updates {
+		for _, task := range u.Tasks {
+			for _, out := range task.OutputDocuments {
+				content := make([]byte, int(*out.Size))
+				for i := range content {
+					content[i] = 'a'
+				}
+				location, _ := utils.ExtractS3BucketAndKey(out.Url)
+				_ = createDocument(ctx, client, location.Bucket, location.Key, content)
+				metadata, _ := store.GetMetadata(out.Url)
+				out.Hash = metadata.Hash
+			}
+		}
+	}
+}
+
+// Merge-if-present: a PUT that carries sequencing_experiments + a new task attaches the task
+// (and its output document) to the existing case, on top of the scalar + clinical replace.
+func Test_ProcessBatch_UpdateCase_AttachesSeqAndTasks_WhenPresent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+		const submitterCaseId = "CASE-UPDATE-B"
+		const outURL = "s3://test-bucket/CASE-UPDATE-B.update.recal.cram"
+		const outName = "CASE-UPDATE-B.update.recal.cram"
+
+		seedBaseCase(t, ctx, client, db, submitterCaseId)
+
+		updates := updateCaseWithSeqAndTask(submitterCaseId, outURL, outName, 11)
+		uploadUpdateTaskDocuments(ctx, client, updates)
+		updateBytes, _ := json.Marshal(updates)
+
+		id := insertPayloadAndProcessBatch(db, string(updateBytes), types.BatchStatusPending, types.UpdateCaseBatchType, false, "user123", "2025-12-06")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		// Scalar + clinical replace still applied.
+		var after types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, submitterCaseId).First(&after)
+		assert.Equal(t, "completed", after.StatusCode)
+		assert.Equal(t, "updated by PUT", after.Note)
+
+		// The task's output document was persisted and linked to a freshly created task.
+		var doc types.Document
+		db.Table("document").Where("url = ?", outURL).First(&doc)
+		assert.NotZero(t, doc.ID, "update output document should be persisted")
+		assert.Equal(t, "alignment", doc.DataTypeCode)
+
+		var thd types.TaskHasDocument
+		db.Table("task_has_document").Where("document_id = ? AND type = ?", doc.ID, "output").First(&thd)
+		assert.NotZero(t, thd.TaskID, "update document should be linked to a task")
+
+		var task types.Task
+		db.Table("task").Where("id = ?", thd.TaskID).First(&task)
+		assert.Equal(t, "alignment_germline_variant_calling", task.TaskTypeCode)
 	})
 }
 

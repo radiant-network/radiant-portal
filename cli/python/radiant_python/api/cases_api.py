@@ -2493,7 +2493,7 @@ class CasesApi:
     ) -> CreateBatchResponse:
         """Update existing cases (batch)
 
-        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -2572,7 +2572,7 @@ class CasesApi:
     ) -> ApiResponse[CreateBatchResponse]:
         """Update existing cases (batch)
 
-        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -2651,7 +2651,7 @@ class CasesApi:
     ) -> RESTResponseType:
         """Update existing cases (batch)
 
-        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+        Replaces a case's scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
 
         :param tenant: Tenant code (required)
         :type tenant: str

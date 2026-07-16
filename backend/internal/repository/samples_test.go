@@ -133,7 +133,7 @@ func Test_UpdateSample_ExistingRow(t *testing.T) {
 			TypeCode:          "dna",
 			TissueSite:        "Blood",
 			HistologyCode:     "tumoral",
-			PatientID:         2,
+			PatientID:         2, // must be ignored — the owning patient is immutable
 		}
 		err = repo.UpdateSample(t.Context(), updated)
 		require.NoError(t, err)
@@ -144,7 +144,7 @@ func Test_UpdateSample_ExistingRow(t *testing.T) {
 		assert.Equal(t, "dna", sample.TypeCode)
 		assert.Equal(t, "Blood", sample.TissueSite)
 		assert.Equal(t, "tumoral", sample.HistologyCode)
-		assert.Equal(t, 2, sample.PatientID)
+		assert.Equal(t, 1, sample.PatientID, "patient_id must not change on update — the sample's owning patient is immutable")
 	})
 }
 

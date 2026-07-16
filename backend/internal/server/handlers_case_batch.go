@@ -146,8 +146,8 @@ func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 // @Id putCaseBatch
 // @Description Replaces a case's scalar fields and clinical patient data (family, observations,
 // @Description family history). Each case is looked up by (project_code, submitter_case_id);
-// @Description CASE-013 is returned if not found. Sequencing experiment attachments and tasks
-// @Description are left untouched.
+// @Description CASE-013 is returned if not found. Sequencing experiments and tasks are
+// @Description merge-if-present: attached when the body carries them, left untouched when omitted.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"

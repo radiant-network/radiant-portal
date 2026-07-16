@@ -16,8 +16,9 @@ import (
 const CaseNotFoundForUpdate = "CASE-013"
 
 // UpdateCaseValidationRecord validates one PUT entry that replaces a case's scalar
-// fields and clinical patient data. It never touches sequencing_experiments or tasks —
-// a missing case is CASE-013, the whole batch entry then fails atomically.
+// fields and clinical patient data, and — merge-if-present — attaches the sequencing
+// experiments and tasks the payload carries. A missing case is CASE-013, the whole batch
+// entry then fails atomically.
 type UpdateCaseValidationRecord struct {
 	batchval.BaseValidationRecord
 	Update types.UpdateCaseBatch
@@ -26,6 +27,12 @@ type UpdateCaseValidationRecord struct {
 	// validators (scalar fields + clinical patients) and, on success, the resolved
 	// patient IDs the persist phase needs.
 	Record *CaseValidationRecord
+	// SequencingExperiments are the resolved experiments to link to the case (empty when the
+	// payload omits sequencing_experiments — links are then left untouched).
+	SequencingExperiments map[int]*types.SequencingExperiment
+	// TaskRecord is the synthetic record the task attachment reuses at persist time (nil when
+	// the payload carries no tasks — existing tasks are then left untouched).
+	TaskRecord *CaseValidationRecord
 }
 
 func (r *UpdateCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -116,6 +123,28 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	r.Infos = append(r.Infos, cr.Infos...)
 	r.Record = cr
 
+	// Merge-if-present: sequencing experiments + tasks are attached like the POST path only
+	// when the payload carries them; when omitted/empty the case's existing links and tasks
+	// are left untouched (never cleared). Reuses the PATCH attach validators.
+	seqExps, err := resolveSequencingExperimentsForAttach(ctx, cache, update.SequencingExperiments, &r.BaseValidationRecord, r.path())
+	if err != nil {
+		return nil, err
+	}
+	r.SequencingExperiments = seqExps
+
+	if len(update.Tasks) > 0 {
+		taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, update.SubmitterCaseId, update.ProjectCode, *r.CaseID, update.SequencingExperiments, update.Tasks, index)
+		if err != nil {
+			return nil, err
+		}
+		if taskRecord != nil {
+			r.Errors = append(r.Errors, taskRecord.Errors...)
+			r.Warnings = append(r.Warnings, taskRecord.Warnings...)
+			r.Infos = append(r.Infos, taskRecord.Infos...)
+			r.TaskRecord = taskRecord
+		}
+	}
+
 	return r, nil
 }
 
@@ -204,8 +233,8 @@ func persistBatchAndUpdateCaseRecords(ctx context.Context, db *gorm.DB, batch *t
 
 // updateCaseAndReplaceClinicalData updates the case row's scalar fields, then replaces its
 // clinical children (family, obs_categorical, obs_string, family_history) with what the
-// PUT body carries. Sequencing experiment attachments and tasks are deliberately left
-// untouched — see the package doc on processUpdateCaseBatch.
+// PUT body carries. Sequencing experiment links and tasks are merge-if-present: attached when
+// the payload carried them (resolved at validation time), left untouched otherwise.
 func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, casesRepo *repository.CasesRepository, rec *UpdateCaseValidationRecord) error {
 	caseID := *rec.CaseID
 	u := rec.Update
@@ -251,6 +280,21 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 	}
 	if err := persistFamilyHistory(ctx, sc, rec.Record); err != nil {
 		return fmt.Errorf("failed to persist family history: %w", err)
+	}
+
+	// Merge-if-present: attach the sequencing experiment links and tasks the payload carried
+	// (mirrors the PATCH persist). When the payload omitted them these are empty/nil, so the
+	// case's existing links and tasks stay untouched.
+	for _, se := range rec.SequencingExperiments {
+		chse := types.CaseHasSequencingExperiment{CaseID: caseID, SequencingExperimentID: se.ID}
+		if err := casesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
+			return fmt.Errorf("failed to attach sequencing experiment %d to case %d: %w", se.ID, caseID, err)
+		}
+	}
+	if rec.TaskRecord != nil {
+		if err := persistTask(ctx, sc, rec.TaskRecord); err != nil {
+			return fmt.Errorf("failed to persist tasks for case %d: %w", caseID, err)
+		}
 	}
 	return nil
 }

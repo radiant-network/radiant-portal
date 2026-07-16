@@ -17,8 +17,10 @@ Name | Type | Description | Notes
 **priority_code** | **str** |  | [optional] 
 **project_code** | **str** |  | 
 **resolution_status_code** | **str** |  | [optional] 
+**sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | [optional] 
 **status_code** | **str** |  | 
 **submitter_case_id** | **str** |  | 
+**tasks** | [**List[CaseTaskBatch]**](CaseTaskBatch.md) |  | [optional] 
 **type** | **str** |  | 
 
 ## Example

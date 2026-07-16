@@ -5042,6 +5042,12 @@ export interface UpdateCaseBatch {
     'resolution_status_code'?: string;
     /**
      * 
+     * @type {Array<CaseSequencingExperimentBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'sequencing_experiments'?: Array<CaseSequencingExperimentBatch>;
+    /**
+     * 
      * @type {string}
      * @memberof UpdateCaseBatch
      */
@@ -5052,6 +5058,12 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'submitter_case_id': string;
+    /**
+     * 
+     * @type {Array<CaseTaskBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'tasks'?: Array<CaseTaskBatch>;
     /**
      * 
      * @type {string}
@@ -6520,7 +6532,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
          * @summary Update existing cases (batch)
          * @param {string} tenant Tenant code
          * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
@@ -6740,7 +6752,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
          * @summary Update existing cases (batch)
          * @param {string} tenant Tenant code
          * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
@@ -6872,7 +6884,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
-         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
          * @summary Update existing cases (batch)
          * @param {string} tenant Tenant code
          * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
@@ -7014,7 +7026,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+     * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
      * @summary Update existing cases (batch)
      * @param {string} tenant Tenant code
      * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body

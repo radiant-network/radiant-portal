@@ -116,24 +116,27 @@ type PatchCaseBatchBody struct {
 }
 
 // UpdateCaseBatch replaces a case's scalar fields and clinical patient data (family,
-// observations, family history). It never touches sequencing_experiments or tasks — see
-// PutCaseBatchHandler.
+// observations, family history). SequencingExperiments and Tasks are merge-if-present: when
+// the payload carries them they are attached like the POST path does; when omitted/empty they
+// are left untouched (never cleared) — see PutCaseBatchHandler.
 type UpdateCaseBatch struct {
-	ProjectCode                string              `json:"project_code" toml:"project_code" binding:"required"`
-	SubmitterCaseId            string              `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
-	Type                       string              `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
-	StatusCode                 string              `json:"status_code" toml:"status_code" binding:"required"`
-	DiagnosticLabCode          string              `json:"diagnostic_lab_code" toml:"diagnostic_lab_code" binding:"required"`
-	PrimaryConditionCodeSystem string              `json:"primary_condition_code_system,omitempty" toml:"primary_condition_code_system"`
-	PrimaryConditionValue      string              `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
-	PriorityCode               string              `json:"priority_code,omitempty" toml:"priority_code"`
-	CategoryCode               string              `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
-	AnalysisCode               string              `json:"analysis_code" toml:"analysis_code" binding:"required"`
-	ResolutionStatusCode       string              `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
-	Note                       string              `json:"note,omitempty" toml:"note"`
-	OrderingOrganizationCode   string              `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
-	OrderingPhysician          string              `json:"ordering_physician,omitempty" toml:"ordering_physician"`
-	Patients                   []*CasePatientBatch `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
+	ProjectCode                string                           `json:"project_code" toml:"project_code" binding:"required"`
+	SubmitterCaseId            string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
+	Type                       string                           `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
+	StatusCode                 string                           `json:"status_code" toml:"status_code" binding:"required"`
+	DiagnosticLabCode          string                           `json:"diagnostic_lab_code" toml:"diagnostic_lab_code" binding:"required"`
+	PrimaryConditionCodeSystem string                           `json:"primary_condition_code_system,omitempty" toml:"primary_condition_code_system"`
+	PrimaryConditionValue      string                           `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
+	PriorityCode               string                           `json:"priority_code,omitempty" toml:"priority_code"`
+	CategoryCode               string                           `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
+	AnalysisCode               string                           `json:"analysis_code" toml:"analysis_code" binding:"required"`
+	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
+	Note                       string                           `json:"note,omitempty" toml:"note"`
+	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
+	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
+	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
+	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive"`
+	Tasks                      []*CaseTaskBatch                 `json:"tasks,omitempty" toml:"tasks" binding:"omitempty,dive"`
 }
 
 type UpdateCaseBatchBody struct {

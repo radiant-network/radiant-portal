@@ -723,7 +723,7 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 				HistologyCode:     "tumoral",
 			},
 			OrganizationCode: "CQGC",
-			PatientId:        2,
+			PatientId:        2, // must be ignored — the owning patient is immutable
 		}}
 
 		err := persistBatchAndUpdateSampleRecords(t.Context(), db, &batch, records)
@@ -735,6 +735,6 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		require.NotNil(t, sample)
 		assert.Equal(t, "dna", sample.TypeCode)
 		assert.Equal(t, "tumoral", sample.HistologyCode)
-		assert.Equal(t, 2, sample.PatientID)
+		assert.Equal(t, 1, sample.PatientID, "patient_id must not change on update — the sample's owning patient is immutable")
 	})
 }
