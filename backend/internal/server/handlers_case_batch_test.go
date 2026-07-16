@@ -252,6 +252,120 @@ func TestPostCaseBatchHandler_ObservationWithoutOnset_Accepted(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, w.Code)
 }
 
+func TestPostCaseBatchHandler_ObservationCategoricalExamAbnormal_Accepted(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    types.BatchStatusPending,
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"project_code": "proj1",
+			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband",
+				"observations_categorical": [{
+					"system": "radiant",
+					"code": "exam",
+					"value": "abnormal",
+					"exam_code": "eeg",
+					"interpretation_code": "abnormal"
+				}]
+			}],
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}],
+			"tasks": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+}
+
+func TestPostCaseBatchHandler_ObservationTextExamNormal_Accepted(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    types.BatchStatusPending,
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"project_code": "proj1",
+			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband",
+				"observations_text": [{
+					"code": "exam",
+					"value": "Normal EEG",
+					"exam_code": "eeg",
+					"interpretation_code": "normal",
+					"note": "Reviewed"
+				}]
+			}],
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}],
+			"tasks": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+}
+
 func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}

@@ -4598,9 +4598,9 @@ func obsCategoricalRecord(obs *types.ObservationCategoricalBatch) CaseValidation
 				{ObservationsCategorical: []*types.ObservationCategoricalBatch{obs}},
 			},
 		},
-		ObservationCodes:    []string{"phenotype", "ancestry", "consanguinity"},
+		ObservationCodes:    []string{"phenotype", "ancestry", "consanguinity", "exam"},
 		OnsetCodes:          []string{"infantile", "unknown"},
-		InterpretationCodes: []string{"positive", "negative"},
+		InterpretationCodes: []string{"positive", "negative", "abnormal", "normal"},
 		AncestryCodes:       []string{"CA-FR", "EU", "OTH"},
 		ConsanguinityCodes:  []string{"consanguinity", "no_consanguinity", "unknown"},
 	}
@@ -4695,4 +4695,31 @@ func Test_validateObservationsCategorical_Consanguinity_InvalidValueRejected(t *
 
 	assert.NoError(t, err)
 	assert.True(t, hasErrorForField(record.Errors, "value"))
+}
+
+func Test_validateObservationsCategorical_ExamCode_OnsetOptional(t *testing.T) {
+	// A row tagged with an exam_code has no onset source data, regardless of its
+	// observation_code, but it still requires an interpretation.
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeExam, System: "radiant", Value: "abnormal",
+		ExamCode: "eeg", InterpretationCode: "abnormal",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsCategorical_ExamCode_InterpretationStillRequired(t *testing.T) {
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeExam, System: "radiant", Value: "abnormal",
+		ExamCode: "eeg",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.False(t, hasErrorForField(record.Errors, "onset_code"), "onset_code should not be required when exam_code is set")
+	assert.True(t, hasErrorForField(record.Errors, "interpretation_code"), "interpretation_code is still required for exam-tagged rows")
 }

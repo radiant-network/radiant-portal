@@ -137,3 +137,9 @@ func Test_ObservationRequiresOnsetAndInterpretation_RequiredCodes(t *testing.T) 
 	// Empty code defaults to required (safe default).
 	assert.True(t, ObservationRequiresOnsetAndInterpretation(""))
 }
+
+func Test_ObservationRequiresOnsetAndInterpretation_Exam(t *testing.T) {
+	// exam is not exempt: it still requires an interpretation_code. Onset is exempted
+	// separately at the call site whenever the row carries an exam_code
+	assert.True(t, ObservationRequiresOnsetAndInterpretation(ObsCodeExam))
+}

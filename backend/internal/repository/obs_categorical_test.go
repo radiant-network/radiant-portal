@@ -70,6 +70,33 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 	})
 }
 
+func Test_CreateObservationCategorical_WithExam_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		newObs := &types.ObsCategorical{
+			ID:                 9998,
+			CaseID:             1,
+			PatientID:          1,
+			ObservationCode:    "exam",
+			CodingSystem:       "radiant",
+			CodeValue:          "abnormal",
+			InterpretationCode: utils.NilIfEmpty("abnormal"),
+			ExamCode:           utils.NilIfEmpty("pg"),
+			TenantCode:         types.DefaultTenantCode,
+		}
+
+		repo := NewObservationCategoricalRepository(env.Postgres)
+		err := repo.CreateObservationCategorical(t.Context(), newObs)
+		assert.NoError(t, err)
+
+		result, err := repo.GetById(t.Context(), 9998)
+		assert.NoError(t, err)
+		assert.Equal(t, utils.NilIfEmpty("pg"), result.ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("abnormal"), result.InterpretationCode)
+
+		env.Postgres.Exec("DELETE FROM obs_categorical WHERE id=9998")
+	})
+}
+
 func Test_CreateObservationCategorical_NilError(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewObservationCategoricalRepository(env.Postgres)

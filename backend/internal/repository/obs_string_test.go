@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -55,6 +56,32 @@ func Test_CreateObservationString_OK(t *testing.T) {
 		assert.Equal(t, "HP:00314159", result.Value)
 
 		db.Exec("DELETE FROM obs_string WHERE id=9999")
+	})
+}
+
+func Test_CreateObservationString_WithExam_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		newObs := &types.ObsString{
+			ID:                 9998,
+			CaseID:             1,
+			PatientID:          1,
+			ObservationCode:    "exam",
+			Value:              "Normal",
+			InterpretationCode: utils.NilIfEmpty("normal"),
+			ExamCode:           utils.NilIfEmpty("eeg"),
+			TenantCode:         types.DefaultTenantCode,
+		}
+
+		repo := NewObservationStringRepository(env.Postgres)
+		err := repo.CreateObservationString(t.Context(), newObs)
+		assert.NoError(t, err)
+
+		result, err := repo.GetById(t.Context(), 9998)
+		assert.NoError(t, err)
+		assert.Equal(t, utils.NilIfEmpty("eeg"), result.ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("normal"), result.InterpretationCode)
+
+		env.Postgres.Exec("DELETE FROM obs_string WHERE id=9998")
 	})
 }
 

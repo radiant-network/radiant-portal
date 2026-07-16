@@ -669,9 +669,10 @@ func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int
 		res := fmt.Sprintf("create_case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
 
 		onsetInterpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
+		onsetRequired := onsetInterpretationRequired && obs.ExamCode == ""
 
 		cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
-		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetInterpretationRequired)
+		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
 		cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, onsetInterpretationRequired)
 
 		cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
@@ -1527,6 +1528,7 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 				OnsetCode:          utils.NilIfEmpty(o.OnsetCode),
 				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
 				Note:               o.Note,
+				ExamCode:           utils.NilIfEmpty(o.ExamCode),
 				TenantCode:         sc.TenantCode,
 			}
 
@@ -1549,11 +1551,13 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 
 		for _, o := range p.ObservationsText {
 			obs := types.ObsString{
-				CaseID:          *cr.CaseID,
-				PatientID:       patient.ID,
-				ObservationCode: o.Code,
-				Value:           o.Value,
-				TenantCode:      sc.TenantCode,
+				CaseID:             *cr.CaseID,
+				PatientID:          patient.ID,
+				ObservationCode:    o.Code,
+				Value:              o.Value,
+				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
+				ExamCode:           utils.NilIfEmpty(o.ExamCode),
+				TenantCode:         sc.TenantCode,
 			}
 
 			if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {

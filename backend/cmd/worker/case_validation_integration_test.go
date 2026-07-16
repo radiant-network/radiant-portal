@@ -123,10 +123,17 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 
 		var obsstr []*types.ObsString
 		db.Table("obs_string").Where("case_id = ?", ca.ID).Find(&obsstr)
-		assert.Len(t, obsstr, 1)
+		assert.Len(t, obsstr, 2)
+		slices.SortFunc(obsstr, func(a, b *types.ObsString) int { return a.ID - b.ID })
 		assert.Equal(t, 1000, obsstr[0].ID)
 		assert.Equal(t, 1, obsstr[0].PatientID)
 		assert.Equal(t, "TEST:678901", obsstr[0].Value)
+		assert.Nil(t, obsstr[0].ExamCode)
+
+		assert.Equal(t, 1, obsstr[1].PatientID)
+		assert.Equal(t, "Normal EEG", obsstr[1].Value)
+		assert.Equal(t, utils.NilIfEmpty("eeg"), obsstr[1].ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("normal"), obsstr[1].InterpretationCode)
 
 		var famhist []*types.FamilyHistory
 		db.Table("family_history").Where("case_id = ?", ca.ID).Find(&famhist)
@@ -204,6 +211,41 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 		// would reject an empty string.
 		assert.Nil(t, ancestry.OnsetCode)
 		assert.Nil(t, ancestry.InterpretationCode)
+	})
+}
+
+func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndInterpretation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Exam_Obs_Cat")
+		payload[0].Patients[0].ObservationsCategorical = append(
+			payload[0].Patients[0].ObservationsCategorical,
+			&types.ObservationCategoricalBatch{
+				Code:               types.ObsCodeExam,
+				System:             "radiant",
+				Value:              "abnormal",
+				ExamCode:           "eeg",
+				InterpretationCode: "abnormal",
+			},
+		)
+		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Exam_Obs_Cat").First(&ca)
+		assert.NotNil(t, ca)
+
+		var exam *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND observation_code = ?", ca.ID, types.ObsCodeExam).First(&exam)
+		assert.NotNil(t, exam)
+		assert.Equal(t, "radiant", exam.CodingSystem)
+		assert.Equal(t, "abnormal", exam.CodeValue)
+		assert.Nil(t, exam.OnsetCode)
+		assert.Equal(t, utils.NilIfEmpty("abnormal"), exam.InterpretationCode)
+		assert.Equal(t, utils.NilIfEmpty("eeg"), exam.ExamCode)
 	})
 }
 

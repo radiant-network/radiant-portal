@@ -69,6 +69,12 @@ ordering_organization_code = "CHUSJ"
     code = "phenotype"
     value = "TEST:678901"
 
+    [[cases.patients.observations_text]]
+    code = "exam"
+    value = "Normal EEG"
+    exam_code = "eeg"
+    interpretation_code = "normal"
+
     [[cases.patients.family_history]]
     family_member_code = "grand-father"
     condition = "Seizure"
