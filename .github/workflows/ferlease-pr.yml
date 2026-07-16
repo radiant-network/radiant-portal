@@ -42,7 +42,7 @@ jobs:
       - name: Pull ferlease binary
         run: |
           container=$(docker create ferlabcrsj/ferlease:0.2.2)
-          docker cp "$container:/rootfs/bin/ferlease" ./ferlease
+          docker cp "$container:/bin/ferlease" ./ferlease
           docker rm "$container"
           chmod +x ./ferlease
 
@@ -163,7 +163,7 @@ jobs:
       - name: Pull ferlease binary
         run: |
           container=$(docker create ferlabcrsj/ferlease:0.2.2)
-          docker cp "$container:/rootfs/bin/ferlease" ./ferlease
+          docker cp "$container:/bin/ferlease" ./ferlease
           docker rm "$container"
           chmod +x ./ferlease
 
