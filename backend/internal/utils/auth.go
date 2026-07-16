@@ -77,6 +77,17 @@ func (auth KeycloakAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, err
 	return &token.Name, nil
 }
 
+// RetrieveRawToken returns the undecoded bearer token string from the Authorization header.
+// It's needed verbatim (not the parsed claims) to forward to StarRocks via mysql-proxy, which
+// re-validates the JWT itself.
+func RetrieveRawToken(c *gin.Context) (string, error) {
+	parts := strings.SplitN(c.GetHeader("Authorization"), " ", 2)
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		return "", fmt.Errorf("invalid authorization header format")
+	}
+	return parts[1], nil
+}
+
 func parseJWTFromHeader(c *gin.Context) (*ginkeycloak.KeyCloakToken, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {

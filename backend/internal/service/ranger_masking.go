@@ -29,6 +29,7 @@ const (
 // Global masking policy names (static, independent of tenant count).
 const (
 	authAccessPolicy    = "sr_access_auth"
+	sharedAccessPolicy  = "sr_access_shared"
 	authRowFilterPolicy = "sr_rowfilter_auth"
 	maskRedactPolicy    = "sr_mask_pii_redact"
 	maskDobPolicy       = "sr_mask_dob"
@@ -77,6 +78,14 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 	}
 	if err := ranger.EnsureRowFilterPolicy(ctx, authRowFilterPolicy, authGrantDatabase, authGrantTable, authRowFilterExpr, roles); err != nil {
 		return fmt.Errorf("ranger: ensure row-filter policy %q: %w", authRowFilterPolicy, err)
+	}
+
+	// Cross-tenant reference/genomic data (variants, genes, HPO/MONDO, frequencies,
+	// staging_sequencing_experiment, …) lives in the shared base database, which per-tenant
+	// reads join (types.SharedDatabase). These are base tables (Ranger-enforced, unlike the
+	// tenant views), non-PII, and readable by every tenant user, so grant the marker role SELECT.
+	if err := ranger.EnsureAccessPolicy(ctx, sharedAccessPolicy, []string{types.SharedDatabase}, []string{"*"}, roles); err != nil {
+		return fmt.Errorf("ranger: ensure access policy %q: %w", sharedAccessPolicy, err)
 	}
 
 	dbs := []string{tenantDatabaseGlob}

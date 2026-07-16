@@ -97,6 +97,15 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	tenantRoutes := privateRoutes.Group("/:tenant")
 	tenantRoutes.Use(server.RequireTenantAccess(auth, repoAuth))
 
+	// When enabled, run tenant-scoped StarRocks reads through mysql-proxy as the calling user so
+	// Ranger enforces per-user masking / row-filter / access. Off by default; the routing pool
+	// otherwise falls back to the root connection (today's behavior). Applied at the GROUP level
+	// on purpose: it is what guarantees every /:tenant read has a user pool bound, so the routing
+	// pool's root fallback is never reached for tenant data (see routingConnPool's security note).
+	if utils.GetBoolEnvOrDefault(server.StarrocksProxyReadEnabledEnv, false) {
+		tenantRoutes.Use(server.BindStarrocksUserPool(auth, database.NewStarrocksUserPool))
+	}
+
 	requireAction := func(action string) gin.HandlerFunc {
 		return server.RequireAction(auth, repoAuth, action)
 	}
