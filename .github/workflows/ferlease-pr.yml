@@ -1,0 +1,191 @@
+name: Ferlease PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: ferlease-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  ferlease-release:
+    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feature/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      release: ${{ steps.release.outputs.value }}
+      url: ${{ steps.release.outputs.url }}
+
+    steps:
+      - name: Extract release
+        id: release
+        run: |
+          branch="${{ github.head_ref }}"
+          release="${branch#feature/}"
+          release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          echo "value=${release}" >> "$GITHUB_OUTPUT"
+          echo "url=https://portail-${release}.dev.qlin.aws.sante.quebec" >> "$GITHUB_OUTPUT"
+
+      - name: Write SSH credentials
+        env:
+          DEPLOY_KEY: ${{ secrets.INFRA_REPO_DEPLOY_KEY }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
+          echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
+          cat > "$RUNNER_TEMP/known_host" <<'EOF'
+          github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GkZN
+          github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          EOF
+
+      - name: Pull ferlease binary
+        run: |
+          container=$(docker create ferlabcrsj/ferlease:0.2.2)
+          docker cp "$container:/rootfs/bin/ferlease" ./ferlease
+          docker rm "$container"
+          chmod +x ./ferlease
+
+      - name: Write ferlease config
+        run: |
+          cat > ferlease-config.yml <<EOF
+          service: radiant-portal-ui
+          release: ${{ steps.release.outputs.value }}
+          environment: dev
+          repo: git@github.com:Ferlab-Ste-Justine/qlin-qa-infra.git
+          ref: main
+          git_auth:
+            ssh_key: $RUNNER_TEMP/id_rsa
+            known_key: $RUNNER_TEMP/known_host
+          author:
+            name: ferlab-automation
+            email: automation@ferlab.bio
+          template_directory: "{{.RepoDir}}/ferlease-templates/{{.Service}}"
+          commit_message: "{{ if eq .Operation \"release\" }}Adding{{ else }}Removing{{ end }} release {{.Release}} of service {{.Service}}"
+          push_retries: 60
+          push_retry_interval: 5s
+          EOF
+
+      - name: Run ferlease release
+        run: ./ferlease release -c ferlease-config.yml
+
+  cypress:
+    needs: ferlease-release
+    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feature/')
+    runs-on: [self-hosted, qlin-arc]
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Get Keycloak client secret
+        id: secrets
+        run: |
+          secret=$(aws secretsmanager get-secret-value \
+            --secret-id /keycloak/clients/radiant \
+            --query SecretString \
+            --output text)
+          echo "keycloak_client_secret=$(echo "$secret" | jq -r .client_secret)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment
+        run: |
+          url="${{ needs.ferlease-release.outputs.url }}"
+          for i in $(seq 1 20); do
+            if curl -sf --max-time 10 "$url" > /dev/null 2>&1; then
+              echo "App ready at $url"
+              exit 0
+            fi
+            echo "Waiting for $url... ($i/20)"
+            sleep 30
+          done
+          echo "App not reachable after 10 minutes"
+          exit 1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress
+        env:
+          CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
+          CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
+          CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          KEYCLOAK_CLIENT_SECRET: ${{ steps.secrets.outputs.keycloak_client_secret }}
+          KEYCLOAK_HOST: https://auth.dev.qlin.aws.sante.quebec
+          KEYCLOAK_REALM: qlin
+          KEYCLOAK_CLIENT: radiant
+          CYPRESS_API_BASE_URL: https://api.dev.qlin.aws.sante.quebec/
+          CYPRESS_API_TENANT: radiant
+          CYPRESS_API_CLIENT: radiant
+        run: npx cypress run
+
+      - name: Upload screenshots to S3
+        if: always()
+        run: |
+          release="${{ needs.ferlease-release.outputs.release }}"
+          aws s3 sync cypress/screenshots/ \
+            "s3://qlin-dev-cypress-artifacts/${release}/screenshots/" \
+            --delete
+
+  ferlease-teardown:
+    if: github.event.action == 'closed' && startsWith(github.head_ref, 'feature/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Extract release
+        id: release
+        run: |
+          branch="${{ github.head_ref }}"
+          release="${branch#feature/}"
+          release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          echo "value=${release}" >> "$GITHUB_OUTPUT"
+
+      - name: Write SSH credentials
+        env:
+          DEPLOY_KEY: ${{ secrets.INFRA_REPO_DEPLOY_KEY }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
+          echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
+          cat > "$RUNNER_TEMP/known_host" <<'EOF'
+          github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GkZN
+          github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          EOF
+
+      - name: Pull ferlease binary
+        run: |
+          container=$(docker create ferlabcrsj/ferlease:0.2.2)
+          docker cp "$container:/rootfs/bin/ferlease" ./ferlease
+          docker rm "$container"
+          chmod +x ./ferlease
+
+      - name: Write ferlease config
+        run: |
+          cat > ferlease-config.yml <<EOF
+          service: radiant-portal-ui
+          release: ${{ steps.release.outputs.value }}
+          environment: dev
+          repo: git@github.com:Ferlab-Ste-Justine/qlin-qa-infra.git
+          ref: main
+          git_auth:
+            ssh_key: $RUNNER_TEMP/id_rsa
+            known_key: $RUNNER_TEMP/known_host
+          author:
+            name: ferlab-automation
+            email: automation@ferlab.bio
+          template_directory: "{{.RepoDir}}/ferlease-templates/{{.Service}}"
+          commit_message: "{{ if eq .Operation \"release\" }}Adding{{ else }}Removing{{ end }} release {{.Release}} of service {{.Service}}"
+          push_retries: 60
+          push_retry_interval: 5s
+          EOF
+
+      - name: Run ferlease teardown
+        run: ./ferlease teardown -c ferlease-config.yml
