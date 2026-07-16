@@ -164,6 +164,7 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in
 // setupRouter. Reads are can_search_case; writes/files/ingest are the org-scoped actions.
 var expectedTenantActions = map[string]string{
+	"GET /:tenant/cases":                                                                         types.ActionIngestData,
 	"POST /:tenant/cases/search":                                                                 types.ActionSearchCase,
 	"GET /:tenant/cases/autocomplete":                                                            types.ActionSearchCase,
 	"GET /:tenant/cases/filters":                                                                 types.ActionSearchCase,
