@@ -101,7 +101,6 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /{tenant}/cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 *CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
-*CasesApi* | [**lookup_case_by_submitter_id**](docs/CasesApi.md#lookup_case_by_submitter_id) | **GET** /{tenant}/cases | Look up a case by (project_code, submitter_case_id)
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
@@ -195,7 +194,6 @@ Class | Method | HTTP request | Description
  - [CaseBatchPatch](docs/CaseBatchPatch.md)
  - [CaseEntity](docs/CaseEntity.md)
  - [CaseFilters](docs/CaseFilters.md)
- - [CaseLookupResult](docs/CaseLookupResult.md)
  - [CasePatientBatch](docs/CasePatientBatch.md)
  - [CasePatientClinicalInformation](docs/CasePatientClinicalInformation.md)
  - [CaseResult](docs/CaseResult.md)

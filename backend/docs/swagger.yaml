@@ -373,18 +373,6 @@ components:
       - resolution_status_code
       - status_code
       type: object
-    CaseLookupResult:
-      description: Line represented a case in case list
-      properties:
-        case_id:
-          type: integer
-        project_code:
-          type: string
-        status_code:
-          type: string
-        submitter_case_id:
-          type: string
-      type: object
     CasePatientBatch:
       properties:
         affected_status_code:
@@ -478,6 +466,7 @@ components:
       - sex_code
       type: object
     CaseResult:
+      description: Line represented a case in case list
       properties:
         analysis_catalog_code:
           type: string
@@ -2995,84 +2984,6 @@ paths:
       summary: Retrieve a batch by ID
       tags:
       - batches
-  /{tenant}/cases:
-    get:
-      description: |-
-        Resolves a case by its natural key. Returns a minimal identity (case_id, status_code)
-        when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
-      operationId: lookupCaseBySubmitterId
-      parameters:
-      - description: Tenant code
-        in: path
-        name: tenant
-        required: true
-        schema:
-          type: string
-      - description: Project code
-        in: query
-        name: project_code
-        required: true
-        schema:
-          type: string
-      - description: Submitter case id (analysis id)
-        in: query
-        name: submitter_case_id
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaseLookupResult'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-          headers:
-            X-Correlation-ID:
-              description: Unique id correlating this error with the server-side log
-                entry
-              schema:
-                type: string
-      security:
-      - bearerauth: []
-      summary: Look up a case by (project_code, submitter_case_id)
-      tags:
-      - cases
   /{tenant}/cases/{case_id}:
     get:
       description: Retrieve CaseEntity by its ID

@@ -500,6 +500,43 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_OnSubmitterCaseId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(env.Starrocks)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
+				Value:     []interface{}{"1:8"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		assert.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 8, (*cases)[0].CaseID)
+		assert.Equal(t, "submitted", (*cases)[0].StatusCode)
+	})
+}
+
+func Test_SearchCases_OnSubmitterCaseId_NoResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(env.Starrocks)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
+				Value:     []interface{}{"does-not-exist"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		assert.NoError(t, err)
+		_, count, err := repo.SearchCases(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
+	})
+}
+
 func Test_Cases_SearchById(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)

@@ -153,10 +153,6 @@ func (m *MockRepository) CreateCase(*types.Case) error { return nil }
 
 func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error { return nil }
 
-func (m *MockRepository) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*types.Case, error) {
-	return nil, nil
-}
-
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -479,74 +475,4 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"key":"father", "label":"Father"}, 
 			{"key":"mother", "label":"Mother"}
 		]}`, w.Body.String())
-}
-
-// ---- CaseLookupHandler (natural-key existence lookup) ----
-
-type mockProjectByCode struct {
-	project *types.Project
-	err     error
-}
-
-func (m mockProjectByCode) GetProjectByCode(context.Context, string) (*types.Project, error) {
-	return m.project, m.err
-}
-
-type mockCaseByKey struct {
-	kase *types.Case
-	err  error
-}
-
-func (m mockCaseByKey) GetCaseBySubmitterCaseIdAndProjectId(context.Context, string, int) (*types.Case, error) {
-	return m.kase, m.err
-}
-
-func caseLookupRouter(proj projectByCodeReader, cas caseByKeyReader) *gin.Engine {
-	r := gin.Default()
-	r.GET("/:tenant/cases", CaseLookupHandler(proj, cas))
-	return r
-}
-
-func Test_CaseLookupHandler_Found(t *testing.T) {
-	proj := mockProjectByCode{project: &types.Project{ID: 4}}
-	cas := mockCaseByKey{kase: &types.Case{ID: 123, StatusCode: "submitted"}}
-	router := caseLookupRouter(proj, cas)
-
-	req, _ := http.NewRequest("GET", "/radiant/cases?project_code=N1&submitter_case_id=A-1", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"case_id":123,"project_code":"N1","submitter_case_id":"A-1","status_code":"submitted"}`, w.Body.String())
-}
-
-func Test_CaseLookupHandler_ProjectNotFound(t *testing.T) {
-	router := caseLookupRouter(mockProjectByCode{project: nil}, mockCaseByKey{})
-
-	req, _ := http.NewRequest("GET", "/radiant/cases?project_code=NOPE&submitter_case_id=A-1", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusNotFound, w.Code)
-}
-
-func Test_CaseLookupHandler_CaseNotFound(t *testing.T) {
-	proj := mockProjectByCode{project: &types.Project{ID: 4}}
-	router := caseLookupRouter(proj, mockCaseByKey{kase: nil})
-
-	req, _ := http.NewRequest("GET", "/radiant/cases?project_code=N1&submitter_case_id=UNKNOWN", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusNotFound, w.Code)
-}
-
-func Test_CaseLookupHandler_MissingParams(t *testing.T) {
-	router := caseLookupRouter(mockProjectByCode{}, mockCaseByKey{})
-
-	req, _ := http.NewRequest("GET", "/radiant/cases?project_code=N1", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusBadRequest, w.Code)
 }

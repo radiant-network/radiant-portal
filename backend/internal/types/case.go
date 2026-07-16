@@ -37,18 +37,6 @@ type Case struct {
 // CaseResult - Search cases result
 // @Description Line represented a case in case list
 // @Name CaseResult
-// CaseLookupResult is the minimal identity returned by the natural-key case lookup
-// (GET /{tenant}/cases?project_code=&submitter_case_id=). It deliberately carries no clinical
-// or patient data — the lookup is gated by can_ingest_data (an ingest scope, not a clinical
-// reader), so it must not expose case content. Callers use it (and the 200-vs-404 status) only
-// to decide create-vs-update.
-type CaseLookupResult struct {
-	CaseID          int    `json:"case_id"`
-	ProjectCode     string `json:"project_code"`
-	SubmitterCaseId string `json:"submitter_case_id"`
-	StatusCode      string `json:"status_code"`
-}
-
 type CaseResult struct {
 	CaseID                   int       `json:"case_id" validate:"required"`
 	ProbandID                int       `json:"proband_id,omitempty"`
@@ -194,6 +182,7 @@ func (CaseHasSequencingExperiment) TableName() string {
 var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
+	CaseSubmitterCaseIdField,
 	PatientIdField,
 	SubmitterPatientIdField,
 	SubmitterProbandIdField,
@@ -275,6 +264,13 @@ var CaseProbandIdField = Field{
 	Name:          "proband_id",
 	CanBeSelected: true,
 	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseSubmitterCaseIdField = Field{
+	Name:          "submitter_case_id",
+	Alias:         "submitter_case_id",
+	CanBeFiltered: true,
 	Table:         CaseTable,
 }
 

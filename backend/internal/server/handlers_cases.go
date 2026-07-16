@@ -2,21 +2,12 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
-
-type projectByCodeReader interface {
-	GetProjectByCode(ctx context.Context, code string) (*types.Project, error)
-}
-
-type caseByKeyReader interface {
-	GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error)
-}
 
 type casesReader interface {
 	SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error)
@@ -32,70 +23,6 @@ type caseDocumentsReader interface {
 
 type caseTasksReader interface {
 	ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
-}
-
-// CaseLookupHandler resolves a case by its natural key (project_code + submitter_case_id) and
-// returns a minimal identity (200) or 404 when the project or case is absent. It exists so an
-// ingest-scoped caller (the qlin→Radiant bridge, which holds can_ingest_data but not
-// can_search_case) can decide create-vs-update before pushing a batch — hence it is gated by
-// ActionIngestData in the router, unlike the other /cases reads. It returns no clinical/patient
-// data. Reuses the same project+case resolution the batch worker uses (GetProjectByCode →
-// GetCaseBySubmitterCaseIdAndProjectId).
-// @Summary Look up a case by (project_code, submitter_case_id)
-// @Id lookupCaseBySubmitterId
-// @Description Resolves a case by its natural key. Returns a minimal identity (case_id, status_code)
-// @Description when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
-// @Tags cases
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Param project_code query string true "Project code"
-// @Param submitter_case_id query string true "Submitter case id (analysis id)"
-// @Accept json
-// @Produce json
-// @Success 200 {object} types.CaseLookupResult
-// @Failure 400 {object} types.ApiError
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/cases [get]
-func CaseLookupHandler(projects projectByCodeReader, cases caseByKeyReader) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		projectCode := c.Query("project_code")
-		submitterCaseId := c.Query("submitter_case_id")
-		if projectCode == "" || submitterCaseId == "" {
-			HandleValidationError(c, fmt.Errorf("project_code and submitter_case_id query parameters are required"))
-			return
-		}
-
-		project, err := projects.GetProjectByCode(c.Request.Context(), projectCode)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if project == nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		kase, err := cases.GetCaseBySubmitterCaseIdAndProjectId(c.Request.Context(), submitterCaseId, project.ID)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if kase == nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.JSON(http.StatusOK, types.CaseLookupResult{
-			CaseID:          kase.ID,
-			ProjectCode:     projectCode,
-			SubmitterCaseId: submitterCaseId,
-			StatusCode:      kase.StatusCode,
-		})
-	}
 }
 
 // SearchCasesHandler handles search of cases

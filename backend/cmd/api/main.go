@@ -71,8 +71,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoBatches := repository.NewBatchRepository(dbPostgres)
 	repoTasks := repository.NewTaskRepository(dbPostgres)
 	repoAuth := repository.NewAuthRepository(dbPostgres)
-	repoProjectsPg := repository.NewProjectRepository(dbPostgres)
-	repoCasesPg := repository.NewCasesRepository(dbPostgres)
 
 	r := newEngine()
 
@@ -104,7 +102,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	}
 
 	casesGroup := tenantRoutes.Group("/cases")
-	casesGroup.GET("", requireAction(types.ActionIngestData), server.CaseLookupHandler(repoProjectsPg, repoCasesPg))
 	casesGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases))

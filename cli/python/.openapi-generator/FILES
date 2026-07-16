@@ -16,7 +16,6 @@ docs/CaseBatch.md
 docs/CaseBatchPatch.md
 docs/CaseEntity.md
 docs/CaseFilters.md
-docs/CaseLookupResult.md
 docs/CasePatientBatch.md
 docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
@@ -167,7 +166,6 @@ radiant_python/models/case_batch.py
 radiant_python/models/case_batch_patch.py
 radiant_python/models/case_entity.py
 radiant_python/models/case_filters.py
-radiant_python/models/case_lookup_result.py
 radiant_python/models/case_patient_batch.py
 radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
@@ -264,4 +262,3 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_case_lookup_result.py
