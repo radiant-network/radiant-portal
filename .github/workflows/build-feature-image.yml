@@ -3,7 +3,7 @@ name: Build feature image
 on:
   push:
     branches:
-      - 'feature/**'
+      - 'feat/**'
 
 env:
   REGISTRY: ghcr.io
@@ -24,7 +24,7 @@ jobs:
         id: tag
         run: |
           branch="${{ github.ref_name }}"
-          release="${branch#feature/}"
+          release="${branch#feat/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
           ts=$(date +%s)
           echo "value=feature-${release}-${GITHUB_SHA:0:7}-${ts}" >> "$GITHUB_OUTPUT"
