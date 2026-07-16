@@ -694,6 +694,37 @@ export interface CaseFilters {
     'status_code': Array<FiltersValue>;
 }
 /**
+ * Line represented a case in case list
+ * @export
+ * @interface CaseLookupResult
+ */
+export interface CaseLookupResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseLookupResult
+     */
+    'case_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseLookupResult
+     */
+    'project_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseLookupResult
+     */
+    'status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseLookupResult
+     */
+    'submitter_case_id'?: string;
+}
+/**
  * 
  * @export
  * @interface CasePatientBatch
@@ -859,7 +890,7 @@ export interface CasePatientClinicalInformation {
     'submitter_patient_id'?: string;
 }
 /**
- * Line represented a case in case list
+ * 
  * @export
  * @interface CaseResult
  */
@@ -6434,6 +6465,62 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Resolves a case by its natural key. Returns a minimal identity (case_id, status_code) when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
+         * @summary Look up a case by (project_code, submitter_case_id)
+         * @param {string} tenant Tenant code
+         * @param {string} projectCode Project code
+         * @param {string} submitterCaseId Submitter case id (analysis id)
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        lookupCaseBySubmitterId: async (tenant: string, projectCode: string, submitterCaseId: string, body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('lookupCaseBySubmitterId', 'tenant', tenant)
+            // verify required parameter 'projectCode' is not null or undefined
+            assertParamExists('lookupCaseBySubmitterId', 'projectCode', projectCode)
+            // verify required parameter 'submitterCaseId' is not null or undefined
+            assertParamExists('lookupCaseBySubmitterId', 'submitterCaseId', submitterCaseId)
+            const localVarPath = `/{tenant}/cases`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (projectCode !== undefined) {
+                localVarQueryParameter['project_code'] = projectCode;
+            }
+
+            if (submitterCaseId !== undefined) {
+                localVarQueryParameter['submitter_case_id'] = submitterCaseId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -6722,6 +6809,22 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Resolves a case by its natural key. Returns a minimal identity (case_id, status_code) when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
+         * @summary Look up a case by (project_code, submitter_case_id)
+         * @param {string} tenant Tenant code
+         * @param {string} projectCode Project code
+         * @param {string} submitterCaseId Submitter case id (analysis id)
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async lookupCaseBySubmitterId(tenant: string, projectCode: string, submitterCaseId: string, body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseLookupResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.lookupCaseBySubmitterId(tenant, projectCode, submitterCaseId, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.lookupCaseBySubmitterId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -6860,6 +6963,19 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
+         * Resolves a case by its natural key. Returns a minimal identity (case_id, status_code) when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
+         * @summary Look up a case by (project_code, submitter_case_id)
+         * @param {string} tenant Tenant code
+         * @param {string} projectCode Project code
+         * @param {string} submitterCaseId Submitter case id (analysis id)
+         * @param {object} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        lookupCaseBySubmitterId(tenant: string, projectCode: string, submitterCaseId: string, body?: object, options?: RawAxiosRequestConfig): AxiosPromise<CaseLookupResult> {
+            return localVarFp.lookupCaseBySubmitterId(tenant, projectCode, submitterCaseId, body, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -6995,6 +7111,21 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(tenant: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Resolves a case by its natural key. Returns a minimal identity (case_id, status_code) when found, or 404 when the project or case does not exist. Ingest-scoped: no clinical data.
+     * @summary Look up a case by (project_code, submitter_case_id)
+     * @param {string} tenant Tenant code
+     * @param {string} projectCode Project code
+     * @param {string} submitterCaseId Submitter case id (analysis id)
+     * @param {object} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public lookupCaseBySubmitterId(tenant: string, projectCode: string, submitterCaseId: string, body?: object, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).lookupCaseBySubmitterId(tenant, projectCode, submitterCaseId, body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

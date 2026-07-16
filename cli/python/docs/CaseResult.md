@@ -1,6 +1,5 @@
 # CaseResult
 
-Line represented a case in case list
 
 ## Properties
 

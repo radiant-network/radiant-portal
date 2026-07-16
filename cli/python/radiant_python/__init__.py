@@ -64,6 +64,7 @@ from radiant_python.models.case_batch import CaseBatch
 from radiant_python.models.case_batch_patch import CaseBatchPatch
 from radiant_python.models.case_entity import CaseEntity
 from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.case_lookup_result import CaseLookupResult
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_result import CaseResult

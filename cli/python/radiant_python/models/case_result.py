@@ -24,7 +24,7 @@ from typing_extensions import Self
 
 class CaseResult(BaseModel):
     """
-    Line represented a case in case list
+    CaseResult
     """ # noqa: E501
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
