@@ -29,8 +29,8 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
   const { t } = useI18n();
   const { history } = useAccordionContext();
 
-  const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
-  const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
+  const label = t(`common.facets.labels.${field.translation_key}`, { defaultValue: field.key });
+  const tooltipKey = `common.facets.labels.${field.translation_key}_tooltip`;
   const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
 
   function renderTrigger() {
@@ -91,7 +91,7 @@ export function FacetComponent({ field }: FacetContainerProps) {
       filterElement = <BooleanFacet field={field} />;
       break;
     default:
-      filterElement = <div>{t('common.filters.unsupported_type', { type: field.type })}</div>;
+      filterElement = <div>{t('common.facets.unsupported_type', { type: field.type })}</div>;
   }
 
   return filterElement;
@@ -107,7 +107,7 @@ export function FacetContainer({ field, isOpen }: FacetContainerProps) {
   if (fieldType === FilterTypes.DIVIDER) {
     return (
       <h4 className="px-2 h-8 text-sidebar-foreground/70 text-xs font-medium line-height-xs text-ellipsis overflow-hidden flex justify-between items-center">
-        {t(`common.filters.${field.key}`)}
+        {t(`common.facets.${field.key}`)}
       </h4>
     );
   }
@@ -137,7 +137,7 @@ export function FacetContainer({ field, isOpen }: FacetContainerProps) {
       );
       break;
     default:
-      filterElement = <div>{t('common.filters.unsupported_type', { type: field.type })}</div>;
+      filterElement = <div>{t('common.facets.unsupported_type', { type: field.type })}</div>;
   }
 
   return filterElement;

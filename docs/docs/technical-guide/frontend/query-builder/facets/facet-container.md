@@ -25,6 +25,6 @@ interface FacetContainerProps {
 
 ## Behavior
 
-- Title comes from `common.filters.labels.<translation_key>` (fallback: `field.key`).
-- If `common.filters.labels.<translation_key>_tooltip` exists, the title is wrapped with a tooltip.
+- Title comes from `common.facets.labels.<translation_key>` (fallback: `field.key`).
+- If `common.facets.labels.<translation_key>_tooltip` exists, the title is wrapped with a tooltip.
 - Accordion content is force-mounted for fields already opened once, so internal state is preserved on collapse/re-expand.

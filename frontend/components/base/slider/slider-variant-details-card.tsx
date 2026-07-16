@@ -473,7 +473,7 @@ export const PredictionCard = ({
     functionalScores.push(
       <DescriptionRow key="lrt" label={t('occurrence_expand.functional_scores.lrt')}>
         <span className="font-mono">
-          {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
+          {t(`common.facets.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
           {lrt_score && ` (${lrt_score})`}
         </span>
       </DescriptionRow>,
@@ -485,7 +485,7 @@ export const PredictionCard = ({
     functionalScores.push(
       <DescriptionRow key="sift" label={t('occurrence_expand.functional_scores.sift')}>
         <span className="font-mono">
-          {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
+          {t(`common.facets.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
           {sift_score && ` (${sift_score})`}
         </span>
       </DescriptionRow>,
@@ -497,7 +497,7 @@ export const PredictionCard = ({
     functionalScores.push(
       <DescriptionRow key="fathmm" label={t('occurrence_expand.functional_scores.fathmm')}>
         <span className="font-mono">
-          {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
+          {t(`common.facets.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
           {fathmm_score && ` (${fathmm_score})`}
         </span>
       </DescriptionRow>,
@@ -518,7 +518,7 @@ export const PredictionCard = ({
     functionalScores.push(
       <DescriptionRow key="polyphen2-hvar" label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
         <span className="font-mono">
-          {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
+          {t(`common.facets.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
           {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
         </span>
       </DescriptionRow>,

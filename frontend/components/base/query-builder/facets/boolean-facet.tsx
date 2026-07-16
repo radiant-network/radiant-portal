@@ -124,7 +124,7 @@ export function BooleanFacet({ field }: BooleanFacetProps) {
           <hr className="my-4 border-border" />
           <div className="flex align-right justify-end items-center space-x-2">
             <Button onClick={handleClear} size="xs">
-              {t('common.filters.buttons.clear')}
+              {t('common.facets.buttons.clear')}
             </Button>
           </div>
         </>

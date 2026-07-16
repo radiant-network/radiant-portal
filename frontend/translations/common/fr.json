@@ -444,7 +444,7 @@
       "de": "Allemand",
       "es": "Espagnol"
     },
-    "filters": {
+    "facets": {
       "labels": {
         "program": "Programme",
         "domain": "Domaine",

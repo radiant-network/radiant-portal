@@ -114,7 +114,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
   const aggregates = useMemo(() => {
     const multiAggregates = (apiAggregates ?? []).map((aggregate: Aggregation) => ({
       ...aggregate,
-      label: t(`common.filters.values.${field.key}.${sanitize(aggregate.key)}`, {
+      label: t(`common.facets.values.${field.key}.${sanitize(aggregate.key)}`, {
         defaultValue: lazyTranslate(aggregate.key),
       }),
     })) as MultiSelectAggregation[];
@@ -277,7 +277,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           startIcon={SearchIcon}
           size="xs"
           type="text"
-          placeholder={t('common.filters.search.placeholder')}
+          placeholder={t('common.facets.search.placeholder')}
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => setSearchValue(e.target.value)}
           value={searchValue}
@@ -292,7 +292,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             variant="link"
             className="px-0"
           >
-            {t('common.filters.buttons.all')}
+            {t('common.facets.buttons.all')}
           </Button>
           <Separator orientation="vertical" className="h-4" />
           <Button
@@ -302,14 +302,14 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             variant="link"
             className="px-0"
           >
-            {t('common.filters.buttons.none')}
+            {t('common.facets.buttons.none')}
           </Button>
 
           {field.withDictionary && (
             <>
               <div className="grow" />
               <Label htmlFor="with-dictionary-switch" className="text-xs">
-                {t('common.filters.with_dictionary')}
+                {t('common.facets.with_dictionary')}
               </Label>
               <Switch
                 data-cy={`facet-dictionary-button-${field.key}`}
@@ -334,7 +334,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
 
           {/* No Result Found */}
           {!isLoading && items.length === 0 && (
-            <div className="text-muted-foreground py-4">{t('common.filters.no_values_found')}</div>
+            <div className="text-muted-foreground py-4">{t('common.facets.no_values_found')}</div>
           )}
 
           {/* Actual content */}
@@ -362,7 +362,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             size="xs"
             variant="link"
           >
-            {t('common.filters.buttons.show_more', { value: thousandNumberFormat(items.length - visibleItemsCount) })}
+            {t('common.facets.buttons.show_more', { value: thousandNumberFormat(items.length - visibleItemsCount) })}
           </Button>
         )}
         {!isLoading && visibleItemsCount > maxVisibleItems && (
@@ -373,7 +373,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             size="xs"
             variant="link"
           >
-            {t('common.filters.buttons.show_less')}
+            {t('common.facets.buttons.show_less')}
           </Button>
         )}
       </CardContent>
@@ -386,7 +386,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             onClick={reset}
             disabled={selectedItems.length === 0 || isLoading}
           >
-            {t('common.filters.buttons.clear')}
+            {t('common.facets.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
             <ActionButton
@@ -398,19 +398,19 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
               actions={[
                 {
                   id: 'some_not_in',
-                  label: t('common.filters.buttons.some_not_in'),
+                  label: t('common.facets.buttons.some_not_in'),
                   onClick: applySomeNotIn,
                 },
                 {
                   id: 'not_in',
-                  label: t('common.filters.buttons.not_in'),
+                  label: t('common.facets.buttons.not_in'),
                   onClick: applyNotIn,
                 },
               ]}
               onDefaultAction={apply}
               disabled={isLoading}
             >
-              {t('common.filters.buttons.apply')}
+              {t('common.facets.buttons.apply')}
             </ActionButton>
           </div>
         </div>
