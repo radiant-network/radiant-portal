@@ -263,7 +263,7 @@ function DataTableFilters({
   }
 
   return (
-    <div id="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
+    <div id="table-filters" data-cy="table-filters" className="py-0 flex flex-2 flex-wrap gap-2 items-button">
       {filterSearch && (
         <TableFiltersSearch
           onSelect={handleAutocompleteSelect}
@@ -288,6 +288,7 @@ function DataTableFilters({
           .map(filter => (
             <FilterButton
               key={filter.key}
+              dataCy={filter.key}
               popoverSize={filter.popoverSize as PopoverSize}
               label={filter.label}
               options={filter.options}
@@ -302,6 +303,7 @@ function DataTableFilters({
         {/* Additional filters control button - only show if there are hidden options */}
         {hiddenFilterOptions.length > 0 && (
           <FilterButton
+            dataCy="more"
             label={t('common.facets.more', 'More')}
             options={hiddenFilterOptions}
             selected={changedFilterButtons}
@@ -315,7 +317,12 @@ function DataTableFilters({
 
         {/* Clear button */}
         {hasActiveFilters && (
-          <Button variant="link" onClick={clearAllFilters} className="text-sm py-2 px-3 h-8">
+          <Button
+            data-cy="table-filters-clear"
+            variant="link"
+            onClick={clearAllFilters}
+            className="text-sm py-2 px-3 h-8"
+          >
             <X size={14} />
             {t('common.actions.clear', 'Clear')}
           </Button>
