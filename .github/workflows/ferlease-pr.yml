@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   ferlease-release:
-    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feat/')
+    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') || startsWith(github.head_ref, 'refactor/') || startsWith(github.head_ref, 'perf/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +23,7 @@ jobs:
         id: release
         run: |
           branch="${{ github.head_ref }}"
-          release="${branch#feat/}"
+          release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
           echo "value=${release}" >> "$GITHUB_OUTPUT"
           echo "url=https://portail-${release}.dev.qlin.aws.sante.quebec" >> "$GITHUB_OUTPUT"
@@ -71,7 +71,7 @@ jobs:
 
   cypress:
     needs: ferlease-release
-    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feat/')
+    if: github.event.action != 'closed' && startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') || startsWith(github.head_ref, 'refactor/') || startsWith(github.head_ref, 'perf/')
     runs-on: [self-hosted, qlin-arc]
     permissions:
       id-token: write
@@ -135,7 +135,7 @@ jobs:
             --delete
 
   ferlease-teardown:
-    if: github.event.action == 'closed' && startsWith(github.head_ref, 'feat/')
+    if: github.event.action == 'closed' && startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') || startsWith(github.head_ref, 'refactor/') || startsWith(github.head_ref, 'perf/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -145,7 +145,7 @@ jobs:
         id: release
         run: |
           branch="${{ github.head_ref }}"
-          release="${branch#feat/}"
+          release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
           echo "value=${release}" >> "$GITHUB_OUTPUT"
 

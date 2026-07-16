@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - 'feat/**'
+      - 'fix/**'
+      - 'refactor/**'
+      - 'perf/**'
 
 env:
   REGISTRY: ghcr.io
@@ -24,7 +27,7 @@ jobs:
         id: tag
         run: |
           branch="${{ github.ref_name }}"
-          release="${branch#feat/}"
+          release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
           ts=$(date +%s)
           echo "value=feature-${release}-${GITHUB_SHA:0:7}-${ts}" >> "$GITHUB_OUTPUT"
