@@ -8,7 +8,7 @@ export const SequencingDetailsModal = {
      * @param dataSeq The seq object.
      */
     shouldHaveSubtitle(dataSeq: any) {
-      cy.get(CommonSelectors.modal).contains(`Sequencing ${dataSeq.seq_id}`).should('exist');
+      cy.get(CommonSelectors.modal).contains(`Sequencing ID ${dataSeq.seq_id}`).should('exist');
     },
   },
 };

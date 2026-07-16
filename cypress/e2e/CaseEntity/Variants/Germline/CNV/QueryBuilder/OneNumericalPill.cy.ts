@@ -11,7 +11,7 @@ describe('Case Entity - Variants - Germline - CNV - Query builder - One numerica
     CaseEntity_Variants_SavedFilters.cnv.actions.selectFilterInDropdown('Cypress_QB_1NumericalPill');
   };
 
-  it('Edit a pill via its inline popup [SJRA-1703]', () => {
+  it('Edit a pill via its inline popup', () => {
     setupTest();
     CaseEntity_Variants_QueryBuilder.cnv.actions.editPillInline();
 
