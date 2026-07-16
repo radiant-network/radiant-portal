@@ -59,7 +59,7 @@ func Test_BootstrapMaskingPolicies_CreatesMarkerRoleAuthGrantRowFilterAndMasks(t
 	require.NoError(t, BootstrapMaskingPolicies(context.Background(), m))
 
 	assert.Equal(t, []string{RangerMaskingRole}, m.roles, "the masking-subject marker role is ensured")
-	assert.Equal(t, []string{authAccessPolicy}, m.accessNames, "SELECT on auth.pii_grant is granted")
+	assert.Equal(t, []string{authAccessPolicy, sharedAccessPolicy}, m.accessNames, "SELECT on auth.pii_grant + the shared base DB is granted")
 	assert.Equal(t, "user_id = "+currentUserLogin, m.rowFilters[authRowFilterPolicy], "row-filter keys pii_grant on the caller's sub")
 	assert.Equal(t, []string{"submitter_patient_id", "first_name", "last_name", "jhn"}, m.masks[maskRedactPolicy])
 	assert.Equal(t, []string{"date_of_birth"}, m.masks[maskDobPolicy])

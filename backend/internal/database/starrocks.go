@@ -3,6 +3,7 @@ package database
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -16,13 +17,14 @@ import (
 )
 
 var (
-	dbHost     = os.Getenv("DB_HOST")
-	dbPort     = os.Getenv("DB_PORT")
-	dbName     = os.Getenv("DB_NAME")
-	dbUserName = os.Getenv("DB_USERNAME")
-	dbPassword = os.Getenv("DB_PASSWORD")
-	dbSSLCA    = os.Getenv("DB_SSL_CA")
-	dbSSLMode  = os.Getenv("DB_SSL_MODE")
+	dbHost      = os.Getenv("DB_HOST")
+	dbPort      = os.Getenv("DB_PORT")
+	dbName      = os.Getenv("DB_NAME")
+	dbUserName  = os.Getenv("DB_USERNAME")
+	dbPassword  = os.Getenv("DB_PASSWORD")
+	dbSSLCA     = os.Getenv("DB_SSL_CA")
+	dbSSLMode   = os.Getenv("DB_SSL_MODE")
+	dbProxyAddr = os.Getenv("STARROCKS_PROXY_ADDR")
 )
 
 // registerStarrocksTLS reads the CA bundle at caPath, registers a TLS config
@@ -77,23 +79,58 @@ func NewStarrocksDB() (*gorm.DB, error) {
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?interpolateParams=true&parseTime=true%s",
 		dbUserName, dbPassword, dbHost, dbPort, dbName, tlsParam)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: observability.NewGormLogger("starrocks")})
+
+	// The root pool (native auth) is the fallback. It is wrapped in routingConnPool so a request
+	// carrying a per-user pool in its context (mysql-proxy path) runs as that user instead —
+	// repositories are unaffected either way.
+	root, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
+	root.SetMaxIdleConns(10)
+	root.SetMaxOpenConns(100)
+	root.SetConnMaxLifetime(time.Hour)
 
-	sqlDB, err := db.DB()
+	db, err := gorm.Open(
+		mysql.New(mysql.Config{Conn: &routingConnPool{root: root}}),
+		&gorm.Config{Logger: observability.NewGormLogger("starrocks")},
+	)
 	if err != nil {
 		return nil, err
 	}
-	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
-	sqlDB.SetMaxIdleConns(10)
-
-	// SetMaxOpenConns sets the maximum number of open connections to the database.
-	sqlDB.SetMaxOpenConns(100)
-
-	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
-	sqlDB.SetConnMaxLifetime(time.Hour)
-
 	return db, nil
+}
+
+// NewStarrocksUserPool opens a per-request StarRocks pool that authenticates as the end user
+// through mysql-proxy: the user's Keycloak sub is the MySQL username and the raw JWT is the
+// password. The proxy advertises mysql_clear_password (hence AllowCleartextPasswords) and
+// translates it into the TLS + authentication_openid_connect_client handshake StarRocks expects,
+// so every query runs as that user and Ranger applies per-user masking / row-filter / access. The
+// client↔proxy hop is plaintext by design (the proxy runs on a trusted host), so no TLS param.
+//
+// defaultDB is the connection's default schema (e.g. "<tenant>_tenant"), forwarded via
+// CLIENT_CONNECT_WITH_DB — StarRocks checks database access at login, which is the real tenant
+// gate (Ranger access is inert on the views themselves, #72910). The returned pool is bound to
+// the request context (ContextWithUserPool) and closed when the request completes.
+func NewStarrocksUserPool(sub, jwt, defaultDB string) (*sql.DB, error) {
+	if dbProxyAddr == "" {
+		return nil, fmt.Errorf("STARROCKS_PROXY_ADDR is not set")
+	}
+	cfg := gomysql.NewConfig()
+	cfg.User = sub
+	cfg.Passwd = jwt
+	cfg.Net = "tcp"
+	cfg.Addr = dbProxyAddr
+	cfg.DBName = defaultDB
+	cfg.AllowCleartextPasswords = true
+	cfg.InterpolateParams = true
+	cfg.ParseTime = true
+
+	pool, err := sql.Open("mysql", cfg.FormatDSN())
+	if err != nil {
+		return nil, err
+	}
+	pool.SetMaxOpenConns(2)
+	pool.SetConnMaxLifetime(5 * time.Minute)
+	return pool, nil
 }

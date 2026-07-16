@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,31 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
+
+func requestWithAuthHeader(value string) *gin.Context {
+	c := &gin.Context{}
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	if value != "" {
+		c.Request.Header.Set("Authorization", value)
+	}
+	return c
+}
+
+func Test_RetrieveRawToken_ReturnsBearerValue(t *testing.T) {
+	tok, err := RetrieveRawToken(requestWithAuthHeader("Bearer ey.header.sig"))
+	assert.NoError(t, err)
+	assert.Equal(t, "ey.header.sig", tok)
+}
+
+func Test_RetrieveRawToken_MissingHeaderIsError(t *testing.T) {
+	_, err := RetrieveRawToken(requestWithAuthHeader(""))
+	assert.Error(t, err)
+}
+
+func Test_RetrieveRawToken_NonBearerSchemeIsError(t *testing.T) {
+	_, err := RetrieveRawToken(requestWithAuthHeader("Basic abc123"))
+	assert.Error(t, err)
+}
 
 func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
 	c := gin.Context{}
