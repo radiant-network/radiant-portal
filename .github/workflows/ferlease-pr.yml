@@ -25,6 +25,7 @@ jobs:
           branch="${{ github.head_ref }}"
           release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          release=$(echo "$release" | sed 's/^[a-z]*-[0-9]*-//')
           echo "value=${release}" >> "$GITHUB_OUTPUT"
           echo "url=https://portail-${release}.dev.qlin.aws.sante.quebec" >> "$GITHUB_OUTPUT"
 
@@ -144,6 +145,7 @@ jobs:
           branch="${{ github.head_ref }}"
           release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          release=$(echo "$release" | sed 's/^[a-z]*-[0-9]*-//')
           echo "value=${release}" >> "$GITHUB_OUTPUT"
 
       - name: Write SSH credentials
