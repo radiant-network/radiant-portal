@@ -34,7 +34,7 @@ jobs:
         run: |
           install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
           echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
-          gh api meta --jq '.ssh_keys[]' | sed 's/^/github.com /' > "$RUNNER_TEMP/known_host"
+          ssh-keyscan -t rsa,ecdsa,ed25519 github.com > "$RUNNER_TEMP/known_host" 2>/dev/null
 
       - name: Pull ferlease binary
         run: |
@@ -152,7 +152,7 @@ jobs:
         run: |
           install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
           echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
-          gh api meta --jq '.ssh_keys[]' | sed 's/^/github.com /' > "$RUNNER_TEMP/known_host"
+          ssh-keyscan -t rsa,ecdsa,ed25519 github.com > "$RUNNER_TEMP/known_host" 2>/dev/null
 
       - name: Pull ferlease binary
         run: |
