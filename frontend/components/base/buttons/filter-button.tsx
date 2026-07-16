@@ -59,6 +59,7 @@ type FilterButtonProps = {
   optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
   showKey?: boolean; // display the option key in front of the label ("key - label")
   withTooltip?: boolean; // wrap each item in a hover tooltip
+  dataCy?: string; // base id for cypress selectors (trigger, badge, options, clear)
 };
 
 const CustomCommandItem = ({
@@ -70,6 +71,7 @@ const CustomCommandItem = ({
   selected,
   showKey,
   withTooltip,
+  dataCy,
 }: {
   option: IFilterButtonItem;
   handleSelect: (value: string) => void;
@@ -79,10 +81,12 @@ const CustomCommandItem = ({
   selected: string[];
   showKey: boolean;
   withTooltip: boolean;
+  dataCy?: string;
 }) => {
   const IconComponent = option.icon;
   const isSelected = selected.includes(option.key || '');
   const labelText = typeof option.label === 'string' ? option.label : '';
+  const optionDataCy = dataCy && option.key ? `filter-option-${dataCy}-${option.key}` : undefined;
 
   // showKey renders the single-line "key - label" display (truncated, muted label).
   const keyLabelContent = (
@@ -119,6 +123,7 @@ const CustomCommandItem = ({
 
   const checkboxFilter = (
     <CheckboxFilter
+      dataCy={optionDataCy}
       fluid
       size="sm"
       className="mx-2 my-1.5"
@@ -133,7 +138,11 @@ const CustomCommandItem = ({
   let content: React.ReactNode;
   if (actionMode) {
     content = (
-      <Button variant="ghost" className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal">
+      <Button
+        data-cy={optionDataCy}
+        variant="ghost"
+        className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal"
+      >
         {option.label}
       </Button>
     );
@@ -178,6 +187,7 @@ export default function FilterButton({
   closeOnSelect = false,
   showKey = false, // defaults to false
   withTooltip = false, // defaults to false
+  dataCy,
 }: FilterButtonProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(openOnAppear);
@@ -227,11 +237,21 @@ export default function FilterButton({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant={variant} size="sm" className={cn('border-dashed', className)}>
+        <Button
+          data-cy={dataCy ? `filter-button-${dataCy}` : undefined}
+          variant={variant}
+          size="sm"
+          className={cn('border-dashed', className)}
+        >
           {icon ? icon : <PlusCircle className="" />}
           <span>{label}</span>
           {!actionMode && selectedCount > 0 && (
-            <Badge className="size-5 items-center justify-center">{selectedCount}</Badge>
+            <Badge
+              data-cy={dataCy ? `filter-badge-${dataCy}` : undefined}
+              className="size-5 items-center justify-center"
+            >
+              {selectedCount}
+            </Badge>
           )}
         </Button>
       </PopoverTrigger>
@@ -267,6 +287,7 @@ export default function FilterButton({
                   selected={selected}
                   showKey={showKey}
                   withTooltip={withTooltip}
+                  dataCy={dataCy}
                 />
               ))}
             </CommandGroup>
@@ -283,6 +304,7 @@ export default function FilterButton({
                   selected={selected}
                   showKey={showKey}
                   withTooltip={withTooltip}
+                  dataCy={dataCy}
                 />
               ))}
             </CommandGroup>
@@ -291,6 +313,7 @@ export default function FilterButton({
         {selectedCount !== 0 && !actionMode && (
           <div className="size-full border-t-1 rounded-none border-border p-1">
             <Button
+              data-cy={dataCy ? `filter-clear-${dataCy}` : undefined}
               variant="ghost"
               size="sm"
               className="size-full"
