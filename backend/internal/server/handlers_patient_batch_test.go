@@ -45,7 +45,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	var response types.CreateBatchResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "patient", response.BatchType)
+	assert.Equal(t, "create_patient", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }

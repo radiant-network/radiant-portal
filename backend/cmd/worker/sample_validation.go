@@ -48,7 +48,7 @@ func (r *SampleValidationRecord) GetBase() *batchval.BaseValidationRecord {
 }
 
 func (r *SampleValidationRecord) GetResourceType() string {
-	return types.SampleBatchType
+	return "sample"
 }
 
 func (r *SampleValidationRecord) getUniqueIds() []string {
@@ -144,7 +144,7 @@ func validateIsDifferentExistingSampleField[T comparable](
 	return false
 }
 
-func processSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
 	cache := batchval.NewBatchValidationCache(bv)

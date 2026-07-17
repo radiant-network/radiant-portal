@@ -52,7 +52,7 @@ func (r *SequencingExperimentValidationRecord) GetBase() *batchval.BaseValidatio
 }
 
 func (r *SequencingExperimentValidationRecord) GetResourceType() string {
-	return types.SequencingExperimentBatchType
+	return "sequencing_experiment" // report label, not the batch type — see PatientValidationRecord.GetResourceType
 }
 
 func (r *SequencingExperimentValidationRecord) getPath(fieldName string) string {
@@ -283,7 +283,7 @@ func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperime
 	return true
 }
 
-func processSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var experimentsBatch []types.SequencingExperimentBatch
 

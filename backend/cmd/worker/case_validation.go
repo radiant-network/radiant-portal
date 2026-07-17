@@ -209,7 +209,7 @@ func (r *CaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
 }
 
 func (r *CaseValidationRecord) GetResourceType() string {
-	return types.CaseBatchType
+	return "case"
 }
 
 func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
@@ -1331,7 +1331,7 @@ func validateCaseRecord(
 	return cr, nil
 }
 
-func processCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var caseBatches []types.CaseBatch
 

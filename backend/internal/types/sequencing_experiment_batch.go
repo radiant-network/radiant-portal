@@ -1,6 +1,6 @@
 package types
 
-const SequencingExperimentBatchType = "sequencing_experiment"
+const CreateSequencingExperimentBatchType = "create_sequencing_experiment"
 const UpdateSequencingExperimentBatchType = "update_sequencing_experiment"
 
 type SequencingExperimentBatch struct {

@@ -67,7 +67,7 @@ func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, true, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, true, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var count int64
@@ -82,7 +82,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
@@ -188,7 +188,7 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
@@ -225,7 +225,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca []*types.Case
@@ -255,7 +255,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "CASE-011",
@@ -282,7 +282,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			payload := createBaseCasePayload("Persist_Failure_ID_Collision_" + tableName)
 			createDocumentsForBatch(context, client, payload)
 			payloadBytes, _ := json.Marshal(payload)
-			id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+			id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 			var msg string
 			switch tableName {
@@ -329,7 +329,7 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 		payload[0].Tasks[0].PipelineVersion = "!@#$%^&*()_+"
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -349,7 +349,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -369,7 +369,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -389,7 +389,7 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -409,7 +409,7 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -435,7 +435,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
 			{
@@ -461,12 +461,12 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		payload[0].SubmitterCaseId = "validateDocument_IdenticalDocumentAlreadyExists_2"
 		payloadBytes, _ = json.Marshal(payload)
-		id = insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id = insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		infos := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-003",
@@ -492,7 +492,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
@@ -513,7 +513,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *test
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateDocument_Error_DocumentNotFoundAtUrl")
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-002",
@@ -548,7 +548,7 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 		payload[0].Tasks[0].OutputDocuments[0].Url = url
 		payload[0].Tasks[0].OutputDocuments[0].Name = "Something Else"
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
@@ -566,7 +566,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *t
 		payload[0].Tasks[0].OutputDocuments = append(payload[0].Tasks[0].OutputDocuments, payload[0].Tasks[0].OutputDocuments[0])
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-008",
@@ -587,7 +587,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 		payload[0].Tasks[0].OutputDocuments[0].Size = &size
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-006",
@@ -607,7 +607,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 		payload[0].Tasks[0].OutputDocuments[0].Hash = "not-the-right-hash"
 
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-007",
@@ -623,7 +623,7 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		scenario, _ := testutils.LoadScenario("cases_case_codes")
 		payload, _ := json.Marshal(scenario.Cases)
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
 		infos := []types.BatchMessage{
 			{
@@ -726,7 +726,7 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
 		errors := []types.BatchMessage{
 			{
@@ -772,7 +772,7 @@ func Test_ProcessBatch_Case_Inner_Codes_SequencingExperiments(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
 		errors := []types.BatchMessage{
 			{
@@ -793,7 +793,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
 		errors := []types.BatchMessage{
 			{
@@ -909,7 +909,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
 		infos := []types.BatchMessage{
 			{
@@ -1003,7 +1003,7 @@ func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
 		var before int64
 		db.Table("cases").Count(&before)
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var after int64
@@ -1020,7 +1020,7 @@ func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 	})
 }
@@ -1077,7 +1077,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca0 []*types.Case
@@ -1113,7 +1113,7 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 		createDocumentsForBatch(context, client, scenario.Cases)
 		payloadBytes, _ := json.Marshal(scenario.Cases)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
@@ -1156,7 +1156,7 @@ func Test_ProcessBatch_Case_Template(t *testing.T) {
 		//
 		//// TODO: Load the payload into the batch and into the database
 		//payloadBytes, _ := json.Marshal(payload)
-		//id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		//id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		//
 		//// TODO: Implement the specific message assertions for your test case
 		//errors := []types.BatchMessage{

@@ -60,7 +60,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	var response types.CreateBatchResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "sequencing_experiment", response.BatchType)
+	assert.Equal(t, "create_sequencing_experiment", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
@@ -107,7 +107,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	var response types.CreateBatchResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "sequencing_experiment", response.BatchType)
+	assert.Equal(t, "create_sequencing_experiment", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }

@@ -356,7 +356,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
-		`, "{}", types.PatientBatchType).Scan(&id).Error
+		`, "{}", types.CreatePatientBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -364,7 +364,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 		//Batch has been considered as SUCCESS before inserting patient records
 		batch := types.Batch{
 			ID:        id,
-			BatchType: types.PatientBatchType,
+			BatchType: types.CreatePatientBatchType,
 			Payload:   "[]",
 			Status:    types.BatchStatusSuccess,
 			DryRun:    false,

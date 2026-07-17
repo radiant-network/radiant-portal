@@ -66,7 +66,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
-		`, payload, types.PatientBatchType).Scan(&id).Error
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -78,7 +78,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -118,7 +118,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
-		`, payload, types.PatientBatchType).Scan(&id).Error
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -130,7 +130,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -164,7 +164,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
-		`, payload, types.PatientBatchType).Scan(&id).Error
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -176,7 +176,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -201,7 +201,7 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		scenario, _ := testutils.LoadScenario("patient_all_codes")
 		payload, _ := json.Marshal(scenario.Patients)
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.PatientBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreatePatientBatchType, false, "user123", "2025-10-10")
 
 		infos := []types.BatchMessage{
 			{
@@ -277,7 +277,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
-		`, payload, types.PatientBatchType).Scan(&id).Error
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -289,7 +289,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, types.PatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -327,7 +327,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -339,7 +339,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, types.SampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -375,7 +375,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -387,7 +387,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, types.SampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -428,7 +428,7 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -471,7 +471,7 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -509,7 +509,7 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -545,7 +545,7 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -591,7 +591,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -644,7 +644,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -656,7 +656,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, types.SampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -697,7 +697,7 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -741,7 +741,7 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -786,7 +786,7 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -823,7 +823,7 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
             INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
             VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
-        `, payload, types.SampleBatchType).Scan(&id).Error
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -845,7 +845,7 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		scenario, _ := testutils.LoadScenario("sample_all_codes")
 		payload, _ := json.Marshal(scenario.Samples)
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.SampleBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateSampleBatchType, false, "user123", "2025-10-10")
 
 		infos := []types.BatchMessage{
 			{
@@ -921,7 +921,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, true, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -933,7 +933,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -973,7 +973,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -997,7 +997,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1049,7 +1049,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -1072,7 +1072,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error; err != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
@@ -1086,7 +1086,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1121,7 +1121,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -1162,7 +1162,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, diff, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
+		`, diff, types.CreateSequencingExperimentBatchType).Scan(&id).Error; err != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
@@ -1176,7 +1176,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1215,7 +1215,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -1238,7 +1238,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1273,7 +1273,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -1296,7 +1296,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1345,7 +1345,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
-		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -1368,7 +1368,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
-		assert.Equal(t, "sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
 		assert.Equal(t, "user123", resultBatch.Username)
 		assert.NotNil(t, resultBatch.StartedOn)
 		assert.NotNil(t, resultBatch.FinishedOn)
@@ -1382,7 +1382,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		scenario, _ := testutils.LoadScenario("sequencing_experiment_all_codes")
 		payload, _ := json.Marshal(scenario.SequencingExperiments)
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.SequencingExperimentBatchType, false, "user123", "2025-10-10")
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CreateSequencingExperimentBatchType, false, "user123", "2025-10-10")
 
 		infos := []types.BatchMessage{
 			{

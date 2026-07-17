@@ -44,7 +44,7 @@ func (r *PatientValidationRecord) GetBase() *batchval.BaseValidationRecord {
 }
 
 func (r *PatientValidationRecord) GetResourceType() string {
-	return types.PatientBatchType
+	return "patient"
 }
 
 func (r *PatientValidationRecord) getUniqueIds() []string {
@@ -189,7 +189,7 @@ func validateIsDifferentExistingPatientField[T comparable](
 	return false
 }
 
-func processPatientBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var patients []types.PatientBatch
 
