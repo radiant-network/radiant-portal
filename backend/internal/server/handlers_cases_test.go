@@ -153,10 +153,6 @@ func (m *MockRepository) CreateCase(*types.Case) error { return nil }
 
 func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error { return nil }
 
-func (m *MockRepository) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*types.Case, error) {
-	return nil, nil
-}
-
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()

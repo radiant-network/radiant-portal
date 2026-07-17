@@ -2169,4 +2169,6 @@ SELECT setval('task_id_seq', (SELECT MAX(id) FROM task));
 SELECT setval('case_id_seq', (SELECT MAX(id) FROM cases));
 SELECT setval('family_id_seq', (SELECT MAX(id) FROM family));
 SELECT setval('observation_coding_id_seq', (SELECT MAX(id) FROM obs_categorical));
+SELECT setval('obs_string_id_seq', (SELECT MAX(id) FROM obs_string));
+SELECT setval('family_history_id_seq', (SELECT MAX(id) FROM family_history));
 SELECT setval('sequencing_experiment_id_seq', (SELECT MAX(id) FROM sequencing_experiment));

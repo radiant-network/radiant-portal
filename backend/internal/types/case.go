@@ -182,6 +182,7 @@ func (CaseHasSequencingExperiment) TableName() string {
 var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
+	CaseSubmitterCaseIdField,
 	PatientIdField,
 	SubmitterPatientIdField,
 	SubmitterProbandIdField,
@@ -263,6 +264,13 @@ var CaseProbandIdField = Field{
 	Name:          "proband_id",
 	CanBeSelected: true,
 	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseSubmitterCaseIdField = Field{
+	Name:          "submitter_case_id",
+	Alias:         "submitter_case_id",
+	CanBeFiltered: true,
 	Table:         CaseTable,
 }
 
