@@ -51,16 +51,8 @@ func (r *SequencingExperimentValidationRecord) GetBase() *batchval.BaseValidatio
 	return &r.BaseValidationRecord
 }
 
-func (r *SequencingExperimentValidationRecord) GetResourceType() string {
-	return "sequencing_experiment" // report label, not the batch type — see PatientValidationRecord.GetResourceType
-}
-
 func (r *SequencingExperimentValidationRecord) getPath(fieldName string) string {
-	path := fmt.Sprintf("sequencing_experiment[%d]", r.Index)
-	if fieldName != "" {
-		path += "." + fieldName
-	}
-	return path
+	return batchval.FormatPath(r, fieldName)
 }
 
 func (r *SequencingExperimentValidationRecord) getUniqueIds() []string {
@@ -403,9 +395,10 @@ func validateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchV
 
 	record := SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
-			Context: bv,
-			Cache:   cache,
-			Index:   index,
+			Context:      bv,
+			Cache:        cache,
+			ResourceType: types.CreateSequencingExperimentBatchType,
+			Index:        index,
 		},
 		SequencingExperiment: seqExp,
 	}
@@ -560,9 +553,10 @@ func validateUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.B
 func validateUpdateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
 	record := SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
-			Context: bv,
-			Cache:   cache,
-			Index:   index,
+			Context:      bv,
+			Cache:        cache,
+			ResourceType: types.UpdateSequencingExperimentBatchType,
+			Index:        index,
 		},
 		SequencingExperiment: seqExp,
 	}

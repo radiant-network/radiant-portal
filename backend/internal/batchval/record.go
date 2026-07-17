@@ -18,11 +18,20 @@ type BaseValidationRecord struct {
 	Context *BatchValidationContext
 	Cache   *BatchValidationCache
 
+	// ResourceType is the batch type of the batch being processed (types.Create*/Update*/Patch*
+	// BatchType). It labels report paths and messages ("create_case[0]", "Invalid field x for
+	// update_patient 0"), so the same record struct reports correctly for create and update flows.
+	ResourceType string
+
 	Index    int
 	Skipped  bool
 	Errors   []types.BatchMessage
 	Warnings []types.BatchMessage
 	Infos    []types.BatchMessage
+}
+
+func (r *BaseValidationRecord) GetResourceType() string {
+	return r.ResourceType
 }
 
 func (r *BaseValidationRecord) AddErrors(message string, code string, path string) {

@@ -29,17 +29,13 @@ func (r *PatchCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r *PatchCaseValidationRecord) GetResourceType() string {
-	return types.PatchCaseBatchType
-}
-
 func (r *PatchCaseValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
 
 func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*PatchCaseValidationRecord, error) {
 	r := &PatchCaseValidationRecord{
-		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index},
+		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index, ResourceType: types.PatchCaseBatchType},
 		Patch:                 patch,
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 	}

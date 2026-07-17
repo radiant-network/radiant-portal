@@ -39,10 +39,6 @@ func (r *UpdateCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r *UpdateCaseValidationRecord) GetResourceType() string {
-	return types.UpdateCaseBatchType
-}
-
 func (r *UpdateCaseValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
@@ -55,7 +51,7 @@ func (r *UpdateCaseValidationRecord) path() string {
 // created or updated.
 func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, update types.UpdateCaseBatch, index int) (*UpdateCaseValidationRecord, error) {
 	r := &UpdateCaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: bv, Cache: cache, Index: index},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: bv, Cache: cache, Index: index, ResourceType: types.UpdateCaseBatchType},
 		Update:               update,
 	}
 

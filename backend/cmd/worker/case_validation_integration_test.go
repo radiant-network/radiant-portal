@@ -259,8 +259,8 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 		errors := []types.BatchMessage{
 			{
 				Code:    "CASE-011",
-				Message: "Case (N1 / SUBMITTER_CASE_ID_COLLISION) appears multiple times in the batch.",
-				Path:    "case[1]",
+				Message: "Create_case (N1 / SUBMITTER_CASE_ID_COLLISION) appears multiple times in the batch.",
+				Path:    "create_case[1]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -287,19 +287,19 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			var msg string
 			switch tableName {
 			case "cases":
-				msg = "error processing case batch records: error during case insertion failed to persist case for case 0: failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist case for create_case 0: failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
 			case "family":
-				msg = "error processing case batch records: error during case insertion failed to persist family for case 0: failed to persist family member \"MRN-283773\" for case 0: ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist family for create_case 0: failed to persist family member \"MRN-283773\" for create_case 0: ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
 			case "obs_categorical":
-				msg = "error processing case batch records: error during case insertion failed to persist observations categorical for case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist observations categorical for create_case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
 			case "obs_string":
-				msg = "error processing case batch records: error during case insertion failed to persist observations text for case 0: failed to persist observation text for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"obs_string_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist observations text for create_case 0: failed to persist observation text for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"obs_string_pkey\" (SQLSTATE 23505)"
 			case "family_history":
-				msg = "error processing case batch records: error during case insertion failed to persist family history for case 0: failed to persist family history for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"family_history_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist family history for create_case 0: failed to persist family history for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"family_history_pkey\" (SQLSTATE 23505)"
 			case "task":
-				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist task for case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for create_case 0: failed to persist task for create_case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
 			case "document":
-				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist document \"Persist_Failure_ID_Collision_document.recal.crai\" for case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for create_case 0: failed to persist document \"Persist_Failure_ID_Collision_document.recal.crai\" for create_case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
 			default:
 				t.Fatalf("unexpected table name: %s", tableName)
 			}
@@ -334,8 +334,8 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0].pipeline_version",
+				Message: "Invalid field pipeline_version for create_case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[0].tasks[0].pipeline_version",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -354,8 +354,8 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
-				Path:    "case[0].tasks[0].type_code",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "create_case[0].tasks[0].type_code",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -374,8 +374,8 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
-				Path:    "case[0].tasks[0]",
+				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for create_case 0 - task 0.",
+				Path:    "create_case[0].tasks[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -394,8 +394,8 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-003",
-				Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
-				Path:    "case[0].tasks[0]",
+				Message: "Missing input documents for create_case 0 - task 0 of type family_variant_calling.",
+				Path:    "create_case[0].tasks[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -414,8 +414,8 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 0 of type alignment_germline_variant_calling.",
-				Path:    "case[0].tasks[0]",
+				Message: "Missing output documents for create_case 0 - task 0 of type alignment_germline_variant_calling.",
+				Path:    "create_case[0].tasks[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -440,13 +440,13 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing \"ABC123\" is not defined for case 0 - task 0.",
-				Path:    "case[0].tasks[0]",
+				Message: "Sequencing \"ABC123\" is not defined for create_case 0 - task 0.",
+				Path:    "create_case[0].tasks[0]",
 			},
 			{
 				Code:    "TASK-006",
-				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
-				Path:    "case[0].tasks[0]",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for create_case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+				Path:    "create_case[0].tasks[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -471,14 +471,14 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 			{
 				Code:    "DOCUMENT-003",
 				Message: "Document s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai already exists, skipped.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai has been found in the output of a different task.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
@@ -496,13 +496,13 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Invalid field name for create_case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-009",
-				Message: "Document name !@#$%^&*()_+ is not consistent with URL s3://test-bucket/validateDocument_Error_DocumentField.recal.crai for case 0 - task 0 - output document 0.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Document name !@#$%^&*()_+ is not consistent with URL s3://test-bucket/validateDocument_Error_DocumentField.recal.crai for create_case 0 - task 0 - output document 0.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -517,8 +517,8 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *test
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-002",
-				Message: "No document can be found on the URL s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai for case 0 - task 0 - output document 0.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "No document can be found on the URL s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai for create_case 0 - task 0 - output document 0.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -553,7 +553,7 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 			{
 				Code:    "DOCUMENT-004",
 				Message: "A document with same url s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai has been found but with a different name (validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai <> Something Else).",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, warnings, emptyMsgs)
@@ -571,7 +571,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *t
 			{
 				Code:    "DOCUMENT-008",
 				Message: "Duplicate output document with URL s3://test-bucket/validateDocument_Error_DuplicateDocumentInBatch.recal.crai found.",
-				Path:    "case[0].tasks[0].output_documents[1]",
+				Path:    "create_case[0].tasks[0].output_documents[1]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -591,8 +591,8 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-006",
-				Message: "Document size does not match the actual size of the document s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai for case 0 - task 0 - output document 0.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai for create_case 0 - task 0 - output document 0.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -611,8 +611,8 @@ func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-007",
-				Message: "Document hash does not match the actual hash of the document s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai for case 0 - task 0 - output document 0.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai for create_case 0 - task 0 - output document 0.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -629,89 +629,89 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			{
 				Code:    "CASE-001",
 				Message: "Case (1 / 1:1) already exists, skipped.",
-				Path:    "case[0]",
+				Path:    "create_case[0]",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "CASE-003",
-				Message: "Project non_existing_project for case 1 does not exist.",
-				Path:    "case[1]",
+				Message: "Project non_existing_project for create_case 1 does not exist.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-004",
-				Message: "Diagnostic lab \"LDM-CHUSJJ\" for case 1 does not exist.",
-				Path:    "case[1]",
+				Message: "Diagnostic lab \"LDM-CHUSJJ\" for create_case 1 does not exist.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-005",
-				Message: "Analysis \"WGAA\" for case 1 does not exist.",
-				Path:    "case[1]",
+				Message: "Analysis \"WGAA\" for create_case 1 does not exist.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-006",
-				Message: "Ordering organization \"CHUSJJ\" for case 1 does not exist.",
-				Path:    "case[1]",
+				Message: "Ordering organization \"CHUSJJ\" for create_case 1 does not exist.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field status_code for case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
-				Path:    "case[1].status_code",
+				Message: "Invalid field status_code for create_case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
+				Path:    "create_case[1].status_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field resolution_status_code for case 1. Reason: \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
-				Path:    "case[1].resolution_status_code",
+				Message: "Invalid field resolution_status_code for create_case 1. Reason: \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
+				Path:    "create_case[1].resolution_status_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field priority_code for case 1. Reason: \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
-				Path:    "case[1].priority_code",
+				Message: "Invalid field priority_code for create_case 1. Reason: \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
+				Path:    "create_case[1].priority_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field category_code for case 1. Reason: \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
-				Path:    "case[1].category_code",
+				Message: "Invalid field category_code for create_case 1. Reason: \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
+				Path:    "create_case[1].category_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field primary_condition_value for case 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[1]",
+				Message: "Invalid field primary_condition_value for create_case 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field ordering_physician for case 1. Reason: field is too long, maximum length allowed is 100.",
-				Path:    "case[1]",
+				Message: "Invalid field ordering_physician for create_case 1. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "create_case[1]",
 			},
 			{
 				Code:    "CASE-007",
 				Message: "Case 1 must have exactly 1 proband.",
-				Path:    "case[1].patients",
+				Path:    "create_case[1].patients",
 			},
 			{
 				Code:    "CASE-008",
-				Message: "Duplicate patient (CHUSJ / MRN-283773) for case 2.",
-				Path:    "case[2].patients",
+				Message: "Duplicate patient (CHUSJ / MRN-283773) for create_case 2.",
+				Path:    "create_case[2].patients",
 			},
 			{
 				Code:    "CASE-007",
 				Message: "Case 2 must have exactly 1 proband.",
-				Path:    "case[2].patients",
+				Path:    "create_case[2].patients",
 			},
 			{
 				Code:    "CASE-005",
-				Message: "Analysis \"\" for case 3 does not exist.",
-				Path:    "case[3]",
+				Message: "Analysis \"\" for create_case 3 does not exist.",
+				Path:    "create_case[3]",
 			},
 			{
 				Code:    "CASE-007",
 				Message: "Case 3 must have exactly 1 proband.",
-				Path:    "case[3].patients",
+				Path:    "create_case[3].patients",
 			},
 			{
 				Code:    "CASE-011",
-				Message: "Case (N1 / CASE-12345) appears multiple times in the batch.",
-				Path:    "case[3]",
+				Message: "Create_case (N1 / CASE-12345) appears multiple times in the batch.",
+				Path:    "create_case[3]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
@@ -731,33 +731,33 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field submitter_patient_id for case 0 - patient 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].patients[1].submitter_patient_id",
+				Message: "Invalid field submitter_patient_id for create_case 0 - patient 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[0].patients[1].submitter_patient_id",
 			},
 			{
 				Code:    "PATIENT-006",
-				Message: "Patient (CHUSJ / MRN-283773!@#$%^) for case 0 - patient 1 does not exist.",
-				Path:    "case[0].patients[1]",
+				Message: "Patient (CHUSJ / MRN-283773!@#$%^) for create_case 0 - patient 1 does not exist.",
+				Path:    "create_case[0].patients[1]",
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field affected_status_code for case 0 - patient 1. Reason: \"super-affected\" is not a valid affected status code. Valid values [affected, non_affected, unknown].",
-				Path:    "case[0].patients[1].affected_status_code",
+				Message: "Invalid field affected_status_code for create_case 0 - patient 1. Reason: \"super-affected\" is not a valid affected status code. Valid values [affected, non_affected, unknown].",
+				Path:    "create_case[0].patients[1].affected_status_code",
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field relation_to_proband_code for case 0 - patient 1. Reason: \"not-proband\" is not a valid relation to proband code. Valid values [brother, father, mother, proband, sibling, sister].",
-				Path:    "case[0].patients[1].relation_to_proband_code",
+				Message: "Invalid field relation_to_proband_code for create_case 0 - patient 1. Reason: \"not-proband\" is not a valid relation to proband code. Valid values [brother, father, mother, proband, sibling, sister].",
+				Path:    "create_case[0].patients[1].relation_to_proband_code",
 			},
 			{
 				Code:    "OBS-001",
-				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: \"infantilee\" is not a valid onset code. Valid values [antenatal, childhood, congenital, infantile, juvenile, middle_age, neonatal, senior, unknown, young_adult].",
-				Path:    "case[0].patients[1].observations_categorical[0].onset_code",
+				Message: "Invalid field onset_code for create_case 0 - patient 1 - observations_categorical 0. Reason: \"infantilee\" is not a valid onset code. Valid values [antenatal, childhood, congenital, infantile, juvenile, middle_age, neonatal, senior, unknown, young_adult].",
+				Path:    "create_case[0].patients[1].observations_categorical[0].onset_code",
 			},
 			{
 				Code:    "OBS-001",
-				Message: "Invalid field system for case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].patients[1].observations_categorical[0].system",
+				Message: "Invalid field system for create_case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[0].patients[1].observations_categorical[0].system",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -778,7 +778,7 @@ func Test_ProcessBatch_Case_Inner_Codes_SequencingExperiments(t *testing.T) {
 			{
 				Code:    "SEQ-007",
 				Message: "Sequencing experiment (CQGC / S13225 / NA128911) does not exist.",
-				Path:    "case[0].sequencing_experiments[0]",
+				Path:    "create_case[0].sequencing_experiments[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -798,103 +798,103 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field aliquots for case 0 - task 0. Reason: field is empty.",
-				Path:    "case[0].tasks[0].aliquots",
+				Message: "Invalid field aliquots for create_case 0 - task 0. Reason: field is empty.",
+				Path:    "create_case[0].tasks[0].aliquots",
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
-				Path:    "case[0].tasks[0].type_code",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "create_case[0].tasks[0].type_code",
 			},
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing \"\" is not defined for case 0 - task 0.",
-				Path:    "case[0].tasks[0]",
+				Message: "Sequencing \"\" is not defined for create_case 0 - task 0.",
+				Path:    "create_case[0].tasks[0]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 0 of type desalignment.",
-				Path:    "case[0].tasks[0]",
+				Message: "Missing output documents for create_case 0 - task 0 of type desalignment.",
+				Path:    "create_case[0].tasks[0]",
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field pipeline_name for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
-				Path:    "case[0].tasks[0].pipeline_name",
+				Message: "Invalid field pipeline_name for create_case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "create_case[0].tasks[0].pipeline_name",
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field aliquots for case 0 - task 1. Reason: aliquots must contain at least one value.",
-				Path:    "case[0].tasks[1].aliquots",
+				Message: "Invalid field aliquots for create_case 0 - task 1. Reason: aliquots must contain at least one value.",
+				Path:    "create_case[0].tasks[1].aliquots",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 1 of type alignment.",
-				Path:    "case[0].tasks[1]",
+				Message: "Missing output documents for create_case 0 - task 1 of type alignment.",
+				Path:    "create_case[0].tasks[1]",
 			},
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing \"NA12891111\" is not defined for case 0 - task 2.",
-				Path:    "case[0].tasks[2]",
+				Message: "Sequencing \"NA12891111\" is not defined for create_case 0 - task 2.",
+				Path:    "create_case[0].tasks[2]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 2 of type radiant_germline_annotation.",
-				Path:    "case[0].tasks[2]",
+				Message: "Missing output documents for create_case 0 - task 2 of type radiant_germline_annotation.",
+				Path:    "create_case[0].tasks[2]",
 			},
 			{
 				Code:    "TASK-006",
-				Message: "Input document with URL s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz for case 0 - task 2 was produced by a sequencing experiment not defined in this case.",
-				Path:    "case[0].tasks[2]",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz for create_case 0 - task 2 was produced by a sequencing experiment not defined in this case.",
+				Path:    "create_case[0].tasks[2]",
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field pipeline_name for case 0 - task 2. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[2].pipeline_name",
+				Message: "Invalid field pipeline_name for create_case 0 - task 2. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_case[0].tasks[2].pipeline_name",
 			},
 			{
 				Code:    "TASK-003",
-				Message: "Missing input documents for case 0 - task 3 of type family_variant_calling.",
-				Path:    "case[0].tasks[3]",
+				Message: "Missing input documents for create_case 0 - task 3 of type family_variant_calling.",
+				Path:    "create_case[0].tasks[3]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 3 of type family_variant_calling.",
-				Path:    "case[0].tasks[3]",
+				Message: "Missing output documents for create_case 0 - task 3 of type family_variant_calling.",
+				Path:    "create_case[0].tasks[3]",
 			},
 			{
 				Code:    "TASK-007",
 				Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
-				Path:    "case[0].tasks[4]",
+				Path:    "create_case[0].tasks[4]",
 			},
 			{
 				Code:    "TASK-003",
-				Message: "Missing input documents for case 0 - task 4 of type exomiser.",
-				Path:    "case[0].tasks[4]",
+				Message: "Missing input documents for create_case 0 - task 4 of type exomiser.",
+				Path:    "create_case[0].tasks[4]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 4 of type exomiser.",
-				Path:    "case[0].tasks[4]",
+				Message: "Missing output documents for create_case 0 - task 4 of type exomiser.",
+				Path:    "create_case[0].tasks[4]",
 			},
 			{
 				Code:    "TASK-007",
 				Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
-				Path:    "case[0].tasks[5]",
+				Path:    "create_case[0].tasks[5]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 5 of type alignment_germline_variant_calling.",
-				Path:    "case[0].tasks[5]",
+				Message: "Missing output documents for create_case 0 - task 5 of type alignment_germline_variant_calling.",
+				Path:    "create_case[0].tasks[5]",
 			},
 			{
 				Code:    "TASK-007",
 				Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
-				Path:    "case[0].tasks[6]",
+				Path:    "create_case[0].tasks[6]",
 			},
 			{
 				Code:    "TASK-004",
-				Message: "Missing output documents for case 0 - task 6 of type alignment_somatic_variant_calling.",
-				Path:    "case[0].tasks[6]",
+				Message: "Missing output documents for create_case 0 - task 6 of type alignment_somatic_variant_calling.",
+				Path:    "create_case[0].tasks[6]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -915,76 +915,76 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			{
 				Code:    "DOCUMENT-003",
 				Message: "Document s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz already exists, skipped.",
-				Path:    "case[0].tasks[0].output_documents[2]",
+				Path:    "create_case[0].tasks[0].output_documents[2]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomicc).",
-				Path:    "case[0].tasks[0].output_documents[3]",
+				Path:    "create_case[0].tasks[0].output_documents[3]",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_category_code for case 0. Reason: data category code \"not-genomic\" is not a valid data category code. Valid values [clinical, genomic].",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Invalid field data_category_code for create_case 0. Reason: data category code \"not-genomic\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf].",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "Invalid field format_code for create_case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf].",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-002",
-				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 0.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for create_case 0 - task 0 - output document 0.",
+				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_category_code for case 0. Reason: data category code \"genomic!@#$%\" is not a valid data category code. Valid values [clinical, genomic].",
-				Path:    "case[0].tasks[0].output_documents[1]",
+				Message: "Invalid field data_category_code for create_case 0. Reason: data category code \"genomic!@#$%\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "create_case[0].tasks[0].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-009",
-				Message: "Document name wrong_name.recal.crai is not consistent with URL s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
-				Path:    "case[0].tasks[0].output_documents[1]",
+				Message: "Document name wrong_name.recal.crai is not consistent with URL s3://test-bucket/existing_document.recal.crai for create_case 0 - task 0 - output document 1.",
+				Path:    "create_case[0].tasks[0].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-006",
-				Message: "Document size does not match the actual size of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
-				Path:    "case[0].tasks[0].output_documents[1]",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/existing_document.recal.crai for create_case 0 - task 0 - output document 1.",
+				Path:    "create_case[0].tasks[0].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-007",
-				Message: "Document hash does not match the actual hash of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
-				Path:    "case[0].tasks[0].output_documents[1]",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/existing_document.recal.crai for create_case 0 - task 0 - output document 1.",
+				Path:    "create_case[0].tasks[0].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[0].output_documents[2]",
+				Path:    "create_case[0].tasks[0].output_documents[2]",
 			},
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[0].output_documents[3]",
+				Path:    "create_case[0].tasks[0].output_documents[3]",
 			},
 			{
 				Code:    "DOCUMENT-002",
-				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 4.",
-				Path:    "case[0].tasks[0].output_documents[4]",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for create_case 0 - task 0 - output document 4.",
+				Path:    "create_case[0].tasks[0].output_documents[4]",
 			},
 			{
 				Code:    "DOCUMENT-008",
 				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
-				Path:    "case[0].tasks[0].output_documents[4]",
+				Path:    "create_case[0].tasks[0].output_documents[4]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)

@@ -43,10 +43,6 @@ func (r *PatientValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r *PatientValidationRecord) GetResourceType() string {
-	return "patient"
-}
-
 func (r *PatientValidationRecord) getUniqueIds() []string {
 	return []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 }
@@ -291,9 +287,10 @@ func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationCont
 func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
-			Context: bv,
-			Cache:   cache,
-			Index:   index,
+			Context:      bv,
+			Cache:        cache,
+			Index:        index,
+			ResourceType: types.CreatePatientBatchType,
 		},
 		Patient: patient,
 	}
@@ -439,9 +436,10 @@ func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidati
 func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
-			Context: bv,
-			Cache:   cache,
-			Index:   index,
+			Context:      bv,
+			Cache:        cache,
+			Index:        index,
+			ResourceType: types.UpdatePatientBatchType,
 		},
 		Patient: patient,
 	}

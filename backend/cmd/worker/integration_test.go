@@ -207,51 +207,51 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 			{
 				Code:    "PATIENT-001",
 				Message: "Patient (CHUSJ / MRN-283773) already exists, skipped.",
-				Path:    "patient[0]",
+				Path:    "create_patient[0]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "PATIENT-002",
 				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different sex_code (male <> female).",
-				Path:    "patient[2].sex_code",
+				Path:    "create_patient[2].sex_code",
 			},
 			{
 				Code:    "PATIENT-002",
 				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different date_of_birth (1970-01-30 00:00:00 +0000 UTC <> 2025-01-30 00:00:00 +0000 UTC).",
-				Path:    "patient[2].date_of_birth",
+				Path:    "create_patient[2].date_of_birth",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field submitter_patient_id for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.",
-				Path:    "patient[1].submitter_patient_id",
+				Message: "Invalid field submitter_patient_id for create_patient (ORG001 / 123456789!@#$%?&*()_+). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.",
+				Path:    "create_patient[1].submitter_patient_id",
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field submitter_patient_id_type for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: field is too long, maximum length allowed is 100.",
-				Path:    "patient[1].submitter_patient_id_type",
+				Message: "Invalid field submitter_patient_id_type for create_patient (ORG001 / 123456789!@#$%?&*()_+). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "create_patient[1].submitter_patient_id_type",
 			},
 			{
 				Code:    "PATIENT-003",
 				Message: "Organization ORG001 for patient 123456789!@#$%?&*()_+ does not exist.",
-				Path:    "patient[1].patient_organization_code",
+				Path:    "create_patient[1].patient_organization_code",
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field date_of_birth for patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
-				Path:    "patient[3].date_of_birth",
+				Message: "Invalid field date_of_birth for create_patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
+				Path:    "create_patient[3].date_of_birth",
 			},
 			{
 				Code:    "PATIENT-005",
 				Message: "Organization type (sequencing_center) defined for patient (CQGC / ABC123456) is not in this list : healthcare_provider, research_institute.",
-				Path:    "patient[3].patient_organization_code",
+				Path:    "create_patient[3].patient_organization_code",
 			},
 			{
 				Code:    "PATIENT-006",
-				Message: "Patient (CHUSJ / ABC123457) appears multiple times in the batch.",
-				Path:    "patient[5]",
+				Message: "Create_patient (CHUSJ / ABC123457) appears multiple times in the batch.",
+				Path:    "create_patient[5]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
@@ -851,46 +851,46 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 			{
 				Code:    "SAMPLE-001",
 				Message: "Sample (CQGC / S13224) already exists, skipped.",
-				Path:    "sample[0]",
+				Path:    "create_sample[0]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "SAMPLE-002",
 				Message: "A sample with same ids (CQGC / S13226) has been found but with a different tissue_site ( <> blood).",
-				Path:    "sample[1].tissue_site",
+				Path:    "create_sample[1].tissue_site",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "SAMPLE-006",
-				Message: "Invalid field tissue_site for sample (CCMG / ABCD1). Reason: field is too long, maximum length allowed is 100.",
-				Path:    "sample[2].tissue_site",
+				Message: "Invalid field tissue_site for create_sample (CCMG / ABCD1). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "create_sample[2].tissue_site",
 			},
 			{
 				Code:    "SAMPLE-006",
-				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, buccal_swab, buffy_coat, dna, not_reported, rna, saliva, solid_tissue].",
-				Path:    "sample[2].type_code",
+				Message: "Invalid field type_code for create_sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, buccal_swab, buffy_coat, dna, not_reported, rna, saliva, solid_tissue].",
+				Path:    "create_sample[2].type_code",
 			},
 			{
 				Code:    "SAMPLE-004",
 				Message: "Patient (CHUSJJ / MRN-283775) for sample ABCD1 does not exist.",
-				Path:    "sample[2].submitter_patient_id",
+				Path:    "create_sample[2].submitter_patient_id",
 			},
 			{
 				Code:    "SAMPLE-003",
 				Message: "Organization CCMG for sample ABCD1 does not exist.",
-				Path:    "sample[2].sample_organization_code",
+				Path:    "create_sample[2].sample_organization_code",
 			},
 			{
 				Code:    "SAMPLE-007",
 				Message: "Invalid field submitter_parent_sample_id for sample (CQGC / ABCD2). Reason: Invalid parent sample B-950.1 for this sample.",
-				Path:    "sample[3].submitter_parent_sample_id",
+				Path:    "create_sample[3].submitter_parent_sample_id",
 			},
 			{
 				Code:    "SAMPLE-008",
-				Message: "Sample (CQGC / ABCD3) appears multiple times in the batch.",
-				Path:    "sample[5]",
+				Message: "Create_sample (CQGC / ABCD3) appears multiple times in the batch.",
+				Path:    "create_sample[5]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
@@ -1388,66 +1388,66 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			{
 				Code:    "SEQ-001",
 				Message: "Sequencing (CQGC / S13224 / NA12892) already exists, skipped.",
-				Path:    "sequencing_experiment[0]",
+				Path:    "create_sequencing_experiment[0]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "SEQ-004",
 				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> draft).",
-				Path:    "sequencing_experiment[2].status_code",
+				Path:    "create_sequencing_experiment[2].status_code",
 			},
 			{
 				Code:    "SEQ-004",
 				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 0001-01-01 00:00:00 +0000 UTC).",
-				Path:    "sequencing_experiment[2].run_date",
+				Path:    "create_sequencing_experiment[2].run_date",
 			},
 			{
 				Code:    "SEQ-004",
 				Message: "A sequencing with same ids (CQGC / S13224 / NA12892) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 2025-01-01 00:00:00 +0000 UTC).",
-				Path:    "sequencing_experiment[5].run_date",
+				Path:    "create_sequencing_experiment[5].run_date",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "sequencing_experiment[1].platform_code",
+				Message: "Invalid field platform_code for create_sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "create_sequencing_experiment[1].platform_code",
 			},
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: \"!@#$%^&\" is not a valid platform code. Valid values [illumina, nanopore, pacbio].",
-				Path:    "sequencing_experiment[1].platform_code",
+				Message: "Invalid field platform_code for create_sequencing_experiment (CQGC / S13224 / ABCD1). Reason: \"!@#$%^&\" is not a valid platform code. Valid values [illumina, nanopore, pacbio].",
+				Path:    "create_sequencing_experiment[1].platform_code",
 			},
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field run_alias for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: field is too long, maximum length allowed is 100.",
-				Path:    "sequencing_experiment[1].run_alias",
+				Message: "Invalid field run_alias for create_sequencing_experiment (CQGC / S13224 / ABCD1). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "create_sequencing_experiment[1].run_alias",
 			},
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field run_date for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: must be a past date.",
-				Path:    "sequencing_experiment[1].run_date",
+				Message: "Invalid field run_date for create_sequencing_experiment (CQGC / S13224 / ABCD1). Reason: must be a past date.",
+				Path:    "create_sequencing_experiment[1].run_date",
 			},
 			{
 				Code:    "SEQ-003",
 				Message: "Sequencing lab CQGCC for sequencing ABCD1 does not exist.",
-				Path:    "sequencing_experiment[1].sequencing_lab_code",
+				Path:    "create_sequencing_experiment[1].sequencing_lab_code",
 			},
 			{
 				Code:    "SEQ-005",
 				Message: "Sample (CHUSJ / S13224) does not exist.",
-				Path:    "sequencing_experiment[3]",
+				Path:    "create_sequencing_experiment[3]",
 			},
 			{
 				Code:    "SEQ-006",
-				Message: "Sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
-				Path:    "sequencing_experiment[4]",
+				Message: "Create_sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
+				Path:    "create_sequencing_experiment[4]",
 			},
 			{
 				Code:    "SEQ-006",
-				Message: "Sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
-				Path:    "sequencing_experiment[5]",
+				Message: "Create_sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
+				Path:    "create_sequencing_experiment[5]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
