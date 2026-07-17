@@ -2,7 +2,7 @@ import { Biohazard, Users } from 'lucide-react';
 
 import { CaseEntity } from '@/api/api';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
@@ -12,7 +12,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
   const { t } = useI18n();
 
   return (
-    <PageHeader
+    <HeaderNavigation
       isLoading={isLoading}
       title={`${t('case_entity.header.case')} ${data?.case_id}`}
       badges={[

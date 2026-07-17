@@ -1,4 +1,4 @@
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { useI18n } from '@/components/hooks/i18n';
 
 import AnalysisNewsletterCard from './cards/analysis-newsletter-card';
@@ -9,7 +9,12 @@ function AnalysisExploration() {
 
   return (
     <>
-      <PageHeader title={t('analysis.title')} description={t('analysis.subtitle')} variant="info" isLoading={false} />
+      <HeaderNavigation
+        title={t('analysis.title')}
+        description={t('analysis.subtitle')}
+        variant="info"
+        isLoading={false}
+      />
       <main className="bg-muted min-h-0 flex-1 overflow-auto p-6">
         <div className="mx-auto max-w-[1200px]">
           <div className="flex gap-6">

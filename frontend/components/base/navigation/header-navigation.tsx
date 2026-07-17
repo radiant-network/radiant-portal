@@ -9,9 +9,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { cn } from '@/components/lib/utils';
 
 import Container from '../container';
-import AnchorLink from '../navigation/anchor-link';
 
-const pageHeaderVariants = tv({
+import AnchorLink from './anchor-link';
+
+const headerNavigationVariants = tv({
   slots: {
     container: 'bg-background',
   },
@@ -30,11 +31,11 @@ const pageHeaderVariants = tv({
   },
 });
 
-type PageHeaderBadge = BadgeProps & { tooltipText?: string };
+type HeaderNavigationBadge = BadgeProps & { tooltipText?: string };
 
-interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
+interface EntityHeaderProps extends VariantProps<typeof headerNavigationVariants> {
   isLoading?: boolean;
-  badges?: PageHeaderBadge[];
+  badges?: HeaderNavigationBadge[];
   buttons?: ButtonProps[];
   statuses?: ReactNode[];
   title?: string;
@@ -42,7 +43,7 @@ interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
   previousPageUrl?: string;
 }
 
-function PageHeader({
+function HeaderNavigation({
   title,
   badges,
   buttons,
@@ -52,7 +53,7 @@ function PageHeader({
   isLoading = true,
   variant,
 }: EntityHeaderProps) {
-  const style = pageHeaderVariants({ variant });
+  const style = headerNavigationVariants({ variant });
 
   if (isLoading) {
     return (
@@ -110,4 +111,4 @@ function PageHeader({
     </div>
   );
 }
-export default PageHeader;
+export default HeaderNavigation;
