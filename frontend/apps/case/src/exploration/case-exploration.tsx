@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
@@ -53,7 +53,7 @@ export default function App() {
   );
   return (
     <>
-      <PageHeader
+      <HeaderNavigation
         isLoading={false}
         title={t('case_exploration.case.title', { total: data?.count ?? 0 })}
         variant="info"

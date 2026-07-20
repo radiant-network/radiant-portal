@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { FacetList } from '@/components/base/query-builder/facets/facet-list';
 import { FacetConfigContext } from '@/components/base/query-builder/facets/hooks/use-facet-config';
 import { getDefaultQBContext, QBProvider } from '@/components/base/query-builder/hooks/use-query-builder';
@@ -34,7 +34,7 @@ export default function StudyExploration() {
         }}
       >
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <PageHeader title={t('study.title')} variant="info" isLoading={false} />
+          <HeaderNavigation title={t('study.title')} variant="info" isLoading={false} />
           <div className="bg-muted flex min-h-0 flex-1 overflow-hidden">
             {facetsOpen ? (
               <aside className="bg-muted w-[300px] shrink-0 overflow-auto border-r p-3">

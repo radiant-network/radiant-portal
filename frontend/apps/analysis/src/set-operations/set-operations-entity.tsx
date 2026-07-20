@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { ArchiveIcon, Dna, FlaskConical, Users } from 'lucide-react';
 
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
@@ -85,7 +85,7 @@ function SetOperationsEntity() {
 
   return (
     <>
-      <PageHeader
+      <HeaderNavigation
         title={t('analysis.set_operations.title')}
         variant="info"
         isLoading={false}

@@ -2,15 +2,15 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Users } from 'lucide-react';
 
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 
 import { StorySection } from '../story-section';
 
 const meta = {
-  title: 'Layout/Page Header',
-  component: PageHeader,
+  title: 'Layout/Header navigation',
+  component: HeaderNavigation,
   args: {},
-} satisfies Meta<typeof PageHeader>;
+} satisfies Meta<typeof HeaderNavigation>;
 
 export default meta;
 
@@ -21,7 +21,7 @@ export const Loading: Story = {
   render: () => (
     <StorySection title="Loading">
       <div className="w-full">
-        <PageHeader />
+        <HeaderNavigation />
       </div>
     </StorySection>
   ),
@@ -61,7 +61,7 @@ export const Default: Story = {
     <StorySection title="Default">
       <BrowserRouter>
         <div className="w-full">
-          <PageHeader {...args} />
+          <HeaderNavigation {...args} />
         </div>
       </BrowserRouter>
     </StorySection>

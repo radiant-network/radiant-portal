@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListFilter } from 'lucide-react';
 
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
-import PageHeader from '@/components/base/page/page-header';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import {
@@ -105,7 +105,7 @@ export default function CommunityExploration() {
 
   return (
     <>
-      <PageHeader title={t('community.title')} variant="info" isLoading={false} />
+      <HeaderNavigation title={t('community.title')} variant="info" isLoading={false} />
       <main className="bg-muted min-h-0 flex-1 overflow-auto p-6">
         <Card className="w-full">
           <CardContent className="space-y-6">

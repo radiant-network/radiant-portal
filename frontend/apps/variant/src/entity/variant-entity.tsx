@@ -4,9 +4,9 @@ import useSWR from 'swr';
 
 import { ApiError, VariantHeader } from '@/api/api';
 import Container from '@/components/base/container';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import PageError from '@/components/base/page/page-error';
-import PageHeader from '@/components/base/page/page-header';
 import { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
@@ -96,7 +96,7 @@ export default function App() {
 
   return (
     <main className="bg-muted h-screen overflow-auto">
-      <PageHeader isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
+      <HeaderNavigation isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           <TabsListItem data-cy="overview-tab" value={VariantEntityTabs.Overview}>
