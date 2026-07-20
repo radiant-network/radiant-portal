@@ -60,3 +60,14 @@ export const WithSignInForm: Story = {
     </StorySection>
   ),
 };
+
+export const WithoutLogo: Story = {
+  args: {
+    children: <span className="text-muted-foreground">Replace with content</span>,
+  },
+  render: args => (
+    <StorySection title="Without logo">
+      <SplitLayout {...args} />
+    </StorySection>
+  ),
+};
