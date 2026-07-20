@@ -91,7 +91,7 @@ func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
 			VALUES (?, 'PENDING', ?, true, 'user-requeue', '2000-01-01', 'radiant')
 			RETURNING id;
-		`, payload, types.PatientBatchType).Scan(&id).Error
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
 		if insertErr != nil {
 			t.Fatal("failed to insert batch:", insertErr)
 		}

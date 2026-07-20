@@ -80,7 +80,7 @@ func seedBaseCase(t *testing.T, ctx context.Context, client *minio.Client, db *g
 	base := createBaseCasePayload(submitterCaseId)
 	createDocumentsForBatch(ctx, client, base)
 	baseBytes, _ := json.Marshal(base)
-	id := insertPayloadAndProcessBatch(db, string(baseBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+	id := insertPayloadAndProcessBatch(db, string(baseBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 	assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 }
 

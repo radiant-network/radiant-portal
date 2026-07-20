@@ -113,7 +113,7 @@ func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType repository.ValueSe
 
 func newBaseRecord() *SequencingExperimentValidationRecord {
 	return &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{},
 	}
 }
@@ -122,18 +122,18 @@ func newBaseRecord() *SequencingExperimentValidationRecord {
 
 func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Index: 0},
 	}
 	verifyIsDifferentField(1, 2, r, "key", "mock_field")
 	assert.Len(t, r.Warnings, 1)
 	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different mock_field (1 <> 2).", r.Warnings[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].mock_field", r.Warnings[0].Path)
+	assert.Equal(t, "create_sequencing_experiment[0].mock_field", r.Warnings[0].Path)
 }
 
 func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Index: 0},
 	}
 	verifyIsDifferentField("same", "same", r, "key", "field")
 	assert.Empty(t, r.Warnings)
@@ -166,8 +166,8 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: \"foobar\" is not a valid experimental strategy code. Valid values [wgs, wxs, rna_seq].", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].experimental_strategy_code", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field experimental_strategy_code for create_sequencing_experiment (ORG / S1 / A1). Reason: \"foobar\" is not a valid experimental strategy code. Valid values [wgs, wxs, rna_seq].", r.Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[0].experimental_strategy_code", r.Errors[0].Path)
 }
 
 func Test_ValidateSequencingReadTechnologyCodeField_Allowed(t *testing.T) {
@@ -196,8 +196,8 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: \"mini_read\" is not a valid sequencing read technology code. Valid values [short_read, long_read].", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].sequencing_read_technology_code", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field sequencing_read_technology_code for create_sequencing_experiment (ORG / S1 / A1). Reason: \"mini_read\" is not a valid sequencing read technology code. Valid values [short_read, long_read].", r.Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[0].sequencing_read_technology_code", r.Errors[0].Path)
 }
 
 func Test_ValidateStatusCodeField_Allowed(t *testing.T) {
@@ -226,8 +226,8 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: \"invalid\" is not a valid status code. Valid values [draft, in_progress, completed].", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].status_code", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field status_code for create_sequencing_experiment (ORG / S1 / A1). Reason: \"invalid\" is not a valid status code. Valid values [draft, in_progress, completed].", r.Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[0].status_code", r.Errors[0].Path)
 }
 
 func Test_ValidatePlatformCodeField_Allowed(t *testing.T) {
@@ -256,8 +256,8 @@ func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field platform_code for sequencing_experiment (ORG / S1 / A1). Reason: \"not-illumina\" is not a valid platform code. Valid values [illumina, pacbio, nanopore].", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].platform_code", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field platform_code for create_sequencing_experiment (ORG / S1 / A1). Reason: \"not-illumina\" is not a valid platform code. Valid values [illumina, pacbio, nanopore].", r.Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[0].platform_code", r.Errors[0].Path)
 }
 
 func Test_ValidateRunDateField_PastDateOK(t *testing.T) {
@@ -278,8 +278,8 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 	r.validateRunDateField()
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field run_date for sequencing_experiment (ORG / S1 / A1). Reason: must be a past date.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].run_date", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field run_date for create_sequencing_experiment (ORG / S1 / A1). Reason: must be a past date.", r.Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[0].run_date", r.Errors[0].Path)
 }
 
 func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
@@ -320,7 +320,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	assert.Len(t, r.Infos, 1)
 	assert.Equal(t, "SEQ-001", r.Infos[0].Code)
 	assert.Equal(t, "Sequencing (ORG / S1 / A1) already exists, skipped.", r.Infos[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Infos[0].Path)
+	assert.Equal(t, "create_sequencing_experiment[0]", r.Infos[0].Path)
 }
 
 func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
@@ -339,7 +339,7 @@ func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-003", r.Errors[0].Code)
 	assert.Equal(t, "Sequencing lab LABX for sequencing A1 does not exist.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].sequencing_lab_code", r.Errors[0].Path)
+	assert.Equal(t, "create_sequencing_experiment[0].sequencing_lab_code", r.Errors[0].Path)
 }
 
 func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarnings(t *testing.T) {
@@ -398,10 +398,10 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	assert.Len(t, r.Warnings, 9)
 	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different submitter_sample_id (S1 <> S2).", r.Warnings[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].submitter_sample_id", r.Warnings[0].Path)
+	assert.Equal(t, "create_sequencing_experiment[0].submitter_sample_id", r.Warnings[0].Path)
 	assert.Equal(t, "SEQ-004", r.Warnings[7].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[7].Message)
-	assert.Equal(t, "sequencing_experiment[0].capture_kit", r.Warnings[7].Path)
+	assert.Equal(t, "create_sequencing_experiment[0].capture_kit", r.Warnings[7].Path)
 }
 
 func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
@@ -415,7 +415,7 @@ func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-005", r.Errors[0].Code)
 	assert.Equal(t, "Sample (ORG / S1) does not exist.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "create_sequencing_experiment[0]", r.Errors[0].Path)
 }
 
 func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
@@ -519,8 +519,8 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	assert.Empty(t, records[0].Errors)
 	assert.Equal(t, 1, len(records[1].Errors))
 	assert.Equal(t, "SEQ-006", records[1].Errors[0].Code)
-	assert.Equal(t, "Sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[1]", records[1].Errors[0].Path)
+	assert.Equal(t, "Create_sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
+	assert.Equal(t, "create_sequencing_experiment[1]", records[1].Errors[0].Path)
 }
 
 func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
@@ -537,7 +537,7 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -584,7 +584,7 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -624,7 +624,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -799,8 +799,8 @@ func Test_UpdateSequencingExperimentRecords_SkipsMissingRecords(t *testing.T) {
 
 	sampleID1 := 10
 	records := []*SequencingExperimentValidationRecord{
-		{SequencingExperiment: types.SequencingExperimentBatch{Aliquot: "A1"}, SampleID: &sampleID1, BaseValidationRecord: batchval.BaseValidationRecord{Skipped: false}},
-		{SequencingExperiment: types.SequencingExperimentBatch{Aliquot: "A2"}, BaseValidationRecord: batchval.BaseValidationRecord{Skipped: true}},
+		{SequencingExperiment: types.SequencingExperimentBatch{Aliquot: "A1"}, SampleID: &sampleID1, BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Skipped: false}},
+		{SequencingExperiment: types.SequencingExperimentBatch{Aliquot: "A2"}, BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSequencingExperimentBatchType, Skipped: true}},
 	}
 
 	err := updateSequencingExperimentRecords(t.Context(), records, seqDAO, types.DefaultTenantCode)

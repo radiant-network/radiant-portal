@@ -1,6 +1,6 @@
 package types
 
-const SampleBatchType = "sample"
+const CreateSampleBatchType = "create_sample"
 const UpdateSampleBatchType = "update_sample"
 
 type SampleBatch struct {

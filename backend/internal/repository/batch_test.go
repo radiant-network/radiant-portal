@@ -48,7 +48,7 @@ func Test_GetBatchByID_CrossTenantIsInvisible(t *testing.T) {
 		batchId := uuid.NewString()
 		if err := env.Postgres.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
-            (?, '{}', ?, 'patient', true, 'user1', now(), 'radiant')
+            (?, '{}', ?, 'create_patient', true, 'user1', now(), 'radiant')
         `, batchId, types.BatchStatusSuccess).Error; err != nil {
 			t.Fatal("failed to insert data:", err)
 		}
@@ -71,7 +71,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
-            (?, '{}', ?, 'patient', true, 'user1', now(), 'radiant')
+            (?, '{}', ?, 'create_patient', true, 'user1', now(), 'radiant')
         `, batchId, types.BatchStatusSuccess).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -80,7 +80,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, batch)
 		assert.Equal(t, batchId, batch.ID)
-		assert.Equal(t, "patient", batch.BatchType)
+		assert.Equal(t, "create_patient", batch.BatchType)
 		assert.Equal(t, "user1", batch.Username)
 		assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 		assert.Empty(t, batch.Payload)
@@ -122,8 +122,8 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		// Add two pending batches
 		initErr := db.Exec(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
-            ('{}', ?, 'patient', true, 'user1', '2025-10-09', 'radiant'),
-            ('{}', ?, 'sample', false, 'user2', '2025-11-09', 'radiant')
+            ('{}', ?, 'create_patient', true, 'user1', '2025-10-09', 'radiant'),
+            ('{}', ?, 'create_sample', false, 'user2', '2025-11-09', 'radiant')
 		`, types.BatchStatusPending, types.BatchStatusPending).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -135,7 +135,7 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		assert.Equal(t, expectedDate, batch.CreatedOn)
 		assert.Equal(t, types.BatchStatusRunning, batch.Status)
 		assert.Equal(t, true, batch.DryRun)
-		assert.Equal(t, "patient", batch.BatchType)
+		assert.Equal(t, "create_patient", batch.BatchType)
 		// Verify that only one pending batch remains
 		var count int64
 		db.Table("batch").Where("status = ?", types.BatchStatusPending).Count(&count)
@@ -150,7 +150,7 @@ func Test_UpdateBatch(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
-    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', 'radiant')
+    		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
@@ -165,7 +165,7 @@ func Test_UpdateBatch(t *testing.T) {
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
-		assert.Equal(t, "patient", resultBatch.BatchType)
+		assert.Equal(t, "create_patient", resultBatch.BatchType)
 		assert.Equal(t, "user999", resultBatch.Username)
 		assert.Equal(t, finished, *resultBatch.FinishedOn)
 
@@ -180,7 +180,7 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
+			VALUES ('{}', ?, 'create_patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
@@ -206,7 +206,7 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 		var id string
 		initErr := db.Raw(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
+			VALUES ('{}', ?, 'create_patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusSuccess).Scan(&id).Error
 		if initErr != nil {
@@ -234,9 +234,9 @@ func Test_UpdateStuckBatch(t *testing.T) {
 		var ids []string
 		initErr := db.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
-    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', ?, 'radiant'),
-				('{}', ?, 'sample', false, 'user999', '2025-10-09', ?, 'radiant'),
-				('{}', ?, 'case', true, 'user999', '2025-10-09', ?, 'radiant')
+    		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', ?, 'radiant'),
+				('{}', ?, 'create_sample', false, 'user999', '2025-10-09', ?, 'radiant'),
+				('{}', ?, 'create_case', true, 'user999', '2025-10-09', ?, 'radiant')
     		RETURNING id;
 		`, types.BatchStatusRunning, timeMoreThan24hAgo,
 			types.BatchStatusPending, timeMoreThan24hAgo,

@@ -53,7 +53,7 @@ func PostSampleBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc 
 			return
 		}
 
-		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Samples, "sample", *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Samples, types.CreateSampleBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

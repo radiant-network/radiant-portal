@@ -1,6 +1,6 @@
 package types
 
-const PatientBatchType = "patient"
+const CreatePatientBatchType = "create_patient"
 const UpdatePatientBatchType = "update_patient"
 
 type PatientBatch struct {

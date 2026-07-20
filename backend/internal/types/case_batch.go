@@ -1,7 +1,7 @@
 package types
 
 const (
-	CaseBatchType       = "case"
+	CreateCaseBatchType = "create_case"
 	PatchCaseBatchType  = "patch_case"
 	UpdateCaseBatchType = "update_case"
 )

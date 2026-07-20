@@ -23,10 +23,10 @@ import (
 )
 
 var supportedProcessors = map[string]func(context.Context, *batchval.BatchValidationContext, *types.Batch, *gorm.DB) error{
-	types.PatientBatchType:                    processPatientBatch,
-	types.SampleBatchType:                     processSampleBatch,
-	types.SequencingExperimentBatchType:       processSequencingExperimentBatch,
-	types.CaseBatchType:                       processCaseBatch,
+	types.CreatePatientBatchType:              processCreatePatientBatch,
+	types.CreateSampleBatchType:               processCreateSampleBatch,
+	types.CreateSequencingExperimentBatchType: processCreateSequencingExperimentBatch,
+	types.CreateCaseBatchType:                 processCreateCaseBatch,
 	types.PatchCaseBatchType:                  processPatchCaseBatch,
 	types.UpdateCaseBatchType:                 processUpdateCaseBatch,
 	types.UpdatePatientBatchType:              processUpdatePatientBatch,
