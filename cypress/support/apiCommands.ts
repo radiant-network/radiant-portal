@@ -89,7 +89,7 @@ Cypress.Commands.add('resetTablePreferences', () => {
  * Validates that a batch response has the expected structure and values.
  * Checks response keys, static fields and validates dynamic fields.
  * @param response The API response object from a batch request.
- * @param batch_type The type of the batch request (patient, sample, etc.).
+ * @param batch_type The type of the batch request (create_patient, create_sample, etc.).
  */
 Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type: string) => {
   expect(response.body).to.have.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'username');
@@ -153,7 +153,7 @@ Cypress.Commands.add('validateReport', (response: any, level: string, code: stri
  * Validates that a batch processed response has the expected structure and values.
  * Checks response keys, static fields and validates dynamic fields.
  * @param response The API response object from a batch processed.
- * @param batch_type The type of the batch processed (patient, sample, etc.).
+ * @param batch_type The type of the batch processed (create_patient, create_sample, etc.).
  * @param batch_id The id of the batch processed.
  */
 Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type: string, batch_id: string) => {

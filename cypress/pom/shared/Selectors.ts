@@ -75,6 +75,7 @@ export const CommonSelectors = {
   myFiltersButton: '[data-cy="my-filters-button"]',
   newQueryButton: '[data-cy="new-query-button"]',
   paginationButton: (name: string) => `[data-cy="pagination-button-${name}"]`,
+  phenotypeCasesFilter: '[data-cy="phenotype-cases-filter"]',
   pinIcon: '[class*="lucide-pin"]',
   pinLeftIcon: '[class*="lucide-pin rotate-90"]',
   pinned: (position: string) => `[data-cy="pinned-${position}"]`,
