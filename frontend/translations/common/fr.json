@@ -2074,9 +2074,7 @@
       "contact": "Contact"
     },
     "tenant_switcher": {
-      "title": "Changer de tenant",
-      "empty_title": "Aucun tenant disponible",
-      "empty_description": "Vous n'avez accès à aucun tenant. Veuillez contacter votre administrateur."
+      "title": "Changer de tenant"
     }
   },
   "occurrence": {
@@ -2086,5 +2084,12 @@
   },
   "pubmed_list_dialog": {
     "title": "Publications PubMed"
+  },
+  "errors": {
+    "forbidden": {
+      "title": "Vous n'avez pas accès à RADIANT",
+      "body": "Pour obtenir l'accès, communiquez avec l'administrateur RADIANT de votre organisation.",
+      "cta": "Retour à la connexion"
+    }
   }
 }

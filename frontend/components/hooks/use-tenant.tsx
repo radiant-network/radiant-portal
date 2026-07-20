@@ -3,17 +3,14 @@ import useSWR from 'swr';
 
 import type { TenantMembership, UserPreference } from '../../api/api';
 import { authApi, userPreferenceApi } from '../../utils/api';
-import EmptyTenant from '../base/empties/empty_tenant';
+import Error403 from '../base/errors/403';
 import { Spinner } from '../base/spinner';
 
 export const TENANT_PREFERENCE_KEY = 'selected-tenant';
 
 export type TenantContextValue = {
-  /** Active tenant code (always defined once children render). */
   tenant: string;
-  /** All tenants the user belongs to (from /auth/me). */
   tenants: TenantMembership[];
-  /** Persist the chosen tenant then hard-reload onto /case so every request uses it. */
   setTenant: (code: string) => Promise<void>;
 };
 
@@ -65,7 +62,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       content: { tenant: code },
     });
     // Hard navigation to /case: the provider re-reads the preference and every
-    // request picks up the new tenant. Keeps us clear of a global SWR cache mutate.
+    // request picks up the new tenant.
     window.location.assign('/case');
   };
 
@@ -77,9 +74,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // Empty state: the user belongs to no tenant.
   if (!tenant) {
-    return <EmptyTenant />;
+    return <Error403 />;
   }
 
   return (

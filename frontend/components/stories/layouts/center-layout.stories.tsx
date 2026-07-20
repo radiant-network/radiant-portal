@@ -1,5 +1,6 @@
 import logoLight from '@assets/logo/header-full.svg';
 import logoDark from '@assets/logo/header-full-dark.svg';
+import logoWhiteUrl from '@assets/logo/header-full-white.svg';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CenterLayout from '@/components/base/layouts/center-layout';
@@ -16,7 +17,7 @@ const logo = (
   </>
 );
 
-const logoWhite = <img src={logoLight} alt="Logo" className="brightness-0 invert" />;
+const logoWhite = <img src={logoWhiteUrl} alt="Logo" />;
 
 const meta = {
   title: 'Layout/Center layout',
