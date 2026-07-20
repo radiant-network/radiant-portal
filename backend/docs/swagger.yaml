@@ -1754,10 +1754,14 @@ components:
       properties:
         code:
           type: string
+        exam_code:
+          type: string
         interpretation_code:
           enum:
           - positive
           - negative
+          - abnormal
+          - normal
           type: string
         note:
           type: string
@@ -1775,6 +1779,15 @@ components:
     ObservationTextBatch:
       properties:
         code:
+          type: string
+        exam_code:
+          type: string
+        interpretation_code:
+          enum:
+          - positive
+          - negative
+          - abnormal
+          - normal
           type: string
         value:
           type: string

@@ -27,7 +27,7 @@ var ViewTables = []string{
 	// Tenant-scoped clinical data.
 	"patient",
 	"organization", "cases", "sample", "sequencing_experiment",
-	"analysis_catalog", "document", "family", "family_history",
+	"analysis_catalog", "document", "exam", "family", "family_history",
 	"interpretation_germline", "interpretation_germline_history",
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",

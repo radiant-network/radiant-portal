@@ -69,6 +69,11 @@ ordering_organization_code = "CHUSJ"
     code = "phenotype"
     value = "TEST:678901"
 
+    [[cases.patients.observations_text]]
+    code = "exam"
+    value = "Additional exam note"
+    exam_code = "other"
+
     [[cases.patients.family_history]]
     family_member_code = "grand-father"
     condition = "Seizure"

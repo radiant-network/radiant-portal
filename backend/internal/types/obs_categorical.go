@@ -15,6 +15,8 @@ type ObsCategorical struct {
 	InterpretationCode *string
 	Interpretation     ObservationInterpretation `gorm:"foreignKey:code;references:InterpretationCode"`
 	Note               string
+	ExamCode           *string
+	Exam               Exam `gorm:"foreignKey:ExamCode,TenantCode;references:Code,TenantCode"`
 	TenantCode         string
 }
 

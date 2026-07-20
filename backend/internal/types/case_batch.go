@@ -9,6 +9,7 @@ const (
 const (
 	ObsCodeAncestry      = "ancestry"
 	ObsCodeConsanguinity = "consanguinity"
+	ObsCodeExam          = "exam"
 )
 
 func ObservationRequiresOnsetAndInterpretation(code string) bool {
@@ -60,13 +61,16 @@ type ObservationCategoricalBatch struct {
 	System             string `json:"system" toml:"system" binding:"required"`
 	Value              string `json:"value" toml:"value" binding:"required"`
 	OnsetCode          string `json:"onset_code,omitempty" toml:"onset_code"`
-	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"omitempty,oneof=positive negative"`
+	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"omitempty,oneof=positive negative abnormal normal"`
 	Note               string `json:"note,omitempty" toml:"note"`
+	ExamCode           string `json:"exam_code,omitempty" toml:"exam_code"`
 }
 
 type ObservationTextBatch struct {
-	Code  string `json:"code" toml:"code" binding:"required"`
-	Value string `json:"value" toml:"value" binding:"required"`
+	Code               string `json:"code" toml:"code" binding:"required"`
+	Value              string `json:"value" toml:"value" binding:"required"`
+	ExamCode           string `json:"exam_code,omitempty" toml:"exam_code"`
+	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"omitempty,oneof=positive negative abnormal normal"`
 }
 
 type CaseSequencingExperimentBatch struct {
