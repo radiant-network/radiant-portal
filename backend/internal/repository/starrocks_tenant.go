@@ -27,7 +27,7 @@ var ViewTables = []string{
 	// Tenant-scoped clinical data.
 	"patient",
 	"organization", "cases", "sample", "sequencing_experiment",
-	"analysis_catalog", "document", "family", "family_history",
+	"analysis_catalog", "document", "exam", "family", "family_history",
 	"interpretation_germline", "interpretation_germline_history",
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
@@ -36,7 +36,7 @@ var ViewTables = []string{
 	"case_has_sequencing_experiment", "task_context", "task_has_document",
 	// Reference / value-set tables.
 	"affected_status", "ancestry", "case_category", "case_type", "consanguinity", "data_category",
-	"data_type", "exam", "experimental_strategy", "family_relationship", "file_format",
+	"data_type", "experimental_strategy", "family_relationship", "file_format",
 	"histology_type", "life_status", "obs_interpretation", "observation", "onset",
 	"organization_category", "panel_type", "platform", "priority", "resolution_status",
 	"sample_type", "sequencing_read_technology", "sex", "status", "task_type",

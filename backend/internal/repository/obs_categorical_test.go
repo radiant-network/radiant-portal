@@ -80,7 +80,7 @@ func Test_CreateObservationCategorical_WithExam_OK(t *testing.T) {
 			CodingSystem:       "radiant",
 			CodeValue:          "abnormal",
 			InterpretationCode: utils.NilIfEmpty("abnormal"),
-			ExamCode:           utils.NilIfEmpty("pg"),
+			ExamCode:           utils.NilIfEmpty("other"),
 			TenantCode:         types.DefaultTenantCode,
 		}
 
@@ -90,7 +90,7 @@ func Test_CreateObservationCategorical_WithExam_OK(t *testing.T) {
 
 		result, err := repo.GetById(t.Context(), 9998)
 		assert.NoError(t, err)
-		assert.Equal(t, utils.NilIfEmpty("pg"), result.ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("other"), result.ExamCode)
 		assert.Equal(t, utils.NilIfEmpty("abnormal"), result.InterpretationCode)
 
 		env.Postgres.Exec("DELETE FROM obs_categorical WHERE id=9998")

@@ -68,7 +68,7 @@ func Test_CreateObservationString_WithExam_OK(t *testing.T) {
 			ObservationCode:    "exam",
 			Value:              "Normal",
 			InterpretationCode: utils.NilIfEmpty("normal"),
-			ExamCode:           utils.NilIfEmpty("eeg"),
+			ExamCode:           utils.NilIfEmpty("other"),
 			TenantCode:         types.DefaultTenantCode,
 		}
 
@@ -78,7 +78,7 @@ func Test_CreateObservationString_WithExam_OK(t *testing.T) {
 
 		result, err := repo.GetById(t.Context(), 9998)
 		assert.NoError(t, err)
-		assert.Equal(t, utils.NilIfEmpty("eeg"), result.ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("other"), result.ExamCode)
 		assert.Equal(t, utils.NilIfEmpty("normal"), result.InterpretationCode)
 
 		env.Postgres.Exec("DELETE FROM obs_string WHERE id=9998")

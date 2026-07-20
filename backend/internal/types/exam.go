@@ -7,8 +7,10 @@ var ExamTable = Table{
 }
 
 type Exam struct {
-	ValueSet
-	NameFr string `json:"name_fr,omitempty"`
+	Code       string `gorm:"primaryKey" json:"id,omitempty"`
+	TenantCode string `gorm:"primaryKey"`
+	NameEn     string `json:"name,omitempty"`
+	NameFr     string `json:"name_fr,omitempty"`
 } // @name Exam
 
 func (Exam) TableName() string {

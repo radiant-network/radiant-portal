@@ -11,7 +11,7 @@ type ObsString struct {
 	InterpretationCode *string
 	Interpretation     ObservationInterpretation `gorm:"foreignKey:code;references:InterpretationCode"`
 	ExamCode           *string
-	Exam               Exam `gorm:"foreignKey:code;references:ExamCode"`
+	Exam               Exam `gorm:"foreignKey:ExamCode,TenantCode;references:Code,TenantCode"`
 	TenantCode         string
 }
 

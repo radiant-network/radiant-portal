@@ -122,18 +122,17 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "TEST:12345", obscat[0].CodeValue)
 
 		var obsstr []*types.ObsString
-		db.Table("obs_string").Where("case_id = ?", ca.ID).Find(&obsstr)
+		db.Table("obs_string").Where("case_id = ?", ca.ID).Order("id").Find(&obsstr)
 		assert.Len(t, obsstr, 2)
-		slices.SortFunc(obsstr, func(a, b *types.ObsString) int { return a.ID - b.ID })
 		assert.Equal(t, 1000, obsstr[0].ID)
 		assert.Equal(t, 1, obsstr[0].PatientID)
 		assert.Equal(t, "TEST:678901", obsstr[0].Value)
 		assert.Nil(t, obsstr[0].ExamCode)
 
 		assert.Equal(t, 1, obsstr[1].PatientID)
-		assert.Equal(t, "Normal EEG", obsstr[1].Value)
-		assert.Equal(t, utils.NilIfEmpty("eeg"), obsstr[1].ExamCode)
-		assert.Equal(t, utils.NilIfEmpty("normal"), obsstr[1].InterpretationCode)
+		assert.Equal(t, "Additional exam note", obsstr[1].Value)
+		assert.Equal(t, utils.NilIfEmpty("other"), obsstr[1].ExamCode)
+		assert.Nil(t, obsstr[1].InterpretationCode)
 
 		var famhist []*types.FamilyHistory
 		db.Table("family_history").Where("case_id = ?", ca.ID).Find(&famhist)
@@ -224,7 +223,7 @@ func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndIn
 				Code:               types.ObsCodeExam,
 				System:             "radiant",
 				Value:              "abnormal",
-				ExamCode:           "eeg",
+				ExamCode:           "other",
 				InterpretationCode: "abnormal",
 			},
 		)
@@ -245,7 +244,7 @@ func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndIn
 		assert.Equal(t, "abnormal", exam.CodeValue)
 		assert.Nil(t, exam.OnsetCode)
 		assert.Equal(t, utils.NilIfEmpty("abnormal"), exam.InterpretationCode)
-		assert.Equal(t, utils.NilIfEmpty("eeg"), exam.ExamCode)
+		assert.Equal(t, utils.NilIfEmpty("other"), exam.ExamCode)
 	})
 }
 
