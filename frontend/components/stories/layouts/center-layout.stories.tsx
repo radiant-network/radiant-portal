@@ -19,7 +19,7 @@ const logo = (
 const logoWhite = <img src={logoLight} alt="Logo" className="brightness-0 invert" />;
 
 const meta = {
-  title: 'Layout/Center',
+  title: 'Layout/Center layout',
   component: CenterLayout,
 } satisfies Meta<typeof CenterLayout>;
 

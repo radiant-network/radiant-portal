@@ -17,7 +17,7 @@ const logo = (
 );
 
 const meta = {
-  title: 'Layout/Split',
+  title: 'Layout/Split layout',
   component: SplitLayout,
 } satisfies Meta<typeof SplitLayout>;
 
