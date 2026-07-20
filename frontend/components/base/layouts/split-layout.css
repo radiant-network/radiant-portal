@@ -1,0 +1,29 @@
+.split-layout-decoration {
+  position: relative;
+  overflow: hidden;
+  background: #132441;
+}
+
+.split-layout-circle {
+  position: absolute;
+  top: 50%;
+  width: calc(100% + 497px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, #008ad2, #132441);
+}
+
+.split-layout-circle--3 {
+  left: -523px;
+  transform: translateY(calc(-50% + 33px));
+}
+
+.split-layout-circle--2 {
+  left: -666px;
+  transform: translateY(calc(-50% - 72px));
+}
+
+.split-layout-circle--1 {
+  left: -807px;
+  transform: translateY(calc(-50% - 375px));
+}
