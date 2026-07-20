@@ -10,6 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -63,6 +64,97 @@ func Test_CreateCases(t *testing.T) {
 		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
 
 		db.Exec("DELETE FROM cases WHERE id = 999")
+	})
+}
+
+// createTestCase inserts a minimal, valid case row under the given id (reusing existing
+// seed project/analysis_catalog/proband ids) so clinical-child delete-by-case-id tests have
+// a case to satisfy the FK on case_id, and registers its cleanup.
+func createTestCase(t *testing.T, db *gorm.DB, id int) {
+	t.Helper()
+	repo := NewCasesRepository(db)
+	orgCode := "CQGC"
+	require.NoError(t, repo.CreateCase(t.Context(), &types.Case{
+		ID:                       id,
+		ProbandID:                1,
+		ProjectID:                1,
+		StatusCode:               "in_progress",
+		AnalysisCatalogID:        1,
+		CaseTypeCode:             "germline",
+		CaseCategoryCode:         "postnatal",
+		OrderingOrganizationCode: &orgCode,
+		DiagnosisLabCode:         &orgCode,
+		TenantCode:               types.DefaultTenantCode,
+	}))
+	t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = ?", id) })
+}
+
+func Test_UpdateCase_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(db)
+
+		diagLab := "CQGC"
+		orgCode := "CQGC"
+		original := &types.Case{
+			ID:                       100010,
+			ProbandID:                1,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "original note",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			ResolutionStatusCode:     "unsolved",
+			OrderingPhysician:        "Dr. Original",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               types.DefaultTenantCode,
+		}
+		require.NoError(t, repo.CreateCase(t.Context(), original))
+		t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = 100010") })
+
+		newDiagLab := "CHUSJ"
+		newOrgCode := "CHUSJ"
+		update := &types.Case{
+			CaseTypeCode:             "somatic",
+			StatusCode:               "completed",
+			DiagnosisLabCode:         &newDiagLab,
+			ConditionCodeSystem:      "OMIM",
+			PrimaryCondition:         "OMIM:0000002",
+			PriorityCode:             "urgent",
+			CaseCategoryCode:         "prenatal",
+			AnalysisCatalogID:        1,
+			ResolutionStatusCode:     "solved",
+			Note:                     "updated note",
+			OrderingOrganizationCode: &newOrgCode,
+			OrderingPhysician:        "Dr. Updated",
+		}
+		err := repo.UpdateCase(t.Context(), 100010, update)
+		assert.NoError(t, err)
+
+		var result types.Case
+		err = db.Table("cases").Where("id = ?", 100010).First(&result).Error
+		assert.NoError(t, err)
+		assert.Equal(t, "somatic", result.CaseTypeCode)
+		assert.Equal(t, "completed", result.StatusCode)
+		assert.Equal(t, "CHUSJ", *result.DiagnosisLabCode)
+		assert.Equal(t, "OMIM", result.ConditionCodeSystem)
+		assert.Equal(t, "OMIM:0000002", result.PrimaryCondition)
+		assert.Equal(t, "urgent", result.PriorityCode)
+		assert.Equal(t, "prenatal", result.CaseCategoryCode)
+		assert.Equal(t, "solved", result.ResolutionStatusCode)
+		assert.Equal(t, "updated note", result.Note)
+		assert.Equal(t, "CHUSJ", *result.OrderingOrganizationCode)
+		assert.Equal(t, "Dr. Updated", result.OrderingPhysician)
+
+		// Immutable identity fields untouched.
+		assert.Equal(t, 1, result.ProbandID)
+		assert.Equal(t, 1, result.ProjectID)
+		assert.Equal(t, types.DefaultTenantCode, result.TenantCode)
 	})
 }
 
@@ -405,6 +497,43 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), *count)
+	})
+}
+
+func Test_SearchCases_OnSubmitterCaseId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(env.Starrocks)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
+				Value:     []interface{}{"1:8"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		assert.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		assert.Len(t, *cases, 1)
+		assert.Equal(t, 8, (*cases)[0].CaseID)
+		assert.Equal(t, "submitted", (*cases)[0].StatusCode)
+	})
+}
+
+func Test_SearchCases_OnSubmitterCaseId_NoResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(env.Starrocks)
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
+				Value:     []interface{}{"does-not-exist"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		assert.NoError(t, err)
+		_, count, err := repo.SearchCases(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), *count)
 	})
 }
 

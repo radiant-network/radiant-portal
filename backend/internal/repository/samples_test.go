@@ -3,8 +3,10 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -107,6 +109,56 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_BothInvalid(t *testing
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "INVALID-ORG", "SAMPLE-UNKNOWN")
 
+		assert.NoError(t, err)
+		assert.Nil(t, sample)
+	})
+}
+
+func Test_UpdateSample_ExistingRow(t *testing.T) {
+	// ExclusivePostgres: inserts directly into "sample" (id >= 1000), a table other parallel
+	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewSamplesRepository(db)
+
+		err := db.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1001, 'blood', NULL, 'normal', 'S-UPDATE-1', 1, 'CQGC', 'radiant')
+		`).Error
+		require.NoError(t, err)
+
+		updated := &types.Sample{
+			SubmitterSampleId: "S-UPDATE-1",
+			OrganizationCode:  "CQGC",
+			TypeCode:          "dna",
+			TissueSite:        "Blood",
+			HistologyCode:     "tumoral",
+			PatientID:         2, // must be ignored — the owning patient is immutable
+		}
+		err = repo.UpdateSample(t.Context(), updated)
+		require.NoError(t, err)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-UPDATE-1")
+		require.NoError(t, err)
+		require.NotNil(t, sample)
+		assert.Equal(t, "dna", sample.TypeCode)
+		assert.Equal(t, "Blood", sample.TissueSite)
+		assert.Equal(t, "tumoral", sample.HistologyCode)
+		assert.Equal(t, 1, sample.PatientID, "patient_id must not change on update — the sample's owning patient is immutable")
+	})
+}
+
+func Test_UpdateSample_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(env.Postgres)
+
+		err := repo.UpdateSample(t.Context(), &types.Sample{
+			SubmitterSampleId: "S-DOES-NOT-EXIST",
+			OrganizationCode:  "CQGC",
+		})
+		assert.NoError(t, err)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-DOES-NOT-EXIST")
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
 	})

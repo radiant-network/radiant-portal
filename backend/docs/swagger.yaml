@@ -2409,6 +2409,80 @@ components:
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
       type: object
+    UpdateCaseBatch:
+      properties:
+        analysis_code:
+          type: string
+        category_code:
+          enum:
+          - prenatal
+          - postnatal
+          type: string
+        diagnostic_lab_code:
+          type: string
+        note:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_physician:
+          type: string
+        patients:
+          items:
+            $ref: '#/components/schemas/CasePatientBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+        primary_condition_code_system:
+          type: string
+        primary_condition_value:
+          type: string
+        priority_code:
+          type: string
+        project_code:
+          type: string
+        resolution_status_code:
+          type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          type: array
+          uniqueItems: false
+        status_code:
+          type: string
+        submitter_case_id:
+          type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/CaseTaskBatch'
+          type: array
+          uniqueItems: false
+        type:
+          enum:
+          - germline
+          - somatic
+          type: string
+      required:
+      - analysis_code
+      - category_code
+      - diagnostic_lab_code
+      - ordering_organization_code
+      - patients
+      - project_code
+      - status_code
+      - submitter_case_id
+      - type
+      type: object
+    UpdateCaseBatchBody:
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/UpdateCaseBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
     UpdateOccurrenceNoteInput:
       properties:
         content:
@@ -3367,6 +3441,75 @@ paths:
       security:
       - bearerauth: []
       summary: Create a new case batch
+      tags:
+      - cases
+    put:
+      description: |-
+        Replaces a case's scalar fields and clinical patient data (family, observations,
+        family history). Each case is looked up by (project_code, submitter_case_id);
+        CASE-013 is returned if not found. Sequencing experiments and tasks are
+        merge-if-present: attached when the body carries them, left untouched when omitted.
+      operationId: putCaseBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseBatchBody'
+        description: Update Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update existing cases (batch)
       tags:
       - cases
   /{tenant}/cases/filters:
@@ -6715,6 +6858,73 @@ paths:
       summary: Create a new patient batch
       tags:
       - patients
+    put:
+      description: |-
+        Update existing patients — each patient is looked up by (patient_organization_code, submitter_patient_id).
+        A patient not found is reported as a validation error and left untouched.
+      operationId: putPatientBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePatientBatchBody'
+        description: Update Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update existing patients (batch)
+      tags:
+      - patients
   /{tenant}/samples/batch:
     post:
       description: Create a new sample batch
@@ -6779,6 +6989,73 @@ paths:
       security:
       - bearerauth: []
       summary: Create a new sample batch
+      tags:
+      - samples
+    put:
+      description: |-
+        Update existing samples — each sample is looked up by (sample_organization_code, submitter_sample_id).
+        A sample not found is reported as a validation error and left untouched.
+      operationId: putSampleBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSampleBatchBody'
+        description: Update Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update existing samples (batch)
       tags:
       - samples
   /{tenant}/sequencing/{seq_id}/details:
@@ -6904,6 +7181,73 @@ paths:
       security:
       - bearerauth: []
       summary: Create a new sequencing experiment batch
+      tags:
+      - sequencing
+    put:
+      description: |-
+        Update existing sequencing experiments — each one is looked up by (sample_organization_code, submitter_sample_id, aliquot).
+        A sequencing experiment not found is reported as a validation error and left untouched.
+      operationId: putSequencingExperimentBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSequencingExperimentBatchBody'
+        description: Update Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update existing sequencing experiments (batch)
       tags:
       - sequencing
   /{tenant}/variants/germline/{locus_id}/cases/count:

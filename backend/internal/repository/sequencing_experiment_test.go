@@ -7,6 +7,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -131,5 +132,62 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSampleNotFound(t *testing.
 		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), aliquot, submitterSampleId, organizationCode)
 		assert.NoError(t, err)
 		assert.Nil(t, seqExp)
+	})
+}
+
+func Test_UpdateSequencingExperiment_ExistingRow(t *testing.T) {
+	// ExclusivePostgres: inserts directly into "sample"/"sequencing_experiment" (id >= 1000),
+	// tables other parallel WritePostgres tests may bulk-clean concurrently — see
+	// setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewSequencingExperimentRepository(db)
+
+		require.NoError(t, db.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1001, 'blood', NULL, 'normal', 'S-SEQ-UPDATE-1', 1, 'CQGC', 'radiant')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, experimental_strategy_code, sequencing_read_technology_code, platform_code, created_on, updated_on)
+			VALUES (1001, 1001, 'submitted', 'ALIQUOT-UPDATE-1', 'CQGC', 'radiant', 'wgs', 'short_read', 'illumina', now(), now())
+		`).Error)
+
+		updated := &SequencingExperiment{
+			SampleID:                     1001,
+			Aliquot:                      "ALIQUOT-UPDATE-1",
+			StatusCode:                   "completed",
+			SequencingLabCode:            "CHUSJ",
+			ExperimentalStrategyCode:     "wxs",
+			SequencingReadTechnologyCode: "long_read",
+			PlatformCode:                 "pacbio",
+			RunName:                      "RUN-1",
+			RunAlias:                     "RUN-ALIAS-1",
+			CaptureKit:                   "CPT-1",
+		}
+		require.NoError(t, repo.UpdateSequencingExperiment(t.Context(), updated))
+
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALIQUOT-UPDATE-1", "S-SEQ-UPDATE-1", "CQGC")
+		require.NoError(t, err)
+		require.NotNil(t, seqExp)
+		assert.Equal(t, "completed", seqExp.StatusCode)
+		assert.Equal(t, "CHUSJ", seqExp.SequencingLabCode)
+		assert.Equal(t, "wxs", seqExp.ExperimentalStrategyCode)
+		assert.Equal(t, "long_read", seqExp.SequencingReadTechnologyCode)
+		assert.Equal(t, "pacbio", seqExp.PlatformCode)
+		assert.Equal(t, "RUN-1", seqExp.RunName)
+		assert.Equal(t, "RUN-ALIAS-1", seqExp.RunAlias)
+		assert.Equal(t, "CPT-1", seqExp.CaptureKit)
+	})
+}
+
+func Test_UpdateSequencingExperiment_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(env.Postgres)
+
+		err := repo.UpdateSequencingExperiment(t.Context(), &SequencingExperiment{
+			SampleID: 999999,
+			Aliquot:  "ALIQUOT-DOES-NOT-EXIST",
+		})
+		assert.NoError(t, err)
 	})
 }

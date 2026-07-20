@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+*CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /{tenant}/documents/autocomplete | Get AutocompleteResult list of matching prefix
 *DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
@@ -148,7 +149,9 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
 *OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
+*PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
+*SamplesApi* | [**put_sample_batch**](docs/SamplesApi.md#put_sample_batch) | **PUT** /{tenant}/samples/batch | Update existing samples (batch)
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
 *SavedFiltersApi* | [**get_saved_filter_by_id**](docs/SavedFiltersApi.md#get_saved_filter_by_id) | **GET** /users/saved_filters/{saved_filter_id} | Get saved filter by id
 *SavedFiltersApi* | [**get_saved_filters**](docs/SavedFiltersApi.md#get_saved_filters) | **GET** /users/saved_filters | Get user saved filters
@@ -156,6 +159,7 @@ Class | Method | HTTP request | Description
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
 *SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /{tenant}/sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
 *SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /{tenant}/sequencing/batch | Create a new sequencing experiment batch
+*SequencingApi* | [**put_sequencing_experiment_batch**](docs/SequencingApi.md#put_sequencing_experiment_batch) | **PUT** /{tenant}/sequencing/batch | Update existing sequencing experiments (batch)
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
@@ -264,6 +268,8 @@ Class | Method | HTTP request | Description
  - [TenantMembership](docs/TenantMembership.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
+ - [UpdateCaseBatch](docs/UpdateCaseBatch.md)
+ - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)
  - [UserPreference](docs/UserPreference.md)
  - [UserSet](docs/UserSet.md)

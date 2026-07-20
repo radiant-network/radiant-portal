@@ -44,6 +44,29 @@ func (r *SequencingExperimentRepository) CreateSequencingExperiment(ctx context.
 	return r.db.WithContext(ctx).Create(&seqExp).Error
 }
 
+// UpdateSequencingExperiment matches on (sample_id, aliquot) — the natural key, since sample_id is
+// already resolved from (sample_organization_code, submitter_sample_id) by the caller.
+func (r *SequencingExperimentRepository) UpdateSequencingExperiment(ctx context.Context, seqExp *SequencingExperiment) error {
+	tx := r.db.WithContext(ctx).
+		Table(types.SequencingExperimentTable.Name).
+		Where("sample_id = ? AND aliquot = ?", seqExp.SampleID, seqExp.Aliquot).
+		Updates(map[string]any{
+			"status_code":                     seqExp.StatusCode,
+			"sequencing_lab_code":             seqExp.SequencingLabCode,
+			"run_name":                        seqExp.RunName,
+			"run_alias":                       seqExp.RunAlias,
+			"run_date":                        seqExp.RunDate,
+			"capture_kit":                     seqExp.CaptureKit,
+			"experimental_strategy_code":      seqExp.ExperimentalStrategyCode,
+			"sequencing_read_technology_code": seqExp.SequencingReadTechnologyCode,
+			"platform_code":                   seqExp.PlatformCode,
+		})
+	if tx.Error != nil {
+		return fmt.Errorf("error updating sequencing experiment: %w", tx.Error)
+	}
+	return nil
+}
+
 func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(ctx context.Context, sampleID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
 	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)

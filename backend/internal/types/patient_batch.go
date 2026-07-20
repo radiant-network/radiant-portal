@@ -1,6 +1,7 @@
 package types
 
-const PatientBatchType = "patient"
+const CreatePatientBatchType = "create_patient"
+const UpdatePatientBatchType = "update_patient"
 
 type PatientBatch struct {
 	SubmitterPatientId      TrimmedString `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`

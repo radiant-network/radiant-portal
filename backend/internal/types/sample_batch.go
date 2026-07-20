@@ -1,6 +1,7 @@
 package types
 
-const SampleBatchType = "sample"
+const CreateSampleBatchType = "create_sample"
+const UpdateSampleBatchType = "update_sample"
 
 type SampleBatch struct {
 	SubmitterPatientId      TrimmedString `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`
