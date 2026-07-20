@@ -1,10 +1,10 @@
-.split-layout-decoration {
+.radiant-background {
   position: relative;
   overflow: hidden;
   background: #132441;
 }
 
-.split-layout-circle {
+.radiant-background-circle {
   position: absolute;
   top: 50%;
   width: calc(100% + 497px);
@@ -13,17 +13,17 @@
   background: radial-gradient(circle closest-side, #008ad2, #132441);
 }
 
-.split-layout-circle--3 {
+.radiant-background-circle--3 {
   left: -523px;
   transform: translateY(calc(-50% + 33px));
 }
 
-.split-layout-circle--2 {
+.radiant-background-circle--2 {
   left: -666px;
   transform: translateY(calc(-50% - 72px));
 }
 
-.split-layout-circle--1 {
+.radiant-background-circle--1 {
   left: -807px;
   transform: translateY(calc(-50% - 375px));
 }

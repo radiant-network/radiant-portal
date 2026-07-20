@@ -1,7 +1,9 @@
+import { HTMLAttributes } from 'react';
+
 import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';
 import { Label } from '@/components/base/shadcn/label';
-import { Separator } from '@/components/base/shadcn/separator';
+import { cn } from '@/components/lib/utils';
 
 function LinkedInIcon() {
   return (
@@ -38,9 +40,9 @@ function GoogleIcon() {
  * Static, non-functional sign-in form used to illustrate layout stories.
  * Shared across layout stories (split, and the upcoming second layout).
  */
-function SignInForm() {
+function SignInForm({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className={cn('w-full max-w-sm space-y-6', className)} {...props}>
       <div className="space-y-1 text-center">
         <h1 className="text-xl font-semibold text-foreground">Sign in to your account</h1>
         <p className="text-sm text-muted-foreground">Choose a sign-in method</p>
@@ -57,11 +59,10 @@ function SignInForm() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Separator />
-        <span className="absolute inset-0 flex items-center justify-center">
-          <span className="bg-background px-2 text-xs text-muted-foreground">Or sign in with email</span>
-        </span>
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="whitespace-nowrap text-xs text-muted-foreground">Or sign in with email</span>
+        <div className="h-px flex-1 bg-border" />
       </div>
 
       <div className="space-y-4">
