@@ -230,7 +230,7 @@ func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndIn
 		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
