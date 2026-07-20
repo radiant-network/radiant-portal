@@ -668,12 +668,12 @@ func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int
 		obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 		res := fmt.Sprintf("create_case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
 
-		onsetAndInterpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
-		onsetRequired := onsetAndInterpretationRequired && obs.ExamCode == ""
+		onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
+		interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
 
 		cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
-		cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, onsetAndInterpretationRequired)
+		cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, interpretationRequired)
 
 		cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 		if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
