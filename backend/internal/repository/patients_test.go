@@ -48,8 +48,8 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 		repo := NewPatientsRepository(db)
 
 		err := db.Exec(`
-			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
-			VALUES (1001, 'MRN-UPDATE-1', 'mrn', 'CHUSJ', 'radiant', 'male', '2000-01-01', 'alive', 'Original', 'Name', 'JHN-ORIGINAL')
+			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn, mother_jhn)
+			VALUES (1001, 'MRN-UPDATE-1', 'mrn', 'CHUSJ', 'radiant', 'male', '2000-01-01', 'alive', 'Original', 'Name', 'JHN-ORIGINAL', 'MOTHER-JHN-ORIGINAL')
 		`).Error
 		require.NoError(t, err)
 
@@ -63,6 +63,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 			FirstName:              "Updated",
 			LastName:               "Person",
 			Jhn:                    "JHN-UPDATED",
+			MotherJhn:              "MOTHER-JHN-UPDATED",
 			DateOfBirth:            time.Time(dob),
 		}
 		err = repo.UpdatePatient(t.Context(), updated)
@@ -77,6 +78,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 		assert.Equal(t, "Updated", patient.FirstName)
 		assert.Equal(t, "Person", patient.LastName)
 		assert.Equal(t, "JHN-UPDATED", patient.Jhn)
+		assert.Equal(t, "MOTHER-JHN-UPDATED", patient.MotherJhn)
 		assert.True(t, time.Time(dob).Equal(patient.DateOfBirth))
 	})
 }

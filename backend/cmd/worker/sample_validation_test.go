@@ -27,6 +27,7 @@ type MockPatientsRepository struct {
 	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
 	UpdatePatientFunc                            func(patient *types.Patient) error
 	UpdatedPatients                              []types.Patient
+	CreatedPatients                              []types.Patient
 }
 
 func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error) {
@@ -37,6 +38,7 @@ func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(_ cont
 }
 
 func (m *MockPatientsRepository) CreatePatient(_ context.Context, newPatient *types.Patient) error {
+	m.CreatedPatients = append(m.CreatedPatients, *newPatient)
 	return nil
 }
 

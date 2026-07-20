@@ -14,6 +14,7 @@ type Patient struct {
 	FirstName              string    `json:"first_name,omitempty"`
 	LastName               string    `json:"last_name,omitempty"`
 	Jhn                    string    `json:"jhn,omitempty"`
+	MotherJhn              string    `json:"mother_jhn,omitempty"`
 	Sex                    Sex       `gorm:"foreignKey:Code;references:SexCode"`
 	DateOfBirth            time.Time `gorm:"type:DATE"`
 }

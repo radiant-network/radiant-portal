@@ -88,6 +88,15 @@ func (r *PatientValidationRecord) validateJhn() {
 
 }
 
+func (r *PatientValidationRecord) validateMotherJhn() {
+	if r.Patient.MotherJhn == "" {
+		return
+	}
+	path := r.getFormattedPath("mother_jhn")
+	r.ValidateStringField(r.Patient.MotherJhn.String(), "mother_jhn", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), false)
+
+}
+
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
 	path := r.getFormattedPath("patient_organization_code")
 	if organization == nil {
@@ -130,6 +139,7 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	anyDifference = validateIsDifferentExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String()) || anyDifference
 	anyDifference = validateIsDifferentExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String()) || anyDifference
 	anyDifference = validateIsDifferentExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String()) || anyDifference
+	anyDifference = validateIsDifferentExistingPatientField(r, "mother_jhn", existingPatient.MotherJhn, r.Patient.MotherJhn.String()) || anyDifference
 
 	if !anyDifference {
 		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.",
@@ -252,6 +262,7 @@ func insertPatientRecords(ctx context.Context, records []*PatientValidationRecor
 				FirstName:              record.Patient.FirstName.String(),
 				LastName:               record.Patient.LastName.String(),
 				Jhn:                    record.Patient.Jhn.String(),
+				MotherJhn:              record.Patient.MotherJhn.String(),
 				SexCode:                record.Patient.SexCode,
 				LifeStatusCode:         record.Patient.LifeStatusCode,
 			}
@@ -299,6 +310,7 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
+	record.validateMotherJhn()
 	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {
@@ -401,6 +413,7 @@ func updatePatientRecords(ctx context.Context, records []*PatientValidationRecor
 				FirstName:              record.Patient.FirstName.String(),
 				LastName:               record.Patient.LastName.String(),
 				Jhn:                    record.Patient.Jhn.String(),
+				MotherJhn:              record.Patient.MotherJhn.String(),
 				SexCode:                record.Patient.SexCode,
 				LifeStatusCode:         record.Patient.LifeStatusCode,
 			}
@@ -448,6 +461,7 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
+	record.validateMotherJhn()
 	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {

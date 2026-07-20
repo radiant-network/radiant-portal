@@ -13,6 +13,7 @@ type PatientBatch struct {
 	SexCode                 string        `json:"sex_code" toml:"sex_code" binding:"required,oneof=male female unknown"`
 	DateOfBirth             *DateISO8601  `json:"date_of_birth" toml:"date_of_birth" binding:"required" swaggertype:"string" format:"date" example:"2020-01-31"`
 	Jhn                     TrimmedString `json:"jhn,omitempty" toml:"jhn,omitempty"`
+	MotherJhn               TrimmedString `json:"mother_jhn,omitempty" toml:"mother_jhn,omitempty"`
 }
 
 // CreatePatientBatchBody represents the body required to create a patient batch

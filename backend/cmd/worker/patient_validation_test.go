@@ -229,6 +229,37 @@ func Test_ValidateJhn(t *testing.T) {
 	assert.Nil(t, rec.Errors)
 }
 
+func Test_ValidateMotherJhn(t *testing.T) {
+	// Empty mother JHN: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", MotherJhn: ""}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateMotherJhn()
+	assert.Nil(t, rec.Errors)
+
+	// Mother JHN with only spaces: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", MotherJhn: "   "}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateMotherJhn()
+	assert.Nil(t, rec.Errors)
+
+	// Valid mother JHN
+	validMotherJhn := types.TrimmedString("JHN-5678")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id2", MotherJhn: validMotherJhn}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateMotherJhn()
+	assert.Nil(t, rec.Errors)
+
+	// Invalid characters
+	invalidMotherJhn := types.TrimmedString("JHN🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id3", MotherJhn: invalidMotherJhn}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateMotherJhn()
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, PatientInvalidValueCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "create_patient[0].mother_jhn", rec.Errors[0].Path)
+}
+
 func Test_ValidateOrganization(t *testing.T) {
 	// Nil organization: should have error
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
@@ -296,6 +327,7 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		LastName:                "Doe",
 		FirstName:               "John",
 		Jhn:                     "JHN-123",
+		MotherJhn:               "MOTHER-JHN-123",
 	}
 	existing := &types.Patient{
 		SubmitterPatientId: "id2",
@@ -305,6 +337,7 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		LastName:           "Doe",
 		FirstName:          "John",
 		Jhn:                "JHN-123",
+		MotherJhn:          "MOTHER-JHN-123",
 	}
 	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
 	rec.validateExistingPatient(existing)
@@ -327,6 +360,7 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		LastName:                "Smith",
 		FirstName:               "Alice",
 		Jhn:                     "JHN-999",
+		MotherJhn:               "MOTHER-JHN-999",
 	}
 	existing := &types.Patient{
 		SubmitterPatientId: "id3",
@@ -336,13 +370,14 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		LastName:           "Jones",
 		FirstName:          "Bob",
 		Jhn:                "JHN-123",
+		MotherJhn:          "MOTHER-JHN-123",
 	}
 	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
 	rec.validateExistingPatient(existing)
 	assert.True(t, rec.Skipped)
 	assert.Len(t, rec.Infos, 0)
-	// All 6 differing fields should produce 6 warnings
-	assert.Len(t, rec.Warnings, 6)
+	// All 7 differing fields should produce 7 warnings
+	assert.Len(t, rec.Warnings, 7)
 	for _, w := range rec.Warnings {
 		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
 	}
@@ -531,6 +566,30 @@ func Test_UpdatePatientRecords_SkipsMissingRecords(t *testing.T) {
 	assert.NoError(t, err)
 	require.Len(t, mockRepo.UpdatedPatients, 1)
 	assert.Equal(t, "id1", mockRepo.UpdatedPatients[0].SubmitterPatientId)
+}
+
+func Test_InsertPatientRecords_CarriesMotherJhn(t *testing.T) {
+	mockRepo := &MockPatientsRepository{}
+	records := []*PatientValidationRecord{
+		{Patient: types.PatientBatch{SubmitterPatientId: "id1", MotherJhn: "MOTHER-JHN-1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType, Skipped: false}},
+	}
+
+	err := insertPatientRecords(t.Context(), records, mockRepo, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	require.Len(t, mockRepo.CreatedPatients, 1)
+	assert.Equal(t, "MOTHER-JHN-1", mockRepo.CreatedPatients[0].MotherJhn)
+}
+
+func Test_UpdatePatientRecords_CarriesMotherJhn(t *testing.T) {
+	mockRepo := &MockPatientsRepository{}
+	records := []*PatientValidationRecord{
+		{Patient: types.PatientBatch{SubmitterPatientId: "id1", MotherJhn: "MOTHER-JHN-1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.UpdatePatientBatchType, Skipped: false}},
+	}
+
+	err := updatePatientRecords(t.Context(), records, mockRepo, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	require.Len(t, mockRepo.UpdatedPatients, 1)
+	assert.Equal(t, "MOTHER-JHN-1", mockRepo.UpdatedPatients[0].MotherJhn)
 }
 
 func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {

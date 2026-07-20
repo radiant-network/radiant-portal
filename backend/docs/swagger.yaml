@@ -1892,6 +1892,8 @@ components:
           - deceased
           - unknown
           type: string
+        mother_jhn:
+          type: string
         patient_organization_code:
           type: string
         sex_code:

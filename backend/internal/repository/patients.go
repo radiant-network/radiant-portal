@@ -50,6 +50,7 @@ func (r *PatientsRepository) UpdatePatient(ctx context.Context, patient *Patient
 			"first_name":                patient.FirstName,
 			"last_name":                 patient.LastName,
 			"jhn":                       patient.Jhn,
+			"mother_jhn":                patient.MotherJhn,
 			"date_of_birth":             patient.DateOfBirth,
 		})
 	if tx.Error != nil {
