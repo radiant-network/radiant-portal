@@ -47,7 +47,7 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0]', () => {
-    cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0]');
+  it('Validate report create_sequencing_experiment[0]', () => {
+    cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0]');
   });
 });

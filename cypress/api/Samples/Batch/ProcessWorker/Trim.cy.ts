@@ -36,6 +36,6 @@ describe('Samples - Batch - Process worker - Trim', () => {
   });
 
   it('Return content', () => {
-    cy.validateSuccessBatchProcessed(response, 'sample', batch_id);
+    cy.validateSuccessBatchProcessed(response, 'create_sample', batch_id);
   });
 });

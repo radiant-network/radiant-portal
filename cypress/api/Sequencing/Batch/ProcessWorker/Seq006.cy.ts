@@ -62,7 +62,7 @@ describe('Sequencing - Batch - Process worker - Seq006', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0]', () => {
-    cy.validateReport(response, 'error', 'SEQ-006', apiMessages.ProcessWorkerErrorMultiple('Sequencing_experiment', 'CQGC', 'S13224', 'Cypress0001'), 'sequencing_experiment[1]');
+  it('Validate report create_sequencing_experiment[0] [SJRA-1730]', () => {
+    cy.validateReport(response, 'error', 'SEQ-006', apiMessages.ProcessWorkerErrorMultiple('Sequencing_experiment', 'CQGC', 'S13224', 'Cypress0001'), 'create_sequencing_experiment[1]');
   });
 });

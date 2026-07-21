@@ -98,6 +98,6 @@ describe('Cases - Batch - Valid', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'case');
+    cy.validateAcceptedBatchResponse(response, 'create_case');
   });
 });
