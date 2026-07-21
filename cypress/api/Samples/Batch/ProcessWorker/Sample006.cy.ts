@@ -43,19 +43,19 @@ describe('Samples - Batch - Process worker - Sample006', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(4);
   });
 
-  it('Validate report sample[0] tissue_site', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExpTissue('sample', 'tissue_site', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].tissue_site');
+  it('Validate report create_sample[0] tissue_site', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExpTissue('create_sample', 'tissue_site', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'create_sample[0].tissue_site');
   });
 
-  it('Validate report sample[0] submitter_sample_id 1', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExpId('sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].submitter_sample_id');
+  it('Validate report create_sample[0] submitter_sample_id 1', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorRegExpId('create_sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'create_sample[0].submitter_sample_id');
   });
 
-  it('Validate report sample[0] submitter_sample_id 2', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorTooLong('sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].submitter_sample_id');
+  it('Validate report create_sample[0] submitter_sample_id 2', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorTooLong('create_sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'create_sample[0].submitter_sample_id');
   });
 
-  it('Validate report sample[0] type_code', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorOneOfTypeCode('sample', 'type_code', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!', 'Cypress'), 'sample[0].type_code');
+  it('Validate report create_sample[0] type_code', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorOneOfTypeCode('create_sample', 'type_code', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!', 'Cypress'), 'create_sample[0].type_code');
   });
 });

@@ -75,6 +75,6 @@ describe('Cases - Batch - Blank fields - Optional dive fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'case');
+    cy.validateAcceptedBatchResponse(response, 'create_case');
   });
 });
