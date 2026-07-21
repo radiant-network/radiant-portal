@@ -1,0 +1,75 @@
+import { Search, X } from 'lucide-react';
+
+import FilterButton from '@/components/base/buttons/filter-button';
+import { Button } from '@/components/base/shadcn/button';
+import { Input } from '@/components/base/shadcn/input';
+import { useI18n } from '@/components/hooks/i18n';
+
+import { MOCK_ORGS, MOCK_ROLES } from '../../mock/data';
+
+export type UsersFilterState = {
+  search: string;
+  roles: string[];
+  orgs: string[];
+};
+
+type UsersTableFiltersProps = {
+  value: UsersFilterState;
+  onChange: (next: UsersFilterState) => void;
+  /** Show the Role/Organization pills. False on the Inactive tab (auto-provisioned, no roles). */
+  showPills?: boolean;
+};
+
+/**
+ * Toolbar for the Users table: search + "Role" / "Organization" dashed filter pills.
+ * Filtering is applied client-side against the mock data in the page. The gear + fullscreen
+ * controls are rendered by DataTable itself, to the right of this slot.
+ */
+export default function UsersTableFilters({ value, onChange, showPills = true }: UsersTableFiltersProps) {
+  const { t } = useI18n();
+
+  // `member` is the implicit baseline (everyone has it), so it isn't a useful filter option.
+  const roleOptions = MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: r.label }));
+  const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: o.name }));
+
+  const hasActiveFilters = value.search.length > 0 || (showPills && (value.roles.length > 0 || value.orgs.length > 0));
+
+  const clearAll = () => onChange({ search: '', roles: [], orgs: [] });
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Input
+        startIcon={Search}
+        placeholder={t('admin.users.search_placeholder')}
+        value={value.search}
+        onChange={e => onChange({ ...value, search: e.target.value })}
+        className="w-72"
+      />
+      {showPills && (
+        <>
+          <FilterButton
+            label={t('admin.users.filter.role')}
+            options={roleOptions}
+            selected={value.roles}
+            onSelect={roles => onChange({ ...value, roles })}
+            dataCy="users-role"
+          />
+          <FilterButton
+            label={t('admin.users.filter.organization')}
+            options={orgOptions}
+            selected={value.orgs}
+            onSelect={orgs => onChange({ ...value, orgs })}
+            popoverSize="md"
+            dataCy="users-org"
+          />
+        </>
+      )}
+      {hasActiveFilters && (
+        <Button data-cy="users-filters-clear" variant="link" onClick={clearAll} className="h-8 px-3 py-2 text-sm">
+          <X size={14} />
+          {t('common.actions.clear')}
+        </Button>
+      )}
+    </div>
+  );
+}

@@ -1,4 +1,36 @@
 {
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "group": "Tenant settings",
+      "users": "Users",
+      "organizations": "Organizations",
+      "roles": "Roles & Permissions"
+    },
+    "users": {
+      "title": "Users",
+      "count": "{{total}} Users",
+      "subtitle": "Manage users and role assignments.",
+      "add": "Add user",
+      "search_placeholder": "Search by name or email",
+      "you": "You",
+      "member": "Member",
+      "tabs": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "col": {
+        "user": "User",
+        "roles": "Roles & Access"
+      },
+      "filter": {
+        "role": "Role",
+        "organization": "Organization"
+      },
+      "edit_aria": "Edit user",
+      "empty": "No users found"
+    }
+  },
   "analysis": {
     "title": "Analysis",
     "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",

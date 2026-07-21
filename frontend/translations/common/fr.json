@@ -1,4 +1,36 @@
 {
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "group": "Paramètres du locataire",
+      "users": "Utilisateurs",
+      "organizations": "Organisations",
+      "roles": "Rôles et permissions"
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "count": "{{total}} utilisateurs",
+      "subtitle": "Gérez les utilisateurs et les attributions de rôles.",
+      "add": "Ajouter un utilisateur",
+      "search_placeholder": "Rechercher par nom ou courriel",
+      "you": "Vous",
+      "member": "Membre",
+      "tabs": {
+        "active": "Actifs",
+        "inactive": "Inactifs"
+      },
+      "col": {
+        "user": "Utilisateur",
+        "roles": "Rôles et accès"
+      },
+      "filter": {
+        "role": "Rôle",
+        "organization": "Organisation"
+      },
+      "edit_aria": "Modifier l'utilisateur",
+      "empty": "Aucun utilisateur trouvé"
+    }
+  },
   "analysis": {
     "title": "Analyses",
     "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",
