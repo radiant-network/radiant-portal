@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CenterLayout from '@/components/base/layouts/center-layout';
 import RadiantBackground from '@/components/base/layouts/radiant-background';
+import NavbarLangSwitcher from '@/components/base/navbar/main-navbar-lang-switcher';
 
 import { StorySection } from '../story-section';
 
@@ -30,6 +31,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     logo,
+    langSwitcher: <NavbarLangSwitcher />,
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
   render: args => (
@@ -42,6 +44,7 @@ export const Default: Story = {
 export const WithBackground: Story = {
   args: {
     logo: logoWhite,
+    langSwitcher: <NavbarLangSwitcher className="text-white hover:bg-white/10 hover:text-white" />,
     background: <RadiantBackground />,
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
@@ -55,22 +58,23 @@ export const WithBackground: Story = {
 export const WithSignInForm: Story = {
   args: {
     logo: logoWhite,
+    langSwitcher: <NavbarLangSwitcher className="text-white hover:bg-white/10 hover:text-white" />,
     background: <RadiantBackground />,
     children: <SignInForm className="rounded-xl border bg-background p-6" />,
   },
   render: args => (
-    <StorySection title="With sign-in form">
+    <StorySection title="With sign-in form" description="Sign in form is mocked without translation.">
       <CenterLayout {...args} />
     </StorySection>
   ),
 };
 
-export const WithoutLogo: Story = {
+export const WithoutLogoAndSwitcher: Story = {
   args: {
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
   render: args => (
-    <StorySection title="Without logo">
+    <StorySection title="Without logo and switcher">
       <CenterLayout {...args} />
     </StorySection>
   ),

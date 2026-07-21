@@ -3,6 +3,7 @@ import logoUrl from '@assets/logo/header-full-white.svg';
 
 import CenterLayout from '@/components/base/layouts/center-layout';
 import RadiantBackground from '@/components/base/layouts/radiant-background';
+import NavbarLangSwitcher from '@/components/base/navbar/main-navbar-lang-switcher';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -17,7 +18,11 @@ interface Error403Props {
 function Error403({ title, message, extra }: Error403Props) {
   const { t } = useI18n();
   return (
-    <CenterLayout logo={logo} background={<RadiantBackground />}>
+    <CenterLayout
+      logo={logo}
+      langSwitcher={<NavbarLangSwitcher className="text-white hover:bg-white/10 hover:text-white" />}
+      background={<RadiantBackground />}
+    >
       <div className="w-full max-w-sm space-y-6 rounded-lg border bg-card p-6 text-center shadow-xs">
         <div className="space-y-3">
           <h1 className="text-lg font-semibold text-foreground">{title ?? t('errors.forbidden.title')}</h1>
