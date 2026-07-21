@@ -48,7 +48,7 @@ describe('Sequencing - Batch - Process worker - Seq003', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0] sequencing_lab_code', () => {
-    cy.validateReport(response, 'error', 'SEQ-003', apiMessages.ProcessWorkerError003('Sequencing lab', 'sequencing', 'UnknownValue', 'Cypress0001'), 'sequencing_experiment[0].sequencing_lab_code');
+  it('Validate report create_sequencing_experiment[0] sequencing_lab_code', () => {
+    cy.validateReport(response, 'error', 'SEQ-003', apiMessages.ProcessWorkerError003('Sequencing lab', 'sequencing', 'UnknownValue', 'Cypress0001'), 'create_sequencing_experiment[0].sequencing_lab_code');
   });
 });

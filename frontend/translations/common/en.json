@@ -2102,9 +2102,7 @@
       "contact": "Contact"
     },
     "tenant_switcher": {
-      "title": "Switch Tenant",
-      "empty_title": "No tenant available",
-      "empty_description": "You do not have access to any tenant. Please contact your administrator."
+      "title": "Switch Tenant"
     }
   },
   "occurrence": {
@@ -2114,5 +2112,12 @@
   },
   "pubmed_list_dialog": {
     "title": "PubMed Publications"
+  },
+  "errors": {
+    "forbidden": {
+      "title": "You don't have access to RADIANT",
+      "body": "To get access, contact your organization's RADIANT administrator.",
+      "cta": "Back to sign in"
+    }
   }
 }

@@ -15,7 +15,6 @@ import {
 import { fn } from 'storybook/test';
 
 import type { TenantMembership } from '@/api/api';
-import EmptyTenant from '@/components/base/empties/empty_tenant';
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { TenantContext } from '@/components/hooks/use-tenant';
@@ -157,10 +156,4 @@ export const SingleTenant: Story = {
       <MainNavbar {...args} />
     </StorySection>
   ),
-};
-
-export const WithoutTenant: Story = {
-  args: MultiTenant.args,
-  parameters: { layout: 'fullscreen' },
-  render: () => <EmptyTenant />,
 };

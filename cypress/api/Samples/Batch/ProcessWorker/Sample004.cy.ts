@@ -42,7 +42,7 @@ describe('Samples - Batch - Process worker - Sample004', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[0] submitter_patient_id', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-004', apiMessages.Sample004('CHOP', 'MRN-283775', 'Cypress0001'), 'sample[0].submitter_patient_id');
+  it('Validate report create_sample[0] submitter_patient_id', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-004', apiMessages.Sample004('CHOP', 'MRN-283775', 'Cypress0001'), 'create_sample[0].submitter_patient_id');
   });
 });

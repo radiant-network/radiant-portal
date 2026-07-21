@@ -19,6 +19,6 @@ describe('Batches - Patient success', () => {
   });
 
   it('Return content', () => {
-    cy.validateSuccessBatchProcessed(response, 'patient', batchId);
+    cy.validateSuccessBatchProcessed(response, 'create_patient', batchId);
   });
 });

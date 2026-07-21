@@ -207,12 +207,12 @@ export const CasesTable_Filters = {
      */
     shouldRequestOnFilterSelect(filterKey: string) {
       const filter = filters.find(f => f.key === filterKey);
+      CasesTable_Filters.actions.openFilter(filterKey);
       cy.intercept('POST', '**/cases/search', req => {
         const criterion = req.body.search_criteria?.find((c: { field: string }) => c.field === filter?.field);
         expect(criterion, `search_criteria for "${filter?.field}"`).to.exist;
         expect(criterion.value).to.have.length.greaterThan(0);
       }).as('filterSearchRequest');
-      CasesTable_Filters.actions.openFilter(filterKey);
       CasesTable_Filters.actions.selectFirstOption(filterKey);
       cy.wait('@filterSearchRequest');
     },

@@ -4,9 +4,9 @@ import useSWR from 'swr';
 
 import { ApiError, VariantHeader } from '@/api/api';
 import Container from '@/components/base/container';
+import Error404 from '@/components/base/errors/404';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import PageError from '@/components/base/page/page-error';
 import { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
@@ -70,10 +70,8 @@ export default function App() {
 
   if (!isLoading && error?.status === 404) {
     return (
-      <PageError
-        status="404"
+      <Error404
         message={t('variant_entity.not_found')}
-        className="h-screen"
         extra={
           <Link to="/">
             <Button>{t('variant_entity.not_found.button')}</Button>

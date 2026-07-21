@@ -48,7 +48,7 @@ describe('Sequencing - Batch - Process worker - Seq005', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0]', () => {
-    cy.validateReport(response, 'error', 'SEQ-005', apiMessages.Sequencing005('CHUSJ', 'S13224'), 'sequencing_experiment[0]');
+  it('Validate report create_sequencing_experiment[0]', () => {
+    cy.validateReport(response, 'error', 'SEQ-005', apiMessages.Sequencing005('CHUSJ', 'S13224'), 'create_sequencing_experiment[0]');
   });
 });

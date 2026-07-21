@@ -3,6 +3,7 @@ import logoDark from '@assets/logo/header-full-dark.svg';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import SplitLayout from '@/components/base/layouts/split-layout';
+import NavbarLangSwitcher from '@/components/base/navbar/main-navbar-lang-switcher';
 
 import { StorySection } from '../story-section';
 
@@ -27,6 +28,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     logo,
+    langSwitcher: <NavbarLangSwitcher />,
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
   render: args => (
@@ -39,6 +41,7 @@ export const Default: Story = {
 export const WithCustomImage: Story = {
   args: {
     logo,
+    langSwitcher: <NavbarLangSwitcher />,
     background: <img src={layoutPicture} alt="" className="size-full object-cover" />,
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
@@ -52,21 +55,22 @@ export const WithCustomImage: Story = {
 export const WithSignInForm: Story = {
   args: {
     logo,
+    langSwitcher: <NavbarLangSwitcher />,
     children: <SignInForm />,
   },
   render: args => (
-    <StorySection title="With sign-in form">
+    <StorySection title="With sign-in form" description="Sign in form is mocked without translation.">
       <SplitLayout {...args} />
     </StorySection>
   ),
 };
 
-export const WithoutLogo: Story = {
+export const WithoutLogoAndSwitcher: Story = {
   args: {
     children: <span className="text-muted-foreground">Replace with content</span>,
   },
   render: args => (
-    <StorySection title="Without logo">
+    <StorySection title="Without logo and switcher">
       <SplitLayout {...args} />
     </StorySection>
   ),

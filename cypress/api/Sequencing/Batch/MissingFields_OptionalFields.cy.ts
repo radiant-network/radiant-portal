@@ -31,6 +31,6 @@ describe('Sequencing - Batch - Missing fields - Optional fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'sequencing_experiment');
+    cy.validateAcceptedBatchResponse(response, 'create_sequencing_experiment');
   });
 });

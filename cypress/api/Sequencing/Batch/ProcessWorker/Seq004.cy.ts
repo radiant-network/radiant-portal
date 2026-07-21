@@ -48,31 +48,31 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
     expect(Object.keys(response.body.report.warn)).to.have.lengthOf(7);
   });
 
-  it('Validate report sequencing_experiment[0] status_code', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'status_code', 'completed', 'submitted', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].status_code');
+  it('Validate report create_sequencing_experiment[0] status_code', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'status_code', 'completed', 'submitted', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].status_code');
   });
 
-  it('Validate report sequencing_experiment[0] experimental_strategy_code', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'experimental_strategy_code', 'wgs', 'wxs', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].experimental_strategy_code');
+  it('Validate report create_sequencing_experiment[0] experimental_strategy_code', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'experimental_strategy_code', 'wgs', 'wxs', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].experimental_strategy_code');
   });
 
-  it('Validate report sequencing_experiment[0] sequencing_read_technology_code', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'sequencing_read_technology_code', 'short_read', 'long_read', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].sequencing_read_technology_code');
+  it('Validate report create_sequencing_experiment[0] sequencing_read_technology_code', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'sequencing_read_technology_code', 'short_read', 'long_read', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].sequencing_read_technology_code');
   });
 
-  it('Validate report sequencing_experiment[0] run_name', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_name', '1617', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].run_name');
+  it('Validate report create_sequencing_experiment[0] run_name', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_name', '1617', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].run_name');
   });
 
-  it('Validate report sequencing_experiment[0] run_alias', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_alias', 'A00516_0169', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].run_alias');
+  it('Validate report create_sequencing_experiment[0] run_alias', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_alias', 'A00516_0169', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].run_alias');
   });
 
-  it('Validate report sequencing_experiment[0] capture_kit', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'capture_kit', '', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].capture_kit');
+  it('Validate report create_sequencing_experiment[0] capture_kit', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'capture_kit', '', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].capture_kit');
   });
 
-  it('Validate report sequencing_experiment[0] run_date', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_date', '2021-08-17 00:00:00 +0000 UTC', '2025-01-01 00:00:00 +0000 UTC', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].run_date');
+  it('Validate report create_sequencing_experiment[0] run_date', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_date', '2021-08-17 00:00:00 +0000 UTC', '2025-01-01 00:00:00 +0000 UTC', 'CQGC', 'S13224', 'NA12878_NA12878'), 'create_sequencing_experiment[0].run_date');
   });
 });

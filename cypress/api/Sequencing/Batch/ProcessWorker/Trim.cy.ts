@@ -40,6 +40,6 @@ describe('Sequencing - Batch - Process worker - Trim', () => {
   });
 
   it('Return content', () => {
-    cy.validateSuccessBatchProcessed(response, 'sequencing_experiment', batch_id);
+    cy.validateSuccessBatchProcessed(response, 'create_sequencing_experiment', batch_id);
   });
 });

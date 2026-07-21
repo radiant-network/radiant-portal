@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getClass, getColumnPosition, getStatusColor, getStatusIcon, getUrlLink, stringToRegExp } from 'pom/shared/Utils';
+import { getClass, getColumnPosition, getStatusColor, getStatusIcon, getUrlLink, oneMinute, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="cases-tab"]',
@@ -756,7 +756,9 @@ export const VariantEntity_Patients = {
          * Select the tab to show the table.
          */
         selectTab() {
+          cy.intercept('POST', '**/users/preferences/*').as('postUsersPreferences');
           cy.get(selectors.uninterpreted.tab).click({ force: true });
+          cy.wait('@postUsersPreferences', { timeout: oneMinute });
         },
       };
     })(),

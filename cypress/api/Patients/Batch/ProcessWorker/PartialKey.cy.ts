@@ -37,6 +37,6 @@ describe('Patients - Batch - Process worker - Partial key', () => {
   });
 
   it('Return content', () => {
-    cy.validateSuccessBatchProcessed(response, 'patient', batch_id);
+    cy.validateSuccessBatchProcessed(response, 'create_patient', batch_id);
   });
 });

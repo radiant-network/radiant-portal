@@ -5,8 +5,8 @@ import useSWR from 'swr';
 
 import { ApiError, CaseEntity } from '@/api/api';
 import Container from '@/components/base/container';
+import Error404 from '@/components/base/errors/404';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
@@ -103,10 +103,8 @@ export default function App() {
 
   if (!isLoading && error?.status === 404) {
     return (
-      <PageError
-        status="404"
+      <Error404
         message={t('case_entity.not_found')}
-        className="h-screen"
         extra={
           <Link to="/">
             <Button>{t('case_entity.not_found.button')}</Button>

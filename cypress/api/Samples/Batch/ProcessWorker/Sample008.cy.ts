@@ -50,7 +50,7 @@ describe('Samples - Batch - Process worker - Sample008', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[1]', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-008', apiMessages.ProcessWorkerErrorMultiple('Sample', 'CQGC', 'Cypress0001'), 'sample[1]');
+  it('Validate report create_sample[1] [SJRA-1730]', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-008', apiMessages.ProcessWorkerErrorMultiple('Sample', 'CQGC', 'Cypress0001'), 'create_sample[1]');
   });
 });

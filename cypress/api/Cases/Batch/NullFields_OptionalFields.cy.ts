@@ -98,6 +98,6 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'case');
+    cy.validateAcceptedBatchResponse(response, 'create_case');
   });
 });

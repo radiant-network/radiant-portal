@@ -30,6 +30,6 @@ describe('Samples - Batch - Valid', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'sample');
+    cy.validateAcceptedBatchResponse(response, 'create_sample');
   });
 });

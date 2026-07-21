@@ -30,6 +30,6 @@ describe('Samples - Batch - Blank fields - Optional fields', () => {
   });
 
   it('Return content', () => {
-    cy.validateAcceptedBatchResponse(response, 'sample');
+    cy.validateAcceptedBatchResponse(response, 'create_sample');
   });
 });

@@ -43,7 +43,7 @@ describe('Samples - Batch - Process worker - Sample005', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[0] submitter_parent_sample_id', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-005', apiMessages.Sample005('UnknownValue'), 'sample[0].submitter_parent_sample_id');
+  it('Validate report create_sample[0] submitter_parent_sample_id', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-005', apiMessages.Sample005('UnknownValue'), 'create_sample[0].submitter_parent_sample_id');
   });
 });

@@ -45,7 +45,7 @@ describe('Patients - Batch - Process worker - Patient001', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report patient[0]', () => {
-    cy.validateReport(response, 'info', 'PATIENT-001', apiMessages.ProcessWorkerError001('Patient', 'CHUSJ', 'MRN-283775'), 'patient[0]');
+  it('Validate report create_patient[0]', () => {
+    cy.validateReport(response, 'info', 'PATIENT-001', apiMessages.ProcessWorkerError001('Patient', 'CHUSJ', 'MRN-283775'), 'create_patient[0]');
   });
 });

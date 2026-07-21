@@ -45,7 +45,7 @@ describe('Patients - Batch - Process worker - Patient005', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report patient[0] patient_organization_code', () => {
-    cy.validateReport(response, 'error', 'PATIENT-005', apiMessages.Patient005('diagnostic_laboratory', 'LDM-CHUSJ', 'Cypress0001'), 'patient[0].patient_organization_code');
+  it('Validate report create_patient[0] patient_organization_code', () => {
+    cy.validateReport(response, 'error', 'PATIENT-005', apiMessages.Patient005('diagnostic_laboratory', 'LDM-CHUSJ', 'Cypress0001'), 'create_patient[0].patient_organization_code');
   });
 });

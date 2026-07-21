@@ -42,7 +42,7 @@ describe('Samples - Batch - Process worker - Sample003', () => {
     expect(Object.keys(response.body.report.error)).to.have.lengthOf(1);
   });
 
-  it('Validate report sample[0] sample_organization_code', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-003', apiMessages.ProcessWorkerError003('Organization', 'sample', 'UnknownValue', 'Cypress0001'), 'sample[0].sample_organization_code');
+  it('Validate report create_sample[0] sample_organization_code', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-003', apiMessages.ProcessWorkerError003('Organization', 'sample', 'UnknownValue', 'Cypress0001'), 'create_sample[0].sample_organization_code');
   });
 });

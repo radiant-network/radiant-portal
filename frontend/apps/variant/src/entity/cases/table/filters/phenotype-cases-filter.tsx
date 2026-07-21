@@ -24,6 +24,7 @@ const PhenotypeCasesFilter = ({ onChange }: PhenotypeCasesFilterProps) => {
     <Field className="w-full min-w-[250px] max-w-[385px]">
       <Label>{t('variant_entity.cases.other_table.filters.search_hpo')}</Label>
       <Input
+        data-cy="phenotype-cases-filter"
         onChange={value => setSearchValue(value.target.value)}
         placeholder={t('variant_entity.cases.other_table.filters.search_hpo_placeholder')}
         size="sm"
