@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -19,8 +20,8 @@ type GenesRepository struct {
 	db *gorm.DB
 }
 
-func NewGenesRepository(db *gorm.DB) *GenesRepository {
-	return &GenesRepository{db: db}
+func NewGenesRepository(db database.StarrocksDB) *GenesRepository {
+	return &GenesRepository{db: db.DB}
 }
 
 func mapToAutoCompleteGene(gene *Gene, input string) AutoCompleteGene {

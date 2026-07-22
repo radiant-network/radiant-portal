@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -14,8 +15,8 @@ type OccurrenceNotesRepository struct {
 	db *gorm.DB
 }
 
-func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
-	return &OccurrenceNotesRepository{db: db}
+func NewOccurrenceNotesRepository(db database.PostgresDB) *OccurrenceNotesRepository {
+	return &OccurrenceNotesRepository{db: db.DB}
 }
 
 func (r *OccurrenceNotesRepository) Create(ctx context.Context, note types.OccurrenceNote) (*types.OccurrenceNote, error) {

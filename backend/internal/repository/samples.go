@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type SamplesRepository struct {
 	db *gorm.DB
 }
 
-func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
-	return &SamplesRepository{db: db}
+func NewSamplesRepository(db database.PostgresDB) *SamplesRepository {
+	return &SamplesRepository{db: db.DB}
 }
 
 func (r *SamplesRepository) GetSampleById(ctx context.Context, id int) (*Sample, error) {

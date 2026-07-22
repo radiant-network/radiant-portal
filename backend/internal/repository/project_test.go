@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -10,7 +11,7 @@ import (
 
 func Test_GetProjectByCode_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewProjectRepository(db)
+		repo := NewProjectRepository(database.PostgresDB{DB: db})
 		project, err := repo.GetProjectByCode(t.Context(), "N1")
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
@@ -21,7 +22,7 @@ func Test_GetProjectByCode_OK(t *testing.T) {
 
 func Test_GetProjectByCode_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewProjectRepository(db)
+		repo := NewProjectRepository(database.PostgresDB{DB: db})
 		project, err := repo.GetProjectByCode(t.Context(), "notexists")
 		assert.NoError(t, err)
 		assert.Nil(t, project)

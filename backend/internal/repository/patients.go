@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type PatientsRepository struct {
 	db *gorm.DB
 }
 
-func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
-	return &PatientsRepository{db: db}
+func NewPatientsRepository(db database.PostgresDB) *PatientsRepository {
+	return &PatientsRepository{db: db.DB}
 }
 
 func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string) (*Patient, error) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -12,8 +13,8 @@ type UserSetsRepository struct {
 	db *gorm.DB
 }
 
-func NewUserSetsRepository(db *gorm.DB) *UserSetsRepository {
-	return &UserSetsRepository{db: db}
+func NewUserSetsRepository(db database.PostgresDB) *UserSetsRepository {
+	return &UserSetsRepository{db: db.DB}
 }
 
 func (r *UserSetsRepository) GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error) {

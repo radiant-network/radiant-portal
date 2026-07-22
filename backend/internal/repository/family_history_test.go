@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func Test_GetFamilyHistoryById_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
@@ -24,7 +25,7 @@ func Test_GetFamilyHistoryById_OK(t *testing.T) {
 
 func Test_GetFamilyHistoryById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -42,7 +43,7 @@ func Test_CreateFamilyHistory_OK(t *testing.T) {
 			TenantCode:       types.DefaultTenantCode,
 		}
 
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamilyHistory(t.Context(), newFamilyHistory)
 		assert.NoError(t, err)
 
@@ -60,7 +61,7 @@ func Test_CreateFamilyHistory_OK(t *testing.T) {
 
 func Test_CreateFamilyHistory_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamilyHistory(t.Context(), nil)
 		assert.Error(t, err)
 	})
@@ -77,7 +78,7 @@ func Test_CreateFamilyHistory_CaseNotFound(t *testing.T) {
 			TenantCode:       types.DefaultTenantCode,
 		}
 
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamilyHistory(t.Context(), newFamilyHistory)
 		assert.Error(t, err)
 
@@ -90,7 +91,7 @@ func Test_CreateFamilyHistory_CaseNotFound(t *testing.T) {
 func Test_DeleteFamilyHistoryByCaseID_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 
 		createTestCase(t, db, 100029)
 		createTestCase(t, db, 100030)
@@ -125,7 +126,7 @@ func Test_CreateFamilyHistory_PatientNotFound(t *testing.T) {
 			TenantCode:       types.DefaultTenantCode,
 		}
 
-		repo := NewFamilyHistoryRepository(db)
+		repo := NewFamilyHistoryRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamilyHistory(t.Context(), newFamilyHistory)
 		assert.Error(t, err)
 

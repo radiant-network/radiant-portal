@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -55,7 +56,7 @@ func Test_appendUnique_SkipsExistingValue(t *testing.T) {
 
 func Test_AuthRepository_HasAction_OrgScoped_SpecificOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		atGrantedOrg, err := repo.HasAction(t.Context(), aliceID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
@@ -69,7 +70,7 @@ func Test_AuthRepository_HasAction_OrgScoped_SpecificOrg(t *testing.T) {
 
 func Test_AuthRepository_HasAction_OrgScoped_Wildcard(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		atChop, err := repo.HasAction(t.Context(), wendyID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
@@ -87,7 +88,7 @@ func Test_AuthRepository_HasAction_OrgScoped_Wildcard(t *testing.T) {
 // "" is used as a literal here because importing the server package would cycle.
 func Test_AuthRepository_HasAction_OrgScoped_EmptyOrgMatchesOnlyWildcard(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// wendy's grant is wildcard ('*') → the empty sentinel matches.
 		wildcardGrantee, err := repo.HasAction(t.Context(), wendyID, types.DefaultTenantCode, "", "can_read_pii")
@@ -103,7 +104,7 @@ func Test_AuthRepository_HasAction_OrgScoped_EmptyOrgMatchesOnlyWildcard(t *test
 
 func Test_AuthRepository_HasAction_TenantScoped_IgnoresOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		noOrg, err := repo.HasAction(t.Context(), aliceID, types.DefaultTenantCode, "", "can_search_case")
 		assert.NoError(t, err)
@@ -117,7 +118,7 @@ func Test_AuthRepository_HasAction_TenantScoped_IgnoresOrg(t *testing.T) {
 
 func Test_AuthRepository_HasAction_OrgScoped_IsolatedToGrantedOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// dan is geneticist at CHUSJ only.
 		atOwnOrg, err := repo.HasAction(t.Context(), danID, types.DefaultTenantCode, "CHUSJ", "can_read_pii")
@@ -132,7 +133,7 @@ func Test_AuthRepository_HasAction_OrgScoped_IsolatedToGrantedOrg(t *testing.T) 
 
 func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		unknownAction, err := repo.HasAction(t.Context(), aliceID, types.DefaultTenantCode, "CHOP", "can_do_nothing")
 		assert.NoError(t, err)
@@ -146,7 +147,7 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 
 func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// alice holds roles in radiant.
 		allowed, err := repo.HasTenantAccess(t.Context(), aliceID, types.DefaultTenantCode)
@@ -157,7 +158,7 @@ func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
 
 func Test_AuthRepository_HasTenantAccess_NonMember(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// alice has no grant in tenant_b.
 		allowed, err := repo.HasTenantAccess(t.Context(), aliceID, "tenant_b")
@@ -168,7 +169,7 @@ func Test_AuthRepository_HasTenantAccess_NonMember(t *testing.T) {
 
 func Test_AuthRepository_HasTenantAccess_MultiTenantMember(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// carol belongs to both tenants.
 		inRadiant, err := repo.HasTenantAccess(t.Context(), carolID, types.DefaultTenantCode)
@@ -183,7 +184,7 @@ func Test_AuthRepository_HasTenantAccess_MultiTenantMember(t *testing.T) {
 
 func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		allowed, err := repo.HasTenantAccess(t.Context(), ghostID, types.DefaultTenantCode)
 		assert.NoError(t, err)
@@ -195,7 +196,7 @@ func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
 // against a future regression that accidentally filters HasTenantAccess by org_code.
 func Test_AuthRepository_HasTenantAccess_OrgScopeShapesAllCountAsMember(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// wendy's only grant is a wildcard ('*') org role.
 		wildcardOnly, err := repo.HasTenantAccess(t.Context(), wendyID, types.DefaultTenantCode)
@@ -216,7 +217,7 @@ func Test_AuthRepository_HasTenantAccess_OrgScopeShapesAllCountAsMember(t *testi
 
 func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		got, err := repo.GetMemberships(t.Context(), aliceID)
 		assert.NoError(t, err)
@@ -239,7 +240,7 @@ func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T)
 
 func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// Expected wildcard expansion is exactly the tenant's full org list.
 		var radiantOrgs []string
@@ -270,7 +271,7 @@ func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testi
 // though the grant is org-specific, and only org-scoped actions go to orgs_by_action.
 func Test_AuthRepository_GetMemberships_MixedScopeRole_RoutesByActionScope(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		got, err := repo.GetMemberships(t.Context(), patID)
 		assert.NoError(t, err)
@@ -292,7 +293,7 @@ func Test_AuthRepository_GetMemberships_MixedScopeRole_RoutesByActionScope(t *te
 // tenant-scoped actions apply; its org-scoped actions have no org and are omitted.
 func Test_AuthRepository_GetMemberships_OrgActionGrantedTenantWide_OmittedFromOrgsByAction(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		got, err := repo.GetMemberships(t.Context(), twID)
 		assert.NoError(t, err)
@@ -309,7 +310,7 @@ func Test_AuthRepository_GetMemberships_OrgActionGrantedTenantWide_OmittedFromOr
 
 func Test_AuthRepository_HasAction_MixedScopeRole(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		// pat's grant is org-specific (CHUSJ), but a tenant-scoped action applies tenant-wide.
 		tenantAction, err := repo.HasAction(t.Context(), patID, types.DefaultTenantCode, "", "can_search_case")
@@ -330,7 +331,7 @@ func Test_AuthRepository_HasAction_MixedScopeRole(t *testing.T) {
 // radiant's orgs must not bleed into the org-less tenant_b.
 func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		var radiantOrgs []string
 		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, types.DefaultTenantCode).Scan(&radiantOrgs).Error
@@ -400,7 +401,7 @@ func Test_AuthRepository_UpsertUser_InsertsThenConvergesEmail(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "sub-upsert"
 		defer purge(env.Postgres, userID, "")
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
 		require.NoError(t, repo.UpsertUser(t.Context(), userID, "first@provisioning.test", "First", "Last"))
 		require.NoError(t, repo.UpsertUser(t.Context(), userID, "second@provisioning.test", "First", "Last")) // re-run, new email
@@ -416,7 +417,7 @@ func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 		const userID, role = "sub-grant", "cu_role_atorg"
 		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		require.NoError(t, repo.UpsertUser(t.Context(), userID, "grant@provisioning.test", "First", "Last"))
 
 		require.NoError(t, repo.GrantRole(t.Context(), userID, types.DefaultTenantCode, "ORG_X", role, "test-admin"))
@@ -442,7 +443,7 @@ func Test_AuthRepository_GrantRole_IsIdempotent(t *testing.T) {
 		const userID, role = "sub-idem", "cu_role_idem"
 		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		require.NoError(t, repo.UpsertUser(t.Context(), userID, "idem@provisioning.test", "First", "Last"))
 
 		require.NoError(t, repo.GrantRole(t.Context(), userID, types.DefaultTenantCode, "ORG_X", role, "createuser"))
@@ -461,7 +462,7 @@ func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
 		const userID, role = "sub-tw", "cu_role_tw"
 		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
-		repo := NewAuthRepository(env.Postgres)
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		require.NoError(t, repo.UpsertUser(t.Context(), userID, "tw@provisioning.test", "First", "Last"))
 
 		// An empty orgCode (tenant-wide grant) must store NULL, not the empty string.

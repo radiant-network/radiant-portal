@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -57,7 +58,7 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		igvRepo := repository.NewIGVRepository(starrocks)
+		igvRepo := repository.NewIGVRepository(database.StarrocksDB{DB: starrocks})
 		casesRepo := repository.NewCasesRepository(starrocks)
 		router := tenantRouter()
 		router.GET("/:tenant/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))

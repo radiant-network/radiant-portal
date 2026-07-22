@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -29,7 +30,7 @@ func assertGetUserPreferencesHandler(t *testing.T, repo *repository.UserPreferen
 
 func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := repository.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		assertGetUserPreferencesHandler(t, repo, auth, http.StatusNotFound, "table_1", `{"status": 404, "message":"user preferences not found"}`)
 	})
@@ -37,7 +38,7 @@ func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 
 func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := repository.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}
@@ -65,7 +66,7 @@ func assertUpdateUserPreferencesHandler(t *testing.T, repo *repository.UserPrefe
 
 func Test_UpdateUserPreferencesHandler(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := repository.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}

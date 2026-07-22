@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -22,7 +23,7 @@ const (
 
 func assertGetMeHandler(t *testing.T, userID string, expected string) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewAuthRepository(env.Postgres)
+		repo := repository.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.Default()
@@ -61,7 +62,7 @@ func Test_GetMeHandler_UserWithoutGrants(t *testing.T) {
 // tenant-scoped route as the given user, returning the resulting status code.
 func assertTenantAccess(t *testing.T, userID, tenant string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewAuthRepository(env.Postgres)
+		repo := repository.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.Default()

@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -11,7 +12,7 @@ import (
 
 func Test_GetObservationCategoricalById_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
@@ -28,7 +29,7 @@ func Test_GetObservationCategoricalById_OK(t *testing.T) {
 
 func Test_GetObservationCategoricalById_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -50,7 +51,7 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 			TenantCode:         types.DefaultTenantCode,
 		}
 
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.NoError(t, err)
 
@@ -84,7 +85,7 @@ func Test_CreateObservationCategorical_WithExam_OK(t *testing.T) {
 			TenantCode:         types.DefaultTenantCode,
 		}
 
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.NoError(t, err)
 
@@ -99,7 +100,7 @@ func Test_CreateObservationCategorical_WithExam_OK(t *testing.T) {
 
 func Test_CreateObservationCategorical_NilError(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), nil)
 		assert.Error(t, err)
 	})
@@ -120,7 +121,7 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 			TenantCode:         types.DefaultTenantCode,
 		}
 
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.Error(t, err)
 
@@ -133,7 +134,7 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 func Test_DeleteObsCategoricalByCaseID_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewObservationCategoricalRepository(db)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: db})
 
 		createTestCase(t, db, 100021)
 		createTestCase(t, db, 100022)
@@ -172,7 +173,7 @@ func Test_CreateObservationCategorical_PatientNotFound(t *testing.T) {
 			TenantCode:         types.DefaultTenantCode,
 		}
 
-		repo := NewObservationCategoricalRepository(env.Postgres)
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.Error(t, err)
 

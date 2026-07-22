@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ import (
 
 func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(db)
+		repo := NewStarrocksRepository(database.StarrocksDB{DB: db})
 		status := repo.CheckDatabaseConnection()
 		assert.Equal(t, "up", status)
 	})

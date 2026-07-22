@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -54,26 +55,26 @@ func (m *MockTermsRepository) GetTermNameById(ctx context.Context, termsTable st
 func Test_GetInterpretationGermline(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(postgres, pubmedService)
-		termsRepo := repository.NewTermsRepository(starrocks)
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: postgres}, pubmedService)
+		termsRepo := repository.NewTermsRepository(database.StarrocksDB{DB: starrocks})
 		// not found
-		assertGetInterpretationGermline(t, repo.Interpretations, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+		assertGetInterpretationGermline(t, repo, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
 		interpretation := &types.InterpretationGermline{}
-		actual := assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual := assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 		// update
 		interpretation.Condition = "one condition"
 		interpretation.Metadata.AnalysisId = "analysis1"
-		actual = assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Condition, "one condition")
 		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
+		assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
 		interpretation.Pubmed[0].CitationID = "1"
-		actual = assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
 }
@@ -81,12 +82,12 @@ func Test_GetInterpretationGermline(t *testing.T) {
 func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(postgres, pubmedService)
-		termsRepo := repository.NewTermsRepository(starrocks)
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: postgres}, pubmedService)
+		termsRepo := repository.NewTermsRepository(database.StarrocksDB{DB: starrocks})
 		interpretation := &types.InterpretationGermline{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
-		assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
-		assertGetInterpretationGermline(t, repo.Interpretations, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+		assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationGermline(t, repo, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
 	})
 }
 
@@ -128,33 +129,33 @@ func assertPostInterpretationGermline(t *testing.T, repo *repository.Interpretat
 func Test_GetInterpretationSomatic(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService)
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
 		termsRepo := &MockTermsRepository{}
 		// not found
-		assertGetInterpretationSomatic(t, repo.Interpretations, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+		assertGetInterpretationSomatic(t, repo, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
 		interpretation := &types.InterpretationSomatic{}
-		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual := assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 		assert.Equal(t, "", actual.TumoralName)
 		// update
 		interpretation.Oncogenicity = "one Oncogenicity"
 		interpretation.Metadata.AnalysisId = "analysis1"
 		interpretation.TumoralType = "MONDO:0000032"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
 		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
 		assert.Equal(t, "MONDO:0000032", actual.TumoralType)
 		// GET resolves tumoral_name from MONDO via termsRepo
-		fetched := assertGetInterpretationSomatic(t, repo.Interpretations, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusOK, "")
+		fetched := assertGetInterpretationSomatic(t, repo, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusOK, "")
 		assert.Equal(t, "MONDO:0000032", fetched.TumoralType)
 		assert.Equal(t, "some tumoral condition", fetched.TumoralName)
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
-		assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
+		assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
 		// Update with known pubmed
 		interpretation.Pubmed[0].CitationID = "1"
-		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		actual = assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
 	})
 }
@@ -162,13 +163,13 @@ func Test_GetInterpretationSomatic(t *testing.T) {
 func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService)
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
 		termsRepo := &MockTermsRepository{}
 		interpretation := &types.InterpretationSomatic{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
 		interpretation.TumoralType = "MONDO:0000004"
-		assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
-		assertGetInterpretationSomatic(t, repo.Interpretations, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+		assertPostInterpretationSomatic(t, repo, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assertGetInterpretationSomatic(t, repo, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
 	})
 }
 
@@ -217,7 +218,7 @@ func Test_SearchGermline(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
 
 		// search empty
 		assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
@@ -253,7 +254,7 @@ func Test_SearchSomatic(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
+		repo := repository.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
 
 		// search empty
 		assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -21,7 +22,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 		db := env.Postgres
 
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.POST(
@@ -87,7 +88,7 @@ func Test_PutPatientBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.PUT("/:tenant/patients/batch", server.PutPatientBatchHandler(repo, &auth))
@@ -130,7 +131,7 @@ func Test_PutSampleBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.PUT("/:tenant/samples/batch", server.PutSampleBatchHandler(repo, &auth))
@@ -172,7 +173,7 @@ func Test_PutSequencingExperimentBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.PUT("/:tenant/sequencing/batch", server.PutSequencingExperimentBatchHandler(repo, &auth))
@@ -216,7 +217,7 @@ func Test_PutCaseBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.PUT("/:tenant/cases/batch", server.PutCaseBatchHandler(repo, &auth))

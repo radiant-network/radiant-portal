@@ -39,8 +39,8 @@ func main() {
 	if err != nil {
 		fatal("connect starrocks", err)
 	}
-	tenants := repository.NewTenantRepository(pg)
-	views := repository.NewStarrocksTenantRepository(sr)
+	tenants := repository.NewTenantRepository(database.PostgresDB{DB: pg})
+	views := repository.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr})
 	ranger := client.NewRangerAdminClient(client.RangerConfigFromEnv())
 
 	ctx := context.Background()

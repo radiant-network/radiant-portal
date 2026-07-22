@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -17,8 +18,8 @@ type BatchRepository struct {
 	db *gorm.DB
 }
 
-func NewBatchRepository(db *gorm.DB) *BatchRepository {
-	return &BatchRepository{db: db}
+func NewBatchRepository(db database.PostgresDB) *BatchRepository {
+	return &BatchRepository{db: db.DB}
 }
 
 func (r *BatchRepository) CreateBatch(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*Batch, error) {

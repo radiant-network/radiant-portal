@@ -11,6 +11,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -1456,7 +1457,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 
 func Test_ProcessBatch_Using_Cache(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewValueSetsRepository(db)
+		repo := repository.NewValueSetsRepository(database.PostgresDB{DB: db})
 		bv := batchval.BatchValidationContext{
 			ValueSetsRepo: repo,
 		}

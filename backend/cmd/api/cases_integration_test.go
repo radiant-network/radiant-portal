@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -160,7 +161,7 @@ func Test_GetCasesFilters(t *testing.T) {
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
-		igvRepo := repository.NewIGVRepository(db)
+		igvRepo := repository.NewIGVRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
 

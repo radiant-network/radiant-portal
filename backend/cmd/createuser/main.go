@@ -128,7 +128,7 @@ func buildDeps() (service.AdminDeps, error) {
 	return service.AdminDeps{
 		Keycloak:  client.NewKeycloakAdminClient(client.KeycloakConfigFromEnv()),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
-		Starrocks: repository.NewStarrocksUserRepository(sr, repository.StarrocksJWTConfigFromEnv()),
-		Auth:      repository.NewAuthRepository(pg),
+		Starrocks: repository.NewStarrocksUserRepository(database.StarrocksDB{DB: sr}, repository.StarrocksJWTConfigFromEnv()),
+		Auth:      repository.NewAuthRepository(database.PostgresDB{DB: pg}),
 	}, nil
 }

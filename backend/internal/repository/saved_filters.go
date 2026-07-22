@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -18,8 +19,8 @@ type SavedFiltersRepository struct {
 	db *gorm.DB
 }
 
-func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
-	return &SavedFiltersRepository{db: db}
+func NewSavedFiltersRepository(db database.PostgresDB) *SavedFiltersRepository {
+	return &SavedFiltersRepository{db: db.DB}
 }
 
 func (r *SavedFiltersRepository) GetSavedFilterByID(ctx context.Context, savedFilterId string) (*SavedFilter, error) {

@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -12,7 +13,7 @@ import (
 
 func Test_GetObservationStringById_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
@@ -25,7 +26,7 @@ func Test_GetObservationStringById_OK(t *testing.T) {
 
 func Test_GetObservationStringById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -43,7 +44,7 @@ func Test_CreateObservationString_OK(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.NoError(t, err)
 
@@ -72,7 +73,7 @@ func Test_CreateObservationString_WithExam_OK(t *testing.T) {
 			TenantCode:         types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(env.Postgres)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.NoError(t, err)
 
@@ -87,7 +88,7 @@ func Test_CreateObservationString_WithExam_OK(t *testing.T) {
 
 func Test_CreateObservationString_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		err := repo.CreateObservationString(t.Context(), nil)
 		assert.Error(t, err)
 	})
@@ -104,7 +105,7 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 
@@ -117,7 +118,7 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 func Test_DeleteObsStringByCaseID_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 
 		createTestCase(t, db, 100025)
 		createTestCase(t, db, 100026)
@@ -152,7 +153,7 @@ func Test_CreateObservationString_PatientNotFound(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(db)
+		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 

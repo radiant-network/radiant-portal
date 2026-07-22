@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -729,7 +730,7 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		err := persistBatchAndUpdateSampleRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewSamplesRepository(db)
+		repo := repository.NewSamplesRepository(database.PostgresDB{DB: db})
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-WORKER-UPDATE-1")
 		require.NoError(t, err)
 		require.NotNil(t, sample)

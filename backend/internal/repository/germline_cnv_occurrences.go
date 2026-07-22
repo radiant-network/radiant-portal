@@ -7,6 +7,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -17,8 +18,8 @@ type GermlineCNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
-	return &GermlineCNVOccurrencesRepository{db: db}
+func NewGermlineCNVOccurrencesRepository(db database.StarrocksDB) *GermlineCNVOccurrencesRepository {
+	return &GermlineCNVOccurrencesRepository{db: db.DB}
 }
 
 func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {

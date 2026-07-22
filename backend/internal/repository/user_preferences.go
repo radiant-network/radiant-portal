@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type UserPreferencesRepository struct {
 	db *gorm.DB
 }
 
-func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
-	return &UserPreferencesRepository{db: db}
+func NewUserPreferencesRepository(db database.PostgresDB) *UserPreferencesRepository {
+	return &UserPreferencesRepository{db: db.DB}
 }
 
 func (r *UserPreferencesRepository) GetUserPreferences(ctx context.Context, userId string, key string) (*types.JsonMap[string, interface{}], error) {

@@ -9,6 +9,7 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/utils"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -27,8 +28,8 @@ type VariantsRepository struct {
 	db *gorm.DB
 }
 
-func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
-	return &VariantsRepository{db: db}
+func NewVariantsRepository(db database.StarrocksDB) *VariantsRepository {
+	return &VariantsRepository{db: db.DB}
 }
 
 func (r *VariantsRepository) GetVariantHeader(ctx context.Context, locusId int) (*VariantHeader, error) {

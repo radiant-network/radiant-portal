@@ -122,7 +122,7 @@ func connectPostgres() (*repository.TenantRepository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
 	}
-	return repository.NewTenantRepository(pg), nil
+	return repository.NewTenantRepository(database.PostgresDB{DB: pg}), nil
 }
 
 func buildDeps() (service.TenantDeps, error) {
@@ -134,11 +134,11 @@ func buildDeps() (service.TenantDeps, error) {
 	if err != nil {
 		return service.TenantDeps{}, fmt.Errorf("connect starrocks: %w", err)
 	}
-	tenantRepo := repository.NewTenantRepository(pg)
+	tenantRepo := repository.NewTenantRepository(database.PostgresDB{DB: pg})
 	return service.TenantDeps{
 		Store:     tenantRepo,
 		Columns:   tenantRepo,
-		Starrocks: repository.NewStarrocksTenantRepository(sr),
+		Starrocks: repository.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr}),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
 	}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -19,8 +20,8 @@ type SomaticSNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepository {
-	return &SomaticSNVOccurrencesRepository{db: db}
+func NewSomaticSNVOccurrencesRepository(db database.StarrocksDB) *SomaticSNVOccurrencesRepository {
+	return &SomaticSNVOccurrencesRepository{db: db.DB}
 }
 
 func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {

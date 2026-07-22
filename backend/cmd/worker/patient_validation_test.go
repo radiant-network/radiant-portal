@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -572,7 +573,7 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 		err := persistBatchAndUpdatePatientRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewPatientsRepository(db)
+		repo := repository.NewPatientsRepository(database.PostgresDB{DB: db})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1")
 		require.NoError(t, err)
 		require.NotNil(t, patient)
@@ -588,7 +589,7 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: repository.NewValueSetsRepository(database.PostgresDB{DB: postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -607,7 +608,7 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: repository.NewValueSetsRepository(database.PostgresDB{DB: postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -634,7 +635,7 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: repository.NewValueSetsRepository(database.PostgresDB{DB: postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},

@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type TermsRepository struct {
 	db *gorm.DB
 }
 
-func NewTermsRepository(db *gorm.DB) *TermsRepository {
-	return &TermsRepository{db: db}
+func NewTermsRepository(db database.StarrocksDB) *TermsRepository {
+	return &TermsRepository{db: db.DB}
 }
 
 func mapToAutoCompleteTerm(term *types.Term, input string) types.AutoCompleteTerm {

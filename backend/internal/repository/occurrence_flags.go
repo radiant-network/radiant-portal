@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -13,8 +14,8 @@ type OccurrenceFlagsRepository struct {
 	db *gorm.DB
 }
 
-func NewOccurrenceFlagsRepository(db *gorm.DB) *OccurrenceFlagsRepository {
-	return &OccurrenceFlagsRepository{db: db}
+func NewOccurrenceFlagsRepository(db database.PostgresDB) *OccurrenceFlagsRepository {
+	return &OccurrenceFlagsRepository{db: db.DB}
 }
 
 func (r *OccurrenceFlagsRepository) Upsert(ctx context.Context, flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {

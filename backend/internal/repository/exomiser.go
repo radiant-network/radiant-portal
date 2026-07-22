@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type ExomiserRepository struct {
 	db *gorm.DB
 }
 
-func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
-	return &ExomiserRepository{db: db}
+func NewExomiserRepository(db database.StarrocksDB) *ExomiserRepository {
+	return &ExomiserRepository{db: db.DB}
 }
 
 func (r *ExomiserRepository) GetExomiser(ctx context.Context, locusId int) ([]Exomiser, error) {

@@ -3,6 +3,7 @@ package batchval
 import (
 	"context"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -82,18 +83,20 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		return nil, err
 	}
 
+	postgresDB := database.PostgresDB{DB: db}
+
 	return &BatchValidationContext{
-		BatchRepo:     repository.NewBatchRepository(db),
-		OrgRepo:       repository.NewOrganizationRepository(db),
-		PatientRepo:   repository.NewPatientsRepository(db),
-		ProjectRepo:   repository.NewProjectRepository(db),
-		SampleRepo:    repository.NewSamplesRepository(db),
+		BatchRepo:     repository.NewBatchRepository(postgresDB),
+		OrgRepo:       repository.NewOrganizationRepository(postgresDB),
+		PatientRepo:   repository.NewPatientsRepository(postgresDB),
+		ProjectRepo:   repository.NewProjectRepository(postgresDB),
+		SampleRepo:    repository.NewSamplesRepository(postgresDB),
 		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
-		ValueSetsRepo: repository.NewValueSetsRepository(db),
+		ValueSetsRepo: repository.NewValueSetsRepository(postgresDB),
 		CasesRepo:     repository.NewCasesRepository(db),
 		DocRepo:       repository.NewDocumentsRepository(db),
-		FamilyRepo:    repository.NewFamilyRepository(db),
-		TaskRepo:      repository.NewTaskRepository(db),
+		FamilyRepo:    repository.NewFamilyRepository(postgresDB),
+		TaskRepo:      repository.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,
 	}, nil
 }

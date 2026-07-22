@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func Test_GetFamilyById_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(db)
+		repo := NewFamilyRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetFamilyById(t.Context(), 1)
 
 		expected := &types.Family{
@@ -30,7 +31,7 @@ func Test_GetFamilyById_OK(t *testing.T) {
 
 func Test_GetFamilyById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(db)
+		repo := NewFamilyRepository(database.PostgresDB{DB: db})
 		result, err := repo.GetFamilyById(t.Context(), 9999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -48,7 +49,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 			TenantCode:                types.DefaultTenantCode,
 		}
 
-		repo := NewFamilyRepository(db)
+		repo := NewFamilyRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamily(t.Context(), newFamily)
 		assert.NoError(t, err)
 
@@ -62,7 +63,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 
 func Test_CreateFamily_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(db)
+		repo := NewFamilyRepository(database.PostgresDB{DB: db})
 		err := repo.CreateFamily(t.Context(), nil)
 		assert.Error(t, err)
 	})
@@ -71,7 +72,7 @@ func Test_CreateFamily_NilError(t *testing.T) {
 func Test_DeleteFamilyByCaseID_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewFamilyRepository(db)
+		repo := NewFamilyRepository(database.PostgresDB{DB: db})
 
 		// Two dedicated cases so the delete-by-case-id can be asserted not to touch the other one.
 		createTestCase(t, db, 100013)

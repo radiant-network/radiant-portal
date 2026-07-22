@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -16,8 +17,8 @@ type IGVRepository struct {
 	db *gorm.DB
 }
 
-func NewIGVRepository(db *gorm.DB) *IGVRepository {
-	return &IGVRepository{db: db}
+func NewIGVRepository(db database.StarrocksDB) *IGVRepository {
+	return &IGVRepository{db: db.DB}
 }
 
 func (r *IGVRepository) GetIGV(ctx context.Context, caseID int) ([]IGVTrack, error) {

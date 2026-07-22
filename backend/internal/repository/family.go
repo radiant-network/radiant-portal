@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type FamilyRepository struct {
 	db *gorm.DB
 }
 
-func NewFamilyRepository(db *gorm.DB) *FamilyRepository {
-	return &FamilyRepository{db: db}
+func NewFamilyRepository(db database.PostgresDB) *FamilyRepository {
+	return &FamilyRepository{db: db.DB}
 }
 
 func (r *FamilyRepository) GetFamilyById(ctx context.Context, familyId int) (*Family, error) {

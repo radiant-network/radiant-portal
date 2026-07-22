@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/gorm"
 )
 
@@ -38,8 +39,8 @@ type StarrocksUserRepository struct {
 	cfg StarrocksJWTConfig
 }
 
-func NewStarrocksUserRepository(db *gorm.DB, cfg StarrocksJWTConfig) *StarrocksUserRepository {
-	return &StarrocksUserRepository{db: db, cfg: cfg}
+func NewStarrocksUserRepository(db database.StarrocksDB, cfg StarrocksJWTConfig) *StarrocksUserRepository {
+	return &StarrocksUserRepository{db: db.DB, cfg: cfg}
 }
 
 // EnsureJWTUser runs CREATE USER IF NOT EXISTS for the given sub with

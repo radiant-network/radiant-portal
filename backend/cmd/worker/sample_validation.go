@@ -9,6 +9,7 @@ import (
 	"regexp"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -173,8 +174,8 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 
 func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSample := repository.NewSamplesRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoSample := repository.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -458,8 +459,8 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 
 func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSample := repository.NewSamplesRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoSample := repository.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate

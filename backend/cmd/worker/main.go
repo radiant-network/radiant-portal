@@ -192,7 +192,7 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 				return
 			case <-ticker.C:
 				slog.Info("clean-up worker started")
-				batchRepo := repository.NewBatchRepository(db)
+				batchRepo := repository.NewBatchRepository(database.PostgresDB{DB: db})
 				rowUpdated, err := batchRepo.UpdateStuckBatch(ctx)
 				if err != nil {
 					slog.Error("error executing batch clean up", slog.Any("error", err))

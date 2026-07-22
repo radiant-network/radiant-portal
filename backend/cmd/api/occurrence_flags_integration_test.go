@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -54,7 +55,7 @@ func assertDeleteOccurrenceFlag(
 
 func Test_UpsertOccurrenceFlag_Integration(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90100", "flag", http.StatusNoContent)
 
@@ -69,7 +70,7 @@ func Test_UpsertOccurrenceFlag_Integration(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_FlagTypePin(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90110", "pin", http.StatusNoContent)
 
@@ -84,7 +85,7 @@ func Test_UpsertOccurrenceFlag_Integration_FlagTypePin(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_FlagTypeStar(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90111", "star", http.StatusNoContent)
 
@@ -99,7 +100,7 @@ func Test_UpsertOccurrenceFlag_Integration_FlagTypeStar(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_UpdatesFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90101", "flag", http.StatusNoContent)
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90101", "pin", http.StatusNoContent)
@@ -115,7 +116,7 @@ func Test_UpsertOccurrenceFlag_Integration_UpdatesFlagType(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_InvalidFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90102", "bogus", http.StatusBadRequest)
 	})
@@ -123,7 +124,7 @@ func Test_UpsertOccurrenceFlag_Integration_InvalidFlagType(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_MissingFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90103", "", http.StatusBadRequest)
 	})
@@ -131,7 +132,7 @@ func Test_UpsertOccurrenceFlag_Integration_MissingFlagType(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_InvalidCaseID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "not-a-number", "1", "1", "90104", "flag", http.StatusNotFound)
 	})
@@ -139,7 +140,7 @@ func Test_UpsertOccurrenceFlag_Integration_InvalidCaseID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_NonExistentCaseID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "99999", "1", "1", "90105", "flag", http.StatusInternalServerError)
 	})
@@ -147,7 +148,7 @@ func Test_UpsertOccurrenceFlag_Integration_NonExistentCaseID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_NonExistentSeqID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "99999", "1", "90106", "flag", http.StatusInternalServerError)
 	})
@@ -155,7 +156,7 @@ func Test_UpsertOccurrenceFlag_Integration_NonExistentSeqID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_Integration_NonExistentTaskID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "99999", "90107", "flag", http.StatusInternalServerError)
 	})
@@ -163,7 +164,7 @@ func Test_UpsertOccurrenceFlag_Integration_NonExistentTaskID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_Integration(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90120", "flag", http.StatusNoContent)
 		assertDeleteOccurrenceFlag(t, repo, "1", "1", "1", "90120", http.StatusNoContent)
@@ -178,7 +179,7 @@ func Test_DeleteOccurrenceFlag_Integration(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_Integration_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertDeleteOccurrenceFlag(t, repo, "1", "1", "1", "90121", http.StatusNotFound)
 	})
@@ -186,7 +187,7 @@ func Test_DeleteOccurrenceFlag_Integration_NotFound(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_Integration_InvalidCaseID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertDeleteOccurrenceFlag(t, repo, "not-a-number", "1", "1", "90122", http.StatusNotFound)
 	})
@@ -194,7 +195,7 @@ func Test_DeleteOccurrenceFlag_Integration_InvalidCaseID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_Integration_InvalidSeqID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertDeleteOccurrenceFlag(t, repo, "1", "not-a-number", "1", "90123", http.StatusNotFound)
 	})
@@ -202,7 +203,7 @@ func Test_DeleteOccurrenceFlag_Integration_InvalidSeqID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_Integration_InvalidTaskID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+		repo := repository.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		assertDeleteOccurrenceFlag(t, repo, "1", "1", "not-a-number", "90124", http.StatusNotFound)
 	})

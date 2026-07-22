@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -9,7 +10,7 @@ import (
 
 func Test_GetVariantGenePanelConditions_Omim(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "omim", 1000, "")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -23,7 +24,7 @@ func Test_GetVariantGenePanelConditions_Omim(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_Omim_WithFilter(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "omim", 1000, "2")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -37,7 +38,7 @@ func Test_GetVariantGenePanelConditions_Omim_WithFilter(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_Hpo(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "hpo", 1000, "")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -51,7 +52,7 @@ func Test_GetVariantGenePanelConditions_Hpo(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_Hpo_WithFilter(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "hpo", 1000, "Canthus")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -65,7 +66,7 @@ func Test_GetVariantGenePanelConditions_Hpo_WithFilter(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_Orphanet(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "orphanet", 1000, "")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -79,7 +80,7 @@ func Test_GetVariantGenePanelConditions_Orphanet(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_Orphanet_WithFilter(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "orphanet", 1000, "1")
 		assert.NoError(t, err)
 		value, ok := ((*result).Conditions)["BRAF"]
@@ -93,7 +94,7 @@ func Test_GetVariantGenePanelConditions_Orphanet_WithFilter(t *testing.T) {
 
 func Test_GetVariantGenePanelConditions_InvalidTable(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGenePanelsRepository(db)
+		repo := NewGenePanelsRepository(database.StarrocksDB{DB: db})
 		result, err := repo.GetVariantGenePanelConditions(t.Context(), "invalid_table", 1000, "")
 		assert.Error(t, err)
 		assert.Nil(t, result)

@@ -3,6 +3,7 @@ package repository
 import (
 	"log/slog"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/gorm"
 )
 
@@ -10,8 +11,8 @@ type StarrocksRepository struct {
 	db *gorm.DB
 }
 
-func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
-	return &StarrocksRepository{db: db}
+func NewStarrocksRepository(db database.StarrocksDB) *StarrocksRepository {
+	return &StarrocksRepository{db: db.DB}
 }
 
 func (r *StarrocksRepository) CheckDatabaseConnection() string {

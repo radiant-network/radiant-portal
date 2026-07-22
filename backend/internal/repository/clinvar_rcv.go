@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -16,8 +17,8 @@ type ClinvarRCVRepository struct {
 	db *gorm.DB
 }
 
-func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
-	return &ClinvarRCVRepository{db: db}
+func NewClinvarRCVRepository(db database.StarrocksDB) *ClinvarRCVRepository {
+	return &ClinvarRCVRepository{db: db.DB}
 }
 
 func (r *ClinvarRCVRepository) GetVariantClinvarConditions(ctx context.Context, locusId int) ([]ClinvarRCV, error) {

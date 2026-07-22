@@ -10,6 +10,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -46,12 +47,12 @@ type StarrocksTenantRepository struct {
 	db *gorm.DB
 }
 
-func NewStarrocksTenantRepository(db *gorm.DB) *StarrocksTenantRepository {
-	if db == nil {
+func NewStarrocksTenantRepository(db database.StarrocksDB) *StarrocksTenantRepository {
+	if db.DB == nil {
 		log.Print("StarrocksTenantRepository: db is nil")
 		return nil
 	}
-	return &StarrocksTenantRepository{db: db}
+	return &StarrocksTenantRepository{db: db.DB}
 }
 
 func (r *StarrocksTenantRepository) EnsureAuthDatabase(ctx context.Context) error {

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -142,11 +143,11 @@ func NewStorageContext(db *gorm.DB) *StorageContext {
 	return &StorageContext{
 		CasesRepo:         repository.NewCasesRepository(db),
 		DocRepo:           repository.NewDocumentsRepository(db),
-		ObsCatRepo:        repository.NewObservationCategoricalRepository(db),
-		ObsStringRepo:     repository.NewObservationStringRepository(db),
-		FamilyHistoryRepo: repository.NewFamilyHistoryRepository(db),
-		FamilyRepo:        repository.NewFamilyRepository(db),
-		TaskRepo:          repository.NewTaskRepository(db),
+		ObsCatRepo:        repository.NewObservationCategoricalRepository(database.PostgresDB{DB: db}),
+		ObsStringRepo:     repository.NewObservationStringRepository(database.PostgresDB{DB: db}),
+		FamilyHistoryRepo: repository.NewFamilyHistoryRepository(database.PostgresDB{DB: db}),
+		FamilyRepo:        repository.NewFamilyRepository(database.PostgresDB{DB: db}),
+		TaskRepo:          repository.NewTaskRepository(database.PostgresDB{DB: db}),
 	}
 }
 
@@ -1361,7 +1362,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 
 func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		batchRepo := repository.NewBatchRepository(tx)
+		batchRepo := repository.NewBatchRepository(database.PostgresDB{DB: tx})
 		txCtx := NewStorageContext(tx)
 		txCtx.TenantCode = batch.TenantCode
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, batchRepo)

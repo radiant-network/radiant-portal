@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func Test_GetUserPreference(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewUserPreferencesRepository(db)
+		repo := NewUserPreferencesRepository(database.PostgresDB{DB: db})
 
 		userId := "b3a74785-b0a9-4a45-879e-f13c476976f7"
 		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "table_1")
@@ -22,7 +23,7 @@ func Test_GetUserPreference(t *testing.T) {
 
 func Test_GetUserPreference_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewUserPreferencesRepository(db)
+		repo := NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		userId := "b3a74785-b0a9-4a45-879e-f13c476976f7"
 		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "not_found")
 		assert.NoError(t, err)
@@ -32,7 +33,7 @@ func Test_GetUserPreference_NotFound(t *testing.T) {
 
 func Test_UpdateUserPreference_Create(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewUserPreferencesRepository(db)
+		repo := NewUserPreferencesRepository(database.PostgresDB{DB: db})
 
 		userId := "610de5c4-a192-45f9-aeac-bb1d5728a006"
 		userPref := types.JsonMap[string, interface{}]{
@@ -58,7 +59,7 @@ func Test_UpdateUserPreference_Create(t *testing.T) {
 
 func Test_UpdateUserPreference_Update(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewUserPreferencesRepository(db)
+		repo := NewUserPreferencesRepository(database.PostgresDB{DB: db})
 
 		userId := "a86f047c-eb72-4e24-a344-e15944ca42be"
 		userPref := types.JsonMap[string, interface{}]{

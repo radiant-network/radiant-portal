@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -13,7 +14,7 @@ import (
 
 func Test_CreateBatch_Valid(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		type samplePayload struct {
 			Message string `json:"message"`
 		}
@@ -44,7 +45,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 // worker path (ClaimNextBatch, no tenant in context) is unaffected — WithTenant is a no-op there.
 func Test_GetBatchByID_CrossTenantIsInvisible(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewBatchRepository(env.Postgres)
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		batchId := uuid.NewString()
 		if err := env.Postgres.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
@@ -67,7 +68,7 @@ func Test_GetBatchByID_CrossTenantIsInvisible(t *testing.T) {
 
 func Test_GetBatchByID_Success(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
@@ -89,7 +90,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 
 func Test_GetBatchByID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		nonExistentId := uuid.NewString()
 		batch, err := repo.GetBatchByID(t.Context(), nonExistentId)
 		assert.NoError(t, err)
@@ -99,7 +100,7 @@ func Test_GetBatchByID_NotFound(t *testing.T) {
 
 func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		invalidId := "not-a-valid-uuid"
 		batch, err := repo.GetBatchByID(t.Context(), invalidId)
 		assert.Error(t, err)
@@ -109,7 +110,7 @@ func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 
 func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		assert.Nil(t, batch)
@@ -118,7 +119,7 @@ func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 
 func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 		// Add two pending batches
 		initErr := db.Exec(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
@@ -145,7 +146,7 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 
 func Test_UpdateBatch(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 
 		var id string
 		initErr := db.Raw(`
@@ -175,7 +176,7 @@ func Test_UpdateBatch(t *testing.T) {
 func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 
 		var id string
 		initErr := db.Raw(`
@@ -201,7 +202,7 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 
 		var id string
 		initErr := db.Raw(`
@@ -226,7 +227,7 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 
 func Test_UpdateStuckBatch(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(db)
+		repo := NewBatchRepository(database.PostgresDB{DB: db})
 
 		timeMoreThan24hAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")
 		timeLessThan24hAgo := time.Now().Add(-22 * time.Hour).Format("2006-01-02")

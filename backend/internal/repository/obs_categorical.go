@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type ObservationCategoricalRepository struct {
 	db *gorm.DB
 }
 
-func NewObservationCategoricalRepository(db *gorm.DB) *ObservationCategoricalRepository {
-	return &ObservationCategoricalRepository{db: db}
+func NewObservationCategoricalRepository(db database.PostgresDB) *ObservationCategoricalRepository {
+	return &ObservationCategoricalRepository{db: db.DB}
 }
 
 func (r *ObservationCategoricalRepository) GetById(ctx context.Context, observationId int) (*ObservationCategorical, error) {

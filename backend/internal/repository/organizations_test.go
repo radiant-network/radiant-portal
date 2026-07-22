@@ -3,13 +3,14 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOrganizationRepository(env.Postgres)
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
 		org, err := repo.GetOrganizationByCode(t.Context(), "CHOP")
 		assert.NoError(t, err)
 		assert.NotNil(t, org)
@@ -20,7 +21,7 @@ func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 }
 func Test_GetOrganizationByCode_Null(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOrganizationRepository(env.Postgres)
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
 		org, err := repo.GetOrganizationByCode(t.Context(), "Unknown")
 		assert.NoError(t, err)
 		assert.Nil(t, org)

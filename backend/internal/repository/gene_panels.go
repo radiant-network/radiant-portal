@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 	"strings"
@@ -16,8 +17,8 @@ type GenePanelsRepository struct {
 	db *gorm.DB
 }
 
-func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
-	return &GenePanelsRepository{db: db}
+func NewGenePanelsRepository(db database.StarrocksDB) *GenePanelsRepository {
+	return &GenePanelsRepository{db: db.DB}
 }
 
 func (r *GenePanelsRepository) GetVariantGenePanelConditions(ctx context.Context, panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error) {

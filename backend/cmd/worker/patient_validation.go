@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -217,8 +218,8 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 
 func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoPatient := repository.NewPatientsRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoPatient := repository.NewPatientsRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -367,8 +368,8 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 
 func persistBatchAndUpdatePatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoPatient := repository.NewPatientsRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoPatient := repository.NewPatientsRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate

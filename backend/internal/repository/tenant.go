@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/gorm"
 )
 
@@ -38,12 +39,12 @@ type TenantRepository struct {
 	db *gorm.DB
 }
 
-func NewTenantRepository(db *gorm.DB) *TenantRepository {
-	if db == nil {
+func NewTenantRepository(db database.PostgresDB) *TenantRepository {
+	if db.DB == nil {
 		log.Print("TenantRepository: db is nil")
 		return nil
 	}
-	return &TenantRepository{db: db}
+	return &TenantRepository{db: db.DB}
 }
 
 func (r *TenantRepository) ListTenants(ctx context.Context) ([]string, error) {

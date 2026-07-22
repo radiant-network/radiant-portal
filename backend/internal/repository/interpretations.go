@@ -10,6 +10,7 @@ import (
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -20,8 +21,8 @@ type InterpretationsRepository struct {
 	pubmedClient client.PubmedClientService
 }
 
-func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
-	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
+func NewInterpretationsRepository(db database.PostgresDB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
+	return &InterpretationsRepository{db: db.DB, pubmedClient: pubmedClient}
 }
 
 func addWhere(tx *gorm.DB, caseId string, sequencingId string, locusId string, transcriptId string) {

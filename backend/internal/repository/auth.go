@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type AuthRepository struct {
 	db *gorm.DB
 }
 
-func NewAuthRepository(db *gorm.DB) *AuthRepository {
-	return &AuthRepository{db: db}
+func NewAuthRepository(db database.PostgresDB) *AuthRepository {
+	return &AuthRepository{db: db.DB}
 }
 
 // HasAction reports whether the user holds an action in the given tenant. Routing is

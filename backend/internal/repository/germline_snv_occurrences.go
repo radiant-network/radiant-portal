@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -24,8 +25,8 @@ type GermlineSNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
-	return &GermlineSNVOccurrencesRepository{db: db}
+func NewGermlineSNVOccurrencesRepository(db database.StarrocksDB) *GermlineSNVOccurrencesRepository {
+	return &GermlineSNVOccurrencesRepository{db: db.DB}
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {

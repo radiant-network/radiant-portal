@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -14,8 +15,8 @@ type ProjectRepository struct {
 	db *gorm.DB
 }
 
-func NewProjectRepository(db *gorm.DB) *ProjectRepository {
-	return &ProjectRepository{db: db}
+func NewProjectRepository(db database.PostgresDB) *ProjectRepository {
+	return &ProjectRepository{db: db.DB}
 }
 
 func (r *ProjectRepository) GetProjectByCode(ctx context.Context, code string) (*Project, error) {

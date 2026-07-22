@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -12,7 +13,7 @@ import (
 
 func Test_GetSavedFilterByID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilter, err := repo.GetSavedFilterByID(t.Context(), "1e1c5bc3-4f65-496a-ad61-cab239bf72d5")
 		assert.NoError(t, err)
 		if assert.NotNil(t, savedFilter) {
@@ -31,7 +32,7 @@ func Test_GetSavedFilterByID(t *testing.T) {
 
 func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilter, err := repo.GetSavedFilterByID(t.Context(), "ac2df672-9702-4dcf-8cfd-457494384762")
 		assert.NoError(t, err)
 		assert.Nil(t, savedFilter)
@@ -40,7 +41,7 @@ func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 
 func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
@@ -50,7 +51,7 @@ func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 
 func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "not_existing_user", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
@@ -60,7 +61,7 @@ func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 
 func Test_GetSavedFiltersByUserID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", types.GERMLINE_SNV_OCCURRENCE)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
@@ -70,7 +71,7 @@ func Test_GetSavedFiltersByUserID(t *testing.T) {
 
 func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", types.SOMATIC_SNV_VARIANT)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
@@ -80,7 +81,7 @@ func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
 
 func Test_CreateSavedFilter(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilterInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence",
 			Type: types.SOMATIC_SNV_OCCURRENCE,
@@ -116,7 +117,7 @@ func Test_CreateSavedFilter(t *testing.T) {
 
 func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilterInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence_1",
 			Type: types.SOMATIC_SNV_OCCURRENCE,
@@ -148,7 +149,7 @@ func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 
 func Test_UpdateSavedFilter(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence_2",
 			Type: types.SOMATIC_SNV_OCCURRENCE,
@@ -204,7 +205,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 
 func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name:    "new_saved_filter_somatic_snv_occurrence",
 			Type:    types.GERMLINE_SNV_OCCURRENCE,
@@ -237,7 +238,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 
 func Test_DeleteSavedFilter(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSavedFiltersRepository(db)
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name:    "new_saved_filter_somatic_snv_occurrence",
 			Type:    types.GERMLINE_SNV_OCCURRENCE,

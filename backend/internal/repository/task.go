@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -17,8 +18,8 @@ type TaskRepository struct {
 	db *gorm.DB
 }
 
-func NewTaskRepository(db *gorm.DB) *TaskRepository {
-	return &TaskRepository{db: db}
+func NewTaskRepository(db database.PostgresDB) *TaskRepository {
+	return &TaskRepository{db: db.DB}
 }
 
 func (r *TaskRepository) CreateTask(ctx context.Context, task *Task) error {

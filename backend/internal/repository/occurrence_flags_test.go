@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 func Test_UpsertOccurrenceFlag_Insert(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 		flag := types.OccurrenceFlag{
 			CaseID:       2,
 			OccurrenceID: "10000",
@@ -43,7 +44,7 @@ func Test_UpsertOccurrenceFlag_Insert(t *testing.T) {
 func Test_UpsertOccurrenceFlag_UpdatesExistingFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 		key := types.OccurrenceFlag{
 			CaseID:       2,
 			OccurrenceID: "10000",
@@ -77,7 +78,7 @@ func Test_UpsertOccurrenceFlag_UpdatesExistingFlagType(t *testing.T) {
 func Test_UpsertOccurrenceFlag_DifferentOccurrenceCreatesSeparateRow(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
@@ -93,7 +94,7 @@ func Test_UpsertOccurrenceFlag_DifferentOccurrenceCreatesSeparateRow(t *testing.
 
 func Test_UpsertOccurrenceFlag_RejectsNonExistentCaseID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOccurrenceFlagsRepository(env.Postgres)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{
 			CaseID:       99999,
@@ -110,7 +111,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentCaseID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_RejectsNonExistentSeqID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOccurrenceFlagsRepository(env.Postgres)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{
 			CaseID:       2,
@@ -127,7 +128,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentSeqID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlag_RejectsNonExistentTaskID(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOccurrenceFlagsRepository(env.Postgres)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{
 			CaseID:       2,
@@ -145,7 +146,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentTaskID(t *testing.T) {
 func Test_DeleteOccurrenceFlag_RemovesRow(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
@@ -164,7 +165,7 @@ func Test_DeleteOccurrenceFlag_RemovesRow(t *testing.T) {
 
 func Test_DeleteOccurrenceFlag_NotFoundReturnsZero(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewOccurrenceFlagsRepository(env.Postgres)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
 
 		affected, err := repo.Delete(t.Context(), 2, 1, 1, "does-not-exist")
 		assert.NoError(t, err)
@@ -175,7 +176,7 @@ func Test_DeleteOccurrenceFlag_NotFoundReturnsZero(t *testing.T) {
 func Test_DeleteOccurrenceFlag_OnlyDeletesMatchingCompositeKey(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
@@ -197,7 +198,7 @@ func Test_DeleteOccurrenceFlag_OnlyDeletesMatchingCompositeKey(t *testing.T) {
 func Test_UpsertOccurrenceFlag_RejectsInvalidFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewOccurrenceFlagsRepository(db)
+		repo := NewOccurrenceFlagsRepository(database.PostgresDB{DB: db})
 
 		_, err := repo.Upsert(t.Context(), types.OccurrenceFlag{
 			CaseID:       2,

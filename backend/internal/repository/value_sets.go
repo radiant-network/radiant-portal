@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -43,7 +44,7 @@ type ValueSetsRepository struct {
 	tableMap map[ValueSetType]string
 }
 
-func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
+func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
 	tableNameMap := map[ValueSetType]string{
 		ValueSetAffectedStatus:            types.AffectedStatusTable.Name,
 		ValueSetAnalysisCatalog:           types.AnalysisCatalogTable.Name,
@@ -73,7 +74,7 @@ func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 	}
 
 	return &ValueSetsRepository{
-		db:       db,
+		db:       db.DB,
 		tableMap: tableNameMap,
 	}
 }

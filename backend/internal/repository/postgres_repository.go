@@ -3,18 +3,16 @@ package repository
 import (
 	"log/slog"
 
-	"github.com/radiant-network/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/gorm"
 )
 
 type PostgresRepository struct {
-	db              *gorm.DB
-	Interpretations *InterpretationsRepository
-	UserSets        *UserSetsRepository
+	db *gorm.DB
 }
 
-func NewPostgresRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *PostgresRepository {
-	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient), UserSets: NewUserSetsRepository(db)}
+func NewPostgresRepository(db database.PostgresDB) *PostgresRepository {
+	return &PostgresRepository{db: db.DB}
 }
 
 func (r *PostgresRepository) CheckDatabaseConnection() string {

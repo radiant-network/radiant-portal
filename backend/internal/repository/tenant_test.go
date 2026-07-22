@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ func Test_ValidateTenantCode_RejectsUnsafeInput(t *testing.T) {
 
 func Test_TenantRepository_EnsureTenant_InsertsIdempotentlyWithoutOverwriting(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewTenantRepository(env.Postgres)
+		repo := NewTenantRepository(database.PostgresDB{DB: env.Postgres})
 		const code = "zz_ensure_tenant"
 		defer env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
 
@@ -42,7 +43,7 @@ func Test_TenantRepository_EnsureTenant_InsertsIdempotentlyWithoutOverwriting(t 
 
 func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewTenantRepository(env.Postgres)
+		repo := NewTenantRepository(database.PostgresDB{DB: env.Postgres})
 		const code = "zz_seed_roles"
 		defer func() {
 			env.Postgres.Exec("DELETE FROM role WHERE tenant_code = ?", code) // cascades role_action
@@ -67,7 +68,7 @@ func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.
 
 func Test_TenantRepository_ListTenants_IncludesSeededDefault(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		codes, err := NewTenantRepository(env.Postgres).ListTenants(t.Context())
+		codes, err := NewTenantRepository(database.PostgresDB{DB: env.Postgres}).ListTenants(t.Context())
 		require.NoError(t, err)
 		assert.Contains(t, codes, types.DefaultTenantCode) // "radiant", seeded by migration 000009
 	})
@@ -75,7 +76,7 @@ func Test_TenantRepository_ListTenants_IncludesSeededDefault(t *testing.T) {
 
 func Test_TenantRepository_FederatableColumns_ExcludesJsonbAndUuid(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		cols, err := NewTenantRepository(env.Postgres).FederatableColumns(t.Context(), []string{"interpretation_germline"})
+		cols, err := NewTenantRepository(database.PostgresDB{DB: env.Postgres}).FederatableColumns(t.Context(), []string{"interpretation_germline"})
 		require.NoError(t, err)
 
 		got := cols["interpretation_germline"]

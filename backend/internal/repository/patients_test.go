@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -13,7 +14,7 @@ import (
 
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(db)
+		repo := NewPatientsRepository(database.PostgresDB{DB: db})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-283773")
 		assert.NoError(t, err)
 		assert.NotNil(t, patient)
@@ -24,7 +25,7 @@ func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 
 func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(db)
+		repo := NewPatientsRepository(database.PostgresDB{DB: db})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UNKNOWN")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
@@ -33,7 +34,7 @@ func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 
 func Test_GetPatientBySubmitterPatientId_Null_OrgId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(db)
+		repo := NewPatientsRepository(database.PostgresDB{DB: db})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "UNKNOWN-ORG", "MRN-283773")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
@@ -45,7 +46,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		repo := NewPatientsRepository(db)
+		repo := NewPatientsRepository(database.PostgresDB{DB: db})
 
 		err := db.Exec(`
 			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
@@ -83,7 +84,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 
 func Test_UpdatePatient_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewPatientsRepository(env.Postgres)
+		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
 
 		err := repo.UpdatePatient(t.Context(), &types.Patient{
 			SubmitterPatientId: "MRN-DOES-NOT-EXIST",

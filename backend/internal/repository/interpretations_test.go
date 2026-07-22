@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ func (m *MockPubmedClient) GetCitationById(id string) (*types.PubmedCitation, er
 }
 
 func newTestInterpretationsRepo(db *gorm.DB) *InterpretationsRepository {
-	return NewInterpretationsRepository(db, client.PubmedClientService(&MockPubmedClient{}))
+	return NewInterpretationsRepository(database.PostgresDB{DB: db}, client.PubmedClientService(&MockPubmedClient{}))
 }
 
 // --- Germline ---
