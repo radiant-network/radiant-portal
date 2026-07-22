@@ -19,6 +19,7 @@ export function QueryBuilderSkeleton({ defaultSidebarOpen, aggregations }: Query
               <Sidebar
                 variant="sidebar"
                 collapsible="icon"
+                brand
                 className={'static! flex flex-col w-full bg-primary dark:bg-secondary '}
               >
                 <SidebarContent>

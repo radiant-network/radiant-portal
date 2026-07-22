@@ -45,7 +45,7 @@ function MainSidebar({
   const { open, toggleSidebar } = useSidebar();
 
   return (
-    <Sidebar side={placement} collapsible="icon">
+    <Sidebar side={placement} collapsible="icon" brand>
       <SidebarHeader>
         <div
           data-cy="logo-desktop"

@@ -204,6 +204,20 @@
   --color-avatar-neutral-foreground: var(--color-slate-300);
 }
 
+/* Sidebar brand mode: apply the `sidebar-brand` utility on a Sidebar root to
+   remap the semantic sidebar tokens onto their brand counterparts, so the
+   Sidebar component can rely on a single set of `sidebar-*` utilities. */
+@utility sidebar-brand {
+  --sidebar-background: var(--sidebar-brand-background);
+  --sidebar-foreground: var(--sidebar-brand-foreground);
+  --sidebar-primary: var(--sidebar-brand-primary);
+  --sidebar-primary-foreground: var(--sidebar-brand-primary-foreground);
+  --sidebar-accent: var(--sidebar-brand-accent);
+  --sidebar-accent-foreground: var(--sidebar-brand-accent-foreground);
+  --sidebar-border: var(--sidebar-brand-border);
+  --sidebar-ring: var(--sidebar-brand-ring);
+}
+
 @theme inline {
   /* Radiant Shadcn UI Styles. Check -> themes/[Portal]/main.css */
   --color-border: var(--border);
