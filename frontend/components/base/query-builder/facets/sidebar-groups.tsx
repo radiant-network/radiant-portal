@@ -20,6 +20,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 // Icon mapping for different aggregation groups
 const iconMap = {
@@ -34,10 +35,10 @@ const iconMap = {
 };
 
 const buttonVariants = tv({
-  base: 'text-secondary dark:text-foreground',
+  base: 'text-sidebar-foreground',
   variants: {
     selected: {
-      true: 'bg-sidebar-brand-accent text-sidebar-brand-accent-foreground',
+      true: 'bg-sidebar-accent text-sidebar-accent-foreground',
     },
   },
   defaultVariants: {
@@ -48,12 +49,14 @@ interface SidebarGroupsProps {
   onItemSelect?: (itemId: string | null) => void;
   selectedItemId?: string | null;
   aggregationGroups: AggregationConfig;
+  brand?: boolean;
 }
 
 export function SidebarGroups({
   onItemSelect,
   aggregationGroups,
   selectedItemId: externalSelectedItemId,
+  brand = true,
 }: SidebarGroupsProps) {
   const { t } = useI18n();
   const { open, toggleSidebar } = useSidebar();
@@ -75,7 +78,8 @@ export function SidebarGroups({
       id="sidebar-facets"
       variant="sidebar"
       collapsible="icon"
-      className={'static! flex flex-col w-full bg-primary dark:bg-secondary '}
+      brand={brand}
+      className={cn('static! flex flex-col w-full', brand && 'bg-primary dark:bg-secondary')}
     >
       <SidebarContent>
         <SidebarGroup>
@@ -86,7 +90,7 @@ export function SidebarGroups({
                 iconOnly
                 onClick={() => toggleSidebar()}
                 className={buttonVariants({
-                  className: 'mb-1 hover:bg-sidebar-brand-accent hover:text-sidebar-brand-accent-foreground',
+                  className: 'mb-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 })}
                 size="sm"
                 variant="ghost"
