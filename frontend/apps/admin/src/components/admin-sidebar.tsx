@@ -30,7 +30,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
   const { t } = useI18n();
   return (
     <nav className="flex flex-col gap-1" aria-label={t('admin.title')}>
-      <div className="px-2 pb-1 text-xs font-medium text-sidebar-foreground">{t('admin.nav.group')}</div>
+      <div className="px-2 pb-1 text-xs font-medium text-sidebar-foreground/70">{t('admin.nav.group')}</div>
       {ADMIN_SECTIONS.map(section => {
         const Icon = section.icon;
         const isActive = section.id === activeSection;
