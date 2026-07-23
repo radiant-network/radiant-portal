@@ -3,6 +3,7 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
+    "rootDir": "../..",
     "esModuleInterop": true,
     "types": ["react", "react-dom"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
