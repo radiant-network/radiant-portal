@@ -15,10 +15,6 @@
       "search_placeholder": "Search by name or email",
       "you": "You",
       "member": "Member",
-      "tabs": {
-        "active": "Active",
-        "inactive": "Inactive"
-      },
       "col": {
         "user": "User",
         "roles": "Roles & Access"

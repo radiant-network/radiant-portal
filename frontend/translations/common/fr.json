@@ -15,10 +15,6 @@
       "search_placeholder": "Rechercher par nom ou courriel",
       "you": "Vous",
       "member": "Membre",
-      "tabs": {
-        "active": "Actifs",
-        "inactive": "Inactifs"
-      },
       "col": {
         "user": "Utilisateur",
         "roles": "Rôles et accès"

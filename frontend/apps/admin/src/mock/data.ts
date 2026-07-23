@@ -3,7 +3,8 @@ import type { AdminUser, Organization, Role, Tenant } from './types';
 /**
  * Seed data for the Admin UI prototype. Illustrative only — not wired to the backend.
  * Codes are stored lowercase (displayed uppercase via CSS). Roles use canonical codes plus one
- * example custom role (`clinical_reviewer`) to show org-scoped chips.
+ * example custom role (`clinical_reviewer`) to show org-scoped chips. Every user is Active and
+ * holds ≥1 role (mandatory `member`); there is no inactive/pending status in v1.
  */
 
 export const MOCK_TENANT: Tenant = { code: 'cbtn', name: 'CBTN' };
@@ -33,7 +34,6 @@ export const MOCK_USERS: AdminUser[] = [
     firstName: 'Sarah',
     lastName: 'Chen',
     email: 'sarah.chen@chop.edu',
-    status: 'active',
     isCurrentUser: true,
     roles: [{ roleCode: 'tenant_admin' }, { roleCode: 'clinical_reviewer', orgCodes: ['chop', 'ucsf'] }],
   },
@@ -42,7 +42,6 @@ export const MOCK_USERS: AdminUser[] = [
     firstName: 'Michael',
     lastName: 'Rodriguez',
     email: 'michael.rodriguez@chop.edu',
-    status: 'active',
     roles: [
       { roleCode: 'data_manager', orgCodes: ['chop'] },
       { roleCode: 'clinical_reviewer', orgCodes: ['chop'] },
@@ -53,51 +52,33 @@ export const MOCK_USERS: AdminUser[] = [
     firstName: 'Priya',
     lastName: 'Patel',
     email: 'priya.patel@chop.edu',
-    status: 'active',
     roles: [{ roleCode: 'clinical_reviewer', orgCodes: ['chop', 'ucsf'] }],
   },
-  { id: 'u-004', firstName: 'James', lastName: 'Wilson', email: 'james.wilson@chop.edu', status: 'active', roles: [] },
-  { id: 'u-005', firstName: 'Emily', lastName: 'Nguyen', email: 'emily.nguyen@chop.edu', status: 'active', roles: [] },
-  { id: 'u-006', firstName: 'David', lastName: 'Okafor', email: 'david.okafor@chop.edu', status: 'active', roles: [] },
+  { id: 'u-004', firstName: 'James', lastName: 'Wilson', email: 'james.wilson@chop.edu', roles: [] },
+  { id: 'u-005', firstName: 'Emily', lastName: 'Nguyen', email: 'emily.nguyen@chop.edu', roles: [] },
+  { id: 'u-006', firstName: 'David', lastName: 'Okafor', email: 'david.okafor@chop.edu', roles: [] },
   {
     id: 'u-007',
     firstName: 'Rachel',
     lastName: 'Goldberg',
     email: 'rachel.goldberg@chop.edu',
-    status: 'active',
     roles: [{ roleCode: 'clinical_reviewer', orgCodes: ['ucsf'] }],
   },
-  {
-    id: 'u-008',
-    firstName: 'Thomas',
-    lastName: 'Muller',
-    email: 'thomas.muller@chop.edu',
-    status: 'active',
-    roles: [],
-  },
+  { id: 'u-008', firstName: 'Thomas', lastName: 'Muller', email: 'thomas.muller@chop.edu', roles: [] },
   {
     id: 'u-009',
     firstName: 'Aisha',
     lastName: 'Hassan',
     email: 'aisha.hassan@chop.edu',
-    status: 'active',
     roles: [{ roleCode: 'clinical_reviewer', orgCodes: ['chop', 'ucsf'] }],
   },
-  { id: 'u-010', firstName: 'Daniel', lastName: 'Kim', email: 'daniel.kim@chop.edu', status: 'active', roles: [] },
-  {
-    id: 'u-011',
-    firstName: 'Laura',
-    lastName: 'Bianchi',
-    email: 'laura.bianchi@chop.edu',
-    status: 'active',
-    roles: [],
-  },
+  { id: 'u-010', firstName: 'Daniel', lastName: 'Kim', email: 'daniel.kim@chop.edu', roles: [] },
+  { id: 'u-011', firstName: 'Laura', lastName: 'Bianchi', email: 'laura.bianchi@chop.edu', roles: [] },
   {
     id: 'u-012',
     firstName: 'Omar',
     lastName: 'Haddad',
     email: 'omar.haddad@chop.edu',
-    status: 'active',
     roles: [{ roleCode: 'geneticist', orgCodes: ['chop'] }],
   },
   {
@@ -105,7 +86,6 @@ export const MOCK_USERS: AdminUser[] = [
     firstName: 'Sofia',
     lastName: 'Rossi',
     email: 'sofia.rossi@chop.edu',
-    status: 'active',
     roles: [{ roleCode: 'data_manager', orgCodes: ['ucsf'] }],
   },
   {
@@ -113,38 +93,9 @@ export const MOCK_USERS: AdminUser[] = [
     firstName: 'Kevin',
     lastName: 'Zhang',
     email: 'kevin.zhang@chop.edu',
-    status: 'active',
     roles: [
       { roleCode: 'geneticist', orgCodes: ['bch'] },
       { roleCode: 'clinical_reviewer', orgCodes: ['bch'] },
     ],
   },
-  // Inactive: SSO auto-provisioned on first sign-in, not yet granted a role.
-  {
-    id: 'u-101',
-    firstName: 'Robert',
-    lastName: 'Fisher',
-    email: 'robert.fisher@chop.edu',
-    status: 'inactive',
-    roles: [],
-  },
-  { id: 'u-102', firstName: 'Nina', lastName: 'Petrov', email: 'nina.petrov@chop.edu', status: 'inactive', roles: [] },
-  {
-    id: 'u-103',
-    firstName: 'Ahmed',
-    lastName: 'Al-Sayed',
-    email: 'ahmed.alsayed@chop.edu',
-    status: 'inactive',
-    roles: [],
-  },
-  { id: 'u-104', firstName: 'Grace', lastName: 'Park', email: 'grace.park@chop.edu', status: 'inactive', roles: [] },
-  {
-    id: 'u-105',
-    firstName: 'Lucas',
-    lastName: 'Moreau',
-    email: 'lucas.moreau@chop.edu',
-    status: 'inactive',
-    roles: [],
-  },
-  { id: 'u-106', firstName: 'Hannah', lastName: 'Berg', email: 'hannah.berg@chop.edu', status: 'inactive', roles: [] },
 ];

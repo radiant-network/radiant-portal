@@ -40,15 +40,16 @@ export interface AssignedRole {
   orgCodes?: string[];
 }
 
-export type UserStatus = 'active' | 'inactive';
-
-/** A user in the tenant. Inactive = SSO auto-provisioned but not yet granted a role. */
+/**
+ * A user in the tenant. Every listed user holds ≥1 role (mandatory `member` baseline) and is
+ * Active — the only status in v1. Auth-but-no-access users (SSO auto-provisioned & never granted,
+ * or access removed) don't appear here; they hit the 403 page. Offboarding = Delete (Edit sheet).
+ */
 export interface AdminUser {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  status: UserStatus;
   /** Explicit (non-baseline) role assignments. Empty = baseline `member` only. */
   roles: AssignedRole[];
   /** The signed-in user gets a "(You)" suffix. */

@@ -13,18 +13,16 @@ import UserCell from './cells/user-cell';
 const columnHelper = createColumnHelper<AdminUser>();
 
 type UsersColumnsOptions = {
-  /** Show the "Roles & Access" column (Active tab only — auto-provisioned users have no roles). */
-  showRoles: boolean;
   onEdit: (user: AdminUser) => void;
 };
 
 /**
  * Column definitions for the Users table. Uses display columns (no server sorting in the mock).
- * The row action is a single edit-pencil (edit is the only per-row action in v1).
+ * The row action is a single edit-pencil; Delete (revoke tenant access) lives in the Edit sheet.
  */
 export function getUsersColumns(
   t: TFunction<string, undefined>,
-  { showRoles, onEdit }: UsersColumnsOptions,
+  { onEdit }: UsersColumnsOptions,
 ): TableColumnDef<AdminUser, any>[] {
   const columns = [
     columnHelper.display({
@@ -34,21 +32,13 @@ export function getUsersColumns(
       size: 300,
       minSize: 200,
     }),
-  ];
-
-  if (showRoles) {
-    columns.push(
-      columnHelper.display({
-        id: 'roles',
-        header: () => t('admin.users.col.roles'),
-        cell: ({ row }) => <RolesAccessCell roles={row.original.roles} />,
-        size: 560,
-        minSize: 240,
-      }),
-    );
-  }
-
-  columns.push(
+    columnHelper.display({
+      id: 'roles',
+      header: () => t('admin.users.col.roles'),
+      cell: ({ row }) => <RolesAccessCell roles={row.original.roles} />,
+      size: 560,
+      minSize: 240,
+    }),
     columnHelper.display({
       id: 'actions',
       header: () => null,
@@ -68,17 +58,16 @@ export function getUsersColumns(
       size: 56,
       minSize: 56,
     }),
-  );
+  ];
 
   return columns as TableColumnDef<AdminUser, any>[];
 }
 
 /** Column settings (order / visibility / sizing) matching the columns above. */
-export function getUsersColumnSettings(t: TFunction<string, undefined>, showRoles: boolean) {
-  const settings = [
+export function getUsersColumnSettings(t: TFunction<string, undefined>) {
+  return createColumnSettings([
     { id: 'user', label: t('admin.users.col.user'), visible: true, fixed: true, size: 300 },
-    ...(showRoles ? [{ id: 'roles', label: t('admin.users.col.roles'), visible: true, size: 560 }] : []),
+    { id: 'roles', label: t('admin.users.col.roles'), visible: true, size: 560 },
     { id: 'actions', label: '', visible: true, fixed: true, size: 56 },
-  ];
-  return createColumnSettings(settings);
+  ]);
 }
