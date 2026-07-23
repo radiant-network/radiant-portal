@@ -19,6 +19,7 @@
       "@/hooks/*": ["../../components/hooks/*"],
       "@assets/*": ["../../themes/radiant/assets/*"],
       "analysis/*": ["../../apps/analysis/src/*"],
+      "assistant/*": ["../../apps/assistant/src/*"],
       "case/*": ["../../apps/case/src/*"],
       "community/*": ["../../apps/community/src/*"],
       "file-archive/*": ["../../apps/file-archive/src/*"],

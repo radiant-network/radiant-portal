@@ -2063,6 +2063,7 @@
       "variants": "Variants"
     },
     "actions": {
+      "assistant": "Assistant",
       "community": "Community",
       "resources": "Resources",
       "website": "Website",
