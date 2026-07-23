@@ -12,6 +12,7 @@ import {
 } from '@/components/base/shadcn/message-scroller';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
 
+import { BlockRenderer } from './blocks/block-renderer';
 import { AssistantComposer } from './assistant-composer';
 import { useAssistant } from './assistant-provider';
 
@@ -53,12 +54,13 @@ export function AssistantPanel() {
                             {message.role === 'user' ? <User className="size-4" /> : <Cat className="size-4" />}
                           </MessageAvatar>
                           <MessageContent>
-                            <Bubble
-                              align={message.role === 'user' ? 'end' : 'start'}
-                              variant={message.role === 'user' ? 'default' : 'muted'}
-                            >
-                              <BubbleContent>{message.content}</BubbleContent>
-                            </Bubble>
+                            {message.blocks.map((block, index) => (
+                              <BlockRenderer
+                                key={index}
+                                block={block}
+                                align={message.role === 'user' ? 'end' : 'start'}
+                              />
+                            ))}
                           </MessageContent>
                         </Message>
                       </MessageScrollerItem>
