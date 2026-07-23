@@ -8,6 +8,7 @@ import (
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -25,11 +26,12 @@ type VariantExternalFrequencies = types.VariantExternalFrequencies
 type VariantInternalFrequencies = types.VariantInternalFrequencies
 
 type VariantsRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	joiner joins.Joiner
 }
 
 func NewVariantsRepository(db database.StarrocksDB) *VariantsRepository {
-	return &VariantsRepository{db: db.DB}
+	return &VariantsRepository{db: db.DB, joiner: joins.Starrocks()}
 }
 
 func (r *VariantsRepository) GetVariantHeader(ctx context.Context, locusId int) (*VariantHeader, error) {
@@ -115,7 +117,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(db)
 
 	tx := db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.TenantQualifiedName(ctx), types.InterpretationGermlineTable.Alias))
-	tx = utils.JoinGermlineInterpretationWithSNVOccurrence(tx)
+	tx = r.joiner.GermlineInterpretationWithSNVOccurrence(tx)
 	// interpretation_germline has no task_id column, so the snv↔interpretation
 	// join above is on (seq_id, locus_id) alone. Bridge through task_context to
 	// scope the snv occurrence to the interpretation's case — otherwise an
@@ -123,11 +125,11 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	// task would leak into this case's interpreted results.
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s tctx ON tctx.task_id = g_snv_o.task_id AND tctx.sequencing_experiment_id = g_snv_o.seq_id AND tctx.case_id = ig.case_id", types.TaskContextTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s s ON s.id = g_snv_o.seq_id", types.SequencingExperimentTable.TenantQualifiedName(ctx)))
-	tx = utils.JoinGermlineInterpretationWithCase(tx)
-	tx = utils.JoinSeqExpWithSample(tx)
-	tx = utils.JoinSampleAndCaseWithFamily(tx)
-	tx = utils.JoinCaseWithAnalysisCatalog(tx)
-	tx = utils.JoinCaseWithDiagnosisLab(tx)
+	tx = r.joiner.GermlineInterpretationWithCase(tx)
+	tx = r.joiner.SeqExpWithSample(tx)
+	tx = r.joiner.SampleAndCaseWithFamily(tx)
+	tx = r.joiner.CaseWithAnalysisCatalog(tx)
+	tx = r.joiner.CaseWithDiagnosisLab(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s mondo ON mondo.id = ig.condition", types.MondoTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 
@@ -197,13 +199,13 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s g_snv_o ON g_snv_o.seq_id = tctx.sequencing_experiment_id AND g_snv_o.task_id = tctx.task_id", types.GermlineSNVOccurrenceTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s c ON c.id = tctx.case_id", types.CaseTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s s ON s.id = tctx.sequencing_experiment_id", types.SequencingExperimentTable.TenantQualifiedName(ctx)))
-	tx = utils.JoinCaseWithAnalysisCatalog(tx)
-	tx = utils.JoinCaseWithDiagnosisLab(tx)
-	tx = utils.JoinSeqExpWithSample(tx)
+	tx = r.joiner.CaseWithAnalysisCatalog(tx)
+	tx = r.joiner.CaseWithDiagnosisLab(tx)
+	tx = r.joiner.SeqExpWithSample(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON f.family_member_id = spl.patient_id AND f.case_id = tctx.case_id", types.FamilyTable.TenantQualifiedName(ctx)))
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.PatientTable) {
-		tx = utils.JoinFamilyWithPatient(tx)
+		tx = r.joiner.FamilyWithPatient(tx)
 	}
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s mondo ON mondo.id = c.primary_condition", types.MondoTable.TenantQualifiedName(ctx)))

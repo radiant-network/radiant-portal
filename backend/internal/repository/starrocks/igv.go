@@ -8,17 +8,19 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"gorm.io/gorm"
 )
 
 type IGVTrack = types.IGVTrack
 
 type IGVRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	joiner joins.Joiner
 }
 
 func NewIGVRepository(db database.StarrocksDB) *IGVRepository {
-	return &IGVRepository{db: db.DB}
+	return &IGVRepository{db: db.DB, joiner: joins.Starrocks()}
 }
 
 func (r *IGVRepository) GetIGV(ctx context.Context, caseID int) ([]IGVTrack, error) {
@@ -29,11 +31,11 @@ func (r *IGVRepository) GetIGV(ctx context.Context, caseID int) ([]IGVTrack, err
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx), types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.TaskContextTable.TenantQualifiedName(ctx), types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
-	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
-	tx = utils.JoinSeqExpWithSample(tx)
-	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
-	tx = utils.JoinTaskHasDocWithDocument(tx)
-	tx = utils.JoinFamilyWithPatient(tx)
+	tx = r.joiner.TaskContextWithTaskHasDoc(tx)
+	tx = r.joiner.SeqExpWithSample(tx)
+	tx = r.joiner.SampleAndCaseHasSeqExpWithFamily(tx)
+	tx = r.joiner.TaskHasDocWithDocument(tx)
+	tx = r.joiner.FamilyWithPatient(tx)
 	tx.Where(alignmentFilter)
 
 	columns := []string{

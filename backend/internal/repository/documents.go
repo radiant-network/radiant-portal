@@ -9,6 +9,7 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"gorm.io/gorm"
 )
 
@@ -19,11 +20,12 @@ type Document = types.Document
 var INDEX_FORMATS = "('crai', 'tbi')"
 
 type DocumentsRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	joiner joins.Joiner
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
-	return &DocumentsRepository{db: db}
+	return &DocumentsRepository{db: db, joiner: joins.Starrocks()}
 }
 
 func (r *DocumentsRepository) CreateDocument(ctx context.Context, document *Document) error {
@@ -181,19 +183,19 @@ func (r *DocumentsRepository) GetDocumentsFilters(ctx context.Context, withProje
 
 func prepareDocumentsQuery(ctx context.Context, userQuery types.Query, r *DocumentsRepository) *gorm.DB {
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
-	tx = utils.JoinDocumentWithTaskHasDocument(tx)
-	tx = utils.JoinTaskHasDocWithTaskContext(tx)
-	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
-	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
-	tx = utils.JoinCaseHasSeqExpWithCase(tx)
-	tx = utils.JoinCaseWithDiagnosisLab(tx)
-	tx = utils.JoinSeqExpWithSample(tx)
+	tx = r.joiner.DocumentWithTaskHasDocument(tx)
+	tx = r.joiner.TaskHasDocWithTaskContext(tx)
+	tx = r.joiner.TaskContextWithCaseHasSeqExp(tx)
+	tx = r.joiner.CaseHasSeqExpWithSequencingExperiment(tx)
+	tx = r.joiner.CaseHasSeqExpWithCase(tx)
+	tx = r.joiner.CaseWithDiagnosisLab(tx)
+	tx = r.joiner.SeqExpWithSample(tx)
 
 	if userQuery.HasFieldFromTables(types.ProjectTable) {
-		tx = utils.JoinCaseWithProject(tx)
+		tx = r.joiner.CaseWithProject(tx)
 	}
 
-	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
+	tx = r.joiner.SampleAndCaseHasSeqExpWithFamily(tx)
 	if userQuery.Filters() != nil {
 		utils.AddWhere(userQuery, tx)
 	}
