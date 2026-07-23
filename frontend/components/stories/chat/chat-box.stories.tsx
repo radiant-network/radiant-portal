@@ -114,7 +114,11 @@ function Conversation() {
                     </Marker>
                   </MessageScrollerItem>
                 ) : (
-                  <MessageScrollerItem key={item.id} messageId={item.id}>
+                  <MessageScrollerItem
+                    key={item.id}
+                    messageId={item.id}
+                    className={item.reactions ? 'pb-4' : undefined}
+                  >
                     <Message align={item.align}>
                       <MessageAvatar className="size-8">
                         {item.align === 'end' ? <User className="size-4" /> : <Bot className="size-4" />}
