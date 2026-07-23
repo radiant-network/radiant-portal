@@ -8,6 +8,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -96,15 +97,15 @@ func (m *mockSeqExpDAO) GetSequencingExperimentDetailById(seqId int) (*types.Seq
 
 type mockValueSetsDAO struct{ mock.Mock }
 
-func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
+func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	switch vsType {
-	case repository.ValueSetExperimentalStrategy:
+	case postgres.ValueSetExperimentalStrategy:
 		return []string{"wgs", "wxs", "rna_seq"}, nil
-	case repository.ValueSetSequencingReadTechnology:
+	case postgres.ValueSetSequencingReadTechnology:
 		return []string{"short_read", "long_read"}, nil
-	case repository.ValueSetStatus:
+	case postgres.ValueSetStatus:
 		return []string{"draft", "in_progress", "completed"}, nil
-	case repository.ValueSetPlatform:
+	case postgres.ValueSetPlatform:
 		return []string{"illumina", "pacbio", "nanopore"}, nil
 	default:
 		return []string{}, nil

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,10 +32,10 @@ func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Contex
 }
 
 type mockValueSetsRepo struct {
-	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
+	GetCodesFunc func(vsType postgres.ValueSetType) ([]string, error)
 }
 
-func (m *mockValueSetsRepo) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
+func (m *mockValueSetsRepo) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	return m.GetCodesFunc(vsType)
 }
 
@@ -165,21 +165,21 @@ func TestBatchValidationCache_GetValueSetCodes(t *testing.T) {
 	codes := []string{"C1", "C2"}
 
 	// Test cache miss
-	mockRepo.GetCodesFunc = func(vsType repository.ValueSetType) ([]string, error) {
-		assert.Equal(t, repository.ValueSetStatus, vsType)
+	mockRepo.GetCodesFunc = func(vsType postgres.ValueSetType) ([]string, error) {
+		assert.Equal(t, postgres.ValueSetStatus, vsType)
 		return codes, nil
 	}
-	result, err := cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
+	result, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
-	assert.Equal(t, codes, cache.ValueSets[repository.ValueSetStatus])
+	assert.Equal(t, codes, cache.ValueSets[postgres.ValueSetStatus])
 
 	// Test cache hit
-	mockRepo.GetCodesFunc = func(vsType repository.ValueSetType) ([]string, error) {
+	mockRepo.GetCodesFunc = func(vsType postgres.ValueSetType) ([]string, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
+	result, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
 }

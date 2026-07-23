@@ -5,6 +5,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -58,7 +59,7 @@ type sampleReader interface {
 }
 
 type valueSetsReader interface {
-	GetCodes(ctx context.Context, vsType repository.ValueSetType) ([]string, error)
+	GetCodes(ctx context.Context, vsType postgres.ValueSetType) ([]string, error)
 }
 
 type BatchValidationContext struct {
@@ -86,17 +87,17 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 	postgresDB := database.PostgresDB{DB: db}
 
 	return &BatchValidationContext{
-		BatchRepo:     repository.NewBatchRepository(postgresDB),
-		OrgRepo:       repository.NewOrganizationRepository(postgresDB),
-		PatientRepo:   repository.NewPatientsRepository(postgresDB),
-		ProjectRepo:   repository.NewProjectRepository(postgresDB),
-		SampleRepo:    repository.NewSamplesRepository(postgresDB),
+		BatchRepo:     postgres.NewBatchRepository(postgresDB),
+		OrgRepo:       postgres.NewOrganizationRepository(postgresDB),
+		PatientRepo:   postgres.NewPatientsRepository(postgresDB),
+		ProjectRepo:   postgres.NewProjectRepository(postgresDB),
+		SampleRepo:    postgres.NewSamplesRepository(postgresDB),
 		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
-		ValueSetsRepo: repository.NewValueSetsRepository(postgresDB),
+		ValueSetsRepo: postgres.NewValueSetsRepository(postgresDB),
 		CasesRepo:     repository.NewCasesRepository(db),
 		DocRepo:       repository.NewDocumentsRepository(db),
-		FamilyRepo:    repository.NewFamilyRepository(postgresDB),
-		TaskRepo:      repository.NewTaskRepository(postgresDB),
+		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
+		TaskRepo:      postgres.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,
 	}, nil
 }

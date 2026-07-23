@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetSavedFilterByIDHandler(t *testing.T, repo *repository.SavedFiltersRepository, savedFilterId string, status int, expected string) {
+func assertGetSavedFilterByIDHandler(t *testing.T, repo *postgres.SavedFiltersRepository, savedFilterId string, status int, expected string) {
 	router := tenantRouter()
 	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
 
@@ -31,14 +31,14 @@ func assertGetSavedFilterByIDHandler(t *testing.T, repo *repository.SavedFilters
 
 func Test_GetSavedFilterByIDHandler_NotFound(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		assertGetSavedFilterByIDHandler(t, repo, "ac2df672-9702-4dcf-8cfd-457494384762", http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
 	})
 }
 
 func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		expected := `{
 			"created_on":"2021-09-12T13:08:00Z", 
 			"favorite":false, 
@@ -59,7 +59,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	})
 }
 
-func assertGetSavedFiltersHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
+func assertGetSavedFiltersHandler(t *testing.T, repo *postgres.SavedFiltersRepository, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
 	router := tenantRouter()
 	router.GET("/users/saved_filters", server.GetSavedFiltersHandler(repo, auth))
 
@@ -78,7 +78,7 @@ func assertGetSavedFiltersHandler(t *testing.T, repo *repository.SavedFiltersRep
 
 func Test_GetSavedFiltersHandler(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		expected := `[{
 			"created_on":"2021-09-12T13:08:00Z", 
@@ -117,7 +117,7 @@ func Test_GetSavedFiltersHandler(t *testing.T) {
 
 func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		savedFilterType := types.GERMLINE_SNV_OCCURRENCE
 		expected := `[{
@@ -140,7 +140,7 @@ func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 	})
 }
 
-func assertPostSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, body string, status int) {
+func assertPostSavedFilterHandler(t *testing.T, repo *postgres.SavedFiltersRepository, auth utils.Auth, body string, status int) {
 	router := tenantRouter()
 	router.POST("/users/saved_filters", server.PostSavedFilterHandler(repo, auth))
 
@@ -153,7 +153,7 @@ func assertPostSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRep
 
 func Test_PostSavedFilterHandler_ErrorDuplicateName(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"name": "saved_filter_snv_1",
@@ -166,7 +166,7 @@ func Test_PostSavedFilterHandler_ErrorDuplicateName(t *testing.T) {
 
 func Test_PostSavedFilterHandler_InvalidInput(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"name": "saved_filter_snv_11",
@@ -179,7 +179,7 @@ func Test_PostSavedFilterHandler_InvalidInput(t *testing.T) {
 
 func Test_PostSavedFilterHandler_Success(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"name": "saved_filter_snv_11",
@@ -190,7 +190,7 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertPutSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, body string, status int) {
+func assertPutSavedFilterHandler(t *testing.T, repo *postgres.SavedFiltersRepository, auth utils.Auth, savedFilterId string, body string, status int) {
 	router := tenantRouter()
 	router.PUT("/users/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repo, auth))
 
@@ -203,7 +203,7 @@ func assertPutSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepo
 
 func Test_PutSavedFilterHandler_InvalidInput(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"name": "saved_filter_snv_11",
@@ -215,7 +215,7 @@ func Test_PutSavedFilterHandler_InvalidInput(t *testing.T) {
 
 func Test_PutSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"favorite": true,
@@ -228,7 +228,7 @@ func Test_PutSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 
 func Test_PutSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"favorite": true,
@@ -241,7 +241,7 @@ func Test_PutSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 
 func Test_PutSavedFilterHandler_Success(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		body := `{
 			"favorite": true,
@@ -252,7 +252,7 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertDeleteSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, status int) {
+func assertDeleteSavedFilterHandler(t *testing.T, repo *postgres.SavedFiltersRepository, auth utils.Auth, savedFilterId string, status int) {
 	router := tenantRouter()
 	router.DELETE("/users/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repo, auth))
 
@@ -265,7 +265,7 @@ func assertDeleteSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersR
 
 func Test_DeleteSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		assertDeleteSavedFilterHandler(t, repo, auth, "ac2df672-9702-4dcf-8cfd-457494384762", http.StatusNotFound)
 	})
@@ -273,7 +273,7 @@ func Test_DeleteSavedFilterHandler_NotExistingSavedFilter(t *testing.T) {
 
 func Test_DeleteSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		assertDeleteSavedFilterHandler(t, repo, auth, "dddfa647-b0df-4ce7-807d-5b8775ee8fcb", http.StatusNotFound)
 	})
@@ -281,7 +281,7 @@ func Test_DeleteSavedFilterHandler_UserIdIsDifferent(t *testing.T) {
 
 func Test_DeleteSavedFilterHandler_Success(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSavedFiltersRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		assertDeleteSavedFilterHandler(t, repo, auth, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", http.StatusNoContent)
 	})

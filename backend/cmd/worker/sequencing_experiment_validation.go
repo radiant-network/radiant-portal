@@ -12,6 +12,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -84,25 +85,25 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo(ctx contex
 		r.SequencingLabCode = &sequencingLab.Code
 	}
 
-	platformCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetPlatform)
+	platformCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetPlatform)
 	if err != nil {
 		return fmt.Errorf("error fetching platform codes: %w", err)
 	}
 	r.PlatformCodes = platformCodes
 
-	experimentalStrategyCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetExperimentalStrategy)
+	experimentalStrategyCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetExperimentalStrategy)
 	if err != nil {
 		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
 	}
 	r.ExperimentalStrategyCodes = experimentalStrategyCodes
 
-	sequencingReadTechnologyCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetSequencingReadTechnology)
+	sequencingReadTechnologyCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSequencingReadTechnology)
 	if err != nil {
 		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
 	}
 	r.SequencingReadTechnologyCodes = sequencingReadTechnologyCodes
 
-	statusCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetStatus)
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error fetching status codes: %w", err)
 	}
@@ -309,7 +310,7 @@ func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 func persistBatchAndSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -473,7 +474,7 @@ func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 func persistBatchAndUpdateSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate

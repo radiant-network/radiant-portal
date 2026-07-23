@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"github.com/radiant-network/radiant-api/internal/database"

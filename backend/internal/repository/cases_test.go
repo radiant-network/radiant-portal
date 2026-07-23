@@ -67,28 +67,6 @@ func Test_CreateCases(t *testing.T) {
 	})
 }
 
-// createTestCase inserts a minimal, valid case row under the given id (reusing existing
-// seed project/analysis_catalog/proband ids) so clinical-child delete-by-case-id tests have
-// a case to satisfy the FK on case_id, and registers its cleanup.
-func createTestCase(t *testing.T, db *gorm.DB, id int) {
-	t.Helper()
-	repo := NewCasesRepository(db)
-	orgCode := "CQGC"
-	require.NoError(t, repo.CreateCase(t.Context(), &types.Case{
-		ID:                       id,
-		ProbandID:                1,
-		ProjectID:                1,
-		StatusCode:               "in_progress",
-		AnalysisCatalogID:        1,
-		CaseTypeCode:             "germline",
-		CaseCategoryCode:         "postnatal",
-		OrderingOrganizationCode: &orgCode,
-		DiagnosisLabCode:         &orgCode,
-		TenantCode:               types.DefaultTenantCode,
-	}))
-	t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = ?", id) })
-}
-
 func Test_UpdateCase_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres

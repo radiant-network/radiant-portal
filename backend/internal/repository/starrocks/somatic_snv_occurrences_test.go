@@ -1,10 +1,11 @@
-package repository
+package starrocks
 
 import (
 	"testing"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -176,9 +177,9 @@ func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 }
 
 func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: starrocks})
-		notesRepo := NewOccurrenceNotesRepository(database.PostgresDB{DB: postgres})
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: pgDB})
 
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)

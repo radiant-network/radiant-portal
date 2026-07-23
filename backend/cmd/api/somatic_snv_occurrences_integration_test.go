@@ -9,7 +9,8 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ import (
 
 func testSomaticSNVList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
 
@@ -32,7 +33,7 @@ func testSomaticSNVList(t *testing.T, data string, body string, expected string)
 }
 func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
 
@@ -46,8 +47,8 @@ func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 }
 func testSomaticSNVAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
-		facetsRepo := repository.NewFacetsRepository()
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		facetsRepo := starrocks.NewFacetsRepository()
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
 		path := "/radiant/occurrences/somatic/snv/71/74/74/aggregate"
@@ -64,7 +65,7 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 }
 func testSomaticSNVStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
 
@@ -201,10 +202,10 @@ func Test_Somatic_SNV_Statistics(t *testing.T) {
 }
 
 func assertGetExpandedSomaticOccurrence(t *testing.T, data string, caseId int, seqId int, taskId int, locusId int, expected string) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
-		repo := repository.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: starrocks})
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
 		pubmedClient := &MockExternalClient{}
-		interpretationRepo := repository.NewInterpretationsRepository(database.PostgresDB{DB: postgres}, pubmedClient)
+		interpretationRepo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedClient)
 		router := tenantRouter()
 		router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 

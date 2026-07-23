@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"fmt"

@@ -12,7 +12,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -34,8 +34,8 @@ func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.Batc
 	return id
 }
 
-func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectInfos []types.BatchMessage, expectWarnings []types.BatchMessage, expectErrors []types.BatchMessage) repository.Batch {
-	resultBatch := repository.Batch{}
+func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectInfos []types.BatchMessage, expectWarnings []types.BatchMessage, expectErrors []types.BatchMessage) postgres.Batch {
+	resultBatch := postgres.Batch{}
 	db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 	assert.Equal(t, expectedStatus, resultBatch.Status)
 	assert.Equal(t, dryRun, resultBatch.DryRun)
@@ -75,7 +75,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
@@ -127,7 +127,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
@@ -173,7 +173,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
@@ -286,7 +286,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -336,7 +336,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
@@ -384,7 +384,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -437,7 +437,7 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Skipped)
@@ -480,7 +480,7 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Skipped)
@@ -518,7 +518,7 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -554,7 +554,7 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -600,13 +600,13 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Len(t, resultBatch.Report.Errors, 0)
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 
-		var childSample repository.Sample
+		var childSample postgres.Sample
 		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD", "CHUSJ").First(&childSample).Error
 		if childSampleErr != nil {
 			t.Fatal("failed to retrieve child sample:", childSampleErr)
@@ -616,7 +616,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		assert.Equal(t, "CHUSJ", childSample.OrganizationCode)
 		assert.NotNil(t, childSample.ParentSampleID)
 
-		var parentSample repository.Sample
+		var parentSample postgres.Sample
 		parentSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-PARENT", "CHUSJ").First(&parentSample).Error
 		if parentSampleErr != nil {
 			t.Fatal("failed to retrieve parent sample:", parentSampleErr)
@@ -653,7 +653,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -665,7 +665,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Infos, 0)
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
-		var childSample repository.Sample
+		var childSample postgres.Sample
 		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD-DB-PARENT", "CQGC").First(&childSample).Error
 		if childSampleErr != nil {
 			t.Fatal("failed to retrieve child sample:", childSampleErr)
@@ -706,7 +706,7 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -750,7 +750,7 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -795,7 +795,7 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -832,7 +832,7 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, 1, resultBatch.Summary.Errors)
@@ -930,7 +930,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
@@ -994,7 +994,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		}
 		assert.Equal(t, int64(1), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1083,7 +1083,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(1), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1173,7 +1173,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(1), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1235,7 +1235,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1293,7 +1293,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1365,7 +1365,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
 		assert.Equal(t, false, resultBatch.DryRun)
@@ -1457,14 +1457,14 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 
 func Test_ProcessBatch_Using_Cache(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewValueSetsRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewValueSetsRepository(database.PostgresDB{DB: db})
 		bv := batchval.BatchValidationContext{
 			ValueSetsRepo: repo,
 		}
 		cache := batchval.NewBatchValidationCache(&bv)
 		expected := []string{"completed", "draft", "incomplete", "in_progress", "revoke", "submitted", "unknown"}
 
-		vc, err := cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
+		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 
@@ -1475,12 +1475,12 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 			t.Fatal("failed to insert status code:", err)
 		}
 
-		codes, err := repo.GetCodes(t.Context(), repository.ValueSetStatus)
+		codes, err := repo.GetCodes(t.Context(), postgres.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Contains(t, codes, "foo") // Make sure the new code is in the DB
 
 		// We should not get the new value, since we use the cache
-		vc, err = cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
+		vc, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 
@@ -1514,7 +1514,7 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(t.Context(), db, context)
 
-		resultBatch := repository.Batch{}
+		resultBatch := postgres.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)

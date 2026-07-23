@@ -17,7 +17,8 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/service"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -32,7 +33,7 @@ func main() {
 		slog.Error("missing required flags: -code and -name")
 		os.Exit(1)
 	}
-	if err := repository.ValidateTenantCode(*code); err != nil {
+	if err := types.ValidateTenantCode(*code); err != nil {
 		fatal("invalid tenant code", err)
 	}
 
@@ -62,7 +63,7 @@ func main() {
 		slog.String("db", types.TenantDatabase(*code)),
 		slog.String("role", service.RangerTenantRole(*code)),
 		slog.String("policy", service.TenantAccessPolicy(*code)),
-		slog.Int("views", len(repository.ViewTables)))
+		slog.Int("views", len(types.ViewTables)))
 }
 
 func fatal(msg string, err error) {
@@ -81,12 +82,12 @@ func printCreatePlan(ctx context.Context, w io.Writer, code, name string, cols s
 
 	fprintf(w, "Phase A — Postgres (source of truth):\n")
 	fprintf(w, "  INSERT INTO public.tenant (code, name) VALUES (%q, %q) ON CONFLICT DO NOTHING\n", code, name)
-	for _, r := range repository.DefaultRoles {
+	for _, r := range postgres.DefaultRoles {
 		fprintf(w, "  seed role %s/%s with actions %v\n", code, r.Code, r.Actions)
 	}
 
 	fprintf(w, "\nPhase B — StarRocks (control-plane DDL, privileged connection):\n")
-	for _, stmt := range repository.BuildAuthStatements() {
+	for _, stmt := range starrocks.BuildAuthStatements() {
 		fprintf(w, "  %s;\n", stmt)
 	}
 	if err := printViews(ctx, w, code, cols); err != nil {
@@ -105,7 +106,7 @@ func printViews(ctx context.Context, w io.Writer, code string, cols service.View
 	if err != nil {
 		return err
 	}
-	stmts, err := repository.BuildViewStatements(code, columns)
+	stmts, err := starrocks.BuildViewStatements(code, columns)
 	if err != nil {
 		return err
 	}
@@ -117,12 +118,12 @@ func printViews(ctx context.Context, w io.Writer, code string, cols service.View
 
 // connectPostgres opens just the Postgres handle, enough for the dry-run plan without
 // connecting to StarRocks or Ranger.
-func connectPostgres() (*repository.TenantRepository, error) {
+func connectPostgres() (*postgres.TenantRepository, error) {
 	pg, err := database.NewPostgresDB()
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
 	}
-	return repository.NewTenantRepository(database.PostgresDB{DB: pg}), nil
+	return postgres.NewTenantRepository(database.PostgresDB{DB: pg}), nil
 }
 
 func buildDeps() (service.TenantDeps, error) {
@@ -134,11 +135,11 @@ func buildDeps() (service.TenantDeps, error) {
 	if err != nil {
 		return service.TenantDeps{}, fmt.Errorf("connect starrocks: %w", err)
 	}
-	tenantRepo := repository.NewTenantRepository(database.PostgresDB{DB: pg})
+	tenantRepo := postgres.NewTenantRepository(database.PostgresDB{DB: pg})
 	return service.TenantDeps{
 		Store:     tenantRepo,
 		Columns:   tenantRepo,
-		Starrocks: repository.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr}),
+		Starrocks: starrocks.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr}),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
 	}, nil
 }

@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"bytes"
@@ -17,31 +17,6 @@ import (
 
 //go:embed views/*.sql views/*.sql.tmpl
 var viewFS embed.FS
-
-// ViewTables are the tables the API reads through the radiant_jdbc federation; each
-// tenant gets a <tenant>_tenant view per table so the API can read <tenant>_tenant.*
-// and never touch radiant_jdbc directly. A view is filtered by tenant_code when the
-// table HAS that column; reference/value-set tables and junctions have no tenant_code
-// and are exposed unfiltered. patient is templated (adds the can_read_pii mask flag).
-// (Filtering is decided per table from its columns, not from the grouping below.)
-var ViewTables = []string{
-	// Tenant-scoped clinical data.
-	"patient",
-	"organization", "cases", "sample", "sequencing_experiment",
-	"analysis_catalog", "document", "exam", "family", "family_history",
-	"interpretation_germline", "interpretation_germline_history",
-	"interpretation_somatic", "interpretation_somatic_history",
-	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
-	"panel", "project", "task",
-	// Junctions.
-	"case_has_sequencing_experiment", "task_context", "task_has_document",
-	// Reference / value-set tables.
-	"affected_status", "ancestry", "case_category", "case_type", "consanguinity", "data_category",
-	"data_type", "experimental_strategy", "family_relationship", "file_format",
-	"histology_type", "life_status", "obs_interpretation", "observation", "onset",
-	"organization_category", "panel_type", "platform", "priority", "resolution_status",
-	"sample_type", "sequencing_read_technology", "sex", "status", "task_type",
-}
 
 type StarrocksTenantRepository struct {
 	db *gorm.DB
@@ -65,7 +40,7 @@ func (r *StarrocksTenantRepository) EnsureAuthDatabase(ctx context.Context) erro
 }
 
 func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
-	if err := ValidateTenantCode(tenantCode); err != nil {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
 		return err
 	}
 	stmts, err := BuildViewStatements(tenantCode, columns)
@@ -94,12 +69,12 @@ func BuildAuthStatements() []string {
 // refresh without a DROP→CREATE gap). A table with views/<table>.sql.tmpl uses that
 // template (e.g. patient's can_read_pii flag); the rest get a generated SELECT.
 func BuildViewStatements(tenantCode string, columns map[string][]string) ([]string, error) {
-	if err := ValidateTenantCode(tenantCode); err != nil {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
 		return nil, err
 	}
 	db := types.TenantDatabase(tenantCode)
 	stmts := []string{fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", db)}
-	for _, t := range ViewTables {
+	for _, t := range types.ViewTables {
 		cols := columns[t]
 		if len(cols) == 0 {
 			continue

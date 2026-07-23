@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -43,9 +44,9 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: starrocks})
-		notesRepo := NewOccurrenceNotesRepository(database.PostgresDB{DB: postgres})
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: pgDB})
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)

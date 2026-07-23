@@ -10,6 +10,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -200,7 +201,7 @@ func processUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 
 func persistBatchAndUpdateCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*UpdateCaseValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		batchRepo := repository.NewBatchRepository(database.PostgresDB{DB: tx})
+		batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, err := batchval.UpdateBatch(ctx, batch, records, batchRepo)
 		if err != nil {
 			return err

@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ import (
 
 func Test_ValidateTenantCode_AcceptsLowerSnakeCase(t *testing.T) {
 	for _, code := range []string{"radiant", "demo", "tenant_a", "cbtn2", "a1"} {
-		if err := ValidateTenantCode(code); err != nil {
+		if err := types.ValidateTenantCode(code); err != nil {
 			t.Errorf("ValidateTenantCode(%q) = %v; want nil", code, err)
 		}
 	}
@@ -20,7 +20,7 @@ func Test_ValidateTenantCode_AcceptsLowerSnakeCase(t *testing.T) {
 
 func Test_ValidateTenantCode_RejectsUnsafeInput(t *testing.T) {
 	for _, code := range []string{"", "1abc", "Radiant", "te-nant", "te nant", "tenant_", "a.b", "x'; DROP DATABASE y; --"} {
-		if err := ValidateTenantCode(code); err == nil {
+		if err := types.ValidateTenantCode(code); err == nil {
 			t.Errorf("ValidateTenantCode(%q) = nil; want error", code)
 		}
 	}

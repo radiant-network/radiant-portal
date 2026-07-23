@@ -14,6 +14,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -51,15 +52,15 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 }
 
 func Test_GetIGVByCaseIdHandler(t *testing.T) {
-	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, _ *gorm.DB, starrocks *gorm.DB) {
+	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, _ *gorm.DB, srDB *gorm.DB) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
 		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		igvRepo := repository.NewIGVRepository(database.StarrocksDB{DB: starrocks})
-		casesRepo := repository.NewCasesRepository(starrocks)
+		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: srDB})
+		casesRepo := repository.NewCasesRepository(srDB)
 		router := tenantRouter()
 		router.GET("/:tenant/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
 

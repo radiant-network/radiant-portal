@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +15,7 @@ import (
 
 func Test_Process_Unexpected_Errors(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewBatchRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
 
 		var id string
 		initErr := db.Raw(`

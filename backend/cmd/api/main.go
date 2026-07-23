@@ -25,6 +25,8 @@ import (
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
@@ -52,32 +54,32 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	starrocksDB := database.StarrocksDB{DB: dbStarrocks}
 	postgresDB := database.PostgresDB{DB: dbPostgres}
 
-	repoStarrocks := repository.NewStarrocksRepository(starrocksDB)
+	repoStarrocks := starrocks.NewStarrocksRepository(starrocksDB)
 	repoSeqExp := repository.NewSequencingExperimentRepository(dbStarrocks)
-	repoVariants := repository.NewVariantsRepository(starrocksDB)
-	repoExomiser := repository.NewExomiserRepository(starrocksDB)
-	repoGenes := repository.NewGenesRepository(starrocksDB)
-	repoGermlineCNVOccurrences := repository.NewGermlineCNVOccurrencesRepository(starrocksDB)
-	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(starrocksDB)
-	repoSomaticSNVOccurrences := repository.NewSomaticSNVOccurrencesRepository(starrocksDB)
-	repoTerms := repository.NewTermsRepository(starrocksDB)
+	repoVariants := starrocks.NewVariantsRepository(starrocksDB)
+	repoExomiser := starrocks.NewExomiserRepository(starrocksDB)
+	repoGenes := starrocks.NewGenesRepository(starrocksDB)
+	repoGermlineCNVOccurrences := starrocks.NewGermlineCNVOccurrencesRepository(starrocksDB)
+	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
+	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
+	repoTerms := starrocks.NewTermsRepository(starrocksDB)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
-	repoGenePanels := repository.NewGenePanelsRepository(starrocksDB)
+	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
 	pubmedClient := client.NewPubmedClient()
-	repoPostgres := repository.NewPostgresRepository(postgresDB)
-	repoInterpretations := repository.NewInterpretationsRepository(postgresDB, pubmedClient)
-	repoUserSets := repository.NewUserSetsRepository(postgresDB)
-	repoClinvarRCV := repository.NewClinvarRCVRepository(starrocksDB)
-	repoIGV := repository.NewIGVRepository(starrocksDB)
+	repoPostgres := postgres.NewPostgresRepository(postgresDB)
+	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
+	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
+	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
+	repoIGV := starrocks.NewIGVRepository(starrocksDB)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
-	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(postgresDB)
-	repoOccurrenceFlags := repository.NewOccurrenceFlagsRepository(postgresDB)
-	repoSavedFilters := repository.NewSavedFiltersRepository(postgresDB)
-	repoUserPreferences := repository.NewUserPreferencesRepository(postgresDB)
-	repoFacets := repository.NewFacetsRepository()
-	repoBatches := repository.NewBatchRepository(postgresDB)
-	repoTasks := repository.NewTaskRepository(postgresDB)
-	repoAuth := repository.NewAuthRepository(postgresDB)
+	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
+	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
+	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
+	repoUserPreferences := postgres.NewUserPreferencesRepository(postgresDB)
+	repoFacets := starrocks.NewFacetsRepository()
+	repoBatches := postgres.NewBatchRepository(postgresDB)
+	repoTasks := postgres.NewTaskRepository(postgresDB)
+	repoAuth := postgres.NewAuthRepository(postgresDB)
 
 	r := newEngine()
 

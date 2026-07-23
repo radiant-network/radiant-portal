@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"testing"
@@ -12,8 +12,8 @@ import (
 )
 
 func Test_IGVInternal_GetIGV(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB) {
-		repo := NewIGVRepository(database.StarrocksDB{DB: starrocks})
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB) {
+		repo := NewIGVRepository(database.StarrocksDB{DB: srDB})
 		igvInternal, err := repo.GetIGV(t.Context(), 70)
 		assert.NoError(t, err)
 		assert.Len(t, igvInternal, 6)

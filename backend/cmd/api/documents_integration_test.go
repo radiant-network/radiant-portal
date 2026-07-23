@@ -252,14 +252,14 @@ func Test_GetDocumentsFilters(t *testing.T) {
 }
 
 func Test_GetDocumentsDownloadUrl(t *testing.T) {
-	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
+	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, pgDB *gorm.DB, srDB *gorm.DB) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
 		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		repo := repository.NewDocumentsRepository(starrocks)
+		repo := repository.NewDocumentsRepository(srDB)
 		router := tenantRouter()
 		router.GET("/:tenant/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
 

@@ -83,7 +83,7 @@ func initPostgresDb() (*gorm.DB, error) {
 		return nil, err
 	}
 	if count, _ := res.RowsAffected(); count == 0 {
-		database.MigrateWithParams("file://../../scripts/init-sql/migrations", host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
+		database.MigrateWithParams("file://"+filepath.Join(ModuleRoot(), "scripts", "init-sql", "migrations"), host, port.Port(), "radiant", "radiant", "radiant", "disable", "")
 		err := populateData(db)
 		if err != nil {
 			log.Fatal("failed to insert basic data in Postgres", err)

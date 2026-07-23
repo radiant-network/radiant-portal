@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -19,7 +19,7 @@ import (
 
 const mockUserUUID = "11111111-1111-1111-1111-111111111111"
 
-func assertPostOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
+func assertPostOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := tenantRouter()
 	router.POST("/:tenant/notes", server.PostOccurrenceNoteHandler(repo, auth))
@@ -39,7 +39,7 @@ func assertPostOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepo
 	return nil
 }
 
-func assertPutOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
+func assertPutOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
@@ -59,7 +59,7 @@ func assertPutOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepos
 	return nil
 }
 
-func assertGetOccurrenceNotes(t *testing.T, repo *repository.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
+func assertGetOccurrenceNotes(t *testing.T, repo *postgres.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
 	t.Helper()
 	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repo))
@@ -76,7 +76,7 @@ func assertGetOccurrenceNotes(t *testing.T, repo *repository.OccurrenceNotesRepo
 	return notes
 }
 
-func assertGetOccurrenceNoteCount(t *testing.T, repo *repository.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
+func assertGetOccurrenceNoteCount(t *testing.T, repo *postgres.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
 	t.Helper()
 	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
@@ -93,7 +93,7 @@ func assertGetOccurrenceNoteCount(t *testing.T, repo *repository.OccurrenceNotes
 	return count.Count
 }
 
-func assertDeleteOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, expectedStatus int) {
+func assertDeleteOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, expectedStatus int) {
 	t.Helper()
 	router := tenantRouter()
 	router.DELETE("/:tenant/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
@@ -110,7 +110,7 @@ func assertDeleteOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRe
 
 func Test_GetOccurrenceNoteCount(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90001", "content": "First note"}`, http.StatusCreated)
@@ -123,7 +123,7 @@ func Test_GetOccurrenceNoteCount(t *testing.T) {
 
 func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 
 		count := assertGetOccurrenceNoteCount(t, repo, 1, 1, 1, "99999", http.StatusOK)
 		assert.Equal(t, int64(0), count)
@@ -132,7 +132,7 @@ func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
 
 func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90002", "content": "Note to delete"}`, http.StatusCreated)
@@ -148,7 +148,7 @@ func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
 
 func Test_PostOccurrenceNote(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90003", "content": "Integration test note"}`, http.StatusCreated)
@@ -170,7 +170,7 @@ func Test_PostOccurrenceNote(t *testing.T) {
 
 func Test_PostOccurrenceNote_MissingContent(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90004"}`, http.StatusBadRequest)
@@ -179,7 +179,7 @@ func Test_PostOccurrenceNote_MissingContent(t *testing.T) {
 
 func Test_GetOccurrenceNotes_EmptyResult(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 
 		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "99998", http.StatusOK)
 		assert.Empty(t, notes)
@@ -188,7 +188,7 @@ func Test_GetOccurrenceNotes_EmptyResult(t *testing.T) {
 
 func Test_GetOccurrenceNotes(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90005", "content": "First note"}`, http.StatusCreated)
@@ -206,7 +206,7 @@ func Test_GetOccurrenceNotes(t *testing.T) {
 
 func Test_PutOccurrenceNote(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90006", "content": "Original content"}`, http.StatusCreated)
@@ -226,7 +226,7 @@ func Test_PutOccurrenceNote(t *testing.T) {
 
 func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		assertPutOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", `{"content": "Updated content"}`, http.StatusNotFound)
@@ -235,7 +235,7 @@ func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
 
 func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
 		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
 
@@ -250,7 +250,7 @@ func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
 
 func Test_DeleteOccurrenceNote(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90008", "content": "Note to delete"}`, http.StatusCreated)
@@ -267,7 +267,7 @@ func Test_DeleteOccurrenceNote(t *testing.T) {
 
 func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
 		assertDeleteOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", http.StatusNotFound)
@@ -276,7 +276,7 @@ func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
 
 func Test_DeleteOccurrenceNote_Forbidden(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: db})
 		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
 		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
 

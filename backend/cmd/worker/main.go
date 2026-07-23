@@ -16,7 +16,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/observability"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -192,7 +192,7 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 				return
 			case <-ticker.C:
 				slog.Info("clean-up worker started")
-				batchRepo := repository.NewBatchRepository(database.PostgresDB{DB: db})
+				batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
 				rowUpdated, err := batchRepo.UpdateStuckBatch(ctx)
 				if err != nil {
 					slog.Error("error executing batch clean up", slog.Any("error", err))

@@ -1,23 +1,14 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
-
-var tenantCodePattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,48}[a-z0-9]$`)
-
-func ValidateTenantCode(code string) error {
-	if !tenantCodePattern.MatchString(code) {
-		return fmt.Errorf("invalid tenant code %q: must match %s", code, tenantCodePattern.String())
-	}
-	return nil
-}
 
 type roleSeed struct {
 	Code        string
@@ -62,7 +53,7 @@ var unsupportedFederationTypes = []string{"json", "jsonb", "uuid"}
 // FederatableColumns returns, per table, the columns whose types the radiant_jdbc
 // catalog can read (ordinal order).
 func (r *TenantRepository) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
-	return r.FederatableColumns(ctx, ViewTables)
+	return r.FederatableColumns(ctx, types.ViewTables)
 }
 
 func (r *TenantRepository) FederatableColumns(ctx context.Context, tables []string) (map[string][]string, error) {
@@ -87,7 +78,7 @@ func (r *TenantRepository) FederatableColumns(ctx context.Context, tables []stri
 }
 
 func (r *TenantRepository) EnsureTenant(ctx context.Context, code, name string) error {
-	if err := ValidateTenantCode(code); err != nil {
+	if err := types.ValidateTenantCode(code); err != nil {
 		return err
 	}
 	err := r.db.WithContext(ctx).Exec(`
@@ -102,7 +93,7 @@ func (r *TenantRepository) EnsureTenant(ctx context.Context, code, name string) 
 }
 
 func (r *TenantRepository) SeedDefaultRoles(ctx context.Context, tenantCode string) error {
-	if err := ValidateTenantCode(tenantCode); err != nil {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
 		return err
 	}
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

@@ -23,8 +23,10 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/service"
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 func main() {
@@ -39,8 +41,8 @@ func main() {
 	if err != nil {
 		fatal("connect starrocks", err)
 	}
-	tenants := repository.NewTenantRepository(database.PostgresDB{DB: pg})
-	views := repository.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr})
+	tenants := postgres.NewTenantRepository(database.PostgresDB{DB: pg})
+	views := starrocks.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr})
 	ranger := client.NewRangerAdminClient(client.RangerConfigFromEnv())
 
 	ctx := context.Background()
@@ -62,8 +64,8 @@ func main() {
 	slog.Info("refreshed masking policies", slog.Any("codes", codes))
 }
 
-func refreshOne(ctx context.Context, tenants *repository.TenantRepository, views *repository.StarrocksTenantRepository, code string) {
-	if err := repository.ValidateTenantCode(code); err != nil {
+func refreshOne(ctx context.Context, tenants *postgres.TenantRepository, views *starrocks.StarrocksTenantRepository, code string) {
+	if err := types.ValidateTenantCode(code); err != nil {
 		fatal("invalid tenant code", err)
 	}
 	if err := views.EnsureAuthDatabase(ctx); err != nil {
@@ -76,7 +78,7 @@ func refreshOne(ctx context.Context, tenants *repository.TenantRepository, views
 	if err := views.EnsureClinicalViews(ctx, code, columns); err != nil {
 		fatal("refresh views", err)
 	}
-	slog.Info("refreshed tenant views", slog.String("tenant", code), slog.Int("views", len(repository.ViewTables)))
+	slog.Info("refreshed tenant views", slog.String("tenant", code), slog.Int("views", len(types.ViewTables)))
 }
 
 func fatal(msg string, err error) {

@@ -11,6 +11,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -29,31 +30,31 @@ func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(_ context.Context, seqExpId int) ([]*repository.TaskContext, error) {
+func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(_ context.Context, seqExpId int) ([]*postgres.TaskContext, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) CreateTask(_ context.Context, task *repository.Task) error {
+func (m *CaseValidationMockRepo) CreateTask(_ context.Context, task *postgres.Task) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateTaskContext(_ context.Context, tc *repository.TaskContext) error {
+func (m *CaseValidationMockRepo) CreateTaskContext(_ context.Context, tc *postgres.TaskContext) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateTaskHasDocument(_ context.Context, thd *repository.TaskHasDocument) error {
+func (m *CaseValidationMockRepo) CreateTaskHasDocument(_ context.Context, thd *postgres.TaskHasDocument) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskById(taskId int) (*repository.Task, error) {
+func (m *CaseValidationMockRepo) GetTaskById(taskId int) (*postgres.Task, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskContextByTaskId(taskId int) ([]*repository.TaskContext, error) {
+func (m *CaseValidationMockRepo) GetTaskContextByTaskId(taskId int) ([]*postgres.TaskContext, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*repository.TaskHasDocument, error) {
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*postgres.TaskHasDocument, error) {
 	return nil, nil
 }
 
@@ -77,7 +78,7 @@ func (m *CaseValidationMockRepo) CreateDocument(_ context.Context, document *rep
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreatePatient(_ context.Context, newPatient *repository.Patient) error {
+func (m *CaseValidationMockRepo) CreatePatient(_ context.Context, newPatient *postgres.Patient) error {
 	return nil
 }
 
@@ -143,9 +144,9 @@ func (m *CaseValidationMockRepo) GetOrganizationByCode(_ context.Context, organi
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*repository.Patient, error) {
+func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*postgres.Patient, error) {
 	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
-		return &repository.Patient{
+		return &postgres.Patient{
 			ID:                 100,
 			SubmitterPatientId: submitterPatientId,
 			OrganizationCode:   organizationCode,
@@ -232,9 +233,9 @@ func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organizatio
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType repository.ValueSetType) ([]string, error) {
+func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetType) ([]string, error) {
 	switch setType {
-	case repository.ValueSetTaskType:
+	case postgres.ValueSetTaskType:
 		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "exomiser", "rnaseq_analysis"}, nil
 	}
 	return nil, nil
@@ -245,49 +246,49 @@ func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType repository.
 // -----------------------------------------------------------------------------
 
 type CodesMockRepo struct {
-	GetCodesFunc func(setType repository.ValueSetType) ([]string, error)
+	GetCodesFunc func(setType postgres.ValueSetType) ([]string, error)
 }
 
-func (m *CodesMockRepo) GetCodes(_ context.Context, setType repository.ValueSetType) ([]string, error) {
+func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetType) ([]string, error) {
 	if m.GetCodesFunc != nil {
 		return m.GetCodesFunc(setType)
 	}
 
 	switch setType {
-	case repository.ValueSetStatus:
+	case postgres.ValueSetStatus:
 		return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 
-	case repository.ValueSetOnset:
+	case postgres.ValueSetOnset:
 		return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
 
-	case repository.ValueSetResolutionStatus:
+	case postgres.ValueSetResolutionStatus:
 		return []string{"solved", "unsolved", "inconclusive"}, nil
 
-	case repository.ValueSetObservation:
+	case postgres.ValueSetObservation:
 		return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
 
-	case repository.ValueSetPriority:
+	case postgres.ValueSetPriority:
 		return []string{"routine", "asap", "urgent", "stat"}, nil
 
-	case repository.ValueSetCaseCategory:
+	case postgres.ValueSetCaseCategory:
 		return []string{"prenatal", "postnatal"}, nil
 
-	case repository.ValueSetAnalysisCatalog:
+	case postgres.ValueSetAnalysisCatalog:
 		return []string{"WGA", "WES", "Panel"}, nil
 
-	case repository.ValueSetAffectedStatus:
+	case postgres.ValueSetAffectedStatus:
 		return []string{"affected", "unaffected", "unknown"}, nil
 
-	case repository.ValueSetFamilyRelationship:
+	case postgres.ValueSetFamilyRelationship:
 		return []string{"proband", "mother", "father", "sibling"}, nil
 
-	case repository.ValueSetDataCategory:
+	case postgres.ValueSetDataCategory:
 		return []string{"clinical", "genomic"}, nil
 
-	case repository.ValueSetDataType:
+	case postgres.ValueSetDataType:
 		return []string{"alignment", "snv", "ssnv", "gcnv", "igv"}, nil
 
-	case repository.ValueSetFileFormat:
+	case postgres.ValueSetFileFormat:
 		return []string{"cram", "crai", "vcf", "tbi", "csv", "tsv", "gvcf"}, nil
 	default:
 		return nil, nil
@@ -304,7 +305,7 @@ type SamplesMockRepo struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
 }
 
-func (m *SamplesMockRepo) GetSampleById(_ context.Context, id int) (*repository.Sample, error) {
+func (m *SamplesMockRepo) GetSampleById(_ context.Context, id int) (*postgres.Sample, error) {
 	return nil, nil
 }
 
@@ -622,7 +623,7 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 
 func Test_fetchStatusCodes_Error(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
@@ -654,7 +655,7 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 
 func Test_fetchObservationCodes_Error(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
@@ -687,7 +688,7 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 
 func Test_fetchOnsetCodes_Error(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
@@ -727,7 +728,7 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 
 func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
@@ -749,7 +750,7 @@ func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 
 func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
@@ -771,7 +772,7 @@ func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 
 func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	mockRepo := &CodesMockRepo{
-		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(setType postgres.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}

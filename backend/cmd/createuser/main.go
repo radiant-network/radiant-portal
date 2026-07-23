@@ -23,7 +23,8 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/service"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -128,7 +129,7 @@ func buildDeps() (service.AdminDeps, error) {
 	return service.AdminDeps{
 		Keycloak:  client.NewKeycloakAdminClient(client.KeycloakConfigFromEnv()),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
-		Starrocks: repository.NewStarrocksUserRepository(database.StarrocksDB{DB: sr}, repository.StarrocksJWTConfigFromEnv()),
-		Auth:      repository.NewAuthRepository(database.PostgresDB{DB: pg}),
+		Starrocks: starrocks.NewStarrocksUserRepository(database.StarrocksDB{DB: sr}, starrocks.StarrocksJWTConfigFromEnv()),
+		Auth:      postgres.NewAuthRepository(database.PostgresDB{DB: pg}),
 	}, nil
 }

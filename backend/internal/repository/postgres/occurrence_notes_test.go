@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"testing"
@@ -125,11 +125,12 @@ func Test_GetByID_CrossTenantIsInvisible(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
 		created, err := repo.Create(t.Context(), types.OccurrenceNote{
-			CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000",
+			CaseID: 71, SeqID: 1, TaskID: 1, OccurrenceID: "cross-tenant-visibility",
 			UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe",
 			TenantCode: types.DefaultTenantCode, Content: "radiant note",
 		})
 		assert.NoError(t, err)
+		t.Cleanup(func() { env.Postgres.Exec("DELETE FROM occurrence_note WHERE id = ?", created.ID) })
 
 		other := types.ContextWithTenant(t.Context(), "tenant_b")
 		got, err := repo.GetByID(other, created.ID)

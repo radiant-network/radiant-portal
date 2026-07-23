@@ -1,17 +1,18 @@
-package repository
+package starrocks
 
 import (
 	"slices"
 	"strings"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func testColumns() map[string][]string {
 	cols := map[string][]string{}
-	for _, t := range ViewTables {
+	for _, t := range types.ViewTables {
 		cols[t] = []string{"id", "tenant_code"}
 	}
 	cols["patient"] = []string{"id", "organization_code"} // can_read_pii references organization_code
@@ -21,9 +22,9 @@ func testColumns() map[string][]string {
 // --- ViewTables --------------------------------------------------------------
 
 func Test_ViewTables_IncludesPatientAndExcludesNonFederatedTables(t *testing.T) {
-	assert.True(t, slices.Contains(ViewTables, "patient"), "patient must get a view")
-	assert.False(t, slices.Contains(ViewTables, "batch"), "batch is tenant-scoped but not federated")
-	assert.False(t, slices.Contains(ViewTables, "user_set"), "user_set is tenant-scoped but not federated")
+	assert.True(t, slices.Contains(types.ViewTables, "patient"), "patient must get a view")
+	assert.False(t, slices.Contains(types.ViewTables, "batch"), "batch is tenant-scoped but not federated")
+	assert.False(t, slices.Contains(types.ViewTables, "user_set"), "user_set is tenant-scoped but not federated")
 }
 
 // --- template registry (loadViewTemplates) -----------------------------------
@@ -129,14 +130,14 @@ func Test_BuildViewStatements_IgnoresColumnsForTablesNotInViewTables(t *testing.
 	stmts, err := BuildViewStatements("demo", map[string][]string{"batch": {"id", "status"}})
 	require.NoError(t, err)
 	assert.NotContains(t, strings.Join(stmts, "\n"), "`batch`",
-		"batch is not in ViewTables; no view even if columns are provided")
+		"batch is not in types.ViewTables; no view even if columns are provided")
 }
 
 func Test_BuildViewStatements_CoversEveryViewTable(t *testing.T) {
 	stmts, err := BuildViewStatements("demo", testColumns())
 	require.NoError(t, err)
 	joined := strings.Join(stmts, "\n")
-	for _, table := range ViewTables {
+	for _, table := range types.ViewTables {
 		assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`"+table+"`", "missing view for %q", table)
 	}
 }

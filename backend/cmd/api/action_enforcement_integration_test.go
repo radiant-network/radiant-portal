@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -35,7 +35,7 @@ const (
 // enforcement on) against the real AuthRepository, and asserts the status for the given user.
 func assertActionEnforced(t *testing.T, userID, action string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.New()
@@ -106,7 +106,7 @@ func Test_ActionEnforcement_IngestData_WithoutActionDenied(t *testing.T) {
 // Batch routes are gated by RequireAction (can_ingest_data).
 func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := repository.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.New()
