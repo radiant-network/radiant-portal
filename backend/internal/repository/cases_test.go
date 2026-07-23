@@ -198,7 +198,7 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(27), *count)
 		assert.Equal(t, "somatic", (*cases)[0].CaseTypeCode)
 		assert.Equal(t, "somatic", (*cases)[0].CaseType)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
@@ -361,7 +361,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(27), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -388,7 +388,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(21), *count)
+		assert.Equal(t, int64(25), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -415,7 +415,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(17), *count)
+		assert.Equal(t, int64(21), *count)
 	})
 }
 
@@ -431,7 +431,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(27), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -469,7 +469,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(0), *count)
+		assert.Equal(t, int64(4), *count)
 	})
 }
 
@@ -485,7 +485,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(26), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{

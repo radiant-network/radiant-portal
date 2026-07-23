@@ -111,25 +111,25 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		db.Table("family").Where("case_id = ?", ca.ID).Find(&fa)
 		assert.Len(t, fa, 1)
 		assert.Equal(t, 1000, fa[0].ID)
-		assert.Equal(t, 1, fa[0].FamilyMemberID)
+		assert.Equal(t, utils.IntPtr(1), fa[0].FamilyMemberID)
 		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
 
 		var obscat []*types.ObsCategorical
 		db.Table("obs_categorical").Where("case_id = ?", ca.ID).Find(&obscat)
 		assert.Len(t, obscat, 1)
 		assert.Equal(t, 1000, obscat[0].ID)
-		assert.Equal(t, 1, obscat[0].PatientID)
+		assert.Equal(t, utils.IntPtr(1), obscat[0].PatientID)
 		assert.Equal(t, "TEST:12345", obscat[0].CodeValue)
 
 		var obsstr []*types.ObsString
 		db.Table("obs_string").Where("case_id = ?", ca.ID).Order("id").Find(&obsstr)
 		assert.Len(t, obsstr, 2)
 		assert.Equal(t, 1000, obsstr[0].ID)
-		assert.Equal(t, 1, obsstr[0].PatientID)
+		assert.Equal(t, utils.IntPtr(1), obsstr[0].PatientID)
 		assert.Equal(t, "TEST:678901", obsstr[0].Value)
 		assert.Nil(t, obsstr[0].ExamCode)
 
-		assert.Equal(t, 1, obsstr[1].PatientID)
+		assert.Equal(t, utils.IntPtr(1), obsstr[1].PatientID)
 		assert.Equal(t, "Additional exam note", obsstr[1].Value)
 		assert.Equal(t, utils.NilIfEmpty("other"), obsstr[1].ExamCode)
 		assert.Nil(t, obsstr[1].InterpretationCode)
@@ -210,6 +210,82 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 		// would reject an empty string.
 		assert.Nil(t, ancestry.OnsetCode)
 		assert.Nil(t, ancestry.InterpretationCode)
+	})
+}
+
+func Test_ProcessBatch_Case_Fetus_CreatesFetusAndFamilyRow(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Fetus_Solo")
+		payload[0].Fetus = &types.CaseFetusBatch{
+			SexCode:            "female",
+			LifeStatusCode:     "deceased",
+			AffectedStatusCode: "affected",
+			ObservationsCategorical: []*types.ObservationCategoricalBatch{
+				{Code: "phenotype", System: "HPO", Value: "HP:0001631", OnsetCode: "antenatal", InterpretationCode: "positive"},
+			},
+			ObservationsText: []*types.ObservationTextBatch{
+				{Code: "note", Value: "Stillborn at 32 weeks"},
+			},
+		}
+		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Fetus_Solo").First(&ca)
+		assert.NotNil(t, ca)
+
+		var fetus *types.Fetus
+		db.Table("fetus").Where("mother_id = ?", ca.ProbandID).First(&fetus)
+		assert.NotNil(t, fetus)
+		assert.Equal(t, "female", fetus.SexCode)
+		assert.Equal(t, "deceased", fetus.LifeStatusCode)
+
+		var fa *types.Family
+		db.Table("family").Where("case_id = ? AND relationship_to_proband_code = ?", ca.ID, RelationshipFetusCode).First(&fa)
+		assert.NotNil(t, fa)
+		assert.Nil(t, fa.FamilyMemberID)
+		assert.Equal(t, fetus.ID, *fa.FetusID)
+		assert.Equal(t, "affected", fa.AffectedStatusCode)
+
+		var obscat *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND fetus_id = ?", ca.ID, fetus.ID).First(&obscat)
+		assert.NotNil(t, obscat)
+		assert.Nil(t, obscat.PatientID)
+		assert.Equal(t, "HP:0001631", obscat.CodeValue)
+
+		var obsstr *types.ObsString
+		db.Table("obs_string").Where("case_id = ? AND fetus_id = ?", ca.ID, fetus.ID).First(&obsstr)
+		assert.NotNil(t, obsstr)
+		assert.Nil(t, obsstr.PatientID)
+		assert.Equal(t, "Stillborn at 32 weeks", obsstr.Value)
+	})
+}
+
+func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Fetus_Invalid_Sex")
+		payload[0].Fetus = &types.CaseFetusBatch{SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown"}
+		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "FETUS-001",
+				Message: "Invalid field sex_code for create_case 0 - fetus. Reason: \"not-a-sex\" is not a valid sex code. Valid values [female, male, unknown].",
+				Path:    "create_case[0].fetus.sex_code",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+
+		var count int64
+		db.Table("fetus").Where("mother_id = ?", 1).Count(&count)
+		assert.Equal(t, int64(0), count)
 	})
 }
 

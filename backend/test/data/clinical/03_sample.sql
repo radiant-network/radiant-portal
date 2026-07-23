@@ -124,7 +124,13 @@ VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 'CQGC', 'radiant'),
        (123,  'blood', NULL, NULL, 'normal', 'B-990.4',62, 'LDM-CHUSJ', 'radiant'),
        (124,  'dna', 123, NULL, 'normal', 'SRX1091646',62, 'LDM-CHUSJ', 'radiant'),
        (125,  'solid_tissue', NULL, NULL, 'tumoral', 'T-100.1',62, 'LDM-CHUSJ', 'radiant'),
-       (126,  'dna', 125, 'brain', 'tumoral', 'SRX1091647',62, 'LDM-CHUSJ', 'radiant')
+       (126,  'dna', 125, 'brain', 'tumoral', 'SRX1091647',62, 'LDM-CHUSJ', 'radiant'),
+       -- CLIN-6117 prenatal fixtures: sample drawn from the mother (patient_id) in each case —
+       -- no fetus_id link on sample yet, that cardinality is still an open point (see
+       -- foetus-analysis.md).
+       (127, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72', 63, 'CQGC', 'radiant'),
+       (128, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73', 64, 'CQGC', 'radiant'),
+       (129, 'dna', NULL, NULL, 'normal', 'S-PRENAT-74', 65, 'CQGC', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE sample ALTER COLUMN id RESTART WITH 1000;

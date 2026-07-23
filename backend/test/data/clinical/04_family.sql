@@ -66,4 +66,20 @@ VALUES (1, 1, 1, 'mother', 'affected', 'radiant'),
        (65, 71, 62, 'proband', 'affected', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
+-- CLIN-6117 prenatal fixtures: mother is proband (family_member_id set, fetus_id NULL);
+-- fetus rows use fetus_id instead (family_member_id NULL) — mutually exclusive per the
+-- family_member_subject_xor CHECK constraint, hence the separate column list here.
+INSERT INTO "family" (id, case_id, family_member_id, fetus_id, relationship_to_proband_code, affected_status_code, tenant_code)
+VALUES (66, 72, 63,   NULL, 'proband', 'affected', 'radiant'),
+       (67, 72, NULL, 1,    'fetus',   'unknown',  'radiant'),
+       (68, 73, 64,   NULL, 'proband', 'affected', 'radiant'),
+       (69, 73, NULL, 2,    'fetus',   'unknown',  'radiant'),
+       (71, 74, 65,   NULL, 'proband', 'affected',     'radiant'),
+       (72, 74, 66,   NULL, 'father',  'non_affected', 'radiant'),
+       (73, 74, NULL, 4,    'fetus',   'unknown',      'radiant'),
+       -- twin B: same mother (64), separate case (75) — 1 fetus per case
+       (74, 75, 64,   NULL, 'proband', 'affected', 'radiant'),
+       (75, 75, NULL, 3,    'fetus',   'unknown',  'radiant')
+ON CONFLICT (id) DO NOTHING;
+
 ALTER TABLE family ALTER COLUMN id RESTART WITH 1000;

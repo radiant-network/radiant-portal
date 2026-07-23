@@ -289,6 +289,12 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType repository.ValueSetT
 
 	case repository.ValueSetFileFormat:
 		return []string{"cram", "crai", "vcf", "tbi", "csv", "tsv", "gvcf"}, nil
+
+	case repository.ValueSetSex:
+		return []string{"male", "female", "unknown"}, nil
+
+	case repository.ValueSetLifeStatus:
+		return []string{"alive", "deceased", "unknown"}, nil
 	default:
 		return nil, nil
 	}

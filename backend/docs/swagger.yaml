@@ -152,6 +152,8 @@ components:
           type: string
         diagnostic_lab_code:
           type: string
+        fetus:
+          $ref: '#/components/schemas/CaseFetusBatch'
         note:
           type: string
         ordering_organization_code:
@@ -302,6 +304,49 @@ components:
       - status_code
       - tasks
       - updated_on
+      type: object
+    CaseFetusBatch:
+      properties:
+        affected_status_code:
+          enum:
+          - affected
+          - non_affected
+          - unknown
+          type: string
+        estimated_due_date:
+          example: "2026-11-08"
+          format: date
+          type: string
+        last_menstrual_period:
+          example: "2026-02-01"
+          format: date
+          type: string
+        life_status_code:
+          enum:
+          - alive
+          - deceased
+          - unknown
+          type: string
+        observations_categorical:
+          items:
+            $ref: '#/components/schemas/ObservationCategoricalBatch'
+          type: array
+          uniqueItems: false
+        observations_text:
+          items:
+            $ref: '#/components/schemas/ObservationTextBatch'
+          type: array
+          uniqueItems: false
+        sex_code:
+          enum:
+          - male
+          - female
+          - unknown
+          type: string
+      required:
+      - affected_status_code
+      - life_status_code
+      - sex_code
       type: object
     CaseFilters:
       properties:

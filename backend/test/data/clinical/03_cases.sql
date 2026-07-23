@@ -22,7 +22,16 @@ VALUES
     (20, 58, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 'CHUSJ', '2:20'),
     (21, 60, 2, 2, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 'CHUSJ', '2:21'),
     (70, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 'CHOP', '1:70'),
-    (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0001657', 'Administrative comment', '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'stat',  'somatic', 'postnatal', 'mondo', 'unsolved', 'Sam Attic', 'CHUSJ', '1:71')
+    (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0001657', 'Administrative comment', '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'stat',  'somatic', 'postnatal', 'mondo', 'unsolved', 'Sam Attic', 'CHUSJ', '1:71'),
+    -- CLIN-6117 prenatal fixtures: proband = mother in each case (fetus is not a patient), one
+    -- case per fetus (a twin pregnancy is 2 cases sharing the same mother as proband, cases 73/75).
+    -- created_on/updated_on deliberately older than every other seed row so these sort last
+    -- under the default `updated_on DESC` order and don't shift position-based assertions
+    -- in other tests (Test_SearchCasesNoFilters etc.) — only count assertions need updating.
+    (72, 63, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2019-01-01T13:08:00-04:00', '2019-01-01T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:72'),
+    (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2019-01-02T13:08:00-04:00', '2019-01-02T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:73'),
+    (74, 65, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2019-01-03T13:08:00-04:00', '2019-01-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:74'),
+    (75, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2019-01-04T13:08:00-04:00', '2019-01-04T13:08:00-04:00', 'routine', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:75')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE cases ALTER COLUMN id RESTART WITH 1000;

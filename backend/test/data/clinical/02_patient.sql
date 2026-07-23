@@ -61,7 +61,12 @@ VALUES
     (59, 'MRN-283831','mrn','CHUSJ','radiant','male', '1984-02-09', 'alive', 'Camille', 'Bélanger', 'BÉL8402099104'),
     (60, 'MRN-283832','mrn','CHUSJ','radiant','female', '1979-07-01', 'alive', 'Gabriel', 'Fortin', 'FOR7907010876'),
     (61, 'MRN-283833','mrn','CHUSJ','radiant','female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143'),
-    (62, 'MRN-283834','mrn','CHUSJ','radiant','female', '2020-03-08', 'alive', 'Ada', 'Lovelace', 'LOV2003081815')
+    (62, 'MRN-283834','mrn','CHUSJ','radiant','female', '2020-03-08', 'alive', 'Ada', 'Lovelace', 'LOV2003081815'),
+    -- CLIN-6117 prenatal fixtures: mothers (proband of each prenatal case) + one father (trio)
+    (63, 'MRN-283835','mrn','CHUSJ','radiant','female', '1992-04-10', 'alive', 'Camille', 'Dubé', 'DUB9204106543'),
+    (64, 'MRN-283836','mrn','CHUSJ','radiant','female', '1988-11-02', 'alive', 'Rosalie', 'Girard', 'GIR8811026621'),
+    (65, 'MRN-283837','mrn','CHUSJ','radiant','female', '1990-06-15', 'alive', 'Léa', 'Bernier', 'BER9006157788'),
+    (66, 'MRN-283838','mrn','CHUSJ','radiant','male', '1987-02-20', 'alive', 'Nicolas', 'Fortin', 'FOR8702204321')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE patient ALTER COLUMN id RESTART WITH 1000;

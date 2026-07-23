@@ -15,3 +15,9 @@ func Test_NilIfEmpty_NonEmpty(t *testing.T) {
 	assert.NotNil(t, result)
 	assert.Equal(t, "infantile", *result)
 }
+
+func Test_IntPtr(t *testing.T) {
+	result := IntPtr(42)
+	assert.NotNil(t, result)
+	assert.Equal(t, 42, *result)
+}

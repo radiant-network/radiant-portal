@@ -241,10 +241,11 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"N2", "label":"NeuroDev Phase II"}
 		], 
 		"relationship_to_proband_code":[
-			{"key":"brother", "label":"Brother"}, 
-			{"key":"father", "label":"Father"}, 
-			{"key":"mother", "label":"Mother"}, 
-			{"key":"proband", "label":"Proband"}, 
+			{"key":"brother", "label":"Brother"},
+			{"key":"father", "label":"Father"},
+			{"key":"fetus", "label":"Fetus"},
+			{"key":"mother", "label":"Mother"},
+			{"key":"proband", "label":"Proband"},
 			{"key":"sibling", "label":"Sibling"},
 			{"key":"sister", "label":"Sister"}
 		]}`

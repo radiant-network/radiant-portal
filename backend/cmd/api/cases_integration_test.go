@@ -48,7 +48,11 @@ func Test_SearchCasesHandler_WithAdditionalFields(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"somatic", "case_id":71, "created_on":"2026-03-09T13:08:00Z", "proband_id":62, "submitter_proband_id":"MRN-283834", "priority_code":"stat", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2026-03-09T13:08:00Z", "has_variants":true}, {"analysis_catalog_code":"IDGD", "analysis_catalog_name":"Intellectual Deficiency and Global Developmental Delay", "case_type":"germline_family", "case_id":21, "created_on":"2020-09-12T13:08:00Z", "proband_id":60, "submitter_proband_id":"MRN-283832", "priority_code":"asap", "project_code":"N2", "project_name":"NeuroDev Phase II", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2020-09-12T13:08:00Z", "has_variants":false}], "count": 23}`
+	// case_id 74/73 (CLIN-6117 prenatal fixtures) now sort first here: their mothers (patient
+	// 65/64) have the highest proband_id in the fixture set. has_variants is false because no
+	// StarRocks staging_sequencing_experiment row backs their (Postgres-only) sequencing
+	// experiments.
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":74, "created_on":"2019-01-03T13:08:00Z", "proband_id":65, "submitter_proband_id":"MRN-283837", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-03T13:08:00Z", "has_variants":false}, {"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline", "case_id":73, "created_on":"2019-01-02T13:08:00Z", "proband_id":64, "submitter_proband_id":"MRN-283836", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-02T13:08:00Z", "has_variants":false}], "count": 27}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "proband_id", "order": "desc"}],
@@ -58,7 +62,7 @@ func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithVariants(t *testing.T) {
-	expected := `{"list":[{"case_id":1,"proband_id":3, "submitter_proband_id":"MRN-283775","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"case_id":2, "proband_id":4, "submitter_proband_id":"MRN-283776","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":23}`
+	expected := `{"list":[{"case_id":1,"proband_id":3, "submitter_proband_id":"MRN-283775","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"case_id":2, "proband_id":4, "submitter_proband_id":"MRN-283776","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":27}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "case_id", "order": "asc"}],
@@ -369,11 +373,12 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"key":"vcf", "label":"VCF File"} 
 		], 
 		"relationship_to_proband_code":[
-			{"key":"brother", "label":"Brother"}, 
-			{"key":"father", "label":"Father"}, 
+			{"key":"brother", "label":"Brother"},
+			{"key":"father", "label":"Father"},
+			{"key":"fetus", "label":"Fetus"},
 			{"key":"mother", "label":"Mother"},
-			{"key":"proband", "label":"Proband"}, 
-			{"key":"sibling", "label":"Sibling"}, 
+			{"key":"proband", "label":"Proband"},
+			{"key":"sibling", "label":"Sibling"},
 			{"key":"sister", "label":"Sister"}
 		]}`
 	assertCaseEntityDocumentsFiltersHandler(t, "simple", 21, expected)

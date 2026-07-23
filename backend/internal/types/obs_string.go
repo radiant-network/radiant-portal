@@ -4,8 +4,10 @@ type ObsString struct {
 	ID                 int `gorm:"unique;primaryKey;autoIncrement"`
 	CaseID             int
 	Case               Case `gorm:"foreignKey:ID;references:CaseID"`
-	PatientID          int
+	PatientID          *int
 	Patient            Patient `gorm:"foreignKey:ID;references:PatientID"`
+	FetusID            *int
+	Fetus              Fetus `gorm:"foreignKey:ID;references:FetusID"`
 	ObservationCode    string
 	Value              string
 	InterpretationCode *string

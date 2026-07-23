@@ -64,5 +64,10 @@ VALUES (1, 1),
        (71, 70),
        (72, 70),
        (73, 71),
-       (74, 71)
+       (74, 71),
+       (75, 72),
+       (76, 73),
+       (77, 74),
+       -- twin B (case 75) shares the mother's one sequencing experiment (76) with twin A (case 73)
+       (76, 75)
 ON CONFLICT (case_id, sequencing_experiment_id) DO NOTHING;

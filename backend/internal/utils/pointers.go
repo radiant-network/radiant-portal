@@ -9,3 +9,10 @@ func NilIfEmpty(s string) *string {
 	}
 	return &s
 }
+
+// IntPtr returns a pointer to i. Useful for populating nullable *int fields (e.g. a subject
+// FK that must be nil for one type of subject and set for the other) from an int literal or
+// variable, which Go doesn't allow taking the address of directly.
+func IntPtr(i int) *int {
+	return &i
+}
