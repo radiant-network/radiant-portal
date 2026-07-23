@@ -47,7 +47,7 @@ const _ProtectedLayout = () => {
   const data = useLoaderData<IAuthUser>();
   const { features } = useBetaFeatures();
   const { orientation } = features as { orientation: 'left' | 'right' | 'top' };
-  const { setOpen: setAssistantOpen } = useAssistant();
+  const { setOpen: setAssistantOpen, reset: resetAssistant } = useAssistant();
 
   return (
     <LoginContext value={{ ...data }}>
@@ -120,7 +120,10 @@ const _ProtectedLayout = () => {
                 // },
               ]}
               userDetails={{ id: data.sub, name: data.name, email: data.email }}
-              onLogoutClick={() => navigate('/auth/logout')}
+              onLogoutClick={() => {
+                resetAssistant();
+                navigate('/auth/logout');
+              }}
             />
             <Outlet />
             <AssistantPanel />
