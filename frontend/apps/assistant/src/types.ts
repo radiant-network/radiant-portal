@@ -15,7 +15,11 @@ export type TableBlock = {
 
 export type ChartDatum = { label: string; count: number };
 
-/** A single-series categorical chart — rendered as a horizontal bar chart. */
+/**
+ * A single-series categorical chart. POC: always rendered as a horizontal bar
+ * chart. To support more types, add a discriminant here (e.g. `chart: 'bar' | 'pie'`)
+ * and switch on it in blocks/chart-block.tsx.
+ */
 export type ChartBlock = {
   type: 'chart';
   title?: string;
