@@ -117,7 +117,7 @@ function Conversation() {
                   <MessageScrollerItem
                     key={item.id}
                     messageId={item.id}
-                    className={item.reactions ? 'pb-4' : undefined}
+                    className={item.reactions ? 'pb-5' : undefined}
                   >
                     <Message align={item.align}>
                       <MessageAvatar className="size-8">
