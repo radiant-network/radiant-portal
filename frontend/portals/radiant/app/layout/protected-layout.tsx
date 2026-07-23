@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
 import logo from '@assets/logo/header.svg';
-import { ArchiveIcon, FolderIcon } from 'lucide-react';
+import { AssistantPanel } from 'assistant/assistant-panel';
+import { AssistantProvider, useAssistant } from 'assistant/assistant-provider';
+import { ArchiveIcon, Cat, FolderIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import MainNavbar from '@/components/base/navbar/main-navbar';
@@ -45,6 +47,7 @@ const _ProtectedLayout = () => {
   const data = useLoaderData<IAuthUser>();
   const { features } = useBetaFeatures();
   const { orientation } = features as { orientation: 'left' | 'right' | 'top' };
+  const { setOpen: setAssistantOpen, reset: resetAssistant } = useAssistant();
 
   return (
     <LoginContext value={{ ...data }}>
@@ -76,46 +79,54 @@ const _ProtectedLayout = () => {
                   active: pathname === '/file',
                 },
               ]}
-              actions={
-                [
-                  // SJRA-389
-                  // {
-                  //   title: t('main_navbar.actions.community'),
-                  //   icon: <UsersIcon />,
-                  //   as: 'button',
-                  // },
-                  // {
-                  //   title: t('main_navbar.actions.resources'),
-                  //   icon: <LightbulbIcon />,
-                  //   as: 'button',
-                  //   subItems: [
-                  //     {
-                  //       title: t('main_navbar.actions.website'),
-                  //       icon: <ExternalLink />,
-                  //       as: 'a',
-                  //       href: 'https://www.radiant-genomics.com',
-                  //     },
-                  //     {
-                  //       title: t('main_navbar.actions.documentation'),
-                  //       icon: <ExternalLink />,
-                  //       as: 'button',
-                  //     },
-                  //     {
-                  //       separator: true,
-                  //     },
-                  //     {
-                  //       title: t('main_navbar.actions.contact'),
-                  //       icon: <MailIcon />,
-                  //       as: 'button',
-                  //     },
-                  //   ],
-                  // },
-                ]
-              }
+              actions={[
+                {
+                  title: t('main_navbar.actions.assistant'),
+                  icon: <Cat />,
+                  as: 'button',
+                  onClick: () => setAssistantOpen(true),
+                },
+                // SJRA-389
+                // {
+                //   title: t('main_navbar.actions.community'),
+                //   icon: <UsersIcon />,
+                //   as: 'button',
+                // },
+                // {
+                //   title: t('main_navbar.actions.resources'),
+                //   icon: <LightbulbIcon />,
+                //   as: 'button',
+                //   subItems: [
+                //     {
+                //       title: t('main_navbar.actions.website'),
+                //       icon: <ExternalLink />,
+                //       as: 'a',
+                //       href: 'https://www.radiant-genomics.com',
+                //     },
+                //     {
+                //       title: t('main_navbar.actions.documentation'),
+                //       icon: <ExternalLink />,
+                //       as: 'button',
+                //     },
+                //     {
+                //       separator: true,
+                //     },
+                //     {
+                //       title: t('main_navbar.actions.contact'),
+                //       icon: <MailIcon />,
+                //       as: 'button',
+                //     },
+                //   ],
+                // },
+              ]}
               userDetails={{ id: data.sub, name: data.name, email: data.email }}
-              onLogoutClick={() => navigate('/auth/logout')}
+              onLogoutClick={() => {
+                resetAssistant();
+                navigate('/auth/logout');
+              }}
             />
             <Outlet />
+            <AssistantPanel />
           </div>
         </SidebarProvider>
       </TenantProvider>
@@ -126,7 +137,9 @@ const _ProtectedLayout = () => {
 export default function ProtectedLayout() {
   return (
     <Suspense>
-      <_ProtectedLayout />
+      <AssistantProvider>
+        <_ProtectedLayout />
+      </AssistantProvider>
     </Suspense>
   );
 }

@@ -2067,6 +2067,7 @@
       "variants": "Variants"
     },
     "actions": {
+      "assistant": "Assistant",
       "community": "Communauté",
       "resources": "Ressources",
       "website": "Site web",
