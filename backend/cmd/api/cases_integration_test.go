@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -18,7 +17,7 @@ import (
 
 func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewCasesRepository(db)
+		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo))
 
@@ -71,7 +70,7 @@ func Test_SearchCasesHandler_WithVariants(t *testing.T) {
 
 func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewCasesRepository(db)
+		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/cases/autocomplete", server.CasesAutocompleteHandler(repo))
 
@@ -91,7 +90,7 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewCasesRepository(db)
+		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo))
 
@@ -161,7 +160,7 @@ func Test_GetCasesFilters(t *testing.T) {
 
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewCasesRepository(db)
+		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: db})
 		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
@@ -266,7 +265,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 
 func assertCaseEntityDocumentsSearchHandler(t *testing.T, data string, caseId int, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewDocumentsRepository(db)
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/cases/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repo))
 
@@ -323,7 +322,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 
 func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewDocumentsRepository(db)
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
 

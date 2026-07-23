@@ -3,7 +3,7 @@ package postgres
 import (
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
@@ -11,11 +11,10 @@ import (
 
 // createTestCase inserts a minimal, valid case row under the given id (reusing existing
 // seed project/analysis_catalog/proband ids) so clinical-child delete-by-case-id tests have
-// a case to satisfy the FK on case_id, and registers its cleanup. The case repository is
-// dual-purpose (still in the root repository package) and takes a raw *gorm.DB.
+// a case to satisfy the FK on case_id, and registers its cleanup.
 func createTestCase(t *testing.T, db *gorm.DB, id int) {
 	t.Helper()
-	repo := repository.NewCasesRepository(db)
+	repo := NewCasesRepository(database.PostgresDB{DB: db})
 	orgCode := "CQGC"
 	require.NoError(t, repo.CreateCase(t.Context(), &types.Case{
 		ID:                       id,

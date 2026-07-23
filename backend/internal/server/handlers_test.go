@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +22,11 @@ type MockIGVRepository struct {
 	err       error
 }
 
-func (m *MockRepository) GetDocumentByUrl(url string) (*repository.Document, error) {
+func (m *MockRepository) GetDocumentByUrl(url string) (*types.Document, error) {
 	return nil, nil
 }
 
-func (m *MockRepository) CreateDocument(document *repository.Document) error {
+func (m *MockRepository) CreateDocument(document *types.Document) error {
 	return nil
 }
 
@@ -35,8 +34,8 @@ func (m *MockRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.
 	return nil
 }
 
-func (m *MockRepository) GetCaseAnalysisCatalogIdByCode(code string) (*repository.AnalysisCatalog, error) {
-	return &repository.AnalysisCatalog{}, nil
+func (m *MockRepository) GetCaseAnalysisCatalogIdByCode(code string) (*types.AnalysisCatalog, error) {
+	return &types.AnalysisCatalog{}, nil
 }
 
 func (m *MockRepository) CheckDatabaseConnection() string {

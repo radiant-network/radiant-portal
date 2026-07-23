@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,8 +40,8 @@ func newCachePatchWithTasks(repo *CaseValidationMockRepo) (*batchval.BatchValida
 
 func caseExistsMock() *CaseValidationMockRepo {
 	return &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
-			return &repository.Case{ID: 100}, nil
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
+			return &types.Case{ID: 100}, nil
 		},
 	}
 }
@@ -135,7 +134,7 @@ func Test_validatePatchCaseRecord_Tasks_UnknownAliquot(t *testing.T) {
 // When the case does not exist, tasks must not be validated or staged for persistence.
 func Test_validatePatchCaseRecord_Tasks_SkippedWhenCaseMissing(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			return nil, nil // case missing
 		},
 	}
@@ -175,9 +174,9 @@ func hasErrorCode(msgs []types.BatchMessage, code string) bool {
 
 func Test_validatePatchCaseRecord_Success(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			if submitterCaseId == "CASE-1" && projectId == 42 {
-				return &repository.Case{ID: 100, SubmitterCaseID: "CASE-1", ProjectID: projectId}, nil
+				return &types.Case{ID: 100, SubmitterCaseID: "CASE-1", ProjectID: projectId}, nil
 			}
 			return nil, nil
 		},
@@ -206,8 +205,8 @@ func Test_validatePatchCaseRecord_Success(t *testing.T) {
 func Test_validatePatchCaseRecord_EmptyExperimentsIsNoOp(t *testing.T) {
 	// An empty sequencing_experiments array is a no-op — the case still resolves, no errors.
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
-			return &repository.Case{ID: 100}, nil
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
+			return &types.Case{ID: 100}, nil
 		},
 	}
 	cache, ctx := newCachePatch(mockRepo)
@@ -248,7 +247,7 @@ func Test_validatePatchCaseRecord_UnknownProject(t *testing.T) {
 
 func Test_validatePatchCaseRecord_CaseNotFound(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			return nil, nil // case missing
 		},
 	}
@@ -272,8 +271,8 @@ func Test_validatePatchCaseRecord_CaseNotFound(t *testing.T) {
 
 func Test_validatePatchCaseRecord_DiagnosticLabCode_Resolved(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
-			return &repository.Case{ID: 100}, nil
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
+			return &types.Case{ID: 100}, nil
 		},
 	}
 	cache, ctx := newCachePatch(mockRepo)
@@ -292,8 +291,8 @@ func Test_validatePatchCaseRecord_DiagnosticLabCode_Resolved(t *testing.T) {
 
 func Test_validatePatchCaseRecord_DiagnosticLabCode_Unknown(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
-			return &repository.Case{ID: 100}, nil
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
+			return &types.Case{ID: 100}, nil
 		},
 	}
 	cache, ctx := newCachePatch(mockRepo)
@@ -316,8 +315,8 @@ func Test_validatePatchCaseRecord_SequencingExperimentMissing(t *testing.T) {
 	// Case resolves, one experiment resolves, one doesn't → one SEQ-007 error per missing item;
 	// the resolved experiment is still captured in the record so persistence attaches it.
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
-			return &repository.Case{ID: 100}, nil
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
+			return &types.Case{ID: 100}, nil
 		},
 	}
 	cache, ctx := newCachePatch(mockRepo)

@@ -1,4 +1,4 @@
-package repository
+package starrocks
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/internal/utils/joins"
@@ -24,24 +25,8 @@ type DocumentsRepository struct {
 	joiner joins.Joiner
 }
 
-func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
-	return &DocumentsRepository{db: db, joiner: joins.Starrocks()}
-}
-
-func (r *DocumentsRepository) CreateDocument(ctx context.Context, document *Document) error {
-	return r.db.WithContext(ctx).Create(&document).Error
-}
-
-func (r *DocumentsRepository) GetDocumentByUrl(ctx context.Context, url string) (*Document, error) {
-	var document Document
-	txUrl := r.db.WithContext(ctx).Table(types.DocumentTable.Name).Where("url = ?", url)
-	if err := txUrl.First(&document).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("error while fetching document by url: %w", err)
-	}
-	return &document, nil
+func NewDocumentsRepository(db database.StarrocksDB) *DocumentsRepository {
+	return &DocumentsRepository{db: db.DB, joiner: joins.Starrocks()}
 }
 
 func (r *DocumentsRepository) SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]DocumentResult, *int64, error) {
@@ -68,24 +53,6 @@ func (r *DocumentsRepository) SearchDocuments(ctx context.Context, userQuery typ
 }
 
 func (r *DocumentsRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]AutocompleteResult, error) {
-	/**
-	  	(SELECT "document_id" as type, id as value from <schema>.document WHERE CAST(id AS TEXT) LIKE '1%')
-		UNION
-		(SELECT "name" as type, name as value from <schema>.document WHERE name LIKE '1%')
-		UNION
-		(SELECT "run_name" as type, run_name as value from <schema>.sequencing_experiment WHERE run_name LIKE '1%')
-		UNION
-		(SELECT "sample_id" as type, id as value from <schema>.sample WHERE CAST(id AS TEXT) LIKE '1%')
-		UNION
-		(SELECT "patient_id" as type, id as value from <schema>.patient WHERE CAST(id AS TEXT) LIKE '1%')
-		UNION
-		(SELECT "case_id" as type, id as value from <schema>.cases WHERE CAST(id AS TEXT) LIKE '1%')
-		UNION
-		(SELECT "seq_id" as type, id as value from <schema>.sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
-		UNION
-		(SELECT "task_id" as type, id as value from <schema>.task WHERE CAST(id AS TEXT) LIKE '1%')
-		ORDER BY value asc, type asc;
-	*/
 	var autocompleteResult []AutocompleteResult
 	searchInput := fmt.Sprintf("%s%%", prefix)
 	db := r.db.WithContext(ctx)

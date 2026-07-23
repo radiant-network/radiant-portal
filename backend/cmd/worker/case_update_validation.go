@@ -9,7 +9,6 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -215,7 +214,7 @@ func persistBatchAndUpdateCaseRecords(ctx context.Context, db *gorm.DB, batch *t
 
 		storageCtx := NewStorageContext(tx)
 		storageCtx.TenantCode = batch.TenantCode
-		casesRepo := repository.NewCasesRepository(tx)
+		casesRepo := postgres.NewCasesRepository(database.PostgresDB{DB: tx})
 
 		for _, rec := range records {
 			if rec.Skipped || rec.CaseID == nil || rec.Record == nil {
@@ -233,7 +232,7 @@ func persistBatchAndUpdateCaseRecords(ctx context.Context, db *gorm.DB, batch *t
 // clinical children (family, obs_categorical, obs_string, family_history) with what the
 // PUT body carries. Sequencing experiment links and tasks are merge-if-present: attached when
 // the payload carried them (resolved at validation time), left untouched otherwise.
-func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, casesRepo *repository.CasesRepository, rec *UpdateCaseValidationRecord) error {
+func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, casesRepo *postgres.CasesRepository, rec *UpdateCaseValidationRecord) error {
 	caseID := *rec.CaseID
 	u := rec.Update
 

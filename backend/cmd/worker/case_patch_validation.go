@@ -9,7 +9,6 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -263,7 +262,7 @@ func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *ty
 			return nil
 		}
 
-		casesRepo := repository.NewCasesRepository(tx)
+		casesRepo := postgres.NewCasesRepository(database.PostgresDB{DB: tx})
 		storageCtx := NewStorageContext(tx)
 		storageCtx.TenantCode = batch.TenantCode
 		for _, rec := range records {

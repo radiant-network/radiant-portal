@@ -10,7 +10,6 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -23,7 +22,7 @@ import (
 // -----------------------------------------------------------------------------
 
 type CaseValidationMockRepo struct {
-	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*repository.Case, error)
+	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*types.Case, error)
 }
 
 func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
@@ -62,7 +61,7 @@ func (m *CaseValidationMockRepo) ListTasksByCaseSeqAndTaskType(caseId int, seqId
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) CreateCase(_ context.Context, c *repository.Case) error {
+func (m *CaseValidationMockRepo) CreateCase(_ context.Context, c *types.Case) error {
 	return nil
 }
 
@@ -74,7 +73,7 @@ func (m *CaseValidationMockRepo) UpdateCaseDiagnosisLabCode(_ context.Context, c
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateDocument(_ context.Context, document *repository.Document) error {
+func (m *CaseValidationMockRepo) CreateDocument(_ context.Context, document *types.Document) error {
 	return nil
 }
 
@@ -82,24 +81,24 @@ func (m *CaseValidationMockRepo) CreatePatient(_ context.Context, newPatient *po
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateSequencingExperiment(_ context.Context, experiment *repository.SequencingExperiment) error {
+func (m *CaseValidationMockRepo) CreateSequencingExperiment(_ context.Context, experiment *types.SequencingExperiment) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) GetById(id int) (*repository.Document, error) {
+func (m *CaseValidationMockRepo) GetById(id int) (*types.Document, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*repository.AnalysisCatalog, error) {
+func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
 	if code == "WGA" {
-		return &repository.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
+		return &types.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
 	} else if strings.Contains(code, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseEntity(caseId int) (*repository.CaseEntity, error) {
+func (m *CaseValidationMockRepo) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 	return nil, nil
 }
 
@@ -107,14 +106,14 @@ func (m *CaseValidationMockRepo) GetCaseType(caseID int) (string, error) {
 	return "", nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*repository.Case, error) {
+func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
 	if m.GetCaseBySubmitterCaseIdAndProjectIdFunc != nil {
 		return m.GetCaseBySubmitterCaseIdAndProjectIdFunc(submitterCaseId, projectId)
 	}
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCasesFilters() (*repository.CaseFilters, error) {
+func (m *CaseValidationMockRepo) GetCasesFilters() (*types.CaseFilters, error) {
 	return nil, nil
 }
 
@@ -167,13 +166,13 @@ func (m *CaseValidationMockRepo) GetProjectByCode(_ context.Context, code string
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]types.SequencingExperiment, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
 	if aliquot == "ALIQUOT-1" {
-		return []repository.SequencingExperiment{
+		return []types.SequencingExperiment{
 			{ID: 200, Aliquot: "ALIQUOT-1"},
 		}, nil
 	}
@@ -183,15 +182,15 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Cont
 	return nil, nil // Not found
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
 	if aliquot == "ALIQUOT-1" && submitterSampleId == "SAMPLE-1" && sampleOrganizationCode == "LAB-1" {
-		return &repository.SequencingExperiment{
+		return &types.SequencingExperiment{
 			ID:      200,
 			Aliquot: aliquot,
 		}, nil
 	}
 	if aliquot == "ALIQUOT-2" && submitterSampleId == "SAMPLE-2" && sampleOrganizationCode == "LAB-2" {
-		return &repository.SequencingExperiment{
+		return &types.SequencingExperiment{
 			ID:      201,
 			Aliquot: aliquot,
 		}, nil
@@ -202,19 +201,19 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSam
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentBySampleID(sampleID int) ([]repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentBySampleID(sampleID int) ([]types.SequencingExperiment, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) SearchById(prefix string, limit int) (*[]repository.AutocompleteResult, error) {
+func (m *CaseValidationMockRepo) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) SearchCases(userQuery types.ListQuery) (*[]repository.CaseResult, *int64, error) {
+func (m *CaseValidationMockRepo) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
 	return nil, nil, nil
 }
 
-func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]repository.DocumentResult, *int64, error) {
+func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error) {
 	return nil, nil, nil
 }
 
@@ -1933,9 +1932,9 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	analysisID := 1
 
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			if submitterCaseId == "CASE-1" && projectId == 42 {
-				return &repository.Case{ID: 100, SubmitterCaseID: "CASE-1"}, nil
+				return &types.Case{ID: 100, SubmitterCaseID: "CASE-1"}, nil
 			}
 			return nil, nil
 		},

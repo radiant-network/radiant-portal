@@ -24,7 +24,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
@@ -55,7 +54,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	postgresDB := database.PostgresDB{DB: dbPostgres}
 
 	repoStarrocks := starrocks.NewStarrocksRepository(starrocksDB)
-	repoSeqExp := repository.NewSequencingExperimentRepository(dbStarrocks)
+	repoSeqExp := starrocks.NewSequencingExperimentRepository(starrocksDB)
 	repoVariants := starrocks.NewVariantsRepository(starrocksDB)
 	repoExomiser := starrocks.NewExomiserRepository(starrocksDB)
 	repoGenes := starrocks.NewGenesRepository(starrocksDB)
@@ -63,7 +62,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
 	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
 	repoTerms := starrocks.NewTermsRepository(starrocksDB)
-	repoCases := repository.NewCasesRepository(dbStarrocks)
+	repoCases := starrocks.NewCasesRepository(starrocksDB)
 	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := postgres.NewPostgresRepository(postgresDB)
@@ -71,7 +70,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
-	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
+	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
 	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
 	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
 	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)

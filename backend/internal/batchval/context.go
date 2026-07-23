@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -92,10 +91,10 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		PatientRepo:   postgres.NewPatientsRepository(postgresDB),
 		ProjectRepo:   postgres.NewProjectRepository(postgresDB),
 		SampleRepo:    postgres.NewSamplesRepository(postgresDB),
-		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
+		SeqExpRepo:    postgres.NewSequencingExperimentRepository(postgresDB),
 		ValueSetsRepo: postgres.NewValueSetsRepository(postgresDB),
-		CasesRepo:     repository.NewCasesRepository(db),
-		DocRepo:       repository.NewDocumentsRepository(db),
+		CasesRepo:     postgres.NewCasesRepository(postgresDB),
+		DocRepo:       postgres.NewDocumentsRepository(postgresDB),
 		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
 		TaskRepo:      postgres.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,

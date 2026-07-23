@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -854,7 +854,7 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 		err := persistBatchAndUpdateSequencingExperimentRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewSequencingExperimentRepository(db)
+		repo := postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: db})
 		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALIQUOT-WORKER-UPDATE-1", "S-SEQ-WORKER-UPDATE-1", "CQGC")
 		require.NoError(t, err)
 		require.NotNil(t, seqExp)

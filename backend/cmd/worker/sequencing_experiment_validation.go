@@ -11,7 +11,6 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -309,7 +308,7 @@ func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 
 func persistBatchAndSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
+		txRepoSeqExp := postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: tx})
 		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
@@ -473,7 +472,7 @@ func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 
 func persistBatchAndUpdateSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
+		txRepoSeqExp := postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: tx})
 		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {

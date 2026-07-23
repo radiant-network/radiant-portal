@@ -12,7 +12,6 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -130,8 +129,8 @@ type DocumentRelation struct {
 }
 
 type StorageContext struct {
-	CasesRepo         *repository.CasesRepository
-	DocRepo           *repository.DocumentsRepository
+	CasesRepo         *postgres.CasesRepository
+	DocRepo           *postgres.DocumentsRepository
 	ObsCatRepo        *postgres.ObservationCategoricalRepository
 	ObsStringRepo     *postgres.ObservationStringRepository
 	FamilyHistoryRepo *postgres.FamilyHistoryRepository
@@ -142,8 +141,8 @@ type StorageContext struct {
 
 func NewStorageContext(db *gorm.DB) *StorageContext {
 	return &StorageContext{
-		CasesRepo:         repository.NewCasesRepository(db),
-		DocRepo:           repository.NewDocumentsRepository(db),
+		CasesRepo:         postgres.NewCasesRepository(database.PostgresDB{DB: db}),
+		DocRepo:           postgres.NewDocumentsRepository(database.PostgresDB{DB: db}),
 		ObsCatRepo:        postgres.NewObservationCategoricalRepository(database.PostgresDB{DB: db}),
 		ObsStringRepo:     postgres.NewObservationStringRepository(database.PostgresDB{DB: db}),
 		FamilyHistoryRepo: postgres.NewFamilyHistoryRepository(database.PostgresDB{DB: db}),
