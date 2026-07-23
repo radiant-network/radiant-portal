@@ -1,0 +1,48 @@
+name: Build feature image
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+      - 'refactor/**'
+      - 'perf/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: radiant-portal
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Compute image tag
+        id: tag
+        run: |
+          branch="${{ github.ref_name }}"
+          release="${branch#*/}"
+          release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          release=$(echo "$release" | sed 's/^[a-z]*-[0-9]*-//')
+          namespace=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          ts=$(date +%s)
+          echo "value=feature-${release}-${GITHUB_SHA:0:7}-${ts}" >> "$GITHUB_OUTPUT"
+          echo "namespace=${namespace}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.radiant
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.tag.outputs.namespace }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
