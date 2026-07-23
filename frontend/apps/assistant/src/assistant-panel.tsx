@@ -15,13 +15,11 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { BlockRenderer } from './blocks/block-renderer';
 import { AssistantComposer } from './assistant-composer';
 import { useAssistant } from './assistant-provider';
+import { TypingDots } from './typing-dots';
 
 /**
  * The assistant side panel: a right-side overlay Sheet with a header,
  * a scrollable conversation and a composer footer.
- *
- * P2 scope: the send → reply cycle with a mock engine. Replies render as
- * plain text bubbles for now; typed blocks (table/chart) arrive in P3–P4.
  */
 export function AssistantPanel() {
   const { open, setOpen, messages, isResponding } = useAssistant();
@@ -68,6 +66,12 @@ export function AssistantPanel() {
                       </MessageScrollerItem>
                     ))}
 
+                    {/*
+                      Generic "thinking" indicator for the POC.
+                      Once a real backend streams tool-calling events,
+                      this is where we could surface detailed steps
+                      ("Searching variants…") derived from those events.
+                    */}
                     {isResponding && (
                       <MessageScrollerItem>
                         <Message align="start">
@@ -76,7 +80,9 @@ export function AssistantPanel() {
                           </MessageAvatar>
                           <MessageContent>
                             <Bubble align="start" variant="muted">
-                              <BubbleContent className="text-muted-foreground">…</BubbleContent>
+                              <BubbleContent className="text-muted-foreground">
+                                <TypingDots />
+                              </BubbleContent>
                             </Bubble>
                           </MessageContent>
                         </Message>
