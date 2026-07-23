@@ -3,7 +3,8 @@ package batchval
 import (
 	"context"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -57,7 +58,7 @@ type sampleReader interface {
 }
 
 type valueSetsReader interface {
-	GetCodes(ctx context.Context, vsType repository.ValueSetType) ([]string, error)
+	GetCodes(ctx context.Context, vsType postgres.ValueSetType) ([]string, error)
 }
 
 type BatchValidationContext struct {
@@ -82,18 +83,20 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		return nil, err
 	}
 
+	postgresDB := database.PostgresDB{DB: db}
+
 	return &BatchValidationContext{
-		BatchRepo:     repository.NewBatchRepository(db),
-		OrgRepo:       repository.NewOrganizationRepository(db),
-		PatientRepo:   repository.NewPatientsRepository(db),
-		ProjectRepo:   repository.NewProjectRepository(db),
-		SampleRepo:    repository.NewSamplesRepository(db),
-		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
-		ValueSetsRepo: repository.NewValueSetsRepository(db),
-		CasesRepo:     repository.NewCasesRepository(db),
-		DocRepo:       repository.NewDocumentsRepository(db),
-		FamilyRepo:    repository.NewFamilyRepository(db),
-		TaskRepo:      repository.NewTaskRepository(db),
+		BatchRepo:     postgres.NewBatchRepository(postgresDB),
+		OrgRepo:       postgres.NewOrganizationRepository(postgresDB),
+		PatientRepo:   postgres.NewPatientsRepository(postgresDB),
+		ProjectRepo:   postgres.NewProjectRepository(postgresDB),
+		SampleRepo:    postgres.NewSamplesRepository(postgresDB),
+		SeqExpRepo:    postgres.NewSequencingExperimentRepository(postgresDB),
+		ValueSetsRepo: postgres.NewValueSetsRepository(postgresDB),
+		CasesRepo:     postgres.NewCasesRepository(postgresDB),
+		DocRepo:       postgres.NewDocumentsRepository(postgresDB),
+		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
+		TaskRepo:      postgres.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,
 	}, nil
 }

@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
@@ -68,9 +68,9 @@ func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.
 		var igvEnrichedTracks *types.IGVTracks
 		switch caseType {
 		case "germline":
-			igvEnrichedTracks, err = repository.PrepareGermlineIgvTracks(internalIgvTracks, presigner)
+			igvEnrichedTracks, err = starrocks.PrepareGermlineIgvTracks(internalIgvTracks, presigner)
 		case "somatic":
-			igvEnrichedTracks, err = repository.PrepareSomaticIgvTracks(internalIgvTracks, presigner)
+			igvEnrichedTracks, err = starrocks.PrepareSomaticIgvTracks(internalIgvTracks, presigner)
 		default:
 			HandleError(c, fmt.Errorf("unsupported case type: %s", caseType))
 			return

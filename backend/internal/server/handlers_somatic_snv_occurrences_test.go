@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Conte
 	return 1111, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]starrocks.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "insertion", Count: 479564},
 			{Bucket: "deletion", Count: 495942},
@@ -27,7 +27,7 @@ func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.C
 		nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*repository.Statistics, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*starrocks.Statistics, error) {
 	return &types.Statistics{
 			Min:  0,
 			Max:  100,

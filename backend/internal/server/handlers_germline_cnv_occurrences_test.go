@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -16,7 +16,7 @@ import (
 
 type MockCNVRepository struct{}
 
-func (m *MockCNVRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+func (m *MockCNVRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]starrocks.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "GAIN", Count: 2},
 			{Bucket: "LOSS", Count: 1},

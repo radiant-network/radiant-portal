@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -33,7 +33,7 @@ type BatchValidationCache struct {
 	Context *BatchValidationContext
 
 	// Value Sets (Static Lookups)
-	ValueSets map[repository.ValueSetType][]string
+	ValueSets map[postgres.ValueSetType][]string
 
 	// Referenced Entities (Indexed by their natural keys)
 	OrganizationsByCode            map[string]*types.Organization                          // Key: code
@@ -53,7 +53,7 @@ type BatchValidationCache struct {
 func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCache {
 	return &BatchValidationCache{
 		Context:                        context,
-		ValueSets:                      make(map[repository.ValueSetType][]string),
+		ValueSets:                      make(map[postgres.ValueSetType][]string),
 		OrganizationsByCode:            make(map[string]*types.Organization),
 		Projects:                       make(map[string]*types.Project),
 		Patients:                       make(map[PatientKey]*types.Patient),
@@ -272,7 +272,7 @@ func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(ctx context.Contex
 	return getCopy(thd), nil
 }
 
-func (c *BatchValidationCache) GetValueSetCodes(ctx context.Context, valueSetType repository.ValueSetType) ([]string, error) {
+func (c *BatchValidationCache) GetValueSetCodes(ctx context.Context, valueSetType postgres.ValueSetType) ([]string, error) {
 	if codes, ok := c.ValueSets[valueSetType]; ok {
 		return getCopy(codes), nil
 	}

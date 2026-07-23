@@ -9,7 +9,8 @@ import (
 	"regexp"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -173,8 +174,8 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 
 func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSample := repository.NewSamplesRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoSample := postgres.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -313,7 +314,7 @@ func (r *SampleValidationRecord) validateTissueSite() {
 }
 
 func (r *SampleValidationRecord) validateTypeCode(ctx context.Context) error {
-	codes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetSampleType)
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSampleType)
 	if err != nil {
 		return fmt.Errorf("error retrieving sample type codes: %v", err)
 	}
@@ -322,7 +323,7 @@ func (r *SampleValidationRecord) validateTypeCode(ctx context.Context) error {
 }
 
 func (r *SampleValidationRecord) validateHistologyCode(ctx context.Context) error {
-	codes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetHistologyType)
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetHistologyType)
 	if err != nil {
 		return fmt.Errorf("error retrieving sample histology codes: %v", err)
 	}
@@ -458,8 +459,8 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 
 func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoSample := repository.NewSamplesRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoSample := postgres.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate

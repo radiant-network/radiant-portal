@@ -24,7 +24,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
@@ -46,31 +47,38 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// S3 URL Presigner for IGV returned URLs
 	s3Presigner := utils.NewS3PreSigner()
 
-	// Create repository
-	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
-	repoSeqExp := repository.NewSequencingExperimentRepository(dbStarrocks)
-	repoVariants := repository.NewVariantsRepository(dbStarrocks)
-	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
-	repoGenes := repository.NewGenesRepository(dbStarrocks)
-	repoGermlineCNVOccurrences := repository.NewGermlineCNVOccurrencesRepository(dbStarrocks)
-	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
-	repoSomaticSNVOccurrences := repository.NewSomaticSNVOccurrencesRepository(dbStarrocks)
-	repoTerms := repository.NewTermsRepository(dbStarrocks)
-	repoCases := repository.NewCasesRepository(dbStarrocks)
-	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
+	// Create repository. The named wrappers make each repo's target database part of its
+	// constructor signature; the dual-purpose repos (cases, sequencing experiment, documents)
+	// still take the raw StarRocks handle here (read path) until they are split.
+	starrocksDB := database.StarrocksDB{DB: dbStarrocks}
+	postgresDB := database.PostgresDB{DB: dbPostgres}
+
+	repoStarrocks := starrocks.NewStarrocksRepository(starrocksDB)
+	repoSeqExp := starrocks.NewSequencingExperimentRepository(starrocksDB)
+	repoVariants := starrocks.NewVariantsRepository(starrocksDB)
+	repoExomiser := starrocks.NewExomiserRepository(starrocksDB)
+	repoGenes := starrocks.NewGenesRepository(starrocksDB)
+	repoGermlineCNVOccurrences := starrocks.NewGermlineCNVOccurrencesRepository(starrocksDB)
+	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
+	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
+	repoTerms := starrocks.NewTermsRepository(starrocksDB)
+	repoCases := starrocks.NewCasesRepository(starrocksDB)
+	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
 	pubmedClient := client.NewPubmedClient()
-	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
-	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
-	repoIGV := repository.NewIGVRepository(dbStarrocks)
-	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
-	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(dbPostgres)
-	repoOccurrenceFlags := repository.NewOccurrenceFlagsRepository(dbPostgres)
-	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
-	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
-	repoFacets := repository.NewFacetsRepository()
-	repoBatches := repository.NewBatchRepository(dbPostgres)
-	repoTasks := repository.NewTaskRepository(dbPostgres)
-	repoAuth := repository.NewAuthRepository(dbPostgres)
+	repoPostgres := postgres.NewPostgresRepository(postgresDB)
+	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
+	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
+	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
+	repoIGV := starrocks.NewIGVRepository(starrocksDB)
+	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
+	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
+	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
+	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
+	repoUserPreferences := postgres.NewUserPreferencesRepository(postgresDB)
+	repoFacets := starrocks.NewFacetsRepository()
+	repoBatches := postgres.NewBatchRepository(postgresDB)
+	repoTasks := postgres.NewTaskRepository(postgresDB)
+	repoAuth := postgres.NewAuthRepository(postgresDB)
 
 	r := newEngine()
 
@@ -131,22 +139,22 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	interpretationsGroup := tenantRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", requireAction(types.ActionSearchCase), server.GetPubmedCitation(pubmedClient))
-	interpretationsGroup.GET("/germline", requireAction(types.ActionSearchCase), server.SearchInterpretationGermline(repoPostgres.Interpretations))
-	interpretationsGroup.GET("/somatic", requireAction(types.ActionSearchCase), server.SearchInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsGroup.GET("/germline", requireAction(types.ActionSearchCase), server.SearchInterpretationGermline(repoInterpretations))
+	interpretationsGroup.GET("/somatic", requireAction(types.ActionSearchCase), server.SearchInterpretationSomatic(repoInterpretations))
 
 	interpretationsGermlineGroupDeprecated := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsGermlineGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermlineDeprecated(repoPostgres.Interpretations))
-	interpretationsGermlineGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermlineDeprecated(repoPostgres.Interpretations))
+	interpretationsGermlineGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermlineDeprecated(repoInterpretations))
+	interpretationsGermlineGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermlineDeprecated(repoInterpretations))
 	interpretationsGermlineGroup := interpretationsGroup.Group("/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsGermlineGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermline(repoPostgres.Interpretations, repoTerms))
-	interpretationsGermlineGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermline(repoPostgres.Interpretations))
+	interpretationsGermlineGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermline(repoInterpretations, repoTerms))
+	interpretationsGermlineGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermline(repoInterpretations))
 
 	interpretationsSomaticGroupDeprecated := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomaticDeprecated(repoPostgres.Interpretations))
-	interpretationsSomaticGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomaticDeprecated(repoPostgres.Interpretations))
+	interpretationsSomaticGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomaticDeprecated(repoInterpretations))
+	interpretationsSomaticGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomaticDeprecated(repoInterpretations))
 	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomatic(repoPostgres.Interpretations, repoTerms))
-	interpretationsSomaticGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsSomaticGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomatic(repoInterpretations, repoTerms))
+	interpretationsSomaticGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomatic(repoInterpretations))
 
 	mondoGroup := tenantRoutes.Group("/mondo")
 	mondoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetMondoTermAutoComplete(repoTerms))
@@ -178,7 +186,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
-	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
 	occurrencesGermlineSNVGroup.GET("/dictionary", requireAction(types.ActionSearchCase), server.GetGermlineSNVDictionary(repoFacets))
 
 	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")
@@ -186,7 +194,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
-	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoInterpretations))
 
 	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
@@ -197,14 +205,14 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.DELETE("/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repoSavedFilters, auth))
 	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
-	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
+	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoUserSets))
 	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
 	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
 
 	variantsGroup := tenantRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")
 	variantsGermlineGroup.GET("/:locus_id/header", requireAction(types.ActionSearchCase), server.GetGermlineVariantHeader(repoVariants))
-	variantsGermlineGroup.GET("/:locus_id/overview", requireAction(types.ActionSearchCase), server.GetGermlineVariantOverview(repoVariants, repoExomiser, repoPostgres.Interpretations))
+	variantsGermlineGroup.GET("/:locus_id/overview", requireAction(types.ActionSearchCase), server.GetGermlineVariantOverview(repoVariants, repoExomiser, repoInterpretations))
 	variantsGermlineGroup.GET("/:locus_id/consequences", requireAction(types.ActionSearchCase), server.GetGermlineVariantConsequences(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", requireAction(types.ActionSearchCase), server.GetGermlineVariantInterpretedCases(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", requireAction(types.ActionSearchCase), server.GetGermlineVariantUninterpretedCases(repoVariants))

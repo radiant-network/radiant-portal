@@ -8,7 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +19,7 @@ import (
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
 
@@ -31,7 +33,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 }
 func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
 
@@ -45,8 +47,8 @@ func testCount(t *testing.T, data string, body string, expected int) {
 }
 func testAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(db)
-		facetsRepo := repository.NewFacetsRepository()
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		facetsRepo := starrocks.NewFacetsRepository()
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
 		path := "/radiant/occurrences/germline/snv/1/1/5/aggregate"
@@ -63,7 +65,7 @@ func testAggregation(t *testing.T, data string, body string, queryParams []strin
 }
 func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
 
@@ -268,7 +270,7 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 
 func Test_CNVOccurrence_List(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
 
@@ -289,7 +291,7 @@ func Test_CNVOccurrence_List(t *testing.T) {
 
 func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
 
@@ -336,7 +338,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 
 func Test_CNVOccurrence_Count(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
 
@@ -354,7 +356,7 @@ func Test_CNVOccurrence_Count(t *testing.T) {
 
 func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
 
@@ -384,11 +386,11 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 }
 
 func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId int, taskId int, locusId int, expected string) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
-		repo := repository.NewGermlineSNVOccurrencesRepository(starrocks)
-		exomiserRepo := repository.NewExomiserRepository(starrocks)
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
+		exomiserRepo := starrocks.NewExomiserRepository(database.StarrocksDB{DB: srDB})
 		pubmedClient := &MockExternalClient{}
-		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
+		interpretationRepo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedClient)
 		router := tenantRouter()
 		router.GET("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
@@ -495,7 +497,7 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 		  }
 		]`
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewGermlineCNVOccurrencesRepository(db)
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
 		router := tenantRouter()
 		router.GET("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))
 

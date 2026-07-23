@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,23 +20,23 @@ import (
 
 var mockTaskFixedTime = time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 
-func (m *MockRepository) CreateTask(task *repository.Task) error             { return nil }
-func (m *MockRepository) CreateTaskContext(tc *repository.TaskContext) error { return nil }
-func (m *MockRepository) CreateTaskHasDocument(thd *repository.TaskHasDocument) error {
+func (m *MockRepository) CreateTask(task *postgres.Task) error             { return nil }
+func (m *MockRepository) CreateTaskContext(tc *postgres.TaskContext) error { return nil }
+func (m *MockRepository) CreateTaskHasDocument(thd *postgres.TaskHasDocument) error {
 	return nil
 }
 func (m *MockRepository) GetTaskTypeCodes() ([]types.TaskType, error) { return nil, nil }
-func (m *MockRepository) GetTaskById(int) (*repository.Task, error)   { return nil, nil }
-func (m *MockRepository) GetTaskContextByTaskId(int) ([]*repository.TaskContext, error) {
+func (m *MockRepository) GetTaskById(int) (*postgres.Task, error)     { return nil, nil }
+func (m *MockRepository) GetTaskContextByTaskId(int) ([]*postgres.TaskContext, error) {
 	return nil, nil
 }
-func (m *MockRepository) GetTaskHasDocumentByTaskId(int) ([]*repository.TaskHasDocument, error) {
+func (m *MockRepository) GetTaskHasDocumentByTaskId(int) ([]*postgres.TaskHasDocument, error) {
 	return nil, nil
 }
-func (m *MockRepository) GetTaskHasDocumentByDocumentId(int) ([]*repository.TaskHasDocument, error) {
+func (m *MockRepository) GetTaskHasDocumentByDocumentId(int) ([]*postgres.TaskHasDocument, error) {
 	return nil, nil
 }
-func (m *MockRepository) GetTaskContextBySequencingExperimentId(int) ([]*repository.TaskContext, error) {
+func (m *MockRepository) GetTaskContextBySequencingExperimentId(int) ([]*postgres.TaskContext, error) {
 	return nil, nil
 }
 

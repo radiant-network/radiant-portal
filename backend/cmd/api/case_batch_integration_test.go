@@ -7,7 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -23,7 +24,7 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.POST("/:tenant/cases/batch", server.PostCaseBatchHandler(repo, &auth))
@@ -75,7 +76,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(db)
+		repo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
 
 		router := tenantRouter()
 		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
@@ -118,7 +119,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 func Test_PatchCaseBatch_RejectsMissingCaseKeyFields(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(env.Postgres)
+		repo := postgres.NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 
 		router := tenantRouter()
 		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))

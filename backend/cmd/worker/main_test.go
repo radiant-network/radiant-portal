@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -101,7 +102,7 @@ func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		bv := &batchval.BatchValidationContext{BatchRepo: repository.NewBatchRepository(db)}
+		bv := &batchval.BatchValidationContext{BatchRepo: postgres.NewBatchRepository(database.PostgresDB{DB: db})}
 		processBatch(ctx, db, bv)
 
 		result := types.Batch{}

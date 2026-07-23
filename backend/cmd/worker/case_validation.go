@@ -11,7 +11,8 @@ import (
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -128,25 +129,25 @@ type DocumentRelation struct {
 }
 
 type StorageContext struct {
-	CasesRepo         *repository.CasesRepository
-	DocRepo           *repository.DocumentsRepository
-	ObsCatRepo        *repository.ObservationCategoricalRepository
-	ObsStringRepo     *repository.ObservationStringRepository
-	FamilyHistoryRepo *repository.FamilyHistoryRepository
-	FamilyRepo        *repository.FamilyRepository
-	TaskRepo          *repository.TaskRepository
+	CasesRepo         *postgres.CasesRepository
+	DocRepo           *postgres.DocumentsRepository
+	ObsCatRepo        *postgres.ObservationCategoricalRepository
+	ObsStringRepo     *postgres.ObservationStringRepository
+	FamilyHistoryRepo *postgres.FamilyHistoryRepository
+	FamilyRepo        *postgres.FamilyRepository
+	TaskRepo          *postgres.TaskRepository
 	TenantCode        string
 }
 
 func NewStorageContext(db *gorm.DB) *StorageContext {
 	return &StorageContext{
-		CasesRepo:         repository.NewCasesRepository(db),
-		DocRepo:           repository.NewDocumentsRepository(db),
-		ObsCatRepo:        repository.NewObservationCategoricalRepository(db),
-		ObsStringRepo:     repository.NewObservationStringRepository(db),
-		FamilyHistoryRepo: repository.NewFamilyHistoryRepository(db),
-		FamilyRepo:        repository.NewFamilyRepository(db),
-		TaskRepo:          repository.NewTaskRepository(db),
+		CasesRepo:         postgres.NewCasesRepository(database.PostgresDB{DB: db}),
+		DocRepo:           postgres.NewDocumentsRepository(database.PostgresDB{DB: db}),
+		ObsCatRepo:        postgres.NewObservationCategoricalRepository(database.PostgresDB{DB: db}),
+		ObsStringRepo:     postgres.NewObservationStringRepository(database.PostgresDB{DB: db}),
+		FamilyHistoryRepo: postgres.NewFamilyHistoryRepository(database.PostgresDB{DB: db}),
+		FamilyRepo:        postgres.NewFamilyRepository(database.PostgresDB{DB: db}),
+		TaskRepo:          postgres.NewTaskRepository(database.PostgresDB{DB: db}),
 	}
 }
 
@@ -225,7 +226,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 }
 
 func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
-	statusCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetStatus)
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving status codes: %v", err)
 	}
@@ -234,7 +235,7 @@ func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error {
-	observationCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetObservation)
+	observationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservation)
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
@@ -243,7 +244,7 @@ func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error 
 }
 
 func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
-	onsetCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetOnset)
+	onsetCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetOnset)
 	if err != nil {
 		return fmt.Errorf("error retrieving onset codes: %v", err)
 	}
@@ -252,7 +253,7 @@ func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) error {
-	interpretationCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetObservationInterpretation)
+	interpretationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservationInterpretation)
 	if err != nil {
 		return fmt.Errorf("error retrieving interpretation codes: %v", err)
 	}
@@ -261,7 +262,7 @@ func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) err
 }
 
 func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
-	ancestryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetAncestry)
+	ancestryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAncestry)
 	if err != nil {
 		return fmt.Errorf("error retrieving ancestry codes: %v", err)
 	}
@@ -270,7 +271,7 @@ func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) error {
-	consanguinityCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetConsanguinity)
+	consanguinityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetConsanguinity)
 	if err != nil {
 		return fmt.Errorf("error retrieving consanguinity codes: %v", err)
 	}
@@ -279,7 +280,7 @@ func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) erro
 }
 
 func (r *CaseValidationRecord) fetchResolutionStatusCodes(ctx context.Context) error {
-	rsCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetResolutionStatus)
+	rsCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetResolutionStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving resolution status codes: %v", err)
 	}
@@ -288,7 +289,7 @@ func (r *CaseValidationRecord) fetchResolutionStatusCodes(ctx context.Context) e
 }
 
 func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
-	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetPriority)
+	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetPriority)
 	if err != nil {
 		return fmt.Errorf("error retrieving priority codes: %v", err)
 	}
@@ -297,7 +298,7 @@ func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
-	categoryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetCaseCategory)
+	categoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetCaseCategory)
 	if err != nil {
 		return fmt.Errorf("error retrieving category codes: %v", err)
 	}
@@ -306,13 +307,13 @@ func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
-	affectedStatusCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetAffectedStatus)
+	affectedStatusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAffectedStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving patient affected status codes: %v", err)
 	}
 	r.PatientAffectedStatusCodes = affectedStatusCodes
 
-	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetFamilyRelationship)
+	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFamilyRelationship)
 	if err != nil {
 		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
 	}
@@ -321,19 +322,19 @@ func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchDocumentCodes(ctx context.Context) error {
-	dataCategoryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetDataCategory)
+	dataCategoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataCategory)
 	if err != nil {
 		return fmt.Errorf("error retrieving document data category codes: %v", err)
 	}
 	r.DocumentDataCategoryCodes = dataCategoryCodes
 
-	dataTypeCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetDataType)
+	dataTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataType)
 	if err != nil {
 		return fmt.Errorf("error retrieving document data type codes: %v", err)
 	}
 	r.DocumentDataTypeCodes = dataTypeCodes
 
-	formatCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetFileFormat)
+	formatCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFileFormat)
 	if err != nil {
 		return fmt.Errorf("error retrieving document format codes: %v", err)
 	}
@@ -383,7 +384,7 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchTaskTypeCodes(ctx context.Context) error {
-	taskTypeCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetTaskType)
+	taskTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetTaskType)
 	if err != nil {
 		return fmt.Errorf("error retrieving task type codes: %v", err)
 	}
@@ -1361,7 +1362,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 
 func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		batchRepo := repository.NewBatchRepository(tx)
+		batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		txCtx := NewStorageContext(tx)
 		txCtx.TenantCode = batch.TenantCode
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, batchRepo)
