@@ -36,14 +36,18 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const userMessage: Message = { id: crypto.randomUUID(), role: 'user', content: trimmed };
+      const userMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        blocks: [{ type: 'text', content: trimmed }],
+      };
       setMessages(previous => [...previous, userMessage]);
       setIsResponding(true);
 
       mockEngine
         .reply(trimmed)
-        .then(reply => {
-          setMessages(previous => [...previous, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
+        .then(blocks => {
+          setMessages(previous => [...previous, { id: crypto.randomUUID(), role: 'assistant', blocks }]);
         })
         .finally(() => setIsResponding(false));
     },

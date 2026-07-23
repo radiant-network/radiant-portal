@@ -1,3 +1,5 @@
+import { type Block } from '../types';
+
 /**
  * The seam between the chat UI and the "brain".
  *
@@ -6,8 +8,8 @@
  * interface can be swapped in without touching the UI.
  */
 export interface AssistantEngine {
-  /** Produce the assistant's reply to a user message. */
-  reply(userText: string): Promise<string>;
+  /** Produce the assistant's reply as a list of typed blocks. */
+  reply(userText: string): Promise<Block[]>;
 }
 
 /** Small helper to simulate latency in the mock engine. */
