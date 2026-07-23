@@ -1,0 +1,232 @@
+name: Cypress Nightly
+
+on:
+  schedule:
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Cypress base URL'
+        required: false
+        default: 'https://portail.dev.qlin.aws.sante.quebec/'
+
+concurrency:
+  group: cypress-nightly
+  cancel-in-progress: false
+
+jobs:
+  cypress-nightly:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set run ID
+        id: run
+        run: |
+          RUN_ID="nightly-$(date +%Y%m%d-%H%M)"
+          echo "value=${RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Upload source to S3
+        env:
+          RUN_ID: ${{ steps.run.outputs.value }}
+        run: |
+          tar -czf /tmp/cypress-source.tar.gz \
+            package.json package-lock.json \
+            cypress/ cypress.config.ts tsconfig.json
+          aws s3 cp /tmp/cypress-source.tar.gz \
+            "s3://qlin-dev-cypress-artifacts/$RUN_ID/source.tar.gz"
+
+      - name: Launch shards and aggregator
+        env:
+          RUN_ID: ${{ steps.run.outputs.value }}
+          CYPRESS_BASE_URL: ${{ inputs.base_url || 'https://portail.dev.qlin.aws.sante.quebec/' }}
+          CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
+          CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.CYPRESS_KEYCLOAK_CLIENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+        run: |
+          SG_ID=$(aws ec2 describe-security-groups \
+            --filters Name=group-name,Values=ferlease-cypress-task \
+            --query 'SecurityGroups[0].GroupId' \
+            --output text)
+
+          SHARDS=(
+            "cypress/e2e/CaseEntity/Details/**/*.cy.ts,cypress/e2e/CaseEntity/Files/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Germline/CNV/**/*.cy.ts,cypress/api/Batches/**/*.cy.ts,cypress/api/Cases/**/*.cy.ts"
+            "cypress/e2e/Cases/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Somatic/**/*.cy.ts,cypress/api/Occurrences/**/*.cy.ts,cypress/api/Patients/**/*.cy.ts"
+            "cypress/e2e/VariantEntity/**/*.cy.ts,cypress/e2e/Connexion/**/*.cy.ts,cypress/e2e/Files/**/*.cy.ts"
+            "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
+          )
+
+          NIGHTLY_SHARD_CMD='
+          set -e
+          S3_PREFIX="s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$SHARD_ID"
+          aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz" /tmp/source.tar.gz
+          mkdir -p /app && tar -xzf /tmp/source.tar.gz -C /app
+          cd /app && npm ci
+          npm install --no-save mochawesome mochawesome-merge mochawesome-report-generator cypress-multi-reporters mocha-junit-reporter
+          mkdir -p cypress/results cypress/screenshots
+          node -e "process.stdout.write(JSON.stringify({reporterEnabled:\"mochawesome,mocha-junit-reporter\",mochawesomeReporterOptions:{reportDir:\"cypress/results\",overwrite:false,html:false,json:true},mochaJunitReporterReporterOptions:{mochaFile:\"cypress/results/results-[hash].xml\"}}))" > /tmp/reporters-config.json
+          set +e
+          npx cypress run ${CYPRESS_SPEC:+--spec "$CYPRESS_SPEC"} --reporter cypress-multi-reporters --reporter-options "configFile=/tmp/reporters-config.json"
+          CYPRESS_EXIT=$?
+          set -e
+          REPORT_URL=""
+          FAIL_COUNT=0
+          if compgen -G "cypress/results/*.json" > /dev/null 2>&1; then
+            npx mochawesome-merge cypress/results/*.json -o /tmp/mochawesome.json
+            npx marge /tmp/mochawesome.json --reportDir /tmp/html-report --inline --charts
+            aws s3 cp /tmp/html-report/mochawesome.html "$S3_PREFIX/report.html" --content-type text/html
+            aws s3 cp /tmp/mochawesome.json "$S3_PREFIX/mochawesome.json"
+            REPORT_URL=$(aws s3 presign "$S3_PREFIX/report.html" --expires-in 21600)
+            FAIL_COUNT=$(node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).stats.failures||0))}catch(e){process.stdout.write(\"0\")}})" < /tmp/mochawesome.json 2>/dev/null || echo 0)
+          fi
+          if compgen -G "cypress/results/*.xml" > /dev/null 2>&1; then
+            node -e "const fs=require(\"fs\");const files=process.argv.slice(1).filter(f=>fs.existsSync(f));const suites=files.flatMap(f=>{const c=fs.readFileSync(f,\"utf8\");const w=[...c.matchAll(/<testsuite(?!s)[\\s\\S]*?<\\/testsuite>/g)].map(m=>m[0]);const s=[...c.matchAll(/<testsuite(?!s)[^>]*\\/>/g)].map(m=>m[0].replace(/\\/>/,\"><\\/testsuite>\"));return [...w,...s];});if(suites.length)fs.writeFileSync(\"/tmp/results.xml\",\"<testsuites>\\n\"+suites.join(\"\\n\")+\"\\n</testsuites>\");" cypress/results/*.xml
+            aws s3 cp /tmp/results.xml "$S3_PREFIX/results.xml"
+          fi
+          fail_count=$(find cypress/screenshots -name "*.png" 2>/dev/null | wc -l | tr -d " ")
+          SURL=""
+          if [ "$fail_count" -gt 0 ]; then
+            zip -r /tmp/screenshots.zip cypress/screenshots/
+            aws s3 cp /tmp/screenshots.zip "$S3_PREFIX/screenshots.zip"
+            SURL=$(aws s3 presign "$S3_PREFIX/screenshots.zip" --expires-in 21600)
+          fi
+          printf "{\"exit_code\":%s,\"report_url\":\"%s\",\"screenshots_url\":\"%s\",\"failure_count\":%s}" "$CYPRESS_EXIT" "$REPORT_URL" "$SURL" "$FAIL_COUNT" > /tmp/result.json
+          aws s3 cp /tmp/result.json "$S3_PREFIX/result.json"
+          exit $CYPRESS_EXIT
+          '
+
+          TASK_ARNS=()
+          for i in "${!SHARDS[@]}"; do
+            OVERRIDES=$(jq -cn \
+              --arg release "$RUN_ID" \
+              --arg base_url "$CYPRESS_BASE_URL" \
+              --arg username "$CYPRESS_USER_USERNAME" \
+              --arg password "$CYPRESS_USER_PASSWORD" \
+              --arg kc_secret "$KEYCLOAK_CLIENT_SECRET" \
+              --arg spec "${SHARDS[$i]}" \
+              --arg shard_id "$i" \
+              --arg cmd "$NIGHTLY_SHARD_CMD" \
+              '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
+                {name:"RELEASE",value:$release},
+                {name:"CYPRESS_BASE_URL",value:$base_url},
+                {name:"CYPRESS_USER_USERNAME",value:$username},
+                {name:"CYPRESS_USER_PASSWORD",value:$password},
+                {name:"KEYCLOAK_CLIENT_SECRET",value:$kc_secret},
+                {name:"CYPRESS_SPEC",value:$spec},
+                {name:"SHARD_ID",value:$shard_id}
+              ]}]}')
+
+            ARN=$(aws ecs run-task \
+              --cluster pipelines \
+              --task-definition ferlease-cypress \
+              --launch-type FARGATE \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
+              --overrides "$OVERRIDES" \
+              --query 'tasks[0].taskArn' \
+              --output text)
+            TASK_ARNS+=("$ARN")
+            echo "Shard $i launched: $ARN"
+          done
+
+          AGGREGATOR_CMD='
+          set -e
+          ARNS=($SHARD_TASK_ARNS)
+          SHARDS_COUNT=$SHARD_COUNT
+          while true; do
+            RUNNING=$(aws ecs describe-tasks --cluster pipelines --tasks "${ARNS[@]}" --query "length(tasks[?lastStatus!=\`STOPPED\`])" --output text)
+            [ "$RUNNING" = "0" ] && break
+            sleep 60
+          done
+          TOTAL_FAILS=0
+          ALL_PASSED=true
+          mkdir -p /tmp/all_screenshots
+          for i in $(seq 0 $((SHARDS_COUNT - 1))); do
+            R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null || echo "{\"exit_code\":1,\"failure_count\":0}")
+            EC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).exit_code||0))}catch(e){process.stdout.write(\"1\")}})" 2>/dev/null || echo 1)
+            FC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).failure_count||0))}catch(e){process.stdout.write(\"0\")}})" 2>/dev/null || echo 0)
+            [ "$EC" != "0" ] && ALL_PASSED=false
+            FC=${FC:-0}
+            TOTAL_FAILS=$((TOTAL_FAILS + FC))
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
+            [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/results.xml" "/tmp/shard_${i}.xml" 2>/dev/null || true
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/mochawesome.json" "/tmp/shard_${i}_moch.json" 2>/dev/null || true
+          done
+          COMBINED_ZURL=""
+          if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
+            cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
+            aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
+            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 21600)
+          fi
+          COMBINED_XURL=""
+          XML_PARTS=()
+          for i in $(seq 0 $((SHARDS_COUNT - 1))); do
+            [ -f "/tmp/shard_${i}.xml" ] && XML_PARTS+=("/tmp/shard_${i}.xml")
+          done
+          if [ ${#XML_PARTS[@]} -gt 0 ]; then
+            node -e "const fs=require(\"fs\");const files=process.argv.slice(1).filter(f=>fs.existsSync(f));const suites=files.flatMap(f=>{const c=fs.readFileSync(f,\"utf8\");const w=[...c.matchAll(/<testsuite(?!s)[\\s\\S]*?<\\/testsuite>/g)].map(m=>m[0]);const s=[...c.matchAll(/<testsuite(?!s)[^>]*\\/>/g)].map(m=>m[0].replace(/\\/>/,\"><\\/testsuite>\"));return [...w,...s];});if(suites.length)fs.writeFileSync(\"/tmp/combined-results.xml\",\"<testsuites>\\n\"+suites.join(\"\\n\")+\"\\n</testsuites>\");" "${XML_PARTS[@]}"
+            if [ -f /tmp/combined-results.xml ]; then
+              aws s3 cp /tmp/combined-results.xml "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-results.xml"
+              COMBINED_XURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-results.xml" --expires-in 21600)
+            fi
+          fi
+          COMBINED_RURL=""
+          MOCH_PARTS=()
+          for i in $(seq 0 $((SHARDS_COUNT - 1))); do
+            [ -f "/tmp/shard_${i}_moch.json" ] && MOCH_PARTS+=("/tmp/shard_${i}_moch.json")
+          done
+          if [ ${#MOCH_PARTS[@]} -gt 0 ]; then
+            npm install --no-save mochawesome-merge mochawesome-report-generator 2>/dev/null || true
+            npx mochawesome-merge "${MOCH_PARTS[@]}" -o /tmp/combined-mochawesome.json 2>/dev/null || true
+            if [ -f /tmp/combined-mochawesome.json ]; then
+              npx marge /tmp/combined-mochawesome.json --reportDir /tmp/combined-html --reportFilename mochawesome --inline --charts 2>/dev/null || true
+              if [ -f /tmp/combined-html/mochawesome.html ]; then
+                aws s3 cp /tmp/combined-html/mochawesome.html "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-report.html" --content-type text/html
+                COMBINED_RURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-report.html" --expires-in 21600)
+              fi
+            fi
+          fi
+          $ALL_PASSED && STATUS="All passed ✅" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${TOTAL_FAILS} new fails 🐛" || STATUS="Failed 🐛"; }
+          $ALL_PASSED && COLOR="good" || COLOR="danger"
+          TITLE="Radiant - Cypress Test Results: $STATUS"
+          BODY_PARTS=()
+          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
+          [ -n "$COMBINED_RURL" ] && BODY_PARTS+=("Rapport HTML: <${COMBINED_RURL}|View Report>")
+          [ -n "$COMBINED_XURL" ] && BODY_PARTS+=("Rapport XML: <${COMBINED_XURL}|Download>")
+          TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
+          PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
+          curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
+          '
+
+          AGG_OVERRIDES=$(jq -cn \
+            --arg release "$RUN_ID" \
+            --arg slack "$SLACK_WEBHOOK" \
+            --arg arns "${TASK_ARNS[*]}" \
+            --arg count "${#TASK_ARNS[@]}" \
+            --arg cmd "$AGGREGATOR_CMD" \
+            '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
+              {name:"RELEASE",value:$release},
+              {name:"SLACK_WEBHOOK",value:$slack},
+              {name:"SHARD_TASK_ARNS",value:$arns},
+              {name:"SHARD_COUNT",value:$count}
+            ]}]}')
+
+          aws ecs run-task \
+            --cluster pipelines \
+            --task-definition ferlease-cypress \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
+            --overrides "$AGG_OVERRIDES" \
+            --query 'tasks[0].taskArn' \
+            --output text | xargs -I{} echo "Aggregator launched: {}"

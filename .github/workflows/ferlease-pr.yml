@@ -1,0 +1,301 @@
+name: Ferlease PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed, labeled]
+
+concurrency:
+  group: ferlease-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  ferlease-release:
+    if: >
+      github.event.action != 'closed' &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
+       startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      release: ${{ steps.release.outputs.value }}
+      url: ${{ steps.release.outputs.url }}
+
+    steps:
+      - name: Extract release
+        id: release
+        run: |
+          branch="${{ github.head_ref }}"
+          release="${branch#*/}"
+          release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          echo "value=${release}" >> "$GITHUB_OUTPUT"
+          echo "url=https://portail-${release}.dev.qlin.aws.sante.quebec" >> "$GITHUB_OUTPUT"
+
+      - name: Write SSH credentials
+        env:
+          DEPLOY_KEY: ${{ secrets.INFRA_REPO_DEPLOY_KEY }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
+          echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
+          cat > "$RUNNER_TEMP/known_host" <<'EOF'
+          github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+          github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+          EOF
+
+      - name: Pull ferlease binary
+        run: |
+          container=$(docker create ferlabcrsj/ferlease:0.2.2)
+          docker cp "$container:/bin/ferlease" ./ferlease
+          docker rm "$container"
+          chmod +x ./ferlease
+
+      - name: Write ferlease config
+        run: |
+          cat > ferlease-config.yml <<EOF
+          service: radiant-portal-ui
+          release: ${{ steps.release.outputs.value }}
+          environment: dev
+          repo: git@github.com:Ferlab-Ste-Justine/qlin-qa-infra.git
+          ref: main
+          git_auth:
+            ssh_key: $RUNNER_TEMP/id_rsa
+            known_key: $RUNNER_TEMP/known_host
+          author:
+            name: ferlab-automation
+            email: automation@ferlab.bio
+          template_directory: "{{.RepoDir}}/ferlease-templates/{{.Service}}"
+          commit_message: "{{ if eq .Operation \"release\" }}Adding{{ else }}Removing{{ end }} release {{.Release}} of service {{.Service}}"
+          push_retries: 60
+          push_retry_interval: 5s
+          EOF
+
+      - name: Run ferlease release
+        run: ./ferlease release -c ferlease-config.yml
+
+      - name: Notify Slack
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          URL: ${{ steps.release.outputs.url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"attachments\":[{\"title\":\"New Radiant Release : Ticket: ${PR_TITLE}\",\"text\":\"You can find the new release for Radiant at ${URL}\",\"color\":\"good\"}]}"
+
+  cypress:
+    needs: ferlease-release
+    if: >
+      github.event.action != 'closed' &&
+      contains(github.event.pull_request.labels.*.name, 'cypress') &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
+       startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Notify Slack launch
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"attachments\":[{\"title\":\"Ferlease - Cypress Launch Attempt (Radiant) ⚙️\",\"text\":\"Cypress tests are starting ✈️ for branch: ${BRANCH}\",\"color\":\"good\"}]}"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Upload source to S3
+        env:
+          RELEASE: ${{ needs.ferlease-release.outputs.release }}
+        run: |
+          tar -czf /tmp/cypress-source.tar.gz \
+            package.json package-lock.json \
+            cypress/ cypress.config.ts tsconfig.json
+          aws s3 cp /tmp/cypress-source.tar.gz \
+            "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz"
+
+      - name: Run Cypress via ECS Fargate
+        env:
+          RELEASE: ${{ needs.ferlease-release.outputs.release }}
+          CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
+          CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
+          CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.CYPRESS_KEYCLOAK_CLIENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          SG_ID=$(aws ec2 describe-security-groups \
+            --filters Name=group-name,Values=ferlease-cypress-task \
+            --query 'SecurityGroups[0].GroupId' \
+            --output text)
+
+          SHARDS=(
+            "cypress/e2e/CaseEntity/Details/**/*.cy.ts,cypress/e2e/CaseEntity/Files/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Germline/CNV/**/*.cy.ts,cypress/api/Batches/**/*.cy.ts,cypress/api/Cases/**/*.cy.ts"
+            "cypress/e2e/Cases/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Somatic/**/*.cy.ts,cypress/api/Occurrences/**/*.cy.ts,cypress/api/Patients/**/*.cy.ts"
+            "cypress/e2e/VariantEntity/**/*.cy.ts,cypress/e2e/Connexion/**/*.cy.ts,cypress/e2e/Files/**/*.cy.ts"
+            "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
+          )
+
+          TASK_ARNS=()
+          for i in "${!SHARDS[@]}"; do
+            OVERRIDES=$(jq -cn \
+              --arg release "$RELEASE" \
+              --arg base_url "$CYPRESS_BASE_URL" \
+              --arg username "$CYPRESS_USER_USERNAME" \
+              --arg password "$CYPRESS_USER_PASSWORD" \
+              --arg kc_secret "$KEYCLOAK_CLIENT_SECRET" \
+              --arg spec "${SHARDS[$i]}" \
+              --arg shard_id "$i" \
+              '{containerOverrides:[{name:"ferlease-cypress",environment:[
+                {name:"RELEASE",value:$release},
+                {name:"CYPRESS_BASE_URL",value:$base_url},
+                {name:"CYPRESS_USER_USERNAME",value:$username},
+                {name:"CYPRESS_USER_PASSWORD",value:$password},
+                {name:"KEYCLOAK_CLIENT_SECRET",value:$kc_secret},
+                {name:"CYPRESS_SPEC",value:$spec},
+                {name:"SHARD_ID",value:$shard_id}
+              ]}]}')
+            ARN=$(aws ecs run-task \
+              --cluster pipelines \
+              --task-definition ferlease-cypress \
+              --launch-type FARGATE \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
+              --overrides "$OVERRIDES" \
+              --query 'tasks[0].taskArn' \
+              --output text)
+            TASK_ARNS+=("$ARN")
+            echo "Shard $i launched: $ARN"
+          done
+
+          AGGREGATOR_CMD='
+          set -e
+          ARNS=($SHARD_TASK_ARNS)
+          SHARDS_COUNT=$SHARD_COUNT
+          while true; do
+            RUNNING=$(aws ecs describe-tasks --cluster pipelines --tasks "${ARNS[@]}" --query "length(tasks[?lastStatus!=\`STOPPED\`])" --output text)
+            [ "$RUNNING" = "0" ] && break
+            sleep 60
+          done
+          TOTAL_FAILS=0
+          REPORT_LINKS=""
+          ALL_PASSED=true
+          mkdir -p /tmp/all_screenshots
+          for i in $(seq 0 $((SHARDS_COUNT - 1))); do
+            R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null || echo "{\"exit_code\":1,\"report_url\":\"\",\"failure_count\":0}")
+            RURL=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(JSON.parse(d).report_url||\"\")}catch(e){}})" 2>/dev/null || true)
+            EC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).exit_code||0))}catch(e){process.stdout.write(\"1\")}})" 2>/dev/null || echo 1)
+            FC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).failure_count||0))}catch(e){process.stdout.write(\"0\")}})" 2>/dev/null || echo 0)
+            [ "$EC" != "0" ] && ALL_PASSED=false
+            FC=${FC:-0}
+            TOTAL_FAILS=$((TOTAL_FAILS + FC))
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
+            [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
+            [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${RURL}|Shard ${i}>  "
+          done
+          COMBINED_ZURL=""
+          if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
+            cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
+            aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
+            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 21600)
+          fi
+          $ALL_PASSED && STATUS="All passed ✅" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${TOTAL_FAILS} new fails 🐛" || STATUS="Failed 🐛"; }
+          $ALL_PASSED && COLOR="good" || COLOR="danger"
+          TITLE="Ferlease - $RELEASE - Cypress Test Results: $STATUS"
+          BODY_PARTS=()
+          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
+          [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Rapports: $REPORT_LINKS")
+          TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
+          PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
+          curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
+          '
+
+          AGG_OVERRIDES=$(jq -cn \
+            --arg release "$RELEASE" \
+            --arg slack "$SLACK_WEBHOOK" \
+            --arg arns "${TASK_ARNS[*]}" \
+            --arg count "${#TASK_ARNS[@]}" \
+            --arg cmd "$AGGREGATOR_CMD" \
+            '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
+              {name:"RELEASE",value:$release},
+              {name:"SLACK_WEBHOOK",value:$slack},
+              {name:"SHARD_TASK_ARNS",value:$arns},
+              {name:"SHARD_COUNT",value:$count}
+            ]}]}')
+
+          aws ecs run-task \
+            --cluster pipelines \
+            --task-definition ferlease-cypress \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
+            --overrides "$AGG_OVERRIDES" \
+            --query 'tasks[0].taskArn' \
+            --output text | xargs -I{} echo "Aggregator launched: {}"
+
+  ferlease-teardown:
+    if: >
+      github.event.action == 'closed' &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
+       startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Extract release
+        id: release
+        run: |
+          branch="${{ github.event.pull_request.head.ref }}"
+          release="${branch#*/}"
+          release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          echo "value=${release}" >> "$GITHUB_OUTPUT"
+
+      - name: Write SSH credentials
+        env:
+          DEPLOY_KEY: ${{ secrets.INFRA_REPO_DEPLOY_KEY }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/id_rsa"
+          echo "$DEPLOY_KEY" > "$RUNNER_TEMP/id_rsa"
+          cat > "$RUNNER_TEMP/known_host" <<'EOF'
+          github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+          github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+          EOF
+
+      - name: Pull ferlease binary
+        run: |
+          container=$(docker create ferlabcrsj/ferlease:0.2.2)
+          docker cp "$container:/bin/ferlease" ./ferlease
+          docker rm "$container"
+          chmod +x ./ferlease
+
+      - name: Write ferlease config
+        run: |
+          cat > ferlease-config.yml <<EOF
+          service: radiant-portal-ui
+          release: ${{ steps.release.outputs.value }}
+          environment: dev
+          repo: git@github.com:Ferlab-Ste-Justine/qlin-qa-infra.git
+          ref: main
+          git_auth:
+            ssh_key: $RUNNER_TEMP/id_rsa
+            known_key: $RUNNER_TEMP/known_host
+          author:
+            name: ferlab-automation
+            email: automation@ferlab.bio
+          template_directory: "{{.RepoDir}}/ferlease-templates/{{.Service}}"
+          commit_message: "{{ if eq .Operation \"release\" }}Adding{{ else }}Removing{{ end }} release {{.Release}} of service {{.Service}}"
+          push_retries: 60
+          push_retry_interval: 5s
+          EOF
+
+      - name: Run ferlease teardown
+        run: ./ferlease teardown -c ferlease-config.yml
