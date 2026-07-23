@@ -40,14 +40,16 @@ export function AssistantPanel() {
         </SheetHeader>
 
         <div className="relative min-h-0 flex-1">
-          <MessageScrollerProvider>
-            <MessageScroller>
-              <MessageScrollerViewport className="p-4">
-                <MessageScrollerContent className="gap-4">
-                  {messages.length === 0 && !isResponding ? (
-                    <p className="mt-8 text-center text-sm text-muted-foreground">Ask a question to get started.</p>
-                  ) : (
-                    messages.map(message => (
+          {messages.length === 0 && !isResponding ? (
+            <div className="flex h-full items-center justify-center p-6 text-center">
+              <p className="text-sm text-muted-foreground">Ask a question to get started.</p>
+            </div>
+          ) : (
+            <MessageScrollerProvider>
+              <MessageScroller>
+                <MessageScrollerViewport className="p-4">
+                  <MessageScrollerContent className="gap-4">
+                    {messages.map(message => (
                       <MessageScrollerItem key={message.id} messageId={message.id}>
                         <Message align={message.role === 'user' ? 'end' : 'start'}>
                           <MessageAvatar className="size-8">
@@ -64,28 +66,28 @@ export function AssistantPanel() {
                           </MessageContent>
                         </Message>
                       </MessageScrollerItem>
-                    ))
-                  )}
+                    ))}
 
-                  {isResponding && (
-                    <MessageScrollerItem>
-                      <Message align="start">
-                        <MessageAvatar className="size-8">
-                          <Cat className="size-4" />
-                        </MessageAvatar>
-                        <MessageContent>
-                          <Bubble align="start" variant="muted">
-                            <BubbleContent className="text-muted-foreground">…</BubbleContent>
-                          </Bubble>
-                        </MessageContent>
-                      </Message>
-                    </MessageScrollerItem>
-                  )}
-                </MessageScrollerContent>
-              </MessageScrollerViewport>
-              <MessageScrollerButton direction="end" />
-            </MessageScroller>
-          </MessageScrollerProvider>
+                    {isResponding && (
+                      <MessageScrollerItem>
+                        <Message align="start">
+                          <MessageAvatar className="size-8">
+                            <Cat className="size-4" />
+                          </MessageAvatar>
+                          <MessageContent>
+                            <Bubble align="start" variant="muted">
+                              <BubbleContent className="text-muted-foreground">…</BubbleContent>
+                            </Bubble>
+                          </MessageContent>
+                        </Message>
+                      </MessageScrollerItem>
+                    )}
+                  </MessageScrollerContent>
+                </MessageScrollerViewport>
+                <MessageScrollerButton direction="end" />
+              </MessageScroller>
+            </MessageScrollerProvider>
+          )}
         </div>
 
         <div className="border-t p-3">

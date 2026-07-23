@@ -3,13 +3,32 @@ export type MessageRole = 'user' | 'assistant';
 /** A text block — plain prose from the user or the assistant. */
 export type TextBlock = { type: 'text'; content: string };
 
+export type TableColumn = { key: string; label: string };
+
+/** A tabular result — rendered with the simple shadcn Table. */
+export type TableBlock = {
+  type: 'table';
+  title?: string;
+  columns: TableColumn[];
+  rows: Record<string, string>[];
+};
+
+export type ChartDatum = { label: string; count: number };
+
+/** A single-series categorical chart — rendered as a horizontal bar chart. */
+export type ChartBlock = {
+  type: 'chart';
+  title?: string;
+  categoryLabel: string;
+  valueLabel: string;
+  data: ChartDatum[];
+};
+
 /**
  * A typed reply fragment. The assistant returns a list of these, and
  * `<BlockRenderer>` maps each one to a component — this is the "generative UI".
- *
- * P3 ships `text` only. P4 adds `table` and `chart`.
  */
-export type Block = TextBlock;
+export type Block = TextBlock | TableBlock | ChartBlock;
 
 export type Message = {
   id: string;
