@@ -1,5 +1,6 @@
-import { Cat, User } from 'lucide-react';
+import { Cat } from 'lucide-react';
 
+import { UserAvatar } from '@/components/base/avatar';
 import { Bubble, BubbleContent } from '@/components/base/shadcn/bubble';
 import { Message, MessageAvatar, MessageContent } from '@/components/base/shadcn/message';
 import {
@@ -11,6 +12,7 @@ import {
   MessageScrollerViewport,
 } from '@/components/base/shadcn/message-scroller';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
+import { useLoginContext } from '@/components/hooks/use-login';
 
 import { BlockRenderer } from './blocks/block-renderer';
 import { AssistantComposer } from './assistant-composer';
@@ -23,6 +25,7 @@ import { TypingDots } from './typing-dots';
  */
 export function AssistantPanel() {
   const { open, setOpen, messages, isResponding } = useAssistant();
+  const user = useLoginContext();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -50,9 +53,13 @@ export function AssistantPanel() {
                     {messages.map(message => (
                       <MessageScrollerItem key={message.id} messageId={message.id}>
                         <Message align={message.role === 'user' ? 'end' : 'start'}>
-                          <MessageAvatar className="size-8">
-                            {message.role === 'user' ? <User className="size-4" /> : <Cat className="size-4" />}
-                          </MessageAvatar>
+                          {message.role === 'user' ? (
+                            <UserAvatar user={{ id: user.sub, name: user.name }} size="md" className="self-end" />
+                          ) : (
+                            <MessageAvatar className="size-8">
+                              <Cat className="size-4" />
+                            </MessageAvatar>
+                          )}
                           <MessageContent>
                             {message.blocks.map((block, index) => (
                               <BlockRenderer
