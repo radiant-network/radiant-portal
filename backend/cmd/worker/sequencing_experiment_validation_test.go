@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -96,15 +97,15 @@ func (m *mockSeqExpDAO) GetSequencingExperimentDetailById(seqId int) (*types.Seq
 
 type mockValueSetsDAO struct{ mock.Mock }
 
-func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
+func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	switch vsType {
-	case repository.ValueSetExperimentalStrategy:
+	case postgres.ValueSetExperimentalStrategy:
 		return []string{"wgs", "wxs", "rna_seq"}, nil
-	case repository.ValueSetSequencingReadTechnology:
+	case postgres.ValueSetSequencingReadTechnology:
 		return []string{"short_read", "long_read"}, nil
-	case repository.ValueSetStatus:
+	case postgres.ValueSetStatus:
 		return []string{"draft", "in_progress", "completed"}, nil
-	case repository.ValueSetPlatform:
+	case postgres.ValueSetPlatform:
 		return []string{"illumina", "pacbio", "nanopore"}, nil
 	default:
 		return []string{}, nil
@@ -853,7 +854,7 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 		err := persistBatchAndUpdateSequencingExperimentRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewSequencingExperimentRepository(db)
+		repo := postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: db})
 		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALIQUOT-WORKER-UPDATE-1", "S-SEQ-WORKER-UPDATE-1", "CQGC")
 		require.NoError(t, err)
 		require.NotNil(t, seqExp)

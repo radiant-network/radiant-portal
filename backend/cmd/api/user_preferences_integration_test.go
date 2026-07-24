@@ -7,7 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -15,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, status int, key string, expected string) {
+func assertGetUserPreferencesHandler(t *testing.T, repo *postgres.UserPreferencesRepository, auth utils.Auth, status int, key string, expected string) {
 	router := tenantRouter()
 	router.GET("/users/preferences/:key", server.GetUserPreferencesHandler(repo, auth))
 
@@ -29,7 +30,7 @@ func assertGetUserPreferencesHandler(t *testing.T, repo *repository.UserPreferen
 
 func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{}
 		assertGetUserPreferencesHandler(t, repo, auth, http.StatusNotFound, "table_1", `{"status": 404, "message":"user preferences not found"}`)
 	})
@@ -37,7 +38,7 @@ func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 
 func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}
@@ -51,7 +52,7 @@ func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	})
 }
 
-func assertUpdateUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, body string, status int, key string, expected string) {
+func assertUpdateUserPreferencesHandler(t *testing.T, repo *postgres.UserPreferencesRepository, auth utils.Auth, body string, status int, key string, expected string) {
 	router := tenantRouter()
 	router.POST("/users/preferences/:key", server.UpdateUserPreferencesHandler(repo, auth))
 
@@ -65,7 +66,7 @@ func assertUpdateUserPreferencesHandler(t *testing.T, repo *repository.UserPrefe
 
 func Test_UpdateUserPreferencesHandler(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := repository.NewUserPreferencesRepository(db)
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}

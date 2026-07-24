@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -15,11 +17,34 @@ import (
 )
 
 const (
-	TestResources            = "../../test/data"
 	StarrocksContainerName   = "starrocks_radiant"
 	PostgresContainerName    = "postgres_radiant"
 	ObjectStoreContainerName = "minio_radiant"
 )
+
+// TestResources is the absolute path to backend/test/data. It is resolved from the module root
+// (the directory holding go.mod) rather than a fixed relative path so it works no matter how deep
+// the test package lives under backend/ (e.g. internal/repository/postgres/ vs cmd/api/).
+var TestResources = filepath.Join(ModuleRoot(), "test", "data")
+
+// ModuleRoot walks up from the test's working directory (Go sets it to the package dir) to the
+// directory containing go.mod, i.e. backend/.
+func ModuleRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("testutils: getwd: %v", err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			log.Fatal("testutils: go.mod not found above test working directory")
+		}
+		dir = parent
+	}
+}
 
 var (
 	PostgresContainerSetup    *ContainerConf

@@ -6,7 +6,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -69,7 +69,7 @@ func ProcessUnexpectedError(ctx context.Context, batch *types.Batch, unexpectedE
 	}
 }
 
-func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](ctx context.Context, batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
+func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](ctx context.Context, batch *types.Batch, records []T, r *postgres.BatchRepository) (int64, error) {
 	CopyRecordIntoBatch(batch, records)
 	now := time.Now()
 	batch.FinishedOn = &now

@@ -8,7 +8,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/service"
 )
 
@@ -28,8 +30,8 @@ const viewRefreshLockKey int64 = 0x726164696e7401
 // the schema). Cases that are NOT errors and return nil: another replica holds the lock,
 // or a shutdown cancelled it mid-run.
 func refreshTenantViews(ctx context.Context, pg, sr *gorm.DB) error {
-	tenants := repository.NewTenantRepository(pg)
-	views := repository.NewStarrocksTenantRepository(sr)
+	tenants := postgres.NewTenantRepository(database.PostgresDB{DB: pg})
+	views := starrocks.NewStarrocksTenantRepository(database.StarrocksDB{DB: sr})
 
 	sqlDB, err := pg.DB()
 	if err != nil {

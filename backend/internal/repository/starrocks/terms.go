@@ -1,0 +1,83 @@
+package starrocks
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type TermsRepository struct {
+	db *gorm.DB
+}
+
+func NewTermsRepository(db database.StarrocksDB) *TermsRepository {
+	return &TermsRepository{db: db.DB}
+}
+
+func mapToAutoCompleteTerm(term *types.Term, input string) types.AutoCompleteTerm {
+	regex := regexp.MustCompile("(?i)" + input)
+	id := ""
+	name := ""
+	if len(input) > 0 {
+		id = regex.ReplaceAllString(term.ID, "<strong>"+strings.ToUpper(input)+"</strong>")
+		name = regex.ReplaceAllString(term.Name, "<strong>"+strings.ToLower(input)+"</strong>")
+	} else {
+		id = term.ID
+		name = term.Name
+	}
+	return types.AutoCompleteTerm{
+		HighLight: types.Term{
+			ID:   id,
+			Name: name,
+		},
+		Source: types.Term{
+			ID:   term.ID,
+			Name: term.Name,
+		},
+	}
+}
+
+func (r *TermsRepository) GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
+	like := fmt.Sprintf("%%%s%%", input)
+	tx := r.db.WithContext(ctx).Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
+
+	var terms []types.Term
+	if err := tx.Find(&terms).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching terms: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	output := make([]types.AutoCompleteTerm, len(terms))
+	for i, term := range terms {
+		output[i] = mapToAutoCompleteTerm(&term, input)
+	}
+
+	return &output, nil
+}
+
+func (r *TermsRepository) GetTermNameById(ctx context.Context, termsTable string, id string) (*string, error) {
+	tx := r.db.WithContext(ctx).Table(termsTable).Select("name").Where("id = ?", id)
+
+	var term types.Term
+	// Keep Take (not First): First can build invalid SQL when the table name carries a database prefix.
+	if err := tx.Take(&term).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching term name: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	output := term.Name
+
+	return &output, nil
+}

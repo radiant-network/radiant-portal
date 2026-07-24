@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
@@ -147,7 +148,7 @@ func (r *PatientValidationRecord) validateExistingPatientForUpdate(existingPatie
 }
 
 func (r *PatientValidationRecord) validateLifeStatusCode(ctx context.Context) error {
-	codes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetLifeStatus)
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetLifeStatus)
 	if err != nil {
 		return fmt.Errorf("error getting life status codes: %v", err)
 	}
@@ -156,7 +157,7 @@ func (r *PatientValidationRecord) validateLifeStatusCode(ctx context.Context) er
 }
 
 func (r *PatientValidationRecord) validateSexCode(ctx context.Context) error {
-	codes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetSex)
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSex)
 	if err != nil {
 		return err
 	}
@@ -217,8 +218,8 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 
 func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoPatient := repository.NewPatientsRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoPatient := postgres.NewPatientsRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -367,8 +368,8 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 
 func persistBatchAndUpdatePatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txRepoPatient := repository.NewPatientsRepository(tx)
-		txRepoBatch := repository.NewBatchRepository(tx)
+		txRepoPatient := postgres.NewPatientsRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate

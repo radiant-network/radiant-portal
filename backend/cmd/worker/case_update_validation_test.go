@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,9 +44,9 @@ func validCaseUpdate() types.UpdateCaseBatch {
 
 func Test_validateUpdateCaseRecord_Success(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			if submitterCaseId == "CASE-1" && projectId == 42 {
-				return &repository.Case{ID: 100, SubmitterCaseID: "CASE-1", ProjectID: projectId}, nil
+				return &types.Case{ID: 100, SubmitterCaseID: "CASE-1", ProjectID: projectId}, nil
 			}
 			return nil, nil
 		},
@@ -79,7 +78,7 @@ func Test_validateUpdateCaseRecord_UnknownProject(t *testing.T) {
 
 func Test_validateUpdateCaseRecord_CaseNotFound(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
-		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*types.Case, error) {
 			return nil, nil // case missing
 		},
 	}
