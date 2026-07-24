@@ -44,6 +44,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// tenant segment value is irrelevant here. Global routes (users/*) stay at root.
 		for _, route := range []string{
 			"radiant/sequencing/1/details",
+			"radiant/organizations",
 			"radiant/cases/1",
 			"radiant/cases/filters",
 			"radiant/cases/autocomplete",

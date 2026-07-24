@@ -27,12 +27,13 @@ class ObservationCategoricalBatch(BaseModel):
     ObservationCategoricalBatch
     """ # noqa: E501
     code: StrictStr
+    exam_code: Optional[StrictStr] = None
     interpretation_code: Optional[StrictStr] = None
     note: Optional[StrictStr] = None
     onset_code: Optional[StrictStr] = None
     system: StrictStr
     value: StrictStr
-    __properties: ClassVar[List[str]] = ["code", "interpretation_code", "note", "onset_code", "system", "value"]
+    __properties: ClassVar[List[str]] = ["code", "exam_code", "interpretation_code", "note", "onset_code", "system", "value"]
 
     @field_validator('interpretation_code')
     def interpretation_code_validate_enum(cls, value):
@@ -40,8 +41,8 @@ class ObservationCategoricalBatch(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['positive', 'negative']):
-            raise ValueError("must be one of enum values ('positive', 'negative')")
+        if value not in set(['positive', 'negative', 'abnormal', 'normal']):
+            raise ValueError("must be one of enum values ('positive', 'negative', 'abnormal', 'normal')")
         return value
 
     model_config = ConfigDict(
@@ -96,6 +97,7 @@ class ObservationCategoricalBatch(BaseModel):
 
         _obj = cls.model_validate({
             "code": obj.get("code"),
+            "exam_code": obj.get("exam_code"),
             "interpretation_code": obj.get("interpretation_code"),
             "note": obj.get("note"),
             "onset_code": obj.get("onset_code"),

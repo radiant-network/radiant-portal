@@ -128,7 +128,7 @@ Two `internal/server` middlewares enforce this model on `/:tenant/*` routes:
 - `RequireTenantAccess` — group-level; verifies tenant membership (`HasTenantAccess`) and stores the tenant in context (`GetTenant`).
 - `RequireAction(auth, repo, action)` — per-route; verifies the caller holds a specific action (`HasAction`). Wired in `cmd/api/main.go` via the `requireAction(...)` closure; action codes are `types.Action*` constants. On denial it returns a **generic 403** (the missing action is logged, never put in the body) and logs server-side.
 
-Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every privileged `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions`, which fails if a new route ships unmapped.
+Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions` (in `cmd/api`), which fails if a new route ships unlisted: an action-gated route goes in `expectedTenantActions` (route → `RequireAction` code), and an intentionally **member-readable** route — gated by tenant membership (`RequireTenantAccess`) alone, no `RequireAction`, for referential reads any member may see, e.g. `GET /:tenant/organizations` — goes in the `membershipOnlyTenantRoutes` allowlist instead.
 
 #### Read-path tenant isolation
 
