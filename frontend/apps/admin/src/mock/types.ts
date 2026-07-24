@@ -8,8 +8,8 @@
  * the generated types when the endpoints land.
  */
 
-/** Scope of a role's actions: tenant-wide, or resolved per organization at assignment. */
-export type RoleScope = 'tenant' | 'org';
+/** Scope of a permission (backend "action"): tenant-wide, or resolved per organization. */
+export type ActionScope = 'tenant' | 'org';
 
 /** An organization within a tenant. Codes are stored lowercase, displayed uppercase (CSS). */
 export interface Organization {
@@ -17,23 +17,37 @@ export interface Organization {
   name: string;
 }
 
-/** A role = a bundle of actions. Default roles are locked; custom roles are duplicable/editable. */
+/**
+ * A permission = a backend "action". Shown as "Permissions" in the UI. Name + description are
+ * i18n'd by code (`admin.permissions.<code>.{name,description}`); the `can_*` code is a system id.
+ */
+export interface Permission {
+  code: string;
+  scope: ActionScope;
+}
+
+/**
+ * A role = a bundle of permissions. A role's scope is derived from its permissions: it needs an
+ * org picker if it grants any org-scoped permission, and its badges show the scope(s) it covers.
+ * Default roles are locked; custom roles are editable. Descriptions are i18n'd (`admin.roles.<code>.description`).
+ */
 export interface Role {
   /** System identifier, not translated (e.g. `tenant_admin`). */
   code: string;
   /** Display label (e.g. "Tenant Admin"). */
   label: string;
-  scope: RoleScope;
   /** Locked default role vs. custom role. */
   isDefault: boolean;
+  /** Permission (action) codes this role grants. */
+  permissions: string[];
 }
 
 /**
  * A role assignment on a user. For org-scoped roles, `orgCodes` lists the organizations the role
- * applies to (`['*']` = all orgs). Tenant-scoped roles omit `orgCodes`.
+ * applies to (`['*']` = all orgs). Tenant-only roles omit `orgCodes`.
  *
  * The baseline `member` role is auto-granted to every user and is implicit — it is NOT stored in
- * `AdminUser.roles`. A user whose `roles` is empty holds only `member` (rendered as muted text).
+ * `AdminUser.roles`. A user whose `roles` is empty holds only `member`.
  */
 export interface AssignedRole {
   roleCode: string;

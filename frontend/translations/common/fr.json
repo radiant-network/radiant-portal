@@ -2,7 +2,7 @@
   "admin": {
     "title": "Administration",
     "nav": {
-      "group": "Paramètres du locataire",
+      "group": "Paramètres du réseau",
       "users": "Utilisateurs",
       "organizations": "Organisations",
       "roles": "Rôles et permissions"
@@ -25,6 +25,67 @@
       },
       "edit_aria": "Modifier l'utilisateur",
       "empty": "Aucun utilisateur trouvé"
+    },
+    "roles": {
+      "scope": { "tenant": "Réseau", "org": "Organisation" },
+      "tenant_admin": { "description": "Accès administratif complet à ce réseau — gérer les utilisateurs, les organisations et les rôles." },
+      "member": { "description": "Accès de base pour tous : rechercher des cas et consulter la base de connaissances." },
+      "geneticist": { "description": "Interpréter les variants et consulter les renseignements personnels sur la santé dans les organisations sélectionnées — inclut les commentaires, les marqueurs et le téléchargement des fichiers de cas." },
+      "data_manager": { "description": "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées." },
+      "clinical_reviewer": { "description": "Réviser et interpréter les variants et consulter la base de connaissances, dans les organisations sélectionnées." },
+      "org_manager": { "description": "Créer et modifier les organisations de ce réseau." }
+    },
+    "permissions": {
+      "can_manage_users": { "name": "Gérer les utilisateurs", "description": "Créer, modifier et supprimer des utilisateurs; attribuer et retirer des rôles." },
+      "can_manage_orgs": { "name": "Gérer les organisations", "description": "Créer et modifier les organisations du réseau." },
+      "can_manage_roles": { "name": "Gérer les rôles", "description": "Créer, modifier et supprimer des rôles personnalisés." },
+      "can_search_case": { "name": "Rechercher des cas", "description": "Rechercher et consulter les cas du réseau (RPS masqués)." },
+      "can_view_kb": { "name": "Consulter la base de connaissances", "description": "Parcourir la base de connaissances dépersonnalisée du réseau." },
+      "can_read_pii": { "name": "Consulter les RPS", "description": "Afficher les renseignements personnels sur la santé des enregistrements de l'organisation." },
+      "can_interpret_variant": { "name": "Interpréter les variants", "description": "Créer ou mettre à jour des interprétations de variants dans l'organisation." },
+      "can_comment_variant": { "name": "Commenter les variants", "description": "Ajouter, modifier ou supprimer des notes sur les occurrences de variants dans l'organisation." },
+      "can_flag_variant": { "name": "Marquer les variants", "description": "Marquer, épingler ou mettre en évidence des occurrences de variants dans l'organisation." },
+      "can_download_file": { "name": "Télécharger les fichiers", "description": "Télécharger les documents de cas de l'organisation." },
+      "can_ingest_data": { "name": "Importer des données", "description": "Soumettre des lots de données (cas, patients, échantillons, séquençage) pour l'organisation." }
+    },
+    "user": {
+      "add_title": "Ajouter un utilisateur",
+      "edit_title": "Modifier l'utilisateur",
+      "user_details": "Détails de l'utilisateur",
+      "assign_roles": "Rôles de l'utilisateur",
+      "assign_roles_subtitle": "Les rôles d'un utilisateur déterminent ce qu'il peut voir et faire dans votre réseau et au sein d'organisations spécifiques.",
+      "view_permissions": "Voir les permissions",
+      "permissions_modal_subtitle": "Descriptions des permissions et portée de ce rôle",
+      "orgs_label": "Dans ces organisations",
+      "orgs_placeholder": "Organisations",
+      "all_orgs": "Toutes les organisations actuelles et futures",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "email": "Courriel",
+      "email_note": "Le courriel est l'identifiant de connexion et ne peut être modifié. Pour corriger un courriel erroné, supprimez l'utilisateur et créez-en un nouveau.",
+      "delete": "Supprimer l'utilisateur",
+      "delete_title": "Supprimer {{name}}?",
+      "delete_body": "Cela retire tous les rôles de {{name}} dans {{tenant}} — cette personne perdra l'accès à ce réseau. Son identifiant de connexion et son accès aux autres réseaux ne sont pas touchés.",
+      "delete_confirm": "Supprimer l'utilisateur",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "create": "Créer l'utilisateur",
+      "understood": "Compris",
+      "err": {
+        "last_admin_title": "Ce réseau doit conserver un administrateur",
+        "last_admin": "{{name}} est le seul Tenant Admin de {{tenant}}. Attribuez le rôle Tenant Admin à une autre personne avant de le retirer ici.",
+        "last_admin_delete": "{{name}} est le seul Tenant Admin de {{tenant}} et ne peut pas être retiré. Attribuez le rôle Tenant Admin à une autre personne avant de supprimer ce compte.",
+        "org_required": "Sélectionnez au moins une organisation.",
+        "name_required": "Le prénom et le nom sont obligatoires.",
+        "email_required": "Le courriel est obligatoire.",
+        "email_invalid": "Saisissez un courriel valide.",
+        "email_duplicate": "Un utilisateur avec ce courriel existe déjà dans ce réseau."
+      },
+      "ok": {
+        "created": "Utilisateur créé.",
+        "updated": "Utilisateur mis à jour.",
+        "deleted": "Utilisateur retiré de ce réseau."
+      }
     }
   },
   "analysis": {
