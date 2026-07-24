@@ -1,21 +1,18 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 
-describe('Cases - Search - Patient', () => {
-  const patientId = data.case.patient;
+describe('Documents - Search - Data type', () => {
+  const dataType = data.file.type;
   let response: any;
 
   before(() => {
     const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
-      "additional_fields": [
-        "case_type"
-      ],
       "search_criteria": [
         {
-          "field": "patient_id",
+          "field": "data_type_code",
           "value": [
-            "${patientId}"
+            "${dataType}"
           ]
         }
       ],
@@ -23,7 +20,7 @@ describe('Cases - Search - Patient', () => {
       "page_index": 0
     }`;
 
-    cy.apiCall('POST', 'cases/search', body, Auth.token).then(res => {
+    cy.apiCall('POST', 'documents/search', body, Auth.token).then(res => {
       response = res;
     });
   });
@@ -33,6 +30,9 @@ describe('Cases - Search - Patient', () => {
   });
 
   it('Return content', () => {
-    expect(response.body.count).to.eq(2);
+    expect(response.body.list).to.have.length.greaterThan(0);
+    response.body.list.forEach((document: { data_type_code: string }) => {
+      expect(document.data_type_code).to.eq(dataType);
+    });
   });
 });
