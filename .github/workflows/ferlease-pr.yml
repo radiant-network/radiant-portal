@@ -205,7 +205,7 @@ jobs:
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
-            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 21600)
+            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 86400)
           fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${TOTAL_FAILS} new fails 🐛" || STATUS="Failed 🐛"; }
           $ALL_PASSED && COLOR="good" || COLOR="danger"
