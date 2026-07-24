@@ -12,12 +12,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertGetSequencingExperimentDetailByIdHandler(t *testing.T, data string, seqId int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewSequencingExperimentRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSequencingExperimentRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/sequencing/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repo))
 

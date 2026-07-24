@@ -14,12 +14,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func testSomaticSNVList(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
 
@@ -32,8 +31,8 @@ func testSomaticSNVList(t *testing.T, data string, body string, expected string)
 	})
 }
 func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
 
@@ -46,8 +45,8 @@ func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 	})
 }
 func testSomaticSNVAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		facetsRepo := starrocks.NewFacetsRepository()
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
@@ -64,8 +63,8 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 	})
 }
 func testSomaticSNVStatistics(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
 
@@ -202,10 +201,10 @@ func Test_Somatic_SNV_Statistics(t *testing.T) {
 }
 
 func assertGetExpandedSomaticOccurrence(t *testing.T, data string, caseId int, seqId int, taskId int, locusId int, expected string) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
-		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		pubmedClient := &MockExternalClient{}
-		interpretationRepo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedClient)
+		interpretationRepo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedClient)
 		router := tenantRouter()
 		router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 

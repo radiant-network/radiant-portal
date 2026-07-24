@@ -12,12 +12,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertMondoTermAutoComplete(t *testing.T, data string, prefix string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewTermsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewTermsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))
 

@@ -10,7 +10,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 var allGermlineCnvFields = sliceutils.Map(types.GermlineCNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -29,8 +28,8 @@ var GermlineCnvQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_GermlineCNV_GetOccurrences(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
@@ -44,9 +43,9 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
-		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: pgDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
@@ -81,8 +80,8 @@ func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 }
 
 func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -104,8 +103,8 @@ func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetOccurrences_PanelFilter(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -127,8 +126,8 @@ func Test_GermlineCNV_GetOccurrences_PanelFilter(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sortedBody := []types.SortBody{
 			{
@@ -170,8 +169,8 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 
@@ -202,8 +201,8 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
 }
 
 func Test_GermlineCNV_CountOccurrences(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
@@ -217,8 +216,8 @@ func Test_GermlineCNV_CountOccurrences(t *testing.T) {
 // task_id=201 simulating a second case that reuses the same sequencing. The
 // repository must filter on task_id so each case sees only its own CNV.
 func Test_GermlineCNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 
@@ -240,8 +239,8 @@ func Test_GermlineCNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 }
 
 func Test_GermlineCNV_CountOccurrences_With_Filtering(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -259,8 +258,8 @@ func Test_GermlineCNV_CountOccurrences_With_Filtering(t *testing.T) {
 }
 
 func Test_GermlineCNV_CountOccurrences_PanelFilter(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -278,8 +277,8 @@ func Test_GermlineCNV_CountOccurrences_PanelFilter(t *testing.T) {
 }
 
 func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewAggregationQueryFromSqon("omim_gene_panel", nil, GermlineCnvQueryConfigForTest.AllFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
@@ -298,8 +297,8 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 }
 
 func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Cytoband(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewAggregationQueryFromSqon("cytoband", nil, GermlineCnvQueryConfigForTest.AllFields)
 		assert.NoError(t, err)
 		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
@@ -314,8 +313,8 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 }
 
 func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Cytoband_Filter_By_Panel(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel4"}}},
@@ -337,8 +336,8 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 }
 
 func Test_GermlineCNV_GetStatisticsOccurrences_Length(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewStatisticsQueryFromSqon("length", nil, types.GermlineCNVOccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 2, 2, query)
@@ -350,8 +349,8 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Length(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewStatisticsQueryFromSqon("pe", nil, types.GermlineCNVOccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 2, 2, query)
@@ -363,8 +362,8 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
 }
 
 func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		overlaps, err := repo.GetGenesOverlap(t.Context(), 1, 1, 1, 1)
 		if assert.NoError(t, err) {
 			if assert.Len(t, overlaps, 3) {
