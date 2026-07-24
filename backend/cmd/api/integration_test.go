@@ -14,12 +14,12 @@ import (
 )
 
 func Test_SecureRoutes(t *testing.T) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
 
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(starrocks, postgres)
+		router := setupRouter(srDB, pgDB)
 		randomPort := 10000 + rand.Intn(50000)
 
 		srv := &http.Server{

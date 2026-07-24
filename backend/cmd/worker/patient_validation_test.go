@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -417,11 +418,11 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 func patientValueSetRepo() *MockValueSetRepository {
 	return &MockValueSetRepository{
-		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(vsType postgres.ValueSetType) ([]string, error) {
 			switch vsType {
-			case repository.ValueSetLifeStatus:
+			case postgres.ValueSetLifeStatus:
 				return []string{"alive", "deceased", "unknown"}, nil
-			case repository.ValueSetSex:
+			case postgres.ValueSetSex:
 				return []string{"male", "female", "unknown"}, nil
 			default:
 				return []string{}, nil
@@ -572,7 +573,7 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 		err := persistBatchAndUpdatePatientRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewPatientsRepository(db)
+		repo := postgres.NewPatientsRepository(database.PostgresDB{DB: db})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1")
 		require.NoError(t, err)
 		require.NotNil(t, patient)
@@ -583,12 +584,12 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -602,12 +603,12 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -629,12 +630,12 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},

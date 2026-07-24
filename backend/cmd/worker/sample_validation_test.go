@@ -5,7 +5,8 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -90,17 +91,17 @@ func (m *MockSamplesRepository) GetTypeCodes() ([]string, error) {
 }
 
 type MockValueSetRepository struct {
-	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
+	GetCodesFunc func(vsType postgres.ValueSetType) ([]string, error)
 }
 
-func (m *MockValueSetRepository) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
+func (m *MockValueSetRepository) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	if m.GetCodesFunc != nil {
 		return m.GetCodesFunc(vsType)
 	}
 	switch vsType {
-	case repository.ValueSetSampleType:
+	case postgres.ValueSetSampleType:
 		return []string{"blood", "dna", "rna", "solid_tissue"}, nil
-	case repository.ValueSetHistologyType:
+	case postgres.ValueSetHistologyType:
 		return []string{"tumoral", "normal"}, nil
 	default:
 		return []string{}, nil
@@ -186,7 +187,7 @@ func Test_ValidateTissueSite_Invalid(t *testing.T) {
 func Test_ValidateTypeCode_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood"}
 	mockValueSetRepo := &MockValueSetRepository{
-		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(vsType postgres.ValueSetType) ([]string, error) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
@@ -203,7 +204,7 @@ func Test_ValidateTypeCode_Valid(t *testing.T) {
 func Test_ValidateTypeCode_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "invalid_type"}
 	mockValueSetRepo := &MockValueSetRepository{
-		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
+		GetCodesFunc: func(vsType postgres.ValueSetType) ([]string, error) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
@@ -729,7 +730,7 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		err := persistBatchAndUpdateSampleRecords(t.Context(), db, &batch, records)
 		require.NoError(t, err)
 
-		repo := repository.NewSamplesRepository(db)
+		repo := postgres.NewSamplesRepository(database.PostgresDB{DB: db})
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-WORKER-UPDATE-1")
 		require.NoError(t, err)
 		require.NotNil(t, sample)
