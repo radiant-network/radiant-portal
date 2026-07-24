@@ -81,6 +81,12 @@ export interface MultipleSelectorProps {
    * Render the badge for each option.
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
+
+  /**
+   * Show ALL selected badges wrapped onto multiple rows instead of truncating to one row with a
+   * "+n" overflow badge. Default false (unchanged behavior).
+   */
+  wrapBadges?: boolean;
 }
 
 export interface MultipleSelectorRef {
