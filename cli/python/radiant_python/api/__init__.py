@@ -13,6 +13,7 @@ from radiant_python.api.mondo_api import MondoApi
 from radiant_python.api.occurrence_flags_api import OccurrenceFlagsApi
 from radiant_python.api.occurrence_notes_api import OccurrenceNotesApi
 from radiant_python.api.occurrences_api import OccurrencesApi
+from radiant_python.api.organizations_api import OrganizationsApi
 from radiant_python.api.patients_api import PatientsApi
 from radiant_python.api.samples_api import SamplesApi
 from radiant_python.api.saved_filters_api import SavedFiltersApi

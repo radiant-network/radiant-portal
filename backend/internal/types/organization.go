@@ -35,3 +35,11 @@ var OrderingOrganizationTable = Table{
 func (Organization) TableName() string {
 	return OrganizationTable.Name
 }
+
+// @Description Organization within a tenant, with its category label.
+type OrganizationResponse struct {
+	Code         string `json:"code"`
+	Name         string `json:"name"`
+	CategoryCode string `json:"category_code"`
+	CategoryName string `json:"category_name"`
+} // @name OrganizationResponse
