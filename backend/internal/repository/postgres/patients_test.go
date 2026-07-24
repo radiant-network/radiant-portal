@@ -9,12 +9,11 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-283773")
 		assert.NoError(t, err)
 		assert.NotNil(t, patient)
@@ -24,8 +23,8 @@ func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 }
 
 func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UNKNOWN")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
@@ -33,8 +32,8 @@ func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 }
 
 func Test_GetPatientBySubmitterPatientId_Null_OrgId(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewPatientsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
 		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "UNKNOWN-ORG", "MRN-283773")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)

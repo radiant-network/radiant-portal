@@ -49,7 +49,7 @@ Skipping this and reporting "done" produces work that compiles in your head but 
 
 ## Use the modern test framework, not legacy shims
 
-New tests use `testutils.RunTest(t, testutils.Need{...}, ...)` directly. Declare what the test needs via `Need` (e.g. `Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}`) and read DBs from `env` (`env.Starrocks`, `env.Postgres`). Do **not** call the legacy shims — `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, `ParallelTestWithStarrocks`, `ParallelTestWithReadOnlyPostgresAndStarrocks`, and friends. They still exist for back-compat and route through `RunTest`, but they are never the target for new code; if you touch a test that uses one, migrate it to `RunTest`.
+All tests use `testutils.RunTest(t, testutils.Need{...}, ...)`. Declare what the test needs via `Need` (e.g. `Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}`) and read DBs from `env` (`env.Starrocks`, `env.Postgres`). The legacy `ParallelTestWith*` / `SequentialTestWith*` shims have been **removed** — don't reintroduce them; write `RunTest` directly.
 
 This rule mirrors the guidance in [backend/CLAUDE.md](../../CLAUDE.md) under "Testing".
 

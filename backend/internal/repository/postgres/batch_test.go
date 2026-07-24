@@ -9,12 +9,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_CreateBatch_Valid(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		type samplePayload struct {
 			Message string `json:"message"`
 		}
@@ -34,7 +33,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 		assert.Equal(t, dryRun, createdBatch.DryRun)
 		assert.Equal(t, types.BatchStatusPending, createdBatch.Status)
 		var dbBatch types.Batch
-		err = db.First(&dbBatch, "id = ?", createdBatch.ID).Error
+		err = env.Postgres.First(&dbBatch, "id = ?", createdBatch.ID).Error
 		assert.NoError(t, err)
 		assert.Equal(t, `[{"message": "hello world"}, {"message": "bye world"}]`, dbBatch.Payload)
 	})
@@ -67,10 +66,10 @@ func Test_GetBatchByID_CrossTenantIsInvisible(t *testing.T) {
 }
 
 func Test_GetBatchByID_Success(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		batchId := uuid.NewString()
-		initErr := db.Exec(`
+		initErr := env.Postgres.Exec(`
             INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
             (?, '{}', ?, 'create_patient', true, 'user1', now(), 'radiant')
         `, batchId, types.BatchStatusSuccess).Error
@@ -89,8 +88,8 @@ func Test_GetBatchByID_Success(t *testing.T) {
 }
 
 func Test_GetBatchByID_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		nonExistentId := uuid.NewString()
 		batch, err := repo.GetBatchByID(t.Context(), nonExistentId)
 		assert.NoError(t, err)
@@ -99,8 +98,8 @@ func Test_GetBatchByID_NotFound(t *testing.T) {
 }
 
 func Test_GetBatchByID_InvalidUUID(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		invalidId := "not-a-valid-uuid"
 		batch, err := repo.GetBatchByID(t.Context(), invalidId)
 		assert.Error(t, err)
@@ -109,8 +108,8 @@ func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 }
 
 func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		assert.Nil(t, batch)
@@ -118,10 +117,10 @@ func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 }
 
 func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 		// Add two pending batches
-		initErr := db.Exec(`
+		initErr := env.Postgres.Exec(`
 			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
             ('{}', ?, 'create_patient', true, 'user1', '2025-10-09', 'radiant'),
             ('{}', ?, 'create_sample', false, 'user2', '2025-11-09', 'radiant')
@@ -139,17 +138,17 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		assert.Equal(t, "create_patient", batch.BatchType)
 		// Verify that only one pending batch remains
 		var count int64
-		db.Table("batch").Where("status = ?", types.BatchStatusPending).Count(&count)
+		env.Postgres.Table("batch").Where("status = ?", types.BatchStatusPending).Count(&count)
 		assert.Equal(t, int64(1), count)
 	})
 }
 
 func Test_UpdateBatch(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 
 		var id string
-		initErr := db.Raw(`
+		initErr := env.Postgres.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
@@ -163,7 +162,7 @@ func Test_UpdateBatch(t *testing.T) {
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, rowsUpdated)
 		resultBatch := Batch{}
-		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, "create_patient", resultBatch.BatchType)
@@ -226,14 +225,14 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 }
 
 func Test_UpdateStuckBatch(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 
 		timeMoreThan24hAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")
 		timeLessThan24hAgo := time.Now().Add(-22 * time.Hour).Format("2006-01-02")
 
 		var ids []string
-		initErr := db.Raw(`
+		initErr := env.Postgres.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
     		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', ?, 'radiant'),
 				('{}', ?, 'create_sample', false, 'user999', '2025-10-09', ?, 'radiant'),
@@ -250,7 +249,7 @@ func Test_UpdateStuckBatch(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), rowsUpdated)
 		resultBatch := Batch{}
-		db.Table("batch").Where("id = ?", ids[0]).Scan(&resultBatch)
+		env.Postgres.Table("batch").Where("id = ?", ids[0]).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 	})
 }

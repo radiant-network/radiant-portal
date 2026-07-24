@@ -6,6 +6,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **code** | **str** |  | 
+**exam_code** | **str** |  | [optional] 
+**interpretation_code** | **str** |  | [optional] 
 **value** | **str** |  | 
 
 ## Example

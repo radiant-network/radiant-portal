@@ -71,6 +71,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
+	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
 	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
 	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
 	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
@@ -198,6 +199,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
+
+	// Organizations are referential: the list is readable by any tenant member (no action gate);
+	// create/edit will live under /:tenant/admin/organizations gated by can_manage_orgs.
+	tenantRoutes.GET("/organizations", server.ListOrganizationsHandler(repoOrganizations))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

@@ -10,16 +10,15 @@ import (
 
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_SecureRoutes(t *testing.T) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(srDB, pgDB)
+		router := setupRouter(env.Starrocks, env.Postgres)
 		randomPort := 10000 + rand.Intn(50000)
 
 		srv := &http.Server{
@@ -45,6 +44,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// tenant segment value is irrelevant here. Global routes (users/*) stay at root.
 		for _, route := range []string{
 			"radiant/sequencing/1/details",
+			"radiant/organizations",
 			"radiant/cases/1",
 			"radiant/cases/filters",
 			"radiant/cases/autocomplete",

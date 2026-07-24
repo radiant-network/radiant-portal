@@ -79,6 +79,7 @@ from radiant_python.models.observation_text_batch import ObservationTextBatch
 from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel
+from radiant_python.models.organization_response import OrganizationResponse
 from radiant_python.models.output_document_batch import OutputDocumentBatch
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
 from radiant_python.models.patient_batch import PatientBatch

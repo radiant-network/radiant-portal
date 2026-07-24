@@ -20,7 +20,7 @@ internal/
   batchval/    - Batch validation context, caching, record validation
   client/      - External clients (PubMed)
   database/    - DB connection setup (postgres.go, starrocks.go)
-  repository/  - Data access layer (61 files); separated by DB target
+  repository/  - Data access layer, split by DB target into postgres/ and starrocks/ subpackages
   server/      - HTTP handlers grouped by resource; middlewares
   types/       - Domain models, filters, facets, OpenAPI annotations
   utils/       - Auth, S3, mappers, env helpers, collection utilities
@@ -28,6 +28,19 @@ scripts/
   init-sql/migrations/ - PostgreSQL migrations (golang-migrate)
 test/testutils/        - Shared test infrastructure (containers, fixtures, JWT, mocks)
 ```
+
+### Repository layer (split by database target)
+
+`internal/repository/` is split so a repository's target database is explicit and enforced at compile time:
+
+- `postgres/` — repositories owning PostgreSQL data; constructors take `database.PostgresDB`.
+- `starrocks/` — repositories reading StarRocks (federation / per-tenant views); constructors take `database.StarrocksDB`.
+
+`database.PostgresDB` / `database.StarrocksDB` (in `internal/database/`) are named `*gorm.DB` wrappers — passing the wrong connection to a constructor is a compile error, not a runtime SQL failure.
+
+Repositories whose data lives in both places are split into two types by role: e.g. `postgres.CasesRepository` (writes/CRUD) and `starrocks.CasesRepository` (search/reads); likewise for `documents` and `sequencing_experiment`. The API builds the StarRocks read variants; the worker/batchval build the PostgreSQL write variants — each side constructs only the variant it needs.
+
+Shared JOIN SQL lives once in `internal/utils/joins` as methods on a `Joiner`; a repo picks `joins.Starrocks()` (resolves table names via `TenantQualifiedName` — federation / tenant views) or `joins.Postgres()` (`.Name`) in its constructor.
 
 ## Key Frameworks & Libraries
 - **Gin** v1.10 — HTTP router/framework
@@ -115,14 +128,14 @@ Two `internal/server` middlewares enforce this model on `/:tenant/*` routes:
 - `RequireTenantAccess` — group-level; verifies tenant membership (`HasTenantAccess`) and stores the tenant in context (`GetTenant`).
 - `RequireAction(auth, repo, action)` — per-route; verifies the caller holds a specific action (`HasAction`). Wired in `cmd/api/main.go` via the `requireAction(...)` closure; action codes are `types.Action*` constants. On denial it returns a **generic 403** (the missing action is logged, never put in the body) and logs server-side.
 
-Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every privileged `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions`, which fails if a new route ships unmapped.
+Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions` (in `cmd/api`), which fails if a new route ships unlisted: an action-gated route goes in `expectedTenantActions` (route → `RequireAction` code), and an intentionally **member-readable** route — gated by tenant membership (`RequireTenantAccess`) alone, no `RequireAction`, for referential reads any member may see, e.g. `GET /:tenant/organizations` — goes in the `membershipOnlyTenantRoutes` allowlist instead.
 
 #### Read-path tenant isolation
 
 Reads are scoped to the active tenant in two places, both activated by `TENANT_VIEWS_READ_ENABLED` (`RequireTenantAccess` binds the tenant to the request context only when on; off → no tenant bound → reads are unscoped / single-tenant behavior):
 
 - **StarRocks (federated clinical reads):** repositories address the tenant's view database `<code>_tenant.*` via `types.TenantSchema(ctx)` / `types.Table.In(schema)` instead of `radiant_jdbc.public.*`. Off → `radiant_jdbc.public` (unchanged).
-- **PostgreSQL-direct reads:** repositories that read/update/delete a tenant-scoped table apply the `repository.WithTenant(ctx)` GORM scope, which adds `WHERE tenant_code = ?` from the bound tenant. It is a **no-op when no tenant is bound**, so the worker (processes all tenants) and the unscoped default path are unaffected. A cross-tenant row is then invisible → repos return nil → handlers return 404 (no existence leak). **Any new read/update/delete against a tenant-scoped PG table (`interpretation_germline`/`interpretation_somatic`, `occurrence_note`, `occurrence_flag`, `batch`, `task`) must add `.Scopes(repository.WithTenant(ctx))`.** The federated tables (cases, patient, documents, …) are isolated by the StarRocks views above, not here.
+- **PostgreSQL-direct reads:** repositories that read/update/delete a tenant-scoped table apply the `postgres.WithTenant(ctx)` GORM scope, which adds `WHERE tenant_code = ?` from the bound tenant. It is a **no-op when no tenant is bound**, so the worker (processes all tenants) and the unscoped default path are unaffected. A cross-tenant row is then invisible → repos return nil → handlers return 404 (no existence leak). **Any new read/update/delete against a tenant-scoped PG table (`interpretation_germline`/`interpretation_somatic`, `occurrence_note`, `occurrence_flag`, `batch`, `task`) must add `.Scopes(postgres.WithTenant(ctx))`.** The federated tables (cases, patient, documents, …) are isolated by the StarRocks views above, not here.
 
 Schema scoping (above) decides *which* database a read targets; it does not by itself enforce PII masking or access — that is **Ranger**, and Ranger only sees a per-user identity if the query runs **as that user**. When `STARROCKS_PROXY_READ_ENABLED` is on, `server.BindStarrocksUserPool` (group middleware on `/:tenant`) opens a per-request StarRocks pool through `mysql-proxy` authenticated with the caller's JWT (default DB `<code>_tenant`) and binds it to the request context. The shared StarRocks `*gorm.DB` is backed by `database.routingConnPool`, which routes each query to that per-request pool — so repositories are unchanged, yet their reads run as the user and Ranger applies masking / row-filter / DB access. **The root fallback is unmasked and fail-open**, safe only because the middleware sits at the group level (every `/:tenant` read has a user pool bound, or the request was aborted); never read tenant StarRocks data off a context that skipped it. Off (default) → all reads use the shared `root` pool (today's behavior). See `internal/database/routing.go` and `internal/server/middlewares_starrocks.go`.
 
@@ -173,7 +186,7 @@ Test utilities in `test/testutils/`: DB container setup, fixtures, JWT generatio
 
 ```go
 testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-    repo := NewGenesRepository(env.Starrocks)
+    repo := starrocks.NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
     ...
 })
 ```
@@ -185,7 +198,7 @@ PostgresMode controls both cleanup and isolation:
 
 Serial is also forced when `MinIO: true` (t.Setenv incompatibility).
 
-Legacy shims (`ParallelTestWithStarrocks`, `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, etc.) still exist and route through `RunTest`. New tests should use `RunTest` directly.
+`RunTest` is the only entry point — the legacy `ParallelTestWith*` / `SequentialTestWith*` shims have been removed. Every test declares its resources via `Need`.
 
 To make a Postgres write test parallel-safe (`WritePostgres` instead of `ExclusivePostgres`):
 - Use IDs/keys that `cleanUp` preserves (e.g., `case_id=1` or `case_id=71` for `occurrence_note`). Check `test/testutils/setup_postgres.go:cleanUp` for the full list of preserved ranges.

@@ -27,8 +27,8 @@ func newTestInterpretationsRepo(db *gorm.DB) *InterpretationsRepository {
 // --- Germline ---
 
 func Test_Interpretations_FirstGermline(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation, err := repo.FirstGermline(t.Context(), "1", "1", "1000", "T001")
 		assert.NoError(t, err)
 		if assert.NotNil(t, interpretation) {
@@ -64,8 +64,8 @@ func Test_Interpretations_FirstGermline_CrossTenantIsInvisible(t *testing.T) {
 }
 
 func Test_Interpretations_FirstGermline_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation, err := repo.FirstGermline(t.Context(), "999", "999", "999", "T999")
 		assert.NoError(t, err)
 		assert.Nil(t, interpretation)
@@ -73,8 +73,8 @@ func Test_Interpretations_FirstGermline_NotFound(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation := &types.InterpretationGermline{
 			InterpretationCommon: types.InterpretationCommon{
 				TenantCode:    types.DefaultTenantCode,
@@ -104,8 +104,8 @@ func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 
 		// Create a fresh record (not fixture) to update
 		interpretation := &types.InterpretationGermline{
@@ -140,8 +140,8 @@ func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
 }
 
 func Test_Interpretations_SearchGermline(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		results, err := repo.SearchGermline(t.Context(), []string{}, []string{}, []string{})
 		assert.NoError(t, err)
 		assert.NotNil(t, results)
@@ -149,8 +149,8 @@ func Test_Interpretations_SearchGermline(t *testing.T) {
 }
 
 func Test_Interpretations_RetrieveGermlineClassificationCounts(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(t.Context(), 1000)
 		assert.NoError(t, err)
 		if assert.NotNil(t, counts) {
@@ -162,8 +162,8 @@ func Test_Interpretations_RetrieveGermlineClassificationCounts(t *testing.T) {
 }
 
 func Test_Interpretations_RetrieveGermlineClassificationCounts_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, counts)
@@ -173,8 +173,8 @@ func Test_Interpretations_RetrieveGermlineClassificationCounts_NotFound(t *testi
 // --- Somatic ---
 
 func Test_Interpretations_FirstSomatic(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation, err := repo.FirstSomatic(t.Context(), "1", "1", "1000", "T001")
 		assert.NoError(t, err)
 		if assert.NotNil(t, interpretation) {
@@ -191,8 +191,8 @@ func Test_Interpretations_FirstSomatic(t *testing.T) {
 }
 
 func Test_Interpretations_FirstSomatic_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation, err := repo.FirstSomatic(t.Context(), "999", "999", "999", "T999")
 		assert.NoError(t, err)
 		assert.Nil(t, interpretation)
@@ -200,8 +200,8 @@ func Test_Interpretations_FirstSomatic_NotFound(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		interpretation := &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
 				TenantCode:    types.DefaultTenantCode,
@@ -231,8 +231,8 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 
 		interpretation := &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
@@ -265,8 +265,8 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 }
 
 func Test_Interpretations_SearchSomatic(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		results, err := repo.SearchSomatic(t.Context(), []string{}, []string{}, []string{})
 		assert.NoError(t, err)
 		assert.NotNil(t, results)
@@ -274,8 +274,8 @@ func Test_Interpretations_SearchSomatic(t *testing.T) {
 }
 
 func Test_Interpretations_RetrieveSomaticClassificationCounts(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(t.Context(), 1000)
 		assert.NoError(t, err)
 		if assert.NotNil(t, counts) {
@@ -286,8 +286,8 @@ func Test_Interpretations_RetrieveSomaticClassificationCounts(t *testing.T) {
 }
 
 func Test_Interpretations_RetrieveSomaticClassificationCounts_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := newTestInterpretationsRepo(db)
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
 		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, counts)

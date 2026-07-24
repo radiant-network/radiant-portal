@@ -60,6 +60,10 @@ func (j Joiner) CaseWithCaseCategory(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.case_category_code=%s.code", j.name(types.CaseCategoryTable, tx), types.CaseCategoryTable.Alias, types.CaseTable.Alias, types.CaseCategoryTable.Alias))
 }
 
+func (j Joiner) OrganizationWithCategory(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.category_code=%s.code", j.name(types.OrganizationCategoryTable, tx), types.OrganizationCategoryTable.Alias, types.OrganizationTable.Alias, types.OrganizationCategoryTable.Alias))
+}
+
 func (j Joiner) AnalysisCatalogWithPanel(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.panel_id=%s.id", j.name(types.PanelTable, tx), types.PanelTable.Alias, types.AnalysisCatalogTable.Alias, types.PanelTable.Alias))
 }

@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_CreateCases(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 		orgCode := "CHOP"
 		labCode := "CQGC"
 		newCase := &types.Case{
@@ -45,7 +44,7 @@ func Test_CreateCases(t *testing.T) {
 		assert.Equal(t, 3, c.ProbandID)
 		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
 
-		db.Exec("DELETE FROM cases WHERE id = 999")
+		env.Postgres.Exec("DELETE FROM cases WHERE id = 999")
 	})
 }
 
@@ -119,8 +118,8 @@ func Test_UpdateCase_OK(t *testing.T) {
 }
 
 func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA")
 		assert.NoError(t, err)
 		assert.Equal(t, 1, analysisCatalog.ID)
@@ -129,8 +128,8 @@ func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 }
 
 func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE")
 		assert.NoError(t, err)
 		assert.Nil(t, analysisCatalog)
@@ -138,8 +137,8 @@ func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
 }
 
 func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 
 		diagLab := "CQGC"
 		orgCode := "CQGC"
@@ -168,14 +167,14 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 
 		if err != nil {
 			// Cleanup in case the record was created
-			db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='1:1';")
+			env.Postgres.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='1:1';")
 		}
 	})
 }
 
 func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 
 		diagLab := "CQGC"
 		orgCode := "CQGC"
@@ -200,6 +199,6 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 		}
 		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)
-		db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
+		env.Postgres.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
 	})
 }

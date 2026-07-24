@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_IGVInternal_GetIGV(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB) {
-		repo := NewIGVRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
 		igvInternal, err := repo.GetIGV(t.Context(), 70)
 		assert.NoError(t, err)
 		assert.Len(t, igvInternal, 6)

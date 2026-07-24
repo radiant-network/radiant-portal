@@ -152,14 +152,24 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 			key := route.Method + " " + route.Path
 			actual[key] = true
 			_, mapped := expectedTenantActions[key]
-			assert.Truef(t, mapped, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions", key)
+			_, memberOnly := membershipOnlyTenantRoutes[key]
+			assert.Truef(t, mapped || memberOnly, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions, or declare it in membershipOnlyTenantRoutes if it is intentionally member-readable", key)
 		}
 
-		// Reverse direction: every mapped route must still exist, so the map can't rot.
+		// Reverse direction: every mapped route must still exist, so the maps can't rot.
 		for key := range expectedTenantActions {
 			assert.Truef(t, actual[key], "mapped route %q is no longer registered — remove it from expectedTenantActions", key)
 		}
+		for key := range membershipOnlyTenantRoutes {
+			assert.Truef(t, actual[key], "member-only route %q is no longer registered — remove it from membershipOnlyTenantRoutes", key)
+		}
 	})
+}
+
+// membershipOnlyTenantRoutes are /:tenant routes intentionally gated by tenant membership alone
+// (RequireTenantAccess) with no per-action RequireAction — referential reads any member may see.
+var membershipOnlyTenantRoutes = map[string]bool{
+	"GET /:tenant/organizations": true,
 }
 
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in

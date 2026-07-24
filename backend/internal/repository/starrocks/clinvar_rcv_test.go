@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetClinvarRCV(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 1000)
 		assert.NoError(t, err)
 
@@ -33,8 +32,8 @@ func Test_GetClinvarRCV(t *testing.T) {
 }
 
 func Test_GetClinvarRCV_EmptyVariant(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 42)
 		assert.NoError(t, err)
 		assert.Len(t, clinvarRcv, 0)
@@ -42,8 +41,8 @@ func Test_GetClinvarRCV_EmptyVariant(t *testing.T) {
 }
 
 func Test_GetClinvarRCV_EmptyClinvarRCV(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 1003)
 		assert.NoError(t, err)
 		assert.Len(t, clinvarRcv, 0)

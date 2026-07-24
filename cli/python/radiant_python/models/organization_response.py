@@ -17,30 +17,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ObservationTextBatch(BaseModel):
+class OrganizationResponse(BaseModel):
     """
-    ObservationTextBatch
+    Organization within a tenant, with its category label.
     """ # noqa: E501
-    code: StrictStr
-    exam_code: Optional[StrictStr] = None
-    interpretation_code: Optional[StrictStr] = None
-    value: StrictStr
-    __properties: ClassVar[List[str]] = ["code", "exam_code", "interpretation_code", "value"]
-
-    @field_validator('interpretation_code')
-    def interpretation_code_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['positive', 'negative', 'abnormal', 'normal']):
-            raise ValueError("must be one of enum values ('positive', 'negative', 'abnormal', 'normal')")
-        return value
+    category_code: Optional[StrictStr] = None
+    category_name: Optional[StrictStr] = None
+    code: Optional[StrictStr] = None
+    name: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["category_code", "category_name", "code", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,7 +50,7 @@ class ObservationTextBatch(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ObservationTextBatch from a JSON string"""
+        """Create an instance of OrganizationResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -85,7 +75,7 @@ class ObservationTextBatch(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ObservationTextBatch from a dict"""
+        """Create an instance of OrganizationResponse from a dict"""
         if obj is None:
             return None
 
@@ -93,10 +83,10 @@ class ObservationTextBatch(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "category_code": obj.get("category_code"),
+            "category_name": obj.get("category_name"),
             "code": obj.get("code"),
-            "exam_code": obj.get("exam_code"),
-            "interpretation_code": obj.get("interpretation_code"),
-            "value": obj.get("value")
+            "name": obj.get("name")
         })
         return _obj
 

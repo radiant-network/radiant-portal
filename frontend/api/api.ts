@@ -3609,6 +3609,12 @@ export interface ObservationCategoricalBatch {
      * @type {string}
      * @memberof ObservationCategoricalBatch
      */
+    'exam_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationCategoricalBatch
+     */
     'interpretation_code'?: ObservationCategoricalBatchInterpretationCodeEnum;
     /**
      * 
@@ -3638,7 +3644,9 @@ export interface ObservationCategoricalBatch {
 
 export const ObservationCategoricalBatchInterpretationCodeEnum = {
     Positive: 'positive',
-    Negative: 'negative'
+    Negative: 'negative',
+    Abnormal: 'abnormal',
+    Normal: 'normal'
 } as const;
 
 export type ObservationCategoricalBatchInterpretationCodeEnum = typeof ObservationCategoricalBatchInterpretationCodeEnum[keyof typeof ObservationCategoricalBatchInterpretationCodeEnum];
@@ -3660,8 +3668,30 @@ export interface ObservationTextBatch {
      * @type {string}
      * @memberof ObservationTextBatch
      */
+    'exam_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationTextBatch
+     */
+    'interpretation_code'?: ObservationTextBatchInterpretationCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObservationTextBatch
+     */
     'value': string;
 }
+
+export const ObservationTextBatchInterpretationCodeEnum = {
+    Positive: 'positive',
+    Negative: 'negative',
+    Abnormal: 'abnormal',
+    Normal: 'normal'
+} as const;
+
+export type ObservationTextBatchInterpretationCodeEnum = typeof ObservationTextBatchInterpretationCodeEnum[keyof typeof ObservationTextBatchInterpretationCodeEnum];
+
 /**
  * 
  * @export
@@ -3768,6 +3798,37 @@ export interface OmimGenePanel {
      * @memberof OmimGenePanel
      */
     'panel'?: string;
+}
+/**
+ * Organization within a tenant, with its category label.
+ * @export
+ * @interface OrganizationResponse
+ */
+export interface OrganizationResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationResponse
+     */
+    'category_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationResponse
+     */
+    'category_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationResponse
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationResponse
+     */
+    'name'?: string;
 }
 /**
  * 
@@ -11538,6 +11599,118 @@ export class OccurrencesApi extends BaseAPI {
      */
     public statisticsSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * OrganizationsApi - axios parameter creator
+ * @export
+ */
+export const OrganizationsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
+         * @summary List the tenant\'s organizations
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizations: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listOrganizations', 'tenant', tenant)
+            const localVarPath = `/{tenant}/organizations`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OrganizationsApi - functional programming interface
+ * @export
+ */
+export const OrganizationsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OrganizationsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
+         * @summary List the tenant\'s organizations
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizations(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizations(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizations']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OrganizationsApi - factory interface
+ * @export
+ */
+export const OrganizationsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OrganizationsApiFp(configuration)
+    return {
+        /**
+         * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
+         * @summary List the tenant\'s organizations
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizations(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationResponse>> {
+            return localVarFp.listOrganizations(tenant, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OrganizationsApi - object-oriented interface
+ * @export
+ * @class OrganizationsApi
+ * @extends {BaseAPI}
+ */
+export class OrganizationsApi extends BaseAPI {
+    /**
+     * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
+     * @summary List the tenant\'s organizations
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizations(tenant: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizations(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

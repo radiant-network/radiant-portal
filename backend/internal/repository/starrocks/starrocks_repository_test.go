@@ -8,28 +8,27 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewStarrocksRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewStarrocksRepository(database.StarrocksDB{DB: env.Starrocks})
 		status := repo.CheckDatabaseConnection()
 		assert.Equal(t, "up", status)
 	})
 }
 
 func Test_StarrocksReadOnlyGuard_RejectsCreate(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		err := db.Exec("INSERT INTO ensembl_gene (gene_id, name) VALUES ('TEST', 'TEST')").Error
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		err := env.Starrocks.Exec("INSERT INTO ensembl_gene (gene_id, name) VALUES ('TEST', 'TEST')").Error
 		assert.ErrorIs(t, err, testutils.ErrStarrocksReadOnly)
 	})
 }
 
 func Test_StarrocksReadOnlyGuard_AllowsRead(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		var count int64
-		err := db.Table("ensembl_gene").Count(&count).Error
+		err := env.Starrocks.Table("ensembl_gene").Count(&count).Error
 		assert.NoError(t, err)
 		assert.Greater(t, count, int64(0))
 	})

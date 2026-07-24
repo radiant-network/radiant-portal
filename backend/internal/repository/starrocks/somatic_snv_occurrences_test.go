@@ -9,7 +9,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 var allSomaticSNVFields = sliceutils.Map(types.SomaticSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -28,8 +27,8 @@ var SomaticSNVQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
@@ -68,8 +67,8 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "symbol"}
 
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
@@ -86,9 +85,9 @@ func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) 
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
@@ -103,8 +102,8 @@ func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		selectedFields := []string{"clinvar"}
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
@@ -118,9 +117,9 @@ func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) 
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
 
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
 				{Op: "in", Content: &types.LeafContent{Field: "symbol", Value: []interface{}{"BRAF"}}},
@@ -147,8 +146,8 @@ func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *te
 // is not enough — locus 2000 is IN both subqueries, so without an explicit
 // task_id on the outer query, each case leaks the other's row for that locus.
 func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 
@@ -177,9 +176,9 @@ func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 }
 
 func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: srDB})
-		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: pgDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
 
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
@@ -214,9 +213,9 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
 
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		sortedBody := []types.SortBody{
 			{
@@ -241,8 +240,8 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 }
 
 func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		expandedOccurrence, err := repo.GetExpandedOccurrence(t.Context(), 71, 74, 74, 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "1000", expandedOccurrence.LocusId)

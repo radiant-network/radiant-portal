@@ -1851,6 +1851,18 @@ components:
         panel:
           type: string
       type: object
+    OrganizationResponse:
+      description: Organization within a tenant, with its category label.
+      properties:
+        category_code:
+          type: string
+        category_name:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+      type: object
     OutputDocumentBatch:
       properties:
         data_category_code:
@@ -6805,6 +6817,58 @@ paths:
       summary: Statistics of somatic SNV occurrences
       tags:
       - occurrences
+  /{tenant}/organizations:
+    get:
+      description: |-
+        Returns the organizations of the tenant in the path, each with its category label.
+        Readable by any member of the tenant; it also feeds the organization picker when
+        assigning org-scoped roles to a user.
+      operationId: listOrganizations
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrganizationResponse'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the tenant's organizations
+      tags:
+      - organizations
   /{tenant}/patients/batch:
     post:
       description: Create a new patient batch

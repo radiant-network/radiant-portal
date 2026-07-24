@@ -5,13 +5,12 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 	"testing"
 )
 
 func Test_GetExomiser(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
-		repo := NewExomiserRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
 		expected := []types.Exomiser{
 			{
 				Part:               1,
@@ -67,8 +66,8 @@ func Test_GetExomiser(t *testing.T) {
 }
 
 func Test_GetExomiser_Empty(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
-		repo := NewExomiserRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
 		exomiser, err := repo.GetExomiser(t.Context(), 42)
 		assert.NoError(t, err)
 		assert.Nil(t, exomiser)
@@ -76,8 +75,8 @@ func Test_GetExomiser_Empty(t *testing.T) {
 }
 
 func Test_GetExomiserACMGClassificationCounts(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
-		repo := NewExomiserRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
 		expected := map[string]int{"Pathogenic": 2, "VUS": 1}
 
 		exomiser, err := repo.GetExomiserACMGClassificationCounts(t.Context(), 1000)
@@ -87,8 +86,8 @@ func Test_GetExomiserACMGClassificationCounts(t *testing.T) {
 }
 
 func Test_GetExomiserACMGClassificationCounts_Empty(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
-		repo := NewExomiserRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
 		exomiser, err := repo.GetExomiserACMGClassificationCounts(t.Context(), 42)
 		assert.NoError(t, err)
 		assert.Nil(t, exomiser)
