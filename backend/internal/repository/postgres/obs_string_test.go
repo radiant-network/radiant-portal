@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetObservationStringById_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
@@ -25,8 +24,8 @@ func Test_GetObservationStringById_OK(t *testing.T) {
 }
 
 func Test_GetObservationStringById_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -34,7 +33,7 @@ func Test_GetObservationStringById_NotFound(t *testing.T) {
 }
 
 func Test_CreateObservationString_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		newObs := &types.ObsString{
 			ID:              9999,
 			CaseID:          1,
@@ -44,7 +43,7 @@ func Test_CreateObservationString_OK(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.NoError(t, err)
 
@@ -56,7 +55,7 @@ func Test_CreateObservationString_OK(t *testing.T) {
 		assert.Equal(t, "phenotype", result.ObservationCode)
 		assert.Equal(t, "HP:00314159", result.Value)
 
-		db.Exec("DELETE FROM obs_string WHERE id=9999")
+		env.Postgres.Exec("DELETE FROM obs_string WHERE id=9999")
 	})
 }
 
@@ -87,15 +86,15 @@ func Test_CreateObservationString_WithExam_OK(t *testing.T) {
 }
 
 func Test_CreateObservationString_NilError(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationString(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
 
 func Test_CreateObservationString_CaseNotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		newObs := &types.ObsString{
 			ID:              4242,
 			CaseID:          9876,
@@ -105,7 +104,7 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 
@@ -143,7 +142,7 @@ func Test_DeleteObsStringByCaseID_OK(t *testing.T) {
 }
 
 func Test_CreateObservationString_PatientNotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		newObs := &types.ObsString{
 			ID:              4242,
 			CaseID:          1,
@@ -153,7 +152,7 @@ func Test_CreateObservationString_PatientNotFound(t *testing.T) {
 			TenantCode:      types.DefaultTenantCode,
 		}
 
-		repo := NewObservationStringRepository(database.PostgresDB{DB: db})
+		repo := NewObservationStringRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 

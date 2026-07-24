@@ -6,12 +6,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetByUrl_Success(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewDocumentsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.PostgresDB{DB: env.Postgres})
 		document, err := repo.GetDocumentByUrl(t.Context(), "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz.tbi")
 		assert.NoError(t, err)
 		assert.NotNil(t, document)
@@ -22,8 +21,8 @@ func Test_GetByUrl_Success(t *testing.T) {
 }
 
 func Test_GetByUrl_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewDocumentsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.PostgresDB{DB: env.Postgres})
 		document, err := repo.GetDocumentByUrl(t.Context(), "s3://radiant-data-test/case_999999/Fi9999999/S99999/Fi9999999.S99999.vcf.gz")
 		assert.NoError(t, err)
 		assert.Nil(t, document)

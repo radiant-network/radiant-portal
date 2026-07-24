@@ -10,19 +10,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertDocumentsSearchHandler(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/documents/search", server.SearchDocumentsHandler(repo))
 
@@ -165,8 +163,8 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func assertDocumentIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
 
@@ -185,8 +183,8 @@ func Test_DocumentIdsAutoComplete(t *testing.T) {
 }
 
 func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/documents/filters", server.DocumentsFiltersHandler(repo))
 
@@ -253,14 +251,14 @@ func Test_GetDocumentsFilters(t *testing.T) {
 }
 
 func Test_GetDocumentsDownloadUrl(t *testing.T) {
-	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, pgDB *gorm.DB, srDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
-		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: srDB})
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
 
@@ -276,7 +274,7 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 		assert.NotEmpty(t, actual.URL)
 		assert.Greater(t, actual.URLExpireAt, int64(0))
 
-		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", endpoint)
+		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", env.MinIO.Endpoint)
 		assert.True(t, strings.HasPrefix(actual.URL, expectedURLPrefix))
 	})
 }

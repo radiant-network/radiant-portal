@@ -12,7 +12,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertGetUserSet(t *testing.T, repo *postgres.UserSetsRepository, userSetId string, status int, expected string) {
@@ -28,8 +27,8 @@ func assertGetUserSet(t *testing.T, repo *postgres.UserSetsRepository, userSetId
 }
 
 func Test_GetUserSet(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := postgres.NewUserSetsRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewUserSetsRepository(database.PostgresDB{DB: env.Postgres})
 		// not found
 		assertGetUserSet(t, repo, "bce3b031-c691-4680-878f-f43d661f9a9f", http.StatusNotFound, `{"status": 404, "message":"user not found"}`)
 	})

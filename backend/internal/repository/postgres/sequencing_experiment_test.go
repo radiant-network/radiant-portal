@@ -9,12 +9,11 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_GetSequencingExperimentBySampleID(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 		seqExps, err := repo.GetSequencingExperimentBySampleID(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Len(t, seqExps, 2)
@@ -26,8 +25,8 @@ func Test_GetSequencingExperimentBySampleID(t *testing.T) {
 }
 
 func Test_GetSequencingExperimentBySampleIDtNotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 		sequencing, err := repo.GetSequencingExperimentBySampleID(t.Context(), -42)
 		assert.NoError(t, err)
 		assert.Empty(t, sequencing)
@@ -35,8 +34,8 @@ func Test_GetSequencingExperimentBySampleIDtNotFound(t *testing.T) {
 }
 
 func Test_GetSequencingExperimentByAliquot(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 		seqExps, err := repo.GetSequencingExperimentByAliquot(t.Context(), "NA12892")
 		assert.NoError(t, err)
 		assert.Len(t, seqExps, 2)
@@ -46,8 +45,8 @@ func Test_GetSequencingExperimentByAliquot(t *testing.T) {
 }
 
 func Test_GetSequencingExperimentByAliquotNotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 		sequencing, err := repo.GetSequencingExperimentByAliquot(t.Context(), "FOOBAR")
 		assert.NoError(t, err)
 		assert.Empty(t, sequencing)
@@ -55,8 +54,8 @@ func Test_GetSequencingExperimentByAliquotNotFound(t *testing.T) {
 }
 
 func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 
 		organizationCode := "CQGC"
 		aliquot := "NA12892"
@@ -93,8 +92,8 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 }
 
 func Test_GetSequencingExperimentByAliquotAndSubmitterSampleNotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.PostgresDB{DB: env.Postgres})
 
 		organizationCode := "CHUSJ"
 		aliquot := "NA12892"

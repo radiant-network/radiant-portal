@@ -14,12 +14,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/header", server.GetGermlineVariantHeader(repo))
 
@@ -38,11 +37,11 @@ func Test_GetVariantHeader(t *testing.T) {
 }
 
 func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: srDB})
-		exomiserRepository := starrocks.NewExomiserRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		exomiserRepository := starrocks.NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
 		pubmedClient := &MockExternalClient{}
-		interpretationRepository := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedClient)
+		interpretationRepository := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedClient)
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
@@ -66,8 +65,8 @@ func Test_GetVariantOverview_With_ExomiserACMGClassificationCounts(t *testing.T)
 }
 
 func assertGetVariantConsequences(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/consequences", server.GetGermlineVariantConsequences(repo))
 
@@ -86,8 +85,8 @@ func Test_GetVariantConsequences(t *testing.T) {
 }
 
 func assertGetVariantInterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/variants/germline/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repo))
 
@@ -131,8 +130,8 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 	assertGetVariantInterpretedCases(t, "simple", 1000, body, expected)
 }
 func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/variants/germline/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repo))
 
@@ -188,8 +187,8 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 }
 
 func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
 
@@ -208,8 +207,8 @@ func Test_GetVariantCasesCount(t *testing.T) {
 }
 
 func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
 
@@ -271,8 +270,8 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 }
 
 func assertGetGermlineVariantConditions(t *testing.T, data string, locusId int, panelType string, filter string, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewGenePanelsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGenePanelsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repo))
 
@@ -352,8 +351,8 @@ func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 }
 
 func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
 
@@ -368,8 +367,8 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 }
 
 func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
-		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
 
@@ -384,8 +383,8 @@ func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
 }
 
 func assertGetGermlineVariantExternalFrequencies(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, srDB *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/external_frequencies", server.GetGermlineVariantExternalFrequenciesHandler(repo))
 
@@ -411,8 +410,8 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 }
 
 func assertGetGermlineVariantGlobalInternalFrequencies(t *testing.T, data string, locusId int, status int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, srDB *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies/global", server.GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
 
@@ -441,8 +440,8 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_NotFound(t *testing
 }
 
 func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, split string, status int, expected string) {
-	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, srDB *gorm.DB) {
-		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: srDB})
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repo))
 

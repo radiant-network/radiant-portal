@@ -4307,14 +4307,14 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 }
 
 func Test_validateFileMetadata_OK(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
 
 		bucketName := "foo"
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4347,8 +4347,8 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 }
 
 func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4357,8 +4357,8 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4397,8 +4397,8 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 }
 
 func Test_validateFileMetadata_NameMismatch(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4407,8 +4407,8 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4447,8 +4447,8 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4457,8 +4457,8 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4497,8 +4497,8 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_HashMismatch(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4507,8 +4507,8 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4547,8 +4547,8 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_OptionalHash(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4557,8 +4557,8 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{

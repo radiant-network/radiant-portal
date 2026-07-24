@@ -7,12 +7,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetFamilyById_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetFamilyById(t.Context(), 1)
 
 		expected := &types.Family{
@@ -30,8 +29,8 @@ func Test_GetFamilyById_OK(t *testing.T) {
 }
 
 func Test_GetFamilyById_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetFamilyById(t.Context(), 9999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -39,7 +38,7 @@ func Test_GetFamilyById_NotFound(t *testing.T) {
 }
 
 func Test_CreateFamily_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		newFamily := &types.Family{
 			ID:                        999,
 			CaseID:                    1,
@@ -49,7 +48,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 			TenantCode:                types.DefaultTenantCode,
 		}
 
-		repo := NewFamilyRepository(database.PostgresDB{DB: db})
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateFamily(t.Context(), newFamily)
 		assert.NoError(t, err)
 
@@ -57,13 +56,13 @@ func Test_CreateFamily_OK(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, newFamily, result)
 
-		db.Exec("DELETE FROM family WHERE id=999")
+		env.Postgres.Exec("DELETE FROM family WHERE id=999")
 	})
 }
 
 func Test_CreateFamily_NilError(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewFamilyRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateFamily(t.Context(), nil)
 		assert.Error(t, err)
 	})

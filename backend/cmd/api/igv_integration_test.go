@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
@@ -19,7 +18,6 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 // assertGetIGV calls GET /igv/{caseID} and asserts the response matches expected.
@@ -51,15 +49,15 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 }
 
 func Test_GetIGVByCaseIdHandler(t *testing.T) {
-	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, _ *gorm.DB, srDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
-		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: srDB})
-		casesRepo := starrocks.NewCasesRepository(database.StarrocksDB{DB: srDB})
+		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+		casesRepo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
 
@@ -71,8 +69,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "male",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", env.MinIO.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", env.MinIO.Endpoint),
 					Name:       "Reads: S13224 proband",
 				},
 				{
@@ -81,8 +79,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.crai", endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.cram", env.MinIO.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.crai", env.MinIO.Endpoint),
 					Name:       "Reads: S13225 mother",
 				},
 				{
@@ -91,8 +89,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "male",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", env.MinIO.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", env.MinIO.Endpoint),
 					Name:       "Reads: S13226 father",
 				},
 			})
@@ -106,8 +104,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", env.MinIO.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", env.MinIO.Endpoint),
 					Name:       "Reads: SRX1091647 tumoral",
 				},
 				{
@@ -116,8 +114,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", env.MinIO.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", env.MinIO.Endpoint),
 					Name:       "Reads: SRX1091646 normal",
 				},
 			})

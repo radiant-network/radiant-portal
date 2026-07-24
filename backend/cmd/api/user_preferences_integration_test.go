@@ -13,7 +13,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func assertGetUserPreferencesHandler(t *testing.T, repo *postgres.UserPreferencesRepository, auth utils.Auth, status int, key string, expected string) {
@@ -29,16 +28,16 @@ func assertGetUserPreferencesHandler(t *testing.T, repo *postgres.UserPreference
 }
 
 func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{}
 		assertGetUserPreferencesHandler(t, repo, auth, http.StatusNotFound, "table_1", `{"status": 404, "message":"user preferences not found"}`)
 	})
 }
 
 func Test_GetUserPreferencesHandler_Found(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}
@@ -65,8 +64,8 @@ func assertUpdateUserPreferencesHandler(t *testing.T, repo *postgres.UserPrefere
 }
 
 func Test_UpdateUserPreferencesHandler(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewUserPreferencesRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
 		}

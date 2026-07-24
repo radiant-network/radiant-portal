@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224")
 
@@ -25,8 +24,8 @@ func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "SAMPLE-UNKNOWN")
 
@@ -36,8 +35,8 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "UNKNOWN-ORG", "S13224")
 
@@ -47,8 +46,8 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "UNKNOWN-ORG", "SAMPLE-UNKNOWN")
 
@@ -58,8 +57,8 @@ func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
 }
 
 func Test_GetTypeCodes(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		typeCodes, err := repo.GetTypeCodes(t.Context())
 
@@ -70,8 +69,8 @@ func Test_GetTypeCodes(t *testing.T) {
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224")
 
@@ -83,8 +82,8 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "SAMPLE-UNKNOWN")
 
@@ -94,8 +93,8 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *tes
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "INVALID-ORG", "S13224")
 
@@ -105,8 +104,8 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *test
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "INVALID-ORG", "SAMPLE-UNKNOWN")
 

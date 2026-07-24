@@ -2,7 +2,6 @@ package utils_test
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"testing"
 
@@ -59,8 +58,8 @@ func Test_extractFileName_Not_S3_URL(t *testing.T) {
 }
 
 func Test_GetMetadata_OK(t *testing.T) {
-	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -69,10 +68,10 @@ func Test_GetMetadata_OK(t *testing.T) {
 		objectName := "test-file.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		err := client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		err := env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
 		assert.NoError(t, err)
 
-		_, err = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_, err = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 		assert.NoError(t, err)
 
 		s3fs, _ := utils.NewS3Store()

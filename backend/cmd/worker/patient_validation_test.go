@@ -13,7 +13,6 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -350,10 +349,10 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 }
 
 func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		/* This test verifies that rollback occurs when there is an error inserting patient records. */
 		var id string
-		initErr := db.Raw(`
+		initErr := env.Postgres.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
@@ -394,14 +393,14 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 			},
 		}
 
-		err := persistBatchAndPatientRecords(t.Context(), db, &batch, patientRecords)
+		err := persistBatchAndPatientRecords(t.Context(), env.Postgres, &batch, patientRecords)
 		if assert.NotNil(t, err) {
 			assert.Contains(t, err.Error(), "violates foreign key constraint")
 		}
 
 		// Verify that no patient records were inserted due to rollback
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "id2", "CHOP").Count(&countPatient).Error
+		countPatientErr := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "id2", "CHOP").Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -409,7 +408,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 		// Verify that batch status has been rolled back to RUNNING
 		resultBatch := types.Batch{}
-		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusRunning, resultBatch.Status) // Batch status should have been rollback
 
 	})
@@ -584,12 +583,12 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -603,12 +602,12 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},
@@ -630,12 +629,12 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 }
 
 func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
 		rec := PatientValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: &batchval.BatchValidationContext{
-					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: pgDB}),
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
 				},
 				ResourceType: types.CreatePatientBatchType,
 			},

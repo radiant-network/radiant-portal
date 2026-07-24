@@ -10,15 +10,14 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_Process_Unexpected_Errors(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 
 		var id string
-		initErr := db.Raw(`
+		initErr := env.Postgres.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
     		VALUES ('{"unmarshalled_json":true}', 'RUNNING', 'create_patient', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
@@ -31,7 +30,7 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 		ProcessUnexpectedError(t.Context(), &types.Batch{ID: id}, err, repo)
 
 		resultBatch := types.Batch{}
-		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		assert.Equal(t, true, resultBatch.DryRun)
 		assert.Equal(t, "create_patient", resultBatch.BatchType)

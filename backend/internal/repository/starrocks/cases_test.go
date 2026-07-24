@@ -9,7 +9,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 var allCasesFields = sliceutils.Map(types.CasesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -28,8 +27,8 @@ var CasesQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_GetCaseType(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		caseType, err := repo.GetCaseType(t.Context(), 70)
 		assert.NoError(t, err)
@@ -42,8 +41,8 @@ func Test_GetCaseType(t *testing.T) {
 }
 
 func Test_SearchCasesNoFilters(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, nil, nil)
 		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
@@ -72,8 +71,8 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 }
 
 func Test_SearchCasesNoResult(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CasePriorityCodeField.GetAlias(),
@@ -89,8 +88,8 @@ func Test_SearchCasesNoResult(t *testing.T) {
 }
 
 func Test_SearchCases(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseStatusCodeField.GetAlias(),
@@ -106,8 +105,8 @@ func Test_SearchCases(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.SubmitterPatientIdField.GetAlias(),
@@ -125,8 +124,8 @@ func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
 }
 
 func Test_SearchCases_OnPatientMRN(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.SubmitterPatientIdField.GetAlias(),
@@ -144,8 +143,8 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandID(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PatientIdField.GetAlias(),
@@ -163,8 +162,8 @@ func Test_SearchCases_OnProbandID(t *testing.T) {
 }
 
 func Test_SearchCases_OnPatientID(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PatientIdField.GetAlias(),
@@ -182,8 +181,8 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 }
 
 func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseSequencingExperimentIdField.GetAlias(),
@@ -200,8 +199,8 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 }
 
 func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
@@ -227,8 +226,8 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CasePrimaryConditionIdField.GetAlias(),
@@ -254,8 +253,8 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 }
 
 func Test_SearchCases_OnPanelCode(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PanelCodeField.GetAlias(),
@@ -270,8 +269,8 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.ProbandLifeStatusCodeField.GetAlias(),
@@ -297,8 +296,8 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseCategoryCodeField.GetAlias(),
@@ -324,8 +323,8 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseTypeCodeField.GetAlias(),
@@ -388,8 +387,8 @@ func Test_SearchCases_OnSubmitterCaseId_NoResult(t *testing.T) {
 }
 
 func Test_Cases_SearchById(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		autocompleteResult, err := repo.SearchById(t.Context(), "1", 5)
 		assert.NoError(t, err)
 		assert.Equal(t, len(*autocompleteResult), 5)
@@ -402,8 +401,8 @@ func Test_Cases_SearchById(t *testing.T) {
 }
 
 func Test_SearchById_CaseInsensitive(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		autocompleteResultLower, errLower := repo.SearchById(t.Context(), "mrn", 5)
 		autocompleteResultUpper, errUpper := repo.SearchById(t.Context(), "MRN", 5)
 		assert.NoError(t, errLower)
@@ -418,8 +417,8 @@ func Test_SearchById_CaseInsensitive(t *testing.T) {
 }
 
 func Test_GetCasesFilters(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		filters, err := repo.GetCasesFilters(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, len((*filters).Status), 7)
@@ -437,8 +436,8 @@ func Test_GetCasesFilters(t *testing.T) {
 }
 
 func Test_GetCaseEntity(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		caseEntity, err := repo.GetCaseEntity(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
@@ -450,8 +449,8 @@ func Test_GetCaseEntity(t *testing.T) {
 }
 
 func Test_RetrieveCaseLevelData(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		caseEntity, err := repo.retrieveCaseLevelData(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
@@ -481,8 +480,8 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 }
 
 func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*sequencingExperiments))
@@ -522,8 +521,8 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 }
 
 func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 71)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(*sequencingExperiments))
@@ -549,8 +548,8 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 }
 
 func Test_RetrieveCasePatients(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		members, err := repo.retrieveCasePatients(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*members))
@@ -611,8 +610,8 @@ func Test_RetrieveCasePatients(t *testing.T) {
 }
 
 func Test_RetrieveCaseTasks(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		tasks, err := repo.retrieveCaseTasks(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 8, len(*tasks))
@@ -635,8 +634,8 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 }
 
 func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		tasks, err := repo.retrieveCaseTasks(t.Context(), 71)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*tasks))

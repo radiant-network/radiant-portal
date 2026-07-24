@@ -16,7 +16,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 type MockExternalClient struct{}
@@ -54,10 +53,10 @@ func (m *MockTermsRepository) GetTermNameById(ctx context.Context, termsTable st
 }
 
 func Test_GetInterpretationGermline(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedService)
-		termsRepo := starrocks.NewTermsRepository(database.StarrocksDB{DB: srDB})
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
+		termsRepo := starrocks.NewTermsRepository(database.StarrocksDB{DB: env.Starrocks})
 		// not found
 		assertGetInterpretationGermline(t, repo, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
@@ -81,10 +80,10 @@ func Test_GetInterpretationGermline(t *testing.T) {
 }
 
 func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, srDB *gorm.DB, pgDB *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: pgDB}, pubmedService)
-		termsRepo := starrocks.NewTermsRepository(database.StarrocksDB{DB: srDB})
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
+		termsRepo := starrocks.NewTermsRepository(database.StarrocksDB{DB: env.Starrocks})
 		interpretation := &types.InterpretationGermline{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
 		assertPostInterpretationGermline(t, repo, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
@@ -128,9 +127,9 @@ func assertPostInterpretationGermline(t *testing.T, repo *postgres.Interpretatio
 }
 
 func Test_GetInterpretationSomatic(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
 		termsRepo := &MockTermsRepository{}
 		// not found
 		assertGetInterpretationSomatic(t, repo, termsRepo, "11", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
@@ -162,9 +161,9 @@ func Test_GetInterpretationSomatic(t *testing.T) {
 }
 
 func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
 		termsRepo := &MockTermsRepository{}
 		interpretation := &types.InterpretationSomatic{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
@@ -216,10 +215,10 @@ func assertPostInterpretationSomatic(t *testing.T, repo *postgres.Interpretation
 }
 
 func Test_SearchGermline(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
 
 		// search empty
 		assertSearchInterpretationGermline(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)
@@ -252,10 +251,10 @@ func assertSearchInterpretationGermline(t *testing.T, repo *postgres.Interpretat
 }
 
 func Test_SearchSomatic(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
-		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: db}, pubmedService)
+		repo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedService)
 
 		// search empty
 		assertSearchInterpretationSomatic(t, repo, "analysis_id=foo,bar&analysis_id=toto", http.StatusOK, 0)

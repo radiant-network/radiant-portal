@@ -7,12 +7,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetSequencingExperimentDetailById(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewSequencingExperimentRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSequencingExperimentRepository(database.StarrocksDB{DB: env.Starrocks})
 		sequencingExperiment, err := repo.GetSequencingExperimentDetailById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, "completed", sequencingExperiment.StatusCode)

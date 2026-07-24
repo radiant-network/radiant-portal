@@ -8,12 +8,11 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_CreateAndGetTask_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
 		newTask := &types.Task{
 			ID:              8888,
@@ -37,21 +36,21 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 		assert.Equal(t, "4.4.4", result.PipelineVersion)
 		assert.Equal(t, "GRch38", result.GenomeBuild)
 
-		db.Exec("DELETE FROM task WHERE id = 8888")
+		env.Postgres.Exec("DELETE FROM task WHERE id = 8888")
 	})
 }
 
 func Test_CreateTask_NilError(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateTask(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
 
 func Test_GetTaskById_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskById(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -59,8 +58,8 @@ func Test_GetTaskById_NotFound(t *testing.T) {
 }
 
 func Test_CreateAndGetTaskContext_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
 		se := 72
 		newContext := &types.TaskContext{
@@ -80,21 +79,21 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 		assert.Nil(t, ctxs[1].CaseID)
 
 		// Clean up
-		db.Exec("DELETE FROM task_context WHERE task_id = 1 AND sequencing_experiment_id = 72")
+		env.Postgres.Exec("DELETE FROM task_context WHERE task_id = 1 AND sequencing_experiment_id = 72")
 	})
 }
 
 func Test_CreateTaskContext_NilError(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateTaskContext(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
 
 func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskContextByTaskId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Empty(t, result)
@@ -102,8 +101,8 @@ func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
 }
 
 func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
 		doc := &types.TaskHasDocument{
 			TaskID:     1,
@@ -122,21 +121,21 @@ func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
 		assert.Equal(t, "output", thd[5].Type)
 
 		// Clean up
-		db.Exec("DELETE FROM task_has_document WHERE task_id = 1 AND document_id = 265")
+		env.Postgres.Exec("DELETE FROM task_has_document WHERE task_id = 1 AND document_id = 265")
 	})
 }
 
 func Test_CreateTaskHasDocument_NilError(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateTaskHasDocument(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
 
 func Test_GetTaskTypeCodes(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskTypeCodes(t.Context())
 		assert.NoError(t, err)
 		assert.Greater(t, len(result), 0)
@@ -144,8 +143,8 @@ func Test_GetTaskTypeCodes(t *testing.T) {
 }
 
 func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskHasDocumentByTaskId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -153,8 +152,8 @@ func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 }
 
 func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 1)
 
 		expected := []*types.TaskHasDocument{
@@ -172,8 +171,8 @@ func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 }
 
 func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
@@ -181,8 +180,8 @@ func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 }
 
 func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskContextBySequencingExperimentId(t.Context(), 1)
 
 		caseId := 1
@@ -217,8 +216,8 @@ func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
 }
 
 func Test_GetTaskContextBySequencingExperimentId_NotFound(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
-		repo := NewTaskRepository(database.PostgresDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 		result, err := repo.GetTaskContextBySequencingExperimentId(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)

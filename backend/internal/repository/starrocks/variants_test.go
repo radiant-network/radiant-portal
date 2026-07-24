@@ -9,12 +9,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func Test_GetVariantHeader(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		variantHeader, err := repo.GetVariantHeader(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "hgvsg1", variantHeader.Hgvsg)
@@ -24,8 +23,8 @@ func Test_GetVariantHeader(t *testing.T) {
 }
 
 func Test_GetVariantOverview(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		variantOverview, err := repo.GetVariantOverview(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "locus1", variantOverview.Locus)
@@ -37,8 +36,8 @@ func Test_GetVariantOverview(t *testing.T) {
 }
 
 func Test_GetVariantConsequences(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		variantConsequences, err := repo.GetVariantConsequences(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(*variantConsequences))
@@ -48,8 +47,8 @@ func Test_GetVariantConsequences(t *testing.T) {
 }
 
 func Test_GetVariantInterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
 		interpretedCases, count, err := repo.GetVariantInterpretedCases(t.Context(), 1000, query)
 		assert.NoError(t, err)
@@ -65,8 +64,8 @@ func Test_GetVariantInterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *te
 }
 
 func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		pagination := types.Pagination{Limit: 2}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
 		interpretedCases, count, err := repo.GetVariantInterpretedCases(t.Context(), 1000, query)
@@ -79,8 +78,8 @@ func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_DefaultSort(t *te
 }
 
 func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_CustomSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		pagination := types.Pagination{Limit: 2}
 		sort := types.SortBody{Field: types.ConditionIdField.Alias, Order: "asc"}
 		query, err := types.NewListQueryFromCriteria(types.VariantInterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
@@ -94,8 +93,8 @@ func Test_GetVariantInterpretedCases_NoCriteria_WithPagination_CustomSort(t *tes
 }
 
 func Test_GetVariantInterpretedCases_WithCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"incompatibility"}, Operator: "contains"},
 			{FieldName: types.GermlineInterpretationClassificationField.Name, Value: []interface{}{"LA26332-9"}},
@@ -111,8 +110,8 @@ func Test_GetVariantInterpretedCases_WithCriteria_NoPagination_DefaultSort(t *te
 }
 
 func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
 		}
@@ -125,8 +124,8 @@ func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
 }
 
 func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(t.Context(), 1000, query)
 		assert.NoError(t, err)
@@ -152,8 +151,8 @@ func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
 }
 
 func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{
 			"primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
 			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_code",
@@ -180,8 +179,8 @@ func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
 }
 
 func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(t.Context(), 1000, query)
 		assert.NoError(t, err)
@@ -196,8 +195,8 @@ func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *
 }
 
 func Test_GetVariantUninterpretedCases_Add_phenotypes(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, _, err := repo.GetVariantUninterpretedCases(t.Context(), 1000, query)
 		assert.NoError(t, err)
@@ -222,8 +221,8 @@ func Test_GetVariantUninterpretedCases_Add_phenotypes(t *testing.T) {
 }
 
 func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		pagination := types.Pagination{Limit: 2}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(t.Context(), 1000, query)
@@ -236,8 +235,8 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_DefaultSort(t *
 }
 
 func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		pagination := types.Pagination{Limit: 2}
 		sort := types.SortBody{Field: types.FamilyRelationshipToProbandCodeField.Name, Order: "asc"}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
@@ -251,8 +250,8 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 }
 
 func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.PatientSexCodeField.Name, Value: []interface{}{"female"}},
 			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"seizure"}, Operator: "contains"},
@@ -268,8 +267,8 @@ func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *
 }
 
 func Test_GetVariantUninterpretedCases_WithPhenotypeCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"seizure"}, Operator: "contains"},
 		}
@@ -284,8 +283,8 @@ func Test_GetVariantUninterpretedCases_WithPhenotypeCriteria_NoPagination_Defaul
 }
 
 func Test_GetVariantUninterpretedCases_WithDiagnosticLabCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.CaseDiagnosisLabCodeField.Alias, Value: []interface{}{"CQGC"}, Operator: "in"},
 		}
@@ -303,8 +302,8 @@ func Test_GetVariantUninterpretedCases_WithDiagnosticLabCriteria_NoPagination_De
 }
 
 func Test_GetVariantUninterpretedCases_WithFilterCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.GermlineSNVFilterIsPassField.Alias, Value: []interface{}{true}, Operator: "in"},
 		}
@@ -326,8 +325,8 @@ func Test_GetVariantUninterpretedCases_WithFilterCriteria_NoPagination_DefaultSo
 }
 
 func Test_GetVariantUninterpretedCases_WithZygosityCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.GermlineSNVZygosityField.Name, Value: []interface{}{"HOM"}, Operator: "in"},
 		}
@@ -342,8 +341,8 @@ func Test_GetVariantUninterpretedCases_WithZygosityCriteria_NoPagination_Default
 }
 
 func Test_GetVariantUninterpretedCases_WithTransmissionModeCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.GermlineSNVTransmissionModeField.Name, Value: []interface{}{"autosomal_dominant"}, Operator: "in"},
 		}
@@ -357,8 +356,8 @@ func Test_GetVariantUninterpretedCases_WithTransmissionModeCriteria_NoPagination
 }
 
 func Test_GetVariantUninterpretedCases_WithCaseAnalysisCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.AnalysisCatalogCodeField.Alias, Value: []interface{}{"IDGD"}, Operator: "in"},
 		}
@@ -372,8 +371,8 @@ func Test_GetVariantUninterpretedCases_WithCaseAnalysisCriteria_NoPagination_Def
 }
 
 func Test_GetVariantUninterpretedCases_WithPatientSexCodeCriteria_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.PatientSexCodeField.Name, Value: []interface{}{"female"}, Operator: "in"},
 		}
@@ -389,8 +388,8 @@ func Test_GetVariantUninterpretedCases_WithPatientSexCodeCriteria_NoPagination_D
 }
 
 func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
 			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
 		}
@@ -403,8 +402,8 @@ func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
 }
 
 func Test_GetVariantCasesCount(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		counts, err := repo.GetVariantCasesCount(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), counts.CountInterpreted)
@@ -413,8 +412,8 @@ func Test_GetVariantCasesCount(t *testing.T) {
 }
 
 func Test_GetVariantCasesFilters(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		filters, err := repo.GetVariantCasesFilters(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, 5, len((*filters).Classification))
@@ -427,8 +426,8 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 }
 
 func Test_GetVariantExternalFrequencies(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		externalFrequencies, err := repo.GetVariantExternalFrequencies(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "locus1", (*externalFrequencies).Locus)
@@ -459,8 +458,8 @@ func Test_GetVariantExternalFrequencies(t *testing.T) {
 }
 
 func Test_GetVariantExternalFrequencies_PartialFound(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		externalFrequencies, err := repo.GetVariantExternalFrequencies(t.Context(), 3000)
 		assert.NoError(t, err)
 		assert.Equal(t, "locus3", (*externalFrequencies).Locus)
@@ -491,8 +490,8 @@ func Test_GetVariantExternalFrequencies_PartialFound(t *testing.T) {
 }
 
 func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		externalFrequencies, err := repo.GetVariantExternalFrequencies(t.Context(), 4000)
 		assert.NoError(t, err)
 		assert.Nil(t, externalFrequencies)
@@ -500,8 +499,8 @@ func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
 }
 
 func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 4000)
 		assert.NoError(t, err)
 		assert.Nil(t, globalFrequencies)
@@ -509,8 +508,8 @@ func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
 }
 
 func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 1000)
 		assert.NoError(t, err)
 		assert.NotNil(t, globalFrequencies)
@@ -530,8 +529,8 @@ func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 }
 
 func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PROJECT)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
@@ -573,8 +572,8 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 }
 
 func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PRIMARY_CONDITION)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
@@ -616,8 +615,8 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 }
 
 func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_ANALYSIS)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
@@ -659,8 +658,8 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 }
 
 func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSplit(t *testing.T) {
-	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(database.StarrocksDB{DB: db})
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, "incorrect")
 		assert.Nil(t, splitRows)
 		assert.Error(t, err)
