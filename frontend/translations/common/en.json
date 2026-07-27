@@ -3,33 +3,33 @@
     "title": "Administration",
     "nav": {
       "group": "Tenant settings",
-      "users": "Users",
+      "users": "Members",
       "organizations": "Organizations",
       "roles": "Roles & Permissions"
     },
     "users": {
-      "title": "Users",
-      "count": "{{total}} Users",
-      "subtitle": "Manage users and role assignments.",
-      "add": "Add user",
+      "title": "Members",
+      "count": "{{total}} Members",
+      "subtitle": "Manage members and role assignments.",
+      "add": "Add member",
       "search_placeholder": "Search by name or email",
       "you": "You",
       "member": "Member",
       "all_orgs": "All orgs",
       "col": {
-        "user": "User",
+        "user": "Name",
         "roles": "Roles & Access"
       },
       "filter": {
         "role": "Role",
         "organization": "Organization"
       },
-      "edit_aria": "Edit user",
-      "empty": "No users found"
+      "edit_aria": "Edit member",
+      "empty": "No members found"
     },
     "roles": {
       "scope": { "tenant": "Tenant", "org": "Organization" },
-      "tenant_admin": { "description": "Full administrative access to this tenant — manage users, organizations, and roles." },
+      "tenant_admin": { "description": "Full administrative access to this tenant — manage members, organizations, and roles." },
       "member": { "description": "Baseline access for everyone: search cases and browse the knowledge base." },
       "geneticist": { "description": "Interpret variants and view protected health information at the selected organization(s) — includes commenting, flagging, and downloading case files." },
       "data_manager": { "description": "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s)." },
@@ -37,7 +37,7 @@
       "org_manager": { "description": "Create and edit organizations in this tenant." }
     },
     "permissions": {
-      "can_manage_users": { "name": "Manage users", "description": "Create, edit, and delete users; assign and unassign roles." },
+      "can_manage_users": { "name": "Manage members", "description": "Create, edit, and delete members; assign and unassign roles." },
       "can_manage_orgs": { "name": "Manage organizations", "description": "Create and edit organizations in the tenant." },
       "can_manage_roles": { "name": "Manage roles", "description": "Create, edit, and delete custom roles." },
       "can_search_case": { "name": "Search cases", "description": "Search and view cases across the tenant (protected health information masked)." },
@@ -50,11 +50,11 @@
       "can_ingest_data": { "name": "Ingest data", "description": "Submit data batches (cases, patients, samples, sequencing) at the organization." }
     },
     "user": {
-      "add_title": "Add user",
-      "edit_title": "Edit user",
-      "user_details": "User details",
-      "assign_roles": "User roles",
-      "assign_roles_subtitle": "A user's roles determine what they can see and do across your tenant and within specific organizations.",
+      "add_title": "Add member",
+      "edit_title": "Edit member",
+      "user_details": "Member details",
+      "assign_roles": "Member roles",
+      "assign_roles_subtitle": "A member's roles determine what they can see and do across your tenant and within specific organizations.",
       "view_permissions": "View permissions",
       "permissions_modal_subtitle": "Permission descriptions and scope for this role",
       "orgs_label": "At these organizations",
@@ -63,14 +63,14 @@
       "first_name": "First name",
       "last_name": "Last name",
       "email": "Email",
-      "email_note": "Email is the sign-in identity and can't be changed. To fix a wrong email, delete the user and create a new one.",
-      "delete": "Delete user",
+      "email_note": "Email is the sign-in identity and can't be changed. To fix a wrong email, delete the member and create a new one.",
+      "delete": "Delete member",
       "delete_title": "Delete {{name}}?",
-      "delete_body": "This user will be removed from the {{tenant}} tenant and all of its organizations.",
-      "delete_confirm": "Delete user",
+      "delete_body": "This member will be removed from the {{tenant}} tenant and all of its organizations.",
+      "delete_confirm": "Delete member",
       "cancel": "Cancel",
       "save": "Save changes",
-      "create": "Create user",
+      "create": "Create member",
       "understood": "Got it",
       "err": {
         "last_admin_title": "This tenant needs an admin",
@@ -80,12 +80,12 @@
         "name_required": "First and last name are required.",
         "email_required": "Email is required.",
         "email_invalid": "Enter a valid email.",
-        "email_duplicate": "A user with this email already exists in this tenant."
+        "email_duplicate": "A member with this email already exists in this tenant."
       },
       "ok": {
-        "created": "User created.",
-        "updated": "User updated.",
-        "deleted": "User removed from this tenant."
+        "created": "Member created.",
+        "updated": "Member updated.",
+        "deleted": "Member removed from this tenant."
       }
     }
   },
