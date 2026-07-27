@@ -25,10 +25,15 @@ export function getUsersColumns(
   { onEdit }: UsersColumnsOptions,
 ): TableColumnDef<AdminUser, any>[] {
   const columns = [
-    columnHelper.display({
+    columnHelper.accessor(row => row.lastName, {
       id: 'user',
       header: () => t('admin.users.col.user'),
       cell: ({ row }) => <UserCell user={row.original} onEdit={() => onEdit(row.original)} />,
+      // Sortable by last name (first name as tiebreak, locale-aware). The pinned-current-member
+      // default order lives in the page's row memo; asc/desc here sort everyone.
+      sortingFn: (a, b) =>
+        a.original.lastName.localeCompare(b.original.lastName) ||
+        a.original.firstName.localeCompare(b.original.firstName),
       size: 300,
       minSize: 200,
     }),

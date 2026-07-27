@@ -53,7 +53,20 @@ export default function UsersPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
-  const rows = useMemo(() => users.filter(user => matchesFilters(user, filters)), [users, filters]);
+  // Default (unsorted) order: the signed-in member pinned on top, then everyone else alphabetically
+  // by last name (first name as tiebreak). Clicking the Name header to sort asc/desc overrides this
+  // and orders everyone by last name (the pin only applies to the default state).
+  const rows = useMemo(
+    () =>
+      users
+        .filter(user => matchesFilters(user, filters))
+        .sort((a, b) => {
+          if (a.isCurrentUser) return -1;
+          if (b.isCurrentUser) return 1;
+          return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
+        }),
+    [users, filters],
+  );
 
   const openAdd = () => {
     setEditingUser(null);
