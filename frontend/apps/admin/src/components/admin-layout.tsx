@@ -32,8 +32,8 @@ export default function AdminLayout({ tenantName, activeSection, onSectionChange
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop: section nav sidebar */}
-        <aside className="hidden w-64 shrink-0 bg-sidebar-background p-3 md:block">
+        {/* Desktop: section nav sidebar (width + background come from the shared Sidebar component) */}
+        <aside className="hidden shrink-0 md:block">
           <AdminSidebar activeSection={activeSection} onSectionChange={onSectionChange} />
         </aside>
         <main className="min-w-0 flex-1 overflow-auto p-3">{children}</main>

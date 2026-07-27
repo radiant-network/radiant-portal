@@ -1,8 +1,18 @@
+import type { CSSProperties } from 'react';
 import { Building2, LucideIcon, Shield, Users } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from '@/components/base/shadcn/sidebar';
 import { useI18n } from '@/components/hooks/i18n';
-import { cn } from '@/components/lib/utils';
 
 export type AdminSectionId = 'users' | 'organizations' | 'roles';
 
@@ -25,35 +35,44 @@ type AdminSidebarProps = {
   onSectionChange: (section: AdminSectionId) => void;
 };
 
-/** Desktop section nav (the "Sidebar" component from Figma). */
+/** Desktop section nav — composes the shared `Sidebar` component (Figma "Sidebar" / Layout/Sidebar). */
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
   const { t } = useI18n();
   return (
-    <nav className="flex flex-col gap-1" aria-label={t('admin.title')}>
-      <div className="px-2 pb-1 text-xs font-medium text-sidebar-foreground/70">{t('admin.nav.group')}</div>
-      {ADMIN_SECTIONS.map(section => {
-        const Icon = section.icon;
-        const isActive = section.id === activeSection;
-        return (
-          <button
-            key={section.id}
-            type="button"
-            disabled={!section.enabled}
-            aria-current={isActive ? 'page' : undefined}
-            onClick={() => section.enabled && onSectionChange(section.id)}
-            className={cn(
-              'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-sidebar-foreground [&_svg]:size-4',
-              isActive && 'bg-sidebar-accent font-medium text-sidebar-accent-foreground',
-              !isActive && section.enabled && 'hover:cursor-pointer hover:bg-sidebar-accent/50',
-              !section.enabled && 'cursor-default',
-            )}
-          >
-            <Icon />
-            <span>{t(section.labelKey)}</span>
-          </button>
-        );
-      })}
-    </nav>
+    // Standalone, bounded use of the shared Sidebar (mirrors the Layout/Sidebar story): the provider
+    // normally spans the whole app (min-h-svh) — neutralized here with min-h-0 + the sidebar width.
+    <SidebarProvider
+      className="h-full min-h-0 w-(--sidebar-width)"
+      // Override the DS default (12rem) to keep the admin section nav at its designed 256px width.
+      style={{ '--sidebar-width': '16rem' } as CSSProperties}
+    >
+      <Sidebar collapsible="none" className="h-full" role="navigation" aria-label={t('admin.title')}>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>{t('admin.nav.group')}</SidebarGroupLabel>
+            <SidebarMenu>
+              {ADMIN_SECTIONS.map(section => {
+                const Icon = section.icon;
+                const isActive = section.id === activeSection;
+                return (
+                  <SidebarMenuItem key={section.id}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      disabled={!section.enabled}
+                      aria-current={isActive ? 'page' : undefined}
+                      onClick={() => section.enabled && onSectionChange(section.id)}
+                    >
+                      <Icon />
+                      <span>{t(section.labelKey)}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    </SidebarProvider>
   );
 }
 
