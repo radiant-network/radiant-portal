@@ -65,7 +65,7 @@
       "email_note": "Email is the sign-in identity and can't be changed. To fix a wrong email, delete the user and create a new one.",
       "delete": "Delete user",
       "delete_title": "Delete {{name}}?",
-      "delete_body": "This removes all of {{name}}'s roles in {{tenant}} — they'll lose access to this tenant. Their sign-in identity and access to other tenants are unaffected.",
+      "delete_body": "This user will be removed from the {{tenant}} tenant and all of its organizations.",
       "delete_confirm": "Delete user",
       "cancel": "Cancel",
       "save": "Save changes",
