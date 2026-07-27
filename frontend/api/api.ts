@@ -5285,6 +5285,25 @@ export interface UtilsPreSignedURL {
     'url'?: string;
 }
 /**
+ * A value-set option: the stored code and its English label.
+ * @export
+ * @interface ValueSetItem
+ */
+export interface ValueSetItem {
+    /**
+     * 
+     * @type {string}
+     * @memberof ValueSetItem
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ValueSetItem
+     */
+    'name'?: string;
+}
+/**
  * 
  * @export
  * @interface VariantCasesCount
@@ -13378,6 +13397,118 @@ export class UserSetsApi extends BaseAPI {
      */
     public getUserSet(userSetId: string, options?: RawAxiosRequestConfig) {
         return UserSetsApiFp(this.configuration).getUserSet(userSetId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ValueSetsApi - axios parameter creator
+ * @export
+ */
+export const ValueSetsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns the (code, label) options of an instance-wide value set — e.g. `organization_category`. Not tenant-scoped; any authenticated user may read it.
+         * @summary List a value set
+         * @param {string} type Value set type (a value-set table name, e.g. organization_category)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValueSet: async (type: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'type' is not null or undefined
+            assertParamExists('listValueSet', 'type', type)
+            const localVarPath = `/value_sets/{type}`
+                .replace(`{${"type"}}`, encodeURIComponent(String(type)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ValueSetsApi - functional programming interface
+ * @export
+ */
+export const ValueSetsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ValueSetsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns the (code, label) options of an instance-wide value set — e.g. `organization_category`. Not tenant-scoped; any authenticated user may read it.
+         * @summary List a value set
+         * @param {string} type Value set type (a value-set table name, e.g. organization_category)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listValueSet(type: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ValueSetItem>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listValueSet(type, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ValueSetsApi.listValueSet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ValueSetsApi - factory interface
+ * @export
+ */
+export const ValueSetsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ValueSetsApiFp(configuration)
+    return {
+        /**
+         * Returns the (code, label) options of an instance-wide value set — e.g. `organization_category`. Not tenant-scoped; any authenticated user may read it.
+         * @summary List a value set
+         * @param {string} type Value set type (a value-set table name, e.g. organization_category)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValueSet(type: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ValueSetItem>> {
+            return localVarFp.listValueSet(type, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ValueSetsApi - object-oriented interface
+ * @export
+ * @class ValueSetsApi
+ * @extends {BaseAPI}
+ */
+export class ValueSetsApi extends BaseAPI {
+    /**
+     * Returns the (code, label) options of an instance-wide value set — e.g. `organization_category`. Not tenant-scoped; any authenticated user may read it.
+     * @summary List a value set
+     * @param {string} type Value set type (a value-set table name, e.g. organization_category)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ValueSetsApi
+     */
+    public listValueSet(type: string, options?: RawAxiosRequestConfig) {
+        return ValueSetsApiFp(this.configuration).listValueSet(type, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

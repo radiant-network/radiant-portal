@@ -201,6 +201,37 @@
           "response": []
         },
         {
+          "name": "List organization categories (value set)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/value_sets/organization_category",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "value_sets",
+                "organization_category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Create organization",
           "request": {
             "auth": {

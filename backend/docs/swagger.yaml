@@ -2560,6 +2560,14 @@ components:
         user_id:
           type: string
       type: object
+    ValueSetItem:
+      description: 'A value-set option: the stored code and its English label.'
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      type: object
     VariantCasesCount:
       properties:
         count_interpreted:
@@ -8571,5 +8579,56 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
+  /value_sets/{type}:
+    get:
+      description: |-
+        Returns the (code, label) options of an instance-wide value set — e.g.
+        `organization_category`. Not tenant-scoped; any authenticated user may read it.
+      operationId: listValueSet
+      parameters:
+      - description: Value set type (a value-set table name, e.g. organization_category)
+        in: path
+        name: type
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ValueSetItem'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List a value set
+      tags:
+      - value_sets
 servers:
 - url: /

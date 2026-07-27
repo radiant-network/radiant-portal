@@ -116,6 +116,8 @@ docs/UserPreferencesApi.md
 docs/UserSet.md
 docs/UserSetsApi.md
 docs/UtilsPreSignedURL.md
+docs/ValueSetItem.md
+docs/ValueSetsApi.md
 docs/VariantApi.md
 docs/VariantCasesCount.md
 docs/VariantCasesFilters.md
@@ -151,6 +153,7 @@ radiant_python/api/sequencing_api.py
 radiant_python/api/status_api.py
 radiant_python/api/user_preferences_api.py
 radiant_python/api/user_sets_api.py
+radiant_python/api/value_sets_api.py
 radiant_python/api/variant_api.py
 radiant_python/api_client.py
 radiant_python/api_response.py
@@ -253,6 +256,7 @@ radiant_python/models/update_occurrence_note_input.py
 radiant_python/models/user_preference.py
 radiant_python/models/user_set.py
 radiant_python/models/utils_pre_signed_url.py
+radiant_python/models/value_set_item.py
 radiant_python/models/variant_cases_count.py
 radiant_python/models/variant_cases_filters.py
 radiant_python/models/variant_consequence.py
@@ -268,4 +272,5 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_create_organization_request.py
+test/test_value_set_item.py
+test/test_value_sets_api.py

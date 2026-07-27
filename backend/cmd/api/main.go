@@ -73,6 +73,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
 	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
 	repoOrganizationsWrite := postgres.NewOrganizationRepository(postgresDB)
+	repoValueSets := postgres.NewValueSetsRepository(postgresDB)
 	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
 	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
 	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
@@ -98,9 +99,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	privateRoutes := r.Group("/")
 	privateRoutes.Use(authMiddleware)
 
-	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*.
+	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*,
+	// /value_sets/:type (instance-wide reference value sets, e.g. organization_category).
 	authGroup := privateRoutes.Group("/auth")
 	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
+
+	privateRoutes.GET("/value_sets/:type", server.ListValueSetHandler(repoValueSets))
 
 	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
 	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.

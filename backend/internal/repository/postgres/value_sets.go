@@ -28,6 +28,7 @@ const (
 	ValueSetObservation               ValueSetType = "observation"
 	ValueSetObservationInterpretation ValueSetType = "observation_interpretation"
 	ValueSetOnset                     ValueSetType = "onset"
+	ValueSetOrganizationCategory      ValueSetType = "organization_category"
 	ValueSetPanelType                 ValueSetType = "panel_type"
 	ValueSetPlatform                  ValueSetType = "platform"
 	ValueSetPriority                  ValueSetType = "priority"
@@ -62,6 +63,7 @@ func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
 		ValueSetObservation:               types.ObservationTable.Name,
 		ValueSetObservationInterpretation: types.ObservationInterpretationTable.Name,
 		ValueSetOnset:                     types.OnsetTable.Name,
+		ValueSetOrganizationCategory:      types.OrganizationCategoryTable.Name,
 		ValueSetPanelType:                 types.PanelTypeTable.Name,
 		ValueSetPlatform:                  types.PlatformTable.Name,
 		ValueSetPriority:                  types.PriorityTable.Name,
@@ -77,6 +79,26 @@ func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
 		db:       db.DB,
 		tableMap: tableNameMap,
 	}
+}
+
+// ListValueSet returns the (code, label) options of a value set by its type string. An unknown
+// type maps to types.ErrUnknownValueSet so the handler can answer 404 without importing this
+// package's ValueSetType. Every mapped table has the code/name_en columns.
+func (r *ValueSetsRepository) ListValueSet(ctx context.Context, valueSetType string) ([]types.ValueSetItem, error) {
+	tableName, ok := r.tableMap[ValueSetType(valueSetType)]
+	if !ok {
+		return nil, types.ErrUnknownValueSet
+	}
+	items := []types.ValueSetItem{}
+	err := r.db.WithContext(ctx).
+		Table(tableName).
+		Select("code, name_en AS name").
+		Order("name_en asc").
+		Scan(&items).Error
+	if err != nil {
+		return nil, fmt.Errorf("error listing value set %q: %w", valueSetType, err)
+	}
+	return items, nil
 }
 
 func (r *ValueSetsRepository) GetCodes(ctx context.Context, vsType ValueSetType) ([]string, error) {
