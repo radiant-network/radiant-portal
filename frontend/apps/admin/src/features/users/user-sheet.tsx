@@ -44,6 +44,9 @@ function toFormValues(user?: AdminUser | null): UserFormValues {
   };
 }
 
+/** True while a warning/confirmation AlertDialog is mounted (it uses role="alertdialog"). */
+const isAlertDialogOpen = () => typeof document !== 'undefined' && !!document.querySelector('[role="alertdialog"]');
+
 export default function UserSheet({ open, onOpenChange, user, users, onSave, onDelete }: UserSheetProps) {
   const { t } = useI18n();
   const isEdit = !!user;
@@ -127,7 +130,19 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:w-[680px] sm:max-w-[680px]">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:w-[680px] sm:max-w-[680px]"
+        // Dismissing a warning/confirm dialog stacked on top of the sheet must not also close the
+        // sheet: block the sheet's outside-click / Escape dismissal while an alert dialog is open.
+        // Explicit closes (Cancel, X, submit, delete-confirm) go through onOpenChange and still work.
+        onInteractOutside={e => {
+          if (isAlertDialogOpen()) e.preventDefault();
+        }}
+        onEscapeKeyDown={e => {
+          if (isAlertDialogOpen()) e.preventDefault();
+        }}
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
             <SheetHeader className="space-y-0 border-b px-6 py-4">
