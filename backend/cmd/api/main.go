@@ -72,6 +72,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
 	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
+	repoOrganizationsWrite := postgres.NewOrganizationRepository(postgresDB)
 	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
 	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
 	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
@@ -200,9 +201,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
 
-	// Organizations are referential: the list is readable by any tenant member (no action gate);
-	// create/edit will live under /:tenant/admin/organizations gated by can_manage_orgs.
-	tenantRoutes.GET("/organizations", server.ListOrganizationsHandler(repoOrganizations))
+	// Organizations: the list is referential (any tenant member); create/edit are gated per-route
+	// by can_manage_org. No /admin path segment — gating is the RequireAction on each write route.
+	organizationsGroup := tenantRoutes.Group("/organizations")
+	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
+	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

@@ -29,3 +29,20 @@ func (r *OrganizationRepository) GetOrganizationByCode(ctx context.Context, orga
 	}
 	return &organization, nil
 }
+
+// CreateOrganization inserts an organization in the tenant. A duplicate (code, tenant_code) maps
+// to types.ErrOrganizationCodeExists and an unknown category_code (the organization_category FK)
+// to types.ErrOrganizationUnknownCategory, so the handler can answer 409 / 400 without knowing
+// the DB driver.
+func (r *OrganizationRepository) CreateOrganization(ctx context.Context, org types.Organization) error {
+	if err := r.db.WithContext(ctx).Omit("Category").Create(&org).Error; err != nil {
+		switch {
+		case isUniqueViolation(err):
+			return types.ErrOrganizationCodeExists
+		case isForeignKeyViolation(err):
+			return types.ErrOrganizationUnknownCategory
+		}
+		return fmt.Errorf("error creating organization %q: %w", org.Code, err)
+	}
+	return nil
+}

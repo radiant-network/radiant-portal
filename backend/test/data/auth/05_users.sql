@@ -8,5 +8,6 @@ VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', 'alice@test.authz', 'Alice', 'Ad
        ('6c330322-c746-4436-bb76-efd2cd943686', 'pat@test.authz',   'Pat',   'Patel'),
        ('4a330f72-24a1-4d37-8ad7-ff9989245fd3', 'tw@test.authz',    'Tess',  'West'),
        ('9f1d2c3b-4a5e-4f60-8c71-2d3e4f5a6b7c', 'mike@test.authz',  'Mike',  'Miller'),
-       ('0a1b2c3d-4e5f-4061-8273-849506a7b8c9', 'gabe@test.authz',  'Gabe',  'Green')
+       ('0a1b2c3d-4e5f-4061-8273-849506a7b8c9', 'gabe@test.authz',  'Gabe',  'Green'),
+       ('a1a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6', 'tara@test.authz',  'Tara',  'Admin')
 ON CONFLICT (user_id) DO NOTHING;

@@ -18,6 +18,8 @@ type roleSeed struct {
 }
 
 var DefaultRoles = []roleSeed{
+	{"tenant_admin", "Tenant Administrator", "Manage users, organizations, and roles in the tenant.",
+		[]string{"can_manage_user", "can_manage_org", "can_manage_role"}},
 	{"member", "Member", "Search cases and view the knowledge base.",
 		[]string{"can_search_case", "can_view_kb"}},
 	{"geneticist", "Geneticist", "Read PII, download files, and interpret, comment on, and flag variants.",
