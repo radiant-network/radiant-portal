@@ -767,6 +767,20 @@ components:
       - seq_id
       - task_id
       type: object
+    CreateOrganizationRequest:
+      description: Payload to create an organization in a tenant.
+      properties:
+        category_code:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - category_code
+      - code
+      - name
+      type: object
     CreatePatientBatchBody:
       description: CreatePatientBatchBody represents the body required to create a
         patient batch
@@ -6867,6 +6881,73 @@ paths:
       security:
       - bearerauth: []
       summary: List the tenant's organizations
+      tags:
+      - organizations
+    post:
+      description: |-
+        Creates an organization in the tenant in the path. Requires the `can_manage_org`
+        action. The code must be unique within the tenant and is immutable after creation.
+      operationId: createOrganization
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+        description: Organization to create
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Create an organization
       tags:
       - organizations
   /{tenant}/patients/batch:

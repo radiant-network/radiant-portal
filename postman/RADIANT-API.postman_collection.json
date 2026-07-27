@@ -199,6 +199,43 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Create organization",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"chop\",\n  \"name\": \"Children's Hospital of Philadelphia\",\n  \"category_code\": \"healthcare_provider\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/organizations",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "organizations"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

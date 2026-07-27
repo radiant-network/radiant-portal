@@ -31,6 +31,13 @@ const (
 	ActionIngestData       = "can_ingest_data"
 )
 
+// Admin management action codes (tenant-scoped), seeded by migration 000018.
+const (
+	ActionManageUser = "can_manage_user"
+	ActionManageOrg  = "can_manage_org"
+	ActionManageRole = "can_manage_role"
+)
+
 // TenantMembership is the caller's effective authorization within a single tenant.
 // TenantActions holds tenant-scoped actions; OrgsByAction maps each org-scoped action
 // to the org codes where it applies ('*' resolved to all the tenant's orgs).
