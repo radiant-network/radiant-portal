@@ -23,7 +23,13 @@ function matchesFilters(user: AdminUser, filters: UsersFilterState): boolean {
     const haystack = `${user.firstName} ${user.lastName} ${user.email}`.toLowerCase();
     if (!haystack.includes(query)) return false;
   }
-  if (filters.roles.length && !user.roles.some(r => filters.roles.includes(r.roleCode))) return false;
+  if (filters.roles.length) {
+    // `member` is a virtual option = baseline only (no assigned roles); other codes match assigned
+    // roles. OR across everything selected: keep the user if they hit any selected role or baseline.
+    const matchesBaselineOnly = filters.roles.includes('member') && user.roles.length === 0;
+    const matchesAssignedRole = user.roles.some(r => filters.roles.includes(r.roleCode));
+    if (!matchesBaselineOnly && !matchesAssignedRole) return false;
+  }
   if (filters.orgs.length && !user.roles.some(r => (r.orgCodes ?? []).some(org => filters.orgs.includes(org)))) {
     return false;
   }

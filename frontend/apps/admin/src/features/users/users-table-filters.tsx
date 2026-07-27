@@ -26,8 +26,12 @@ type UsersTableFiltersProps = {
 export default function UsersTableFilters({ value, onChange }: UsersTableFiltersProps) {
   const { t } = useI18n();
 
-  // `member` is the implicit baseline (everyone has it), so it isn't a useful filter option.
-  const roleOptions = MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: r.label }));
+  // Grantable roles, plus a "Member" option meaning "baseline only" (no additional role assigned).
+  // It matches exactly the rows the Roles & Access column labels "Member", so filter and column agree.
+  const roleOptions = [
+    ...MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: r.label })),
+    { key: 'member', label: t('admin.users.member') },
+  ];
   const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: o.name }));
 
   const hasActiveFilters = value.search.length > 0 || value.roles.length > 0 || value.orgs.length > 0;
