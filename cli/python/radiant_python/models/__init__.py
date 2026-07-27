@@ -110,6 +110,7 @@ from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceN
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_set import UserSet
 from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
+from radiant_python.models.value_set_item import ValueSetItem
 from radiant_python.models.variant_cases_count import VariantCasesCount
 from radiant_python.models.variant_cases_filters import VariantCasesFilters
 from radiant_python.models.variant_consequence import VariantConsequence
