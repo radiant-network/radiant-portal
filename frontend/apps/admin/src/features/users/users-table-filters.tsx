@@ -7,6 +7,8 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import { MOCK_ORGS, MOCK_ROLES } from '../../mock/data';
 
+import { OrgOptionLabel } from './org-option-label';
+
 export type UsersFilterState = {
   search: string;
   roles: string[];
@@ -32,7 +34,7 @@ export default function UsersTableFilters({ value, onChange }: UsersTableFilters
     ...MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: r.label })),
     { key: 'member', label: t('admin.users.member') },
   ];
-  const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: o.name }));
+  const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: <OrgOptionLabel code={o.code} name={o.name} /> }));
 
   const hasActiveFilters = value.search.length > 0 || value.roles.length > 0 || value.orgs.length > 0;
 

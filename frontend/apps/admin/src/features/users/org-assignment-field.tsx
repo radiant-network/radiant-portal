@@ -6,6 +6,8 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import { MOCK_ORGS } from '../../mock/data';
 
+import { OrgOptionLabel } from './org-option-label';
+
 /** Sentinel org code meaning "all organizations". */
 const ALL_ORGS = '*';
 
@@ -22,7 +24,7 @@ export default function OrgAssignmentField({ value, onChange }: OrgAssignmentFie
 
   const options = MOCK_ORGS.map(org => ({
     value: org.code,
-    label: `${org.code.toUpperCase()} — ${org.name}`,
+    label: <OrgOptionLabel code={org.code} name={org.name} />,
     badgeLabel: org.code.toUpperCase(),
   }));
 
