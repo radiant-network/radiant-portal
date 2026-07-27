@@ -23,14 +23,18 @@ export default function RolesAccessCell({ roles }: { roles: AssignedRole[] }) {
         const label = role?.label ?? assigned.roleCode;
         const isAdmin = assigned.roleCode === 'tenant_admin';
         const orgs = assigned.orgCodes ?? [];
+        const allOrgs = orgs.includes('*'); // '*' sentinel = all current and future organizations
         return (
           <Badge key={index} variant={isAdmin ? 'blue' : 'secondary'} className="font-normal">
             <span>{label}</span>
-            {orgs.length > 0 && (
-              <span className="uppercase text-muted-foreground">
-                {orgs.map(code => ORGS_BY_CODE[code]?.code ?? code).join(' • ')}
-              </span>
-            )}
+            {orgs.length > 0 &&
+              (allOrgs ? (
+                <span className="text-muted-foreground">{t('admin.users.all_orgs')}</span>
+              ) : (
+                <span className="uppercase text-muted-foreground">
+                  {orgs.map(code => ORGS_BY_CODE[code]?.code ?? code).join(' • ')}
+                </span>
+              ))}
           </Badge>
         );
       })}

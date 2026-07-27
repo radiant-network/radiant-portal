@@ -15,6 +15,7 @@
       "search_placeholder": "Search by name or email",
       "you": "You",
       "member": "Member",
+      "all_orgs": "All orgs",
       "col": {
         "user": "User",
         "roles": "Roles & Access"
