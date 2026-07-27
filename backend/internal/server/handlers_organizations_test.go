@@ -93,7 +93,8 @@ func Test_PostOrganizationHandler(t *testing.T) {
 }
 
 func Test_PostOrganizationHandler_InvalidCode(t *testing.T) {
-	w := servePostOrganization(&mockOrganizationCreator{}, `{"code":"BadCode","name":"X","category_code":"healthcare_provider"}`)
+	// starts with a digit → invalid (uppercase and dashes are allowed, e.g. LDM-CHUSJ).
+	w := servePostOrganization(&mockOrganizationCreator{}, `{"code":"9chop","name":"X","category_code":"healthcare_provider"}`)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
