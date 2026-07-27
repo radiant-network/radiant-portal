@@ -5,6 +5,7 @@ export const apiMessages = {
   InvalidBatchUUID: (batchId: string) => `error retrieve batch by its ID: ERROR: invalid input syntax for type uuid: \"${batchId}\" (SQLSTATE 22P02)`,
   InvalidDateFormat: 'invalid date format, expected ISO8601 (e.g. 2020-01-31)',
   BatchIdNotFound: 'batch_id not found',
+  DocumentIdNotFound: 'document_id not found',
   ParsingError: (field: string) => `error parsing ${field}`,
   ParsingErrorDateFormat: 'invalid date format, expected RFC3339 (e.g. 2020-01-02T15:04:05Z)',
   Patient005: (orgType: string, code: string, id: string) => `Organization type (${orgType}) defined for patient (${code} / ${id}) is not in this list : healthcare_provider, research_institute.`,

@@ -20,13 +20,7 @@ describe('Cases - Search - Mrn', () => {
         }
       ],
       "limit": 20,
-      "page_index": 0,
-      "sort": [
-        {
-          "field": "created_at",
-          "order": "asc"
-        }
-      ]
+      "page_index": 0
     }`;
 
     cy.apiCall('POST', 'cases/search', body, Auth.token).then(res => {
