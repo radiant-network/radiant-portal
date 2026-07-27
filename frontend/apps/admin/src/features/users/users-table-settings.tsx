@@ -28,7 +28,7 @@ export function getUsersColumns(
     columnHelper.display({
       id: 'user',
       header: () => t('admin.users.col.user'),
-      cell: ({ row }) => <UserCell user={row.original} />,
+      cell: ({ row }) => <UserCell user={row.original} onEdit={() => onEdit(row.original)} />,
       size: 300,
       minSize: 200,
     }),
