@@ -6,6 +6,7 @@ import AdminLayout from '@/apps/admin/src/components/admin-layout';
 import { AdminSectionId } from '@/apps/admin/src/components/admin-sidebar';
 import UsersPage from '@/apps/admin/src/features/users/users-page';
 import { MOCK_TENANT } from '@/apps/admin/src/mock/data';
+import { Toaster } from '@/components/base/shadcn/sonner';
 
 /** Full admin screen (shell + sidebar + Users section) on mock data. */
 function AdminUsersScreen() {
@@ -13,6 +14,8 @@ function AdminUsersScreen() {
   return (
     <AdminLayout tenantName={MOCK_TENANT.name} activeSection={section} onSectionChange={setSection}>
       {section === 'users' && <UsersPage />}
+      {/* Mirrors the portal root, which mounts the Toaster in production — lets stories show toasts. */}
+      <Toaster position="top-right" />
     </AdminLayout>
   );
 }

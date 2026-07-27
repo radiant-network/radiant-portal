@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
@@ -66,6 +67,7 @@ export default function UsersPage() {
   const handleSave = (values: UserFormValues, userId?: string) => {
     if (userId) {
       setUsers(prev => prev.map(u => (u.id === userId ? { ...u, roles: assignmentsToRoles(values) } : u)));
+      toast.success(t('admin.user.ok.updated'));
     } else {
       const id = `u-new-${users.length + 1}`;
       setUsers(prev => [
@@ -78,11 +80,13 @@ export default function UsersPage() {
         },
         ...prev,
       ]);
+      toast.success(t('admin.user.ok.created'));
     }
   };
 
   const handleDelete = (user: AdminUser) => {
     setUsers(prev => prev.filter(u => u.id !== user.id));
+    toast.success(t('admin.user.ok.deleted'));
   };
 
   const columns = useMemo(() => getUsersColumns(t, { onEdit: openEdit }), [t]);
