@@ -1,9 +1,21 @@
 package types
 
+import "errors"
+
 type ValueSet struct {
 	Code   string `json:"id,omitempty"`
 	NameEn string `json:"name,omitempty"`
 }
+
+// @Description A value-set option: the stored code and its English label.
+type ValueSetItem struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+} // @name ValueSetItem
+
+// ErrUnknownValueSet is returned by the value-set repository when the requested type is not a
+// known value set, so a handler can map it to 404 without importing the repository package.
+var ErrUnknownValueSet = errors.New("unknown value set type")
 
 var SexTable = Table{
 	Name:           "sex",
