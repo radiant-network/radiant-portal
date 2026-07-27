@@ -1466,6 +1466,31 @@ export interface CreateOccurrenceNoteInput {
     'task_id': number;
 }
 /**
+ * Payload to create an organization in a tenant.
+ * @export
+ * @interface CreateOrganizationRequest
+ */
+export interface CreateOrganizationRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOrganizationRequest
+     */
+    'category_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOrganizationRequest
+     */
+    'code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOrganizationRequest
+     */
+    'name': string;
+}
+/**
  * CreatePatientBatchBody represents the body required to create a patient batch
  * @export
  * @interface CreatePatientBatchBody
@@ -11611,6 +11636,50 @@ export class OccurrencesApi extends BaseAPI {
 export const OrganizationsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Creates an organization in the tenant in the path. Requires the `can_manage_org` action. The code must be unique within the tenant and is immutable after creation.
+         * @summary Create an organization
+         * @param {string} tenant Tenant code
+         * @param {CreateOrganizationRequest} createOrganizationRequest Organization to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganization: async (tenant: string, createOrganizationRequest: CreateOrganizationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('createOrganization', 'tenant', tenant)
+            // verify required parameter 'createOrganizationRequest' is not null or undefined
+            assertParamExists('createOrganization', 'createOrganizationRequest', createOrganizationRequest)
+            const localVarPath = `/{tenant}/organizations`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createOrganizationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
          * @summary List the tenant\'s organizations
          * @param {string} tenant Tenant code
@@ -11659,6 +11728,20 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OrganizationsApiAxiosParamCreator(configuration)
     return {
         /**
+         * Creates an organization in the tenant in the path. Requires the `can_manage_org` action. The code must be unique within the tenant and is immutable after creation.
+         * @summary Create an organization
+         * @param {string} tenant Tenant code
+         * @param {CreateOrganizationRequest} createOrganizationRequest Organization to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createOrganization(tenant: string, createOrganizationRequest: CreateOrganizationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganization(tenant, createOrganizationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.createOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
          * @summary List the tenant\'s organizations
          * @param {string} tenant Tenant code
@@ -11682,6 +11765,17 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
     const localVarFp = OrganizationsApiFp(configuration)
     return {
         /**
+         * Creates an organization in the tenant in the path. Requires the `can_manage_org` action. The code must be unique within the tenant and is immutable after creation.
+         * @summary Create an organization
+         * @param {string} tenant Tenant code
+         * @param {CreateOrganizationRequest} createOrganizationRequest Organization to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganization(tenant: string, createOrganizationRequest: CreateOrganizationRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.createOrganization(tenant, createOrganizationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
          * @summary List the tenant\'s organizations
          * @param {string} tenant Tenant code
@@ -11701,6 +11795,19 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
  * @extends {BaseAPI}
  */
 export class OrganizationsApi extends BaseAPI {
+    /**
+     * Creates an organization in the tenant in the path. Requires the `can_manage_org` action. The code must be unique within the tenant and is immutable after creation.
+     * @summary Create an organization
+     * @param {string} tenant Tenant code
+     * @param {CreateOrganizationRequest} createOrganizationRequest Organization to create
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public createOrganization(tenant: string, createOrganizationRequest: CreateOrganizationRequest, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).createOrganization(tenant, createOrganizationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Returns the organizations of the tenant in the path, each with its category label. Readable by any member of the tenant; it also feeds the organization picker when assigning org-scoped roles to a user.
      * @summary List the tenant\'s organizations

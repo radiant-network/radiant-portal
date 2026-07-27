@@ -148,6 +148,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
 *OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
+*OrganizationsApi* | [**create_organization**](docs/OrganizationsApi.md#create_organization) | **POST** /{tenant}/organizations | Create an organization
 *OrganizationsApi* | [**list_organizations**](docs/OrganizationsApi.md#list_organizations) | **GET** /{tenant}/organizations | List the tenant&#39;s organizations
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
@@ -210,6 +211,7 @@ Class | Method | HTTP request | Description
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
  - [CreateCaseBatchBody](docs/CreateCaseBatchBody.md)
  - [CreateOccurrenceNoteInput](docs/CreateOccurrenceNoteInput.md)
+ - [CreateOrganizationRequest](docs/CreateOrganizationRequest.md)
  - [CreatePatientBatchBody](docs/CreatePatientBatchBody.md)
  - [CreateSampleBatchBody](docs/CreateSampleBatchBody.md)
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
