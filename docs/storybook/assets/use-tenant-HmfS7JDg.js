@@ -1,0 +1,1 @@
+import{r as t}from"./iframe-DzVRG0r9.js";import"./api-DxuPvJi3.js";import"./403-mlWohY-o.js";const n=t.createContext({tenant:"",tenants:[],setTenant:async()=>{}});function r(){return t.useContext(n)}export{n as T,r as u};
