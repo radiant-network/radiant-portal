@@ -354,6 +354,12 @@ export interface CaseBatch {
     'diagnostic_lab_code': string;
     /**
      * 
+     * @type {Array<CaseFetusBatch>}
+     * @memberof CaseBatch
+     */
+    'fetuses'?: Array<CaseFetusBatch>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseBatch
      */
@@ -654,6 +660,78 @@ export interface CaseEntity {
 /**
  * 
  * @export
+ * @interface CaseFetusBatch
+ */
+export interface CaseFetusBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'affected_status_code': CaseFetusBatchAffectedStatusCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'estimated_due_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'last_menstrual_period'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'life_status_code': CaseFetusBatchLifeStatusCodeEnum;
+    /**
+     * 
+     * @type {Array<ObservationCategoricalBatch>}
+     * @memberof CaseFetusBatch
+     */
+    'observations_categorical'?: Array<ObservationCategoricalBatch>;
+    /**
+     * 
+     * @type {Array<ObservationTextBatch>}
+     * @memberof CaseFetusBatch
+     */
+    'observations_text'?: Array<ObservationTextBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'sex_code': CaseFetusBatchSexCodeEnum;
+}
+
+export const CaseFetusBatchAffectedStatusCodeEnum = {
+    Affected: 'affected',
+    NonAffected: 'non_affected',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchAffectedStatusCodeEnum = typeof CaseFetusBatchAffectedStatusCodeEnum[keyof typeof CaseFetusBatchAffectedStatusCodeEnum];
+export const CaseFetusBatchLifeStatusCodeEnum = {
+    Alive: 'alive',
+    Deceased: 'deceased',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchLifeStatusCodeEnum = typeof CaseFetusBatchLifeStatusCodeEnum[keyof typeof CaseFetusBatchLifeStatusCodeEnum];
+export const CaseFetusBatchSexCodeEnum = {
+    Male: 'male',
+    Female: 'female',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchSexCodeEnum = typeof CaseFetusBatchSexCodeEnum[keyof typeof CaseFetusBatchSexCodeEnum];
+
+/**
+ * 
+ * @export
  * @interface CaseFilters
  */
 export interface CaseFilters {
@@ -818,6 +896,12 @@ export interface CasePatientClinicalInformation {
     'ethnicity_codes'?: Array<string>;
     /**
      * 
+     * @type {number}
+     * @memberof CasePatientClinicalInformation
+     */
+    'fetus_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
@@ -869,7 +953,7 @@ export interface CasePatientClinicalInformation {
      * @type {number}
      * @memberof CasePatientClinicalInformation
      */
-    'patient_id': number;
+    'patient_id'?: number;
     /**
      * 
      * @type {string}
@@ -3104,6 +3188,12 @@ export interface IGVTrackEnriched {
     'family_role'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'fetus_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof IGVTrackEnriched
      */
@@ -4093,6 +4183,12 @@ export interface PubmedCitationDetails {
  * @interface SampleBatch
  */
 export interface SampleBatch {
+    /**
+     * Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus\'s genome.
+     * @type {number}
+     * @memberof SampleBatch
+     */
+    'fetus_id'?: number;
     /**
      * 
      * @type {string}
