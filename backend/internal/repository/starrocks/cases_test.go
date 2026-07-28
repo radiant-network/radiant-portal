@@ -761,20 +761,20 @@ func Test_RetrieveCaseTasks_PrenatalCase_CountsMotherAndFetusAsTwoDistinctIndivi
 		assert.NoError(t, err)
 		require.Len(t, *tasks, 2)
 
-		task82 := (*tasks)[0]
-		assert.Equal(t, 82, task82.ID)
-		assert.Equal(t, int64(1), task82.PatientCount)
-		assert.Equal(t, 1, len(task82.Patients))
-		assert.True(t, slices.Contains(task82.Patients, "fetus"))
+		fetusOnlyTask := (*tasks)[0]
+		assert.Equal(t, 83, fetusOnlyTask.ID)
+		assert.Equal(t, int64(1), fetusOnlyTask.PatientCount)
+		assert.Equal(t, 1, len(fetusOnlyTask.Patients))
+		assert.True(t, slices.Contains(fetusOnlyTask.Patients, "fetus"))
 
-		// Task 83 covers both the fetus's sequencing (sample 127) and the mother's own,
+		// Task 84 covers both the fetus's sequencing (sample 127) and the mother's own,
 		// separate sequencing (sample 130) — both samples share patient_id 63, but must still
 		// count as 2 distinct individuals, not 1.
-		task83 := (*tasks)[1]
-		assert.Equal(t, 83, task83.ID)
-		assert.Equal(t, int64(2), task83.PatientCount)
-		assert.True(t, slices.Contains(task83.Patients, "fetus"))
-		assert.True(t, slices.Contains(task83.Patients, "proband"))
+		motherAndFetusTask := (*tasks)[1]
+		assert.Equal(t, 84, motherAndFetusTask.ID)
+		assert.Equal(t, int64(2), motherAndFetusTask.PatientCount)
+		assert.True(t, slices.Contains(motherAndFetusTask.Patients, "fetus"))
+		assert.True(t, slices.Contains(motherAndFetusTask.Patients, "proband"))
 	})
 }
 

@@ -48,7 +48,7 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		assert.Equal(t, "fetus", document272.RelationshipToProbandCode)
 		assert.Equal(t, 63, document272.PatientID)
 		assert.Equal(t, "S-PRENAT-72", document272.SubmitterSampleID)
-		assert.Equal(t, 82, document272.TaskID)
+		assert.Equal(t, 83, document272.TaskID)
 		assert.Equal(t, 75, document272.SeqID)
 		assert.Equal(t, "9d7fa39c3ab46a21c649e057482b8911-9585", document272.Hash)
 		assert.Equal(t, "A00516_0201", document272.RunAlias)
