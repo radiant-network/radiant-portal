@@ -3,7 +3,14 @@ package types
 import (
 	"errors"
 	"fmt"
+	"regexp"
 )
+
+// organizationCodePattern is permissive on purpose: existing org codes are uppercase and some
+// contain dashes (e.g. CHOP, LDM-CHUSJ), and unlike a tenant code an org code is never used as a
+// DB identifier — only as an FK data value. So it allows either case, digits, underscore, and
+// dash, must start with a letter, and is stored as entered.
+var organizationCodePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_-]{0,49}$`)
 
 type Organization struct {
 	Code         string `gorm:"primaryKey"`
@@ -64,8 +71,8 @@ type CreateOrganizationRequest struct {
 } // @name CreateOrganizationRequest
 
 func (r CreateOrganizationRequest) Validate() error {
-	if !IsValidCode(r.Code) {
-		return fmt.Errorf("code %q is invalid: must be lowercase, start with a letter, and contain only letters, digits, or underscores (max 50)", r.Code)
+	if !organizationCodePattern.MatchString(r.Code) {
+		return fmt.Errorf("code %q is invalid: must start with a letter and contain only letters, digits, underscores, or dashes (max 50)", r.Code)
 	}
 	return nil
 }
