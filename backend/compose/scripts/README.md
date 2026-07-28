@@ -71,6 +71,16 @@ go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
     -grant tenant_a:ORG_A1:geneticist
 ```
 
+For a user that already exists in Keycloak (a real user who has logged in), pass
+its `sub` instead of an email: Keycloak is skipped and only Postgres, Ranger and
+StarRocks are provisioned. Useful against a deployed environment, where the
+identity is not yours to create:
+
+```bash
+go run ./cmd/createuser -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
+    -grant tenant_a:ORG_A1:geneticist
+```
+
 ## Connecting as a user
 
 `starrocks-connect.sh` fetches a JWT from Keycloak (ROPC, password `radiant123!`) and opens

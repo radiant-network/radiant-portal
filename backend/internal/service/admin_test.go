@@ -148,6 +148,42 @@ func Test_ProvisionUser_AddsUserToEachDistinctTenantRoleOnce(t *testing.T) {
 	assert.Equal(t, [][2]string{{"tenant_a_user", kc.sub}, {"tenant_b_user", kc.sub}}, rg.roleAdds)
 }
 
+func Test_ProvisionUser_WithSubSkipsKeycloak(t *testing.T) {
+	_, rg, sr, auth, deps := newMockDeps()
+	// Any Keycloak call fails, so reaching it would surface as an error.
+	deps.Keycloak = &mockKeycloak{err: errors.New("keycloak must not be called")}
+	const existing = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+	sub, err := ProvisionUser(context.Background(), deps, types.UserInput{
+		Sub:    existing,
+		Grants: []types.Grant{{TenantCode: "radiant", OrgCode: "*", RoleCode: "geneticist"}},
+	}, "createuser")
+
+	assert.NoError(t, err)
+	assert.Equal(t, existing, sub)
+	assert.Equal(t, [][2]string{{existing, ""}}, auth.users, "no email to record; attributes stay optional")
+	assert.Equal(t, [][4]string{{"radiant", "*", "geneticist", "createuser"}}, auth.grants)
+	assert.Equal(t, []string{existing}, rg.ensured)
+	assert.Equal(t, [][2]string{{"radiant_user", existing}}, rg.roleAdds)
+	assert.Equal(t, []string{existing}, sr.subs)
+}
+
+func Test_ProvisionUser_RejectsNonUUIDSubBeforeAnyWrite(t *testing.T) {
+	_, rg, sr, auth, deps := newMockDeps()
+
+	sub, err := ProvisionUser(context.Background(), deps, types.UserInput{
+		Sub:    "alice@demo.org",
+		Grants: []types.Grant{{TenantCode: "radiant", OrgCode: "*", RoleCode: "geneticist"}},
+	}, "createuser")
+
+	assert.Error(t, err)
+	assert.Empty(t, sub)
+	assert.Empty(t, auth.users, "nothing written before the sub is validated")
+	assert.Empty(t, auth.grants)
+	assert.Empty(t, rg.ensured)
+	assert.Empty(t, sr.subs)
+}
+
 func Test_ProvisionUser_StopsWhenKeycloakFails(t *testing.T) {
 	_, rg, sr, auth, deps := newMockDeps()
 	deps.Keycloak = &mockKeycloak{err: errors.New("boom")}
