@@ -5,6 +5,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func Test_GetFamilyById_OK(t *testing.T) {
 		expected := &types.Family{
 			ID:                        1,
 			CaseID:                    1,
-			FamilyMemberID:            1,
+			FamilyMemberID:            utils.IntPtr(1),
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
 			TenantCode:                types.DefaultTenantCode,
@@ -42,7 +43,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 		newFamily := &types.Family{
 			ID:                        999,
 			CaseID:                    1,
-			FamilyMemberID:            1,
+			FamilyMemberID:            utils.IntPtr(1),
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
 			TenantCode:                types.DefaultTenantCode,
