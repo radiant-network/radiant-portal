@@ -169,7 +169,7 @@ export function EditableUserSelection({
     <>
       {/* Search Bar with Selected Users */}
       <div className="pt-3 pb-1.5">
-        <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs ring-offset-background focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0">
+        <div className="flex flex-wrap items-center gap-2 min-h-9 w-full rounded-md border border-input bg-background pl-3 pr-3 py-2 text-sm shadow-xs ring-offset-background focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]">
           <SelectedUsersDisplay selectedUsers={selectedUsers} onRemoveUser={handleRemoveUser} />
 
           {/* Search Input */}

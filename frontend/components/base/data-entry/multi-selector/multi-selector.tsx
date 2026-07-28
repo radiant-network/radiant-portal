@@ -348,7 +348,7 @@ function MultiSelector({
       <div
         ref={dropdownRef}
         className={cn(
-          'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring',
+          'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
           {
             'px-3 py-2': selected.length !== 0,
             'cursor-text': !disabled && selected.length !== 0,
