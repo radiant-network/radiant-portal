@@ -131,7 +131,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	tx = r.joiner.CaseWithAnalysisCatalog(tx)
 	tx = r.joiner.CaseWithDiagnosisLab(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s mondo ON mondo.id = ig.condition", types.MondoTable.TenantQualifiedName(ctx)))
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND ((spl.fetus_id IS NULL AND agg_phenotypes.patient_id = spl.patient_id) OR (spl.fetus_id IS NOT NULL AND agg_phenotypes.fetus_id = spl.fetus_id))", txAggPhenotypes)
 
 	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 	if userQuery != nil {
@@ -202,7 +202,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 	tx = r.joiner.CaseWithAnalysisCatalog(tx)
 	tx = r.joiner.CaseWithDiagnosisLab(tx)
 	tx = r.joiner.SeqExpWithSample(tx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON f.family_member_id = spl.patient_id AND f.case_id = tctx.case_id", types.FamilyTable.TenantQualifiedName(ctx)))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON %s", types.FamilyTable.TenantQualifiedName(ctx), joins.SampleToFamilyJoinCondition("tctx.case_id")))
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.PatientTable) {
 		tx = r.joiner.FamilyWithPatient(tx)
@@ -210,7 +210,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s mondo ON mondo.id = c.primary_condition", types.MondoTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s ig ON ig.locus_id = ? AND ig.sequencing_id = tctx.sequencing_experiment_id AND ig.case_id = tctx.case_id", types.InterpretationGermlineTable.TenantQualifiedName(ctx)), locusIdString)
-	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
+	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND ((spl.fetus_id IS NULL AND agg_phenotypes.patient_id = spl.patient_id) OR (spl.fetus_id IS NOT NULL AND agg_phenotypes.fetus_id = spl.fetus_id))", txAggPhenotypes)
 	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 
 	if userQuery != nil {
@@ -447,6 +447,8 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 	cases := types.CaseTable.TenantQualifiedName(ctx)
 	caseHasSeqExp := types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx)
 	stagingSeq := types.SequencingTable.TenantQualifiedName(ctx)
+	sequencingExperiment := types.SequencingExperimentTable.TenantQualifiedName(ctx)
+	sample := types.SampleTable.TenantQualifiedName(ctx)
 	occurrence := types.GermlineSNVOccurrenceTable.TenantQualifiedName(ctx)
 	project := types.ProjectTable.TenantQualifiedName(ctx)
 	analysisCatalog := types.AnalysisCatalogTable.TenantQualifiedName(ctx)
@@ -476,30 +478,34 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 			base AS (
 				SELECT
 					%s as split_code,
-					seq.patient_id,
+					-- The mother's own sample and her fetus's share spl.patient_id; compose with
+					-- fetus_id so the distinct count below doesn't collapse them into one person.
+					CASE WHEN spl.fetus_id IS NOT NULL THEN CONCAT(spl.patient_id, '-', spl.fetus_id) ELSE CAST(spl.patient_id AS TEXT) END AS dedup_id,
 					seq.affected_status as affected_status_code,
 					g_snv_o.zygosity
 				FROM %s c
 				%s
 				LEFT JOIN %s chse ON chse.case_id = c.id
 				JOIN %s seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs' AND analysis_type = 'germline'
+				LEFT JOIN %s se ON se.id = chse.sequencing_experiment_id
+				LEFT JOIN %s spl ON spl.id = se.sample_id
 				LEFT JOIN %s g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt > 3
 			),
 			result AS (
 				SELECT
 					split_code,
 					affected_status_code,
-					COUNT(DISTINCT patient_id) AS pn,
-					COUNT(DISTINCT CASE WHEN zygosity IS NOT NULL THEN patient_id END) AS pc,
-					COUNT(DISTINCT CASE WHEN zygosity = 'HOM' THEN patient_id END) AS hom
+					COUNT(DISTINCT dedup_id) AS pn,
+					COUNT(DISTINCT CASE WHEN zygosity IS NOT NULL THEN dedup_id END) AS pc,
+					COUNT(DISTINCT CASE WHEN zygosity = 'HOM' THEN dedup_id END) AS hom
 				FROM (
-					SELECT split_code, patient_id, affected_status_code, zygosity
+					SELECT split_code, dedup_id, affected_status_code, zygosity
 					FROM base
 					WHERE affected_status_code IN ('affected', 'non_affected')
 
 					UNION ALL
-			
-					SELECT split_code, patient_id, 'all' AS affected_status_code, zygosity
+
+					SELECT split_code, dedup_id, 'all' AS affected_status_code, zygosity
 					FROM base
 				) x
 				GROUP BY split_code, affected_status_code
@@ -517,7 +523,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 			END AS pf
 		FROM result
 		%s
-		ORDER BY split_code;`, splitCodeColumn, cases, joinToRetrieveSplitCode, caseHasSeqExp, stagingSeq, occurrence, splitNameColumn, joinToRetrieveSplitName), locusId)
+		ORDER BY split_code;`, splitCodeColumn, cases, joinToRetrieveSplitCode, caseHasSeqExp, stagingSeq, sequencingExperiment, sample, occurrence, splitNameColumn, joinToRetrieveSplitName), locusId)
 
 	if err := tx.Scan(&frequenciesByPrimaryCondition).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {

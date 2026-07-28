@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -142,9 +143,9 @@ func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.
 			{ID: 1, TypeCode: "alignment", TypeName: "Alignment", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "proband, mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
 		},
 		Members: types.JsonArray[types.CasePatientClinicalInformation]{
-			{PatientID: 3, FirstName: "Marie", LastName: "Lambert", RelationshipToProband: "proband", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283775", Jhn: "LAM7303233380", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
-			{PatientID: 1, FirstName: "Juliette", LastName: "Gagnon", RelationshipToProband: "mother", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283773", Jhn: "GAG1202030277", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC)},
-			{PatientID: 2, FirstName: "Antoine", LastName: "Lefebvre", RelationshipToProband: "father", AffectedStatusCode: "non_affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283774", Jhn: "LEF7001303889", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC)},
+			{PatientID: utils.IntPtr(3), FirstName: "Marie", LastName: "Lambert", RelationshipToProband: "proband", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283775", Jhn: "LAM7303233380", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC)), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: utils.IntPtr(1), FirstName: "Juliette", LastName: "Gagnon", RelationshipToProband: "mother", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283773", Jhn: "GAG1202030277", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC))},
+			{PatientID: utils.IntPtr(2), FirstName: "Antoine", LastName: "Lefebvre", RelationshipToProband: "father", AffectedStatusCode: "non_affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283774", Jhn: "LEF7001303889", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC))},
 		},
 	}, nil
 }

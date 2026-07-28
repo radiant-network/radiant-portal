@@ -35,16 +35,18 @@ func (r *IGVRepository) GetIGV(ctx context.Context, caseID int) ([]IGVTrack, err
 	tx = r.joiner.SeqExpWithSample(tx)
 	tx = r.joiner.SampleAndCaseHasSeqExpWithFamily(tx)
 	tx = r.joiner.TaskHasDocWithDocument(tx)
-	tx = r.joiner.FamilyWithPatient(tx)
+	tx = r.joiner.SampleWithPatient(tx)
+	tx = r.joiner.SampleWithFetus(tx)
 	tx.Where(alignmentFilter)
 
 	columns := []string{
 		"s.id AS sequencing_experiment_id",
-		"p.id as patient_id",
+		"spl.patient_id as patient_id",
+		"spl.fetus_id as fetus_id",
 		"spl.submitter_sample_id AS sample_id",
 		"spl.histology_code AS histology_code",
 		"f.relationship_to_proband_code AS family_role",
-		"p.sex_code",
+		"COALESCE(fetus.sex_code, p.sex_code) AS sex_code",
 		"doc.data_type_code",
 		"doc.format_code",
 		"doc.url",
@@ -100,6 +102,7 @@ func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suff
 		if !exists {
 			m = &types.IGVTrackEnriched{
 				PatientId:  r.PatientId,
+				FetusId:    r.FetusId,
 				Type:       r.DataTypeCode,
 				Sex:        r.SexCode,
 				FamilyRole: r.FamilyRole,

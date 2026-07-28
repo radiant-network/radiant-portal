@@ -457,7 +457,7 @@ func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locu
 func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByProject(t *testing.T) {
 	expected := `{
 		"split_rows":[
-			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 5, "pn_all": 5, "pf_all": 1.0, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 1, "pf_non_affected": 1.0, "hom_non_affected": 1}}, 
+			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 5, "pn_all": 7, "pf_all": 0.7142857142857143, "hom_all": 2, "pc_affected": 4, "pn_affected": 6, "pf_affected": 0.6666666666666666, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 1, "pf_non_affected": 1.0, "hom_non_affected": 1}},
 			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 2, "pf_all": 0.5, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0, "pc_non_affected": 0, "pn_non_affected": 1, "pf_non_affected": 0.0, "hom_non_affected": 0}}
 		] 
 	}`
@@ -468,7 +468,7 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByPrimaryCondition(t
 	expected := `{
 		"split_rows":[
 			{"split_value_code":"MONDO:0000003", "split_value_name": "colorblindness, partial", "frequencies":{"pc_all": 1, "pn_all": 1, "pf_all": 1.0, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0}}, 
-			{"split_value_code":"MONDO:0700092", "split_value_name": "neurodevelopmental disorder", "frequencies":{"pc_all": 5, "pn_all": 6, "pf_all": 0.8333333333333334, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
+			{"split_value_code":"MONDO:0700092", "split_value_name": "neurodevelopmental disorder", "frequencies":{"pc_all": 5, "pn_all": 8, "pf_all": 0.625, "hom_all": 2, "pc_affected": 4, "pn_affected": 6, "pf_affected": 0.6666666666666666, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
 		] 
 	}`
 	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_PRIMARY_CONDITION, http.StatusOK, expected)
@@ -478,7 +478,7 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByAnalysis(t *testin
 	expected := `{
 		"split_rows":[
 			{"split_value_code":"IDGD", "split_value_name": "Intellectual Deficiency and Global Developmental Delay", "frequencies":{"pc_all": 1, "pn_all": 1, "pf_all": 1.0, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0}}, 
-			{"split_value_code":"WGA", "split_value_name": "Whole Genome Analysis", "frequencies":{"pc_all": 5, "pn_all": 6, "pf_all": 0.8333333333333334, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
+			{"split_value_code":"WGA", "split_value_name": "Whole Genome Analysis", "frequencies":{"pc_all": 5, "pn_all": 8, "pf_all": 0.625, "hom_all": 2, "pc_affected": 4, "pn_affected": 6, "pf_affected": 0.6666666666666666, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
 		] 
 	}`
 	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_ANALYSIS, http.StatusOK, expected)

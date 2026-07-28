@@ -32,25 +32,27 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(148), *count)
+		assert.Equal(t, int64(149), *count)
 
-		document270 := (*documents)[0]
-		assert.Equal(t, 270, document270.DocumentID)
-		assert.Equal(t, "SRX1091647-T.recal.cram", document270.Name)
-		assert.Equal(t, "cram", document270.FormatCode)
-		assert.Equal(t, "alignment", document270.DataTypeCode)
-		assert.Equal(t, 49126489623, document270.Size)
-		assert.Equal(t, 71, document270.CaseID)
-		assert.Equal(t, "CQGC", document270.DiagnosisLabCode)
-		assert.Equal(t, "Quebec Clinical Genomic Center", document270.DiagnosisLabName)
-		assert.Equal(t, "proband", document270.RelationshipToProbandCode)
-		assert.Equal(t, 62, document270.PatientID)
-		assert.Equal(t, "SRX1091647", document270.SubmitterSampleID)
-		assert.Equal(t, 76, document270.TaskID)
-		assert.Equal(t, 74, document270.SeqID)
-		assert.Equal(t, "72a59834feee767b29f6279562f164b5-9371", document270.Hash)
-		assert.Equal(t, "TSRX1091647_1679", document270.RunAlias)
-		assert.NotNil(t, document270.CreatedOn)
+		// CLIN-6117 prenatal fixture: document 272 (case 72's fetus alignment) now has the
+		// highest id, so it sorts first under the default document_id DESC.
+		document272 := (*documents)[0]
+		assert.Equal(t, 272, document272.DocumentID)
+		assert.Equal(t, "S-PRENAT-72.recal.cram", document272.Name)
+		assert.Equal(t, "cram", document272.FormatCode)
+		assert.Equal(t, "alignment", document272.DataTypeCode)
+		assert.Equal(t, 50243021081, document272.Size)
+		assert.Equal(t, 72, document272.CaseID)
+		assert.Equal(t, "CQGC", document272.DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", document272.DiagnosisLabName)
+		assert.Equal(t, "fetus", document272.RelationshipToProbandCode)
+		assert.Equal(t, 63, document272.PatientID)
+		assert.Equal(t, "S-PRENAT-72", document272.SubmitterSampleID)
+		assert.Equal(t, 82, document272.TaskID)
+		assert.Equal(t, 75, document272.SeqID)
+		assert.Equal(t, "9d7fa39c3ab46a21c649e057482b8911-9585", document272.Hash)
+		assert.Equal(t, "A00516_0201", document272.RunAlias)
+		assert.NotNil(t, document272.CreatedOn)
 	})
 }
 
@@ -61,7 +63,7 @@ func Test_SearchDocumentsCustomSort(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(148), *count)
+		assert.Equal(t, int64(149), *count)
 
 		document135 := (*documents)[0]
 		assert.Equal(t, 135, document135.DocumentID)
@@ -241,10 +243,10 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(70), *count)
+		assert.Equal(t, int64(71), *count)
 
-		document270 := (*documents)[0]
-		assert.Equal(t, 270, document270.DocumentID)
+		document272 := (*documents)[0]
+		assert.Equal(t, 272, document272.DocumentID)
 	})
 }
 
@@ -261,10 +263,10 @@ func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(148), *count)
+		assert.Equal(t, int64(149), *count)
 
-		document270 := (*documents)[0]
-		assert.Equal(t, 270, document270.DocumentID)
+		document272 := (*documents)[0]
+		assert.Equal(t, 272, document272.DocumentID)
 	})
 }
 
@@ -404,7 +406,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len((*filters).Project))
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
-		assert.Equal(t, 6, len((*filters).RelationshipToProband))
+		assert.Equal(t, 7, len((*filters).RelationshipToProband))
 		assert.Equal(t, 13, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))
 	})
@@ -417,7 +419,7 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Nil(t, (*filters).Project)
 		assert.Nil(t, (*filters).DiagnosisLab)
-		assert.Equal(t, 6, len((*filters).RelationshipToProband))
+		assert.Equal(t, 7, len((*filters).RelationshipToProband))
 		assert.Equal(t, 13, len((*filters).Format))
 		assert.Equal(t, 15, len((*filters).DataType))
 	})
