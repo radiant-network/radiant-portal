@@ -196,6 +196,7 @@ Class | Method | HTTP request | Description
  - [CaseBatch](docs/CaseBatch.md)
  - [CaseBatchPatch](docs/CaseBatchPatch.md)
  - [CaseEntity](docs/CaseEntity.md)
+ - [CaseFetusBatch](docs/CaseFetusBatch.md)
  - [CaseFilters](docs/CaseFilters.md)
  - [CasePatientBatch](docs/CasePatientBatch.md)
  - [CasePatientClinicalInformation](docs/CasePatientClinicalInformation.md)

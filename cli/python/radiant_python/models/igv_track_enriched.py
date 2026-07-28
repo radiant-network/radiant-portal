@@ -27,6 +27,7 @@ class IGVTrackEnriched(BaseModel):
     IGVTrackEnriched
     """ # noqa: E501
     family_role: Optional[StrictStr] = None
+    fetus_id: Optional[StrictInt] = None
     format: Optional[StrictStr] = None
     index_url: Optional[StrictStr] = Field(default=None, alias="indexURL")
     index_url_expire_at: Optional[StrictInt] = Field(default=None, alias="indexURLExpireAt")
@@ -36,7 +37,7 @@ class IGVTrackEnriched(BaseModel):
     type: Optional[StrictStr] = None
     url: Optional[StrictStr] = None
     url_expire_at: Optional[StrictInt] = Field(default=None, alias="urlExpireAt")
-    __properties: ClassVar[List[str]] = ["family_role", "format", "indexURL", "indexURLExpireAt", "name", "patient_id", "sex", "type", "url", "urlExpireAt"]
+    __properties: ClassVar[List[str]] = ["family_role", "fetus_id", "format", "indexURL", "indexURLExpireAt", "name", "patient_id", "sex", "type", "url", "urlExpireAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,6 +91,7 @@ class IGVTrackEnriched(BaseModel):
 
         _obj = cls.model_validate({
             "family_role": obj.get("family_role"),
+            "fetus_id": obj.get("fetus_id"),
             "format": obj.get("format"),
             "indexURL": obj.get("indexURL"),
             "indexURLExpireAt": obj.get("indexURLExpireAt"),

@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -26,6 +26,7 @@ class SampleBatch(BaseModel):
     """
     SampleBatch
     """ # noqa: E501
+    fetus_id: Optional[StrictInt] = Field(default=None, description="FetusId, unlike SubmitterPatientId, is not mutually exclusive with it: PatientId stays the mother the sample was physically drawn from, while FetusId (optional) says whose genome the sample's sequencing data represents — needed to attribute frequency/occurrence data to the right distinct individual. Nil when unknown at ingestion time.")
     histology_code: StrictStr
     patient_organization_code: StrictStr
     sample_organization_code: StrictStr
@@ -34,7 +35,7 @@ class SampleBatch(BaseModel):
     submitter_sample_id: StrictStr
     tissue_site: Optional[StrictStr] = None
     type_code: StrictStr
-    __properties: ClassVar[List[str]] = ["histology_code", "patient_organization_code", "sample_organization_code", "submitter_parent_sample_id", "submitter_patient_id", "submitter_sample_id", "tissue_site", "type_code"]
+    __properties: ClassVar[List[str]] = ["fetus_id", "histology_code", "patient_organization_code", "sample_organization_code", "submitter_parent_sample_id", "submitter_patient_id", "submitter_sample_id", "tissue_site", "type_code"]
 
     @field_validator('histology_code')
     def histology_code_validate_enum(cls, value):
@@ -94,6 +95,7 @@ class SampleBatch(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "fetus_id": obj.get("fetus_id"),
             "histology_code": obj.get("histology_code"),
             "patient_organization_code": obj.get("patient_organization_code"),
             "sample_organization_code": obj.get("sample_organization_code"),

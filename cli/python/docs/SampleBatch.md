@@ -5,6 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**fetus_id** | **int** | FetusId, unlike SubmitterPatientId, is not mutually exclusive with it: PatientId stays the mother the sample was physically drawn from, while FetusId (optional) says whose genome the sample&#39;s sequencing data represents — needed to attribute frequency/occurrence data to the right distinct individual. Nil when unknown at ingestion time. | [optional] 
 **histology_code** | **str** |  | 
 **patient_organization_code** | **str** |  | 
 **sample_organization_code** | **str** |  | 
