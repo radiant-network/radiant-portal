@@ -7,6 +7,7 @@ import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { getMemberKey } from '@/components/lib/case-entity';
 import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
@@ -28,7 +29,9 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   return (
     <div className="flex w-full justify-between gap-4">
       <div className="flex flex-col gap-2 flex-1">
-        <InformationField label={t('case_entity.patient_information.id')}>{member.patient_id}</InformationField>
+        <InformationField label={t('case_entity.patient_information.id')}>
+          {member.patient_id ?? member.fetus_id}
+        </InformationField>
 
         {(member.first_name || member.last_name) && (
           <InformationField label={t('case_entity.patient_information.name')}>
@@ -87,11 +90,11 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
 
   const isFamilyCase = data.case_type === CaseType.germline_family;
   const members = data.members || [];
-  const [activeTab, setActiveTab] = useState<string>(() => members[0]?.patient_id.toString() || '');
+  const [activeTab, setActiveTab] = useState<string>(() => (members[0] ? getMemberKey(members[0]) : ''));
 
   useEffect(() => {
-    if (members.length > 0 && !members.find(m => m.patient_id.toString() === activeTab)) {
-      setActiveTab(members[0].patient_id.toString());
+    if (members.length > 0 && !members.find(m => getMemberKey(m) === activeTab)) {
+      setActiveTab(getMemberKey(members[0]));
     }
   }, [members, activeTab]);
 
@@ -105,13 +108,13 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
               {members.map(member => (
-                <TabsTrigger key={member.patient_id} value={member.patient_id.toString()}>
+                <TabsTrigger key={getMemberKey(member)} value={getMemberKey(member)}>
                   {t(`common.relationships.${member.relationship_to_proband}`)}
                 </TabsTrigger>
               ))}
             </TabsList>
             {members.map(member => (
-              <TabsContent key={member.patient_id} value={member.patient_id.toString()}>
+              <TabsContent key={getMemberKey(member)} value={getMemberKey(member)}>
                 <PatientInfoDisplay member={member} />
               </TabsContent>
             ))}

@@ -8,6 +8,7 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
+import { getMemberKey } from '@/components/lib/case-entity';
 
 import EmptyField from '../information/empty-field';
 
@@ -33,7 +34,7 @@ const SliderCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
     >
       <div className="flex flex-col gap-3 text-sm [&_h4]:text-sm">
         {caseEntity.members.map(member => (
-          <FamilyMemberCard key={member.patient_id} member={member} />
+          <FamilyMemberCard key={getMemberKey(member)} member={member} />
         ))}
       </div>
     </SliderCard>

@@ -11,6 +11,7 @@ import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } f
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { getMemberKey } from '@/components/lib/case-entity';
 import { cn } from '@/components/lib/utils';
 import { PROBAND } from 'components/base/constants';
 
@@ -115,7 +116,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
             <div className={cn('flex flex-col gap-4 flex-1')}>
               {family.map(member => (
-                <Card key={member.patient_id} className="p-4 gap-4 flex shadow-none">
+                <Card key={getMemberKey(member)} className="p-4 gap-4 flex shadow-none">
                   {/* Relationship */}
                   <CardTitle className="capitalize">{member.relationship_to_proband}</CardTitle>
 
