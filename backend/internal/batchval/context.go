@@ -40,6 +40,10 @@ type familyStore interface {
 	CreateFamily(ctx context.Context, family *types.Family) error
 }
 
+type fetusReader interface {
+	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
+}
+
 type organizationReader interface {
 	GetOrganizationByCode(ctx context.Context, organizationCode string) (*types.Organization, error)
 }
@@ -66,6 +70,7 @@ type BatchValidationContext struct {
 	CasesRepo     casesReader
 	DocRepo       documentsReader
 	FamilyRepo    familyStore
+	FetusRepo     fetusReader
 	OrgRepo       organizationReader
 	PatientRepo   patientReader
 	ProjectRepo   projectReader
@@ -96,6 +101,7 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		CasesRepo:     postgres.NewCasesRepository(postgresDB),
 		DocRepo:       postgres.NewDocumentsRepository(postgresDB),
 		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
+		FetusRepo:     postgres.NewFetusRepository(postgresDB),
 		TaskRepo:      postgres.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,
 	}, nil
