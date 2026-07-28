@@ -145,6 +145,7 @@ from radiant_python.models.transcript import Transcript
 from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
+from radiant_python.models.update_organization_request import UpdateOrganizationRequest
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_set import UserSet
 from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL

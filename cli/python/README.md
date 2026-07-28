@@ -150,6 +150,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
 *OrganizationsApi* | [**create_organization**](docs/OrganizationsApi.md#create_organization) | **POST** /{tenant}/organizations | Create an organization
 *OrganizationsApi* | [**list_organizations**](docs/OrganizationsApi.md#list_organizations) | **GET** /{tenant}/organizations | List the tenant&#39;s organizations
+*OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
@@ -276,6 +277,7 @@ Class | Method | HTTP request | Description
  - [UpdateCaseBatch](docs/UpdateCaseBatch.md)
  - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)
+ - [UpdateOrganizationRequest](docs/UpdateOrganizationRequest.md)
  - [UserPreference](docs/UserPreference.md)
  - [UserSet](docs/UserSet.md)
  - [UtilsPreSignedURL](docs/UtilsPreSignedURL.md)

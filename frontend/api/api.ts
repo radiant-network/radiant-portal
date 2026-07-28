@@ -5198,6 +5198,19 @@ export interface UpdateOccurrenceNoteInput {
     'content': string;
 }
 /**
+ * Payload to update an organization. Only the name is editable; code and category are immutable after creation.
+ * @export
+ * @interface UpdateOrganizationRequest
+ */
+export interface UpdateOrganizationRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateOrganizationRequest
+     */
+    'name': string;
+}
+/**
  * 
  * @export
  * @interface UserPreference
@@ -11736,6 +11749,54 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * @summary Update an organization
+         * @param {string} tenant Tenant code
+         * @param {string} code Organization code
+         * @param {UpdateOrganizationRequest} updateOrganizationRequest Organization fields to update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganization: async (tenant: string, code: string, updateOrganizationRequest: UpdateOrganizationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('updateOrganization', 'tenant', tenant)
+            // verify required parameter 'code' is not null or undefined
+            assertParamExists('updateOrganization', 'code', code)
+            // verify required parameter 'updateOrganizationRequest' is not null or undefined
+            assertParamExists('updateOrganization', 'updateOrganizationRequest', updateOrganizationRequest)
+            const localVarPath = `/{tenant}/organizations/{code}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"code"}}`, encodeURIComponent(String(code)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -11773,6 +11834,21 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizations']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * @summary Update an organization
+         * @param {string} tenant Tenant code
+         * @param {string} code Organization code
+         * @param {UpdateOrganizationRequest} updateOrganizationRequest Organization fields to update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateOrganization(tenant: string, code: string, updateOrganizationRequest: UpdateOrganizationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganization(tenant, code, updateOrganizationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -11803,6 +11879,18 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          */
         listOrganizations(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationResponse>> {
             return localVarFp.listOrganizations(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * @summary Update an organization
+         * @param {string} tenant Tenant code
+         * @param {string} code Organization code
+         * @param {UpdateOrganizationRequest} updateOrganizationRequest Organization fields to update
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganization(tenant: string, code: string, updateOrganizationRequest: UpdateOrganizationRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.updateOrganization(tenant, code, updateOrganizationRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11837,6 +11925,20 @@ export class OrganizationsApi extends BaseAPI {
      */
     public listOrganizations(tenant: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizations(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+     * @summary Update an organization
+     * @param {string} tenant Tenant code
+     * @param {string} code Organization code
+     * @param {UpdateOrganizationRequest} updateOrganizationRequest Organization fields to update
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateOrganization(tenant: string, code: string, updateOrganizationRequest: UpdateOrganizationRequest, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateOrganization(tenant, code, updateOrganizationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
