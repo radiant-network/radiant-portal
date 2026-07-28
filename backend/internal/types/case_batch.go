@@ -37,6 +37,7 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
+	Fetuses                    []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
@@ -49,6 +50,18 @@ type CasePatientBatch struct {
 	SubmitterPatientId      string                         `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`
 	PatientOrganizationCode string                         `json:"patient_organization_code" toml:"patient_organization_code" binding:"required"`
 	RelationToProbandCode   string                         `json:"relation_to_proband_code" toml:"relation_to_proband_code" binding:"required,oneof=mother father brother sister sibling proband"`
+}
+
+// A case's fetuses always belong to its proband, so — unlike CasePatientBatch — no mother
+// reference or relation-to-proband is carried here.
+type CaseFetusBatch struct {
+	SexCode                 string                         `json:"sex_code" toml:"sex_code" binding:"required,oneof=male female unknown"`
+	LifeStatusCode          string                         `json:"life_status_code" toml:"life_status_code" binding:"required,oneof=alive deceased unknown"`
+	AffectedStatusCode      string                         `json:"affected_status_code" toml:"affected_status_code" binding:"required,oneof=affected non_affected unknown"`
+	LastMenstrualPeriod     *DateISO8601                   `json:"last_menstrual_period,omitempty" toml:"last_menstrual_period" swaggertype:"string" format:"date" example:"2026-02-01"`
+	EstimatedDueDate        *DateISO8601                   `json:"estimated_due_date,omitempty" toml:"estimated_due_date" swaggertype:"string" format:"date" example:"2026-11-08"`
+	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" toml:"observations_categorical" binding:"dive"`
+	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" toml:"observations_text" binding:"dive"`
 }
 
 type FamilyHistoryBatch struct {

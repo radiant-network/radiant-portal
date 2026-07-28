@@ -129,10 +129,11 @@ type CaseSequencingExperiment struct {
 type CasePatientClinicalInformation struct {
 	RelationshipToProband string            `json:"relationship_to_proband" validate:"required"`
 	AffectedStatusCode    string            `json:"affected_status_code" validate:"required"`
-	PatientID             int               `json:"patient_id" validate:"required"`
+	PatientID             *int              `json:"patient_id,omitempty"`
+	FetusID               *int              `json:"fetus_id,omitempty"`
 	FirstName             string            `json:"first_name,omitempty"`
 	LastName              string            `json:"last_name,omitempty"`
-	DateOfBirth           time.Time         `json:"date_of_birth"`
+	DateOfBirth           *time.Time        `json:"date_of_birth,omitempty"`
 	LifeStatusCode        string            `json:"life_status_code" validate:"required"`
 	SexCode               string            `json:"sex_code" validate:"required"`
 	SubmitterPatientId    string            `json:"submitter_patient_id,omitempty"`
