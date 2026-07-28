@@ -78,6 +78,13 @@ export interface MultipleSelectorProps {
   openOnFocus?: boolean;
 
   /**
+   * Display every selected badge, letting the control grow in height, instead of
+   * collapsing the overflow into a `+N` badge on a single line.
+   * @default false
+   */
+  multiline?: boolean;
+
+  /**
    * Render the badge for each option.
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;

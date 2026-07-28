@@ -35,6 +35,7 @@ function MultiSelector({
   inputProps,
   hideClearAllButton = false,
   openOnFocus = false,
+  multiline = false,
   renderBadge,
   ref,
 }: MultipleSelectorProps) {
@@ -132,6 +133,12 @@ function MultiSelector({
 
   // Calculate how many badges can fit on one line
   useEffect(() => {
+    // In multiline mode every badge is rendered and the container wraps freely.
+    if (multiline) {
+      setVisibleBadgesCount(selected.length);
+      return;
+    }
+
     if (!badgesContainerRef.current || selected.length === 0) {
       setVisibleBadgesCount(selected.length);
       return;
@@ -197,7 +204,7 @@ function MultiSelector({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [selected, inputValue]);
+  }, [selected, inputValue, multiline]);
 
   useEffect(() => {
     /** If `onSearch` is provided, do not trigger options updated. */
@@ -441,6 +448,7 @@ function MultiSelector({
             onChange?.(selected.filter(s => s.fixed).map(o => o.value));
           }}
           className={cn(
+            multiline && 'self-start',
             (hideClearAllButton ||
               disabled ||
               selected.length < 1 ||
