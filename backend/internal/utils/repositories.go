@@ -71,8 +71,8 @@ func GetAggregatedPhenotypes(db *gorm.DB) *gorm.DB {
 	tx := db.Table(fmt.Sprintf("%s obs", types.ObsCategoricalTable.TenantQualifiedName(CtxOf(db))))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(CtxOf(db))))
 	tx = tx.Where("obs.observation_code = 'phenotype' AND obs.interpretation_code = 'positive'")
-	tx = tx.Group("case_id, patient_id")
-	tx = tx.Select("obs.case_id as case_id, obs.patient_id as patient_id, GROUP_CONCAT(CONCAT(hpo.id,'__',hpo.name) SEPARATOR '|') as phenotypes_term")
+	tx = tx.Group("case_id, patient_id, fetus_id")
+	tx = tx.Select("obs.case_id as case_id, obs.patient_id as patient_id, obs.fetus_id as fetus_id, GROUP_CONCAT(CONCAT(hpo.id,'__',hpo.name) SEPARATOR '|') as phenotypes_term")
 
 	return tx
 }

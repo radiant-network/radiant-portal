@@ -66,7 +66,9 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
-	txMembersCount := db.Table(types.FamilyTable.TenantQualifiedName(ctx)).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
+	// COUNT DISTINCT ignores NULL, so counting family_member_id alone drops every fetus-only row
+	// and undercounts a prenatal case's members.
+	txMembersCount := db.Table(types.FamilyTable.TenantQualifiedName(ctx)).Select("case_id, count(distinct CASE WHEN fetus_id IS NOT NULL THEN CONCAT('f:', fetus_id) ELSE CONCAT('p:', family_member_id) END) as distinct_members_count").Group("case_id")
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
@@ -297,10 +299,18 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	db := r.db.WithContext(ctx)
 	txMembers := db.Table(fmt.Sprintf("%s %s", types.FamilyTable.TenantQualifiedName(ctx), types.FamilyTable.Alias))
 	txMembers = r.joiner.FamilyWithPatient(txMembers)
+	txMembers = r.joiner.FamilyWithFetus(txMembers)
 	txMembers = r.joiner.PatientWithManagingOrg(txMembers)
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
 	txMembers = txMembers.Order("affected_status_code asc, relationship_to_proband_code desc")
-	txMembers = txMembers.Select("p.id as patient_id, p.last_name, p.first_name, f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, p.date_of_birth, p.life_status_code, p.sex_code, p.submitter_patient_id, p.jhn, mgmt_org.code as organization_code, mgmt_org.name as organization_name")
+	txMembers = txMembers.Select("p.id as patient_id, fetus.id as fetus_id, " +
+		"COALESCE(p.last_name, '') as last_name, COALESCE(p.first_name, '') as first_name, " +
+		"f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, " +
+		"p.date_of_birth, " +
+		"COALESCE(p.life_status_code, fetus.life_status_code) as life_status_code, " +
+		"COALESCE(p.sex_code, fetus.sex_code) as sex_code, " +
+		"COALESCE(p.submitter_patient_id, '') as submitter_patient_id, COALESCE(p.jhn, '') as jhn, " +
+		"COALESCE(mgmt_org.code, '') as organization_code, COALESCE(mgmt_org.name, '') as organization_name")
 	if err := txMembers.Find(&members).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}
@@ -309,20 +319,20 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	txObservations = txObservations.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(ctx)))
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
-	txObservations = txObservations.Select("obs.patient_id, COALESCE(hpo.id, obs.code_value) as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
+	txObservations = txObservations.Select("obs.patient_id, obs.fetus_id, COALESCE(hpo.id, obs.code_value) as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
 	if err := txObservations.Find(&phenotypeObsCategoricals).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case phenotypes: %w", err)
 	}
 
-	phenotypesPerPatient := utils.GroupByProperty(phenotypeObsCategoricals, func(p types.PhenotypeObsCategorical) int {
-		return p.PatientID
+	phenotypesPerPatient := utils.GroupByProperty(phenotypeObsCategoricals, func(p types.PhenotypeObsCategorical) string {
+		return subjectKey(p.PatientID, p.FetusID)
 	})
 
 	for i, m := range members {
 		members[i].ObservedPhenotypes = make(types.JsonArray[types.Term], 0)
 		members[i].NonObservedPhenotypes = make(types.JsonArray[types.Term], 0)
 
-		phenotypes, ok := phenotypesPerPatient[m.PatientID]
+		phenotypes, ok := phenotypesPerPatient[subjectKey(m.PatientID, m.FetusID)]
 
 		if ok {
 			for _, phenotype := range phenotypes {
@@ -344,6 +354,20 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	return &members, nil
 }
 
+// patient.id and fetus.id are independent sequences that can produce the same number, so tag
+// which subject owns the row rather than keying on the bare id. Neither set means a data
+// anomaly — key it apart instead of dereferencing nil.
+func subjectKey(patientID *int, fetusID *int) string {
+	switch {
+	case fetusID != nil:
+		return fmt.Sprintf("f:%d", *fetusID)
+	case patientID != nil:
+		return fmt.Sprintf("p:%d", *patientID)
+	default:
+		return "unresolved"
+	}
+}
+
 func (r *CasesRepository) retrieveCaseTasks(ctx context.Context, caseId int) (*[]CaseTask, error) {
 	var tasks []CaseTask
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.TenantQualifiedName(ctx), types.TaskContextTable.Alias))
@@ -354,7 +378,9 @@ func (r *CasesRepository) retrieveCaseTasks(ctx context.Context, caseId int) (*[
 	tx = r.joiner.SeqExpWithSample(tx)
 	tx = r.joiner.SampleAndCaseHasSeqExpWithFamily(tx)
 	tx = tx.Where("chseq.case_id = ?", caseId)
-	tx = tx.Select("task.id, task.task_type_code as type_code, task.created_on, task_type.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
+	// spl.patient_id (the mother) is shared by her own sample and her fetus's — counting it alone
+	// would collapse a task covering both into a single individual.
+	tx = tx.Select("task.id, task.task_type_code as type_code, task.created_on, task_type.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct CASE WHEN spl.fetus_id IS NOT NULL THEN CONCAT(spl.patient_id, '-', spl.fetus_id) ELSE CAST(spl.patient_id AS TEXT) END) as patient_count")
 	tx = tx.Group("task.id, task.task_type_code, task.created_on, task_type.name_en")
 	tx = tx.Order("task.id asc")
 
