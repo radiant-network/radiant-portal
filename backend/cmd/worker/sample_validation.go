@@ -29,6 +29,8 @@ const (
 	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
 	SampleDuplicateInBatchCode               = "SAMPLE-008"
 	SampleNotExistForUpdateCode              = "SAMPLE-009"
+	SampleFetusNotExistCode                  = "SAMPLE-010"
+	SampleInvalidFetusForPatientCode         = "SAMPLE-011"
 )
 
 type SampleKey struct {
@@ -42,6 +44,7 @@ type SampleValidationRecord struct {
 	PatientId        int
 	OrganizationCode string
 	ParentSampleId   *int
+	FetusId          *int
 }
 
 func (r *SampleValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -64,6 +67,29 @@ func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 	} else {
 		r.PatientId = patient.ID
 	}
+}
+
+// validateFetus checks the optional fetus_id, when provided: the fetus must exist, and it must
+// belong to the sample's own patient (its mother) — a sample can't carry another patient's fetus.
+func (r *SampleValidationRecord) validateFetus(fetus *types.Fetus) {
+	if r.Sample.FetusId == nil {
+		return
+	}
+
+	path := r.getFormattedPath("fetus_id")
+	if fetus == nil {
+		message := fmt.Sprintf("Fetus %d for sample %s does not exist.", *r.Sample.FetusId, r.Sample.SubmitterSampleId)
+		r.AddErrors(message, SampleFetusNotExistCode, path)
+		return
+	}
+
+	if fetus.MotherID != r.PatientId {
+		message := fmt.Sprintf("Invalid field fetus_id for sample (%s / %s). Reason: fetus %d does not belong to patient %s.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, *r.Sample.FetusId, r.Sample.SubmitterPatientId)
+		r.AddErrors(message, SampleInvalidFetusForPatientCode, path)
+		return
+	}
+
+	r.FetusId = r.Sample.FetusId
 }
 
 func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
@@ -225,6 +251,7 @@ func insertSampleRecords(ctx context.Context, records []*SampleValidationRecord,
 				TenantCode:        tenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
+				FetusID:           record.FetusId,
 			}
 			newSample, err := repo.CreateSample(ctx, &sample)
 			if err != nil {
@@ -382,6 +409,17 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		}
 		record.validatePatient(patient)
 
+		// 3b. Validate fetus, if referenced
+		var fetus *types.Fetus
+		if sample.FetusId != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusById(ctx, *sample.FetusId)
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+		}
+		record.validateFetus(fetus)
+
 		// 4. Validate organization
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
 		if orgErr != nil {
@@ -494,6 +532,7 @@ func updateSampleRecords(ctx context.Context, records []*SampleValidationRecord,
 				TenantCode:        tenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    record.ParentSampleId,
+				FetusID:           record.FetusId,
 			}
 			if err := repo.UpdateSample(ctx, &sample); err != nil {
 				return err
@@ -552,6 +591,16 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
 		record.validatePatient(patient)
+
+		var fetus *types.Fetus
+		if sample.FetusId != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusById(ctx, *sample.FetusId)
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+		}
+		record.validateFetus(fetus)
 
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
 		if orgErr != nil {

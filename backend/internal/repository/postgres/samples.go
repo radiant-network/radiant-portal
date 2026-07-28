@@ -57,6 +57,9 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 	// updated; neither is tenant_code. patient_id is the resolved owning patient — it is
 	// deliberately NOT updated here: a sample must not be re-pointed to a different patient
 	// (equivalent to changing submitter_patient_id), which is immutable across updates.
+	// fetus_id, unlike patient_id, is updatable — it's often attached after creation. Careful:
+	// this is a full replace, not a merge, so a batch that omits fetus_id clears it (like
+	// parent_sample_id).
 	tx := r.db.WithContext(ctx).
 		Table(types.SampleTable.Name).
 		Where("organization_code = ? AND submitter_sample_id = ?", sample.OrganizationCode, sample.SubmitterSampleId).
@@ -65,6 +68,7 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 			"tissue_site":      sample.TissueSite,
 			"histology_code":   sample.HistologyCode,
 			"parent_sample_id": sample.ParentSampleID,
+			"fetus_id":         sample.FetusID,
 		})
 	if tx.Error != nil {
 		return fmt.Errorf("error updating sample: %w", tx.Error)
