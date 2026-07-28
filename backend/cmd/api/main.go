@@ -276,7 +276,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 func newEngine() *gin.Engine {
 	r := gin.New()
 	r.Use(server.RequestID())
-	r.Use(server.RequestLogger())
+	r.Use(server.RequestLogger("/status"))
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
 
