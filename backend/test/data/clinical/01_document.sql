@@ -556,7 +556,12 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (270, 'SRX1091647-T.recal.cram', 'genomic', 'alignment', 'cram', 49126489623,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram', '72a59834feee767b29f6279562f164b5-9371', '2026-03-09T13:08:00-04:00', 'radiant'),
        (271, 'SRX1091647-T.recal.cram.crai', 'genomic', 'alignment', 'crai', 2030639,
-        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai', 'a5a1e735ac4344019bd81c05f273877e', '2026-03-09T13:08:00-04:00', 'radiant')
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai', 'a5a1e735ac4344019bd81c05f273877e', '2026-03-09T13:08:00-04:00', 'radiant'),
+       -- prenatal fixture: alignment for the fetus's own sequencing (case 72, sample 127).
+       (272, 'S-PRENAT-72.recal.cram', 'genomic', 'alignment', 'cram', 50243021081,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/S-PRENAT-72.recal.cram', '9d7fa39c3ab46a21c649e057482b8911-9585', '2026-04-01T13:08:00-04:00', 'radiant'),
+       (273, 'S-PRENAT-72.recal.cram.crai', 'genomic', 'alignment', 'crai', 1971347,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/S-PRENAT-72.recal.cram.crai', '37b443e867ae59a043e5aaa7ca706853', '2026-04-01T13:08:00-04:00', 'radiant')
 ON CONFLICT(id) DO NOTHING;
 
 ALTER TABLE document ALTER COLUMN id RESTART WITH 1000;

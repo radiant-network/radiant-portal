@@ -114,5 +114,13 @@ VALUES (1, 1, NULL),
        (74, 73, 71),
        (74, 74, 71),
        (75, 73, NULL),
-       (76, 74, NULL)
+       (76, 74, NULL),
+
+       -- prenatal fixture: alignment task for the fetus's own sequencing (case 72).
+       (82, 75, 72),
+
+       -- Task 83 covers both the fetus's sequencing (75) and the mother's own (78), so
+       -- patient_count must be 2. Kept off task 82 so it doesn't fan out into its IGV fixtures.
+       (83, 75, 72),
+       (83, 78, 72)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

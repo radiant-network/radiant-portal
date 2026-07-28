@@ -469,7 +469,16 @@ VALUES (1, 16, 44, 'phenotype', 'HPO', 'HP:0001263', 'unknown', 'negative', 'Cli
        (460, 20, 58, 'phenotype', 'HPO', 'HP:0001511', 'childhood', 'negative', 'Clinical comment', 'radiant'),
        (461, 20, 58, 'phenotype', 'HPO', 'HP:0001520', 'childhood', 'negative', 'Clinical comment', 'radiant'),
        (462, 20, 58, 'phenotype', 'HPO', 'HP:0001562', 'unknown', 'negative', 'Clinical comment', 'radiant'),
-       (463, 20, 58, 'phenotype', 'HPO', 'HP:0001622', 'childhood', 'negative', 'Clinical comment', 'radiant')
+       (463, 20, 58, 'phenotype', 'HPO', 'HP:0001622', 'childhood', 'negative', 'Clinical comment', 'radiant'),
+       -- prenatal fixture: the mother's own finding, independent of her fetus's below.
+       (464, 74, 65, 'phenotype', 'HPO', 'HP:0000822', 'unknown', 'positive', 'Mother''s own finding', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system, code_value, onset_code, interpretation_code, note, tenant_code)
+VALUES (465, 72, NULL, 1, 'phenotype', 'HPO', 'HP:0001631', 'antenatal', 'positive', 'Ultrasound finding', 'radiant'),
+       (466, 73, NULL, 3, 'phenotype', 'HPO', 'HP:0001561', 'antenatal', 'positive', 'Ultrasound finding (deceased twin)', 'radiant'),
+       (467, 74, NULL, 4, 'phenotype', 'HPO', 'HP:0001631', 'antenatal', 'positive', 'Ultrasound finding', 'radiant'),
+       (468, 73, NULL, 2, 'phenotype', 'HPO', 'HP:0001631', 'antenatal', 'positive', 'Ultrasound finding', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE obs_categorical ALTER COLUMN id RESTART WITH 1000;

@@ -315,5 +315,9 @@ VALUES (1, 27, 'output'),
        (75, 268, 'output'),
        (75, 269, 'output'),
        (76, 270, 'output'),
-       (76, 271, 'output')
+       (76, 271, 'output'),
+
+       -- prenatal fixture: alignment for the fetus's own sequencing (case 72).
+       (82, 272, 'output'),
+       (82, 273, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;

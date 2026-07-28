@@ -7,3 +7,5 @@ part	seq_id	task_id	locus_id	gq	filter	zygosity	ad_ratio	exomiser_gene_combined_
 4	19	80	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive	5	0.6
 4	19	80	1000	100	VQSRTrancheSNP99.95to100.00	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive	5	0.7
 4	46	81	2000	100	PASS	HOM	1.0	0.7	"[""PS1"",""PVS2""]"	PATHOGENIC	5	autosomal_dominant	5	0.8
+6	75	82	3000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_dominant	5	0.1
+6	78	83	3000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_dominant	5	0.1

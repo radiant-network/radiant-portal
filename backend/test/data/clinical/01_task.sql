@@ -77,7 +77,11 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (78, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (79, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (80, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
-       (81, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant')
+       (81, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
+       -- prenatal fixture: alignment task for the fetus's own sequencing (case 72).
+       (82, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
+       -- Covers both the fetus's and the mother's own sequencing for case 72 (Fix 7 test).
+       (83, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE task ALTER COLUMN id RESTART WITH 1000;

@@ -9,3 +9,5 @@ part	seq_id	task_id	case_id	patient_id	analysis_type	affected_status	ingested_at
 5	74	74	71	62	somatic	affected	1969-12-31 19:00:00.0	radiant_somatic_annotation	wgs	tumoral
 5	73	74	71	62	somatic	affected	1969-12-31 19:00:00.0	radiant_somatic_annotation	wgs	normal
 1	1	1	1	3	germline	affected	1969-12-31 19:00:00.0	alignment_germline_variant_calling	wgs	normal
+6	75	82	72	63	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	normal
+6	78	83	72	63	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	normal
