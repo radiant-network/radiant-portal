@@ -61,6 +61,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/occurrences/somatic/snv/1/1/1/1/expanded",
 			"users/preferences/table_1",
 			"users/sets/1",
+			"value_sets/organization_category",
 			"radiant/variants/germline/1/header",
 			"radiant/variants/germline/1/overview",
 			"radiant/variants/germline/1/consequences",
@@ -80,6 +81,7 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// POST requests
 		for _, route := range []string{
+			"radiant/organizations",
 			"radiant/cases/search",
 			"radiant/genes/search",
 			"radiant/interpretations/germline/1/1/1",

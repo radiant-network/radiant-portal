@@ -5,6 +5,9 @@ import (
 	"regexp"
 )
 
+// tenantCodePattern is strict because a tenant code becomes a StarRocks database name
+// (<code>_tenant) and a Ranger resource: lowercase, starts with a letter, ends alphanumeric
+// (no trailing '_'), 2–50 characters.
 var tenantCodePattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,48}[a-z0-9]$`)
 
 // ValidateTenantCode reports whether code is a syntactically valid tenant code. It is shared by
@@ -12,7 +15,7 @@ var tenantCodePattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,48}[a-z0-9]$`)
 // creation), so it lives here rather than in either repository package.
 func ValidateTenantCode(code string) error {
 	if !tenantCodePattern.MatchString(code) {
-		return fmt.Errorf("invalid tenant code %q: must match %s", code, tenantCodePattern.String())
+		return fmt.Errorf("invalid tenant code %q: must be lowercase letters/digits/underscore, start with a letter, be at least 2 characters, and not end with '_'", code)
 	}
 	return nil
 }

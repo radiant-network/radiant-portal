@@ -72,6 +72,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
 	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
+	repoOrganizationsWrite := postgres.NewOrganizationRepository(postgresDB)
+	repoValueSets := postgres.NewValueSetsRepository(postgresDB)
 	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
 	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
 	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
@@ -97,9 +99,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	privateRoutes := r.Group("/")
 	privateRoutes.Use(authMiddleware)
 
-	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*.
+	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*,
+	// /value_sets/:type (instance-wide reference value sets, e.g. organization_category).
 	authGroup := privateRoutes.Group("/auth")
 	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
+
+	privateRoutes.GET("/value_sets/:type", server.ListValueSetHandler(repoValueSets))
 
 	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
 	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.
@@ -200,9 +205,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
 
-	// Organizations are referential: the list is readable by any tenant member (no action gate);
-	// create/edit will live under /:tenant/admin/organizations gated by can_manage_orgs.
-	tenantRoutes.GET("/organizations", server.ListOrganizationsHandler(repoOrganizations))
+	// Organizations: the list is referential (any tenant member); create/edit are gated per-route
+	// by can_manage_org. No /admin path segment — gating is the RequireAction on each write route.
+	organizationsGroup := tenantRoutes.Group("/organizations")
+	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
+	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

@@ -8,6 +8,7 @@
 --   tw:    mixed-scope practitioner granted tenant-wide (org_code NULL)       [radiant]
 --   mike:  wildcard member ('*') — search cases + view kb                    [radiant]
 --   gabe:  wildcard data_manager ('*') — ingest data                         [radiant]
+--   tara:  tenant-wide tenant_admin (NULL) — can_manage_user/org/role         [radiant]
 -- mike/gabe use the seeded radiant roles (migration 000012). gabe is the grantee for
 -- can_ingest_data; can_download_file lives on geneticist, so wendy (wildcard
 -- geneticist) is its grantee.
@@ -23,4 +24,5 @@ VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', 'radiant',  'CHOP',  'geneticist
        ('6c330322-c746-4436-bb76-efd2cd943686', 'radiant',  'CHUSJ', 'practitioner'), -- pat
        ('4a330f72-24a1-4d37-8ad7-ff9989245fd3', 'radiant',  NULL,    'practitioner'), -- tw
        ('9f1d2c3b-4a5e-4f60-8c71-2d3e4f5a6b7c', 'radiant',  '*',     'member'),       -- mike
-       ('0a1b2c3d-4e5f-4061-8273-849506a7b8c9', 'radiant',  '*',     'data_manager'); -- gabe
+       ('0a1b2c3d-4e5f-4061-8273-849506a7b8c9', 'radiant',  '*',     'data_manager'),  -- gabe
+       ('a1a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6', 'radiant',  NULL,    'tenant_admin');  -- tara

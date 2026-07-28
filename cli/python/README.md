@@ -148,6 +148,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
 *OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
+*OrganizationsApi* | [**create_organization**](docs/OrganizationsApi.md#create_organization) | **POST** /{tenant}/organizations | Create an organization
 *OrganizationsApi* | [**list_organizations**](docs/OrganizationsApi.md#list_organizations) | **GET** /{tenant}/organizations | List the tenant&#39;s organizations
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
@@ -165,6 +166,7 @@ Class | Method | HTTP request | Description
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
+*ValueSetsApi* | [**list_value_set**](docs/ValueSetsApi.md#list_value_set) | **GET** /value_sets/{type} | List a value set
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /{tenant}/variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
 *VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /{tenant}/variants/germline/cases/filters | Get cases filters for germline variant entity
 *VariantApi* | [**get_germline_variant_conditions**](docs/VariantApi.md#get_germline_variant_conditions) | **GET** /{tenant}/variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
@@ -210,6 +212,7 @@ Class | Method | HTTP request | Description
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
  - [CreateCaseBatchBody](docs/CreateCaseBatchBody.md)
  - [CreateOccurrenceNoteInput](docs/CreateOccurrenceNoteInput.md)
+ - [CreateOrganizationRequest](docs/CreateOrganizationRequest.md)
  - [CreatePatientBatchBody](docs/CreatePatientBatchBody.md)
  - [CreateSampleBatchBody](docs/CreateSampleBatchBody.md)
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
@@ -276,6 +279,7 @@ Class | Method | HTTP request | Description
  - [UserPreference](docs/UserPreference.md)
  - [UserSet](docs/UserSet.md)
  - [UtilsPreSignedURL](docs/UtilsPreSignedURL.md)
+ - [ValueSetItem](docs/ValueSetItem.md)
  - [VariantCasesCount](docs/VariantCasesCount.md)
  - [VariantCasesFilters](docs/VariantCasesFilters.md)
  - [VariantConsequence](docs/VariantConsequence.md)

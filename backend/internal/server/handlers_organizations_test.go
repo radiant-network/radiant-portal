@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,16 @@ type mockOrganizationsReader struct {
 
 func (m *mockOrganizationsReader) ListOrganizations(_ context.Context) ([]types.OrganizationResponse, error) {
 	return m.organizations, m.err
+}
+
+type mockOrganizationCreator struct {
+	err error
+	got types.Organization
+}
+
+func (m *mockOrganizationCreator) CreateOrganization(_ context.Context, org types.Organization) error {
+	m.got = org
+	return m.err
 }
 
 func serveListOrganizations(repo organizationsReader) *httptest.ResponseRecorder {
@@ -56,6 +67,57 @@ func Test_ListOrganizationsHandler_RepoError(t *testing.T) {
 	repo := &mockOrganizationsReader{err: errors.New("boom")}
 	w := serveListOrganizations(repo)
 
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+func servePostOrganization(repo organizationCreator, body string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	group := router.Group("/:tenant")
+	group.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
+	group.POST("/organizations", PostOrganizationHandler(repo))
+	req, _ := http.NewRequest("POST", "/radiant/organizations", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PostOrganizationHandler(t *testing.T) {
+	repo := &mockOrganizationCreator{}
+	w := servePostOrganization(repo, `{"code":"chop2","name":"CHOP 2","category_code":"healthcare_provider"}`)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, types.Organization{Code: "chop2", Name: "CHOP 2", CategoryCode: "healthcare_provider", TenantCode: "radiant"}, repo.got)
+}
+
+func Test_PostOrganizationHandler_InvalidCode(t *testing.T) {
+	// starts with a digit → invalid (uppercase and dashes are allowed, e.g. LDM-CHUSJ).
+	w := servePostOrganization(&mockOrganizationCreator{}, `{"code":"9chop","name":"X","category_code":"healthcare_provider"}`)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostOrganizationHandler_MissingName(t *testing.T) {
+	w := servePostOrganization(&mockOrganizationCreator{}, `{"code":"chop2","category_code":"healthcare_provider"}`)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostOrganizationHandler_DuplicateCode(t *testing.T) {
+	repo := &mockOrganizationCreator{err: types.ErrOrganizationCodeExists}
+	w := servePostOrganization(repo, `{"code":"chop","name":"X","category_code":"healthcare_provider"}`)
+	assert.Equal(t, http.StatusConflict, w.Code)
+}
+
+func Test_PostOrganizationHandler_UnknownCategory(t *testing.T) {
+	repo := &mockOrganizationCreator{err: types.ErrOrganizationUnknownCategory}
+	w := servePostOrganization(repo, `{"code":"chop2","name":"X","category_code":"nope"}`)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostOrganizationHandler_RepoError(t *testing.T) {
+	repo := &mockOrganizationCreator{err: errors.New("boom")}
+	w := servePostOrganization(repo, `{"code":"chop2","name":"X","category_code":"healthcare_provider"}`)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
