@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **affected_status_code** | **str** |  | 
 **date_of_birth** | **str** |  | [optional] 
 **ethnicity_codes** | **List[str]** | TODO | [optional] 
+**fetus_id** | **int** |  | [optional] 
 **first_name** | **str** |  | [optional] 
 **jhn** | **str** |  | [optional] 
 **last_name** | **str** |  | [optional] 
@@ -17,7 +18,7 @@ Name | Type | Description | Notes
 **observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
 **organization_code** | **str** |  | [optional] 
 **organization_name** | **str** |  | [optional] 
-**patient_id** | **int** |  | 
+**patient_id** | **int** |  | [optional] 
 **relationship_to_proband** | **str** |  | 
 **sex_code** | **str** |  | 
 **submitter_patient_id** | **str** |  | [optional] 

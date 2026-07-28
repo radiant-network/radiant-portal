@@ -17,6 +17,7 @@ docs/CNVGeneOverlap.md
 docs/CaseBatch.md
 docs/CaseBatchPatch.md
 docs/CaseEntity.md
+docs/CaseFetusBatch.md
 docs/CaseFilters.md
 docs/CasePatientBatch.md
 docs/CasePatientClinicalInformation.md
@@ -177,6 +178,7 @@ radiant_python/models/batch_summary.py
 radiant_python/models/case_batch.py
 radiant_python/models/case_batch_patch.py
 radiant_python/models/case_entity.py
+radiant_python/models/case_fetus_batch.py
 radiant_python/models/case_filters.py
 radiant_python/models/case_patient_batch.py
 radiant_python/models/case_patient_clinical_information.py

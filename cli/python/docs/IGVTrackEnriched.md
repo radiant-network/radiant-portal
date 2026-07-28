@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **family_role** | **str** |  | [optional] 
+**fetus_id** | **int** |  | [optional] 
 **format** | **str** |  | [optional] 
 **index_url** | **str** |  | [optional] 
 **index_url_expire_at** | **int** |  | [optional] 

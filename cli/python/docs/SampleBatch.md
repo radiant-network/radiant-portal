@@ -5,6 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**fetus_id** | **int** | Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus&#39;s genome. | [optional] 
 **histology_code** | **str** |  | 
 **patient_organization_code** | **str** |  | 
 **sample_organization_code** | **str** |  | 
