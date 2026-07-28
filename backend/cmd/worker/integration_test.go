@@ -526,6 +526,127 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Sample_Fetus_Success_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// MRN-283835 (patient 63) is fetus 1's mother.
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-001",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283835",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "fetus_id": 1
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var sample postgres.Sample
+		findErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = 'CHUSJ'", "SAMPLE-FETUS-001").Scan(&sample).Error
+		if findErr != nil {
+			t.Fatal("failed to find sample:", findErr)
+		}
+		assert.Equal(t, 63, sample.PatientID, "patient_id stays the mother the sample was physically drawn from")
+		if assert.NotNil(t, sample.FetusID, "fetus_id says whose genome the sample's sequencing data represents") {
+			assert.Equal(t, 1, *sample.FetusID)
+		}
+	})
+}
+
+func Test_ProcessBatch_Sample_Fetus_Not_Exist(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-002",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283835",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "fetus_id": 9999
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, SampleFetusNotExistCode, resultBatch.Report.Errors[0].Code)
+		}
+	})
+}
+
+func Test_ProcessBatch_Sample_Fetus_Wrong_Mother(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// Fetus 1's mother is patient 63 (MRN-283835), not MRN-283836 (patient 64).
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-003",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283836",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "fetus_id": 1
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, SampleInvalidFetusForPatientCode, resultBatch.Report.Errors[0].Code)
+		}
+	})
+}
+
 func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		payload := `[

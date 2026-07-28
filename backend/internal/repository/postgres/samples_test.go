@@ -148,6 +148,39 @@ func Test_UpdateSample_ExistingRow(t *testing.T) {
 	})
 }
 
+func Test_UpdateSample_ExistingRow_SetsFetusId(t *testing.T) {
+	// ExclusivePostgres: inserts directly into "sample" (id >= 1000), a table other parallel
+	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewSamplesRepository(database.PostgresDB{DB: db})
+
+		err := db.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1002, 'blood', NULL, 'normal', 'S-UPDATE-FETUS-1', 63, 'CHUSJ', 'radiant')
+		`).Error
+		require.NoError(t, err)
+
+		fetusId := 1
+		updated := &types.Sample{
+			SubmitterSampleId: "S-UPDATE-FETUS-1",
+			OrganizationCode:  "CHUSJ",
+			TypeCode:          "dna",
+			TissueSite:        "Blood",
+			HistologyCode:     "tumoral",
+			FetusID:           &fetusId,
+		}
+		err = repo.UpdateSample(t.Context(), updated)
+		require.NoError(t, err)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CHUSJ", "S-UPDATE-FETUS-1")
+		require.NoError(t, err)
+		require.NotNil(t, sample)
+		require.NotNil(t, sample.FetusID)
+		assert.Equal(t, fetusId, *sample.FetusID)
+	})
+}
+
 func Test_UpdateSample_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSamplesRepository(database.PostgresDB{DB: env.Postgres})
