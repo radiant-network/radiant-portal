@@ -4,8 +4,10 @@ type Family struct {
 	ID                        int `gorm:"unique;primaryKey;autoIncrement"`
 	CaseID                    int
 	Case                      Case `gorm:"foreignKey:ID;references:CaseID"`
-	FamilyMemberID            int
+	FamilyMemberID            *int
 	FamilyMember              Patient `gorm:"foreignKey:ID;references:FamilyMemberID"`
+	FetusID                   *int
+	Fetus                     Fetus `gorm:"foreignKey:ID;references:FetusID"`
 	RelationshipToProbandCode string
 	RelationshipToProband     FamilyRelationship `gorm:"foreignKey:code;references:RelationshipToProbandCode"`
 	AffectedStatusCode        string
