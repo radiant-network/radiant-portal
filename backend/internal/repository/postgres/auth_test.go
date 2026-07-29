@@ -379,7 +379,7 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 func seedRole(t *testing.T, db *gorm.DB, roleCode string) {
 	t.Helper()
 	require.NoError(t, db.Exec(
-		"INSERT INTO public.role (tenant_code, code, name) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
+		"INSERT INTO public.role (tenant_code, code, name_en) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
 		roleCode, roleCode).Error)
 	for _, action := range []string{"can_read_pii", "can_search_case"} {
 		require.NoError(t, db.Exec(
