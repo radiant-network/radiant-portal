@@ -39,9 +39,8 @@ const CommandInputVariants = tv({
   },
   variants: {
     variant: {
-      default: 'enabled:focus-within:ring-1 enabled:focus-within:ring-ring',
-      search:
-        'focus-within:ring-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-0 [&:has(:focus-visible)]:ring-1',
+      default: 'enabled:focus-within:border-ring enabled:focus-within:ring-ring/50 enabled:focus-within:ring-[3px]',
+      search: 'focus-within:border-ring focus-within:ring-ring/50 [&:has(:focus-visible)]:ring-[3px]',
     },
   },
   defaultVariants: {

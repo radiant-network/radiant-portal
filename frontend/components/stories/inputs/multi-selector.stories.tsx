@@ -6,7 +6,7 @@ import { action } from 'storybook/actions';
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 
-import { StorySection } from '../story-section';
+import { StoryLabel, StorySection } from '../story-section';
 
 const meta = {
   title: 'Components/Inputs/Multi Selector',
@@ -84,6 +84,53 @@ export const WithMaxSelected: Story = {
           defaultOptions={defaultOptions}
           hidePlaceholderWhenSelected
         />
+      </StorySection>
+    );
+  },
+};
+
+export const Multiline: Story = {
+  render: () => {
+    const preselected = ['Nextjs', 'vite', 'remix', 'react', 'angular', 'gatsby'];
+    const [collapsedValues, setCollapsedValues] = useState<string[]>(preselected);
+    const [multilineValues, setMultilineValues] = useState<string[]>(preselected);
+
+    return (
+      <StorySection title="Multiline">
+        {/* Widths are set inline: Tailwind does not scan components/stories, so story-only arbitrary classes are never generated. */}
+        <div className="flex flex-col gap-6" style={{ width: 320 }}>
+          <div className="flex flex-col gap-3">
+            <StoryLabel>Default — overflowing badges collapse into a “+N” on a single line</StoryLabel>
+            <MultiSelector
+              value={collapsedValues}
+              onChange={newValues => {
+                setCollapsedValues(newValues);
+                action('onChange')(newValues);
+              }}
+              openOnFocus
+              className="w-full"
+              placeholder="Placeholder"
+              commandProps={{ className: 'w-full' }}
+              defaultOptions={defaultOptions}
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            <StoryLabel>multiline — every badge stays visible and the control grows in height</StoryLabel>
+            <MultiSelector
+              multiline
+              value={multilineValues}
+              onChange={newValues => {
+                setMultilineValues(newValues);
+                action('onChange')(newValues);
+              }}
+              openOnFocus
+              className="w-full"
+              placeholder="Placeholder"
+              commandProps={{ className: 'w-full' }}
+              defaultOptions={defaultOptions}
+            />
+          </div>
+        </div>
       </StorySection>
     );
   },

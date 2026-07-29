@@ -8,7 +8,7 @@ import { cn } from '@/components/lib/utils';
 
 export const checkboxFilterVariants = tv({
   slots: {
-    base: 'flex items-start gap-2 w-full max-w-[228px] cursor-pointer justify-between',
+    base: 'flex items-start gap-2 w-full max-w-[228px] cursor-pointer',
     label: 'first-letter:capitalize line-clamp-2 cursor-pointer max-w-[154px] whitespace-normal break-words',
     description: 'w-full',
     icon: '',
@@ -97,7 +97,7 @@ function CheckboxFilter({
       </Label>
 
       {count != undefined && (
-        <span className={cn('text-muted-foreground font-mono text-right min-w-12', styles.label({ size }))}>
+        <span className={cn('text-muted-foreground font-mono text-right min-w-12 ml-auto', styles.label({ size }))}>
           {numberFormatWithAbbrv(count)}
         </span>
       )}
