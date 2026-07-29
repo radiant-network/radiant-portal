@@ -1,6 +1,7 @@
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
@@ -16,6 +17,10 @@ type RoleBoxProps = {
   onToggle: (checked: boolean) => void;
   onOrgCodesChange: (orgCodes: string[]) => void;
   onViewPermissions: () => void;
+  /** Non-toggleable (e.g. self-guard: you can't grant yourself this role). View permissions stays live. */
+  disabled?: boolean;
+  /** Tooltip text explaining why the box is locked; shown on hover/focus when `disabled`. */
+  disabledReason?: string;
 };
 
 /**
@@ -30,23 +35,33 @@ export default function RoleBox({
   onToggle,
   onOrgCodesChange,
   onViewPermissions,
+  disabled = false,
+  disabledReason,
 }: RoleBoxProps) {
   const { t } = useI18n();
   const scopes = getRoleScopes(role);
   const showOrgPicker = checked && roleIsOrgScoped(role);
 
-  return (
-    <div className={cn('rounded-md border border-input', checked && 'border-primary bg-accent')}>
+  const box = (
+    <div
+      className={cn('rounded-md border border-input', checked && 'border-primary bg-accent', disabled && 'opacity-60')}
+    >
       {/*
        * The whole box is one clickable <label> tied to the checkbox (mirrors the radio-group box pattern).
        * Interactive descendants (the "View permissions" button) don't toggle the checkbox — per the HTML
        * spec a label does nothing for clicks on its interactive content. The org picker sits OUTSIDE the
-       * label so clicking within it never toggles the role off.
+       * label so clicking within it never toggles the role off. When `disabled`, the checkbox is locked
+       * (label clicks are no-ops on a disabled control) but "View permissions" stays live — inspecting a
+       * role is read-only and harmless.
        */}
-      <label htmlFor={`role-${role.code}`} className="flex cursor-pointer items-start gap-3 p-4">
+      <label
+        htmlFor={`role-${role.code}`}
+        className={cn('flex items-start gap-3 p-4', disabled ? 'cursor-not-allowed' : 'cursor-pointer')}
+      >
         <Checkbox
           id={`role-${role.code}`}
           checked={checked}
+          disabled={disabled}
           onCheckedChange={value => onToggle(value === true)}
           className="mt-0.5"
         />
@@ -84,4 +99,19 @@ export default function RoleBox({
       )}
     </div>
   );
+
+  // Locked (self-guard): explain why on hover/focus via a tooltip over the whole faded box, mirroring
+  // the disabled Delete button. "View permissions" inside stays clickable.
+  if (disabled && disabledReason) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{box}</TooltipTrigger>
+          <TooltipContent>{disabledReason}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return box;
 }

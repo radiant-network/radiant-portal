@@ -15,6 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/base/shadcn/sheet';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { MOCK_TENANT, roleIsOrgScoped, ROLES_BY_CODE } from '../../mock/data';
@@ -50,6 +51,10 @@ const isAlertDialogOpen = () => typeof document !== 'undefined' && !!document.qu
 export default function UserSheet({ open, onOpenChange, user, users, onSave, onDelete }: UserSheetProps) {
   const { t } = useI18n();
   const isEdit = !!user;
+  // Self-action guards: privileged users editing their own account can't self-escalate to Tenant Admin
+  // or delete their own account. Both are static "this row is you" conditions → shown as disabled
+  // (vs. the dynamic last-admin veto). See Build Tracker: Users / Inc 2 hardening.
+  const isSelf = isEdit && !!user?.isCurrentUser;
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -128,6 +133,32 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
     onOpenChange(false);
   };
 
+  // Footer left slot: Delete in edit mode; on your own account it's disabled with a self-guard tooltip
+  // (wrapped in a focusable span so the tooltip still fires — disabled controls emit no hover/focus events).
+  let deleteSlot = <span />;
+  if (isSelf) {
+    deleteSlot = (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span tabIndex={0} className="inline-flex">
+              <Button type="button" variant="destructive" disabled aria-disabled className="pointer-events-none">
+                {t('admin.user.delete')}
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{t('admin.user.err.self_delete')}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  } else if (isEdit) {
+    deleteSlot = (
+      <Button type="button" variant="destructive" onClick={handleDelete}>
+        {t('admin.user.delete')}
+      </Button>
+    );
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -156,6 +187,10 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                   <div className="flex flex-col">
                     <SheetTitle className="text-lg leading-tight">
                       {user!.firstName} {user!.lastName}
+                      {/* "(You)" matches the table cell + the email below: muted, text-sm, normal weight. */}
+                      {isSelf && (
+                        <span className="text-sm font-normal text-muted-foreground"> ({t('admin.users.you')})</span>
+                      )}
                     </SheetTitle>
                     <SheetDescription>{user!.email}</SheetDescription>
                   </div>
@@ -222,18 +257,16 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                   <h3 className="text-base font-semibold text-foreground">{t('admin.user.assign_roles')}</h3>
                   <p className="text-sm text-muted-foreground">{t('admin.user.assign_roles_subtitle')}</p>
                 </div>
-                <RoleCheckboxGroup value={assignments} onChange={handleAssignmentsChange} />
+                <RoleCheckboxGroup
+                  value={assignments}
+                  onChange={handleAssignmentsChange}
+                  lockGrantRoleCodes={isSelf ? { tenant_admin: t('admin.user.err.self_admin') } : undefined}
+                />
               </div>
             </div>
 
             <SheetFooter className="flex-row items-center justify-between border-t p-6 sm:justify-between">
-              {isEdit ? (
-                <Button type="button" variant="destructive" onClick={handleDelete}>
-                  {t('admin.user.delete')}
-                </Button>
-              ) : (
-                <span />
-              )}
+              {deleteSlot}
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   {t('admin.user.cancel')}

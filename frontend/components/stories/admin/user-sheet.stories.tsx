@@ -52,7 +52,26 @@ export const EditUser: Story = {
   args: { user: MOCK_USERS.find(u => u.id === 'u-002') }, // Michael Rodriguez — Data Manager + Clinical Reviewer (CHOP)
 };
 
-/** Edit the only Tenant Admin — unchecking Admin triggers the last-admin block. */
+/**
+ * The signed-in user (Sarah Chen) editing her own account while she's the only Administrator.
+ * Self-guard: Delete is disabled with a tooltip (can't delete your own account). She still holds
+ * Administrator, so that box stays toggleable — unchecking it triggers the last-admin veto dialog.
+ */
 export const EditTenantAdmin: Story = {
-  args: { user: MOCK_USERS.find(u => u.id === 'u-001') }, // Sarah Chen
+  args: { user: MOCK_USERS.find(u => u.id === 'u-001') }, // Sarah Chen (isCurrentUser)
+};
+
+/**
+ * The signed-in user (Sarah Chen) editing her own account in a scenario where she does NOT hold
+ * Administrator — shows both self-action guards together: the Administrator box is locked with a
+ * "can't grant yourself" tooltip (no self-escalation), and Delete is disabled with a tooltip.
+ * Other roles stay editable. Same person = "you" as the other self story, just without admin here.
+ */
+export const EditOwnAccount: Story = {
+  args: {
+    user: {
+      ...MOCK_USERS.find(u => u.id === 'u-001')!,
+      roles: [{ roleCode: 'clinical_reviewer', orgCodes: ['chop'] }],
+    },
+  },
 };

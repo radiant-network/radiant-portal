@@ -19,9 +19,9 @@ export const MOCK_ORGS: Organization[] = [
 
 /** Permission (action) catalog with scope. Names/descriptions live in i18n, keyed by code. */
 export const PERMISSIONS: Permission[] = [
-  { code: 'can_manage_users', scope: 'tenant' },
-  { code: 'can_manage_orgs', scope: 'tenant' },
-  { code: 'can_manage_roles', scope: 'tenant' },
+  { code: 'can_manage_user', scope: 'tenant' },
+  { code: 'can_manage_org', scope: 'tenant' },
+  { code: 'can_manage_role', scope: 'tenant' },
   { code: 'can_search_case', scope: 'tenant' },
   { code: 'can_view_kb', scope: 'tenant' },
   { code: 'can_read_pii', scope: 'org' },
@@ -37,9 +37,9 @@ export const PERMISSIONS_BY_CODE: Record<string, Permission> = Object.fromEntrie
 export const MOCK_ROLES: Role[] = [
   {
     code: 'tenant_admin',
-    label: 'Tenant Admin',
+    label: 'Administrator',
     isDefault: true,
-    permissions: ['can_manage_users', 'can_manage_orgs', 'can_manage_roles'],
+    permissions: ['can_manage_user', 'can_manage_org', 'can_manage_role'],
   },
   { code: 'member', label: 'Member', isDefault: true, permissions: ['can_search_case', 'can_view_kb'] },
   {
@@ -62,7 +62,7 @@ export const MOCK_ROLES: Role[] = [
     isDefault: false,
     permissions: ['can_view_kb', 'can_interpret_variant', 'can_comment_variant'],
   },
-  { code: 'org_manager', label: 'Org Manager', isDefault: false, permissions: ['can_manage_orgs'] },
+  { code: 'org_manager', label: 'Org Manager', isDefault: false, permissions: ['can_manage_org'] },
 ];
 
 /** Lookup maps for cell rendering / filters. */

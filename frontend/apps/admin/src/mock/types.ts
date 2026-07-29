@@ -1,7 +1,7 @@
 /**
  * Mock data model for the Admin UI prototype.
  *
- * The backend `can_manage_users/orgs/roles` endpoints are still Incoming, and the generated
+ * The backend `can_manage_user/org/role` endpoints are still Incoming, and the generated
  * client (`frontend/api/`) has no "admin user record" type — `TenantMembership` only carries a
  * caller's *effective* actions per tenant, not identity/role/org rows. So we shape our own model
  * here, mirroring the real tables (`users` + `user_role` + `role` + `organization`). Swap this for
