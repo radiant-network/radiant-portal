@@ -674,7 +674,19 @@ func (cr *CaseValidationRecord) observationValueCodes(code string) []string {
 	}
 }
 
+// addNullObservationError flags a null array entry. `dive` without `required` accepts one, so a
+// payload of `"observations_text": [null]` binds and the callers would nil-deref. The guard lives
+// here rather than in the binding tag because the worker re-unmarshals the stored payload with no
+// validator attached.
+func (cr *CaseValidationRecord) addNullObservationError(res, path string) {
+	cr.AddErrors(fmt.Sprintf("Invalid observation for %s. Reason: entry is null.", res), ObservationInvalidField, path)
+}
+
 func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.ObservationCategoricalBatch, obsPath, res string) {
+	if obs == nil {
+		cr.addNullObservationError(res, obsPath)
+		return
+	}
 	onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
 	interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
 
@@ -717,6 +729,10 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error
 		res := fmt.Sprintf("create_case %d - patient %d - observations_text %d", cr.Index, patientIndex, obsIndex)
 
 		path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
+		if obs == nil {
+			cr.addNullObservationError(res, path)
+			continue
+		}
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.validateObsTextValue(patientIndex, obsIndex)
 	}

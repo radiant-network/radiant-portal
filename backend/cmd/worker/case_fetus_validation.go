@@ -66,6 +66,10 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsText {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "observations_text", &obsIndex)
 		res := fmt.Sprintf("create_case %d - fetus %d - observations_text %d", cr.Index, fetusIndex, obsIndex)
+		if obs == nil {
+			cr.addNullObservationError(res, path)
+			continue
+		}
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.ValidateStringField(obs.Value, "value", path+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 	}

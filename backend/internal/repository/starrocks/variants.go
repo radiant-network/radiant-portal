@@ -480,9 +480,9 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 					%s as split_code,
 					-- The mother's own sample and her fetus's share the same patient; compose with
 					-- fetus_id so the distinct count below doesn't collapse them into one person.
-					-- The base id stays seq.patient_id (inner-joined, always present): sourcing it
-					-- from the outer-joined sample would yield NULL on an unmatched sample, and
-					-- COUNT(DISTINCT NULL) would silently drop the individual from pn.
+					-- The base id stays seq.patient_id, whose row the inner join guarantees: sourcing
+					-- it from the outer-joined sample would yield NULL for a seq experiment with no
+					-- matching sample, and COUNT(DISTINCT NULL) drops that individual from pn.
 					CASE WHEN spl.fetus_id IS NOT NULL THEN CONCAT(seq.patient_id, '-', spl.fetus_id) ELSE CAST(seq.patient_id AS TEXT) END AS dedup_id,
 					seq.affected_status as affected_status_code,
 					g_snv_o.zygosity
