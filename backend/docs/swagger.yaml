@@ -1,5 +1,17 @@
 components:
   schemas:
+    ActionResponse:
+      description: Action from the authorization catalog.
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+        scope:
+          type: string
+      type: object
     Aggregation:
       description: Aggregation represents an aggregation result
       properties:
@@ -2975,6 +2987,57 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /{tenant}/actions:
+    get:
+      description: |-
+        Returns the global action catalog with localized labels, used to build the
+        role-editing action picker. Requires the `can_manage_role` action.
+      operationId: listActions
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActionResponse'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the authorization action catalog
+      tags:
+      - actions
   /{tenant}/batches/{batchId}:
     get:
       description: Retrieve a batch by ID

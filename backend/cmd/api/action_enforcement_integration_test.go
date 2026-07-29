@@ -175,6 +175,7 @@ var membershipOnlyTenantRoutes = map[string]bool{
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in
 // setupRouter. Reads are can_search_case; writes/files/ingest are the org-scoped actions.
 var expectedTenantActions = map[string]string{
+	"GET /:tenant/actions":                                                                       types.ActionManageRole,
 	"POST /:tenant/organizations":                                                                types.ActionManageOrg,
 	"PUT /:tenant/organizations/:code":                                                           types.ActionManageOrg,
 	"POST /:tenant/cases/search":                                                                 types.ActionSearchCase,

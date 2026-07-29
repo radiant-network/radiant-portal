@@ -1,5 +1,7 @@
 .gitignore
 README.md
+docs/ActionResponse.md
+docs/ActionsApi.md
 docs/Aggregation.md
 docs/AggregationBodyWithSqon.md
 docs/ApiError.md
@@ -134,6 +136,7 @@ docs/VariantUninterpretedCasesSearchResponse.md
 docs/VepImpact.md
 radiant_python/__init__.py
 radiant_python/api/__init__.py
+radiant_python/api/actions_api.py
 radiant_python/api/auth_api.py
 radiant_python/api/batches_api.py
 radiant_python/api/cases_api.py
@@ -161,6 +164,7 @@ radiant_python/api_response.py
 radiant_python/configuration.py
 radiant_python/exceptions.py
 radiant_python/models/__init__.py
+radiant_python/models/action_response.py
 radiant_python/models/aggregation.py
 radiant_python/models/aggregation_body_with_sqon.py
 radiant_python/models/api_error.py
@@ -274,4 +278,5 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_update_organization_request.py
+test/test_action_response.py
+test/test_actions_api.py

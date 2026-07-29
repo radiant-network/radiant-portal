@@ -20,6 +20,21 @@ func NewAuthRepository(db database.PostgresDB) *AuthRepository {
 	return &AuthRepository{db: db.DB}
 }
 
+// ListActions returns the global action catalog. It serves the English labels for now
+// (name_en / description_en); resolving by the caller's locale is a separate task.
+func (r *AuthRepository) ListActions(ctx context.Context) ([]types.ActionResponse, error) {
+	actions := []types.ActionResponse{}
+	err := r.db.WithContext(ctx).
+		Table("action").
+		Select("code, scope, COALESCE(name_en, '') AS name, description_en AS description").
+		Order("scope, code").
+		Scan(&actions).Error
+	if err != nil {
+		return nil, fmt.Errorf("error listing actions: %w", err)
+	}
+	return actions, nil
+}
+
 // HasAction reports whether the user holds an action in the given tenant. Routing is
 // by the action's scope, not the grant's org_code (a role may map both scopes): a
 // tenant-scoped action matches any grant in the tenant regardless of orgCode; an
