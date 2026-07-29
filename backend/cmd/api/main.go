@@ -210,6 +210,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	organizationsGroup := tenantRoutes.Group("/organizations")
 	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
 	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
+	organizationsGroup.PUT("/:code", requireAction(types.ActionManageOrg), server.PutOrganizationHandler(repoOrganizationsWrite))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

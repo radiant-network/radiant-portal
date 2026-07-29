@@ -2530,6 +2530,15 @@ components:
       required:
       - content
       type: object
+    UpdateOrganizationRequest:
+      description: Payload to update an organization. Only the name is editable; code
+        and category are immutable after creation.
+      properties:
+        name:
+          type: string
+      required:
+      - name
+      type: object
     UserPreference:
       properties:
         content:
@@ -6956,6 +6965,80 @@ paths:
       security:
       - bearerauth: []
       summary: Create an organization
+      tags:
+      - organizations
+  /{tenant}/organizations/{code}:
+    put:
+      description: |-
+        Updates an organization's name in the tenant. Requires the `can_manage_org` action.
+        Code and category are immutable, so only the name can change.
+      operationId: updateOrganization
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Organization code
+        in: path
+        name: code
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRequest'
+        description: Organization fields to update
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update an organization
       tags:
       - organizations
   /{tenant}/patients/batch:
