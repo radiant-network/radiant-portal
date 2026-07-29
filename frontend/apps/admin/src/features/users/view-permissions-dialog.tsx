@@ -26,7 +26,7 @@ export default function ViewPermissionsDialog({ role, open, onOpenChange }: View
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="sm" variant="stickyHeader">
         <DialogHeader>
-          <DialogTitle>{role?.label ?? ''}</DialogTitle>
+          <DialogTitle>{role ? t(`admin.roles.${role.code}.name`) : ''}</DialogTitle>
           <DialogDescription>{t('admin.user.permissions_modal_subtitle')}</DialogDescription>
         </DialogHeader>
         <DialogBody>

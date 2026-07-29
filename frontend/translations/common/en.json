@@ -29,12 +29,12 @@
     },
     "roles": {
       "scope": { "tenant": "Network", "org": "Organization" },
-      "tenant_admin": { "description": "Full administrative access to this network: manage members, organizations, and roles." },
-      "member": { "description": "Baseline access for everyone: search cases and browse the knowledge base (genes, variants, phenotypes, population frequencies)." },
-      "geneticist": { "description": "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s)." },
-      "data_manager": { "description": "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s)." },
-      "clinical_reviewer": { "description": "Review and interpret variants and browse the knowledge base, at the selected organization(s)." },
-      "org_manager": { "description": "Create and edit organizations in this network." }
+      "tenant_admin": { "name": "Administrator", "description": "Full administrative access to this network: manage members, organizations, and roles." },
+      "member": { "name": "Member", "description": "Baseline access for everyone: search cases and browse the knowledge base (genes, variants, phenotypes, population frequencies)." },
+      "geneticist": { "name": "Geneticist", "description": "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s)." },
+      "data_manager": { "name": "Data Manager", "description": "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s)." },
+      "clinical_reviewer": { "name": "Clinical Reviewer", "description": "Review and interpret variants and browse the knowledge base, at the selected organization(s)." },
+      "org_manager": { "name": "Org Manager", "description": "Create and edit organizations in this network." }
     },
     "permissions": {
       "can_manage_user": { "name": "Manage members", "description": "Create, edit, and delete members; assign and unassign roles." },
@@ -54,7 +54,11 @@
       "edit_title": "Edit member",
       "user_details": "Member details",
       "assign_roles": "Member roles",
-      "assign_roles_subtitle": "A member's roles determine what they can see and do across your network and within specific organizations.",
+      "baseline": "Every member can search cases and browse the knowledge base",
+      "baseline_link": "see what's included",
+      "admin_access": "Full administrative access to this network",
+      "admin_access_link": "view permissions",
+      "assign_roles_subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
       "view_permissions": "View permissions",
       "permissions_modal_subtitle": "Permission descriptions and scope for this role",
       "orgs_label": "At these organizations",

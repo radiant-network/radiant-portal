@@ -1,31 +1,25 @@
-import { useState } from 'react';
-
 import { ASSIGNABLE_ROLES } from '../../mock/data';
 import type { Role } from '../../mock/types';
 
 import RoleBox from './role-box';
 import type { RoleAssignmentForm } from './user-form.types';
-import ViewPermissionsDialog from './view-permissions-dialog';
 
 type RoleCheckboxGroupProps = {
-  /** Current assignments (excludes the implicit baseline `member`). */
+  /** Current assignments (excludes the implicit baseline `member` and the promoted `tenant_admin`). */
   value: RoleAssignmentForm[];
   onChange: (next: RoleAssignmentForm[]) => void;
   /**
-   * Roles the user can't *grant* here, mapped to the reason shown on the box (e.g. self-guard:
-   * you can't grant yourself Tenant Admin). Grant-only — a role already assigned stays toggleable
-   * so it can still be removed (subject to the sheet's last-admin veto).
+   * Open the shared "view permissions" dialog for a role. Owned by the sheet (not this group) so the
+   * baseline line can reuse the same dialog for the implicit `member` role.
    */
-  lockGrantRoleCodes?: Record<string, string>;
+  onViewPermissions: (role: Role) => void;
 };
 
 /**
- * The "Assign roles" box group: one selectable box per assignable role (all except the implicit
- * `member`). Checking an org-scoped role reveals its inline org picker. Owns the View-permissions modal.
+ * The "Member roles" box group: one selectable box per additive role (everything except the implicit
+ * `member` and the promoted Administrator). Checking an org-scoped role reveals its inline org picker.
  */
-export default function RoleCheckboxGroup({ value, onChange, lockGrantRoleCodes }: RoleCheckboxGroupProps) {
-  const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
-
+export default function RoleCheckboxGroup({ value, onChange, onViewPermissions }: RoleCheckboxGroupProps) {
   const toggleRole = (role: Role, checked: boolean) => {
     if (checked) {
       onChange([...value, { roleCode: role.code, orgCodes: [] }]);
@@ -42,9 +36,6 @@ export default function RoleCheckboxGroup({ value, onChange, lockGrantRoleCodes 
     <div className="flex flex-col gap-3">
       {ASSIGNABLE_ROLES.map(role => {
         const assignment = value.find(a => a.roleCode === role.code);
-        // Grant-lock applies only when the role isn't already held: block adding it, allow removing it.
-        const grantReason = lockGrantRoleCodes?.[role.code];
-        const disabled = !!grantReason && !assignment;
         return (
           <RoleBox
             key={role.code}
@@ -53,17 +44,10 @@ export default function RoleCheckboxGroup({ value, onChange, lockGrantRoleCodes 
             orgCodes={assignment?.orgCodes ?? []}
             onToggle={checked => toggleRole(role, checked)}
             onOrgCodesChange={orgCodes => setOrgCodes(role.code, orgCodes)}
-            onViewPermissions={() => setPermissionsRole(role)}
-            disabled={disabled}
-            disabledReason={disabled ? grantReason : undefined}
+            onViewPermissions={() => onViewPermissions(role)}
           />
         );
       })}
-      <ViewPermissionsDialog
-        role={permissionsRole}
-        open={!!permissionsRole}
-        onOpenChange={open => !open && setPermissionsRole(null)}
-      />
     </div>
   );
 }

@@ -55,7 +55,8 @@ export const EditUser: Story = {
 /**
  * The signed-in user (Sarah Chen) editing her own account while she's the only Administrator.
  * Self-guard: Delete is disabled with a tooltip (can't delete your own account). She still holds
- * Administrator, so that box stays toggleable — unchecking it triggers the last-admin veto dialog.
+ * Administrator, so the header Admin checkbox stays toggleable — unchecking it triggers the
+ * last-admin veto dialog.
  */
 export const EditTenantAdmin: Story = {
   args: { user: MOCK_USERS.find(u => u.id === 'u-001') }, // Sarah Chen (isCurrentUser)
@@ -63,7 +64,7 @@ export const EditTenantAdmin: Story = {
 
 /**
  * The signed-in user (Sarah Chen) editing her own account in a scenario where she does NOT hold
- * Administrator — shows both self-action guards together: the Administrator box is locked with a
+ * Administrator — shows both self-action guards together: the header Admin checkbox is locked with a
  * "can't grant yourself" tooltip (no self-escalation), and Delete is disabled with a tooltip.
  * Other roles stay editable. Same person = "you" as the other self story, just without admin here.
  */

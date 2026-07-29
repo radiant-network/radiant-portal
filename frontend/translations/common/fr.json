@@ -29,12 +29,12 @@
     },
     "roles": {
       "scope": { "tenant": "Réseau", "org": "Organisation" },
-      "tenant_admin": { "description": "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles." },
-      "member": { "description": "Accès de base pour tous : rechercher des cas et consulter la base de connaissances (gènes, variants, phénotypes, fréquences populationnelles)." },
-      "geneticist": { "description": "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées." },
-      "data_manager": { "description": "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées." },
-      "clinical_reviewer": { "description": "Réviser et interpréter les variants et consulter la base de connaissances, dans les organisations sélectionnées." },
-      "org_manager": { "description": "Créer et modifier les organisations de ce réseau." }
+      "tenant_admin": { "name": "Administrateur", "description": "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles." },
+      "member": { "name": "Membre", "description": "Accès de base pour tous : rechercher des cas et consulter la base de connaissances (gènes, variants, phénotypes, fréquences populationnelles)." },
+      "geneticist": { "name": "Généticien", "description": "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées." },
+      "data_manager": { "name": "Gestionnaire de données", "description": "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées." },
+      "clinical_reviewer": { "name": "Réviseur clinique", "description": "Réviser et interpréter les variants et consulter la base de connaissances, dans les organisations sélectionnées." },
+      "org_manager": { "name": "Gestionnaire d'organisation", "description": "Créer et modifier les organisations de ce réseau." }
     },
     "permissions": {
       "can_manage_user": { "name": "Gérer les membres", "description": "Créer, modifier et supprimer des membres; attribuer et retirer des rôles." },
@@ -54,7 +54,11 @@
       "edit_title": "Modifier le membre",
       "user_details": "Détails du membre",
       "assign_roles": "Rôles du membre",
-      "assign_roles_subtitle": "Les rôles d'un membre déterminent ce qu'il peut voir et faire dans votre réseau et au sein d'organisations spécifiques.",
+      "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances",
+      "baseline_link": "voir le détail",
+      "admin_access": "Accès administratif complet à ce réseau",
+      "admin_access_link": "voir les permissions",
+      "assign_roles_subtitle": "Attribuez des rôles pour permettre des actions supplémentaires — les rôles ajoutent des permissions, sans jamais en retirer.",
       "view_permissions": "Voir les permissions",
       "permissions_modal_subtitle": "Descriptions des permissions et portée de ce rôle",
       "orgs_label": "Dans ces organisations",

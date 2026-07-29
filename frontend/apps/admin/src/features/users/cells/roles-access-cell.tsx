@@ -20,7 +20,7 @@ export default function RolesAccessCell({ roles }: { roles: AssignedRole[] }) {
     <div className="flex flex-wrap items-center gap-1.5">
       {roles.map((assigned, index) => {
         const role = ROLES_BY_CODE[assigned.roleCode];
-        const label = role?.label ?? assigned.roleCode;
+        const label = role ? t(`admin.roles.${role.code}.name`) : assigned.roleCode;
         const isAdmin = assigned.roleCode === 'tenant_admin';
         const orgs = assigned.orgCodes ?? [];
         const allOrgs = orgs.includes('*'); // '*' sentinel = all current and future organizations

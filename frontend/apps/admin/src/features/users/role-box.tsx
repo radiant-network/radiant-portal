@@ -69,7 +69,7 @@ export default function RoleBox({
             wraps within its own column instead of crowding the badges. */}
         <div className="flex flex-1 items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-foreground">{role.label}</span>
+            <span className="text-sm font-medium text-foreground">{t(`admin.roles.${role.code}.name`)}</span>
             <p className="text-sm text-muted-foreground">
               {t(`admin.roles.${role.code}.description`)}{' '}
               <Button

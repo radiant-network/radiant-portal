@@ -31,7 +31,7 @@ export default function UsersTableFilters({ value, onChange }: UsersTableFilters
   // Grantable roles, plus a "Member" option meaning "baseline only" (no additional role assigned).
   // It matches exactly the rows the Roles & Access column labels "Member", so filter and column agree.
   const roleOptions = [
-    ...MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: r.label })),
+    ...MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: t(`admin.roles.${r.code}.name`) })),
     { key: 'member', label: t('admin.users.member') },
   ];
   const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: <OrgOptionLabel code={o.code} name={o.name} /> }));

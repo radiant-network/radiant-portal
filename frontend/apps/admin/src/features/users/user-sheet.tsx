@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { User } from 'lucide-react';
@@ -18,12 +19,14 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { MOCK_TENANT, roleIsOrgScoped, ROLES_BY_CODE } from '../../mock/data';
-import type { AdminUser } from '../../mock/types';
+import { ADMIN_ROLE, MEMBER_ROLE, MOCK_TENANT, roleIsOrgScoped, ROLES_BY_CODE } from '../../mock/data';
+import type { AdminUser, Role } from '../../mock/types';
 
+import AdminRoleToggle from './admin-role-toggle';
 import RoleCheckboxGroup from './role-checkbox-group';
 import type { RoleAssignmentForm, UserFormValues } from './user-form.types';
 import { userFormSchema } from './user-sheet-schema';
+import ViewPermissionsDialog from './view-permissions-dialog';
 
 type UserSheetProps = {
   open: boolean;
@@ -63,6 +66,15 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
 
   const assignments = form.watch('assignments');
 
+  // Shared "view permissions" dialog, owned here so both the role boxes and the baseline line
+  // (member role) can open it.
+  const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
+
+  const hasAdmin = assignments.some(a => a.roleCode === 'tenant_admin');
+  // Self-guard: you can't grant yourself Administrator (grant-only — if already held it stays
+  // toggleable so removal still routes through the last-admin veto below).
+  const adminGrantLocked = isSelf && !hasAdmin;
+
   // Org-required: every checked org-scoped role must target ≥1 organization (or all).
   const orgError = assignments.some(a => {
     const role = ROLES_BY_CODE[a.roleCode];
@@ -91,6 +103,13 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
       return; // veto the change
     }
     form.setValue('assignments', next, { shouldDirty: true });
+  };
+
+  const toggleAdmin = (checked: boolean) => {
+    const next = checked
+      ? [...assignments, { roleCode: 'tenant_admin', orgCodes: [] }]
+      : assignments.filter(a => a.roleCode !== 'tenant_admin');
+    handleAssignmentsChange(next); // reuses the last-admin veto
   };
 
   const handleDelete = () => {
@@ -177,36 +196,49 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
             <SheetHeader className="space-y-0 border-b px-6 py-4">
-              {isEdit ? (
-                <div className="flex items-center gap-3">
-                  <Avatar size="2xl">
-                    <AvatarFallback color="neutral" className="text-muted-foreground">
-                      <User className="size-6" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <SheetTitle className="text-lg leading-tight">
-                      {user!.firstName} {user!.lastName}
-                      {/* "(You)" matches the table cell + the email below: muted, text-sm, normal weight. */}
-                      {isSelf && (
-                        <span className="text-sm font-normal text-muted-foreground"> ({t('admin.users.you')})</span>
-                      )}
-                    </SheetTitle>
-                    <SheetDescription>{user!.email}</SheetDescription>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <SheetTitle className="text-lg">{t('admin.user.add_title')}</SheetTitle>
-                  {/* sr-only description satisfies the dialog a11y requirement (visible copy lives under "User roles"). */}
-                  <SheetDescription className="sr-only">{t('admin.user.add_title')}</SheetDescription>
-                </>
-              )}
+              <SheetTitle className="text-lg">
+                {isEdit ? t('admin.user.edit_title') : t('admin.user.add_title')}
+              </SheetTitle>
+              {/* sr-only description satisfies the dialog a11y requirement; the visible identity block
+                  and roles copy live in the sheet body below. */}
+              <SheetDescription className="sr-only">
+                {isEdit ? `${user!.firstName} ${user!.lastName}` : t('admin.user.add_title')}
+              </SheetDescription>
             </SheetHeader>
 
             <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
-              {!isEdit && (
-                <div className="flex flex-col gap-4">
+              {isEdit ? (
+                // Identity row: avatar + name/email on the left, the promoted Administrator grant on
+                // the right. items-center keeps the checkbox on the avatar's centre line.
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar size="2xl">
+                      <AvatarFallback color="neutral" className="text-muted-foreground">
+                        <User className="size-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-base font-semibold leading-tight text-foreground">
+                        {user!.firstName} {user!.lastName}
+                        {/* "(You)" matches the table cell + email: muted, text-sm, normal weight. */}
+                        {isSelf && (
+                          <span className="text-sm font-normal text-muted-foreground"> ({t('admin.users.you')})</span>
+                        )}
+                      </span>
+                      <span className="text-sm text-muted-foreground">{user!.email}</span>
+                    </div>
+                  </div>
+                  <AdminRoleToggle
+                    role={ADMIN_ROLE}
+                    checked={hasAdmin}
+                    onToggle={toggleAdmin}
+                    onViewPermissions={() => setPermissionsRole(ADMIN_ROLE)}
+                    disabled={adminGrantLocked}
+                    disabledReason={adminGrantLocked ? t('admin.user.err.self_admin') : undefined}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6">
                   <h3 className="text-base font-semibold text-foreground">{t('admin.user.user_details')}</h3>
                   <div className="flex gap-3">
                     <FormField
@@ -252,15 +284,43 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                 </div>
               )}
 
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
+              {/* Add has no avatar identity row, so the Administrator grant gets its own row here. */}
+              {!isEdit && (
+                <AdminRoleToggle
+                  role={ADMIN_ROLE}
+                  checked={hasAdmin}
+                  onToggle={toggleAdmin}
+                  onViewPermissions={() => setPermissionsRole(ADMIN_ROLE)}
+                  disabled={adminGrantLocked}
+                  disabledReason={adminGrantLocked ? t('admin.user.err.self_admin') : undefined}
+                />
+              )}
+
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
                   <h3 className="text-base font-semibold text-foreground">{t('admin.user.assign_roles')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('admin.user.assign_roles_subtitle')}</p>
+                  <div className="flex flex-col gap-1">
+                    {/* Baseline everyone gets (implicit `member` role) — dispels "no role = no access".
+                        The link opens the same permissions dialog as the role boxes, for `member`. */}
+                    <p className="text-sm text-muted-foreground">
+                      {t('admin.user.baseline')} (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0 align-baseline text-sm"
+                        onClick={() => setPermissionsRole(MEMBER_ROLE)}
+                      >
+                        {t('admin.user.baseline_link')}
+                      </Button>
+                      ).
+                    </p>
+                    <p className="text-sm text-muted-foreground">{t('admin.user.assign_roles_subtitle')}</p>
+                  </div>
                 </div>
                 <RoleCheckboxGroup
                   value={assignments}
                   onChange={handleAssignmentsChange}
-                  lockGrantRoleCodes={isSelf ? { tenant_admin: t('admin.user.err.self_admin') } : undefined}
+                  onViewPermissions={setPermissionsRole}
                 />
               </div>
             </div>
@@ -276,6 +336,13 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                 </Button>
               </div>
             </SheetFooter>
+
+            {/* Shared by the role boxes and the baseline line (opened for the implicit `member` role). */}
+            <ViewPermissionsDialog
+              role={permissionsRole}
+              open={!!permissionsRole}
+              onOpenChange={open => !open && setPermissionsRole(null)}
+            />
           </form>
         </Form>
       </SheetContent>

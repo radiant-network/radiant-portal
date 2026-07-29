@@ -67,10 +67,19 @@ export const MOCK_ROLES: Role[] = [
 
 /** Lookup maps for cell rendering / filters. */
 export const ROLES_BY_CODE: Record<string, Role> = Object.fromEntries(MOCK_ROLES.map(r => [r.code, r]));
+
+/** The Administrator role, promoted to its own control on the member sheet's identity row. */
+export const ADMIN_ROLE: Role = MOCK_ROLES.find(r => r.code === 'tenant_admin')!;
+/** The implicit baseline role every member holds (never assigned/removed in the UI). */
+export const MEMBER_ROLE: Role = MOCK_ROLES.find(r => r.code === 'member')!;
 export const ORGS_BY_CODE: Record<string, Organization> = Object.fromEntries(MOCK_ORGS.map(o => [o.code, o]));
 
-/** The roles the admin can assign in the sheet — everything except the implicit baseline `member`. */
-export const ASSIGNABLE_ROLES: Role[] = MOCK_ROLES.filter(r => r.code !== 'member');
+/**
+ * Roles listed as additive boxes in the sheet: everything except the implicit baseline `member`
+ * and `tenant_admin` (Administrator is promoted to its own control on the identity row, so it's
+ * not one of the additive roles below).
+ */
+export const ASSIGNABLE_ROLES: Role[] = MOCK_ROLES.filter(r => r.code !== 'member' && r.code !== 'tenant_admin');
 
 /** Distinct scopes a role covers (tenant first), derived from its permissions — drives scope badges. */
 export function getRoleScopes(role: Role): ActionScope[] {
