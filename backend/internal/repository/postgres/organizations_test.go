@@ -47,6 +47,35 @@ func Test_CreateOrganization(t *testing.T) {
 	})
 }
 
+func Test_UpdateOrganization(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = 'org_test_update' AND tenant_code = 'radiant'")
+
+		err := repo.CreateOrganization(t.Context(), types.Organization{
+			Code: "org_test_update", Name: "Old Name", CategoryCode: "healthcare_provider", TenantCode: "radiant",
+		})
+		assert.NoError(t, err)
+
+		err = repo.UpdateOrganization(t.Context(), "radiant", "org_test_update", "New Name")
+		assert.NoError(t, err)
+
+		updated, err := repo.GetOrganizationByCode(t.Context(), "org_test_update")
+		assert.NoError(t, err)
+		assert.Equal(t, "New Name", updated.Name)
+		assert.Equal(t, "healthcare_provider", updated.CategoryCode) // category untouched
+	})
+}
+
+func Test_UpdateOrganization_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.UpdateOrganization(t.Context(), "radiant", "does_not_exist", "X")
+		assert.ErrorIs(t, err, types.ErrOrganizationNotFound)
+	})
+}
+
 func Test_CreateOrganization_DuplicateCode(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})

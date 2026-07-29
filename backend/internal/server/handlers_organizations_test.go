@@ -32,6 +32,16 @@ func (m *mockOrganizationCreator) CreateOrganization(_ context.Context, org type
 	return m.err
 }
 
+type mockOrganizationUpdater struct {
+	err                         error
+	gotTenant, gotCode, gotName string
+}
+
+func (m *mockOrganizationUpdater) UpdateOrganization(_ context.Context, tenantCode, code, name string) error {
+	m.gotTenant, m.gotCode, m.gotName = tenantCode, code, name
+	return m.err
+}
+
 func serveListOrganizations(repo organizationsReader) *httptest.ResponseRecorder {
 	router := gin.Default()
 	router.GET("/:tenant/organizations", ListOrganizationsHandler(repo))
@@ -118,6 +128,47 @@ func Test_PostOrganizationHandler_UnknownCategory(t *testing.T) {
 func Test_PostOrganizationHandler_RepoError(t *testing.T) {
 	repo := &mockOrganizationCreator{err: errors.New("boom")}
 	w := servePostOrganization(repo, `{"code":"chop2","name":"X","category_code":"healthcare_provider"}`)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+func servePutOrganization(repo organizationUpdater, code, body string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	group := router.Group("/:tenant")
+	group.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
+	group.PUT("/organizations/:code", PutOrganizationHandler(repo))
+	req, _ := http.NewRequest("PUT", "/radiant/organizations/"+code, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PutOrganizationHandler(t *testing.T) {
+	repo := &mockOrganizationUpdater{}
+	w := servePutOrganization(repo, "CHOP", `{"name":"New Name"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, "radiant", repo.gotTenant)
+	assert.Equal(t, "CHOP", repo.gotCode)
+	assert.Equal(t, "New Name", repo.gotName)
+}
+
+func Test_PutOrganizationHandler_MissingName(t *testing.T) {
+	w := servePutOrganization(&mockOrganizationUpdater{}, "CHOP", `{}`)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PutOrganizationHandler_NotFound(t *testing.T) {
+	repo := &mockOrganizationUpdater{err: types.ErrOrganizationNotFound}
+	w := servePutOrganization(repo, "nope", `{"name":"X"}`)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_PutOrganizationHandler_RepoError(t *testing.T) {
+	repo := &mockOrganizationUpdater{err: errors.New("boom")}
+	w := servePutOrganization(repo, "CHOP", `{"name":"X"}`)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }

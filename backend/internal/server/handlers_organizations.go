@@ -17,6 +17,10 @@ type organizationCreator interface {
 	CreateOrganization(ctx context.Context, org types.Organization) error
 }
 
+type organizationUpdater interface {
+	UpdateOrganization(ctx context.Context, tenantCode, code, name string) error
+}
+
 // ListOrganizationsHandler
 // @Summary List the tenant's organizations
 // @Id listOrganizations
@@ -93,6 +97,50 @@ func PostOrganizationHandler(repo organizationCreator) gin.HandlerFunc {
 			HandleConflictError(c, err.Error())
 		case errors.Is(err, types.ErrOrganizationUnknownCategory):
 			HandleValidationError(c, err)
+		default:
+			HandleError(c, err)
+		}
+	}
+}
+
+// PutOrganizationHandler
+// @Summary Update an organization
+// @Id updateOrganization
+// @Description Updates an organization's name in the tenant. Requires the `can_manage_org` action.
+// @Description Code and category are immutable, so only the name can change.
+// @Tags organizations
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param code path string true "Organization code"
+// @Param message body types.UpdateOrganizationRequest true "Organization fields to update"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/organizations/{code} [put]
+func PutOrganizationHandler(repo organizationUpdater) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req types.UpdateOrganizationRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		switch err := repo.UpdateOrganization(c.Request.Context(), *tenant, c.Param("code"), req.Name); {
+		case err == nil:
+			c.Status(http.StatusOK)
+		case errors.Is(err, types.ErrOrganizationNotFound):
+			HandleNotFoundError(c, "organization")
 		default:
 			HandleError(c, err)
 		}

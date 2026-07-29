@@ -11,7 +11,14 @@ type Grant struct {
 
 // UserInput is everything needed to provision one regular user end-to-end across
 // Keycloak, Postgres, Ranger, and StarRocks.
+//
+// Sub short-circuits the Keycloak step: set it for a user that already exists in
+// the identity provider (has logged in at least once) to provision Postgres,
+// Ranger and StarRocks only. In that mode Username and Password are unused, and
+// the name/email attributes are optional — an empty one leaves whatever Postgres
+// already holds untouched rather than blanking it.
 type UserInput struct {
+	Sub       string
 	Username  string
 	Email     string
 	FirstName string

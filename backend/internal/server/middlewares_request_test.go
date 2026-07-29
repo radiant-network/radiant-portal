@@ -107,3 +107,41 @@ func Test_RequestLogger_LogsRequestFields(t *testing.T) {
 	assert.Equal(t, float64(http.StatusTeapot), line["status"])
 	assert.Contains(t, line, "latency_ms")
 }
+
+func Test_RequestLogger_SkipsHealthyProbePath(t *testing.T) {
+	var buf bytes.Buffer
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&buf, nil)))
+	defer slog.SetDefault(prev)
+
+	r := gin.New()
+	r.Use(RequestLogger("/status"))
+	r.GET("/status", func(c *gin.Context) { c.Status(http.StatusOK) })
+	r.GET("/cases/:id", func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/status", nil))
+	assert.Empty(t, buf.String(), "healthy /status should not be logged")
+
+	r.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/cases/7", nil))
+	assert.Contains(t, buf.String(), "/cases/:id", "non-skipped paths are still logged")
+}
+
+func Test_RequestLogger_StillLogsFailingProbePath(t *testing.T) {
+	var buf bytes.Buffer
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&buf, nil)))
+	defer slog.SetDefault(prev)
+
+	r := gin.New()
+	r.Use(RequestLogger("/status"))
+	r.GET("/status", func(c *gin.Context) { c.Status(http.StatusServiceUnavailable) })
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/status", nil))
+
+	var line map[string]any
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &line))
+	assert.Equal(t, "/status", line["path"])
+	assert.Equal(t, float64(http.StatusServiceUnavailable), line["status"], "failing /status must stay visible")
+}

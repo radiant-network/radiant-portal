@@ -111,6 +111,7 @@ docs/Transcript.md
 docs/UpdateCaseBatch.md
 docs/UpdateCaseBatchBody.md
 docs/UpdateOccurrenceNoteInput.md
+docs/UpdateOrganizationRequest.md
 docs/UserPreference.md
 docs/UserPreferencesApi.md
 docs/UserSet.md
@@ -253,6 +254,7 @@ radiant_python/models/transcript.py
 radiant_python/models/update_case_batch.py
 radiant_python/models/update_case_batch_body.py
 radiant_python/models/update_occurrence_note_input.py
+radiant_python/models/update_organization_request.py
 radiant_python/models/user_preference.py
 radiant_python/models/user_set.py
 radiant_python/models/utils_pre_signed_url.py
@@ -272,5 +274,4 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_value_set_item.py
-test/test_value_sets_api.py
+test/test_update_organization_request.py

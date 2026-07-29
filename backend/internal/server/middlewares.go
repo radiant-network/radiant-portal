@@ -70,10 +70,21 @@ func validRequestID(id string) bool {
 // carrying the method, matched route template, status, latency and client ip. The
 // request id is added automatically by the context handler. It replaces gin.Logger and
 // the gin-glog request logger.
-func RequestLogger() gin.HandlerFunc {
+//
+// skipPaths are matched against the raw request path and logged only when they fail
+// (non-2xx), so high-frequency probes (health checks on /status) don't drown the log.
+func RequestLogger(skipPaths ...string) gin.HandlerFunc {
+	skip := make(map[string]struct{}, len(skipPaths))
+	for _, p := range skipPaths {
+		skip[p] = struct{}{}
+	}
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
+
+		if _, ok := skip[c.Request.URL.Path]; ok && c.Writer.Status() < 300 {
+			return
+		}
 
 		path := c.FullPath()
 		if path == "" {

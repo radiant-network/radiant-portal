@@ -131,7 +131,7 @@ const RichTextEditor = ({
   return (
     <div
       className={cn(
-        'shadow-xs rounded-md bg-background border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden',
+        'shadow-xs rounded-md bg-background border border-input focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] overflow-hidden',
         wrapperClassName,
       )}
     >

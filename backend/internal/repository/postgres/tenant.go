@@ -11,21 +11,47 @@ import (
 )
 
 type roleSeed struct {
-	Code        string
-	Name        string
-	Description string
-	Actions     []string
+	Code          string
+	NameEn        string
+	DescriptionEn string
+	NameFr        string
+	DescriptionFr string
+	Actions       []string
 }
 
 var DefaultRoles = []roleSeed{
-	{"tenant_admin", "Tenant Administrator", "Manage users, organizations, and roles in the tenant.",
-		[]string{"can_manage_user", "can_manage_org", "can_manage_role"}},
-	{"member", "Member", "Search cases and view the knowledge base.",
-		[]string{"can_search_case", "can_view_kb"}},
-	{"geneticist", "Geneticist", "Read PII, download files, and interpret, comment on, and flag variants.",
-		[]string{"can_read_pii", "can_interpret_variant", "can_comment_variant", "can_flag_variant", "can_download_file"}},
-	{"data_manager", "Data Manager", "Submit batches (cases, patients, samples, sequencing).",
-		[]string{"can_ingest_data"}},
+	{
+		Code:          "tenant_admin",
+		NameEn:        "Administrator",
+		DescriptionEn: "Full administrative access to this network: manage members, organizations, and roles.",
+		NameFr:        "Administrateur",
+		DescriptionFr: "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles.",
+		Actions:       []string{"can_manage_user", "can_manage_org", "can_manage_role"},
+	},
+	{
+		Code:          "member",
+		NameEn:        "Member",
+		DescriptionEn: "Baseline access for everyone: search cases and browse the knowledge base (genes, variants, phenotypes, population frequencies).",
+		NameFr:        "Membre",
+		DescriptionFr: "Accès de base pour tous : rechercher des cas et consulter la base de connaissances (gènes, variants, phénotypes, fréquences populationnelles).",
+		Actions:       []string{"can_search_case", "can_view_kb"},
+	},
+	{
+		Code:          "geneticist",
+		NameEn:        "Geneticist",
+		DescriptionEn: "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s).",
+		NameFr:        "Généticien",
+		DescriptionFr: "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées.",
+		Actions:       []string{"can_read_pii", "can_interpret_variant", "can_comment_variant", "can_flag_variant", "can_download_file"},
+	},
+	{
+		Code:          "data_manager",
+		NameEn:        "Data Manager",
+		DescriptionEn: "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s).",
+		NameFr:        "Gestionnaire de données",
+		DescriptionFr: "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées.",
+		Actions:       []string{"can_ingest_data"},
+	},
 }
 
 type TenantRepository struct {
@@ -101,10 +127,10 @@ func (r *TenantRepository) SeedDefaultRoles(ctx context.Context, tenantCode stri
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, role := range DefaultRoles {
 			if err := tx.Exec(`
-				INSERT INTO public.role (tenant_code, code, name, description)
-				VALUES (?, ?, ?, ?)
+				INSERT INTO public.role (tenant_code, code, name_en, description_en, name_fr, description_fr)
+				VALUES (?, ?, ?, ?, ?, ?)
 				ON CONFLICT (tenant_code, code) DO NOTHING`,
-				tenantCode, role.Code, role.Name, role.Description).Error; err != nil {
+				tenantCode, role.Code, role.NameEn, role.DescriptionEn, role.NameFr, role.DescriptionFr).Error; err != nil {
 				return fmt.Errorf("seed role %s/%s: %w", tenantCode, role.Code, err)
 			}
 			for _, action := range role.Actions {

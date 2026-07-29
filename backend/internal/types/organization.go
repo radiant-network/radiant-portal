@@ -61,6 +61,7 @@ type OrganizationResponse struct {
 var (
 	ErrOrganizationCodeExists      = errors.New("organization code already exists in this tenant")
 	ErrOrganizationUnknownCategory = errors.New("unknown organization category")
+	ErrOrganizationNotFound        = errors.New("organization not found in this tenant")
 )
 
 // @Description Payload to create an organization in a tenant.
@@ -76,3 +77,9 @@ func (r CreateOrganizationRequest) Validate() error {
 	}
 	return nil
 }
+
+// @Description Payload to update an organization. Only the name is editable; code and category
+// @Description are immutable after creation.
+type UpdateOrganizationRequest struct {
+	Name string `json:"name" binding:"required"`
+} // @name UpdateOrganizationRequest

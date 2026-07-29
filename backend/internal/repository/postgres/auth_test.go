@@ -379,7 +379,7 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 func seedRole(t *testing.T, db *gorm.DB, roleCode string) {
 	t.Helper()
 	require.NoError(t, db.Exec(
-		"INSERT INTO public.role (tenant_code, code, name) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
+		"INSERT INTO public.role (tenant_code, code, name_en) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
 		roleCode, roleCode).Error)
 	for _, action := range []string{"can_read_pii", "can_search_case"} {
 		require.NoError(t, db.Exec(
@@ -409,6 +409,26 @@ func Test_AuthRepository_UpsertUser_InsertsThenConvergesEmail(t *testing.T) {
 		var email string
 		require.NoError(t, env.Postgres.Raw("SELECT email FROM public.users WHERE user_id = ?", userID).Scan(&email).Error)
 		assert.Equal(t, "second@provisioning.test", email, "re-run converges email to the latest value")
+	})
+}
+
+func Test_AuthRepository_UpsertUser_EmptyAttributesPreserveStoredValues(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "sub-upsert-preserve"
+		defer purge(env.Postgres, userID, "")
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		require.NoError(t, repo.UpsertUser(t.Context(), userID, "keep@provisioning.test", "Keep", "Me"))
+		// Provisioning by sub alone hands over no attributes.
+		require.NoError(t, repo.UpsertUser(t.Context(), userID, "", "", ""))
+
+		var email, firstName, lastName string
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT email, first_name, last_name FROM public.users WHERE user_id = ?", userID,
+		).Row().Scan(&email, &firstName, &lastName))
+		assert.Equal(t, "keep@provisioning.test", email, "empty email does not blank the stored one")
+		assert.Equal(t, "Keep", firstName)
+		assert.Equal(t, "Me", lastName)
 	})
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -52,13 +54,24 @@ func RangerTenantRole(tenantCode string) string {
 // StarRocks login that authorization rides on. Every step is idempotent, so a
 // re-run converges.
 //
+// When in.Sub is set the identity already exists, so Keycloak is skipped entirely
+// and that sub is used as-is for the remaining three systems.
+//
 // grantedBy records audit attribution for the role grants (who performed the
 // provisioning) — the createuser CLI passes "createuser"; a POST /users handler
 // would pass the acting admin's identity.
 func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, grantedBy string) (string, error) {
-	sub, err := deps.Keycloak.UpsertUser(ctx, in.Username, in.Email, in.FirstName, in.LastName, in.Password)
-	if err != nil {
-		return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
+	sub := in.Sub
+	if sub == "" {
+		var err error
+		sub, err = deps.Keycloak.UpsertUser(ctx, in.Username, in.Email, in.FirstName, in.LastName, in.Password)
+		if err != nil {
+			return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
+		}
+	} else if _, err := uuid.Parse(sub); err != nil {
+		// Validate up front: the StarRocks DDL guard is the last step, so a malformed
+		// sub would otherwise leave Postgres rows and a Ranger user behind.
+		return "", fmt.Errorf("sub %q is not a valid UUID: %w", sub, err)
 	}
 
 	if err := deps.Auth.UpsertUser(ctx, sub, in.Email, in.FirstName, in.LastName); err != nil {

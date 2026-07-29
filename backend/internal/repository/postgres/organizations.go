@@ -46,3 +46,20 @@ func (r *OrganizationRepository) CreateOrganization(ctx context.Context, org typ
 	}
 	return nil
 }
+
+// UpdateOrganization updates an organization's name within the tenant. Code and category are
+// immutable, so only name is written. A code that does not exist in the tenant (or belongs to
+// another tenant) affects no rows and maps to types.ErrOrganizationNotFound → 404.
+func (r *OrganizationRepository) UpdateOrganization(ctx context.Context, tenantCode, code, name string) error {
+	tx := r.db.WithContext(ctx).
+		Table(types.OrganizationTable.Name).
+		Where("code = ? AND tenant_code = ?", code, tenantCode).
+		Update("name", name)
+	if tx.Error != nil {
+		return fmt.Errorf("error updating organization %q: %w", code, tx.Error)
+	}
+	if tx.RowsAffected == 0 {
+		return types.ErrOrganizationNotFound
+	}
+	return nil
+}

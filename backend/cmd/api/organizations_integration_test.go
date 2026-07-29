@@ -14,6 +14,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // tara holds tenant_admin (can_manage_org) tenant-wide in radiant (test/data/auth/06_user_role.sql).
@@ -88,4 +89,63 @@ func Test_CreateOrganization_WithoutManageOrgs_Forbidden(t *testing.T) {
 	w := postOrganization(t, mikeID, `{"code":"int_org_b","name":"Integration Org","category_code":"healthcare_provider"}`)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func putOrganization(t *testing.T, userID, code, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	var w *httptest.ResponseRecorder
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		orgRepo := postgres.NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: userID}
+
+		router := gin.Default()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+		tenantRoutes.PUT("/organizations/:code", server.RequireAction(auth, authRepo, types.ActionManageOrg), server.PutOrganizationHandler(orgRepo))
+
+		req, _ := http.NewRequest("PUT", "/radiant/organizations/"+code, strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+	})
+	return w
+}
+
+func Test_UpdateOrganization_TenantAdmin_Updated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		orgRepo := postgres.NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: taraID}
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = 'int_org_upd' AND tenant_code = 'radiant'")
+
+		require.NoError(t, orgRepo.CreateOrganization(t.Context(), types.Organization{
+			Code: "int_org_upd", Name: "Before", CategoryCode: "healthcare_provider", TenantCode: "radiant",
+		}))
+
+		router := gin.Default()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+		tenantRoutes.PUT("/organizations/:code", server.RequireAction(auth, authRepo, types.ActionManageOrg), server.PutOrganizationHandler(orgRepo))
+
+		req, _ := http.NewRequest("PUT", "/radiant/organizations/int_org_upd", strings.NewReader(`{"name":"After"}`))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		updated, err := orgRepo.GetOrganizationByCode(t.Context(), "int_org_upd")
+		require.NoError(t, err)
+		assert.Equal(t, "After", updated.Name)
+	})
+}
+
+func Test_UpdateOrganization_WithoutManageOrgs_Forbidden(t *testing.T) {
+	w := putOrganization(t, mikeID, "int_org_x", `{"name":"X"}`)
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_UpdateOrganization_NotFound(t *testing.T) {
+	w := putOrganization(t, taraID, "does_not_exist", `{"name":"X"}`)
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }

@@ -119,6 +119,7 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// PUT requests
 		for _, route := range []string{
+			"radiant/organizations/CHOP",
 			"radiant/patients/batch",
 			"radiant/samples/batch",
 			"radiant/sequencing/batch",
