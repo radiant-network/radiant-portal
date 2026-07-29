@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { useId, useState } from 'react';
 import { tv, VariantProps } from 'tailwind-variants';
 
@@ -16,9 +17,12 @@ export const checkboxGroupFieldVariants = tv({
     checkboxInBox: 'focus-visible:ring-0 focus-visible:outline-none',
     checkboxDisabled: 'disabled:opacity-100',
     itemContainer: 'flex items-center gap-3',
-    content: 'flex flex-col flex-1 gap-1.5 pt-0.5',
+    contentContainer: 'flex flex-1 items-start gap-2 self-stretch pt-0.5',
+    content: 'flex flex-col flex-1 gap-1.5',
+    contentWithExtraTitle: 'min-w-[50%]',
     label: 'text-sm font-medium text-foreground leading-none',
     description: 'text-sm text-muted-foreground font-normal',
+    extraTitle: 'flex flex-wrap items-center gap-1.5',
     extraContent: 'flex flex-col gap-4',
   },
   variants: {
@@ -41,6 +45,7 @@ export type CheckboxGroupFieldItem = {
   label: string;
   description?: React.ReactNode;
   disabled?: boolean;
+  extraTitle?: React.ReactNode;
   extraContent?: React.ReactNode;
 };
 
@@ -123,14 +128,21 @@ function CheckboxGroupField({
                   aria-describedby={item.description ? descriptionId : undefined}
                   onCheckedChange={state => handleCheckedChange(item.id, state === true)}
                 />
-                <div className={styles.content()}>
-                  <span id={labelId} className={styles.label()}>
-                    {item.label}
-                  </span>
-                  {item.description && (
-                    <span id={descriptionId} className={styles.description()}>
-                      {item.description}
+                <div className={styles.contentContainer()}>
+                  <div className={cn(styles.content(), item.extraTitle && styles.contentWithExtraTitle())}>
+                    <span id={labelId} className={styles.label()}>
+                      {item.label}
                     </span>
+                    {item.description && (
+                      <span id={descriptionId} className={styles.description()}>
+                        {item.description}
+                      </span>
+                    )}
+                  </div>
+                  {item.extraTitle && (
+                    <div data-slot="checkbox-group-item-extra-title" className={styles.extraTitle()}>
+                      {item.extraTitle}
+                    </div>
                   )}
                 </div>
               </div>
