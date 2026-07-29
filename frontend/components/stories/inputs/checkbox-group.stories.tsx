@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CheckboxGroupField, { CheckboxGroupFieldItem } from '@/components/base/checkboxes/checkbox-group-field';
+import { Badge } from '@/components/base/shadcn/badge';
 import { Label } from '@/components/base/shadcn/label';
 import { Switch } from '@/components/base/shadcn/switch';
 
@@ -56,6 +57,50 @@ const disabledOptionsWithExtraContent: CheckboxGroupFieldItem[] = [
   { id: 'option2', label: 'Option 2', description: 'This is option 2', disabled: true },
 ];
 
+const optionsWithExtraTitle: CheckboxGroupFieldItem[] = [
+  {
+    id: 'option1',
+    label: 'Option 1',
+    description: 'This is option 1',
+    extraTitle: (
+      <>
+        <Badge variant="green">Recommended</Badge>
+        <Badge variant="blue">SNV</Badge>
+        <Badge variant="violet">WGS</Badge>
+      </>
+    ),
+  },
+  {
+    id: 'option2',
+    label: 'Option 2',
+    description: 'This is option 2',
+    extraTitle: (
+      <>
+        <Badge variant="amber">Beta</Badge>
+        <Badge variant="cyan">CNV</Badge>
+      </>
+    ),
+  },
+];
+
+const optionsWithManyExtraTitleBadges: CheckboxGroupFieldItem[] = [
+  {
+    id: 'option1',
+    label: 'Option 1',
+    description: 'This is option 1',
+    extraTitle: (
+      <>
+        <Badge variant="green">Recommended</Badge>
+        <Badge variant="blue">SNV</Badge>
+        <Badge variant="violet">WGS</Badge>
+        <Badge variant="cyan">CNV</Badge>
+        <Badge variant="amber">Beta</Badge>
+        <Badge variant="neutral">Deprecated</Badge>
+      </>
+    ),
+  },
+];
+
 const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
   {
     id: 'option1',
@@ -66,6 +111,12 @@ const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
         <a href="#" className="text-primary underline underline-offset-4">
           View permissions
         </a>
+      </>
+    ),
+    extraTitle: (
+      <>
+        <Badge variant="green">Recommended</Badge>
+        <Badge variant="blue">SNV</Badge>
       </>
     ),
     extraContent: (
@@ -168,6 +219,27 @@ export const AllVariants: Story = {
           <div style={{ width: 420 }}>
             <CheckboxGroupField data={disabledOptionsWithExtraContent} box defaultValue={['option1']} />
           </div>
+        </div>
+      </StorySection>
+
+      <StorySection
+        title="Extra title"
+        description={
+          'Extra title sits at the right of the label and description, vertically centered. With align="end" it ' +
+          'stays between the text and the checkbox. When the content is too wide for the item, it wraps onto ' +
+          'several lines, and the label and description column keeps at least half the width.'
+        }
+      >
+        <div className="flex gap-20">
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraTitle} box defaultValue={['option1']} />
+          </div>
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraTitle} box defaultValue={['option1']} align="end" />
+          </div>
+        </div>
+        <div style={{ width: 420, marginTop: '20px' }}>
+          <CheckboxGroupField data={optionsWithManyExtraTitleBadges} box defaultValue={['option1']} />
         </div>
       </StorySection>
 
