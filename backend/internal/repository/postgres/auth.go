@@ -177,14 +177,18 @@ func appendUnique(values []string, value string) []string {
 // name. user_id (the Keycloak sub) is the identity key; email is an optional
 // attribute. This is the write side used at provisioning time, paired with the
 // read side above. Idempotent.
+//
+// An empty attribute preserves the stored value instead of blanking it, so
+// provisioning an existing user by sub alone (no email/names to hand) doesn't
+// erase attributes an earlier run or a login recorded.
 func (r *AuthRepository) UpsertUser(ctx context.Context, userID, email, firstName, lastName string) error {
 	err := r.db.WithContext(ctx).Exec(`
 		INSERT INTO public.users (user_id, email, first_name, last_name)
 		VALUES (?, ?, ?, ?)
 		ON CONFLICT (user_id) DO UPDATE
-		SET email = EXCLUDED.email,
-		    first_name = EXCLUDED.first_name,
-		    last_name = EXCLUDED.last_name`,
+		SET email = COALESCE(NULLIF(EXCLUDED.email, ''), users.email),
+		    first_name = COALESCE(NULLIF(EXCLUDED.first_name, ''), users.first_name),
+		    last_name = COALESCE(NULLIF(EXCLUDED.last_name, ''), users.last_name)`,
 		userID, email, firstName, lastName).Error
 	if err != nil {
 		return fmt.Errorf("upsert user %q: %w", userID, err)

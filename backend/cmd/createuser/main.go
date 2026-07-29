@@ -8,6 +8,16 @@
 // derives a separate username. Identity is keyed on email, not username, so this
 // works whether or not the realm enforces email-as-username: an existing user is
 // matched by email even if its stored username differs.
+//
+// For a user that already exists in Keycloak (a real user who has logged in),
+// pass its `sub` instead of an email to provision Postgres, Ranger and StarRocks
+// only — Keycloak is left untouched and no password is needed:
+//
+//	go run ./cmd/createuser -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
+//	    -grant radiant:*:geneticist
+//
+// -email / -first / -last remain accepted alongside -sub as Postgres attributes;
+// omitting them keeps whatever is already stored.
 package main
 
 import (
@@ -48,22 +58,28 @@ func (g *grantList) Set(value string) error {
 
 func main() {
 	var (
-		email  = flag.String("email", "", "user email (PK and Keycloak username); required")
+		sub    = flag.String("sub", "", "existing Keycloak sub (user_id); skips Keycloak and provisions Postgres/Ranger/StarRocks only")
+		email  = flag.String("email", "", "user email (PK and Keycloak username); required unless -sub is given")
 		first  = flag.String("first", "", "first name")
 		last   = flag.String("last", "", "last name")
-		prompt = flag.Bool("p", false, "prompt for the user password (masked); ignored if USER_PASSWORD is set")
+		prompt = flag.Bool("p", false, "prompt for the user password (masked); ignored if USER_PASSWORD is set or -sub is given")
 		grants grantList
 	)
 	flag.Var(&grants, "grant", "tenant:org:role grant; repeatable")
 	flag.Parse()
 
-	if *email == "" {
-		log.Fatal("createuser: -email is required")
+	if *email == "" && *sub == "" {
+		log.Fatal("createuser: one of -email (create in Keycloak) or -sub (already in Keycloak) is required")
 	}
 
-	password, err := resolvePassword(*prompt)
-	if err != nil {
-		log.Fatalf("createuser: %v", err)
+	// No Keycloak account is created in -sub mode, so there is no password to set —
+	// don't prompt for one.
+	var password string
+	if *sub == "" {
+		var err error
+		if password, err = resolvePassword(*prompt); err != nil {
+			log.Fatalf("createuser: %v", err)
+		}
 	}
 
 	deps, err := buildDeps()
@@ -74,16 +90,21 @@ func main() {
 	// New users are created with the email as their Keycloak username; existing
 	// users are matched by email regardless of their stored username.
 	in := types.UserInput{
-		Username: *email, Email: *email, FirstName: *first, LastName: *last,
+		Sub: *sub, Username: *email, Email: *email, FirstName: *first, LastName: *last,
 		Password: password, Grants: grants,
 	}
 
-	ctx := context.Background()
-	sub, err := service.ProvisionUser(ctx, deps, in, grantedBy)
-	if err != nil {
-		log.Fatalf("createuser: provision %q: %v", in.Email, err)
+	target := *email
+	if target == "" {
+		target = *sub
 	}
-	log.Printf("provisioned %s (sub=%s) with %d grant(s)", in.Email, sub, len(in.Grants))
+
+	ctx := context.Background()
+	provisioned, err := service.ProvisionUser(ctx, deps, in, grantedBy)
+	if err != nil {
+		log.Fatalf("createuser: provision %q: %v", target, err)
+	}
+	log.Printf("provisioned %s (sub=%s) with %d grant(s)", target, provisioned, len(in.Grants))
 }
 
 // resolvePassword determines the password applied to every provisioned user.
