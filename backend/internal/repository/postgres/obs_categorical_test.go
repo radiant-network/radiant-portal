@@ -131,7 +131,7 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 	})
 }
 
-func Test_DeleteObsCategoricalByCaseID_OK(t *testing.T) {
+func Test_DeleteNonFetusObsCategoricalByCaseID_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: db})
@@ -141,11 +141,14 @@ func Test_DeleteObsCategoricalByCaseID_OK(t *testing.T) {
 
 		db.Exec(`INSERT INTO obs_categorical (id, case_id, patient_id, observation_code, coding_system, code_value, tenant_code) VALUES (100023, 100021, 1, 'phenotype', 'HPO', 'HP:0000001', 'radiant')`)
 		db.Exec(`INSERT INTO obs_categorical (id, case_id, patient_id, observation_code, coding_system, code_value, tenant_code) VALUES (100024, 100022, 1, 'phenotype', 'HPO', 'HP:0000002', 'radiant')`)
+		db.Exec(`INSERT INTO fetus (id, mother_id, life_status_code, sex_code, tenant_code) VALUES (100021, 1, 'alive', 'male', 'radiant')`)
+		db.Exec(`INSERT INTO obs_categorical (id, case_id, fetus_id, observation_code, coding_system, code_value, tenant_code) VALUES (100029, 100021, 100021, 'phenotype', 'HPO', 'HP:0000003', 'radiant')`)
 		t.Cleanup(func() {
-			db.Exec("DELETE FROM obs_categorical WHERE id IN (100023, 100024)")
+			db.Exec("DELETE FROM obs_categorical WHERE id IN (100023, 100024, 100029)")
+			db.Exec("DELETE FROM fetus WHERE id = 100021")
 		})
 
-		err := repo.DeleteObsCategoricalByCaseID(t.Context(), 100021)
+		err := repo.DeleteNonFetusObsCategoricalByCaseID(t.Context(), 100021)
 		assert.NoError(t, err)
 
 		deleted, err := repo.GetById(t.Context(), 100023)
@@ -155,6 +158,42 @@ func Test_DeleteObsCategoricalByCaseID_OK(t *testing.T) {
 		untouched, err := repo.GetById(t.Context(), 100024)
 		assert.NoError(t, err)
 		assert.NotNil(t, untouched)
+
+		// A fetus phenotype on the replaced case is not carried by the update payload, so it
+		// must survive the replace.
+		fetusObs, err := repo.GetById(t.Context(), 100029)
+		assert.NoError(t, err)
+		assert.NotNil(t, fetusObs)
+	})
+}
+
+func Test_CreateObservationCategorical_RejectsBothSubjectsSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateObservationCategorical(t.Context(), &ObservationCategorical{
+			CaseID:          1,
+			PatientID:       utils.IntPtr(1),
+			FetusID:         utils.IntPtr(1),
+			ObservationCode: "phenotype",
+			CodingSystem:    "HPO",
+			CodeValue:       "HP:0000001",
+			TenantCode:      "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
+	})
+}
+
+func Test_CreateObservationCategorical_RejectsNoSubjectSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateObservationCategorical(t.Context(), &ObservationCategorical{
+			CaseID:          1,
+			ObservationCode: "phenotype",
+			CodingSystem:    "HPO",
+			CodeValue:       "HP:0000001",
+			TenantCode:      "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
 	})
 }
 
