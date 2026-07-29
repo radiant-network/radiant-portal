@@ -22,7 +22,9 @@ func NewFetusRepository(db database.PostgresDB) *FetusRepository {
 
 func (r *FetusRepository) GetFetusById(ctx context.Context, fetusId int) (*Fetus, error) {
 	var fetus Fetus
-	if err := r.db.WithContext(ctx).Table(types.FetusTable.Name).First(&fetus, fetusId).Error; err != nil {
+	// fetus is tenant-scoped and fetusId comes from a batch payload: without the scope a batch
+	// could reference another tenant's fetus. No-op when no tenant is bound (the worker).
+	if err := r.db.WithContext(ctx).Table(types.FetusTable.Name).Scopes(WithTenant(ctx)).First(&fetus, fetusId).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching fetus: %w", err)
 		}

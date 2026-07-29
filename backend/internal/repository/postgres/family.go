@@ -33,9 +33,17 @@ func (r *FamilyRepository) GetFamilyById(ctx context.Context, familyId int) (*Fa
 }
 
 func (r *FamilyRepository) CreateFamily(ctx context.Context, family *Family) error {
+	if family == nil {
+		return fmt.Errorf("create family: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(family.FamilyMemberID, family.FetusID); err != nil {
+		return fmt.Errorf("create family for case %d: %w", family.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(family).Error
 }
 
-func (r *FamilyRepository) DeleteFamilyByCaseID(ctx context.Context, caseID int) error {
-	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&Family{}).Error
+// DeleteNonFetusFamilyByCaseID clears only the patient-owned rows. Fetus rows are not carried by
+// the update payload, so deleting them would drop the fetus from the case with no way to restore it.
+func (r *FamilyRepository) DeleteNonFetusFamilyByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ? AND fetus_id IS NULL", caseID).Delete(&Family{}).Error
 }

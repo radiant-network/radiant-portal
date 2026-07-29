@@ -33,9 +33,17 @@ func (r *ObservationStringRepository) GetById(ctx context.Context, observationId
 }
 
 func (r *ObservationStringRepository) CreateObservationString(ctx context.Context, observation *ObservationString) error {
+	if observation == nil {
+		return fmt.Errorf("create obs_string: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(observation.PatientID, observation.FetusID); err != nil {
+		return fmt.Errorf("create obs_string for case %d: %w", observation.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(observation).Error
 }
 
-func (r *ObservationStringRepository) DeleteObsStringByCaseID(ctx context.Context, caseID int) error {
-	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&ObservationString{}).Error
+// DeleteNonFetusObsStringByCaseID clears only the patient-owned rows, see
+// DeleteNonFetusFamilyByCaseID.
+func (r *ObservationStringRepository) DeleteNonFetusObsStringByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ? AND fetus_id IS NULL", caseID).Delete(&ObservationString{}).Error
 }

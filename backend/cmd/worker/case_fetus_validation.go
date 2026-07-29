@@ -66,26 +66,31 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsText {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "observations_text", &obsIndex)
 		res := fmt.Sprintf("create_case %d - fetus %d - observations_text %d", cr.Index, fetusIndex, obsIndex)
+		if obs == nil {
+			cr.addNullObservationError(res, path)
+			continue
+		}
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.ValidateStringField(obs.Value, "value", path+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 	}
 }
 
-func (cr *CaseValidationRecord) validateCaseFetuses() error {
+func (cr *CaseValidationRecord) validateCaseFetuses() {
 	for fetusIndex := range cr.Case.Fetuses {
+		// `dive` alone accepts a null array entry, so a payload of `"fetuses": [null]` binds
+		// fine and would nil-deref below. Reject it as a validation error instead.
+		if cr.Case.Fetuses[fetusIndex] == nil {
+			path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
+			res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+			cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: entry is null.", res), FetusInvalidField, path)
+			continue
+		}
 		cr.validateFetusSexCode(fetusIndex)
 		cr.validateFetusLifeStatusCode(fetusIndex)
 		cr.validateFetusAffectedStatusCode(fetusIndex)
 		cr.validateFetusObservationsCategorical(fetusIndex)
 		cr.validateFetusObservationsText(fetusIndex)
 	}
-	return nil
-}
-
-// exactlyOneSubjectSet mirrors the DB's subject_xor CHECK constraints: a clinical row belongs to
-// the mother or to one of her fetuses, never both or neither.
-func exactlyOneSubjectSet(patientID, fetusID *int) bool {
-	return (patientID != nil) != (fetusID != nil)
 }
 
 func dateISO8601ToTimePtr(d *types.DateISO8601) *time.Time {
@@ -131,9 +136,6 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 			AffectedStatusCode:        fb.AffectedStatusCode,
 			TenantCode:                sc.TenantCode,
 		}
-		if !exactlyOneSubjectSet(familyMember.FamilyMemberID, familyMember.FetusID) {
-			return fmt.Errorf("family row for fetus %d in create_case %d has an invalid subject (family_member_id and fetus_id must be mutually exclusive)", fetusIndex, cr.Index)
-		}
 		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
 			return fmt.Errorf("failed to persist family for fetus %d in create_case %d: %w", fetusIndex, cr.Index, err)
 		}
@@ -162,9 +164,6 @@ func persistFetusObservationsCategorical(ctx context.Context, sc *StorageContext
 			ExamCode:           utils.NilIfEmpty(o.ExamCode),
 			TenantCode:         sc.TenantCode,
 		}
-		if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-			return fmt.Errorf("observation categorical for fetus %d in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", fetusID, cr.Index)
-		}
 		if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
 			return fmt.Errorf("failed to persist observation categorical for fetus %d in create_case %d: %w", fetusID, cr.Index, err)
 		}
@@ -182,9 +181,6 @@ func persistFetusObservationsText(ctx context.Context, sc *StorageContext, cr *C
 			InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
 			ExamCode:           utils.NilIfEmpty(o.ExamCode),
 			TenantCode:         sc.TenantCode,
-		}
-		if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-			return fmt.Errorf("observation text for fetus %d in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", fetusID, cr.Index)
 		}
 		if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
 			return fmt.Errorf("failed to persist observation text for fetus %d in create_case %d: %w", fetusID, cr.Index, err)

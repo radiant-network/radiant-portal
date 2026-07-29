@@ -253,13 +253,16 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		return fmt.Errorf("failed to update case scalars: %w", err)
 	}
 
-	if err := sc.FamilyRepo.DeleteFamilyByCaseID(ctx, caseID); err != nil {
+	// The replace is scoped to patient-owned rows: UpdateCaseBatch carries no fetus, so a
+	// case-wide delete would drop a prenatal case's fetuses and their phenotypes with nothing
+	// to restore them from, and orphan the fetus rows themselves.
+	if err := sc.FamilyRepo.DeleteNonFetusFamilyByCaseID(ctx, caseID); err != nil {
 		return fmt.Errorf("failed to delete family for case %d: %w", caseID, err)
 	}
-	if err := sc.ObsCatRepo.DeleteObsCategoricalByCaseID(ctx, caseID); err != nil {
+	if err := sc.ObsCatRepo.DeleteNonFetusObsCategoricalByCaseID(ctx, caseID); err != nil {
 		return fmt.Errorf("failed to delete observations categorical for case %d: %w", caseID, err)
 	}
-	if err := sc.ObsStringRepo.DeleteObsStringByCaseID(ctx, caseID); err != nil {
+	if err := sc.ObsStringRepo.DeleteNonFetusObsStringByCaseID(ctx, caseID); err != nil {
 		return fmt.Errorf("failed to delete observations text for case %d: %w", caseID, err)
 	}
 	if err := sc.FamilyHistoryRepo.DeleteFamilyHistoryByCaseID(ctx, caseID); err != nil {

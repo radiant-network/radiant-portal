@@ -33,9 +33,17 @@ func (r *ObservationCategoricalRepository) GetById(ctx context.Context, observat
 }
 
 func (r *ObservationCategoricalRepository) CreateObservationCategorical(ctx context.Context, observation *ObservationCategorical) error {
+	if observation == nil {
+		return fmt.Errorf("create obs_categorical: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(observation.PatientID, observation.FetusID); err != nil {
+		return fmt.Errorf("create obs_categorical for case %d: %w", observation.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(observation).Error
 }
 
-func (r *ObservationCategoricalRepository) DeleteObsCategoricalByCaseID(ctx context.Context, caseID int) error {
-	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&ObservationCategorical{}).Error
+// DeleteNonFetusObsCategoricalByCaseID clears only the patient-owned rows, see
+// DeleteNonFetusFamilyByCaseID.
+func (r *ObservationCategoricalRepository) DeleteNonFetusObsCategoricalByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ? AND fetus_id IS NULL", caseID).Delete(&ObservationCategorical{}).Error
 }
