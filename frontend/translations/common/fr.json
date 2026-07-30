@@ -27,6 +27,38 @@
       "edit_aria": "Modifier le membre",
       "empty": "Aucun membre trouvé"
     },
+    "orgs": {
+      "title": "Organisations",
+      "count": "{{total}} organisations",
+      "subtitle": "Créez et modifiez les organisations.",
+      "add": "Ajouter une organisation",
+      "search_placeholder": "Rechercher par nom ou code",
+      "col": { "name": "Nom", "category": "Catégorie" },
+      "filter": { "category": "Catégorie" },
+      "edit_aria": "Modifier l'organisation",
+      "empty": "Aucune organisation trouvée"
+    },
+    "org": {
+      "add_title": "Ajouter une organisation",
+      "edit_title": "Modifier l'organisation",
+      "name": "Nom",
+      "code": "Code",
+      "code_hint": "Lettres minuscules, chiffres et traits de soulignement. Ne peut être modifié après la création.",
+      "code_locked_hint": "Le code ne peut être modifié après la création.",
+      "category": "Catégorie",
+      "category_placeholder": "Sélectionnez une catégorie",
+      "category_locked_hint": "La catégorie ne peut être modifiée après la création.",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "create": "Créer l'organisation",
+      "ok": { "created": "Organisation créée.", "updated": "Organisation mise à jour." }
+    },
+    "org_categories": {
+      "diagnostic_laboratory": "Laboratoire de diagnostic",
+      "healthcare_provider": "Établissement de santé",
+      "research_institute": "Institut de recherche",
+      "sequencing_center": "Centre de séquençage"
+    },
     "roles": {
       "scope": { "tenant": "Réseau", "org": "Organisation" },
       "tenant_admin": { "name": "Administrateur", "description": "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles." },
@@ -186,7 +218,9 @@
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
-        "invalid_email": "Saisissez une adresse courriel valide."
+        "invalid_email": "Saisissez une adresse courriel valide.",
+        "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
+        "code_duplicate": "Une organisation avec ce code existe déjà."
       }
     },
     "editor": {

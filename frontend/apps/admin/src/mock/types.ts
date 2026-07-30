@@ -11,10 +11,25 @@
 /** Scope of a permission (backend "action"): tenant-wide, or resolved per organization. */
 export type ActionScope = 'tenant' | 'org';
 
-/** An organization within a tenant. Codes are stored lowercase, displayed uppercase (CSS). */
+/**
+ * An organization category — one of the instance-wide seeded `organization_category` values. The
+ * `code` is a system id; the display label is i18n'd (`admin.org_categories.<code>`).
+ */
+export interface OrgCategory {
+  code: string;
+}
+
+/**
+ * An organization within a tenant. Codes are stored lowercase, displayed uppercase (CSS). Field
+ * names mirror the generated client's `OrganizationResponse` (`code`, `name`, `category_code`) so
+ * the swap to real types is a straight replacement. In production the list response also carries a
+ * server-localized `category_name`; the mock labels categories via interim i18n instead (see below).
+ */
 export interface Organization {
   code: string;
   name: string;
+  /** Category code (one of the seeded `organization_category` values). Immutable after creation. */
+  category_code: string;
 }
 
 /**

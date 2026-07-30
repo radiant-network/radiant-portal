@@ -1,4 +1,4 @@
-import type { ActionScope, AdminUser, Organization, Permission, Role, Tenant } from './types';
+import type { ActionScope, AdminUser, Organization, OrgCategory, Permission, Role, Tenant } from './types';
 
 /**
  * Seed data for the Admin UI prototype. Illustrative only — not wired to the backend.
@@ -9,12 +9,23 @@ import type { ActionScope, AdminUser, Organization, Permission, Role, Tenant } f
 
 export const MOCK_TENANT: Tenant = { code: 'cbtn', name: 'CBTN' };
 
+/**
+ * The instance-wide `organization_category` value set. Codes are system ids; labels are i18n'd
+ * (`admin.org_categories.<code>`). In production these come from `GET /organization-categories`.
+ */
+export const ORG_CATEGORIES: OrgCategory[] = [
+  { code: 'diagnostic_laboratory' },
+  { code: 'healthcare_provider' },
+  { code: 'research_institute' },
+  { code: 'sequencing_center' },
+];
+
 export const MOCK_ORGS: Organization[] = [
-  { code: 'chop', name: 'Children’s Hospital of Philadelphia' },
-  { code: 'clev', name: 'Cleveland Clinic' },
-  { code: 'bch', name: 'Boston Children’s Hospital' },
-  { code: 'mayo', name: 'Mayo Clinic' },
-  { code: 'ucsf', name: 'University of California, San Francisco' },
+  { code: 'chop', name: 'Children’s Hospital of Philadelphia', category_code: 'healthcare_provider' },
+  { code: 'clev', name: 'Cleveland Clinic', category_code: 'healthcare_provider' },
+  { code: 'bch', name: 'Boston Children’s Hospital', category_code: 'research_institute' },
+  { code: 'mayo', name: 'Mayo Clinic', category_code: 'sequencing_center' },
+  { code: 'ucsf', name: 'University of California, San Francisco', category_code: 'diagnostic_laboratory' },
 ];
 
 /** Permission (action) catalog with scope. Names/descriptions live in i18n, keyed by code. */

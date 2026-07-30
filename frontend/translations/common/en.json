@@ -27,6 +27,38 @@
       "edit_aria": "Edit member",
       "empty": "No members found"
     },
+    "orgs": {
+      "title": "Organizations",
+      "count": "{{total}} Organizations",
+      "subtitle": "Create and edit organizations.",
+      "add": "Add organization",
+      "search_placeholder": "Search by name or code",
+      "col": { "name": "Name", "category": "Category" },
+      "filter": { "category": "Category" },
+      "edit_aria": "Edit organization",
+      "empty": "No organizations found"
+    },
+    "org": {
+      "add_title": "Add organization",
+      "edit_title": "Edit organization",
+      "name": "Name",
+      "code": "Code",
+      "code_hint": "Lowercase letters, numbers, and underscores. Can't be changed after creation.",
+      "code_locked_hint": "The code can't be changed after creation.",
+      "category": "Category",
+      "category_placeholder": "Select a category",
+      "category_locked_hint": "The category can't be changed after creation.",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "create": "Create organization",
+      "ok": { "created": "Organization created.", "updated": "Organization updated." }
+    },
+    "org_categories": {
+      "diagnostic_laboratory": "Diagnostic Laboratory",
+      "healthcare_provider": "Healthcare Provider",
+      "research_institute": "Research Institute",
+      "sequencing_center": "Sequencing Center"
+    },
     "roles": {
       "scope": { "tenant": "Network", "org": "Organization" },
       "tenant_admin": { "name": "Administrator", "description": "Full administrative access to this network: manage members, organizations, and roles." },
@@ -186,7 +218,9 @@
         "required": "This field is required",
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
-        "invalid_email": "Enter a valid email."
+        "invalid_email": "Enter a valid email.",
+        "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
+        "code_duplicate": "An organization with this code already exists."
       }
     },
     "editor": {

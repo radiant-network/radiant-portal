@@ -26,7 +26,7 @@ type AdminSection = {
 
 export const ADMIN_SECTIONS: AdminSection[] = [
   { id: 'users', labelKey: 'admin.nav.users', icon: Users, enabled: true },
-  { id: 'organizations', labelKey: 'admin.nav.organizations', icon: Building2, enabled: false },
+  { id: 'organizations', labelKey: 'admin.nav.organizations', icon: Building2, enabled: true },
   { id: 'roles', labelKey: 'admin.nav.roles', icon: Shield, enabled: false },
 ];
 
