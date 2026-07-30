@@ -16,9 +16,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictStr
 from typing import List
-from typing_extensions import Annotated
 from radiant_python.models.action_response import ActionResponse
 
 from radiant_python.api_client import ApiClient, RequestSerialized
@@ -42,7 +40,6 @@ class ActionsApi:
     @validate_call
     def list_actions(
         self,
-        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -58,10 +55,8 @@ class ActionsApi:
     ) -> List[ActionResponse]:
         """List the authorization action catalog
 
-        Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+        Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
 
-        :param tenant: Tenant code (required)
-        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -85,7 +80,6 @@ class ActionsApi:
         """ # noqa: E501
 
         _param = self._list_actions_serialize(
-            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -95,7 +89,6 @@ class ActionsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[ActionResponse]",
             '401': "ApiError",
-            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -112,7 +105,6 @@ class ActionsApi:
     @validate_call
     def list_actions_with_http_info(
         self,
-        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -128,10 +120,8 @@ class ActionsApi:
     ) -> ApiResponse[List[ActionResponse]]:
         """List the authorization action catalog
 
-        Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+        Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
 
-        :param tenant: Tenant code (required)
-        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -155,7 +145,6 @@ class ActionsApi:
         """ # noqa: E501
 
         _param = self._list_actions_serialize(
-            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -165,7 +154,6 @@ class ActionsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[ActionResponse]",
             '401': "ApiError",
-            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -182,7 +170,6 @@ class ActionsApi:
     @validate_call
     def list_actions_without_preload_content(
         self,
-        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -198,10 +185,8 @@ class ActionsApi:
     ) -> RESTResponseType:
         """List the authorization action catalog
 
-        Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+        Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
 
-        :param tenant: Tenant code (required)
-        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -225,7 +210,6 @@ class ActionsApi:
         """ # noqa: E501
 
         _param = self._list_actions_serialize(
-            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -235,7 +219,6 @@ class ActionsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[ActionResponse]",
             '401': "ApiError",
-            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -247,7 +230,6 @@ class ActionsApi:
 
     def _list_actions_serialize(
         self,
-        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -269,8 +251,6 @@ class ActionsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if tenant is not None:
-            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -293,7 +273,7 @@ class ActionsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/{tenant}/actions',
+            resource_path='/actions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

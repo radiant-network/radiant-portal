@@ -6086,17 +6086,13 @@ export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
 export const ActionsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+         * Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
          * @summary List the authorization action catalog
-         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listActions: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('listActions', 'tenant', tenant)
-            const localVarPath = `/{tenant}/actions`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+        listActions: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/actions`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6134,14 +6130,13 @@ export const ActionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ActionsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+         * Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
          * @summary List the authorization action catalog
-         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listActions(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ActionResponse>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listActions(tenant, options);
+        async listActions(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ActionResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listActions(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ActionsApi.listActions']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6157,14 +6152,13 @@ export const ActionsApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = ActionsApiFp(configuration)
     return {
         /**
-         * Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+         * Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
          * @summary List the authorization action catalog
-         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listActions(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ActionResponse>> {
-            return localVarFp.listActions(tenant, options).then((request) => request(axios, basePath));
+        listActions(options?: RawAxiosRequestConfig): AxiosPromise<Array<ActionResponse>> {
+            return localVarFp.listActions(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6177,15 +6171,14 @@ export const ActionsApiFactory = function (configuration?: Configuration, basePa
  */
 export class ActionsApi extends BaseAPI {
     /**
-     * Returns the global action catalog with localized labels, used to build the role-editing action picker. Requires the `can_manage_role` action.
+     * Returns the global action catalog, used to build the role-editing action picker. Not tenant-scoped; any authenticated user may read it.
      * @summary List the authorization action catalog
-     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ActionsApi
      */
-    public listActions(tenant: string, options?: RawAxiosRequestConfig) {
-        return ActionsApiFp(this.configuration).listActions(tenant, options).then((request) => request(this.axios, this.basePath));
+    public listActions(options?: RawAxiosRequestConfig) {
+        return ActionsApiFp(this.configuration).listActions(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

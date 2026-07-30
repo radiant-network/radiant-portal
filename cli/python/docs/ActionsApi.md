@@ -4,16 +4,16 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**list_actions**](ActionsApi.md#list_actions) | **GET** /{tenant}/actions | List the authorization action catalog
+[**list_actions**](ActionsApi.md#list_actions) | **GET** /actions | List the authorization action catalog
 
 
 # **list_actions**
-> List[ActionResponse] list_actions(tenant)
+> List[ActionResponse] list_actions()
 
 List the authorization action catalog
 
-Returns the global action catalog with localized labels, used to build the
-role-editing action picker. Requires the `can_manage_role` action.
+Returns the global action catalog, used to build the role-editing action picker.
+Not tenant-scoped; any authenticated user may read it.
 
 ### Example
 
@@ -45,11 +45,10 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.ActionsApi(api_client)
-    tenant = 'tenant_example' # str | Tenant code
 
     try:
         # List the authorization action catalog
-        api_response = api_instance.list_actions(tenant)
+        api_response = api_instance.list_actions()
         print("The response of ActionsApi->list_actions:\n")
         pprint(api_response)
     except Exception as e:
@@ -60,10 +59,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **tenant** | **str**| Tenant code | 
+This endpoint does not need any parameter.
 
 ### Return type
 
@@ -84,7 +80,6 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **401** | Unauthorized |  -  |
-**403** | Forbidden |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
