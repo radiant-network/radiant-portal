@@ -105,7 +105,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
 
 	privateRoutes.GET("/value_sets/:type", server.ListValueSetHandler(repoValueSets))
-	// Actions are a global catalog (no tenant_code), so the list is a global authenticated route.
 	privateRoutes.GET("/actions", server.ListActionsHandler(repoAuth))
 
 	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
