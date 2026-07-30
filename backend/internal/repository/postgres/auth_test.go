@@ -145,6 +145,25 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	})
 }
 
+func Test_AuthRepository_ListActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		actions, err := repo.ListActions(t.Context())
+		assert.NoError(t, err)
+		assert.Len(t, actions, 11) // 8 from migration 000009 + 3 from 000018
+
+		byCode := map[string]types.ActionResponse{}
+		for _, a := range actions {
+			byCode[a.Code] = a
+		}
+		mo := byCode["can_manage_org"]
+		assert.Equal(t, "tenant", mo.Scope)
+		assert.Equal(t, "Manage organizations", mo.Name)
+		assert.Equal(t, "Create and edit organizations in the network.", mo.Description)
+	})
+}
+
 func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})

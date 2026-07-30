@@ -1,5 +1,17 @@
 components:
   schemas:
+    ActionResponse:
+      description: Action from the authorization catalog.
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+        scope:
+          type: string
+      type: object
     Aggregation:
       description: Aggregation represents an aggregation result
       properties:
@@ -8249,6 +8261,44 @@ paths:
       summary: Get cases filters for germline variant entity
       tags:
       - variant
+  /actions:
+    get:
+      description: |-
+        Returns the global action catalog, used to build the role-editing action picker.
+        Not tenant-scoped; any authenticated user may read it.
+      operationId: listActions
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActionResponse'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the authorization action catalog
+      tags:
+      - actions
   /auth/me:
     get:
       description: |-
