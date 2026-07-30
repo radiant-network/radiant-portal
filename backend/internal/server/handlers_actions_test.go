@@ -23,8 +23,8 @@ func (m *mockActionsReader) ListActions(_ context.Context) ([]types.ActionRespon
 
 func serveListActions(repo actionsReader) *httptest.ResponseRecorder {
 	router := gin.Default()
-	router.GET("/:tenant/actions", ListActionsHandler(repo))
-	req, _ := http.NewRequest("GET", "/radiant/actions", nil)
+	router.GET("/actions", ListActionsHandler(repo))
+	req, _ := http.NewRequest("GET", "/actions", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	return w

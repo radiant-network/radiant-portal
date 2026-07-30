@@ -188,12 +188,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/actions",
+              "raw": "{{radiant-api-url}}/actions",
               "host": [
                 "{{radiant-api-url}}"
               ],
               "path": [
-                "{{tenant}}",
                 "actions"
               ]
             }

@@ -105,6 +105,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
 
 	privateRoutes.GET("/value_sets/:type", server.ListValueSetHandler(repoValueSets))
+	// Actions are a global catalog (no tenant_code), so the list is a global authenticated route.
+	privateRoutes.GET("/actions", server.ListActionsHandler(repoAuth))
 
 	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
 	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.
@@ -207,9 +209,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	// Organizations: the list is referential (any tenant member); create/edit are gated per-route
 	// by can_manage_org. No /admin path segment — gating is the RequireAction on each write route.
-	// Actions catalog (global data, tenant-gated): the role-editing picker, gated by can_manage_role.
-	tenantRoutes.GET("/actions", requireAction(types.ActionManageRole), server.ListActionsHandler(repoAuth))
-
 	organizationsGroup := tenantRoutes.Group("/organizations")
 	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
 	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
