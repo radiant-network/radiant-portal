@@ -7,7 +7,8 @@ import { z } from 'zod';
 export const userFormSchema = z.object({
   firstName: z.string().min(1, { message: 'required' }),
   lastName: z.string().min(1, { message: 'required' }),
-  email: z.string().min(1, { message: 'required' }),
+  // min(1) first so an empty field reads "required"; .email() catches a malformed address.
+  email: z.string().min(1, { message: 'required' }).email({ message: 'invalid_email' }),
   assignments: z.array(
     z.object({
       roleCode: z.string(),

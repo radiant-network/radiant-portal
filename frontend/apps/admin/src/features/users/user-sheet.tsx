@@ -18,6 +18,7 @@ import {
 } from '@/components/base/shadcn/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 import { ADMIN_ROLE, MEMBER_ROLE, MOCK_TENANT, roleIsOrgScoped, ROLES_BY_CODE } from '../../mock/data';
 import type { AdminUser, Role } from '../../mock/types';
@@ -69,17 +70,22 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
   // Shared "view permissions" dialog, owned here so both the role boxes and the baseline line
   // (member role) can open it.
   const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
+  // Submit buttons stay enabled; on the first submit attempt we reveal inline validation instead.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const hasAdmin = assignments.some(a => a.roleCode === 'tenant_admin');
   // Self-guard: you can't grant yourself Administrator (grant-only — if already held it stays
   // toggleable so removal still routes through the last-admin veto below).
   const adminGrantLocked = isSelf && !hasAdmin;
 
-  // Org-required: every checked org-scoped role must target ≥1 organization (or all).
-  const orgError = assignments.some(a => {
-    const role = ROLES_BY_CODE[a.roleCode];
-    return role && roleIsOrgScoped(role) && a.orgCodes.length === 0;
-  });
+  // Org-required: every checked org-scoped role must target ≥1 organization (or all). Offending
+  // roles surface an inline error on their picker once a submit has been attempted.
+  const orgErrorRoleCodes = assignments
+    .filter(a => {
+      const role = ROLES_BY_CODE[a.roleCode];
+      return role && roleIsOrgScoped(role) && a.orgCodes.length === 0;
+    })
+    .map(a => a.roleCode);
 
   const otherAdminCount = users.filter(
     u => u.id !== user?.id && u.roles.some(r => r.roleCode === 'tenant_admin'),
@@ -146,11 +152,24 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
     });
   };
 
-  const onSubmit = (values: UserFormValues) => {
-    if (orgError) return;
+  // Identity fields passed zod validation. Still block on a missing org (revealing the inline error);
+  // an unchanged edit is a no-op that just closes (no save, no success toast).
+  const onValid = (values: UserFormValues) => {
+    if (orgErrorRoleCodes.length > 0) {
+      setSubmitAttempted(true);
+      return;
+    }
+    if (isEdit && !form.formState.isDirty) {
+      onOpenChange(false);
+      return;
+    }
     onSave(values, user?.id);
     onOpenChange(false);
   };
+
+  // Identity validation failed — RHF shows the field messages and focuses the first invalid input.
+  // Reveal any org-picker errors too, so one click surfaces everything.
+  const onInvalid = () => setSubmitAttempted(true);
 
   // Footer left slot: Delete in edit mode; on your own account it's disabled with a self-guard tooltip
   // (wrapped in a focusable span so the tooltip still fires — disabled controls emit no hover/focus events).
@@ -194,7 +213,7 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
         }}
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
+          <form onSubmit={form.handleSubmit(onValid, onInvalid)} className="flex h-full flex-col overflow-hidden">
             <SheetHeader className="space-y-0 border-b px-6 py-4">
               <SheetTitle className="text-lg">
                 {isEdit ? t('admin.user.edit_title') : t('admin.user.add_title')}
@@ -245,11 +264,11 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                       control={form.control}
                       name="firstName"
                       schema={userFormSchema}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem className="flex-1">
                           <FormLabel>{t('admin.user.first_name')}</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} className={cn(fieldState.error && 'border-destructive')} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -258,11 +277,11 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                       control={form.control}
                       name="lastName"
                       schema={userFormSchema}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem className="flex-1">
                           <FormLabel>{t('admin.user.last_name')}</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} className={cn(fieldState.error && 'border-destructive')} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -272,11 +291,11 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                     control={form.control}
                     name="email"
                     schema={userFormSchema}
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>{t('admin.user.email')}</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} />
+                          <Input type="email" {...field} className={cn(fieldState.error && 'border-destructive')} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -321,6 +340,7 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                   value={assignments}
                   onChange={handleAssignmentsChange}
                   onViewPermissions={setPermissionsRole}
+                  orgErrorRoleCodes={submitAttempted ? orgErrorRoleCodes : []}
                 />
               </div>
             </div>
@@ -331,9 +351,7 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   {t('admin.user.cancel')}
                 </Button>
-                <Button type="submit" disabled={orgError || (isEdit && !form.formState.isDirty)}>
-                  {isEdit ? t('admin.user.save') : t('admin.user.create')}
-                </Button>
+                <Button type="submit">{isEdit ? t('admin.user.save') : t('admin.user.create')}</Button>
               </div>
             </SheetFooter>
 

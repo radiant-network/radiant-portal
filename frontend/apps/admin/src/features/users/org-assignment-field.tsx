@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { Switch } from '@/components/base/shadcn/switch';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 import { MOCK_ORGS } from '../../mock/data';
 
@@ -15,10 +16,12 @@ type OrgAssignmentFieldProps = {
   /** Selected org codes. `['*']` = all organizations. */
   value: string[];
   onChange: (orgCodes: string[]) => void;
+  /** Required-org error state (red border + message). Set once the user has attempted to submit. */
+  error?: boolean;
 };
 
 /** Inline org picker for an org-scoped role: a searchable multi-select + an "All organizations" toggle. */
-export default function OrgAssignmentField({ value, onChange }: OrgAssignmentFieldProps) {
+export default function OrgAssignmentField({ value, onChange, error = false }: OrgAssignmentFieldProps) {
   const { t } = useI18n();
   const allSelected = value.includes(ALL_ORGS);
 
@@ -50,6 +53,7 @@ export default function OrgAssignmentField({ value, onChange }: OrgAssignmentFie
             openOnFocus
             hidePlaceholderWhenSelected
             wrapBadges
+            className={cn(error && 'border-destructive')}
             inputProps={showSearchIcon ? { className: 'pl-8' } : undefined}
           />
         </div>
@@ -62,6 +66,7 @@ export default function OrgAssignmentField({ value, onChange }: OrgAssignmentFie
         />
         {t('admin.user.all_orgs')}
       </label>
+      {error && <p className="text-sm text-destructive">{t('admin.user.err.org_required')}</p>}
     </div>
   );
 }

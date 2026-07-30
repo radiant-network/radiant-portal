@@ -21,6 +21,8 @@ type RoleBoxProps = {
   disabled?: boolean;
   /** Tooltip text explaining why the box is locked; shown on hover/focus when `disabled`. */
   disabledReason?: string;
+  /** Org-scoped role checked with no org selected, after a submit attempt → error state on the picker. */
+  orgError?: boolean;
 };
 
 /**
@@ -37,6 +39,7 @@ export default function RoleBox({
   onViewPermissions,
   disabled = false,
   disabledReason,
+  orgError = false,
 }: RoleBoxProps) {
   const { t } = useI18n();
   const scopes = getRoleScopes(role);
@@ -94,7 +97,7 @@ export default function RoleBox({
       {/* Org picker, indented to align under the role name (label padding + checkbox width + gap). */}
       {showOrgPicker && (
         <div className="pb-4 pl-11 pr-4">
-          <OrgAssignmentField value={orgCodes} onChange={onOrgCodesChange} />
+          <OrgAssignmentField value={orgCodes} onChange={onOrgCodesChange} error={orgError} />
         </div>
       )}
     </div>

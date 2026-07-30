@@ -185,7 +185,8 @@
       "errors": {
         "required": "This field is required",
         "min_2": "Min 2 characters",
-        "max_50": "Max 50 characters"
+        "max_50": "Max 50 characters",
+        "invalid_email": "Enter a valid email."
       }
     },
     "editor": {

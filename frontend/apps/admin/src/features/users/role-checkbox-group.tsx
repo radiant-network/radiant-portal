@@ -13,13 +13,20 @@ type RoleCheckboxGroupProps = {
    * baseline line can reuse the same dialog for the implicit `member` role.
    */
   onViewPermissions: (role: Role) => void;
+  /** Codes of org-scoped roles that are checked but missing an org, after a submit attempt. */
+  orgErrorRoleCodes?: string[];
 };
 
 /**
  * The "Member roles" box group: one selectable box per additive role (everything except the implicit
  * `member` and the promoted Administrator). Checking an org-scoped role reveals its inline org picker.
  */
-export default function RoleCheckboxGroup({ value, onChange, onViewPermissions }: RoleCheckboxGroupProps) {
+export default function RoleCheckboxGroup({
+  value,
+  onChange,
+  onViewPermissions,
+  orgErrorRoleCodes = [],
+}: RoleCheckboxGroupProps) {
   const toggleRole = (role: Role, checked: boolean) => {
     if (checked) {
       onChange([...value, { roleCode: role.code, orgCodes: [] }]);
@@ -45,6 +52,7 @@ export default function RoleCheckboxGroup({ value, onChange, onViewPermissions }
             onToggle={checked => toggleRole(role, checked)}
             onOrgCodesChange={orgCodes => setOrgCodes(role.code, orgCodes)}
             onViewPermissions={() => onViewPermissions(role)}
+            orgError={orgErrorRoleCodes.includes(role.code)}
           />
         );
       })}
