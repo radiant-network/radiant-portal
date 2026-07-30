@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import CheckboxGroupField, { CheckboxGroupFieldItem } from '@/components/base/checkboxes/checkbox-group-field';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Label } from '@/components/base/shadcn/label';
+import { Separator } from '@/components/base/shadcn/separator';
 import { Switch } from '@/components/base/shadcn/switch';
 
 import { StorySection, StoryShowcase } from '../story-section';
@@ -42,6 +43,7 @@ const disabledOptionsWithExtraContent: CheckboxGroupFieldItem[] = [
     disabled: true,
     extraContent: (
       <div className="flex flex-col gap-2">
+        <Separator style={{ marginTop: '16px' }} />
         <span className="text-sm font-medium text-foreground">
           Extra content <span className="text-destructive">*</span>
         </span>
@@ -63,11 +65,11 @@ const optionsWithExtraTitle: CheckboxGroupFieldItem[] = [
     label: 'Option 1',
     description: 'This is option 1',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
         <Badge variant="violet">WGS</Badge>
-      </>
+      </div>
     ),
   },
   {
@@ -75,10 +77,10 @@ const optionsWithExtraTitle: CheckboxGroupFieldItem[] = [
     label: 'Option 2',
     description: 'This is option 2',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="amber">Beta</Badge>
         <Badge variant="cyan">CNV</Badge>
-      </>
+      </div>
     ),
   },
 ];
@@ -89,14 +91,14 @@ const optionsWithManyExtraTitleBadges: CheckboxGroupFieldItem[] = [
     label: 'Option 1',
     description: 'This is option 1',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5" style={{ width: 160 }}>
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
         <Badge variant="violet">WGS</Badge>
         <Badge variant="cyan">CNV</Badge>
         <Badge variant="amber">Beta</Badge>
         <Badge variant="neutral">Deprecated</Badge>
-      </>
+      </div>
     ),
   },
 ];
@@ -114,13 +116,14 @@ const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
       </>
     ),
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
-      </>
+      </div>
     ),
     extraContent: (
       <div className="flex flex-col gap-2">
+        <Separator style={{ marginTop: '16px' }} />
         <span className="text-sm font-medium text-foreground">
           Extra content <span className="text-destructive">*</span>
         </span>
@@ -225,9 +228,8 @@ export const AllVariants: Story = {
       <StorySection
         title="Extra title"
         description={
-          'Extra title sits at the right of the label and description, vertically centered. With align="end" it ' +
-          'stays between the text and the checkbox. When the content is too wide for the item, it wraps onto ' +
-          'several lines, and the label and description column keeps at least half the width.'
+          'Extra title is a generic slot at the right of the label and description — the content brings its own ' +
+          'layout and its own width. With align="end" it stays between the text and the checkbox.'
         }
       >
         <div className="flex gap-20">
@@ -246,13 +248,17 @@ export const AllVariants: Story = {
       <StorySection
         title="Extra content"
         description={
-          'Extra content is revealed under the description once the item is selected. The whole item is a click ' +
-          'target, but nested interactive controls — a link in the description, a switch in the extra content — ' +
-          'keep their own behaviour.'
+          'Extra content is a generic slot revealed under the label, description and extra title once the item ' +
+          'is selected, and spans the same width — the content brings its own layout.'
         }
       >
-        <div style={{ width: 420 }}>
-          <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} />
+        <div className="flex gap-20">
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} />
+          </div>
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} align="end" />
+          </div>
         </div>
       </StorySection>
     </StoryShowcase>
