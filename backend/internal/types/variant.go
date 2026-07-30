@@ -135,8 +135,9 @@ type VariantInternalFrequencies struct {
 }
 
 var VariantTable = Table{
-	Name:  "snv__variant",
-	Alias: "v",
+	Name:      "snv__variant",
+	Alias:     "v",
+	PerTenant: true,
 }
 
 var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)

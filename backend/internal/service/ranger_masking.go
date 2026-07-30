@@ -80,10 +80,12 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 		return fmt.Errorf("ranger: ensure row-filter policy %q: %w", authRowFilterPolicy, err)
 	}
 
-	// Cross-tenant reference/genomic data (variants, genes, HPO/MONDO, frequencies,
-	// staging_sequencing_experiment, …) lives in the shared base database, which per-tenant
-	// reads join (types.SharedDatabase). These are base tables (Ranger-enforced, unlike the
-	// tenant views), non-PII, and readable by every tenant user, so grant the marker role SELECT.
+	// Cross-tenant reference/annotation data (snv__consequence, genes, HPO/MONDO, external
+	// frequencies, staging_sequencing_experiment, …) lives in the shared base database, which
+	// per-tenant reads join (types.SharedDatabase). These are base tables (Ranger-enforced,
+	// unlike the tenant views), non-PII, and readable by every tenant user, so grant the marker
+	// role SELECT. snv__variant is *not* here — it is per-tenant, covered by the tenant DB
+	// grant in EnsureTenantRangerConfig.
 	if err := ranger.EnsureAccessPolicy(ctx, sharedAccessPolicy, []string{types.SharedDatabase}, []string{"*"}, roles); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", sharedAccessPolicy, err)
 	}

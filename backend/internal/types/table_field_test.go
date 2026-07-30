@@ -47,9 +47,9 @@ func Test_Table_TenantQualifiedName_PerTenant(t *testing.T) {
 
 func Test_Table_TenantQualifiedName_Shared(t *testing.T) {
 	t.Parallel()
-	tbl := Table{Name: "snv__variant"}
-	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "snv__variant")
-	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "tenant1")), "radiant.snv__variant")
+	tbl := Table{Name: "snv__consequence"}
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "snv__consequence")
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "tenant1")), "radiant.snv__consequence")
 }
 
 func Test_Table_In_FederationSchemaMatchesFederationName(t *testing.T) {
