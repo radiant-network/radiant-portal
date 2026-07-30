@@ -106,11 +106,12 @@ export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgS
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:w-[480px] sm:max-w-[480px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onValid)} className="flex h-full flex-col overflow-hidden">
-            <SheetHeader className="space-y-0 border-b px-6 py-4">
+            <SheetHeader className="space-y-1.5 border-b px-6 py-4">
               <SheetTitle className="text-lg">
                 {isEdit ? t('admin.org.edit_title') : t('admin.org.add_title')}
               </SheetTitle>
-              <SheetDescription className="sr-only">{isEdit ? org!.name : t('admin.org.add_title')}</SheetDescription>
+              {/* Visible one-liner orienting the admin: orgs are the scope roles are assigned at. */}
+              <SheetDescription>{t('admin.org.description')}</SheetDescription>
             </SheetHeader>
 
             <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
@@ -133,7 +134,6 @@ export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgS
                 <div className="flex flex-col gap-2.5">
                   <FormLabel className="text-foreground">{t('admin.org.code')}</FormLabel>
                   <Input value={org!.code} readOnly disabled className="uppercase" />
-                  <p className="text-sm text-muted-foreground">{t('admin.org.code_locked_hint')}</p>
                 </div>
               ) : (
                 <FormField
@@ -165,7 +165,6 @@ export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgS
                 <div className="flex flex-col gap-2.5">
                   <FormLabel className="text-foreground">{t('admin.org.category')}</FormLabel>
                   <Input value={currentCategoryLabel} readOnly disabled />
-                  <p className="text-sm text-muted-foreground">{t('admin.org.category_locked_hint')}</p>
                 </div>
               ) : (
                 <FormField
@@ -189,6 +188,7 @@ export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgS
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-sm text-muted-foreground">{t('admin.org.category_hint')}</p>
                     </FormItem>
                   )}
                 />
