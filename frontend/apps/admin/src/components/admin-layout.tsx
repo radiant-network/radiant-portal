@@ -14,7 +14,7 @@ type AdminLayoutProps = {
 };
 
 /**
- * Admin shell: page header ("Admin Settings - {tenant}") + section nav + content area.
+ * Admin shell: page header ("{tenant} — Administration") + section nav + content area.
  * On desktop the nav is a left sidebar; on mobile it collapses to a dropdown select.
  * The global portal navbar (tenant switcher, Cases/Files/Admin) is the portal shell and is not
  * part of this screen — it's rendered by the portal once these routes are wired.

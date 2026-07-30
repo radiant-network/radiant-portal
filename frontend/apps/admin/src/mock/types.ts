@@ -34,7 +34,10 @@ export interface Permission {
 export interface Role {
   /** System identifier, not translated (e.g. `tenant_admin`). */
   code: string;
-  /** Display label (e.g. "Tenant Admin"). */
+  /**
+   * Display label (e.g. "Administrator"). Interim: the UI now renders role names from i18n
+   * (`admin.roles.<code>.name`); this field is dropped once server-provided labels land.
+   */
   label: string;
   /** Locked default role vs. custom role. */
   isDefault: boolean;
