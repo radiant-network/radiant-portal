@@ -35,7 +35,7 @@ const CommandDialog = ({ children, ...props }: DialogProps) => (
 
 const CommandInputVariants = tv({
   slots: {
-    base: 'flex h-9 items-center px-3 bg-background rounded-md border',
+    base: 'flex h-9 items-center px-3 bg-background rounded-md border has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:focus-within:border-destructive has-[[aria-invalid=true]]:focus-within:ring-destructive/50',
   },
   variants: {
     variant: {

@@ -94,6 +94,9 @@ export interface MultipleSelectorProps {
    * "+n" overflow badge. Default false (unchanged behavior).
    */
   wrapBadges?: boolean;
+
+  /** Set by `FormControl` when the field is in error, turns the control red. */
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }
 
 export interface MultipleSelectorRef {

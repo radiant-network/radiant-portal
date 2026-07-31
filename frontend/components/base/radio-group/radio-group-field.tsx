@@ -23,6 +23,12 @@ export const radioGroupFieldVariants = tv({
         itemContainer: 'flex items-start gap-3 flex-row-reverse',
       },
     },
+    invalid: {
+      true: {
+        label: 'text-destructive',
+        boxChecked: 'border-destructive bg-alert-error/20',
+      },
+    },
   },
   defaultVariants: {
     align: 'start',
@@ -35,18 +41,39 @@ type RadioGroupFieldProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrim
     box?: boolean;
   };
 
-function RadioGroupField({ align = 'start', className, data, box, ...props }: RadioGroupFieldProps) {
-  const styles = radioGroupFieldVariants({ align });
-  const [selectedValue, setSelectedValue] = useState<string | undefined>(props.defaultValue);
+function RadioGroupField({
+  align = 'start',
+  className,
+  data,
+  box,
+  value: valueProp,
+  defaultValue,
+  onValueChange,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: RadioGroupFieldProps) {
+  const invalid = ariaInvalid === true || ariaInvalid === 'true';
+  const styles = radioGroupFieldVariants({ align, invalid });
+  const [uncontrolledValue, setUncontrolledValue] = useState<string | undefined>(defaultValue);
+
+  const isControlled = valueProp !== undefined;
+  const selectedValue = isControlled ? valueProp : uncontrolledValue;
+
+  const handleValueChange = (nextValue: string) => {
+    if (!isControlled) {
+      setUncontrolledValue(nextValue);
+    }
+    onValueChange?.(nextValue);
+  };
 
   return (
     <div className={styles.base({ className })}>
       <RadioGroup
-        onValueChange={value => {
-          setSelectedValue(value);
-          props.onValueChange?.(value);
-        }}
         {...props}
+        aria-invalid={ariaInvalid}
+        value={valueProp}
+        defaultValue={defaultValue}
+        onValueChange={handleValueChange}
       >
         {data.map(item => {
           const isChecked = selectedValue === item.id;
@@ -62,7 +89,7 @@ function RadioGroupField({ align = 'start', className, data, box, ...props }: Ra
               )}
             >
               <div className={styles.itemContainer()}>
-                <RadioGroupItem id={item.id} value={item.id} />
+                <RadioGroupItem id={item.id} value={item.id} aria-invalid={ariaInvalid} />
                 <div className="flex flex-col flex-1 gap-1.5 pt-0.5">
                   <span className={styles.label()}>{item.label}</span>
                   {item.description && <span className={styles.description()}>{item.description}</span>}

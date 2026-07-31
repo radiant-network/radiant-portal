@@ -75,15 +75,15 @@ configuration = radiant_python.Configuration(
 # Enter a context with an instance of the API client
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = radiant_python.AuthApi(api_client)
+    api_instance = radiant_python.ActionsApi(api_client)
 
     try:
-        # Get the caller's effective authorization
-        api_response = api_instance.get_me()
-        print("The response of AuthApi->get_me:\n")
+        # List the authorization action catalog
+        api_response = api_instance.list_actions()
+        print("The response of ActionsApi->list_actions:\n")
         pprint(api_response)
     except ApiException as e:
-        print("Exception when calling AuthApi->get_me: %s\n" % e)
+        print("Exception when calling ActionsApi->list_actions: %s\n" % e)
 
 ```
 
@@ -93,6 +93,7 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*ActionsApi* | [**list_actions**](docs/ActionsApi.md#list_actions) | **GET** /actions | List the authorization action catalog
 *AuthApi* | [**get_me**](docs/AuthApi.md#get_me) | **GET** /auth/me | Get the caller&#39;s effective authorization
 *BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /{tenant}/batches/{batchId} | Retrieve a batch by ID
 *CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /{tenant}/cases/autocomplete | Get AutocompleteResult list of matching prefix
@@ -184,6 +185,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [ActionResponse](docs/ActionResponse.md)
  - [Aggregation](docs/Aggregation.md)
  - [AggregationBodyWithSqon](docs/AggregationBodyWithSqon.md)
  - [ApiError](docs/ApiError.md)

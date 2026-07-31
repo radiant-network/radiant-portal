@@ -1,4 +1,4 @@
-import { type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type AriaAttributes, type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
 
@@ -31,6 +31,8 @@ export type AutoCompleteProps<T extends Option> = {
   leftAddon?: ReactNode;
   /** Minimum length to consider a search has started. @default 0 */
   minSearchLength?: number;
+  /** Set by `FormControl` when the field is in error, turns the control red. */
+  'aria-invalid'?: AriaAttributes['aria-invalid'];
 };
 
 export function getSelectedOptionByValue<T extends Option>(value: string | undefined, options: T[]): T | undefined {
@@ -53,6 +55,7 @@ export const AutoComplete = <T extends Option>({
   loading,
   leftAddon,
   minSearchLength = 0,
+  'aria-invalid': ariaInvalid,
 }: AutoCompleteProps<T>) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useI18n();
@@ -153,9 +156,10 @@ export const AutoComplete = <T extends Option>({
       // based on the custom optionFilterProp
       shouldFilter={false}
     >
-      <div className="w-full relative shadow-xs outline-none focus-within:ring-ring/50 focus-within:ring-[3px] rounded-md">
+      <div className="w-full relative shadow-xs outline-none focus-within:ring-ring/50 focus-within:ring-[3px] rounded-md has-[[aria-invalid=true]]:focus-within:ring-destructive/50">
         <CommandInput
           ref={inputRef}
+          aria-invalid={ariaInvalid}
           value={inputValue}
           onValueChange={
             loading

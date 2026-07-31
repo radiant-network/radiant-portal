@@ -132,6 +132,7 @@ const RichTextEditor = ({
     <div
       className={cn(
         'shadow-xs rounded-md bg-background border border-input focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] overflow-hidden',
+        'has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:focus-within:border-destructive has-[[aria-invalid=true]]:focus-within:ring-destructive/50',
         wrapperClassName,
       )}
     >

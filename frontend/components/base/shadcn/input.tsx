@@ -5,7 +5,7 @@ import { cn } from '@/components/lib/utils';
 
 export const inputVariants = tv({
   slots: {
-    base: 'flex w-full rounded-md border border-input bg-background shadow-xs ring-offset-background file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+    base: 'flex w-full rounded-md border border-input bg-background shadow-xs ring-offset-background file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/50',
   },
   variants: {
     size: {

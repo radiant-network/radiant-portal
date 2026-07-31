@@ -38,6 +38,16 @@ const (
 	ActionManageRole = "can_manage_role"
 )
 
+// ActionResponse carries the action catalog entry. name/description are the English labels for
+// now; resolving them by the caller's locale is a separate cross-cutting task.
+// @Description Action from the authorization catalog.
+type ActionResponse struct {
+	Code        string `json:"code"`
+	Scope       string `json:"scope"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+} // @name ActionResponse
+
 // TenantMembership is the caller's effective authorization within a single tenant.
 // TenantActions holds tenant-scoped actions; OrgsByAction maps each org-scoped action
 // to the org codes where it applies ('*' resolved to all the tenant's orgs).

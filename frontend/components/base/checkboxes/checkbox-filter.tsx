@@ -10,7 +10,7 @@ export const checkboxFilterVariants = tv({
   slots: {
     base: 'flex items-start gap-2 w-full max-w-[228px] cursor-pointer',
     label: 'first-letter:capitalize line-clamp-2 cursor-pointer max-w-[154px] whitespace-normal break-words',
-    description: 'w-full',
+    description: 'w-full font-normal',
     icon: '',
   },
   variants: {
@@ -32,7 +32,7 @@ export const checkboxFilterVariants = tv({
       },
       md: {
         base: '',
-        label: 'text-md leading-5',
+        label: 'text-base leading-5',
         icon: '[&_svg]:size-4',
       },
       lg: {

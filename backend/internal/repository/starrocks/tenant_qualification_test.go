@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +29,7 @@ func Test_SingleRowLookup_BoundTenant_NoBrokenImplicitOrderBy(t *testing.T) {
 		var vh types.VariantHeader
 		sql := tx.Take(&vh).Statement.SQL.String()
 
-		assert.Contains(t, sql, "radiant.snv__variant")
+		assert.Contains(t, sql, "tenant1_tenant.snv__variant")
 		assert.NotContains(t, sql, "`.`") // the empty table qualifier First()'s ORDER BY produces
 	})
 }
@@ -40,7 +42,7 @@ func Test_SNVOccurrences_TenantIsolation(t *testing.T) {
 		sql := buildSNVSQL(db)
 
 		assert.Contains(t, sql, "tenant1_tenant.germline__snv__occurrence")
-		assert.Contains(t, sql, "radiant.snv__variant")
+		assert.Contains(t, sql, "tenant1_tenant.snv__variant")
 		assert.NotContains(t, sql, "tenant2_tenant")
 	})
 }
@@ -56,6 +58,45 @@ func Test_SNVOccurrences_NoTenant_KeepsBareNames(t *testing.T) {
 		assert.Contains(t, sql, "germline__snv__occurrence")
 		assert.Contains(t, sql, "snv__variant")
 	})
+}
+
+// snv__variant is per-tenant while snv__consequence stays the full annotated catalog in the
+// shared base DB, so GetVariantOverview is now a two-database join in a single statement.
+// Execute it, not just DryRun it — rendering the qualified names proves nothing about
+// StarRocks resolving a cross-database join.
+func Test_VariantOverview_CrossDatabaseJoin_Executes(t *testing.T) {
+	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly: the multi-tenant
+	// loader caches per (folder, tenants, keyColumns) but the databases it builds are globally
+	// named, so a Need that differs in any of those recreates radiant/<code>_tenant underneath
+	// the other test. Offsetting seq_id leaves snv__variant untouched (it is keyed on locus_id
+	// and has no seq_id), so both tenants hold the same loci — which is what this test needs,
+	// since offsetting locus_id would put tenant2's variants at loci the shared consequence
+	// catalog lacks and invert the real superset/subset relationship.
+	testutils.RunTest(t, testutils.Need{
+		Starrocks:        "simple",
+		Tenants:          []string{"tenant1", "tenant2"},
+		TenantKeyColumns: []string{"seq_id"},
+	},
+		func(t *testing.T, env *testutils.Env) {
+			ctx := env.TenantCtx("tenant1")
+
+			var dest []map[string]any
+			sql := env.Starrocks.Session(&gorm.Session{DryRun: true}).WithContext(ctx).
+				Table(fmt.Sprintf("%s %s", types.VariantTable.TenantQualifiedName(ctx), types.VariantTable.Alias)).
+				Joins(fmt.Sprintf("JOIN %s c ON v.locus_id=c.locus_id", types.ConsequenceTable.TenantQualifiedName(ctx))).
+				Select("v.locus, c.sift_pred").
+				Find(&dest).Statement.SQL.String()
+			assert.Contains(t, sql, "tenant1_tenant.snv__variant")
+			assert.Contains(t, sql, "radiant.snv__consequence")
+
+			repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+			overview, err := repo.GetVariantOverview(ctx, 1000)
+			require.NoError(t, err)
+			require.NotNil(t, overview)
+
+			assert.Equal(t, "locus1", overview.Locus) // v, from tenant1_tenant
+			assert.Equal(t, "T", overview.SiftPred)   // c, from the shared base DB
+		})
 }
 
 func runGermlineSNVJoin(t *testing.T, db *gorm.DB, seqID int) []map[string]any {

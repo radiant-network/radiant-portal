@@ -39,6 +39,7 @@ function MultiSelector({
   renderBadge,
   wrapBadges = false,
   ref,
+  'aria-invalid': ariaInvalid,
 }: MultipleSelectorProps) {
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -357,6 +358,7 @@ function MultiSelector({
         ref={dropdownRef}
         className={cn(
           'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+          'has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:focus-within:border-destructive has-[[aria-invalid=true]]:focus-within:ring-destructive/50',
           {
             'px-3 py-2': selected.length !== 0,
             'cursor-text': !disabled && selected.length !== 0,
@@ -400,6 +402,7 @@ function MultiSelector({
             ref={inputRef}
             value={inputValue}
             disabled={disabled}
+            aria-invalid={ariaInvalid ?? inputProps?.['aria-invalid']}
             onValueChange={value => {
               setInputValue(value);
               setShowHiddenBadgesDropdown(false);

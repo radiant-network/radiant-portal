@@ -7,6 +7,8 @@ import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete
 
 import { StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
+
 const FRAMEWORKS: Option[] = [
   {
     value: 'next.js',
@@ -110,6 +112,29 @@ export const Async: Story = {
           className="max-w-[300px]"
           placeholder="Placeholder"
         />
+      </StorySection>
+    );
+  },
+};
+
+export const ErrorState: Story = {
+  render: () => {
+    const [value, setValue] = useState<string | undefined>('');
+
+    return (
+      <StorySection title="Error">
+        <StoryErrorField label="Framework" invalid={!value}>
+          <AutoComplete
+            aria-invalid={!value}
+            value={value}
+            onChange={value => {
+              setValue(value);
+              action('onChange')(value);
+            }}
+            placeholder="Placeholder"
+            options={FRAMEWORKS}
+          />
+        </StoryErrorField>
       </StorySection>
     );
   },

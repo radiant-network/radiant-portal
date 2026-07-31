@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Car } from 'lucide-react';
 
@@ -6,6 +7,7 @@ import { Input } from '@/components/base/shadcn/input';
 
 import { StoryLabel, StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
 import { sizes } from './utils';
 
 const meta = {
@@ -73,16 +75,16 @@ export const WithFieldVariant: Story = {
 
         {/* Field with Label, Description and Error */}
         <Field>
-          <FieldLabel>Input with Error State</FieldLabel>
+          <FieldLabel className="text-destructive">Input with Error State</FieldLabel>
           <FieldDescription>This field shows an error message below</FieldDescription>
-          <Input size="sm" placeholder="Placeholder" className="border-destructive" />
+          <Input size="sm" placeholder="Placeholder" aria-invalid />
           <FieldError>This field is required</FieldError>
         </Field>
 
         {/* Field with multiple errors */}
         <Field>
-          <FieldLabel>Input with Multiple Errors</FieldLabel>
-          <Input size="sm" placeholder="Placeholder" className="border-destructive" />
+          <FieldLabel className="text-destructive">Input with Multiple Errors</FieldLabel>
+          <Input size="sm" placeholder="Placeholder" aria-invalid />
           <FieldError errors={[{ message: 'This field is required' }, { message: 'Must be at least 3 characters' }]} />
         </Field>
 
@@ -96,6 +98,31 @@ export const WithFieldVariant: Story = {
           <FieldDescription className="text-xs">Additional helper text can go here</FieldDescription>
         </Field>
       </div>
+    </StorySection>
+  ),
+};
+
+function InputErrorDemo() {
+  const [value, setValue] = useState('');
+  const invalid = value.trim() === '';
+
+  return (
+    <StoryErrorField label="Full name" invalid={invalid}>
+      <Input
+        size="sm"
+        placeholder="Placeholder"
+        aria-invalid={invalid}
+        value={value}
+        onChange={event => setValue(event.target.value)}
+      />
+    </StoryErrorField>
+  );
+}
+
+export const ErrorState: Story = {
+  render: () => (
+    <StorySection title="Error">
+      <InputErrorDemo />
     </StorySection>
   ),
 };

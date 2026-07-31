@@ -17,6 +17,7 @@
 __version__ = "0.1.0"
 
 # import apis into sdk package
+from radiant_python.api.actions_api import ActionsApi
 from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
 from radiant_python.api.cases_api import CasesApi
@@ -52,6 +53,7 @@ from radiant_python.exceptions import ApiAttributeError
 from radiant_python.exceptions import ApiException
 
 # import models into sdk package
+from radiant_python.models.action_response import ActionResponse
 from radiant_python.models.aggregation import Aggregation
 from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
 from radiant_python.models.api_error import ApiError
