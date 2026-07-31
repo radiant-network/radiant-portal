@@ -88,6 +88,9 @@ export interface MultipleSelectorProps {
    * Render the badge for each option.
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
+
+  /** Set by `FormControl` when the field is in error, turns the control red. */
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }
 
 export interface MultipleSelectorRef {

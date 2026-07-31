@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import RadioGroupField from '@/components/base/radio-group/radio-group-field';
 
-import { StorySection, StoryShowcase } from '../story-section';
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
+
+import { StoryErrorField } from './story-error-field';
 
 const meta = {
   title: 'Components/Inputs/Radio Group',
@@ -13,6 +16,81 @@ const meta = {
 export default meta;
 
 type Story = StoryObj<typeof meta>;
+
+const errorOptions = [
+  { id: 'option1err', label: '18 and under' },
+  { id: 'option2err', label: '19 - 60' },
+  { id: 'option3err', label: '60 and over' },
+];
+
+const errorBoxOptions = [
+  { id: 'option1box', label: '18 and under', description: 'Enjoy your young' },
+  { id: 'option2box', label: '19 - 60', description: 'Be brave' },
+  { id: 'option3box', label: '60 and over', description: 'Enjoy no work anymore' },
+];
+
+// RadioGroupField uses each item id as the DOM id, so ids must stay unique across the page.
+const checkedErrorOptions = errorOptions.map(option => ({ ...option, id: `${option.id}-checked` }));
+const checkedErrorBoxOptions = errorBoxOptions.map(option => ({ ...option, id: `${option.id}-checked` }));
+
+function RadioGroupErrorDemo() {
+  const [value, setValue] = useState<string>();
+  const [boxValue, setBoxValue] = useState<string>();
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <StoryLabel>
+          Empty — the error clears as soon as an option is picked, and comes back if it is cleared
+        </StoryLabel>
+        <div className="flex gap-20">
+          <StoryErrorField label="How old are you?" error="Please pick an option" invalid={!value}>
+            <RadioGroupField
+              value={value}
+              onValueChange={setValue}
+              aria-invalid={!value}
+              data={errorOptions}
+              style={{ marginLeft: '16px' }}
+            />
+          </StoryErrorField>
+          <StoryErrorField label="How old are you?" error="Please pick an option" invalid={!boxValue}>
+            <RadioGroupField
+              box
+              value={boxValue}
+              onValueChange={setBoxValue}
+              aria-invalid={!boxValue}
+              data={errorBoxOptions}
+            />
+          </StoryErrorField>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <StoryLabel>
+          Checked while still in error — the box turns red and gets a pale red fill; without a box, only the dot appears
+        </StoryLabel>
+        <div className="flex gap-20">
+          <StoryErrorField label="How old are you?" error="Please pick an option">
+            <RadioGroupField
+              aria-invalid
+              defaultValue={checkedErrorOptions[1].id}
+              data={checkedErrorOptions}
+              style={{ marginLeft: '16px' }}
+            />
+          </StoryErrorField>
+          <StoryErrorField label="How old are you?" error="Please pick an option">
+            <RadioGroupField
+              box
+              aria-invalid
+              defaultValue={checkedErrorBoxOptions[1].id}
+              data={checkedErrorBoxOptions}
+            />
+          </StoryErrorField>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const AllVariants: Story = {
   args: {
@@ -86,6 +164,13 @@ export const AllVariants: Story = {
             align="end"
           />
         </div>
+      </StorySection>
+
+      <StorySection
+        title="Error"
+        description="In error, the field label, the message, the option labels and the radio circles turn red, while the descriptions stay muted. An unchecked box keeps its neutral border; a checked one turns red with a pale red fill."
+      >
+        <RadioGroupErrorDemo />
       </StorySection>
     </StoryShowcase>
   ),

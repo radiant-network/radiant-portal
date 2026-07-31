@@ -7,6 +7,8 @@ import { Checkbox } from '@/components/base/shadcn/checkbox';
 
 import { StoryLabel, StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
+
 const meta = {
   title: 'Components/Inputs/Checkbox',
   args: {
@@ -35,6 +37,28 @@ export const Sizes: Story = {
           <StoryLabel>xs</StoryLabel>
           <Checkbox size="xs" checked={checked} onCheckedChange={setChecked} />
         </div>
+      </StorySection>
+    );
+  },
+};
+
+export const ErrorState: Story = {
+  render: () => {
+    const [checked, setChecked] = useState<CheckedState>(false);
+
+    return (
+      <StorySection
+        title="Error"
+        description="No red border on the box: by design, a checkbox in error shows the red label and the message only."
+      >
+        <StoryErrorField
+          label="I accept the terms"
+          error="You must accept the terms to continue"
+          layout="inline"
+          invalid={checked !== true}
+        >
+          <Checkbox checked={checked} onCheckedChange={setChecked} />
+        </StoryErrorField>
       </StorySection>
     );
   },

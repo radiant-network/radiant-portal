@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Button } from '@/components/base/shadcn/button';
 
 import { StorySection } from '../story-section';
+import { StoryErrorField } from './story-error-field';
 
 const meta = {
   title: 'Components/Inputs/Rich Text Editor',
@@ -82,6 +83,36 @@ export const Viewer: Story = {
           <RichTextEditor className="w-[800px]" value={value} onChange={value => setValue(value)} />
           <RichTextViewer value={value} wrapperClassName="max-w-[800px]" autoFocus />
         </div>
+      </StorySection>
+    );
+  },
+};
+
+export const ErrorState: Story = {
+  render: () => {
+    const { t } = useI18n();
+    const [value, setValue] = useState('');
+    // The editor always returns markup, so strip the tags to know whether it holds text.
+    const isEmpty =
+      value
+        .replace(/<[^>]*>/g, '')
+        .replaceAll('&nbsp;', '')
+        .trim() === '';
+
+    return (
+      <StorySection title="Error">
+        <StoryErrorField label="Note" width={500} invalid={isEmpty}>
+          <RichTextEditor
+            aria-invalid={isEmpty}
+            value=""
+            onChange={next => {
+              setValue(next);
+              action('onChange')(next);
+            }}
+            onBlur={action('onBlur')}
+            placeholder={t('common.editor.placeholder')}
+          />
+        </StoryErrorField>
       </StorySection>
     );
   },

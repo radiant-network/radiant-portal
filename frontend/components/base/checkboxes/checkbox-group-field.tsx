@@ -32,6 +32,13 @@ export const checkboxGroupFieldVariants = tv({
         itemContainer: 'flex items-start gap-3 flex-row-reverse',
       },
     },
+    invalid: {
+      true: {
+        title: 'text-destructive',
+        box: 'has-[:focus-visible]:ring-destructive/50',
+        boxChecked: 'border-destructive bg-alert-error/20',
+      },
+    },
   },
   defaultVariants: {
     align: 'start',
@@ -66,9 +73,11 @@ function CheckboxGroupField({
   defaultValue,
   onValueChange,
   name,
+  'aria-invalid': ariaInvalid,
   ...props
 }: CheckboxGroupFieldProps) {
-  const styles = checkboxGroupFieldVariants({ align });
+  const invalid = ariaInvalid === true || ariaInvalid === 'true';
+  const styles = checkboxGroupFieldVariants({ align, invalid });
   const groupId = useId();
   const [uncontrolledValue, setUncontrolledValue] = useState<string[]>(defaultValue ?? []);
 
@@ -89,7 +98,13 @@ function CheckboxGroupField({
   };
 
   return (
-    <div role="group" data-slot="checkbox-group" className={styles.base({ className })} {...props}>
+    <div
+      role="group"
+      data-slot="checkbox-group"
+      aria-invalid={ariaInvalid}
+      className={styles.base({ className })}
+      {...props}
+    >
       {data.map(item => {
         const isChecked = selectedValues.includes(item.id);
         const isDisabled = item.disabled;
@@ -118,6 +133,7 @@ function CheckboxGroupField({
                 checked={isChecked}
                 disabled={isDisabled}
                 className={cn(box && styles.checkboxInBox(), isDisabled ? styles.checkboxDisabled() : 'cursor-pointer')}
+                aria-invalid={ariaInvalid}
                 aria-labelledby={labelId}
                 aria-describedby={item.description ? descriptionId : undefined}
                 onCheckedChange={state => handleCheckedChange(item.id, state === true)}
