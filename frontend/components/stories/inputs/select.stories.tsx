@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -15,6 +16,7 @@ import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/
 
 import { StoryLabel, StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
 import { selectSizes } from './utils';
 
 const config: PortalConfig = {
@@ -99,6 +101,36 @@ export const Sizes: Story = {
           </Select>
         </div>
       ))}
+    </StorySection>
+  ),
+};
+
+function SelectErrorDemo() {
+  const [fruit, setFruit] = useState<string>();
+  const invalid = !fruit;
+
+  return (
+    <StoryErrorField label="Fruit" invalid={invalid}>
+      <Select value={fruit} onValueChange={setFruit}>
+        <SelectTrigger size="sm" aria-invalid={invalid}>
+          <SelectValue placeholder="Select a fruit" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="apple">Apple</SelectItem>
+            <SelectItem value="banana">Banana</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </StoryErrorField>
+  );
+}
+
+export const ErrorState: Story = {
+  args: {},
+  render: () => (
+    <StorySection title="Error">
+      <SelectErrorDemo />
     </StorySection>
   ),
 };

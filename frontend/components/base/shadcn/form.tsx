@@ -100,13 +100,17 @@ function FormLabel({
   colon?: boolean;
   infoCardContent?: React.ReactNode;
 }) {
-  const { formItemId } = useFormField();
+  const { error, formItemId } = useFormField();
   const fieldContext = React.useContext(FormFieldContext);
   const schema = React.useContext(FormSchemaContext);
   const isRequired = schema && fieldContext?.name ? isFieldRequired(schema, fieldContext.name as string) : false;
 
   return (
-    <Label className={cn('flex items-center gap-1', className)} htmlFor={formItemId} {...props}>
+    <Label
+      className={cn('flex items-center gap-1', error && 'text-destructive', className)}
+      htmlFor={formItemId}
+      {...props}
+    >
       {children}{' '}
       {infoCardContent && (
         <HoverCard openDelay={0}>

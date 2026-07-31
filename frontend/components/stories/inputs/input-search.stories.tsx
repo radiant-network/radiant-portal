@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
 import { fn } from 'storybook/test';
@@ -6,6 +7,7 @@ import InputSearch from '@/components/base/data-entry/input-search';
 
 import { StoryLabel, StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
 import { sizes } from './utils';
 
 const meta = {
@@ -46,6 +48,35 @@ export const Sizes: Story = {
           />
         </div>
       ))}
+    </StorySection>
+  ),
+};
+
+function InputSearchErrorDemo() {
+  const [value, setValue] = useState('');
+  const invalid = value.trim() === '';
+
+  return (
+    <StoryErrorField label="Search term" invalid={invalid}>
+      <InputSearch
+        size="sm"
+        aria-invalid={invalid}
+        placeholder="Placeholder"
+        value={value}
+        onChange={event => {
+          setValue(event.target.value);
+          action('onChange')(event);
+        }}
+        onSearch={searchValue => action('onSearch')(searchValue)}
+      />
+    </StoryErrorField>
+  );
+}
+
+export const ErrorState: Story = {
+  render: () => (
+    <StorySection title="Error">
+      <InputSearchErrorDemo />
     </StorySection>
   ),
 };

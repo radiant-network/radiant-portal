@@ -8,6 +8,8 @@ import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector
 
 import { StoryLabel, StorySection } from '../story-section';
 
+import { StoryErrorField } from './story-error-field';
+
 const meta = {
   title: 'Components/Inputs/Multi Selector',
   component: MultiSelector,
@@ -162,6 +164,30 @@ export const AsyncSearch: Story = {
             className: 'max-w-[300px]',
           }}
         />
+      </StorySection>
+    );
+  },
+};
+
+export const ErrorState: Story = {
+  render: () => {
+    const [values, setValues] = useState<string[]>([]);
+
+    return (
+      <StorySection title="Error">
+        <StoryErrorField label="Frameworks" invalid={values.length === 0}>
+          <MultiSelector
+            aria-invalid={values.length === 0}
+            value={values}
+            onChange={newValues => {
+              setValues(newValues);
+              action('onChange')(newValues);
+            }}
+            placeholder="Placeholder"
+            defaultOptions={defaultOptions}
+            hidePlaceholderWhenSelected
+          />
+        </StoryErrorField>
       </StorySection>
     );
   },

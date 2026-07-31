@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CheckboxGroupField, { CheckboxGroupFieldItem } from '@/components/base/checkboxes/checkbox-group-field';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Label } from '@/components/base/shadcn/label';
+import { Separator } from '@/components/base/shadcn/separator';
 import { Switch } from '@/components/base/shadcn/switch';
 
-import { StorySection, StoryShowcase } from '../story-section';
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
+
+import { StoryErrorField } from './story-error-field';
 
 const meta = {
   title: 'Components/Inputs/Checkbox Group',
@@ -16,6 +20,104 @@ const meta = {
 export default meta;
 
 type Story = StoryObj<typeof meta>;
+
+const errorOptions: CheckboxGroupFieldItem[] = [
+  { id: 'option1err', label: 'Horse' },
+  { id: 'option2err', label: 'Red panda' },
+  { id: 'option3err', label: 'Otter' },
+];
+
+// The nested switch needs a unique DOM id per example, so the options are built per example.
+function makeErrorBoxOptions(exampleId: string): CheckboxGroupFieldItem[] {
+  const switchId = `${exampleId}-extra-switch`;
+
+  return [
+    {
+      id: 'option1box',
+      label: 'Horse',
+      description: 'This is a description.',
+      extraContent: (
+        <div className="flex flex-col gap-2">
+          <Separator style={{ marginTop: '16px' }} />
+          <span className="text-sm font-medium text-foreground">
+            Extra content <span className="text-destructive">*</span>
+          </span>
+          <div className="flex items-center gap-2">
+            <Switch id={switchId} />
+            <Label htmlFor={switchId} className="text-sm font-normal">
+              An option nested in the extra content
+            </Label>
+          </div>
+        </div>
+      ),
+    },
+    { id: 'option2box', label: 'Red panda', description: 'This is a description.' },
+  ];
+}
+
+const errorBoxOptions = makeErrorBoxOptions('error-box');
+const checkedErrorBoxOptions = makeErrorBoxOptions('error-checked-box');
+
+const checkedErrorOptions: CheckboxGroupFieldItem[] = [
+  { id: 'option1box', label: 'Horse', description: 'This is a description.' },
+  { id: 'option2box', label: 'Red panda', description: 'This is a description.' },
+];
+
+function CheckboxGroupErrorDemo() {
+  const [values, setValues] = useState<string[]>([]);
+  const [boxValues, setBoxValues] = useState<string[]>([]);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <StoryLabel>
+          Empty — the error clears as soon as an option is picked, and comes back if all are cleared
+        </StoryLabel>
+        <div className="flex gap-20">
+          <StoryErrorField
+            label="What is your favorite animal?"
+            error="Please pick at least one option"
+            invalid={values.length === 0}
+          >
+            <CheckboxGroupField
+              value={values}
+              onValueChange={setValues}
+              aria-invalid={values.length === 0}
+              data={errorOptions}
+              style={{ marginLeft: '16px' }}
+            />
+          </StoryErrorField>
+          <StoryErrorField
+            label="What is your favorite animal?"
+            error="Please pick at least one option"
+            invalid={boxValues.length === 0}
+            width={420}
+          >
+            <CheckboxGroupField
+              box
+              value={boxValues}
+              onValueChange={setBoxValues}
+              aria-invalid={boxValues.length === 0}
+              data={errorBoxOptions}
+            />
+          </StoryErrorField>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <StoryLabel>Checked while still in error</StoryLabel>
+        <div className="flex gap-20">
+          <StoryErrorField label="What is your favorite animal?" error="Please pick at least one option" width={420}>
+            <CheckboxGroupField aria-invalid defaultValue={['option1box']} data={checkedErrorOptions} />
+          </StoryErrorField>
+          <StoryErrorField label="What is your favorite animal?" error="Please pick at least one option" width={420}>
+            <CheckboxGroupField box aria-invalid defaultValue={['option1box']} data={checkedErrorBoxOptions} />
+          </StoryErrorField>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const singleOption: CheckboxGroupFieldItem[] = [{ id: 'option1', label: 'Option 1' }];
 
@@ -42,6 +144,7 @@ const disabledOptionsWithExtraContent: CheckboxGroupFieldItem[] = [
     disabled: true,
     extraContent: (
       <div className="flex flex-col gap-2">
+        <Separator style={{ marginTop: '16px' }} />
         <span className="text-sm font-medium text-foreground">
           Extra content <span className="text-destructive">*</span>
         </span>
@@ -63,11 +166,11 @@ const optionsWithExtraTitle: CheckboxGroupFieldItem[] = [
     label: 'Option 1',
     description: 'This is option 1',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
         <Badge variant="violet">WGS</Badge>
-      </>
+      </div>
     ),
   },
   {
@@ -75,10 +178,10 @@ const optionsWithExtraTitle: CheckboxGroupFieldItem[] = [
     label: 'Option 2',
     description: 'This is option 2',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="amber">Beta</Badge>
         <Badge variant="cyan">CNV</Badge>
-      </>
+      </div>
     ),
   },
 ];
@@ -89,14 +192,14 @@ const optionsWithManyExtraTitleBadges: CheckboxGroupFieldItem[] = [
     label: 'Option 1',
     description: 'This is option 1',
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5" style={{ width: 160 }}>
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
         <Badge variant="violet">WGS</Badge>
         <Badge variant="cyan">CNV</Badge>
         <Badge variant="amber">Beta</Badge>
         <Badge variant="neutral">Deprecated</Badge>
-      </>
+      </div>
     ),
   },
 ];
@@ -114,13 +217,14 @@ const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
       </>
     ),
     extraTitle: (
-      <>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
         <Badge variant="green">Recommended</Badge>
         <Badge variant="blue">SNV</Badge>
-      </>
+      </div>
     ),
     extraContent: (
       <div className="flex flex-col gap-2">
+        <Separator style={{ marginTop: '16px' }} />
         <span className="text-sm font-medium text-foreground">
           Extra content <span className="text-destructive">*</span>
         </span>
@@ -225,9 +329,8 @@ export const AllVariants: Story = {
       <StorySection
         title="Extra title"
         description={
-          'Extra title sits at the right of the label and description, vertically centered. With align="end" it ' +
-          'stays between the text and the checkbox. When the content is too wide for the item, it wraps onto ' +
-          'several lines, and the label and description column keeps at least half the width.'
+          'Extra title is a generic slot at the right of the label and description — the content brings its own ' +
+          'layout and its own width. With align="end" it stays between the text and the checkbox.'
         }
       >
         <div className="flex gap-20">
@@ -246,14 +349,25 @@ export const AllVariants: Story = {
       <StorySection
         title="Extra content"
         description={
-          'Extra content is revealed under the description once the item is selected. The whole item is a click ' +
-          'target, but nested interactive controls — a link in the description, a switch in the extra content — ' +
-          'keep their own behaviour.'
+          'Extra content is a generic slot revealed under the label, description and extra title once the item ' +
+          'is selected, and spans the same width — the content brings its own layout.'
         }
       >
-        <div style={{ width: 420 }}>
-          <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} />
+        <div className="flex gap-20">
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} />
+          </div>
+          <div style={{ width: 420 }}>
+            <CheckboxGroupField data={optionsWithExtraContent} box defaultValue={['option1']} align="end" />
+          </div>
         </div>
+      </StorySection>
+
+      <StorySection
+        title="Error"
+        description="In error, the field label, the message, the option labels and the checkboxes turn red, while the descriptions stay muted. An unchecked box keeps its neutral border; a checked one turns red with a pale red fill."
+      >
+        <CheckboxGroupErrorDemo />
       </StorySection>
     </StoryShowcase>
   ),
