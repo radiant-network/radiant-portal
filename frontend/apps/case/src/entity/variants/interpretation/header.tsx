@@ -25,8 +25,8 @@ function InterpretationVariantHeader({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 self-stretch">
         {t('variant.interpretation_form.title')}
-        <AnchorLink href={`/variants/entity/${locus_id}`} size="lg">
-          <span className="min-w-28 max-w-56 overflow-hidden text-ellipsis">{hgvsg}</span>
+        <AnchorLink href={`/variants/entity/${locus_id}`} size="lg" mono className="min-w-28 max-w-56 truncate">
+          {hgvsg}
         </AnchorLink>
         <Badge>{t(`variant.interpretation_form.header.${case_type}`)}</Badge>
       </div>

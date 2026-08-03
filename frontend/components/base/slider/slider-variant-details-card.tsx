@@ -728,7 +728,7 @@ export const GeneCard = ({
           )}
           {dna_change && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.cdna_change')}>
-              <div className="font-mono">{dna_change}</div>
+              <div className="font-mono min-w-0 max-w-48 truncate">{dna_change}</div>
             </DescriptionRow>
           )}
           {transcript_id && (
