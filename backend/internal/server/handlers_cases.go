@@ -259,13 +259,13 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		taskTypeCode, err := types.OccurrenceType(c.Query("data_type")).TaskTypeCode()
+		selector, err := types.OccurrenceType(c.Query("data_type")).TaskSelector()
 		if err != nil {
 			HandleValidationError(c, err)
 			return
 		}
 
-		tasks, err := repo.ListTasksByCaseSeqAndTaskType(c.Request.Context(), caseId, seqId, *taskTypeCode)
+		tasks, err := repo.ListTasksByCaseSeqAndTaskType(c.Request.Context(), caseId, seqId, selector.TaskTypeCode)
 		if err != nil {
 			HandleError(c, err)
 			return
