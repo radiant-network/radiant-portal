@@ -233,8 +233,8 @@ func Test_ListTasksByCaseSeqAndTaskType_GermlineSNV_ReturnsGermlineAnnotationTas
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
-		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
+		selector, _ := types.OccurrenceTypeGermlineSNV.TaskSelector()
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, selector.TaskTypeCode)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
@@ -248,8 +248,8 @@ func Test_ListTasksByCaseSeqAndTaskType_GermlineCNV_ReturnsGermlineAlignmentTask
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
-		code, _ := types.OccurrenceTypeGermlineCNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
+		selector, _ := types.OccurrenceTypeGermlineCNV.TaskSelector()
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, selector.TaskTypeCode)
 
 		// Task 1 has task_context.case_id = NULL — included via the OR-NULL branch.
 		assert.NoError(t, err)
@@ -263,8 +263,8 @@ func Test_ListTasksByCaseSeqAndTaskType_SomaticSNV_ReturnsSomaticAnnotationTask(
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
-		code, _ := types.OccurrenceTypeSomaticSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 73, *code)
+		selector, _ := types.OccurrenceTypeSomaticSNVTumorNormal.TaskSelector()
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 73, selector.TaskTypeCode)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
@@ -279,8 +279,8 @@ func Test_ListTasksByCaseSeqAndTaskType_EmptyWhenCaseHasNoMatchingTask(t *testin
 
 		// Case 2 has its own sequencings (4, 5, 6) — querying with seq 1 (which
 		// belongs to case 1) must not leak case 1's annotation task (task 5).
-		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 2, 1, *code)
+		selector, _ := types.OccurrenceTypeGermlineSNV.TaskSelector()
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 2, 1, selector.TaskTypeCode)
 
 		assert.NoError(t, err)
 		assert.Empty(t, result)
@@ -300,8 +300,8 @@ func Test_ListTasksByCaseSeqAndTaskType_SortedByCreatedOnDesc(t *testing.T) {
 		`).Error)
 
 		repo := NewTaskRepository(database.PostgresDB{DB: db})
-		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
+		selector, _ := types.OccurrenceTypeGermlineSNV.TaskSelector()
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, selector.TaskTypeCode)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 3) // seeded task 5 (2021) + inserted 91001 (2024) + 91002 (2025)
@@ -324,16 +324,16 @@ func Test_ListTasksByCaseSeqAndTaskType_ExcludesTaskAttachedToDifferentCase(t *t
 		`).Error)
 
 		repo := NewTaskRepository(database.PostgresDB{DB: db})
-		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
+		selector, _ := types.OccurrenceTypeGermlineSNV.TaskSelector()
 
 		// Querying with a *different* case on the same sequencing must not see
 		// the case-scoped task we just inserted.
-		resultOtherCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 70, *code)
+		resultOtherCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 70, selector.TaskTypeCode)
 		assert.NoError(t, err)
 		assert.Empty(t, resultOtherCase)
 
 		// Sanity check: querying with the right case does see it.
-		resultRightCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 70, *code)
+		resultRightCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 70, selector.TaskTypeCode)
 		assert.NoError(t, err)
 		assert.Len(t, resultRightCase, 1)
 		assert.Equal(t, 91003, resultRightCase[0].ID)
@@ -366,17 +366,17 @@ func Test_ListTasksByCaseSeqAndTaskType_CaseAgnosticTaskReturnedForBothCasesShar
 		})
 
 		repo := NewTaskRepository(database.PostgresDB{DB: db})
-		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
+		selector, _ := types.OccurrenceTypeGermlineSNV.TaskSelector()
 
 		// Case 1 sees: seeded task 5 (case=1) + case-agnostic 91010. Not 91011 (case=70).
-		fromCase1, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
+		fromCase1, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, selector.TaskTypeCode)
 		assert.NoError(t, err)
 		assert.Len(t, fromCase1, 2)
 		assert.Equal(t, 91010, fromCase1[0].ID) // 2024 > 2021
 		assert.Equal(t, 5, fromCase1[1].ID)
 
 		// Case 70 sees: case-specific 91011 + case-agnostic 91010. Not task 5 (case=1).
-		fromCase70, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 1, *code)
+		fromCase70, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 1, selector.TaskTypeCode)
 		assert.NoError(t, err)
 		assert.Len(t, fromCase70, 2)
 		assert.Equal(t, 91011, fromCase70[0].ID) // 2025 > 2024
