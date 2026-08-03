@@ -435,7 +435,11 @@ const defaultContentHandler: ContentHandler = ({ position, dataVariant, columnID
 
 const sharedContentHandlers: Record<string, ContentHandler> = {
   interpretation: ({ position }) => cy.validateTableFirstRowClass(CommonSelectors.interpretationIcon, position),
-  dbsnp: ({ position }) => cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position),
+  dbsnp: ({ position, dataVariant }) => {
+    if (dataVariant.dbsnp !== '-') {
+      cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
+    }
+  },
   gene: ({ position, dataVariant }) => {
     cy.validateTableFirstRowContent(dataVariant.gene, position);
     cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
