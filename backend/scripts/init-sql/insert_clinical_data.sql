@@ -563,7 +563,7 @@ INSERT INTO tenant (code, name)
 VALUES ('qlin', 'QLIN')
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO public.role (tenant_code, code, name, description) VALUES
+INSERT INTO public.role (tenant_code, code, name_en, description_en) VALUES
     ('qlin', 'member',       'Member',       'Search cases and view the knowledge base.'),
     ('qlin', 'geneticist',   'Geneticist',   'Read PII, download files, and interpret, comment on, and flag variants.'),
     ('qlin', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing).')
