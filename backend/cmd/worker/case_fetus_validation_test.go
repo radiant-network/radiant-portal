@@ -196,6 +196,56 @@ func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
 	assert.Equal(t, "create_case[0].fetuses[1].life_status_code", cr.Errors[1].Path)
 }
 
+// `dive` without `required` lets a null entry through binding, so the worker must report it as a
+// validation error rather than nil-deref on it.
+func Test_validateCaseFetuses_NullEntry(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{nil})
+	err := cr.validateCaseFetuses()
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+}
+
+func Test_validateFetusObservationsCategorical_NullEntry(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
+		{ObservationsCategorical: []*types.ObservationCategoricalBatch{nil}},
+	})
+	cr.validateFetusObservationsCategorical(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
+}
+
+func Test_validateFetusObservationsText_NullEntry(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
+		{ObservationsText: []*types.ObservationTextBatch{nil}},
+	})
+	cr.validateFetusObservationsText(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0].observations_text[0]", cr.Errors[0].Path)
+}
+
+// A valid fetus whose observation entries are null: validateCaseFetuses reaches both arrays in the
+// same pass, so it must survive them together.
+func Test_validateCaseFetuses_NullObservationEntries(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
+		{
+			SexCode:                 "male",
+			LifeStatusCode:          "alive",
+			AffectedStatusCode:      "affected",
+			ObservationsCategorical: []*types.ObservationCategoricalBatch{nil},
+			ObservationsText:        []*types.ObservationTextBatch{nil},
+		},
+	})
+	err := cr.validateCaseFetuses()
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 2)
+	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
+	assert.Equal(t, "create_case[0].fetuses[0].observations_text[0]", cr.Errors[1].Path)
+}
+
 func Test_dateISO8601ToTimePtr_Nil(t *testing.T) {
 	assert.Nil(t, dateISO8601ToTimePtr(nil))
 }

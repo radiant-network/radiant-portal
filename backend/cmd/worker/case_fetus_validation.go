@@ -66,6 +66,10 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsText {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "observations_text", &obsIndex)
 		res := fmt.Sprintf("create_case %d - fetus %d - observations_text %d", cr.Index, fetusIndex, obsIndex)
+		if obs == nil {
+			cr.addNullObservationError(res, path)
+			continue
+		}
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.ValidateStringField(obs.Value, "value", path+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 	}
@@ -73,6 +77,12 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 
 func (cr *CaseValidationRecord) validateCaseFetuses() error {
 	for fetusIndex := range cr.Case.Fetuses {
+		if cr.Case.Fetuses[fetusIndex] == nil {
+			path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
+			res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+			cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: entry is null.", res), FetusInvalidField, path)
+			continue
+		}
 		cr.validateFetusSexCode(fetusIndex)
 		cr.validateFetusLifeStatusCode(fetusIndex)
 		cr.validateFetusAffectedStatusCode(fetusIndex)

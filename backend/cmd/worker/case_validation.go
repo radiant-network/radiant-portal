@@ -684,7 +684,20 @@ func (cr *CaseValidationRecord) observationValueCodes(code string) []string {
 	}
 }
 
+// addNullObservationError flags a null array entry, e.g. `"observations_text": [null]`. `dive`
+// without `required` accepts one, so the payload binds at the API and reaches the worker, which
+// would nil-deref on it. Tightening the tag to `dive,required` is NOT an option: swag v2 reads any
+// `required` in a binding tag as "this field is required" and would wrongly mark these optional
+// arrays required in the generated OpenAPI spec (and in the TS/Python clients).
+func (cr *CaseValidationRecord) addNullObservationError(res, path string) {
+	cr.AddErrors(fmt.Sprintf("Invalid observation for %s. Reason: entry is null.", res), ObservationInvalidField, path)
+}
+
 func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.ObservationCategoricalBatch, obsPath, res string) {
+	if obs == nil {
+		cr.addNullObservationError(res, obsPath)
+		return
+	}
 	onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
 	interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
 

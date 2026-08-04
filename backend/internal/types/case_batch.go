@@ -37,7 +37,7 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
-	Fetuses                    []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive"`
+	Fetuses                    []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive,notnull"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
@@ -60,8 +60,8 @@ type CaseFetusBatch struct {
 	AffectedStatusCode      string                         `json:"affected_status_code" toml:"affected_status_code" binding:"required,oneof=affected non_affected unknown"`
 	LastMenstrualPeriod     *DateISO8601                   `json:"last_menstrual_period,omitempty" toml:"last_menstrual_period" swaggertype:"string" format:"date" example:"2026-02-01"`
 	EstimatedDueDate        *DateISO8601                   `json:"estimated_due_date,omitempty" toml:"estimated_due_date" swaggertype:"string" format:"date" example:"2026-11-08"`
-	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" toml:"observations_categorical" binding:"dive"`
-	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" toml:"observations_text" binding:"dive"`
+	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" toml:"observations_categorical" binding:"dive,notnull"`
+	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" toml:"observations_text" binding:"dive,notnull"`
 }
 
 type FamilyHistoryBatch struct {
