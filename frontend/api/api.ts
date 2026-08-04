@@ -2129,6 +2129,12 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'aq'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'cadd_phred'?: number;
     /**
      * 
@@ -2339,13 +2345,31 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
     /**
      * 
      * @type {number}
@@ -2358,6 +2382,12 @@ export interface ExpandedSomaticSNVOccurrence {
      * @memberof ExpandedSomaticSNVOccurrence
      */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sq'?: number;
     /**
      * 
      * @type {number}
@@ -4539,6 +4569,12 @@ export interface SomaticSNVOccurrence {
     'ad_ratio'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'aq'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
@@ -4662,7 +4698,25 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pc_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pf_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'sq'?: number;
     /**
      * 
      * @type {number}

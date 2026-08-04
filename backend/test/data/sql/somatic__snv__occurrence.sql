@@ -9,6 +9,7 @@ CREATE TABLE somatic__snv__occurrence
     filter                          VARCHAR(255),
     -- INFO fields
     info_hotspotallele              INT,
+    info_hotspot                    BOOLEAN,
     info_old_record                 VARCHAR(2000),
     info_baseq_rank_sum             FLOAT,
     info_excess_het                 FLOAT,
@@ -32,6 +33,7 @@ CREATE TABLE somatic__snv__occurrence
     info_germq                      FLOAT,
     info_tlod                       FLOAT,
     info_mapq                       FLOAT,
+    info_aq                         FLOAT,
     -- Tumor FORMAT
     tumor_calls                     ARRAY<INT>,
     tumor_dp                        INT,
@@ -44,6 +46,7 @@ CREATE TABLE somatic__snv__occurrence
     tumor_ad_ratio                  FLOAT,
     tumor_phased                    BOOLEAN,
     tumor_gt_status                 VARCHAR(50),
+    tumor_sq                        FLOAT,
     -- Normal FORMAT
     normal_calls                    ARRAY<INT>,
     normal_dp                       INT,
@@ -55,6 +58,7 @@ CREATE TABLE somatic__snv__occurrence
     normal_ad_total                 INT,
     normal_ad_ratio                 FLOAT,
     normal_phased                   BOOLEAN,
-    normal_gt_status                VARCHAR(50)
+    normal_gt_status                VARCHAR(50),
+    normal_sq                       FLOAT
 ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `task_id`, `tumor_seq_id`, `locus_id`);

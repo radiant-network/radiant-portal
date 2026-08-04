@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **aa_change** | **str** |  | 
 **ad_ratio** | **float** |  | [optional] 
+**aq** | **float** |  | [optional] 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | 
 **end** | **int** |  | 
@@ -27,7 +28,10 @@ Name | Type | Description | Notes
 **rsnumber** | **str** |  | 
 **seq_id** | **int** |  | 
 **somatic_pc_tn_wgs** | **int** |  | 
+**somatic_pc_to_wgs** | **int** |  | 
 **somatic_pf_tn_wgs** | **float** |  | 
+**somatic_pf_to_wgs** | **float** |  | 
+**sq** | **float** |  | [optional] 
 **start** | **int** |  | 
 **symbol** | **str** |  | 
 **task_id** | **int** |  | 

@@ -3024,7 +3024,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"additional_fields\": [\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
+              "raw": "{\n    \"additional_fields\": [\n        \"sq\",\n        \"aq\"\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3154,6 +3154,49 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"field\":\"somatic_pf_tn_wgs\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/snv/71/74/74/statistics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "74",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics (Tumor-Only Frequency)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"somatic_pf_to_wgs\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
