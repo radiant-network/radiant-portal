@@ -547,6 +547,25 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 	})
 }
 
+// Tumoral seq 74 of case 71 is staged under both tumor-normal task 74 and tumor-only task 82.
+func Test_RetrieveCaseSequencingExperiments_TumorSeqInBothCohorts_NotDuplicated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 71)
+		assert.NoError(t, err)
+
+		var tumoral []CaseSequencingExperiment
+		for _, seqExp := range *sequencingExperiments {
+			if seqExp.SeqID == 74 {
+				tumoral = append(tumoral, seqExp)
+			}
+		}
+		if assert.Len(t, tumoral, 1, "seq 74 must appear once even though two somatic tasks stage it") {
+			assert.True(t, tumoral[0].HasVariants)
+		}
+	})
+}
+
 func Test_RetrieveCasePatients(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

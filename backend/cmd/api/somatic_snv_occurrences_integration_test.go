@@ -16,13 +16,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testSomaticSNVList(t *testing.T, data string, body string, expected string) {
+func testSomaticSNVList(t *testing.T, data string, taskId string, body string, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/occurrences/somatic/snv/71/74/%s/list", taskId), bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -78,7 +78,7 @@ func testSomaticSNVStatistics(t *testing.T, data string, body string, expected s
 }
 
 func Test_Somatic_SNV_List(t *testing.T) {
-	testSomaticSNVList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "chromosome": "1", "clinvar":["Benign", "Pathogenic"], "end": 0, "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "has_note": true, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "start": 1111, "symbol":"BRAF", "task_id":74, "transcript_id": "T001", "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
+	testSomaticSNVList(t, "simple", "74", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "chromosome": "1", "clinvar":["Benign", "Pathogenic"], "end": 0, "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "has_note": true, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "somatic_pc_to_wgs":21, "somatic_pf_to_wgs":0.42, "start": 1111, "symbol":"BRAF", "task_id":74, "transcript_id": "T001", "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
 }
 
 func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -116,16 +116,110 @@ func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *te
 				"picked_consequences": null, 
 				"rsnumber":"", 
 				"seq_id":74, 
-				"somatic_pc_tn_wgs":null, 
-				"somatic_pf_tn_wgs":null, 
-				"start": 1111,		
+				"somatic_pc_tn_wgs":null,
+				"somatic_pf_tn_wgs":null,
+				"somatic_pc_to_wgs":null,
+				"somatic_pf_to_wgs":null,
+				"start": 1111,
 				"symbol":"BRAF", 
 				"task_id":74, 
 				"variant_class":"class1", 
 				"vep_impact":"MODIFIER"
 			}
 		]`
-	testSomaticSNVList(t, "multiple", body, expected)
+	testSomaticSNVList(t, "multiple", "74", body, expected)
+}
+
+// Task 82 is the tumor-only task on tumoral seq 74; task_id alone discriminates the cohort.
+func Test_Somatic_SNV_List_Return_TumorOnly_Occurrence_When_TumorOnlyTask(t *testing.T) {
+	expected := `[
+			{
+				"aa_change":"p.Arg19His",
+				"chromosome": "1",
+				"clinvar":["Benign", "Pathogenic"],
+				"end": 0,
+				"germline_pc_wgs":3,
+				"germline_pf_wgs":0.99,
+				"gnomad_v3_af":0.001,
+				"has_interpretation":false,
+				"has_note":false,
+				"hgvsg":"hgvsg1",
+				"hotspot":true,
+				"is_canonical":true,
+				"is_mane_plus":null,
+				"is_mane_select":true,
+				"locus_id":"1000",
+				"omim_inheritance_code":["code1"],
+				"picked_consequences":["splice acceptor"],
+				"rsnumber":"rs111111111",
+				"seq_id":74,
+				"somatic_pc_tn_wgs":6,
+				"somatic_pf_tn_wgs":0.55,
+				"somatic_pc_to_wgs":21,
+				"somatic_pf_to_wgs":0.42,
+				"start": 1111,
+				"symbol":"BRAF",
+				"task_id":82,
+				"transcript_id": "T001",
+				"variant_class":"class1",
+				"vep_impact":"MODIFIER"
+			}
+		]`
+	testSomaticSNVList(t, "simple", "82", `{"additional_fields":["locus_id"]}`, expected)
+}
+
+func Test_Somatic_SNV_List_Return_Sq_And_Aq_When_Requested(t *testing.T) {
+	body := `{
+			"additional_fields":["sq", "aq"],
+			"sqon":{
+				"op":"and",
+				"content":[
+					{
+						"op":">=",
+						"content":{
+							"field": "sq",
+							"value": [30]
+						}
+					}
+				]
+			}
+		}`
+	expected := `[
+			{
+				"aa_change":"p.Arg19His",
+				"aq":4.2,
+				"chromosome": "1",
+				"clinvar":["Benign", "Pathogenic"],
+				"end": 0,
+				"germline_pc_wgs":3,
+				"germline_pf_wgs":0.99,
+				"gnomad_v3_af":0.001,
+				"has_interpretation":false,
+				"has_note":true,
+				"hgvsg":"hgvsg1",
+				"hotspot":true,
+				"is_canonical":true,
+				"is_mane_plus":null,
+				"is_mane_select":true,
+				"locus_id":"1000",
+				"omim_inheritance_code":["code1"],
+				"picked_consequences":["splice acceptor"],
+				"rsnumber":"rs111111111",
+				"seq_id":74,
+				"somatic_pc_tn_wgs":6,
+				"somatic_pf_tn_wgs":0.55,
+				"somatic_pc_to_wgs":21,
+				"somatic_pf_to_wgs":0.42,
+				"sq":31.5,
+				"start": 1111,
+				"symbol":"BRAF",
+				"task_id":74,
+				"transcript_id": "T001",
+				"variant_class":"class1",
+				"vep_impact":"MODIFIER"
+			}
+		]`
+	testSomaticSNVList(t, "simple", "74", body, expected)
 }
 
 func Test_Somatic_SNV_Count(t *testing.T) {
@@ -253,6 +347,11 @@ func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 		"sift_score":0.1,
 		"somatic_pc_tn_wgs":6,
 		"somatic_pf_tn_wgs":0.55,
+		"somatic_pc_to_wgs":21,
+		"somatic_pn_to_wgs":50,
+		"somatic_pf_to_wgs":0.42,
+		"sq":31.5,
+		"aq":4.2,
 		"spliceai_ds":0.1,
 		"spliceai_type":["AG"],
 		"start":1111,

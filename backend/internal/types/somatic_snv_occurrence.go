@@ -28,7 +28,11 @@ type SomaticSNVOccurrence struct {
 	GermlinePcWgs       *int               `json:"germline_pc_wgs" validate:"required"`
 	SomaticPfTnWgs      *float64           `json:"somatic_pf_tn_wgs" validate:"required"`
 	SomaticPcTnWgs      *int               `json:"somatic_pc_tn_wgs" validate:"required"`
+	SomaticPfToWgs      *float64           `json:"somatic_pf_to_wgs" validate:"required"`
+	SomaticPcToWgs      *int               `json:"somatic_pc_to_wgs" validate:"required"`
 	AdRatio             *float32           `json:"ad_ratio,omitempty"`
+	Sq                  *float32           `json:"sq,omitempty"`
+	Aq                  *float32           `json:"aq,omitempty"`
 	TranscriptId        string             `json:"transcript_id,omitempty"`
 }
 
@@ -59,6 +63,9 @@ type ExpandedSomaticSNVOccurrence struct {
 	SomaticPcTnWgs                     *int                     `json:"somatic_pc_tn_wgs,omitempty"`
 	SomaticPnTnWgs                     *int                     `json:"somatic_pn_tn_wgs,omitempty"`
 	SomaticPfTnWgs                     *float64                 `json:"somatic_pf_tn_wgs,omitempty"`
+	SomaticPcToWgs                     *int                     `json:"somatic_pc_to_wgs,omitempty"`
+	SomaticPnToWgs                     *int                     `json:"somatic_pn_to_wgs,omitempty"`
+	SomaticPfToWgs                     *float64                 `json:"somatic_pf_to_wgs,omitempty"`
 	GnomadV3Af                         *float64                 `json:"gnomad_v3_af,omitempty"`
 	SiftPred                           string                   `json:"sift_pred,omitempty"`
 	SiftScore                          *float32                 `json:"sift_score,omitempty"`
@@ -74,6 +81,8 @@ type ExpandedSomaticSNVOccurrence struct {
 	Polyphen2HvarScore                 *float32                 `json:"polyphen2_hvar_score,omitempty"`
 	OmimConditions                     JsonArray[OmimGenePanel] `gorm:"type:json" json:"omim_conditions,omitempty"`
 	InfoQd                             float32                  `json:"qd,omitempty"`
+	Sq                                 *float32                 `json:"sq,omitempty"`
+	Aq                                 *float32                 `json:"aq,omitempty"`
 	AdAlt                              *int32                   `json:"ad_alt,omitempty"`
 	AdTotal                            *int32                   `json:"ad_total,omitempty"`
 	AdRatio                            *float32                 `json:"ad_ratio,omitempty"`
@@ -153,6 +162,26 @@ var SomaticSNVInfoQdField = Field{
 	Table:         SomaticSNVOccurrenceTable,
 }
 
+var SomaticSNVTumorSqField = Field{
+	Name:          "tumor_sq",
+	Alias:         "sq",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticSNVOccurrenceTable,
+}
+
+var SomaticSNVInfoAqField = Field{
+	Name:          "info_aq",
+	Alias:         "aq",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticSNVOccurrenceTable,
+}
+
 var SomaticSNVInfoHotspotAlleleField = Field{
 	Name:            "info_hotspotallele",
 	Alias:           "hotspot",
@@ -188,6 +217,8 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	GermlinePcWgsField,
 	SomaticPfTnWgsField,
 	SomaticPcTnWgsField,
+	SomaticPfToWgsField,
+	SomaticPcToWgsField,
 }
 
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
@@ -230,6 +261,8 @@ var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	SomaticSNVTumorAdRatioField,
 	SomaticSNVTumorAdAltField,
 	SomaticSNVTumorAdTotalField,
+	SomaticSNVTumorSqField,
+	SomaticSNVInfoAqField,
 )
 
 var SomaticSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}

@@ -269,11 +269,18 @@ func (r *CasesRepository) retrieveCaseLevelData(ctx context.Context, caseId int)
 func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context, caseId int) (*[]CaseSequencingExperiment, error) {
 	var sequencingExperiments []CaseSequencingExperiment
 
-	txSeqExp := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx), types.CaseHasSequencingExperimentTable.Alias))
+	db := r.db.WithContext(ctx)
+
+	txSeqExp := db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx), types.CaseHasSequencingExperimentTable.Alias))
 	txSeqExp = r.joiner.CaseHasSeqExpWithSequencingExperiment(txSeqExp)
 	txSeqExp = r.joiner.SeqExpWithSample(txSeqExp)
 	txSeqExp = r.joiner.SampleAndCaseHasSeqExpWithFamily(txSeqExp)
-	txSeqExp = txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s se on s.id = se.seq_id and se.ingested_at is not null and (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral')) and se.case_id = ?", types.SequencingTable.TenantQualifiedName(ctx)), caseId)
+	// DISTINCT, not a direct join: staging is keyed (case_id, seq_id, task_id), so a tumor
+	// sequencing carried by both a tumor-normal and a tumor-only task matches twice.
+	txIngested := db.Table(types.SequencingTable.TenantQualifiedName(ctx)).
+		Select("DISTINCT(seq_id)").
+		Where("ingested_at is not null and (task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral')) and case_id = ?", caseId)
+	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")

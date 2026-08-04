@@ -32,6 +32,7 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     ad_alt: Optional[StrictInt] = None
     ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
     ad_total: Optional[StrictInt] = None
+    aq: Optional[Union[StrictFloat, StrictInt]] = None
     cadd_phred: Optional[Union[StrictFloat, StrictInt]] = None
     cadd_score: Optional[Union[StrictFloat, StrictInt]] = None
     chromosome: StrictStr
@@ -67,15 +68,19 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     sift_pred: Optional[StrictStr] = None
     sift_score: Optional[Union[StrictFloat, StrictInt]] = None
     somatic_pc_tn_wgs: Optional[StrictInt] = None
+    somatic_pc_to_wgs: Optional[StrictInt] = None
     somatic_pf_tn_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pf_to_wgs: Optional[Union[StrictFloat, StrictInt]] = None
     somatic_pn_tn_wgs: Optional[StrictInt] = None
+    somatic_pn_to_wgs: Optional[StrictInt] = None
     spliceai_ds: Optional[Union[StrictFloat, StrictInt]] = None
     spliceai_type: Optional[List[StrictStr]] = None
+    sq: Optional[Union[StrictFloat, StrictInt]] = None
     start: StrictInt
     symbol: Optional[StrictStr] = None
     transcript_id: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "somatic_pn_tn_wgs", "spliceai_ds", "spliceai_type", "start", "symbol", "transcript_id", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "aq", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_pc_tn_wgs", "somatic_pc_to_wgs", "somatic_pf_tn_wgs", "somatic_pf_to_wgs", "somatic_pn_tn_wgs", "somatic_pn_to_wgs", "spliceai_ds", "spliceai_type", "sq", "start", "symbol", "transcript_id", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -139,6 +144,7 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
             "ad_alt": obj.get("ad_alt"),
             "ad_ratio": obj.get("ad_ratio"),
             "ad_total": obj.get("ad_total"),
+            "aq": obj.get("aq"),
             "cadd_phred": obj.get("cadd_phred"),
             "cadd_score": obj.get("cadd_score"),
             "chromosome": obj.get("chromosome"),
@@ -174,10 +180,14 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
             "sift_pred": obj.get("sift_pred"),
             "sift_score": obj.get("sift_score"),
             "somatic_pc_tn_wgs": obj.get("somatic_pc_tn_wgs"),
+            "somatic_pc_to_wgs": obj.get("somatic_pc_to_wgs"),
             "somatic_pf_tn_wgs": obj.get("somatic_pf_tn_wgs"),
+            "somatic_pf_to_wgs": obj.get("somatic_pf_to_wgs"),
             "somatic_pn_tn_wgs": obj.get("somatic_pn_tn_wgs"),
+            "somatic_pn_to_wgs": obj.get("somatic_pn_to_wgs"),
             "spliceai_ds": obj.get("spliceai_ds"),
             "spliceai_type": obj.get("spliceai_type"),
+            "sq": obj.get("sq"),
             "start": obj.get("start"),
             "symbol": obj.get("symbol"),
             "transcript_id": obj.get("transcript_id"),

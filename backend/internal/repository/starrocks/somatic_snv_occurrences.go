@@ -88,10 +88,12 @@ func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Cont
 	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
-		"v.somatic_pc_tn_wgs, v.somatic_pn_tn_wgs, v.somatic_pf_tn_wgs, v.gnomad_v3_af, " +
+		"v.somatic_pc_tn_wgs, v.somatic_pn_tn_wgs, v.somatic_pf_tn_wgs, " +
+		"v.somatic_pc_to_wgs, v.somatic_pn_to_wgs, v.somatic_pf_to_wgs, v.gnomad_v3_af, " +
 		"c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +
 		"c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, " +
-		"s_snv_o.info_qd, s_snv_o.tumor_ad_alt as ad_alt, s_snv_o.tumor_ad_total as ad_total, s_snv_o.tumor_ad_ratio as ad_ratio, s_snv_o.filter, " +
+		"s_snv_o.info_qd, s_snv_o.tumor_sq as sq, s_snv_o.info_aq as aq, " +
+		"s_snv_o.tumor_ad_alt as ad_alt, s_snv_o.tumor_ad_total as ad_total, s_snv_o.tumor_ad_ratio as ad_ratio, s_snv_o.filter, " +
 		"g.gene_id as ensembl_gene_id")
 
 	var expandedOccurrence ExpandedSomaticSNVOccurrence
