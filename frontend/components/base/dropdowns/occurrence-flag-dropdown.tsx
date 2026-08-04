@@ -3,7 +3,7 @@ import { Flag, type LucideIcon, Pin, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import { type OccurrenceFlagType } from '@/api/api';
+import type { OccurrenceFlagType } from '@/api/api';
 import { Button, type ButtonProps } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,

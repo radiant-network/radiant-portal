@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type DocumentResult } from '@/api/api';
+import type { DocumentResult } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';

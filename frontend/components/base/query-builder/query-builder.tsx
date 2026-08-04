@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import { type SavedFilter, type SavedFilterType } from '@/api/index';
+import type { SavedFilter, SavedFilterType } from '@/api/index';
 import { SidebarGroups } from '@/components/base/query-builder//facets/sidebar-groups';
 import { FacetList } from '@/components/base/query-builder/facets/facet-list';
 import { FacetConfigContext } from '@/components/base/query-builder/facets/hooks/use-facet-config';

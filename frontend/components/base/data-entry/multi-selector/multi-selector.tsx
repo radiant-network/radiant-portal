@@ -10,11 +10,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-import {
-  type MultipleSelectorProps,
-  type MultiSelectorGroupOption,
-  type MultiSelectorOption,
-} from './multi-selector.types';
+import type { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
 import { getSelectedOptionByValue, isOptionsExist, transToGroupOption } from './multi-selector.utils';
 
 function MultiSelector({

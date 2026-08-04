@@ -3,13 +3,13 @@ import { CopyIcon, TrashIcon } from 'lucide-react';
 import useSWR from 'swr';
 import { tv } from 'tailwind-variants';
 
-import { type Count, type SqonContent, type SqonOpEnum } from '@/api/api';
+import type { Count, SqonContent, SqonOpEnum } from '@/api/api';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
-import { type AggregationConfig } from '@/components/cores/applications-config';
+import type { AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
@@ -31,7 +31,7 @@ import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
 import SearchQueryPill from './pills/search-query-pill';
-import { type ISqonGroupFacet, type ISyntheticSqon, type IValueFacet, type TSyntheticSqonContentValue } from './type';
+import type { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
 
 const queryBar = tv({
   base: 'flex flex-1 py-2 px-3 border ',

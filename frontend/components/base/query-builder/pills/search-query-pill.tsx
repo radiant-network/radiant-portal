@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
-import { type IValueFacet } from '../type';
+import type { IValueFacet } from '../type';
 
 import QueryPillContainer from './containers/query-pill-container';
 import LabelOperator from './operators/label-operator';

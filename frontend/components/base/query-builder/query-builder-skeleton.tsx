@@ -1,7 +1,7 @@
 import { Card } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { type AggregationConfig } from '@/components/cores/applications-config';
+import type { AggregationConfig } from '@/components/cores/applications-config';
 
 import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarProvider } from '../shadcn/sidebar';
 

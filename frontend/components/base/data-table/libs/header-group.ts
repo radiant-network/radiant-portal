@@ -1,4 +1,4 @@
-import { type Header } from '@tanstack/react-table';
+import type { Header } from '@tanstack/react-table';
 
 /**
  * Works like getFlatColumns of stantacks.

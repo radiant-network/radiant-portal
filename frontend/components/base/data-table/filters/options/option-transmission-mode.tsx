@@ -1,5 +1,5 @@
-import { type FiltersValue } from '@/api/api';
-import { type IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import type { FiltersValue } from '@/api/api';
+import type { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 const transmissionModeTranslationKeyPrefix = 'common.facets.values.transmission_mode';
 

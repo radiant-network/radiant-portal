@@ -1,8 +1,8 @@
-import { type ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { useSearchParams } from 'react-router';
 import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 
-import { type CaseEntity, type Term } from '@/api/api';
+import type { CaseEntity, Term } from '@/api/api';
 import AffectedStatusBadge, { type AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import ExpandableList from '@/components/base/list/expandable-list';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';

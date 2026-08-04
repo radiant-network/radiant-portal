@@ -2,9 +2,9 @@
  * Hooks to be manage a table with localeStorage
  */
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from 'react';
-import { type TableState } from '@tanstack/react-table';
+import type { TableState } from '@tanstack/react-table';
 
-import { type DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import type { DefaultColumnTableState } from '@/components/base/data-table/data-table';
 
 import { DEFAULT_TABLE_OBSERVER, type TableObserverColumn, type TableObserverProps } from '../type/data-table-type';
 

@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { type Term, type VepImpact } from '@/api/api';
+import type { Term, VepImpact } from '@/api/api';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
@@ -11,7 +11,7 @@ import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
 import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/table/cells/occurrence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
-import { type Status } from '@/components/base/badges/status-badge';
+import type { Status } from '@/components/base/badges/status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,

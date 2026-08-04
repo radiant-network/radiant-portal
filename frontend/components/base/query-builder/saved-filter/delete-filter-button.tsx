@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { type SavedFilter } from '@/api/index';
+import type { SavedFilter } from '@/api/index';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';

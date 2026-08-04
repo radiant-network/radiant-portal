@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { type CellContext } from '@tanstack/react-table';
+import type { CellContext } from '@tanstack/react-table';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
-import { type CaseResult } from '@/api/api';
+import type { CaseResult } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,

@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type CNVGeneOverlap } from '@/api/api';
+import type { CNVGeneOverlap } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';

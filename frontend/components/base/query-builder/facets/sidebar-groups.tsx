@@ -18,7 +18,7 @@ import {
   useSidebar,
 } from '@/components/base/shadcn/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
-import { type AggregationConfig } from '@/components/cores/applications-config';
+import type { AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 

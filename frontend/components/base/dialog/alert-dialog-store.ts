@@ -1,6 +1,6 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { type AlertDialogActionProps, type AlertDialogCancelProps } from '@/components/base/shadcn/alert-dialog';
+import type { AlertDialogActionProps, AlertDialogCancelProps } from '@/components/base/shadcn/alert-dialog';
 
 export type AlertDialogType = 'success' | 'info' | 'warning' | 'error';
 

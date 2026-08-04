@@ -1,6 +1,6 @@
-import { type RefObject } from 'react';
+import type { RefObject } from 'react';
 
-import { type ColumnSettings } from './data-table';
+import type { ColumnSettings } from './data-table';
 
 type getFilteredAdditionalFieldsProps = {
   columnVisibility: Record<string, boolean>;

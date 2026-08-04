@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { type SavedFilter, type SavedFilterCreationInput, type SavedFilterUpdateInput, type Sqon } from '@/api/api';
+import type { SavedFilter, SavedFilterCreationInput, SavedFilterUpdateInput, Sqon } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { savedFiltersApi } from '@/utils/api';
 

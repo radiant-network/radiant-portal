@@ -1,6 +1,6 @@
 import { Biohazard, Users } from 'lucide-react';
 
-import { type CaseEntity } from '@/api/api';
+import type { CaseEntity } from '@/api/api';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';

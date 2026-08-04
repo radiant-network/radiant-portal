@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type CaseEntity, type GermlineCNVOccurrence } from '@/api/api';
+import type { CaseEntity, GermlineCNVOccurrence } from '@/api/api';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import NumberListCell from '@/components/base/data-table/cells/number-list-cell';

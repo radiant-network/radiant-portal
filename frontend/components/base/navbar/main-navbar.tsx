@@ -12,7 +12,7 @@ import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import MainNavbarItem from './main-navbar-item';
 import MainNavbarLangSwitcher from './main-navbar-lang-switcher';
 import MainNavbarTenantSwitcher from './main-navbar-tenant-switcher';
-import { type BaseMainNavbarProps } from './main-navbar-types';
+import type { BaseMainNavbarProps } from './main-navbar-types';
 import MainNavbarUserAvatar from './main-navbar-user-avatar';
 import MainSidebar from './main-sidebar';
 

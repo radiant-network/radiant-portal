@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { type SearchCriterion, type VariantCasesFilters } from '@/api/index';
-import { type IFilterButton } from '@/components/base/buttons/filter-button';
+import type { SearchCriterion, VariantCasesFilters } from '@/api/index';
+import type { IFilterButton } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,

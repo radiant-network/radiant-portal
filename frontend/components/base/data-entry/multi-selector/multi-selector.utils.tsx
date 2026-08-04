@@ -1,4 +1,4 @@
-import { type MultiSelectorGroupOption, type MultiSelectorOption } from './multi-selector.types';
+import type { MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
 
 export function transToGroupOption(options: MultiSelectorOption[], groupBy?: string) {
   if (options.length === 0) {

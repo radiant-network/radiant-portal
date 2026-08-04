@@ -6,7 +6,7 @@ import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
 
 import { SavedFilterType } from '@/api/index';
-import { type TableColumnDef } from '@/components/base/data-table/data-table';
+import type { TableColumnDef } from '@/components/base/data-table/data-table';
 import {
   getDefaultQBContext,
   type ICountInput,

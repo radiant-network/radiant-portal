@@ -1,7 +1,7 @@
 import { formatDate } from 'date-fns';
 import { DotIcon } from 'lucide-react';
 
-import { type CaseSequencingExperiment, type TaskOccurrenceType } from '@/api/api';
+import type { CaseSequencingExperiment, TaskOccurrenceType } from '@/api/api';
 import AffectedStatusBadge, { type AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { Badge } from '@/components/base/shadcn/badge';
 import {

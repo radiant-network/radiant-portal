@@ -26,6 +26,9 @@ module.exports = defineConfig({
         fixStyle: 'inline-type-imports',
       },
     ],
+    // with verbatimModuleSyntax, `import { type A } from 'x'` still emits
+    // `import {} from 'x'` and keeps a useless runtime dependency
+    '@typescript-eslint/no-import-type-side-effects': 'error',
     'max-len': [
       'warn', // or 'error'
       {

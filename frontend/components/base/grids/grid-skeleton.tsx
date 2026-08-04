@@ -3,7 +3,7 @@ import { Responsive, type ResponsiveLayouts, useContainerWidth } from 'react-gri
 
 import { Skeleton } from '../shadcn/skeleton';
 
-import { type GridCards } from './grid';
+import type { GridCards } from './grid';
 import GridCard from './grid-card';
 
 type GridSkeletonProps = {

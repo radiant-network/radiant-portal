@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
 

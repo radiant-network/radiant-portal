@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { type UserPreference } from '@/api/api';
-import { type ApplicationId } from '@/components/cores/applications-config';
+import type { UserPreference } from '@/api/api';
+import type { ApplicationId } from '@/components/cores/applications-config';
 import { userPreferenceApi } from '@/utils/api';
 
-import { type ISyntheticSqon } from '../type';
+import type { ISyntheticSqon } from '../type';
 
 import { getDefaultQBContext, type IQBContext, type ISettings } from './use-query-builder';
 

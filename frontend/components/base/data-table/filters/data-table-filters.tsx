@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { ListFilter, X } from 'lucide-react';
 
-import { type SearchCriterion } from '@/api/api';
+import type { SearchCriterion } from '@/api/api';
 import FilterButton, {
   type IFilterButton,
   type IFilterButtonItem,
@@ -10,7 +10,7 @@ import FilterButton, {
 import { Button } from '@/components/base/shadcn/button';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import type { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
 import TableFiltersSearch, { type AutocompleteApiFn } from './data-table-filter-search';
 

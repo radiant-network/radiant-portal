@@ -1,4 +1,4 @@
-import { type CellContext } from '@tanstack/react-table';
+import type { CellContext } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';

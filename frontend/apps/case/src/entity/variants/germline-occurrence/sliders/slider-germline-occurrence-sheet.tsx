@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
 import useSWR from 'swr';
 
-import { type CaseSequencingExperiment, type GermlineSNVOccurrence, type InterpretationGermline } from '@/api/api';
+import type { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import OccurrenceFlagDropdown from '@/components/base/dropdowns/occurrence-flag-dropdown';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';

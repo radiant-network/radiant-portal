@@ -6,7 +6,7 @@ import { SqonOpEnum } from '@/api/api';
 import QueryPillValuesContainer, {
   type QueryPillValuesContainerProps,
 } from '@/components/base/query-builder/pills/containers/query-pill-values-container';
-import { type IValueFacet } from '@/components/base/query-builder/type';
+import type { IValueFacet } from '@/components/base/query-builder/type';
 import { useI18n } from '@/components/hooks/i18n';
 
 const MAX_VALUES = 3;

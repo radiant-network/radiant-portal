@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import GroupedVerticalBarChart from '@/components/base/charts/bar-charts/grouped-vertical-bar-chart';
 import VerticalBarChart from '@/components/base/charts/bar-charts/vertical-bar-chart';
 import ChartPalettePreview from '@/components/base/charts/palettes/chart-palette-preview';
-import { type ChartTooltipPayload } from '@/components/base/charts/type';
+import type { ChartTooltipPayload } from '@/components/base/charts/type';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 
 import { StorySection } from '../story-section';

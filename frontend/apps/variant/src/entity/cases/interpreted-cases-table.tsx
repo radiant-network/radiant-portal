@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
-import { type PaginationState } from '@tanstack/table-core';
+import type { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
-import {
-  type ApiError,
-  type ListBodyWithCriteria,
-  type SearchCriterion,
-  type SortBody,
-  type VariantInterpretedCasesSearchResponse,
+import type {
+  ApiError,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  VariantInterpretedCasesSearchResponse,
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';

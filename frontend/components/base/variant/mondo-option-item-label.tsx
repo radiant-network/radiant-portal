@@ -1,4 +1,4 @@
-import { type AutoCompleteTerm } from '@/api/api';
+import type { AutoCompleteTerm } from '@/api/api';
 
 function MondoOptionItemLabel({ mondo }: { mondo: AutoCompleteTerm }) {
   return (

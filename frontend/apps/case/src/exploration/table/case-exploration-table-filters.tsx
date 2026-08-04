@@ -2,8 +2,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { type CaseFilters, type SearchCriterion } from '@/api/api';
-import { type IFilterButton, type PopoverSize } from '@/components/base/buttons/filter-button';
+import type { CaseFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,

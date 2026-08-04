@@ -7,7 +7,7 @@ import { Checkbox } from '../shadcn/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '../shadcn/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../shadcn/tooltip';
 
-import { type GridCards } from './grid';
+import type { GridCards } from './grid';
 
 type GridOptionsMenuSettingsProps = {
   activeCards: string[];

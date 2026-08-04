@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 
 import { avatarStyles, getIconSize } from '@/components/base/avatar/avatar.styles';
-import { type AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarUser } from '@/components/base/avatar/avatar.types';
 import { getInitials, getUserColor } from '@/components/base/avatar/avatar.utils';
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { Button } from '@/components/base/shadcn/button';

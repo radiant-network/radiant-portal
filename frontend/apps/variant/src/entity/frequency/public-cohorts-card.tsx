@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
 
-import { type ApiError, type VariantExternalFrequencies } from '@/api/index';
+import type { ApiError, VariantExternalFrequencies } from '@/api/index';
 import DisplayTable from '@/components/base/data-table/display-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';

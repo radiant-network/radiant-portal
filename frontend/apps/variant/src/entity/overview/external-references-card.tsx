@@ -1,4 +1,4 @@
-import { type VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';

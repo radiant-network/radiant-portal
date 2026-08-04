@@ -1,11 +1,6 @@
 import useSWR from 'swr';
 
-import {
-  type Aggregation,
-  type AggregationBodyWithSqon,
-  type Statistics,
-  type StatisticsBodyWithSqon,
-} from '@/api/api';
+import type { Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
 import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
 import { useTenant } from '@/components/hooks/use-tenant';

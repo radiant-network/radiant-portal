@@ -13,7 +13,7 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import { mockSets, type UserSetOption } from './mocks/user-set';
 import { germlineThreeSets, germlineTwoSets, somaticThreeSets } from './mocks/variant-sets';
-import { type SetSelectOption } from './set-operations-entity';
+import type { SetSelectOption } from './set-operations-entity';
 
 type SetOperationsVennChartProps = {
   userSets: UserSetOption[];

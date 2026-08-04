@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
-import { type ApiError, type VariantCasesCount, type VariantCasesFilters } from '@/api/api';
+import type { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';

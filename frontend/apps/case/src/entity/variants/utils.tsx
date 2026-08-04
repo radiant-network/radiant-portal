@@ -1,4 +1,4 @@
-import { type AggregationConfig } from '@/components/cores/applications-config';
+import type { AggregationConfig } from '@/components/cores/applications-config';
 
 export function getVisibleAggregations(aggregationGroups: AggregationConfig) {
   return Object.fromEntries(

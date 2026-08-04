@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { type InterpretationSomatic } from '@/api/api';
+import type { InterpretationSomatic } from '@/api/api';
 import {
   getOncogenicityClassificationCriteriaColor,
   oncogenicityClassificationCriterias,

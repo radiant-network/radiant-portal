@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { PopoverClose } from '@radix-ui/react-popover';
-import { type Editor } from '@tiptap/react';
+import type { Editor } from '@tiptap/react';
 import { Link2Icon, Trash2Icon, XIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';

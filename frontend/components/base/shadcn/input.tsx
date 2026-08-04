@@ -1,4 +1,4 @@
-import { type LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
 import { cn } from '@/components/lib/utils';

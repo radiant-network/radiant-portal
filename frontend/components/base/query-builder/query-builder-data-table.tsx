@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { type PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { type Count, type SortBody, type SqonContent, type SqonOpEnum } from '@/api/api';
+import type { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
 import DataTable, { type TableProps } from '../data-table/data-table';
 import { DataTableProvider } from '../data-table/hooks/use-data-table';

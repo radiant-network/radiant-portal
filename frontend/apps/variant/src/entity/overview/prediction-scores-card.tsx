@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';

@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
-import { type VariantConsequence } from '@/api/api';
+import type { VariantConsequence } from '@/api/api';
 import EmptyField from '@/components/base/information/empty-field';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Badge } from '@/components/base/shadcn/badge';

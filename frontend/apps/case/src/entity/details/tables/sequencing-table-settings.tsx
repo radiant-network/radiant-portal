@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type CaseSequencingExperiment } from '@/api/api';
+import type { CaseSequencingExperiment } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';

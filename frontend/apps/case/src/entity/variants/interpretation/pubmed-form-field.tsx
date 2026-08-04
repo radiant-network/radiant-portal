@@ -12,7 +12,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { interpretationApi } from '@/utils/api';
 
-import { type GenericInterpretationSchemaType } from './types';
+import type { GenericInterpretationSchemaType } from './types';
 
 function PubmedFormField() {
   const { t } = useI18n();

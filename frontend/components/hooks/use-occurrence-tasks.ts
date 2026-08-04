@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import { type CaseTasksWithOccurrencesDataTypeEnum, type TaskOccurrenceType } from '../../api/api';
+import type { CaseTasksWithOccurrencesDataTypeEnum, TaskOccurrenceType } from '../../api/api';
 import { caseApi } from '../../utils/api';
 
 import { useTenant } from './use-tenant';

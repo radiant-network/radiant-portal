@@ -3,7 +3,7 @@ import { type Layout, Responsive, type ResponsiveLayouts, useContainerWidth } fr
 import useSWRImmutable from 'swr/immutable';
 import useSWRMutation from 'swr/mutation';
 
-import { type UserPreference } from '@/api/api';
+import type { UserPreference } from '@/api/api';
 import { userPreferenceApi } from '@/utils/api';
 
 import GridCard, { type CardLayoutItem } from './grid-card';

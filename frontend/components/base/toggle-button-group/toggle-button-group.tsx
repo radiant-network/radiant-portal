@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { type VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
 
 import { Button, type buttonVariants } from '@/components/base/shadcn/button';
 import { ButtonGroup, type buttonGroupVariants } from '@/components/base/shadcn/button-group';

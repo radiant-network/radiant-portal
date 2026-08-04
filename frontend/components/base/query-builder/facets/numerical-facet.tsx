@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { type Statistics } from '@/api/api';
+import type { Statistics } from '@/api/api';
 import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
 import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';
 import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operator-icon';
@@ -14,8 +14,8 @@ import { Input } from '@/components/base/shadcn/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { TextMuted } from '@/components/base/typography/text-muted';
-import { type IFilterRangeConfig } from '@/components/cores/applications-config';
-import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import type { IFilterRangeConfig } from '@/components/cores/applications-config';
+import type { Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 

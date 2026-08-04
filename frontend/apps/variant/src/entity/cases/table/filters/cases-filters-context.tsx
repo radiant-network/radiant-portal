@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
-import { type VariantCasesFilters } from '@/api/api';
+import type { VariantCasesFilters } from '@/api/api';
 
 interface CasesFiltersContextType {
   filters: VariantCasesFilters | undefined;

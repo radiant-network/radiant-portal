@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { type CaseEntity } from '@/api/api';
-import { type ICountInput, type IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
+import type { CaseEntity } from '@/api/api';
+import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';

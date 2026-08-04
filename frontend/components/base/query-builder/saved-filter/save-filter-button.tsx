@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { SaveIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { type SavedFilter, type SavedFilterCreationInput, type SavedFilterUpdateInput, type Sqon } from '@/api/api';
+import type { SavedFilter, SavedFilterCreationInput, SavedFilterUpdateInput, Sqon } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';

@@ -1,6 +1,6 @@
-import { type VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
 
-import { type anchorLinkVariants as anchorLinkVar } from '@/components/base/navigation/anchor-link';
+import type { anchorLinkVariants as anchorLinkVar } from '@/components/base/navigation/anchor-link';
 
 export const anchorLinkVariants: VariantProps<typeof anchorLinkVar>['variant'][] = ['primary', 'secondary', 'white'];
 

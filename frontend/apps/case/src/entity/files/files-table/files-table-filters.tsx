@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { type DocumentFilters, type SearchCriterion } from '@/api/api';
-import { type IFilterButton, type PopoverSize } from '@/components/base/buttons/filter-button';
+import type { DocumentFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';

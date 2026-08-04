@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 import { type ClinvarRCV, type GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';

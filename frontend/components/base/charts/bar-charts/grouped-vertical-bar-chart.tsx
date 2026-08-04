@@ -7,7 +7,7 @@ import { useGroupedBarChartConfig } from '../hooks/use-chart-config';
 import { colors, useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
 import GroupedBarRectangle from '../shapes/grouped-bar-rectangle';
-import { type ChartTooltipPayload, type GroupedBarChartProps } from '../type';
+import type { ChartTooltipPayload, GroupedBarChartProps } from '../type';
 
 /**
  * Horizontal bar chart with grouped (side-by-side) series per category.

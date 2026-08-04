@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
-import { type VepImpact } from '@/api/api';
+import type { VepImpact } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 
 import ImpactIndicator from '../../base/indicators/impact-indicator';

@@ -3,15 +3,8 @@ import { createContext, type Dispatch, useContext, useMemo, useReducer } from 'r
 import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
-import {
-  type Count,
-  type CountBodyWithSqon,
-  type SortBody,
-  type Sqon,
-  type SqonContent,
-  type SqonOpEnum,
-} from '@/api/api';
-import { type AggregationConfig, type IFilterRangeConfig } from '@/components/cores/applications-config';
+import type { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
+import type { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
 import { createEmptyQuery, hasEmptyQuery, isEqualToField } from '../libs/sqon';
 import {

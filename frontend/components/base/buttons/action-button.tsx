@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { MoreVerticalIcon } from 'lucide-react';
-import { type VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
 
 import {
   DropdownMenu,

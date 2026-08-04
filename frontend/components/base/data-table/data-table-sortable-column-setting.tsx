@@ -1,9 +1,9 @@
-import { type UniqueIdentifier } from '@dnd-kit/core';
+import type { UniqueIdentifier } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVerticalIcon } from 'lucide-react';
 
-import { type ColumnSettings } from '@/components/base/data-table/data-table';
+import type { ColumnSettings } from '@/components/base/data-table/data-table';
 import VisibilityColumnSetting from '@/components/base/data-table/data-table-column-visibility-settings';
 import { cn } from '@/lib/utils';
 

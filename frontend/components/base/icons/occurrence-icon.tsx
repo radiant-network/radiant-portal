@@ -1,6 +1,6 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { type IconType } from './types';
+import type { IconType } from './types';
 
 const OccurrenceIcon = ({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement => (
   <svg height={size} width={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill={fill} {...props}>

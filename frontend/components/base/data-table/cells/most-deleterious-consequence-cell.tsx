@@ -1,4 +1,4 @@
-import { type VepImpact } from '@/api/api';
+import type { VepImpact } from '@/api/api';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import { cn } from '@/components/lib/utils';

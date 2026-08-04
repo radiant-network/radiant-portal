@@ -1,4 +1,4 @@
-import { type HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';

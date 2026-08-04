@@ -14,11 +14,11 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { type ColumnOrderState, type ColumnPinningState } from '@tanstack/react-table';
+import type { ColumnOrderState, ColumnPinningState } from '@tanstack/react-table';
 import { SettingsIcon } from 'lucide-react';
 
 import { Button } from '@/base/shadcn/button';
-import { type ColumnSettings } from '@/components/base/data-table/data-table';
+import type { ColumnSettings } from '@/components/base/data-table/data-table';
 import TableSortableColumnSetting from '@/components/base/data-table/data-table-sortable-column-setting';
 import {
   DropdownMenu,

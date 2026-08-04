@@ -1,7 +1,7 @@
 import { type ComponentProps, useEffect, useState } from 'react';
 import { formatDate } from 'date-fns';
 
-import { type CaseEntity, type CasePatientClinicalInformation } from '@/api/api';
+import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';

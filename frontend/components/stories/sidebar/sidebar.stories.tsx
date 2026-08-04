@@ -14,7 +14,7 @@ import {
   SidebarProvider,
   SidebarSeparator,
 } from '@/components/base/shadcn/sidebar';
-import { type AggregationConfig } from '@/components/cores/applications-config';
+import type { AggregationConfig } from '@/components/cores/applications-config';
 
 import { StorySection, StoryShowcase } from '../story-section';
 

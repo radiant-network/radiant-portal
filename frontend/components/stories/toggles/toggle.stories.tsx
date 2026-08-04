@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bold } from 'lucide-react';
-import { type VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
 
 import { Toggle, type toggleVariants } from '@/components/base/shadcn/toggle';
 

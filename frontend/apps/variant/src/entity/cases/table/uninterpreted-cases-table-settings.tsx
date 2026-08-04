@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type Term, type VariantUninterpretedCase } from '@/api/api';
+import type { Term, VariantUninterpretedCase } from '@/api/api';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';

@@ -1,4 +1,4 @@
-import { type Editor } from '@tiptap/react';
+import type { Editor } from '@tiptap/react';
 import { BoldIcon, ItalicIcon, ListIcon, ListOrderedIcon, StrikethroughIcon, UnderlineIcon } from 'lucide-react';
 
 import { Separator } from '@/components/base/shadcn/separator';

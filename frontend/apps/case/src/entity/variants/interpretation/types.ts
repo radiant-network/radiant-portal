@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { type InterpretationGermline, type InterpretationPubmed, type InterpretationSomatic } from '@/api/api';
+import type { InterpretationGermline, InterpretationPubmed, InterpretationSomatic } from '@/api/api';
 import { isEditorHasEmptyContent } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
-import { type ZodSchema } from '@/components/lib/zod';
+import type { ZodSchema } from '@/components/lib/zod';
 
 export interface InterpretationFormRef {
   submit: () => void;

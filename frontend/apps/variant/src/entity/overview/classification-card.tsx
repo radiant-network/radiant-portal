@@ -1,6 +1,6 @@
 import { BrainCircuit } from 'lucide-react';
 
-import { type VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 

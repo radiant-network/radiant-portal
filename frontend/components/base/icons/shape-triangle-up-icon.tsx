@@ -1,6 +1,6 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { type IconType } from './types';
+import type { IconType } from './types';
 
 export default function ShapeTriangleUpIcon({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement {
   return (

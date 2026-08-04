@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import useSWR from 'swr';
 
-import { type VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';

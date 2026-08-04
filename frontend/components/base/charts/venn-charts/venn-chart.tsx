@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import { type RowSelectionState } from '@tanstack/react-table';
+import type { RowSelectionState } from '@tanstack/react-table';
 import { formatDate } from 'date-fns';
 import { Download } from 'lucide-react';
 
-import { type ISqonGroupFacet } from '@/components/base/query-builder/type';
+import type { ISqonGroupFacet } from '@/components/base/query-builder/type';
 import { useI18n } from '@/components/hooks/i18n';
 import { downloadSvgAsPng } from '@/components/lib/svg-to-png';
 

@@ -1,4 +1,4 @@
-import { type CaseEntity, type CasePatientClinicalInformation, type CaseSequencingExperiment } from '@/api/api';
+import type { CaseEntity, CasePatientClinicalInformation, CaseSequencingExperiment } from '@/api/api';
 
 import { PROBAND } from '../base/constants';
 

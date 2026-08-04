@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { TableHeaderUserFilter } from '@/components/base/assignation/user-selection';
-import { type AvatarUser } from '@/components/base/avatar';
+import type { AvatarUser } from '@/components/base/avatar';
 
 import { StorySection, StoryShowcase } from '../story-section';
 

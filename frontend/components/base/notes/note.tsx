@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { EllipsisVertical } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
 
-import { type OccurrenceNote, type UpdateOccurrenceNoteInput } from '@/api/api';
+import type { OccurrenceNote, UpdateOccurrenceNoteInput } from '@/api/api';
 import { UserAvatar } from '@/components/base/avatar/user-avatar';
 import RichTextEditor, {
   isEditorHasEmptyContent,

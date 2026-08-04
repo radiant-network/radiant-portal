@@ -2,12 +2,12 @@ import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
 import useSWR from 'swr';
 
-import {
-  type CaseEntity,
-  type CaseSequencingExperiment,
-  type ExpandedSomaticSNVOccurrence,
-  type InterpretationSomatic,
-  type SomaticSNVOccurrence,
+import type {
+  CaseEntity,
+  CaseSequencingExperiment,
+  ExpandedSomaticSNVOccurrence,
+  InterpretationSomatic,
+  SomaticSNVOccurrence,
 } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import OccurrenceFlagDropdown from '@/components/base/dropdowns/occurrence-flag-dropdown';

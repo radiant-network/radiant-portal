@@ -5,7 +5,7 @@ import { createColumnHelper, type HeaderContext, type RowSelectionState } from '
 
 import { SavedFilterType } from '@/api/api';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import { type TableColumnDef } from '@/components/base/data-table/data-table';
+import type { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';

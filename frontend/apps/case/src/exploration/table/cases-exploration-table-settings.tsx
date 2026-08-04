@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type CaseResult } from '@/api/api';
+import type { CaseResult } from '@/api/api';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';

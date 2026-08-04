@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { type CaseEntity, type GermlineSNVOccurrence, type SomaticSNVOccurrence } from '@/api/api';
+import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';

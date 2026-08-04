@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { Field, FieldError, FieldLabel } from '@/components/base/shadcn/field';
 

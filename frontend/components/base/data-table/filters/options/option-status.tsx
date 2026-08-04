@@ -1,7 +1,7 @@
 import { Check, CircleDashed, FileQuestion, Hourglass, OctagonX, Pen, RefreshCcw } from 'lucide-react';
 
-import { type FiltersValue } from '@/api/api';
-import { type IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import type { FiltersValue } from '@/api/api';
+import type { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 /**
  * Item Status

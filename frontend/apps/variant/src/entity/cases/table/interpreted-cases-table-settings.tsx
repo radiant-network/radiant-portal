@@ -1,8 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { EllipsisVertical } from 'lucide-react';
 
-import { type VariantInterpretedCase } from '@/api/api';
+import type { VariantInterpretedCase } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';

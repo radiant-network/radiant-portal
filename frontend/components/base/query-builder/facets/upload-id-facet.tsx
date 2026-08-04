@@ -25,7 +25,7 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../../cards/collapsible-card';
-import { type TableColumnDef } from '../../data-table/data-table';
+import type { TableColumnDef } from '../../data-table/data-table';
 import DisplayTable from '../../data-table/display-table';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../shadcn/hover-card';
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';

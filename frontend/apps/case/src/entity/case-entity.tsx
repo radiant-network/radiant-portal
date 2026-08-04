@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router';
 import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
 import useSWR from 'swr';
 
-import { type ApiError, type CaseEntity } from '@/api/api';
+import type { ApiError, CaseEntity } from '@/api/api';
 import Container from '@/components/base/container';
 import Error404 from '@/components/base/errors/404';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';

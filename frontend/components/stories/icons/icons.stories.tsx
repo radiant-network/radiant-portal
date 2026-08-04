@@ -33,7 +33,7 @@ import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon'
 import TranscriptCanonicalIcon from '@/components/base/icons/transcript-canonical-icon';
 import TranscriptManePlusIcon from '@/components/base/icons/transcript-mane-plus-icon';
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
-import { type IconType } from '@/components/base/icons/types';
+import type { IconType } from '@/components/base/icons/types';
 
 import { StorySection, StoryShowcase } from '../story-section';
 

@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router';
 import { InfoIcon } from 'lucide-react';
 
-import { type VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';

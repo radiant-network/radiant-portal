@@ -1,7 +1,7 @@
 import { format, formatDistance, isThisYear, isToday } from 'date-fns';
 import { enCA } from 'date-fns/locale/en-CA';
 import { frCA } from 'date-fns/locale/fr-CA';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 export function formatRelativeByCurrentTime(t: TFunction<string, undefined>, datetime: string) {
   const date = new Date(datetime);

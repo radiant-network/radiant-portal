@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ArchiveIcon, Dna, FlaskConical, Users } from 'lucide-react';
 
-import { type MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import type { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';

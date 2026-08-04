@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { type InterpretationGermline, type InterpretationPubmed } from '@/api/api';
+import type { InterpretationGermline, InterpretationPubmed } from '@/api/api';
 import { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
 import {
   classificationCriterias,

@@ -1,18 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  type ColumnOrderState,
-  type ColumnPinningState,
-  type PaginationState,
-  type TableState,
-} from '@tanstack/react-table';
+import type { ColumnOrderState, ColumnPinningState, PaginationState, TableState } from '@tanstack/react-table';
 import useSWR, { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { type UserPreference } from '@/api/api';
+import type { UserPreference } from '@/api/api';
 import { userPreferenceApi } from '@/utils/api';
 
-import { type ColumnSettings, type ColumnVisiblity, type LoadingStates } from '../data-table';
-import { type TableObserverColumn, type TableObserverProps } from '../type/data-table-type';
+import type { ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
+import type { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
 import { getFilteredAdditionalFields } from '../utils';
 
 export enum DataTableState {
