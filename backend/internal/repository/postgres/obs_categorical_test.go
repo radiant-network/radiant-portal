@@ -102,7 +102,37 @@ func Test_CreateObservationCategorical_NilError(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateObservationCategorical(t.Context(), nil)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, ErrNilRecord)
+	})
+}
+
+func Test_CreateObservationCategorical_RejectsBothSubjectsSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateObservationCategorical(t.Context(), &ObservationCategorical{
+			CaseID:          1,
+			PatientID:       utils.IntPtr(1),
+			FetusID:         utils.IntPtr(1),
+			ObservationCode: "phenotype",
+			CodingSystem:    "HPO",
+			CodeValue:       "HP:0000001",
+			TenantCode:      "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
+	})
+}
+
+func Test_CreateObservationCategorical_RejectsNoSubjectSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewObservationCategoricalRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateObservationCategorical(t.Context(), &ObservationCategorical{
+			CaseID:          1,
+			ObservationCode: "phenotype",
+			CodingSystem:    "HPO",
+			CodeValue:       "HP:0000001",
+			TenantCode:      "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
 	})
 }
 

@@ -1547,9 +1547,6 @@ func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRe
 			AffectedStatusCode:        p.AffectedStatusCode,
 			TenantCode:                sc.TenantCode,
 		}
-		if !exactlyOneSubjectSet(familyMember.FamilyMemberID, familyMember.FetusID) {
-			return fmt.Errorf("family row for patient %q in create_case %d has an invalid subject (family_member_id and fetus_id must be mutually exclusive)", p.SubmitterPatientId, cr.Index)
-		}
 		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
 			return fmt.Errorf("failed to persist family member %q for create_case %d: %w", p.SubmitterPatientId, cr.Index, err)
 		}
@@ -1579,10 +1576,6 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 				ExamCode:           utils.NilIfEmpty(o.ExamCode),
 				TenantCode:         sc.TenantCode,
 			}
-			if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-				return fmt.Errorf("observation categorical for patient %q in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", p.SubmitterPatientId, cr.Index)
-			}
-
 			if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
@@ -1610,10 +1603,6 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 				ExamCode:           utils.NilIfEmpty(o.ExamCode),
 				TenantCode:         sc.TenantCode,
 			}
-			if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-				return fmt.Errorf("observation text for patient %q in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", p.SubmitterPatientId, cr.Index)
-			}
-
 			if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation text for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}

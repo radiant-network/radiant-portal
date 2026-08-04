@@ -82,12 +82,6 @@ func (cr *CaseValidationRecord) validateCaseFetuses() error {
 	return nil
 }
 
-// exactlyOneSubjectSet mirrors the DB's subject_xor CHECK constraints: a clinical row belongs to
-// the mother or to one of her fetuses, never both or neither.
-func exactlyOneSubjectSet(patientID *int, fetusID *int) bool {
-	return (patientID != nil) != (fetusID != nil)
-}
-
 func dateISO8601ToTimePtr(d *types.DateISO8601) *time.Time {
 	if d == nil {
 		return nil
@@ -131,9 +125,6 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 			AffectedStatusCode:        fb.AffectedStatusCode,
 			TenantCode:                sc.TenantCode,
 		}
-		if !exactlyOneSubjectSet(familyMember.FamilyMemberID, familyMember.FetusID) {
-			return fmt.Errorf("family row for fetus %d in create_case %d has an invalid subject (family_member_id and fetus_id must be mutually exclusive)", fetusIndex, cr.Index)
-		}
 		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
 			return fmt.Errorf("failed to persist family for fetus %d in create_case %d: %w", fetusIndex, cr.Index, err)
 		}
@@ -162,9 +153,6 @@ func persistFetusObservationsCategorical(ctx context.Context, sc *StorageContext
 			ExamCode:           utils.NilIfEmpty(o.ExamCode),
 			TenantCode:         sc.TenantCode,
 		}
-		if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-			return fmt.Errorf("observation categorical for fetus %d in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", fetusID, cr.Index)
-		}
 		if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
 			return fmt.Errorf("failed to persist observation categorical for fetus %d in create_case %d: %w", fetusID, cr.Index, err)
 		}
@@ -182,9 +170,6 @@ func persistFetusObservationsText(ctx context.Context, sc *StorageContext, cr *C
 			InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
 			ExamCode:           utils.NilIfEmpty(o.ExamCode),
 			TenantCode:         sc.TenantCode,
-		}
-		if !exactlyOneSubjectSet(obs.PatientID, obs.FetusID) {
-			return fmt.Errorf("observation text for fetus %d in create_case %d has an invalid subject (patient_id and fetus_id must be mutually exclusive)", fetusID, cr.Index)
 		}
 		if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
 			return fmt.Errorf("failed to persist observation text for fetus %d in create_case %d: %w", fetusID, cr.Index, err)

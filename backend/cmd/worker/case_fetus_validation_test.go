@@ -8,7 +8,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -195,22 +194,6 @@ func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
 	assert.Len(t, cr.Errors, 2)
 	assert.Equal(t, "create_case[0].fetuses[1].sex_code", cr.Errors[0].Path)
 	assert.Equal(t, "create_case[0].fetuses[1].life_status_code", cr.Errors[1].Path)
-}
-
-func Test_exactlyOneSubjectSet_OnlyPatient(t *testing.T) {
-	assert.True(t, exactlyOneSubjectSet(utils.IntPtr(1), nil))
-}
-
-func Test_exactlyOneSubjectSet_OnlyFetus(t *testing.T) {
-	assert.True(t, exactlyOneSubjectSet(nil, utils.IntPtr(1)))
-}
-
-func Test_exactlyOneSubjectSet_BothNil(t *testing.T) {
-	assert.False(t, exactlyOneSubjectSet(nil, nil))
-}
-
-func Test_exactlyOneSubjectSet_BothSet(t *testing.T) {
-	assert.False(t, exactlyOneSubjectSet(utils.IntPtr(1), utils.IntPtr(2)))
 }
 
 func Test_dateISO8601ToTimePtr_Nil(t *testing.T) {
