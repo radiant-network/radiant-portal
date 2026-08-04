@@ -114,6 +114,8 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	types.ExomiserTaskTypeCode:          {},
 }
 
+const VCFFormatCode = "vcf"
+
 var VariantVCFDataTypeCodes = map[string]struct{}{
 	"snv":  {},
 	"ssnv": {},
@@ -1260,7 +1262,7 @@ func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentB
 }
 
 func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode string, doc *types.OutputDocumentBatch, path string) {
-	if taskTypeCode != types.ClinicalReportTaskTypeCode || doc.FormatCode != "vcf" {
+	if taskTypeCode != types.ClinicalReportTaskTypeCode || doc.FormatCode != VCFFormatCode {
 		return
 	}
 
