@@ -1557,6 +1557,80 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Tasks With Occurrences (Somatic Tumor-Normal)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/71/74/tasks_with_occurrences?data_type=somatic_snv_tn",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "71",
+                "74",
+                "tasks_with_occurrences"
+              ],
+              "query": [
+                {
+                  "key": "data_type",
+                  "value": "somatic_snv_tn"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tasks With Occurrences (Somatic Tumor-Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/71/74/tasks_with_occurrences?data_type=somatic_snv_to",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "71",
+                "74",
+                "tasks_with_occurrences"
+              ],
+              "query": [
+                {
+                  "key": "data_type",
+                  "value": "somatic_snv_to"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

@@ -3136,7 +3136,8 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Occurrence type
+      - description: 'Occurrence type. somatic_snv is deprecated: it is an alias of
+          somatic_snv_tn, kept until every client sends an explicit somatic cohort.'
         in: query
         name: data_type
         required: true
@@ -3145,6 +3146,8 @@ paths:
           - germline_snv
           - germline_cnv
           - somatic_snv
+          - somatic_snv_tn
+          - somatic_snv_to
           type: string
       responses:
         "200":

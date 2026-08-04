@@ -61,6 +61,41 @@ func Test_CaseOccurrenceTasksEndpoint_SomaticSNV_ReturnsSomaticAnnotationTask(t 
 	})
 }
 
+func Test_CaseOccurrenceTasksEndpoint_SomaticSNVTumorOnly_ReturnsTumorOnlyTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// Tumoral seq 74 carries both somatic tasks: 74 (paired with normal seq 73) and 82 (unpaired).
+		expected := `[{"id":82,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-10T13:08:00Z"}]`
+		code, body := getCaseOccurrenceTasks(t, env.Postgres, 71, 74, "somatic_snv_to")
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.JSONEq(t, expected, body)
+	})
+}
+
+func Test_CaseOccurrenceTasksEndpoint_SomaticSNVTumorNormal_ExcludesTumorOnlyTaskOnSameTumorSeq(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// End-to-end guard on the "group by task_id alone" rule: were the tumoral/normal counts
+		// narrowed to the queried seq 74, task 74 would read 1 tumoral / 0 normal and the two
+		// tasks would swap cohorts.
+		expected := `[{"id":74,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
+		code, body := getCaseOccurrenceTasks(t, env.Postgres, 71, 74, "somatic_snv_tn")
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.JSONEq(t, expected, body)
+	})
+}
+
+func Test_CaseOccurrenceTasksEndpoint_DeprecatedSomaticSNVAlias_MatchesTumorNormal(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// The alias must keep tumor-only task 82 out of the legacy "SNV (TN)" list.
+		expected := `[{"id":74,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
+		code, body := getCaseOccurrenceTasks(t, env.Postgres, 71, 74, "somatic_snv")
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.JSONEq(t, expected, body)
+	})
+}
+
 func Test_CaseOccurrenceTasksEndpoint_NoMatchingTask_ReturnsEmptyArray(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		// Case 2 doesn't share seq 1 with case 1 — annotation task 5 must not leak.
