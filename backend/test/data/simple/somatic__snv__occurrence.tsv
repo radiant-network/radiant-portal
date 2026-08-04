@@ -1,3 +1,3 @@
-part	task_id	tumor_seq_id	locus_id	normal_seq_id	tumor_ad_ratio	info_hotspotallele	tumor_sq	info_aq
-5	74	74	1000	73	0.66	1	31.5	4.2
-5	82	74	1000	NULL	0.51	1	18.25	9.75
+part	task_id	tumor_seq_id	locus_id	normal_seq_id	tumor_ad_ratio	info_hotspot	tumor_sq	info_aq	info_hotspotallele
+5	74	74	1000	73	0.66	true	31.5	4.2	NULL
+5	82	74	1000	NULL	0.51	false	18.25	9.75	NULL
