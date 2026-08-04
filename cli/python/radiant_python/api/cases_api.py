@@ -1249,7 +1249,7 @@ class CasesApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
-        data_type: Annotated[StrictStr, Field(description="Occurrence type")],
+        data_type: Annotated[StrictStr, Field(description="Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1273,7 +1273,7 @@ class CasesApi:
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
         :type seq_id: int
-        :param data_type: Occurrence type (required)
+        :param data_type: Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort. (required)
         :type data_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1333,7 +1333,7 @@ class CasesApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
-        data_type: Annotated[StrictStr, Field(description="Occurrence type")],
+        data_type: Annotated[StrictStr, Field(description="Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1357,7 +1357,7 @@ class CasesApi:
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
         :type seq_id: int
-        :param data_type: Occurrence type (required)
+        :param data_type: Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort. (required)
         :type data_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1417,7 +1417,7 @@ class CasesApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
-        data_type: Annotated[StrictStr, Field(description="Occurrence type")],
+        data_type: Annotated[StrictStr, Field(description="Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1441,7 +1441,7 @@ class CasesApi:
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
         :type seq_id: int
-        :param data_type: Occurrence type (required)
+        :param data_type: Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort. (required)
         :type data_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

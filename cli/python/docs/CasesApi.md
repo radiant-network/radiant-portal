@@ -395,7 +395,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequencing Experiment ID
-    data_type = 'data_type_example' # str | Occurrence type
+    data_type = 'data_type_example' # str | Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
 
     try:
         # List tasks producing occurrences of a given type for a (case, sequencing) pair
@@ -416,7 +416,7 @@ Name | Type | Description  | Notes
  **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequencing Experiment ID | 
- **data_type** | **str**| Occurrence type | 
+ **data_type** | **str**| Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort. | 
 
 ### Return type
 

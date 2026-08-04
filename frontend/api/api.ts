@@ -6602,7 +6602,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6952,7 +6952,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7096,7 +7096,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7230,7 +7230,7 @@ export class CasesApi extends BaseAPI {
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
-     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
@@ -7313,7 +7313,9 @@ export class CasesApi extends BaseAPI {
 export const CaseTasksWithOccurrencesDataTypeEnum = {
     GermlineSnv: 'germline_snv',
     GermlineCnv: 'germline_cnv',
-    SomaticSnv: 'somatic_snv'
+    SomaticSnv: 'somatic_snv',
+    SomaticSnvTn: 'somatic_snv_tn',
+    SomaticSnvTo: 'somatic_snv_to'
 } as const;
 export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
 
