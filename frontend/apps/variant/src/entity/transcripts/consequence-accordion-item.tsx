@@ -28,7 +28,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
     <AccordionItem value={value}>
       <Card className="py-4 gap-0">
         <CardHeader>
-          <AccordionTrigger className="hover:cursor-pointer">
+          <AccordionTrigger>
             <div className="flex flex-1 ml-4 items-center gap-2">
               <span className="font-semibold text-base">{data.symbol || t('common.no_gene')}</span>
               {/* ref: https://d3b.atlassian.net/browse/SJRA-146 */}
