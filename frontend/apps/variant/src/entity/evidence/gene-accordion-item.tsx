@@ -24,7 +24,7 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
 
   return (
     <AccordionItem value={symbol} className="border rounded">
-      <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
+      <AccordionTrigger asChild className="py-4 px-5">
         <div className="flex flex-1 ml-4 items-center gap-2">
           <span className="font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
           {symbol && (
