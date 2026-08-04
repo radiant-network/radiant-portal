@@ -78,3 +78,18 @@ ordering_organization_code = "CHUSJ"
         name = "CASE-12345.recal.crai"
         size = 11
         url = "s3://test-bucket/CASE-12345.recal.crai"  # DOCUMENT-008 document already exists in the batch
+
+    [[cases.tasks]]
+    type_code = "clinical_report"
+    aliquots = ["NA12891"]
+    pipeline_name = "DGD Nexus"
+    pipeline_version = "1.0.0"
+    genome_build = "GRch38"
+
+        [[cases.tasks.output_documents]]
+        data_category_code = "clinical"
+        data_type_code = "ssnv"  # DOCUMENT-010 a clinical_report task's VCF must be tagged clinical_report, otherwise the ETL ingests it as variant data
+        format_code = "vcf"
+        name = "CASE-12345.report.vcf"
+        size = 11
+        url = "s3://test-bucket/CASE-12345.report.vcf"  # DOCUMENT-002 document not found at URL
