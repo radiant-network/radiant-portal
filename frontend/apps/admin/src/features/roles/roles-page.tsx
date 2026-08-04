@@ -10,6 +10,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
+import ViewPermissionsDialog from '../../components/view-permissions-dialog';
 import {
   getRoleUsage,
   MEMBER_ROLE,
@@ -76,6 +77,9 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeRole, setActiveRole] = useState<Role | null>(null);
+  // Read-only permissions dialog (default roles, the "see what's included" link, and every
+  // permissions-count click). Independent of the create/edit sheet.
+  const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
   // Add-mode prefill for Duplicate (undefined = a blank Add).
   const [initialValues, setInitialValues] = useState<RoleFormValues | undefined>(undefined);
 
@@ -100,6 +104,12 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
     setInitialValues(undefined);
     setActiveRole(role);
     setSheetOpen(true);
+  };
+  const openPermissions = (role: Role) => setPermissionsRole(role);
+  // Edit hand-off from the dialog (custom roles): close the dialog, open the edit sheet.
+  const editFromDialog = (role: Role) => {
+    setPermissionsRole(null);
+    openRole(role);
   };
   const openDuplicate = (role: Role) => {
     setActiveRole(null);
@@ -171,6 +181,7 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
       getRolesColumns(t, {
         users: MOCK_USERS,
         onOpen: openRole,
+        onViewPermissions: openPermissions,
         onViewMembers: role => onViewMembers(role.code),
         onDuplicate: openDuplicate,
         onDelete: requestDelete,
@@ -185,61 +196,71 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
   };
 
   return (
-    <Card className="h-auto w-full">
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">{t('admin.roles_page.count', { total: listedRoles.length })}</h2>
-            <p className="max-w-3xl text-sm text-muted-foreground">
-              {t('admin.roles_page.subtitle')} (
-              <Button
-                type="button"
-                variant="link"
-                className="h-auto p-0 align-baseline text-sm"
-                onClick={() => openRole(MEMBER_ROLE)}
-              >
-                {t('admin.roles_page.see_included')}
-              </Button>
-              ).
-            </p>
+    <div className="flex flex-col gap-4">
+      <Card className="h-auto w-full">
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold">{t('admin.roles_page.count', { total: listedRoles.length })}</h2>
+              <p className="max-w-3xl text-sm text-muted-foreground">
+                {t('admin.roles_page.subtitle')} (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 align-baseline text-sm"
+                  onClick={() => openPermissions(MEMBER_ROLE)}
+                >
+                  {t('admin.roles_page.see_included')}
+                </Button>
+                ).
+              </p>
+            </div>
+            <Button onClick={openAdd}>
+              <Plus />
+              {t('admin.roles_page.add')}
+            </Button>
           </div>
-          <Button onClick={openAdd}>
-            <Plus />
-            {t('admin.roles_page.add')}
-          </Button>
-        </div>
 
-        <DataTable
-          id="admin-roles"
-          columns={columns}
-          data={rows}
-          defaultColumnSettings={columnSettings}
-          loadingStates={{ total: false, list: false }}
-          total={rows.length}
-          TableFilters={<RolesTableFilters value={filters} onChange={handleFilterChange} />}
-          pagination={{ type: 'locale', state: pagination, onPaginationChange: setPagination }}
-          enableColumnOrdering
-          enableFullscreen
-          tableIndexResultPosition="bottom"
+          <DataTable
+            id="admin-roles"
+            columns={columns}
+            data={rows}
+            defaultColumnSettings={columnSettings}
+            loadingStates={{ total: false, list: false }}
+            total={rows.length}
+            TableFilters={<RolesTableFilters value={filters} onChange={handleFilterChange} />}
+            pagination={{ type: 'locale', state: pagination, onPaginationChange: setPagination }}
+            enableColumnOrdering
+            enableFullscreen
+            tableIndexResultPosition="bottom"
+          />
+        </CardContent>
+
+        <RoleSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          role={activeRole}
+          initialValues={initialValues}
+          roles={roles}
+          onSave={handleSave}
+          onDuplicate={openDuplicate}
+          onRequestDelete={requestDelete}
         />
 
-        {/* Card footer note: defaults are locked. */}
-        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Lock className="size-3.5" />
-          {t('admin.roles_page.footer_note')}
-        </p>
-      </CardContent>
+        {/* Read-only permissions dialog. `onEdit` gives custom roles an Edit hand-off to the sheet. */}
+        <ViewPermissionsDialog
+          role={permissionsRole}
+          open={!!permissionsRole}
+          onOpenChange={open => !open && setPermissionsRole(null)}
+          onEdit={editFromDialog}
+        />
+      </Card>
 
-      <RoleSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        role={activeRole}
-        initialValues={initialValues}
-        roles={roles}
-        onSave={handleSave}
-        onDuplicate={openDuplicate}
-        onRequestDelete={requestDelete}
-      />
-    </Card>
+      {/* Table footnote sits outside the card (defaults are locked). */}
+      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Lock className="size-3.5" />
+        {t('admin.roles_page.footer_note')}
+      </p>
+    </div>
   );
 }

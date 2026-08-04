@@ -26,8 +26,10 @@ function scopeRank(role: Role): number {
 
 type RolesColumnsOptions = {
   users: AdminUser[];
-  /** Open the sheet: read-only View for defaults, Edit for custom. */
+  /** Open the edit sheet (custom roles only). */
   onOpen: (role: Role) => void;
+  /** Open the read-only permissions dialog (default roles + any permissions-count click). */
+  onViewPermissions: (role: Role) => void;
   onViewMembers: (role: Role) => void;
   onDuplicate: (role: Role) => void;
   onDelete: (role: Role) => void;
@@ -36,13 +38,19 @@ type RolesColumnsOptions = {
 /** Column definitions for the Roles table. Display columns (no server sorting in the mock). */
 export function getRolesColumns(
   t: TFunction<string, undefined>,
-  { users, onOpen, onViewMembers, onDuplicate, onDelete }: RolesColumnsOptions,
+  { users, onOpen, onViewPermissions, onViewMembers, onDuplicate, onDelete }: RolesColumnsOptions,
 ): TableColumnDef<Role, any>[] {
   const columns = [
     columnHelper.accessor(row => roleName(row, t), {
       id: 'role',
       header: () => t('admin.roles_page.col.role'),
-      cell: ({ row }) => <RoleCell role={row.original} onOpen={() => onOpen(row.original)} />,
+      // Name click: custom → edit sheet, default → read-only dialog.
+      cell: ({ row }) => (
+        <RoleCell
+          role={row.original}
+          onOpen={() => (row.original.isDefault ? onViewPermissions(row.original) : onOpen(row.original))}
+        />
+      ),
       sortingFn: (a, b) => roleName(a.original, t).localeCompare(roleName(b.original, t)),
       size: 420,
       minSize: 260,
@@ -69,11 +77,11 @@ export function getRolesColumns(
     columnHelper.accessor(row => row.permissions.length, {
       id: 'permissions',
       header: () => t('admin.roles_page.col.permissions'),
-      // The count doubles as a shortcut into the role's sheet.
+      // The count doubles as a shortcut into the read-only permissions dialog (all roles).
       cell: ({ row }) => (
         <button
           type="button"
-          onClick={() => onOpen(row.original)}
+          onClick={() => onViewPermissions(row.original)}
           className="w-fit cursor-pointer text-sm text-primary hover:underline"
         >
           {t('admin.roles_page.permissions_count', { count: row.original.permissions.length })}
@@ -93,7 +101,13 @@ export function getRolesColumns(
       id: 'actions',
       header: () => null,
       cell: ({ row }) => (
-        <RoleActionsCell role={row.original} onOpen={onOpen} onDuplicate={onDuplicate} onDelete={onDelete} />
+        <RoleActionsCell
+          role={row.original}
+          onOpen={onOpen}
+          onViewPermissions={onViewPermissions}
+          onDuplicate={onDuplicate}
+          onDelete={onDelete}
+        />
       ),
       size: 56,
       minSize: 56,

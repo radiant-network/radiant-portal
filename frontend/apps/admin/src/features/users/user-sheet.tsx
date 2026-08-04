@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
+import ViewPermissionsDialog from '../../components/view-permissions-dialog';
 import { ADMIN_ROLE, MEMBER_ROLE, MOCK_TENANT, roleIsOrgScoped, ROLES_BY_CODE } from '../../mock/data';
 import type { AdminUser, Role } from '../../mock/types';
 
@@ -27,7 +28,6 @@ import AdminRoleToggle from './admin-role-toggle';
 import RoleCheckboxGroup from './role-checkbox-group';
 import type { RoleAssignmentForm, UserFormValues } from './user-form.types';
 import { userFormSchema } from './user-sheet-schema';
-import ViewPermissionsDialog from './view-permissions-dialog';
 
 type UserSheetProps = {
   open: boolean;
