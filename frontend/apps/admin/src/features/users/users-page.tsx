@@ -44,11 +44,16 @@ function assignmentsToRoles(values: UserFormValues): AssignedRole[] {
   );
 }
 
+type UsersPageProps = {
+  /** Seed filters, e.g. when arriving from a role's "assigned to" deep-link on the Roles page. */
+  initialFilters?: UsersFilterState;
+};
+
 /** The Users section: count header + Add user, the users table, and the Add/Edit sheet (mock data). */
-export default function UsersPage() {
+export default function UsersPage({ initialFilters }: UsersPageProps = {}) {
   const { t } = useI18n();
   const [users, setUsers] = useState<AdminUser[]>(MOCK_USERS);
-  const [filters, setFilters] = useState<UsersFilterState>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<UsersFilterState>(initialFilters ?? EMPTY_FILTERS);
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);

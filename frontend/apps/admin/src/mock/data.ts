@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 import type { ActionScope, AdminUser, Organization, OrgCategory, Permission, Role, Tenant } from './types';
 
 /**
@@ -108,6 +110,44 @@ export const SCOPE_BADGE_VARIANT: Record<ActionScope, 'cyan' | 'violet'> = {
   tenant: 'cyan',
   org: 'violet',
 };
+
+/**
+ * The single reserved action: managing members is bound to the Administrator role and can't be
+ * granted to a custom role. It's excluded from the custom-role permission picker.
+ */
+export const RESERVED_ACTION_CODE = 'can_manage_user';
+
+/**
+ * Role name + description resolve differently for default vs. custom roles: default (seeded) roles
+ * read i18n by code; custom roles created in the UI carry their own `label`/`description`.
+ */
+export function roleName(role: Role, t: TFunction<string, undefined>): string {
+  return role.isDefault ? t(`admin.roles.${role.code}.name`) : role.label;
+}
+export function roleDescription(role: Role, t: TFunction<string, undefined>): string {
+  return role.isDefault ? t(`admin.roles.${role.code}.description`) : (role.description ?? '');
+}
+
+/**
+ * Usage of a role across the tenant, for the roles list: how many members hold it and across how
+ * many distinct organizations it's assigned. The baseline `member` role is held by everyone
+ * (it's implicit), so its member count is the whole tenant and it has no org scope.
+ */
+export function getRoleUsage(role: Role, users: AdminUser[]): { members: number; orgs: number } {
+  if (role.code === 'member') {
+    return { members: users.length, orgs: 0 };
+  }
+  const orgCodes = new Set<string>();
+  let members = 0;
+  users.forEach(user => {
+    const grants = user.roles.filter(r => r.roleCode === role.code);
+    if (!grants.length) return;
+    members += 1;
+    // '*' = all orgs (not a concrete org) → not counted toward the distinct-org tally.
+    grants.forEach(g => (g.orgCodes ?? []).forEach(code => code !== '*' && orgCodes.add(code)));
+  });
+  return { members, orgs: orgCodes.size };
+}
 
 export const MOCK_USERS: AdminUser[] = [
   {

@@ -81,6 +81,59 @@
       "can_download_file": { "name": "Download files", "description": "Download case documents." },
       "can_ingest_data": { "name": "Ingest data", "description": "Submit data batches (cases, patients, samples, sequencing)." }
     },
+    "roles_page": {
+      "title": "Roles & Permissions",
+      "count": "{{total}} Roles",
+      "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base",
+      "see_included": "see what's included",
+      "add": "Add role",
+      "search_placeholder": "Search by role name",
+      "custom_only": "Custom roles only",
+      "footer_note": "Default roles can't be edited or deleted.",
+      "lock_tooltip": "Can't be edited or deleted",
+      "col": { "role": "Role", "scope": "Scope", "permissions": "Permissions", "members": "Assigned to" },
+      "action": { "view": "View", "edit": "Edit", "duplicate": "Duplicate", "delete": "Delete" },
+      "actions_aria": "Role actions",
+      "permissions_count_one": "{{count}} permission",
+      "permissions_count_other": "{{count}} permissions",
+      "members_count_one": "{{count}} member",
+      "members_count_other": "{{count}} members",
+      "orgs_count_one": "{{count}} organization",
+      "orgs_count_other": "{{count}} organizations",
+      "edit_aria": "Edit role",
+      "view_aria": "View role",
+      "empty": "No roles found"
+    },
+    "role": {
+      "add_title": "Add role",
+      "edit_title": "Edit role",
+      "description": "A role is a named bundle of permissions. Assign it to members to grant those actions—roles only add access, never remove it.",
+      "view_description": "Default roles can't be edited or deleted.",
+      "name": "Name",
+      "name_placeholder": "Role name",
+      "description_label": "Description",
+      "description_placeholder": "What is this role for? (optional)",
+      "permissions_label": "Permissions",
+      "permissions_hint": "Select at least one. Network and Organization permissions can be mixed.",
+      "view_permissions_heading": "Users with this role can:",
+      "admin_reserved_note": "The administrator role is reserved and cannot be duplicated.",
+      "duplicate_suffix": "(copy)",
+      "cancel": "Cancel",
+      "close": "Close",
+      "save": "Save changes",
+      "create": "Create role",
+      "duplicate": "Duplicate",
+      "delete": "Delete role",
+      "delete_title": "Delete {{name}}?",
+      "delete_body_one": "This deletes the role and unassigns it from {{count}} member in {{tenant}}.",
+      "delete_body_other": "This deletes the role and unassigns it from {{count}} members in {{tenant}}.",
+      "delete_body_empty": "This deletes the role. No members currently hold it.",
+      "delete_confirm": "Delete role",
+      "err": {
+        "at_least_one_permission": "Select at least one permission."
+      },
+      "ok": { "created": "Role created.", "updated": "Role updated.", "deleted": "Role deleted." }
+    },
     "user": {
       "add_title": "Add member",
       "edit_title": "Edit member",
@@ -220,7 +273,8 @@
         "max_50": "Max 50 characters",
         "invalid_email": "Enter a valid email.",
         "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
-        "code_duplicate": "An organization with this code already exists."
+        "code_duplicate": "An organization with this code already exists.",
+        "role_name_duplicate": "A role with this name already exists."
       }
     },
     "editor": {

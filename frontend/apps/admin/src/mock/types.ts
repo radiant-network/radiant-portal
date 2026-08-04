@@ -1,11 +1,16 @@
 /**
  * Mock data model for the Admin UI prototype.
  *
- * The backend `can_manage_user/org/role` endpoints are still Incoming, and the generated
- * client (`frontend/api/`) has no "admin user record" type — `TenantMembership` only carries a
- * caller's *effective* actions per tenant, not identity/role/org rows. So we shape our own model
- * here, mirroring the real tables (`users` + `user_role` + `role` + `organization`). Swap this for
- * the generated types when the endpoints land.
+ * The backend `can_manage_user/org/role` (users + roles) endpoints are still Incoming, and the
+ * generated client (`frontend/api/`) has no "admin user record" or role type — `TenantMembership`
+ * only carries a caller's *effective* actions per tenant, not identity/role/org rows. So we shape
+ * our own model here, mirroring the real tables (`users` + `user_role` + `role` + `organization`).
+ * Swap this for the generated types when the endpoints land.
+ *
+ * NOTE: the *action catalog* (our `Permission`) now HAS a real endpoint — `listActions()` →
+ * `ActionResponse { code, name, description, scope }` (SJRA-1737). We keep the mock `PERMISSIONS`
+ * for the Storybook prototype (no live backend/auth there), but `Permission` is intentionally a
+ * subset of `ActionResponse` so sourcing it from the server later is a straight swap.
  */
 
 /** Scope of a permission (backend "action"): tenant-wide, or resolved per organization. */
@@ -50,10 +55,16 @@ export interface Role {
   /** System identifier, not translated (e.g. `tenant_admin`). */
   code: string;
   /**
-   * Display label (e.g. "Administrator"). Interim: the UI now renders role names from i18n
-   * (`admin.roles.<code>.name`); this field is dropped once server-provided labels land.
+   * Display label (e.g. "Administrator"). Default roles render their name from i18n
+   * (`admin.roles.<code>.name`); custom roles created in the UI have no i18n entry, so THIS field
+   * holds their author-typed name. Read both via `roleName()`. Dropped once server labels land.
    */
   label: string;
+  /**
+   * Author-typed description for custom roles (default roles read `admin.roles.<code>.description`).
+   * Read both via `roleDescription()`.
+   */
+  description?: string;
   /** Locked default role vs. custom role. */
   isDefault: boolean;
   /** Permission (action) codes this role grants. */

@@ -81,6 +81,59 @@
       "can_download_file": { "name": "Télécharger les fichiers", "description": "Télécharger les documents de cas." },
       "can_ingest_data": { "name": "Importer des données", "description": "Soumettre des lots de données (cas, patients, échantillons, séquençage)." }
     },
+    "roles_page": {
+      "title": "Rôles et permissions",
+      "count": "{{total}} Rôles",
+      "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances",
+      "see_included": "voir ce qui est inclus",
+      "add": "Ajouter un rôle",
+      "search_placeholder": "Rechercher par nom de rôle",
+      "custom_only": "Rôles personnalisés seulement",
+      "footer_note": "Les rôles par défaut ne peuvent pas être modifiés ni supprimés.",
+      "lock_tooltip": "Non modifiable ni supprimable",
+      "col": { "role": "Rôle", "scope": "Portée", "permissions": "Permissions", "members": "Attribué à" },
+      "action": { "view": "Voir", "edit": "Modifier", "duplicate": "Dupliquer", "delete": "Supprimer" },
+      "actions_aria": "Actions du rôle",
+      "permissions_count_one": "{{count}} permission",
+      "permissions_count_other": "{{count}} permissions",
+      "members_count_one": "{{count}} membre",
+      "members_count_other": "{{count}} membres",
+      "orgs_count_one": "{{count}} organisation",
+      "orgs_count_other": "{{count}} organisations",
+      "edit_aria": "Modifier le rôle",
+      "view_aria": "Voir le rôle",
+      "empty": "Aucun rôle trouvé"
+    },
+    "role": {
+      "add_title": "Ajouter un rôle",
+      "edit_title": "Modifier le rôle",
+      "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
+      "view_description": "Les rôles par défaut ne peuvent pas être modifiés ni supprimés.",
+      "name": "Nom",
+      "name_placeholder": "Nom du rôle",
+      "description_label": "Description",
+      "description_placeholder": "À quoi sert ce rôle? (facultatif)",
+      "permissions_label": "Permissions",
+      "permissions_hint": "Sélectionnez-en au moins une. Les permissions Réseau et Organisation peuvent être combinées.",
+      "view_permissions_heading": "Les utilisateurs avec ce rôle peuvent :",
+      "admin_reserved_note": "Le rôle administrateur est réservé et ne peut pas être dupliqué.",
+      "duplicate_suffix": "(copie)",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "save": "Enregistrer les modifications",
+      "create": "Créer le rôle",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer le rôle",
+      "delete_title": "Supprimer {{name}}?",
+      "delete_body_one": "Cela supprime le rôle et le retire de {{count}} membre dans {{tenant}}.",
+      "delete_body_other": "Cela supprime le rôle et le retire de {{count}} membres dans {{tenant}}.",
+      "delete_body_empty": "Cela supprime le rôle. Aucun membre ne le possède actuellement.",
+      "delete_confirm": "Supprimer le rôle",
+      "err": {
+        "at_least_one_permission": "Sélectionnez au moins une permission."
+      },
+      "ok": { "created": "Rôle créé.", "updated": "Rôle mis à jour.", "deleted": "Rôle supprimé." }
+    },
     "user": {
       "add_title": "Ajouter un membre",
       "edit_title": "Modifier le membre",
@@ -220,7 +273,8 @@
         "max_50": "50 caractères maximum",
         "invalid_email": "Saisissez une adresse courriel valide.",
         "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
-        "code_duplicate": "Une organisation avec ce code existe déjà."
+        "code_duplicate": "Une organisation avec ce code existe déjà.",
+        "role_name_duplicate": "Un rôle avec ce nom existe déjà."
       }
     },
     "editor": {

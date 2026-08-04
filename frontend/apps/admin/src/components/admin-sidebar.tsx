@@ -20,14 +20,14 @@ type AdminSection = {
   id: AdminSectionId;
   labelKey: string;
   icon: LucideIcon;
-  /** Sections beyond Users are placeholders until their increments — shown but not navigable. */
+  /** A section not yet built shows in the nav but isn't navigable (disabled). */
   enabled: boolean;
 };
 
 export const ADMIN_SECTIONS: AdminSection[] = [
   { id: 'users', labelKey: 'admin.nav.users', icon: Users, enabled: true },
   { id: 'organizations', labelKey: 'admin.nav.organizations', icon: Building2, enabled: true },
-  { id: 'roles', labelKey: 'admin.nav.roles', icon: Shield, enabled: false },
+  { id: 'roles', labelKey: 'admin.nav.roles', icon: Shield, enabled: true },
 ];
 
 type AdminSidebarProps = {
