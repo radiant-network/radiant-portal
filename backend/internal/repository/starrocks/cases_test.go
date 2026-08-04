@@ -638,7 +638,8 @@ func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		tasks, err := repo.retrieveCaseTasks(t.Context(), 71)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, len(*tasks))
+		// Tasks 74 (somatic TN), 75, 76 (alignments) and 82 (somatic TO), ordered by id.
+		assert.Equal(t, 4, len(*tasks))
 
 		assert.Equal(t, 74, (*tasks)[0].ID)
 		assert.Equal(t, "radiant_somatic_annotation", (*tasks)[0].TypeCode)

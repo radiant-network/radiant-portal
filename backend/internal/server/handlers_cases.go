@@ -22,7 +22,7 @@ type caseDocumentsReader interface {
 }
 
 type caseTasksReader interface {
-	ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
+	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
 // SearchCasesHandler handles search of cases
@@ -265,7 +265,7 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			return
 		}
 
-		tasks, err := repo.ListTasksByCaseSeqAndTaskType(c.Request.Context(), caseId, seqId, selector.TaskTypeCode)
+		tasks, err := repo.ListTasksByCaseAndSequencing(c.Request.Context(), caseId, seqId, selector)
 		if err != nil {
 			HandleError(c, err)
 			return

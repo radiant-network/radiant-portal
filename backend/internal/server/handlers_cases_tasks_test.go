@@ -40,35 +40,43 @@ func (m *MockRepository) GetTaskContextBySequencingExperimentId(int) ([]*postgre
 	return nil, nil
 }
 
-func (m *MockRepository) ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
+// The somatic branches key on the cohort as well as the task type: tumor-only and
+// tumor-normal share a task_type_code, so a mock switching on the type alone would hide a
+// handler that drops the cohort.
+func (m *MockRepository) ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error) {
 	if caseId == 9999 {
 		return nil, fmt.Errorf("mock repo error")
 	}
-	switch taskTypeCode {
-	case types.AlignmentGermlineVariantCallingTaskTypeCode:
+	switch {
+	case selector.TaskTypeCode == types.AlignmentGermlineVariantCallingTaskTypeCode:
 		return []types.TaskOccurrenceType{{
-			ID: 91, TaskTypeCode: taskTypeCode, TaskTypeName: "Genome Alignment and Germline Variant Calling",
+			ID: 91, TaskTypeCode: selector.TaskTypeCode, TaskTypeName: "Genome Alignment and Germline Variant Calling",
 			PipelineName: "Dragen", PipelineVersion: "4.4.4", GenomeBuild: "GRch38", CreatedOn: mockTaskFixedTime,
 		}}, nil
-	case types.RadiantGermlineAnnotationTask:
+	case selector.TaskTypeCode == types.RadiantGermlineAnnotationTask:
 		return []types.TaskOccurrenceType{{
-			ID: 92, TaskTypeCode: taskTypeCode, TaskTypeName: "RADIANT Germline Annotation",
+			ID: 92, TaskTypeCode: selector.TaskTypeCode, TaskTypeName: "RADIANT Germline Annotation",
 			PipelineName: "Dragen", PipelineVersion: "4.4.4", GenomeBuild: "GRch38", CreatedOn: mockTaskFixedTime,
 		}}, nil
-	case types.RadiantSomaticAnnotationTask:
+	case selector.TaskTypeCode == types.RadiantSomaticAnnotationTask && selector.SomaticCohort == types.SomaticCohortTumorNormal:
 		return []types.TaskOccurrenceType{{
-			ID: 93, TaskTypeCode: taskTypeCode, TaskTypeName: "RADIANT Somatic Annotation",
+			ID: 93, TaskTypeCode: selector.TaskTypeCode, TaskTypeName: "RADIANT Somatic Annotation",
+			PipelineVersion: "1.0.0", GenomeBuild: "GRch38", CreatedOn: mockTaskFixedTime,
+		}}, nil
+	case selector.TaskTypeCode == types.RadiantSomaticAnnotationTask && selector.SomaticCohort == types.SomaticCohortTumorOnly:
+		return []types.TaskOccurrenceType{{
+			ID: 94, TaskTypeCode: selector.TaskTypeCode, TaskTypeName: "RADIANT Somatic Annotation",
 			PipelineVersion: "1.0.0", GenomeBuild: "GRch38", CreatedOn: mockTaskFixedTime,
 		}}, nil
 	}
 	return nil, nil
 }
 
-// emptyTaskRepo overrides ListTasksByCaseSeqAndTaskType to return nil so the
+// emptyTaskRepo overrides ListTasksByCaseAndSequencing to return nil so the
 // handler's nil → [] coercion can be exercised explicitly.
 type emptyTaskRepo struct{ MockRepository }
 
-func (e *emptyTaskRepo) ListTasksByCaseSeqAndTaskType(context.Context, int, int, string) ([]types.TaskOccurrenceType, error) {
+func (e *emptyTaskRepo) ListTasksByCaseAndSequencing(context.Context, int, int, types.TaskSelector) ([]types.TaskOccurrenceType, error) {
 	return nil, nil
 }
 
@@ -118,6 +126,22 @@ func Test_CaseOccurrenceTasksHandler_SomaticSNV_DispatchesSomaticAnnotationTaskT
 
 	// pipeline_name uses omitempty and is "" in the mock — must be absent from JSON.
 	expected := `[{"id":93,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_version":"1.0.0","genome_build":"GRch38","created_on":"2024-01-01T00:00:00Z"}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_CaseOccurrenceTasksHandler_SomaticSNVTumorNormal_DispatchesTumorNormalCohort(t *testing.T) {
+	w := caseOccurrenceTasksRequest("71", "74", "somatic_snv_tn")
+
+	expected := `[{"id":93,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_version":"1.0.0","genome_build":"GRch38","created_on":"2024-01-01T00:00:00Z"}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_CaseOccurrenceTasksHandler_SomaticSNVTumorOnly_DispatchesTumorOnlyCohort(t *testing.T) {
+	w := caseOccurrenceTasksRequest("71", "74", "somatic_snv_to")
+
+	expected := `[{"id":94,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_version":"1.0.0","genome_build":"GRch38","created_on":"2024-01-01T00:00:00Z"}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

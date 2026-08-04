@@ -57,10 +57,6 @@ func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*post
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
-	return nil, nil
-}
-
 func (m *CaseValidationMockRepo) CreateCase(_ context.Context, c *types.Case) error {
 	return nil
 }
