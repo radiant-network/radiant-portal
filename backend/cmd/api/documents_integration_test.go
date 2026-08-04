@@ -200,8 +200,9 @@ func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
 func Test_GetDocumentsFilters(t *testing.T) {
 	expected := `{
 		"data_type_code":[
-			{"key":"alignment", "label":"Aligned Reads"}, 
-			{"key":"cnvvis", "label":"CNV Visualization"}, 
+			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"clinical_report", "label":"Clinical Report"},
+			{"key":"cnvvis", "label":"CNV Visualization"},
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
 			{"key":"exomiser", "label":"Exomiser Report"}, 
 			{"key":"exp", "label":"Expression PNG"}, 

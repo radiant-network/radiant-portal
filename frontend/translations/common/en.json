@@ -252,7 +252,8 @@
       "exp": "Expression PNG",
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
-      "exomiser": "Exomiser Report"
+      "exomiser": "Exomiser Report",
+      "clinical_report": "Clinical Report"
     },
     "query_bar": {
       "selector": "Q{{index}}",

@@ -100,6 +100,7 @@ var CaseRelatedTaskTypes = map[string]struct{}{
 	"tumor_only_variant_calling":        {},
 	types.RadiantGermlineAnnotationTask: {},
 	types.RadiantSomaticAnnotationTask:  {},
+	types.ClinicalReportTaskTypeCode:    {},
 	types.ExomiserTaskTypeCode:          {},
 }
 

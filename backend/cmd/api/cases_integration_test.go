@@ -337,7 +337,8 @@ func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId i
 func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 	expected := `{
 		"data_type_code":[
-			{"key":"alignment", "label":"Aligned Reads"}, 
+			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"clinical_report", "label":"Clinical Report"},
 			{"key":"cnvvis", "label":"CNV Visualization"}, 
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
 			{"key":"exomiser", "label":"Exomiser Report"}, 

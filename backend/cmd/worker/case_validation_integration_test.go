@@ -395,7 +395,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "create_case[0].tasks[0].type_code",
 			},
 		}
@@ -844,7 +844,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "create_case[0].tasks[0].type_code",
 			},
 			{
@@ -969,7 +969,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
+				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
 				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1179,6 +1179,58 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 		assert.Equal(t, "Dragen", rGA.PipelineName)
 		assert.Equal(t, "4.4.4", rGA.PipelineVersion)
 		assert.Equal(t, "GRch38", rGA.GenomeBuild)
+	})
+}
+
+func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Clinical_Report")
+		size := int64(13)
+		reportUrl := "s3://test-bucket/Clinical_Report.nexus.vcf"
+		payload[0].Tasks = append(payload[0].Tasks, &types.CaseTaskBatch{
+			TypeCode:        types.ClinicalReportTaskTypeCode,
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "DGD Nexus",
+			PipelineVersion: "1.0.0",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{
+					DataCategoryCode: "clinical",
+					DataTypeCode:     "clinical_report",
+					FormatCode:       "vcf",
+					Name:             "Clinical_Report.nexus.vcf",
+					Size:             &size,
+					Url:              reportUrl,
+				},
+			},
+		})
+
+		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Clinical_Report").First(&ca)
+
+		var task *types.Task
+		env.Postgres.Table("task").Where("task_type_code = ?", types.ClinicalReportTaskTypeCode).First(&task)
+		assert.Equal(t, "DGD Nexus", task.PipelineName)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = ?", task.ID).Find(&tc)
+		assert.NotEmpty(t, tc)
+		for _, ctx := range tc {
+			if assert.NotNil(t, ctx.CaseID) {
+				assert.Equal(t, ca.ID, *ctx.CaseID)
+			}
+		}
+
+		var doc *types.Document
+		env.Postgres.Table("document").Where("url = ?", reportUrl).First(&doc)
+		assert.Equal(t, "clinical_report", doc.DataTypeCode)
+		assert.Equal(t, "vcf", doc.FileFormatCode)
 	})
 }
 
