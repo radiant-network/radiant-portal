@@ -75,6 +75,8 @@ const occurrenceMock = {
   germline_pc_wgs: 10,
   somatic_pf_tn_wgs: 7,
   somatic_pc_tn_wgs: 11,
+  somatic_pf_to_wgs: 4,
+  somatic_pc_to_wgs: 9,
   chromosome: '1',
   start: 10276319,
   end: 10276319,

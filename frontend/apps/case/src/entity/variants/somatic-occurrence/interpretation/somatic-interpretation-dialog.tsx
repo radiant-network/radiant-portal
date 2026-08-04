@@ -1,9 +1,14 @@
-import { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import { CaseEntity, CaseSequencingExperiment, ExpandedSomaticSNVOccurrence, InterpretationSomatic } from '@/api/api';
+import type {
+  CaseEntity,
+  CaseSequencingExperiment,
+  ExpandedSomaticSNVOccurrence,
+  InterpretationSomatic,
+} from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import {
@@ -29,7 +34,7 @@ import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
-import { Interpretation, InterpretationFormRef } from '../../interpretation/types';
+import type { Interpretation, InterpretationFormRef } from '../../interpretation/types';
 
 import SomaticInterpretationForm from './somatic-interpretation-form';
 
@@ -145,7 +150,7 @@ function SomaticInterpretationDialog({
     (url, opts) => fetchInterpretationSomatic(url, opts, tenant),
   );
 
-  const saveInterpretation = useSWRMutation(
+  const saveInterpretation = useSWRMutation<InterpretationSomatic, any, string, SomaticInterpretationFormInput>(
     `save-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
     (url, opts) => saveSomaticInterpretation(url, opts, tenant),
     {

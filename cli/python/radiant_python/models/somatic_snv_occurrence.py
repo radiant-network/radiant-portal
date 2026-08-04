@@ -30,6 +30,7 @@ class SomaticSNVOccurrence(BaseModel):
     """ # noqa: E501
     aa_change: StrictStr
     ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
+    aq: Optional[Union[StrictFloat, StrictInt]] = None
     chromosome: StrictStr
     clinvar: List[StrictStr]
     end: StrictInt
@@ -50,14 +51,17 @@ class SomaticSNVOccurrence(BaseModel):
     rsnumber: StrictStr
     seq_id: StrictInt
     somatic_pc_tn_wgs: StrictInt
+    somatic_pc_to_wgs: StrictInt
     somatic_pf_tn_wgs: Union[StrictFloat, StrictInt]
+    somatic_pf_to_wgs: Union[StrictFloat, StrictInt]
+    sq: Optional[Union[StrictFloat, StrictInt]] = None
     start: StrictInt
     symbol: StrictStr
     task_id: StrictInt
     transcript_id: Optional[StrictStr] = None
     variant_class: StrictStr
     vep_impact: VepImpact
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "end", "flag_type", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "aq", "chromosome", "clinvar", "end", "flag_type", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pc_to_wgs", "somatic_pf_tn_wgs", "somatic_pf_to_wgs", "sq", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -112,6 +116,7 @@ class SomaticSNVOccurrence(BaseModel):
         _obj = cls.model_validate({
             "aa_change": obj.get("aa_change"),
             "ad_ratio": obj.get("ad_ratio"),
+            "aq": obj.get("aq"),
             "chromosome": obj.get("chromosome"),
             "clinvar": obj.get("clinvar"),
             "end": obj.get("end"),
@@ -132,7 +137,10 @@ class SomaticSNVOccurrence(BaseModel):
             "rsnumber": obj.get("rsnumber"),
             "seq_id": obj.get("seq_id"),
             "somatic_pc_tn_wgs": obj.get("somatic_pc_tn_wgs"),
+            "somatic_pc_to_wgs": obj.get("somatic_pc_to_wgs"),
             "somatic_pf_tn_wgs": obj.get("somatic_pf_tn_wgs"),
+            "somatic_pf_to_wgs": obj.get("somatic_pf_to_wgs"),
+            "sq": obj.get("sq"),
             "start": obj.get("start"),
             "symbol": obj.get("symbol"),
             "task_id": obj.get("task_id"),

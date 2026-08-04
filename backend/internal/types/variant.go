@@ -392,6 +392,24 @@ var SomaticPcTnWgsField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticPfToWgsField = Field{
+	Name:          "somatic_pf_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticPcToWgsField = Field{
+	Name:          "somatic_pc_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
 	Table:         VariantTable,
 }

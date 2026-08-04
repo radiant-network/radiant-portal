@@ -49,9 +49,13 @@ func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Cont
 func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
 	somaticPfTn := 0.55
 	somaticPcTn := 6
+	somaticPfTo := 0.42
+	somaticPcTo := 21
 	germlinePf := 0.99
 	germlinePc := 3
 	adRatio := float32(1.0)
+	sq := float32(31.5)
+	aq := float32(4.2)
 	gnomadV3Af := 0.1
 	isCanonical := true
 	isManeSelect := true
@@ -84,7 +88,11 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, in
 			GermlinePfWgs:       &germlinePf,
 			SomaticPfTnWgs:      &somaticPfTn,
 			SomaticPcTnWgs:      &somaticPcTn,
+			SomaticPfToWgs:      &somaticPfTo,
+			SomaticPcToWgs:      &somaticPcTo,
 			AdRatio:             &adRatio,
+			Sq:                  &sq,
+			Aq:                  &aq,
 			TranscriptId:        "T001",
 		},
 	}, nil
@@ -105,8 +113,9 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
-		"aa_change":"p.Arg19His", 
-		"ad_ratio":1, 
+		"aa_change":"p.Arg19His",
+		"ad_ratio":1,
+		"aq":4.2,
 		"chromosome": "1",
 		"clinvar":["splice acceptor"], 
 		"end": 1001,
@@ -125,10 +134,13 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"picked_consequences":["Benign", "Pathogenic"], 
 		"rsnumber":"rs111111111", 
 		"seq_id":74, 
-		"somatic_pc_tn_wgs":6, 
-		"somatic_pf_tn_wgs":0.55, 
+		"somatic_pc_tn_wgs":6,
+		"somatic_pf_tn_wgs":0.55,
+		"somatic_pc_to_wgs":21,
+		"somatic_pf_to_wgs":0.42,
+		"sq":31.5,
 		"start": 1000,
-		"symbol":"BRAF", 
+		"symbol":"BRAF",
 		"task_id":74,
 		"transcript_id":"T001",
 		"variant_class":"class1", 

@@ -22,7 +22,7 @@ type caseDocumentsReader interface {
 }
 
 type caseTasksReader interface {
-	ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
+	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
 // SearchCasesHandler handles search of cases
@@ -227,8 +227,10 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // whose task type produces occurrences of the requested OccurrenceType. Used to
 // populate the task dropdown of the Variants tab header.
 //
-// The task_type that produces each occurrence type is resolved server-side; clients
-// only need to pass the occurrence type (germline_snv, germline_cnv, somatic_snv).
+// The task_type that produces each occurrence type is resolved server-side; clients only
+// need to pass the occurrence type. That resolution is more than a lookup for the somatic
+// types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
+// the tumor/normal makeup of the task, which no client can compute.
 // @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
 // @Id caseTasksWithOccurrences
 // @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
@@ -237,7 +239,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
-// @Param data_type query string true "Occurrence type" Enums(germline_snv, germline_cnv, somatic_snv)
+// @Param data_type query string true "Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort." Enums(germline_snv, germline_cnv, somatic_snv, somatic_snv_tn, somatic_snv_to)
 // @Produce json
 // @Success 200 {array} types.TaskOccurrenceType
 // @Failure 400 {object} types.ApiError
@@ -259,13 +261,13 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		taskTypeCode, err := types.OccurrenceType(c.Query("data_type")).TaskTypeCode()
+		selector, err := types.OccurrenceType(c.Query("data_type")).TaskSelector()
 		if err != nil {
 			HandleValidationError(c, err)
 			return
 		}
 
-		tasks, err := repo.ListTasksByCaseSeqAndTaskType(c.Request.Context(), caseId, seqId, *taskTypeCode)
+		tasks, err := repo.ListTasksByCaseAndSequencing(c.Request.Context(), caseId, seqId, selector)
 		if err != nil {
 			HandleError(c, err)
 			return

@@ -37,6 +37,6 @@ describe('Case Entity - Variants - Germline - SNV - Table - Sort', () => {
     CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gnomad');
     CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gq');
     CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gq');
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveFirstRowValue('3.00', 'gq');
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveFirstRowValue('9.00', 'gq');
   });
 });

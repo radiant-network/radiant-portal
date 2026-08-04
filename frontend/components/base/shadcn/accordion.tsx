@@ -51,14 +51,22 @@ export interface AccordionTriggerProps extends AccordionPrimitive.AccordionTrigg
 function AccordionTrigger({ className, children, chevronPlacement = 'left', ...props }: AccordionTriggerProps) {
   return (
     <AccordionPrimitive.Header className="flex justify-between items-center">
-      <AccordionPrimitive.Trigger className={cn('py-2 transition-all group w-full', className)} {...props}>
+      <AccordionPrimitive.Trigger
+        className={cn(
+          'group w-full cursor-pointer rounded-md py-2 text-left transition-all',
+          'focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+          className,
+        )}
+        {...props}
+      >
         <div className="flex flex-1 items-center">
           {chevronPlacement === 'left' && (
             <ChevronRight className="size-4 text-muted-foreground shrink-0 group-data-[state=open]:rotate-90 transition-transform duration-200 mr-2" />
           )}
           {children}
           {chevronPlacement === 'right' && (
-            <ChevronDown className="size-4 text-muted-foreground shrink-0 group-data-[state=open]:rotate-180 transition-transform duration-200 ml-2" />
+            <ChevronDown className="size-4 text-muted-foreground shrink-0 group-data-[state=open]:rotate-180 transition-transform duration-200 ml-auto" />
           )}
         </div>
       </AccordionPrimitive.Trigger>
@@ -74,10 +82,13 @@ AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 function AccordionContent({ className, children, ...props }: AccordionPrimitive.AccordionContentProps) {
   return (
     <AccordionPrimitive.Content
-      className={cn('overflow-hidden text-sm transition-all data-[state=open]:animate-accordion-down ', {
-        'data-[state=closed]:hidden': props.forceMount,
-        'data-[state=closed]:animate-accordion-up ': !props.forceMount,
-      })}
+      className={cn(
+        'overflow-hidden text-sm transition-all data-[state=open]:animate-accordion-down data-[disabled]:opacity-50',
+        {
+          'data-[state=closed]:hidden': props.forceMount,
+          'data-[state=closed]:animate-accordion-up ': !props.forceMount,
+        },
+      )}
       {...props}
     >
       <div className={cn('pb-2 pt-0', className)}>{children}</div>

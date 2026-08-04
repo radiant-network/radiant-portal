@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **ad_alt** | **int** |  | [optional] 
 **ad_ratio** | **float** |  | [optional] 
 **ad_total** | **int** |  | [optional] 
+**aq** | **float** |  | [optional] 
 **cadd_phred** | **float** |  | [optional] 
 **cadd_score** | **float** |  | [optional] 
 **chromosome** | **str** |  | 
@@ -44,10 +45,14 @@ Name | Type | Description | Notes
 **sift_pred** | **str** |  | [optional] 
 **sift_score** | **float** |  | [optional] 
 **somatic_pc_tn_wgs** | **int** |  | [optional] 
+**somatic_pc_to_wgs** | **int** |  | [optional] 
 **somatic_pf_tn_wgs** | **float** |  | [optional] 
+**somatic_pf_to_wgs** | **float** |  | [optional] 
 **somatic_pn_tn_wgs** | **int** |  | [optional] 
+**somatic_pn_to_wgs** | **int** |  | [optional] 
 **spliceai_ds** | **float** |  | [optional] 
 **spliceai_type** | **List[str]** |  | [optional] 
+**sq** | **float** |  | [optional] 
 **start** | **int** |  | 
 **symbol** | **str** |  | [optional] 
 **transcript_id** | **str** |  | [optional] 

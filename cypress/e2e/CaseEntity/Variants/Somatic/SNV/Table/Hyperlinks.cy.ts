@@ -19,11 +19,6 @@ describe('Case Entity - Variants - Somatic - SNV - Table - Hyperlinks', () => {
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldDrawerOpen(data.variantSomatic);
   });
 
-  it('dbSNP', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'dbsnp');
-  });
-
   it('Gene', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'gene');

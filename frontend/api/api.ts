@@ -2129,6 +2129,12 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'aq'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'cadd_phred'?: number;
     /**
      * 
@@ -2339,13 +2345,31 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
     /**
      * 
      * @type {number}
@@ -2358,6 +2382,12 @@ export interface ExpandedSomaticSNVOccurrence {
      * @memberof ExpandedSomaticSNVOccurrence
      */
     'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sq'?: number;
     /**
      * 
      * @type {number}
@@ -4539,6 +4569,12 @@ export interface SomaticSNVOccurrence {
     'ad_ratio'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'aq'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
@@ -4662,7 +4698,25 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pc_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pf_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'sq'?: number;
     /**
      * 
      * @type {number}
@@ -6602,7 +6656,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6952,7 +7006,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7096,7 +7150,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
-         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7230,7 +7284,7 @@ export class CasesApi extends BaseAPI {
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
-     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
@@ -7313,7 +7367,9 @@ export class CasesApi extends BaseAPI {
 export const CaseTasksWithOccurrencesDataTypeEnum = {
     GermlineSnv: 'germline_snv',
     GermlineCnv: 'germline_cnv',
-    SomaticSnv: 'somatic_snv'
+    SomaticSnv: 'somatic_snv',
+    SomaticSnvTn: 'somatic_snv_tn',
+    SomaticSnvTo: 'somatic_snv_to'
 } as const;
 export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
 

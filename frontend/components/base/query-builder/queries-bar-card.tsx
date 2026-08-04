@@ -126,7 +126,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger
             data-cy="query-builder-header"
-            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
+            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none"
             asChild
           >
             <QueryBuilderSavedFilters />
