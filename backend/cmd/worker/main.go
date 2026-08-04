@@ -40,6 +40,10 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	if err := database.AssertTLSRequirement(); err != nil {
+		glog.Fatalf("%v", err)
+	}
+
 	pollIntervalStr := utils.GetEnvOrDefault("POLL_INTERVAL_MS", "1000")
 	pollInterval, pollIntervalErr := strconv.Atoi(pollIntervalStr)
 	if pollIntervalErr != nil {
