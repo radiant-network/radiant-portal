@@ -111,8 +111,12 @@ VALUES (1, 1, NULL),
        (72, 71, NULL),
        (73, 72, NULL),
 
+       -- Task 74 is tumor-normal: seq 73 is a normal sample, seq 74 a tumoral one.
        (74, 73, 71),
        (74, 74, 71),
        (75, 73, NULL),
-       (76, 74, NULL)
+       (76, 74, NULL),
+
+       -- Task 82 is tumor-only: the same tumoral seq 74, with no normal counterpart.
+       (82, 74, 71)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
