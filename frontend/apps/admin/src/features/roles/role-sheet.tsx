@@ -73,6 +73,9 @@ export default function RoleSheet({
   });
 
   const permissions = form.watch('permissions');
+  // Read isDirty during render so RHF's formState Proxy actually tracks it; accessed only inside the
+  // submit handler it stays stale (false), which wrongly short-circuits every edit as a no-op.
+  const { isDirty } = form.formState;
   // Submit stays enabled; the first submit attempt reveals inline validation (name via RHF, the
   // permissions "pick at least one" rule manually — the picker isn't a native input RHF can focus).
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -96,7 +99,7 @@ export default function RoleSheet({
       }
     }
     // An unchanged edit is a no-op that just closes (no save, no success toast).
-    if (isEdit && !form.formState.isDirty) {
+    if (isEdit && !isDirty) {
       onOpenChange(false);
       return;
     }

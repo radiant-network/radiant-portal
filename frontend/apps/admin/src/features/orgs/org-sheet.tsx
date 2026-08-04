@@ -80,10 +80,14 @@ export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgS
 
   const currentCategoryLabel = org ? t(`admin.org_categories.${org.category_code}`) : '';
 
+  // Read isDirty during render so RHF's formState Proxy actually tracks it; accessed only inside the
+  // submit handler it stays stale (false), which wrongly short-circuits every edit as a no-op.
+  const { isDirty } = form.formState;
+
   const onValid = (values: OrgFormValues) => {
     if (isEdit) {
       // Edit is name-only; an unchanged edit is a no-op that just closes (no save, no toast).
-      if (!form.formState.isDirty) {
+      if (!isDirty) {
         onOpenChange(false);
         return;
       }

@@ -66,6 +66,9 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
   });
 
   const assignments = form.watch('assignments');
+  // Read isDirty during render so RHF's formState Proxy actually tracks it; accessed only inside the
+  // submit handler it stays stale (false), which wrongly short-circuits every edit as a no-op.
+  const { isDirty } = form.formState;
 
   // Shared "view permissions" dialog, owned here so both the role boxes and the baseline line
   // (member role) can open it.
@@ -159,7 +162,7 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
       setSubmitAttempted(true);
       return;
     }
-    if (isEdit && !form.formState.isDirty) {
+    if (isEdit && !isDirty) {
       onOpenChange(false);
       return;
     }
