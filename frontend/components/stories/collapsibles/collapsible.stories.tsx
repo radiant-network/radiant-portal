@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SavedFilterType } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/shadcn/collapsible';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 

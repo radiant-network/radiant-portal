@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import Plot from 'react-plotly.js';
-import { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
+import { type Annotations, type Data, type Layout, type PlotMouseEvent, type PlotSelectionEvent } from 'plotly.js';
 
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
-import { SwarmPlotPoint, SwarmPlotProps } from '@/components/base/charts/type';
+import { type SwarmPlotPoint, type SwarmPlotProps } from '@/components/base/charts/type';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { cn } from '@/components/lib/utils';
 

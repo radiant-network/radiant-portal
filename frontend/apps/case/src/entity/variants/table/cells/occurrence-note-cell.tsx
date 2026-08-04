@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 
-import { Count } from '@/api/api';
+import { type Count } from '@/api/api';
 import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
-import { GetOccurrenceNoteInput } from '@/components/base/notes/notes-container';
+import { type GetOccurrenceNoteInput } from '@/components/base/notes/notes-container';
 import NotesPopover from '@/components/base/notes/notes-popover';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { occurencesNotesApi } from '@/utils/api';

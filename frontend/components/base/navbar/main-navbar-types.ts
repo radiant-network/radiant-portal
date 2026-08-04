@@ -1,4 +1,4 @@
-import { MainNavbarItemProps } from './main-navbar-item';
+import { type MainNavbarItemProps } from './main-navbar-item';
 
 export interface BaseMainNavbarProps {
   logo: React.ReactNode;

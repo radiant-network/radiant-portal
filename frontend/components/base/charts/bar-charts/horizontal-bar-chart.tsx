@@ -7,7 +7,7 @@ import { useBarChartConfig } from '../hooks/use-chart-config';
 import { useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
 import BarRectangle from '../shapes/bar-rectangle';
-import { BarChartProps } from '../type';
+import { type BarChartProps } from '../type';
 
 /**
  * Horizontal bar chart with a single series, one bar per category.

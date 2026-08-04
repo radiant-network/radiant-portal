@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { DocumentResult } from '@/api/api';
+import { type DocumentResult } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
@@ -10,7 +10,7 @@ import DownloadFileCell from '@/components/base/data-table/cells/download-file-c
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 const columnHelper = createColumnHelper<DocumentResult>();

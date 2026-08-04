@@ -1,5 +1,6 @@
-import { ReactElement } from 'react';
-import { IconType } from './types';
+import { type ReactElement } from 'react';
+
+import { type IconType } from './types';
 
 export default function ShapeSquareIcon({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement {
   return (

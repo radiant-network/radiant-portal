@@ -14,7 +14,7 @@ import {
 import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
 
-import MainNavbarLink, { MainNavbarLinkProps } from './main-navbar-button';
+import MainNavbarLink, { type MainNavbarLinkProps } from './main-navbar-button';
 
 export interface MainNavbarItemProps extends Omit<MainNavbarLinkProps, 'children'> {
   title: string;

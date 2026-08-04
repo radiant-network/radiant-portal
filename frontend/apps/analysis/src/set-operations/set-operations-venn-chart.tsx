@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { mockSets, UserSetOption } from './mocks/user-set';
+import { mockSets, type UserSetOption } from './mocks/user-set';
 import { germlineThreeSets, germlineTwoSets, somaticThreeSets } from './mocks/variant-sets';
-import { SetSelectOption } from './set-operations-entity';
+import { type SetSelectOption } from './set-operations-entity';
 
 type SetOperationsVennChartProps = {
   userSets: UserSetOption[];

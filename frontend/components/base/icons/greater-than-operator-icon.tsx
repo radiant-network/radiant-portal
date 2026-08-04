@@ -1,5 +1,6 @@
-import { ReactElement } from 'react';
-import { IconType } from './types';
+import { type ReactElement } from 'react';
+
+import { type IconType } from './types';
 
 const GreaterThanOperatorIcon = ({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement => (
   <svg height={size} width={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill={fill} {...props}>

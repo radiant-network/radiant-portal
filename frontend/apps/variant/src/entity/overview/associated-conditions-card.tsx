@@ -1,7 +1,7 @@
-import { VariantOverview } from '@/api/api';
+import { type VariantOverview } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import { Badge } from '@/components/base/shadcn/badge';
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 

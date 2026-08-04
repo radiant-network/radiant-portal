@@ -1,5 +1,5 @@
-import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
-import { BadgeProps } from '@/components/base/shadcn/badge';
+import { type MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import { type BadgeProps } from '@/components/base/shadcn/badge';
 
 export const classificationCriterias: (MultiSelectorOption & {
   color?: BadgeProps['variant'];

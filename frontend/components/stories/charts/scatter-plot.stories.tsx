@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import ScatterPlot from '@/components/base/charts/scatter-plot/scatter-plot';
-import { ScatterPlotPoint } from '@/components/base/charts/type';
+import { type ScatterPlotPoint } from '@/components/base/charts/type';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 
 import { StorySection } from '../story-section';

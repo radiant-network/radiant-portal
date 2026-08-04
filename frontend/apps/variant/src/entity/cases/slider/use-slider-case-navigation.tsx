@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { SetURLSearchParams } from 'react-router';
+import { type SetURLSearchParams } from 'react-router';
 
 interface CaseItem {
   case_id: number;

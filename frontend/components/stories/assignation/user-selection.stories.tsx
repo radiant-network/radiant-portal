@@ -6,7 +6,7 @@ import {
   UserSelection,
   UserSelectionPopover,
 } from '@/components/base/assignation/user-selection';
-import { AvatarUser } from '@/components/base/avatar';
+import { type AvatarUser } from '@/components/base/avatar';
 
 import { StoryLabel, StorySection } from '../story-section';
 

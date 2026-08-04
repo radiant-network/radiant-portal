@@ -7,7 +7,7 @@ import { useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
 import ChartPalettePreview from '../palettes/chart-palette-preview';
 import PieSlice from '../shapes/pie-slice';
-import { PieChartProps } from '../type';
+import { type PieChartProps } from '../type';
 
 /**
  * Pie chart

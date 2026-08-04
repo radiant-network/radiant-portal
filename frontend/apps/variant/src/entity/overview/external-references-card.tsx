@@ -1,7 +1,7 @@
-import { VariantOverview } from '@/api/api';
+import { type VariantOverview } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { getDbSnpUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 

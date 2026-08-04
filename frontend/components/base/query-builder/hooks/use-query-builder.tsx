@@ -1,13 +1,27 @@
 /* eslint-disable complexity */
-import { createContext, Dispatch, useContext, useMemo, useReducer } from 'react';
+import { createContext, type Dispatch, useContext, useMemo, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
-import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
-import { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
+import {
+  type Count,
+  type CountBodyWithSqon,
+  type SortBody,
+  type Sqon,
+  type SqonContent,
+  type SqonOpEnum,
+} from '@/api/api';
+import { type AggregationConfig, type IFilterRangeConfig } from '@/components/cores/applications-config';
 
 import { createEmptyQuery, hasEmptyQuery, isEqualToField } from '../libs/sqon';
-import { BooleanOperators, ISqonGroupFacet, ISyntheticSqon, IValueContent, IValueFacet, TFacetValue } from '../type';
+import {
+  BooleanOperators,
+  type ISqonGroupFacet,
+  type ISyntheticSqon,
+  type IValueContent,
+  type IValueFacet,
+  type TFacetValue,
+} from '../type';
 
 export const DEFAULT_EMPTY_QUERY = {
   content: [],

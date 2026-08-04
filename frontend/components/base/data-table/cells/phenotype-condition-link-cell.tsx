@@ -1,5 +1,5 @@
 import PhenotypeConditionLink, {
-  PhenotypeConditionLinkProps,
+  type PhenotypeConditionLinkProps,
 } from '../../navigation/phenotypes/phenotype-condition-link';
 
 import EmptyCell from './empty-cell';

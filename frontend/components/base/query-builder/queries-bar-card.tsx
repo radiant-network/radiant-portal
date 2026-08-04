@@ -17,7 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import { Switch } from '@/components/base/shadcn/switch';
-import { ApplicationId } from '@/components/cores/applications-config';
+import { type ApplicationId } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useSqonsQBUpdatePreferenceEffect } from './hooks/use-query-builder-preference';

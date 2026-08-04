@@ -1,5 +1,5 @@
 import OccurrenceFlagDropdown, {
-  OccurrenceFlagDropdownProps,
+  type OccurrenceFlagDropdownProps,
 } from '@/components/base/dropdowns/occurrence-flag-dropdown';
 
 function OccurrenceFlagCell(props: OccurrenceFlagDropdownProps) {

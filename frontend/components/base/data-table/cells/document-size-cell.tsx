@@ -1,4 +1,4 @@
-import DocumentSize, { DocumentSizeProps } from '../../information/document-size';
+import DocumentSize, { type DocumentSizeProps } from '../../information/document-size';
 
 import EmptyCell from './empty-cell';
 

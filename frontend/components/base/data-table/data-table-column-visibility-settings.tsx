@@ -1,4 +1,4 @@
-import { UniqueIdentifier } from '@dnd-kit/core';
+import { type UniqueIdentifier } from '@dnd-kit/core';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { useI18n } from '@/components/hooks/i18n';

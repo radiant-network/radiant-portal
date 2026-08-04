@@ -3,11 +3,11 @@ import { SquarePen } from 'lucide-react';
 import useSWR from 'swr';
 
 import {
-  CaseEntity,
-  CaseSequencingExperiment,
-  ExpandedSomaticSNVOccurrence,
-  InterpretationSomatic,
-  SomaticSNVOccurrence,
+  type CaseEntity,
+  type CaseSequencingExperiment,
+  type ExpandedSomaticSNVOccurrence,
+  type InterpretationSomatic,
+  type SomaticSNVOccurrence,
 } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import OccurrenceFlagDropdown from '@/components/base/dropdowns/occurrence-flag-dropdown';

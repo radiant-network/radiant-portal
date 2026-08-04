@@ -3,7 +3,7 @@ import { CopyIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 } from 'uuid';
 
-import { SavedFilter, SavedFilterCreationInput } from '@/api/api';
+import { type SavedFilter, type SavedFilterCreationInput } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';

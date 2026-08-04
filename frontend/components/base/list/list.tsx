@@ -1,5 +1,5 @@
 import React from 'react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 const listVariants = tv({
   base: 'overflow-scroll rounded-xs',

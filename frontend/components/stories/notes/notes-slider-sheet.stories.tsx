@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 
 import { SavedFilterType } from '@/api/api';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 import { LoginContext } from '@/components/hooks/use-login';
 
 import { getHTTPMockNotesList, notesListApi } from '../api/api-notes';

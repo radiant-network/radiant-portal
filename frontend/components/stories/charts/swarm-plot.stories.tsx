@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import SwarmPlot from '@/components/base/charts/swarm-plot/swarm-plot';
-import { SwarmPlotPoint } from '@/components/base/charts/type';
+import { type SwarmPlotPoint } from '@/components/base/charts/type';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 
 import { StorySection } from '../story-section';

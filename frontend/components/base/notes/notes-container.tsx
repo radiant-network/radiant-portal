@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { ApiError, CreateOccurrenceNoteInput, OccurrenceNote } from '@/api/api';
+import { type ApiError, type CreateOccurrenceNoteInput, type OccurrenceNote } from '@/api/api';
 import RichTextEditor, {
   isEditorHasEmptyContent,
 } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';

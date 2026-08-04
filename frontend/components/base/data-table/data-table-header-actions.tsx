@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type ColumnPinningPosition, type Header, type SortDirection } from '@tanstack/react-table';
+import { type TFunction } from 'i18next';
 import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';

@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Responsive, useContainerWidth, ResponsiveLayouts } from 'react-grid-layout';
+import { Responsive, type ResponsiveLayouts, useContainerWidth } from 'react-grid-layout';
+
 import { Skeleton } from '../shadcn/skeleton';
+
+import { type GridCards } from './grid';
 import GridCard from './grid-card';
-import { GridCards } from './grid';
 
 type GridSkeletonProps = {
   cards: GridCards;

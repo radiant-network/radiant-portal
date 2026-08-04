@@ -1,5 +1,5 @@
+import AffectedStatusBadge, { type AffectedStatusBadgeProps } from '../../badges/affected-status-badge';
 
-import AffectedStatusBadge, { AffectedStatusBadgeProps } from '../../badges/affected-status-badge';
 import EmptyCell from './empty-cell';
 
 function AffectedStatusCell({ status, ...props }: AffectedStatusBadgeProps) {

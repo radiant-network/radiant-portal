@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import isEqual from 'lodash/isEqual';
 import { SearchIcon } from 'lucide-react';
 
-import { Aggregation } from '@/api/api';
+import { type Aggregation } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { useFacetConfig } from '@/components/base/query-builder/facets/hooks/use-facet-config';

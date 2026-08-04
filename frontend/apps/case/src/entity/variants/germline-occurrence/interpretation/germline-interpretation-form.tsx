@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
+import { type InterpretationGermline, type InterpretationPubmed } from '@/api/api';
 import { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
 import {
   classificationCriterias,
@@ -21,9 +21,9 @@ import InterpretationFormGeneric from '../../interpretation/interpretation-form-
 import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
   germlineInterpretationFormSchema,
-  GermlineInterpretationSchemaType,
-  InterpretationFormProps,
-  InterpretationFormRef,
+  type GermlineInterpretationSchemaType,
+  type InterpretationFormProps,
+  type InterpretationFormRef,
 } from '../../interpretation/types';
 
 const GermlineInterpretationForm = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(

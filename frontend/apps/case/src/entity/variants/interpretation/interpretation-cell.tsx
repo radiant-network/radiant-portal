@@ -1,4 +1,4 @@
-import { ComponentType, ReactNode } from 'react';
+import { type ComponentType, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 

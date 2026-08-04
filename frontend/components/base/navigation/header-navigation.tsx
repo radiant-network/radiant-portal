@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
-import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
-import { Button, ButtonProps } from '@/components/base/shadcn/button';
+import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
+import { Button, type ButtonProps } from '@/components/base/shadcn/button';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { cn } from '@/components/lib/utils';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CellContext } from '@tanstack/react-table';
+import { type CellContext } from '@tanstack/react-table';
 
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';

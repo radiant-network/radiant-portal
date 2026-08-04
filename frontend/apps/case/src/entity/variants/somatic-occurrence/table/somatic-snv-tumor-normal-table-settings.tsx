@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
+import { type CaseEntity, type GermlineSNVOccurrence, type SomaticSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
@@ -14,7 +14,7 @@ import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/som
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import TumorNormalFrequencyCell from '@/components/base/data-table/cells/tumor-normal-frequency-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 

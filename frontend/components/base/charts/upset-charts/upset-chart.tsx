@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { asSets, ISetLike, UpSetJS } from '@upsetjs/react';
+import { asSets, type ISetLike, UpSetJS } from '@upsetjs/react';
 import { throttle } from 'lodash';
 import { v4 } from 'uuid';
 
-import { UpsetChartProps } from '../type';
+import { type UpsetChartProps } from '../type';
 
 import './upset-chart.css';
 

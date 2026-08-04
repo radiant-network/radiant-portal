@@ -14,7 +14,7 @@ import { Input } from '@/components/base/shadcn/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { TextMuted } from '@/components/base/typography/text-muted';
-import { IFilterRangeConfig } from '@/components/cores/applications-config';
+import { type IFilterRangeConfig } from '@/components/cores/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
@@ -29,7 +29,7 @@ import {
   useQBNumericalSqon,
 } from '../hooks/use-query-builder';
 import { createEmptyQuery } from '../libs/sqon';
-import { IValueFacet, RangeOperators } from '../type';
+import { type IValueFacet, RangeOperators } from '../type';
 
 const INTEGER_TYPE = 'integer';
 

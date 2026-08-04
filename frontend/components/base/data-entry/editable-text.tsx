@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LucideProps, PencilLineIcon } from 'lucide-react';
+import { type LucideProps, PencilLineIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';

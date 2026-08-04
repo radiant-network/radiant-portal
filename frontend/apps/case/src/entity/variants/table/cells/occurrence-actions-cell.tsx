@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Row } from '@tanstack/react-table';
+import { type Row } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
-import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
+import { type CaseEntity, type GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';

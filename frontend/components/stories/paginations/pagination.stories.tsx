@@ -15,7 +15,7 @@ import {
   PaginationPageSize,
   PaginationPrevious,
 } from '@/components/base/shadcn/pagination';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection, StoryShowcase } from '../story-section';
 

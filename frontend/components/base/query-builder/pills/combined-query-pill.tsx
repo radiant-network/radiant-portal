@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { QBActionType, useQBDispatch, useQBSqons } from '../hooks/use-query-builder';
 import { getColorByIndex } from '../libs/theme';
-import { ISyntheticSqon } from '../type';
+import { type ISyntheticSqon } from '../type';
 
 import QueryPillContainer from './containers/query-pill-container';
 import QueryPillValuesContainer from './containers/query-pill-values-container';

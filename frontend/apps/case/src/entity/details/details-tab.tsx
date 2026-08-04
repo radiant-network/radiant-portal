@@ -1,4 +1,4 @@
-import { CaseEntity } from '@/api/api';
+import { type CaseEntity } from '@/api/api';
 import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';

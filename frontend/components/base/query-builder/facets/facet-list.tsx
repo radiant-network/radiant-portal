@@ -4,7 +4,7 @@ import { FacetContainer } from '@/components/base/query-builder/facets/facet-con
 import { SearchFacet } from '@/components/base/query-builder/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
-import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
+import { type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import UploadIdModal from './upload-id-facet';

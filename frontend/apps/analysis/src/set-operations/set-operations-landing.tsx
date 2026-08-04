@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next';
 
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import { type MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import AndOrIcon from '@/components/base/icons/and-or-icon';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/shadcn/button';
@@ -12,7 +12,7 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import logo1 from '../exploration/cards/assets/newsletter-widget-1.svg';
 
-import { SetSelectOption } from './set-operations-entity';
+import { type SetSelectOption } from './set-operations-entity';
 
 type SetOperationsLandingProps = {
   setTypesList: SetSelectOption[];

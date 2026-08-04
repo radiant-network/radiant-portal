@@ -1,10 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { CNVGeneOverlap } from '@/api/api';
+import { type CNVGeneOverlap } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { toKiloBases } from '@/components/lib/number-format';
 

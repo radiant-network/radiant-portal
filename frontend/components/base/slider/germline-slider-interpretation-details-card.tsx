@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarIcon, ClipboardList, LibraryBig, StethoscopeIcon } from 'lucide-react';
 import useSWR from 'swr';
 
-import { InterpretationGermline } from '@/api/api';
+import { type InterpretationGermline } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import { getClassificationCriteriaColor } from '@/components/base/classifications/interpretation';

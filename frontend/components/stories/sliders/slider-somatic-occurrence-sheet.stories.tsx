@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
 import { mocked } from 'storybook/test';
 
-import { SavedFilterType, SomaticSNVOccurrence } from '@/api/api';
+import { SavedFilterType, type SomaticSNVOccurrence } from '@/api/api';
 import { SomaticOccurrenceSheetContent } from '@/apps/case/src/entity/variants/somatic-occurrence/sliders/slider-somatic-occurrence-sheet';
 import SliderSheet from '@/components/base/slider/slider-sheet';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { caseEntityApi, httpCaseSomaticEntityApi } from '../api/api-case';

@@ -1,10 +1,11 @@
-import { CSS } from '@dnd-kit/utilities';
+import { type UniqueIdentifier } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
-import { UniqueIdentifier } from '@dnd-kit/core';
-import { ColumnSettings } from '@/components/base/data-table/data-table';
+import { CSS } from '@dnd-kit/utilities';
 import { GripVerticalIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
+import { type ColumnSettings } from '@/components/base/data-table/data-table';
 import VisibilityColumnSetting from '@/components/base/data-table/data-table-column-visibility-settings';
+import { cn } from '@/lib/utils';
 
 /**
  * SortableColumnSetting
@@ -17,7 +18,13 @@ type SortableColumnSettingProps = {
   sortEnabled: boolean;
   handleCheckboxChange: (target: string, checked: boolean) => void;
 };
-function TableSortableColumnSetting({ id, checked, column, handleCheckboxChange, sortEnabled }: SortableColumnSettingProps) {
+function TableSortableColumnSetting({
+  id,
+  checked,
+  column,
+  handleCheckboxChange,
+  sortEnabled,
+}: SortableColumnSettingProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -28,7 +35,12 @@ function TableSortableColumnSetting({ id, checked, column, handleCheckboxChange,
     return (
       <div key={id} className={cn('flex items-center gap-[8xp] mt-[8px] mr-[8px]')}>
         <GripVerticalIcon className="mr-[4px] opacity-50  cursor-not-allowed " size={14} />
-        <VisibilityColumnSetting id={id} checked={checked} label={column.label} handleCheckboxChange={handleCheckboxChange} />
+        <VisibilityColumnSetting
+          id={id}
+          checked={checked}
+          label={column.label}
+          handleCheckboxChange={handleCheckboxChange}
+        />
       </div>
     );
   }
@@ -38,7 +50,12 @@ function TableSortableColumnSetting({ id, checked, column, handleCheckboxChange,
       <div {...attributes} {...listeners}>
         <GripVerticalIcon className="mr-[4px]" size={14} />
       </div>
-      <VisibilityColumnSetting id={id} checked={checked} label={column.label} handleCheckboxChange={handleCheckboxChange} />
+      <VisibilityColumnSetting
+        id={id}
+        checked={checked}
+        label={column.label}
+        handleCheckboxChange={handleCheckboxChange}
+      />
     </div>
   );
 }

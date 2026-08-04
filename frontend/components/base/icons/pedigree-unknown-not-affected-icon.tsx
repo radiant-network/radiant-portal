@@ -1,5 +1,6 @@
-import React, { ReactElement } from 'react';
-import { IconType } from './types';
+import React, { type ReactElement } from 'react';
+
+import { type IconType } from './types';
 
 function PedigreeUnknownNotAffectedIcon({ size = 16, fill = 'currentColor', ...props }: IconType): ReactElement {
   return (

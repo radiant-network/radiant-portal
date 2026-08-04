@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { Term, VariantUninterpretedCase } from '@/api/api';
+import { type Term, type VariantUninterpretedCase } from '@/api/api';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
@@ -13,7 +13,7 @@ import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/pheno
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 

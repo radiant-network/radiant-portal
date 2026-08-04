@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router';
-import { VariantProps } from 'tailwind-variants';
+import { type VariantProps } from 'tailwind-variants';
 
 import { buttonVariants } from '@/components/base/shadcn/button';
 import { cn } from '@/components/lib/utils';

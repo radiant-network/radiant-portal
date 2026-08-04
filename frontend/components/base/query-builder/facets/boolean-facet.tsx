@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { Aggregation, SqonOpEnum } from '@/api/api';
+import { type Aggregation, SqonOpEnum } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import { Label } from '@/components/base/shadcn/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { SavedFilter } from '@/api/index';
+import { type SavedFilter } from '@/api/index';
 import List from '@/components/base/list/list';
 import ListItemAction from '@/components/base/list/list-item-with-action';
 import { Button } from '@/components/base/shadcn/button';

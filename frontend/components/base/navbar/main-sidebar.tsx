@@ -20,7 +20,7 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-import { BaseMainNavbarProps } from './main-navbar-types';
+import { type BaseMainNavbarProps } from './main-navbar-types';
 import { AvatarUserDetails } from './main-navbar-user-avatar';
 
 type MainSidebarProps = BaseMainNavbarProps & {

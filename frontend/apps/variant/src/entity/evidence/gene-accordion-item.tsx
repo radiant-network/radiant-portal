@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
-import { GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import { type GenePanelCondition, type GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import Empty from '@/components/base/empties/empty';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';

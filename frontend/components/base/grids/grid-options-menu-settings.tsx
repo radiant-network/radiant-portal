@@ -1,10 +1,13 @@
 import { SettingsIcon } from 'lucide-react';
+
+import { useI18n } from '@/components/hooks/i18n';
+
 import { Button } from '../shadcn/button';
 import { Checkbox } from '../shadcn/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '../shadcn/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../shadcn/tooltip';
-import { GridCards } from './grid';
-import { useI18n } from '@/components/hooks/i18n';
+
+import { type GridCards } from './grid';
 
 type GridOptionsMenuSettingsProps = {
   activeCards: string[];

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AxiosResponse, RawAxiosRequestConfig } from 'axios';
+import { type AxiosResponse, type RawAxiosRequestConfig } from 'axios';
 import { Barcode, FolderOpen, Search, TestTubeDiagonal, User, X } from 'lucide-react';
 import useSWR from 'swr';
 
-import { AutocompleteResult } from '@/api/api';
+import { type AutocompleteResult } from '@/api/api';
 import {
   Command,
   CommandEmpty,

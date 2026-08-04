@@ -1,4 +1,4 @@
-import { GermlineCNVOccurrence } from '@/api/api';
+import { type GermlineCNVOccurrence } from '@/api/api';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 

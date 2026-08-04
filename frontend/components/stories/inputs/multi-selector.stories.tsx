@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
 
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import { type MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 
 import { StoryLabel, StorySection } from '../story-section';
 

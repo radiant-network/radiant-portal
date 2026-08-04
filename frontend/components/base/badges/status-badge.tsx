@@ -1,6 +1,6 @@
 import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
 
-import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
 export type Status = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';

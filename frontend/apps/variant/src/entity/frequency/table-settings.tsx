@@ -1,16 +1,16 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 import {
-  ExternalFrequencies,
+  type ExternalFrequencies,
   GetGermlineVariantInternalFrequenciesSplitEnum,
-  InternalFrequenciesSplitBy,
+  type InternalFrequenciesSplitBy,
 } from '@/api/api';
 import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { toExponentialNotation } from '@/components/lib/number-format';

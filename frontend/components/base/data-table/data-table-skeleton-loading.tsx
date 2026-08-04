@@ -1,6 +1,6 @@
-import { HeaderGroup, PaginationState } from '@tanstack/react-table';
+import { type HeaderGroup, type PaginationState } from '@tanstack/react-table';
 
-import { ColumnSettings } from '@/components/base/data-table/data-table';
+import { type ColumnSettings } from '@/components/base/data-table/data-table';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 

@@ -7,7 +7,7 @@ import QueryPillContainer from '@/components/base/query-builder/pills/containers
 import LabelOperator from '@/components/base/query-builder/pills/operators/label-operator';
 import Operator from '@/components/base/query-builder/pills/operators/operator';
 import QueryPillValues from '@/components/base/query-builder/pills/values/query-pill-values';
-import { IValueFacet } from '@/components/base/query-builder/type';
+import { type IValueFacet } from '@/components/base/query-builder/type';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 
 type MultiSelectPillProps = {

@@ -1,6 +1,6 @@
-import { ColumnOrderState, ColumnPinningState, ColumnSizingState } from '@tanstack/react-table';
+import { type ColumnOrderState, type ColumnPinningState, type ColumnSizingState } from '@tanstack/react-table';
 
-import { ColumnVisiblity } from '../data-table';
+import { type ColumnVisiblity } from '../data-table';
 
 export type TableObserverProps = {
   columnOrder: ColumnOrderState;

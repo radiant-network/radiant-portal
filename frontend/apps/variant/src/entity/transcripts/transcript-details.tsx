@@ -1,6 +1,6 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { Transcript } from '@/api/api';
+import { type Transcript } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import EmptyField from '@/components/base/information/empty-field';
 import ExpandableList from '@/components/base/list/expandable-list';

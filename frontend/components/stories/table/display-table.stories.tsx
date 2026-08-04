@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper, HeaderContext, RowSelectionState } from '@tanstack/react-table';
+import { createColumnHelper, type HeaderContext, type RowSelectionState } from '@tanstack/react-table';
 
 import { SavedFilterType } from '@/api/api';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import { TableColumnDef } from '@/components/base/data-table/data-table';
+import { type TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 
-import { data, TableMockData } from './table-mock';
+import { data, type TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
 
@@ -229,6 +229,7 @@ export const WithRowSelection: Story = {
     ] as TableColumnDef<TableMockData, any>[],
   },
   render: args => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     return (
       <StorySection

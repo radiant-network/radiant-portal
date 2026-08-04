@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 
-import { SavedFilter } from '@/api/index';
+import { type SavedFilter } from '@/api/index';
 
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
-import { ISyntheticSqon } from '../type';
+import { type ISyntheticSqon } from '../type';
 
 type SavedFilterSyncWrapperProps = {
   children: React.ReactNode;

@@ -1,8 +1,8 @@
 import { useParams } from 'react-router';
 import { HospitalIcon } from 'lucide-react';
 
-import { VariantOverview } from '@/api/api';
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import { type VariantOverview } from '@/api/api';
+import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 

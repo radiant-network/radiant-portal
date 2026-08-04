@@ -1,11 +1,11 @@
 import useSWR from 'swr';
 
 import {
-  CaseEntity,
-  CasePatientClinicalInformation,
-  CaseSequencingExperiment,
-  ExpandedGermlineSNVOccurrence,
-  ExpandedSomaticSNVOccurrence,
+  type CaseEntity,
+  type CasePatientClinicalInformation,
+  type CaseSequencingExperiment,
+  type ExpandedGermlineSNVOccurrence,
+  type ExpandedSomaticSNVOccurrence,
 } from '@/api/api';
 import { PROBAND } from '@/components/base/constants';
 import { useTenant } from '@/components/hooks/use-tenant';

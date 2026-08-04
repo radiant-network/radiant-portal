@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { type z } from 'zod';
 
 /**
  * Ref for better solution still in discussion: https://github.com/colinhacks/zod/issues/2807

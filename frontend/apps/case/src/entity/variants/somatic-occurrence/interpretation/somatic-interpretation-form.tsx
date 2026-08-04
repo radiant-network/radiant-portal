@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { InterpretationSomatic } from '@/api/api';
+import { type InterpretationSomatic } from '@/api/api';
 import {
   getOncogenicityClassificationCriteriaColor,
   oncogenicityClassificationCriterias,
@@ -20,10 +20,10 @@ import { ToggleGroup, ToggleGroupItem } from 'components/base/shadcn/toggle-grou
 import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
 import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
-  InterpretationFormProps,
-  InterpretationFormRef,
+  type InterpretationFormProps,
+  type InterpretationFormRef,
   somaticInterpretationFormSchema,
-  SomaticInterpretationSchemaType,
+  type SomaticInterpretationSchemaType,
 } from '../../interpretation/types';
 
 const SomaticInterpretationForm = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(

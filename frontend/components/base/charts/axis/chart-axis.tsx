@@ -1,5 +1,6 @@
 import { XAxis, YAxis } from 'recharts';
-import { ChartAxisProps, ChartLayout } from '../type';
+
+import { type ChartAxisProps, type ChartLayout } from '../type';
 
 type AxisProps = {
   layout: ChartLayout;

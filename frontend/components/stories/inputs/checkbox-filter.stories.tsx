@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TestTubeDiagonalIcon } from 'lucide-react';
 
 import ChecboxFilter from '@/components/base/checkboxes/checkbox-filter';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StoryLabel, StorySection } from '../story-section';
 

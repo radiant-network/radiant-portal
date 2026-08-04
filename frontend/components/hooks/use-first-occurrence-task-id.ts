@@ -1,4 +1,4 @@
-import { CaseTasksWithOccurrencesDataTypeEnum } from '../../api/api';
+import { type CaseTasksWithOccurrencesDataTypeEnum } from '../../api/api';
 
 import { useOccurrenceTasks } from './use-occurrence-tasks';
 

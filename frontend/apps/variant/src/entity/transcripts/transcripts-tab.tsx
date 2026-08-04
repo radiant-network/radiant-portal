@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import useSWR from 'swr';
 
-import { VariantConsequence } from '@/api/api';
+import { type VariantConsequence } from '@/api/api';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';

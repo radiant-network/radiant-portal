@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
-import { PaginationState } from '@tanstack/table-core';
+import { type PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
 import {
-  ApiError,
-  ListBodyWithCriteria,
-  SearchCriterion,
-  SortBody,
-  VariantInterpretedCasesSearchResponse,
+  type ApiError,
+  type ListBodyWithCriteria,
+  type SearchCriterion,
+  type SortBody,
+  type VariantInterpretedCasesSearchResponse,
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
@@ -17,7 +17,7 @@ import { variantsApi } from '@/utils/api';
 
 import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
-import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
+import InterpretedCasesFilters, { type InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
 import { INTERPRETED_CASE_ID_PARAM, INTERPRETED_PATIENT_ID_PARAM } from './constants';
 

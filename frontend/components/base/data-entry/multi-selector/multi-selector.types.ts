@@ -1,7 +1,7 @@
-import React from 'react';
-import { Command as CommandPrimitive } from 'cmdk';
+import type React from 'react';
+import { type Command as CommandPrimitive } from 'cmdk';
 
-import { Command } from '@/components/base/shadcn/command';
+import { type Command } from '@/components/base/shadcn/command';
 
 export interface MultiSelectorOption {
   value: string;

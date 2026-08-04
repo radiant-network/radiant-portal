@@ -1,4 +1,10 @@
-import { flexRender, getCoreRowModel, OnChangeFn, RowSelectionState, useReactTable } from '@tanstack/react-table';
+import {
+  flexRender,
+  getCoreRowModel,
+  type OnChangeFn,
+  type RowSelectionState,
+  useReactTable,
+} from '@tanstack/react-table';
 import { SearchIcon } from 'lucide-react';
 
 import {
@@ -15,7 +21,7 @@ import { cn } from '@/components/lib/utils';
 
 import Empty from '../empties/empty';
 
-import { HEADER_HEIGHT, ROW_HEIGHT, TableColumnDef } from './data-table';
+import { HEADER_HEIGHT, ROW_HEIGHT, type TableColumnDef } from './data-table';
 
 const TABLE_MAX_HEIGHT = HEADER_HEIGHT + ROW_HEIGHT * 10;
 

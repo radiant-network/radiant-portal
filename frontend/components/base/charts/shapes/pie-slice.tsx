@@ -1,6 +1,6 @@
 import { Pie, Sector } from 'recharts';
 
-import { PieSliceProps } from '../type';
+import { type PieSliceProps } from '../type';
 
 /**
  * Slice of pie chart.
