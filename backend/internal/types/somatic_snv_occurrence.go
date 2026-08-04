@@ -182,8 +182,12 @@ var SomaticSNVInfoAqField = Field{
 	Table:         SomaticSNVOccurrenceTable,
 }
 
-var SomaticSNVInfoHotspotAlleleField = Field{
-	Name:            "info_hotspotallele",
+// info_hotspot is the caller-agnostic boolean the ETL resolves from whichever INFO key the caller
+// emits — DRAGEN's lowercase `hotspot` flag, or `HotspotAllele` from GATK-era callers. Never fall
+// back to info_hotspotallele here: that fallback already happened at ingestion, and the raw allele
+// index is truthy for values that resolve to false.
+var SomaticSNVInfoHotspotField = Field{
+	Name:            "info_hotspot",
 	Alias:           "hotspot",
 	CanBeSelected:   true,
 	CanBeFiltered:   true,
@@ -210,7 +214,7 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	PickedTranscriptIdField,
 	RsNumberField,
 	PickedOmimInheritanceCodeField,
-	SomaticSNVInfoHotspotAlleleField,
+	SomaticSNVInfoHotspotField,
 	ClinvarField,
 	GnomadV3AfField,
 	GermlinePfWgsField,

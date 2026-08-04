@@ -144,7 +144,7 @@ func Test_Somatic_SNV_List_Return_TumorOnly_Occurrence_When_TumorOnlyTask(t *tes
 				"has_interpretation":false,
 				"has_note":false,
 				"hgvsg":"hgvsg1",
-				"hotspot":true,
+				"hotspot":false,
 				"is_canonical":true,
 				"is_mane_plus":null,
 				"is_mane_select":true,
@@ -258,6 +258,14 @@ func Test_Somatic_SNV_Aggregation(t *testing.T) {
 			"size": 10
 		}`
 	expected := `[{"key": "LOW", "count": 1}, {"key": "MODIFIER", "count": 1}]`
+	testSomaticSNVAggregation(t, "aggregation", body, []string{}, expected)
+}
+
+// The hotspot facet now aggregates a BOOLEAN column, which buckets as "0"/"1" rather than
+// "false"/"true" — pinned here because the frontend has to label those keys.
+func Test_Somatic_SNV_Aggregation_Hotspot(t *testing.T) {
+	body := `{"field": "hotspot", "size": 10}`
+	expected := `[{"key": "0", "count": 1}, {"key": "1", "count": 1}]`
 	testSomaticSNVAggregation(t, "aggregation", body, []string{}, expected)
 }
 
