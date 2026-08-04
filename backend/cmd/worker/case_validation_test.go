@@ -4302,6 +4302,96 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 	assert.Len(t, record.Errors, 0)
 }
 
+func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantVCF_Error(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "ssnv", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	expected := types.BatchMessage{
+		Code:    "DOCUMENT-010",
+		Message: "A document with a data type ssnv and format type vcf cannot be linked to a task of type clinical_report.",
+		Path:    "create_case[0].tasks[0].output_documents[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithGermlineCNVVCF_Error(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "gcnv", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	expected := types.BatchMessage{
+		Code:    "DOCUMENT-010",
+		Message: "A document with a data type gcnv and format type vcf cannot be linked to a task of type clinical_report.",
+		Path:    "create_case[0].tasks[0].output_documents[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithClinicalReportVCF_OK(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "clinical_report", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantPDF_OK(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "ssnv", FormatCode: "pdf"}
+
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+// A non-variant data type is left alone: the ETL only reads snv / ssnv / gcnv out of a VCF.
+func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithNonVariantVCF_OK(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "ssup", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithVariantVCF_OK(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "snv", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.RadiantGermlineAnnotationTask, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithClinicalReportVCF_OK(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	doc := types.OutputDocumentBatch{DataTypeCode: "clinical_report", FormatCode: "vcf"}
+
+	record.validateDocumentDataTypeForTaskType(types.RadiantSomaticAnnotationTask, &doc, "create_case[0].tasks[0].output_documents[0]")
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
 func Test_validateFileMetadata_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
 

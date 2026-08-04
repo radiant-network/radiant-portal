@@ -1027,6 +1027,16 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
 				Path:    "create_case[0].tasks[0].output_documents[4]",
 			},
+			{
+				Code:    "DOCUMENT-010",
+				Message: "A document with a data type ssnv and format type vcf cannot be linked to a task of type clinical_report.",
+				Path:    "create_case[0].tasks[1].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.report.vcf for create_case 0 - task 1 - output document 0.",
+				Path:    "create_case[0].tasks[1].output_documents[0]",
+			},
 		}
 		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
 	})

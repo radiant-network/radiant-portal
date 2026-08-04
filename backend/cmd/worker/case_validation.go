@@ -91,6 +91,7 @@ const (
 	DocumentHashMismatch                     = "DOCUMENT-007"
 	DocumentDuplicateInBatch                 = "DOCUMENT-008"
 	DocumentNameInconsistency                = "DOCUMENT-009"
+	DocumentDataTypeNotAllowedForTaskType    = "DOCUMENT-010"
 )
 
 const RelationshipProbandCode = "proband"
@@ -111,6 +112,12 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	types.RadiantGermlineAnnotationTask: {},
 	types.RadiantSomaticAnnotationTask:  {},
 	types.ExomiserTaskTypeCode:          {},
+}
+
+var VariantVCFDataTypeCodes = map[string]struct{}{
+	"snv":  {},
+	"ssnv": {},
+	"gcnv": {},
 }
 
 var SingleAliquotTaskTypes = map[string]struct{}{
@@ -1252,10 +1259,22 @@ func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentB
 	}
 }
 
+func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode string, doc *types.OutputDocumentBatch, path string) {
+	if taskTypeCode != types.ClinicalReportTaskTypeCode || doc.FormatCode != "vcf" {
+		return
+	}
+
+	if _, isVariantDataType := VariantVCFDataTypeCodes[doc.DataTypeCode]; isVariantDataType {
+		msg := fmt.Sprintf("A document with a data type %s and format type %s cannot be linked to a task of type %s.", doc.DataTypeCode, doc.FormatCode, taskTypeCode)
+		cr.AddErrors(msg, DocumentDataTypeNotAllowedForTaskType, path)
+	}
+}
+
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
 		for did, doc := range t.OutputDocuments {
 			path := fmt.Sprintf("create_case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
+			cr.validateDocumentDataTypeForTaskType(t.TypeCode, doc, path)
 			if d, ok := cr.Documents[doc.Url]; ok {
 				cr.validateDocumentExists(doc, d, path)
 				cr.validateDocumentIsOutputOfAnotherTask(d, path)
