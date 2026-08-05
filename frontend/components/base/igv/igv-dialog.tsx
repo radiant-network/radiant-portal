@@ -1,7 +1,7 @@
-import { ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import useSWR from 'swr';
 
-import { IGVTracks } from '@/api/api';
+import type { IGVTracks } from '@/api/api';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';

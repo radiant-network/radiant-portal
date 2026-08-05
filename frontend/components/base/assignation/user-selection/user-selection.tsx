@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { User, X } from 'lucide-react';
 
 import { avatarStyles, getIconSize } from '@/components/base/avatar/avatar.styles';
-import { AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarUser } from '@/components/base/avatar/avatar.types';
 import { getInitials, getUserColor } from '@/components/base/avatar/avatar.utils';
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { useI18n } from '@/components/hooks/i18n';

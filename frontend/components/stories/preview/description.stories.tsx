@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SavedFilterType } from '@/api/api';
 import { DescriptionSection } from '@/components/base/slider/description';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 

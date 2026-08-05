@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { SearchCriterion, VariantCasesFilters } from '@/api/index';
-import { IFilterButton } from '@/components/base/buttons/filter-button';
+import type { SearchCriterion, VariantCasesFilters } from '@/api/index';
+import type { IFilterButton } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,
@@ -12,7 +12,7 @@ import getItemTransmissionMode from '@/components/base/data-table/filters/option
 import getItemZygosity from '@/components/base/data-table/filters/options/option-zygosity';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { variantsApi } from '@/utils/api';
 
 import PhenotypeCasesFilter from './filters/phenotype-cases-filter';

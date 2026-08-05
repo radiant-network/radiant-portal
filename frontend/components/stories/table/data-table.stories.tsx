@@ -5,13 +5,13 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
-import DataTable, { TableColumnDef } from '@/components/base/data-table/data-table';
+import DataTable, { type TableColumnDef } from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/shadcn/card';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 
-import { data, mockColumns, mockDefaultColumnSettings, TableMockData } from './table-mock';
+import { data, mockColumns, mockDefaultColumnSettings, type TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
 

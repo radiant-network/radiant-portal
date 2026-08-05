@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { IIGVBrowser, IIGVBrowserOptions } from './types';
+import type { IIGVBrowser, IIGVBrowserOptions } from './types';
 
 import './igv.css';
 

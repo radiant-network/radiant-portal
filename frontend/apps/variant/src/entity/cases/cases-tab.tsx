@@ -3,14 +3,15 @@ import { useParams } from 'react-router';
 import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
-import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
+import type { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
+
+import { tabContentClassName } from '../../style';
 
 import { CasesFiltersProvider } from './table/filters/cases-filters-context';
 import InterpretedCasesTable from './interpreted-cases-table';

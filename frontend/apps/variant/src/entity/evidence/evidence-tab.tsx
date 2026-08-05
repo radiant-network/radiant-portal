@@ -1,5 +1,6 @@
 import { cn } from '@/components/lib/utils';
-import { tabContentClassName } from '@/style';
+
+import { tabContentClassName } from '../../style';
 
 import ClinVarCard from './clinVar-card';
 import ConditionPhenotypeCard from './condition-phenotype-card';

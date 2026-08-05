@@ -34,7 +34,11 @@ describe('Occurrences - Germline - SNV - Count - Variant', () => {
         cy.apiCall('POST', `occurrences/germline/snv/${case_id}/${seq_id}/${task_id}/count`, body, Auth.token).then(res => {
           response = res;
           expect(response.status).to.eq(200);
-          expect(response.body.count).to.eq(facetData.count);
+          if (facetData.count instanceof RegExp) {
+            expect(response.body.count.toString()).to.match(facetData.count);
+          } else {
+            expect(response.body.count).to.eq(facetData.count);
+          }
         });
       });
     });

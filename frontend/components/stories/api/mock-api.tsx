@@ -1,9 +1,10 @@
+/* eslint-disable complexity */
 // @ts-ignore
 import { HttpResponse } from 'msw';
 
-import { SqonContent, SqonOpEnum } from '@/api/api';
+import { type SqonContent, SqonOpEnum } from '@/api/api';
 
-import { advancedData, AdvancedTableMockData } from '../table/table-mock';
+import { advancedData, type AdvancedTableMockData } from '../table/table-mock';
 
 export const mockAggregateApi = `api/mock/aggregate`;
 export const mockAggregateStatisticApi = `api/mock/statistics`;

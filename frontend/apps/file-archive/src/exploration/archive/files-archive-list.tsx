@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
+import type { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
@@ -54,7 +54,7 @@ function FilesArchiveList() {
     <DataTable
       id="files-archive-list"
       columns={columns}
-      TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={false} />}
+      TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} />}
       data={data?.list ?? []}
       defaultColumnSettings={defaultSettings}
       hasError={!!error}

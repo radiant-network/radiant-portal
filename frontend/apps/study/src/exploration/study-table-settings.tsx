@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { type TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BooleanCell from '@/components/base/data-table/cells/boolean-cell';
@@ -7,7 +7,7 @@ import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
-import { type Study } from './mocks/study-model';
+import type { Study } from './mocks/study-model';
 
 const columnHelper = createColumnHelper<Study>();
 

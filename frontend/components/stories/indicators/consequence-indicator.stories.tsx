@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SavedFilterType, VepImpact } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 

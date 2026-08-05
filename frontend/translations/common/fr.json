@@ -424,7 +424,8 @@
       "exp": "PNG d’expression",
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
-      "exomiser": "Rapport Exomiser"
+      "exomiser": "Rapport Exomiser",
+      "clinical_report": "Rapport clinique"
     },
     "query_bar": {
       "selector": "Q{{index}}",

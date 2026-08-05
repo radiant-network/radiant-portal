@@ -1,11 +1,11 @@
-import { CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Column,
-  ColumnDef,
-  ColumnOrderState,
-  ColumnPinningPosition,
-  ColumnPinningState,
-  ExpandedState,
+  type Column,
+  type ColumnDef,
+  type ColumnOrderState,
+  type ColumnPinningPosition,
+  type ColumnPinningState,
+  type ExpandedState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -13,20 +13,20 @@ import {
   getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  GroupingState,
-  Header,
-  OnChangeFn,
-  PaginationState,
-  Row,
-  RowPinningState,
-  SortingState,
-  Table as TableType,
+  type GroupingState,
+  type Header,
+  type OnChangeFn,
+  type PaginationState,
+  type Row,
+  type RowPinningState,
+  type SortingState,
+  type Table as TableType,
   useReactTable,
 } from '@tanstack/react-table';
 import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
-import { SortBody, SortBodyOrderEnum } from '@/api/api';
+import { type SortBody, SortBodyOrderEnum } from '@/api/api';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';

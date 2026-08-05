@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
+import type { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
-import DataTable, { TableProps } from '../data-table/data-table';
+import DataTable, { type TableProps } from '../data-table/data-table';
 import { DataTableProvider } from '../data-table/hooks/use-data-table';
 import { Card, CardContent } from '../shadcn/card';
 

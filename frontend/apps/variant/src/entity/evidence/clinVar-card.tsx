@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { ExternalLink, Search } from 'lucide-react';
 import useSWR from 'swr';
 
-import { ApiError, ClinvarVariantConditions } from '@/api/api';
+import type { ApiError, ClinvarVariantConditions } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';

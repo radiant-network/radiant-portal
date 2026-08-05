@@ -1,7 +1,7 @@
 import { BrainCircuit } from 'lucide-react';
 
-import { VariantOverview } from '@/api/api';
-import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import type { VariantOverview } from '@/api/api';
+import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
 import ClassificationSection from './classification-section';

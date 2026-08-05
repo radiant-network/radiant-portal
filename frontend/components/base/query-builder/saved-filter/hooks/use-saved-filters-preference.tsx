@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { SavedFilter, SavedFilterType, UserPreference } from '@/api/api';
+import type { SavedFilter, SavedFilterType, UserPreference } from '@/api/api';
 import { userPreferenceApi } from '@/utils/api';
 
 import { getDefaultSavedFilterContext } from './use-saved-filter';

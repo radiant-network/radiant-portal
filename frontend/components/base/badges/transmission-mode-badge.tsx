@@ -1,10 +1,10 @@
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { MultiSelectorOption } from '../data-entry/multi-selector/multi-selector.types';
+import type { MultiSelectorOption } from '../data-entry/multi-selector/multi-selector.types';
 
 interface TransmissionModeBadgeProps extends BadgeProps {
   value: string;

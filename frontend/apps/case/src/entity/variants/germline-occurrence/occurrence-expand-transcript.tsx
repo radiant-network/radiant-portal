@@ -1,4 +1,4 @@
-import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import type { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Separator } from '@/components/base/shadcn/separator';

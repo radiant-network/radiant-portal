@@ -6,20 +6,20 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { SortBodyOrderEnum } from '@/api/api';
 import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 
 import {
   advancedData,
-  AdvancedTableMockData,
+  type AdvancedTableMockData,
   data,
   mockColumns,
   mockDefaultColumnSettings,
-  TableMockData,
+  type TableMockData,
 } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
 import useSWR from 'swr';
 
-import {
+import type {
   CaseEntity,
   CaseSequencingExperiment,
   ExpandedSomaticSNVOccurrence,

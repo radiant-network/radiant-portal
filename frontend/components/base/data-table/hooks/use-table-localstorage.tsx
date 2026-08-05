@@ -1,12 +1,12 @@
 /**
  * Hooks to be manage a table with localeStorage
  */
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { TableState } from '@tanstack/react-table';
+import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from 'react';
+import type { TableState } from '@tanstack/react-table';
 
-import { DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import type { DefaultColumnTableState } from '@/components/base/data-table/data-table';
 
-import { DEFAULT_TABLE_OBSERVER, TableObserverColumn, TableObserverProps } from '../type/data-table-type';
+import { DEFAULT_TABLE_OBSERVER, type TableObserverColumn, type TableObserverProps } from '../type/data-table-type';
 
 // SERVER SIDE RENDERING
 export const IS_SERVER = typeof window === 'undefined';

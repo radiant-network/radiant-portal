@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { CaseEntity, TaskOccurrenceType } from '@/api/api';
+import type { CaseEntity, TaskOccurrenceType } from '@/api/api';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 
 /**

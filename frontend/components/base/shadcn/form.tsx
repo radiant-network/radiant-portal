@@ -1,9 +1,16 @@
 import * as React from 'react';
-import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
-import * as LabelPrimitive from '@radix-ui/react-label';
+import {
+  Controller,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+  FormProvider,
+  useFormContext,
+} from 'react-hook-form';
+import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { InfoIcon } from 'lucide-react';
-import z from 'zod';
+import type z from 'zod';
 
 import { Label } from '@/base/shadcn/label';
 import { useI18n } from '@/components/hooks/i18n';

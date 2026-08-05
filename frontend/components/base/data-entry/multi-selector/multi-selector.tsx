@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { KeyboardEvent, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
 
@@ -10,7 +10,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-import { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
+import type { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
 import { getSelectedOptionByValue, isOptionsExist, transToGroupOption } from './multi-selector.utils';
 
 function MultiSelector({

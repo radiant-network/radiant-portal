@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { InfoIcon, Paperclip, UploadIcon } from 'lucide-react';
 
-import { GeneResult, SqonOpEnum } from '@/api/api';
+import { type GeneResult, SqonOpEnum } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
@@ -25,7 +25,7 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../../cards/collapsible-card';
-import { TableColumnDef } from '../../data-table/data-table';
+import type { TableColumnDef } from '../../data-table/data-table';
 import DisplayTable from '../../data-table/display-table';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../shadcn/hover-card';
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';

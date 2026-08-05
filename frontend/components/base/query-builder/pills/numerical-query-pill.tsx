@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../shadcn/popover';
 import { FacetComponent } from '../facets/facet-container';
 import { QBActionType, useQBContext, useQBDispatch } from '../hooks/use-query-builder';
 import { getAggregationByField } from '../libs/aggregations';
-import { IValueFacet } from '../type';
+import type { IValueFacet } from '../type';
 
 import QueryPillContainer from './containers/query-pill-container';
 import LabelOperator from './operators/label-operator';

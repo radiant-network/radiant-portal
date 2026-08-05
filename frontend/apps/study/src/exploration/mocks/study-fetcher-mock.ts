@@ -1,13 +1,9 @@
-import { type Count } from '@/api/api';
-import { type IAggregationBuilder } from '@/components/base/query-builder/hooks/use-aggregation-builder';
-import {
-  type ICountInput,
-  type IListInput,
-  type IQBFetcher,
-} from '@/components/base/query-builder/hooks/use-query-builder';
+import type { Count } from '@/api/api';
+import type { IAggregationBuilder } from '@/components/base/query-builder/hooks/use-aggregation-builder';
+import type { ICountInput, IListInput, IQBFetcher } from '@/components/base/query-builder/hooks/use-query-builder';
 
 import { MOCK_STUDIES } from './studies-mock';
-import { type Study } from './study-model';
+import type { Study } from './study-model';
 
 /** Maps a facet field key to the study value(s) it filters on. */
 const FIELD_ACCESSORS: Record<string, (s: Study) => string[]> = {

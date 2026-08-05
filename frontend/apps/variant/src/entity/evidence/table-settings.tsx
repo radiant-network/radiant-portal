@@ -1,11 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { ClinvarRCV, GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import { type ClinvarRCV, type GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';

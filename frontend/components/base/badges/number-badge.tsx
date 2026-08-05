@@ -1,6 +1,7 @@
 import React from 'react';
+import { tv, type VariantProps } from 'tailwind-variants';
+
 import { cn } from '../../lib/utils';
-import { tv, VariantProps } from 'tailwind-variants';
 
 export const numberBadgeVariants = tv({
   slots: {

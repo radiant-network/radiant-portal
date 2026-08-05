@@ -17,6 +17,18 @@ module.exports = defineConfig({
         caughtErrorsIgnorePattern: '^_',
       },
     ],
+    // required by verbatimModuleSyntax: a type imported without the `type`
+    // keyword is kept in the bundle and breaks at runtime
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      {
+        prefer: 'type-imports',
+        fixStyle: 'inline-type-imports',
+      },
+    ],
+    // with verbatimModuleSyntax, `import { type A } from 'x'` still emits
+    // `import {} from 'x'` and keeps a useless runtime dependency
+    '@typescript-eslint/no-import-type-side-effects': 'error',
     'max-len': [
       'warn', // or 'error'
       {

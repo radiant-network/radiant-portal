@@ -10,7 +10,7 @@ import { occurencesNotesApi } from '@/utils/api';
 import { Button } from '../shadcn/button';
 import { Spinner } from '../shadcn/spinner';
 
-import NotesContainer, { NotesContainerProps } from './notes-container';
+import NotesContainer, { type NotesContainerProps } from './notes-container';
 
 type NotesSliderProps = NotesContainerProps;
 

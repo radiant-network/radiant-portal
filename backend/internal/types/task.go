@@ -8,6 +8,7 @@ import (
 const (
 	RadiantGermlineAnnotationTask               = "radiant_germline_annotation"
 	RadiantSomaticAnnotationTask                = "radiant_somatic_annotation"
+	ClinicalReportTaskTypeCode                  = "clinical_report"
 	ExomiserTaskTypeCode                        = "exomiser"
 	AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
 	AlignmentSomaticVariantCallingTaskTypeCode  = "alignment_somatic_variant_calling"

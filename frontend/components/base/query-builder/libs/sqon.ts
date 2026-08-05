@@ -2,14 +2,14 @@ import { v4 } from 'uuid';
 
 import {
   BooleanOperators,
-  ISqonGroupFacet,
-  ISyntheticSqon,
-  IValueFacet,
+  type ISqonGroupFacet,
+  type ISyntheticSqon,
+  type IValueFacet,
   RangeOperators,
   SET_ID_PREFIX,
-  TSyntheticSqonContentValue,
+  type TSyntheticSqonContentValue,
 } from '@/components/base/query-builder/type';
-import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
+import { type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
 export const isSet = (value: IValueFacet): boolean =>
   value.content.value && value.content.value.some(value => value?.toString().startsWith(SET_ID_PREFIX));

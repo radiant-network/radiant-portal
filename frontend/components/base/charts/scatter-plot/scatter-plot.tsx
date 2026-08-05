@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Plot from 'react-plotly.js';
-import { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
+import type { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
 
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
-import { ScatterPlotPoint, ScatterPlotProps } from '@/components/base/charts/type';
+import type { ScatterPlotPoint, ScatterPlotProps } from '@/components/base/charts/type';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { cn } from '@/components/lib/utils';
 

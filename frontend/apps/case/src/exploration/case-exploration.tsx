@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
+import type { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';

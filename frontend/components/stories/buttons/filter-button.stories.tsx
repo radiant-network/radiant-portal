@@ -2,8 +2,8 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Calendar, Database, FileText, Filter, Settings, Users } from 'lucide-react';
 
-import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
-import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import FilterButton, { type IFilterButtonItem, type PopoverSize } from '@/components/base/buttons/filter-button';
+import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
 import { StorySection, StoryShowcase } from '../story-section';
 

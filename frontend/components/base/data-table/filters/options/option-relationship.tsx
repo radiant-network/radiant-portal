@@ -1,5 +1,5 @@
-import { FiltersValue } from '@/api/api';
-import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import type { FiltersValue } from '@/api/api';
+import type { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 /**
  * Relationship

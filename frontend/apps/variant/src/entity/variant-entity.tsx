@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
-import { ApiError, VariantHeader } from '@/api/api';
+import type { ApiError, VariantHeader } from '@/api/api';
 import Container from '@/components/base/container';
 import Error404 from '@/components/base/errors/404';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { BadgeProps } from '@/components/base/shadcn/badge';
+import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';

@@ -1,4 +1,4 @@
-import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 
 import EmptyCell from './empty-cell';
 

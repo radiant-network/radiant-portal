@@ -1,4 +1,4 @@
-import StatusBadge, { Status } from '../../badges/status-badge';
+import StatusBadge, { type Status } from '../../badges/status-badge';
 
 import EmptyCell from './empty-cell';
 

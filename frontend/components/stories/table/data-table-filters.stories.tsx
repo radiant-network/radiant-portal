@@ -6,8 +6,8 @@ import { http } from 'msw';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
-import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import {
   caseAutocompleteApi,
@@ -19,7 +19,7 @@ import {
 } from '../api/api-case';
 import { StorySection } from '../story-section';
 
-import { data, TableMockData } from './table-mock';
+import { data, type TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
 

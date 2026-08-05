@@ -2,7 +2,7 @@ import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import PriorityIndicator, { PriorityIndicatorCode } from '../../indicators/priority-indicator';
+import PriorityIndicator, { type PriorityIndicatorCode } from '../../indicators/priority-indicator';
 
 type PriorityIndicatorCellProps = {
   code: PriorityIndicatorCode | undefined;

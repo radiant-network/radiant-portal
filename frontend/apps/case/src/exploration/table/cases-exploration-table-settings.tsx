@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { CaseResult } from '@/api/api';
+import type { CaseResult } from '@/api/api';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
@@ -11,7 +11,7 @@ import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/pheno
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';

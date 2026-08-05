@@ -1,4 +1,12 @@
-import { type AriaAttributes, type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type AriaAttributes,
+  type KeyboardEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
 

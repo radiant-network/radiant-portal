@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { Aggregation, SqonOpEnum } from '@/api/api';
+import { type Aggregation, SqonOpEnum } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import { Label } from '@/components/base/shadcn/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
-import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import type { Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { QBActionType, useQBBooleanValue, useQBContext, useQBDispatch, useQBHistory } from '../hooks/use-query-builder';

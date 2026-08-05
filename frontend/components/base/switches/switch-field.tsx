@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import { useId, useState } from 'react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 import { Switch } from '@/components/base/shadcn/switch';
 import { cn } from '@/components/lib/utils';

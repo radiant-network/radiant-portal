@@ -1,4 +1,5 @@
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+
 import { cn } from '../lib/utils';
 
 function Container({ className, children, ...props }: ComponentProps<'div'>) {

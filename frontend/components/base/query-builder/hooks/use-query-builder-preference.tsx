@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { UserPreference } from '@/api/api';
-import { ApplicationId } from '@/components/cores/applications-config';
+import type { UserPreference } from '@/api/api';
+import type { ApplicationId } from '@/components/cores/applications-config';
 import { userPreferenceApi } from '@/utils/api';
 
-import { ISyntheticSqon } from '../type';
+import type { ISyntheticSqon } from '../type';
 
-import { getDefaultQBContext, IQBContext, ISettings } from './use-query-builder';
+import { getDefaultQBContext, type IQBContext, type ISettings } from './use-query-builder';
 
 type FetchUserPreferenceInput = {
   key: string;

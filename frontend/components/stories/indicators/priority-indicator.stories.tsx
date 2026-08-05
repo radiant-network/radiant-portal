@@ -2,8 +2,8 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SavedFilterType } from '@/api/api';
-import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 

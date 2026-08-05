@@ -1,4 +1,4 @@
-import { Avatar, AvatarUser } from '@/components/base/avatar';
+import { Avatar, type AvatarUser } from '@/components/base/avatar';
 import type { AvatarSize } from '@/components/base/shadcn/avatar';
 
 export interface AvatarCellProps {

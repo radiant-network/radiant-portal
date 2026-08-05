@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { Edit2Icon, Share2Icon, TrashIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';

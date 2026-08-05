@@ -1,4 +1,4 @@
-import { OnChangeFn, RowSelectionState } from '@tanstack/react-table';
+import type { OnChangeFn, RowSelectionState } from '@tanstack/react-table';
 
 import { thousandNumberFormat } from '@/components/lib/number-format';
 

@@ -1,7 +1,7 @@
 import { ArrowUpRight, FolderOpen } from 'lucide-react';
 
-import { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
-import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
+import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
+import AffectedStatusBadge, { type AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { PROBAND } from '@/components/base/constants';
 import ExpandableList from '@/components/base/list/expandable-list';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';

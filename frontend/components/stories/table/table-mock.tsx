@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import uniqBy from 'lodash/uniqBy';
 
 import NumberCell from '@/components/base/data-table/cells/number-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 
 export type TableMockData = {
   firstName: string;

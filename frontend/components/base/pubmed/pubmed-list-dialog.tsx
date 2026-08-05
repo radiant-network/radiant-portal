@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { InterpretationPubmed } from '@/api/api';
+import type { InterpretationPubmed } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/shadcn/button';
 import {

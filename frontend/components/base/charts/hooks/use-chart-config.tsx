@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ChartAxisProps } from '../type';
+import type { ChartAxisProps } from '../type';
 
 export function usePieChartConfig(pies: string[]) {
   return useMemo(() => {

@@ -1,4 +1,4 @@
-import { GermlineCNVOccurrence } from '@/api/api';
+import type { GermlineCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
 /**

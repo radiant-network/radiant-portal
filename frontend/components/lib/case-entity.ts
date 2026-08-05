@@ -1,4 +1,5 @@
-import { CaseEntity, CasePatientClinicalInformation, CaseSequencingExperiment } from '@/api/api';
+import type { CaseEntity, CasePatientClinicalInformation, CaseSequencingExperiment } from '@/api/api';
+
 import { PROBAND } from '../base/constants';
 
 export function getPatientClinicalInformation(caseEntity?: CaseEntity, patient?: CaseSequencingExperiment) {

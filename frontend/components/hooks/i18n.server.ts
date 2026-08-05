@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 import { initReactI18next } from 'react-i18next';
-import i18next from 'i18next';
+import i18next, { type i18n } from 'i18next';
 
 // Get the current theme from environment variable
 const getCurrentTheme = () => process.env.THEME || 'radiant';
@@ -70,7 +70,7 @@ export const loadTranslations = async (lang: string) => {
 };
 
 // Create a simple server-side i18n instance
-export const createServerI18n = async (lng: string = 'en') => {
+export const createServerI18n = async (lng: string = 'en'): Promise<i18n> => {
   const translations = await loadTranslations(lng);
 
   const serverI18n = i18next.createInstance();
