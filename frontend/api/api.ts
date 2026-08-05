@@ -705,6 +705,12 @@ export interface CaseFetusBatch {
      * @memberof CaseFetusBatch
      */
     'sex_code': CaseFetusBatchSexCodeEnum;
+    /**
+     * SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like submitter_patient_id: without it an update could not resolve which fetus to modify and would have to delete and recreate — which sample.fetus_id forbids once a sample is attached.
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'submitter_fetus_id': string;
 }
 
 export const CaseFetusBatchAffectedStatusCodeEnum = {
@@ -4184,12 +4190,6 @@ export interface PubmedCitationDetails {
  */
 export interface SampleBatch {
     /**
-     * Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus\'s genome.
-     * @type {number}
-     * @memberof SampleBatch
-     */
-    'fetus_id'?: number;
-    /**
      * 
      * @type {string}
      * @memberof SampleBatch
@@ -4207,6 +4207,12 @@ export interface SampleBatch {
      * @memberof SampleBatch
      */
     'sample_organization_code': string;
+    /**
+     * Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus\'s genome. Identified by the submitter\'s own key, resolved against the mother — the internal fetus id stays out of the API, as it does for patients and samples.
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'submitter_fetus_id'?: string;
     /**
      * 
      * @type {string}
@@ -5253,6 +5259,12 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'diagnostic_lab_code': string;
+    /**
+     * Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already on the case is updated in place, a new key is created, and a key the payload drops is deleted — refused when a sample still points at it.
+     * @type {Array<CaseFetusBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'fetuses'?: Array<CaseFetusBatch>;
     /**
      * 
      * @type {string}

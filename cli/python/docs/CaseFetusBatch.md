@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **observations_categorical** | [**List[ObservationCategoricalBatch]**](ObservationCategoricalBatch.md) |  | [optional] 
 **observations_text** | [**List[ObservationTextBatch]**](ObservationTextBatch.md) |  | [optional] 
 **sex_code** | **str** |  | 
+**submitter_fetus_id** | **str** | SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like submitter_patient_id: without it an update could not resolve which fetus to modify and would have to delete and recreate — which sample.fetus_id forbids once a sample is attached. | 
 
 ## Example
 

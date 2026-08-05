@@ -5,10 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**fetus_id** | **int** | Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus&#39;s genome. | [optional] 
 **histology_code** | **str** |  | 
 **patient_organization_code** | **str** |  | 
 **sample_organization_code** | **str** |  | 
+**submitter_fetus_id** | **str** | Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus&#39;s genome. Identified by the submitter&#39;s own key, resolved against the mother — the internal fetus id stays out of the API, as it does for patients and samples. | [optional] 
 **submitter_parent_sample_id** | **str** |  | [optional] 
 **submitter_patient_id** | **str** |  | 
 **submitter_sample_id** | **str** |  | 
