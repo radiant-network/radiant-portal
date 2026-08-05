@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from datetime import date
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
 from radiant_python.models.observation_text_batch import ObservationTextBatch
@@ -36,7 +36,8 @@ class CaseFetusBatch(BaseModel):
     observations_categorical: Optional[List[ObservationCategoricalBatch]] = None
     observations_text: Optional[List[ObservationTextBatch]] = None
     sex_code: StrictStr
-    __properties: ClassVar[List[str]] = ["affected_status_code", "estimated_due_date", "last_menstrual_period", "life_status_code", "observations_categorical", "observations_text", "sex_code"]
+    submitter_fetus_id: StrictStr = Field(description="SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like submitter_patient_id: without it an update could not resolve which fetus to modify and would have to delete and recreate — which sample.fetus_id forbids once a sample is attached.")
+    __properties: ClassVar[List[str]] = ["affected_status_code", "estimated_due_date", "last_menstrual_period", "life_status_code", "observations_categorical", "observations_text", "sex_code", "submitter_fetus_id"]
 
     @field_validator('affected_status_code')
     def affected_status_code_validate_enum(cls, value):
@@ -130,7 +131,8 @@ class CaseFetusBatch(BaseModel):
             "life_status_code": obj.get("life_status_code"),
             "observations_categorical": [ObservationCategoricalBatch.from_dict(_item) for _item in obj["observations_categorical"]] if obj.get("observations_categorical") is not None else None,
             "observations_text": [ObservationTextBatch.from_dict(_item) for _item in obj["observations_text"]] if obj.get("observations_text") is not None else None,
-            "sex_code": obj.get("sex_code")
+            "sex_code": obj.get("sex_code"),
+            "submitter_fetus_id": obj.get("submitter_fetus_id")
         })
         return _obj
 
