@@ -52,7 +52,7 @@ export default function OrgAssignmentField({ value, onChange, error = false }: O
             placeholder={t('admin.user.orgs_placeholder')}
             openOnFocus
             hidePlaceholderWhenSelected
-            wrapBadges
+            multiline
             className={cn(error && 'border-destructive')}
             inputProps={showSearchIcon ? { className: 'pl-8' } : undefined}
           />
