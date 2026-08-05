@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { User } from 'lucide-react';
 
@@ -107,7 +108,7 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
           tenant: MOCK_TENANT.name,
         }),
         hideCancel: true,
-        actionProps: { children: t('admin.user.understood') },
+        actionProps: { children: t('common.close') },
       });
       return; // veto the change
     }
@@ -134,17 +135,23 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
           tenant: MOCK_TENANT.name,
         }),
         hideCancel: true,
-        actionProps: { children: t('admin.user.understood') },
+        actionProps: { children: t('common.close') },
       });
       return; // veto the delete
     }
     alertDialog.open({
-      type: 'warning',
-      title: t('admin.user.delete_title', { name: `${user.firstName} ${user.lastName}` }),
-      description: t('admin.user.delete_body', { name: user.firstName, tenant: MOCK_TENANT.name }),
+      type: 'error',
+      title: t('admin.user.delete_title'),
+      description: (
+        <Trans
+          i18nKey="admin.user.delete_body"
+          values={{ name: `${user.firstName} ${user.lastName}`, tenant: MOCK_TENANT.name }}
+          components={{ b: <strong /> }}
+        />
+      ),
       cancelProps: { children: t('admin.user.cancel') },
       actionProps: {
-        color: 'destructive',
+        variant: 'destructive',
         dataCy: 'delete-user-confirm',
         children: t('admin.user.delete_confirm'),
         onClick: async () => {

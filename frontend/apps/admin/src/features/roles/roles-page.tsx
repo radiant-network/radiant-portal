@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { PaginationState } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { Lock, Plus } from 'lucide-react';
@@ -6,20 +7,13 @@ import { toast } from 'sonner';
 
 import DataTable from '@/components/base/data-table/data-table';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+import { Alert, AlertContent, AlertDescription, AlertTitle } from '@/components/base/shadcn/alert';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
 import ViewPermissionsDialog from '../../components/view-permissions-dialog';
-import {
-  getRoleUsage,
-  MEMBER_ROLE,
-  MOCK_ROLES,
-  MOCK_TENANT,
-  MOCK_USERS,
-  roleDescription,
-  roleName,
-} from '../../mock/data';
+import { getRoleUsage, MEMBER_ROLE, MOCK_ROLES, MOCK_USERS, roleDescription, roleName } from '../../mock/data';
 import type { Role } from '../../mock/types';
 
 import type { RoleFormValues } from './role-form.types';
@@ -154,18 +148,45 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
 
   // Delete confirm lives at the page so both the row menu and the Edit-sheet footer share it.
   const requestDelete = (role: Role) => {
-    const { members } = getRoleUsage(role, MOCK_USERS);
-    const description =
-      members === 0
-        ? t('admin.role.delete_body_empty', { tenant: MOCK_TENANT.name })
-        : t('admin.role.delete_body', { count: members, tenant: MOCK_TENANT.name });
+    const { members, orgs } = getRoleUsage(role, MOCK_USERS);
+    // Unassigned → plain sentence. Assigned → an error Alert callout stating the impact; the
+    // "across N organizations" clause is dropped for network-scoped roles (orgs === 0), mirroring
+    // the "Assigned to" cell.
+    let description: ReactNode;
+    if (members === 0) {
+      description = (
+        <Trans
+          i18nKey="admin.role.delete_body_empty"
+          values={{ name: roleName(role, t) }}
+          components={{ b: <strong /> }}
+        />
+      );
+    } else {
+      description = (
+        <Alert variant="error" bordered>
+          <AlertContent>
+            <AlertTitle>{roleName(role, t)}</AlertTitle>
+            <AlertDescription>
+              <Trans
+                i18nKey={orgs > 0 ? 'admin.role.delete_body' : 'admin.role.delete_body_no_orgs'}
+                values={{
+                  members: t('admin.roles_page.members_count', { count: members }),
+                  orgs: t('admin.roles_page.orgs_count', { count: orgs }),
+                }}
+                components={{ b: <strong /> }}
+              />
+            </AlertDescription>
+          </AlertContent>
+        </Alert>
+      );
+    }
     alertDialog.open({
-      type: 'warning',
-      title: t('admin.role.delete_title', { name: roleName(role, t) }),
+      type: 'error',
+      title: t('admin.role.delete_title'),
       description,
       cancelProps: { children: t('admin.role.cancel') },
       actionProps: {
-        color: 'destructive',
+        variant: 'destructive',
         dataCy: 'delete-role-confirm',
         children: t('admin.role.delete_confirm'),
         onClick: async () => {
