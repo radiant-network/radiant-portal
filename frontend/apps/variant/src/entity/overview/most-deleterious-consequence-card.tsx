@@ -142,9 +142,14 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           )}
           {data?.dna_change && (
-            <div data-cy="dna-change" className="font-mono">
-              {data?.dna_change}
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div data-cy="dna-change" className="font-mono min-w-0 max-w-48 truncate">
+                  {data?.dna_change}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="font-mono break-all">{data.dna_change}</TooltipContent>
+            </Tooltip>
           )}
           {data?.rsnumber && (
             <AnchorLink
