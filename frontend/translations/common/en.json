@@ -158,7 +158,7 @@
       "save": "Save changes",
       "create": "Create member",
       "err": {
-        "last_admin_title": "This network needs an admin",
+        "last_admin_title": "This network needs an Administrator",
         "last_admin": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
         "last_admin_delete": "{{name}} is the only Administrator in {{tenant}} and can't be removed. Assign the Administrator role to someone else before deleting this account.",
         "self_admin": "You can't grant yourself the Administrator role.",
@@ -166,7 +166,6 @@
         "org_required": "Select at least one organization.",
         "name_required": "First and last name are required.",
         "email_required": "Email is required.",
-        "email_invalid": "Enter a valid email.",
         "email_duplicate": "A member with this email already exists in this network."
       },
       "ok": {

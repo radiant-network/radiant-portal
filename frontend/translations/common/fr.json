@@ -166,7 +166,6 @@
         "org_required": "Sélectionnez au moins une organisation.",
         "name_required": "Le prénom et le nom sont obligatoires.",
         "email_required": "Le courriel est obligatoire.",
-        "email_invalid": "Saisissez un courriel valide.",
         "email_duplicate": "Un membre avec ce courriel existe déjà dans ce réseau."
       },
       "ok": {
