@@ -61,6 +61,10 @@ func (m *MockSamplesRepository) GetSampleById(_ context.Context, id int) (*types
 	return nil, nil
 }
 
+func (m *MockSamplesRepository) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
+	return nil, nil
+}
+
 func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
 		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
@@ -267,32 +271,22 @@ func Test_ValidateFetus_NotProvided(t *testing.T) {
 	assert.Nil(t, rec.FetusId)
 }
 
+// A key that belongs to another patient's fetus lands here too: the caller resolves it against the
+// mother, so it is simply not found — there is no distinct "wrong patient" outcome any more.
 func Test_ValidateFetus_NotFound(t *testing.T) {
-	fetusId := 9999
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", FetusId: &fetusId}
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283836", SubmitterFetusId: "F-UNKNOWN"}
 	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
 	rec.validateFetus(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleFetusNotExistCode, rec.Errors[0].Code)
-	assert.Equal(t, "create_sample[0].fetus_id", rec.Errors[0].Path)
-	assert.Nil(t, rec.FetusId)
-}
-
-func Test_ValidateFetus_WrongMother(t *testing.T) {
-	fetusId := 1
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283836", FetusId: &fetusId}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 64}
-	rec.validateFetus(&types.Fetus{ID: 1, MotherID: 63})
-	assert.Len(t, rec.Errors, 1)
-	assert.Equal(t, SampleInvalidFetusForPatientCode, rec.Errors[0].Code)
+	assert.Equal(t, "create_sample[0].submitter_fetus_id", rec.Errors[0].Path)
 	assert.Nil(t, rec.FetusId)
 }
 
 func Test_ValidateFetus_Valid(t *testing.T) {
-	fetusId := 1
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283835", FetusId: &fetusId}
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283835", SubmitterFetusId: "F-1"}
 	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
-	rec.validateFetus(&types.Fetus{ID: 1, MotherID: 63})
+	rec.validateFetus(&types.Fetus{ID: 1, SubmitterFetusId: "F-1", MotherID: 63})
 	assert.Empty(t, rec.Errors)
 	require.NotNil(t, rec.FetusId)
 	assert.Equal(t, 1, *rec.FetusId)

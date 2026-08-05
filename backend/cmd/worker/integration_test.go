@@ -538,7 +538,7 @@ func Test_ProcessBatch_Sample_Fetus_Success_Not_Dry_Run(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal",
-                "fetus_id": 1
+                "submitter_fetus_id": "F-72-1"
             }
         ]
         `
@@ -583,7 +583,7 @@ func Test_ProcessBatch_Sample_Fetus_Not_Exist(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal",
-                "fetus_id": 9999
+                "submitter_fetus_id": "F-UNKNOWN"
             }
         ]
         `
@@ -609,9 +609,11 @@ func Test_ProcessBatch_Sample_Fetus_Not_Exist(t *testing.T) {
 	})
 }
 
+// Referencing another patient's fetus resolves to nothing rather than to a distinct error: the
+// lookup is scoped to the mother, so the key is simply absent for this patient.
 func Test_ProcessBatch_Sample_Fetus_Wrong_Mother(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		// Fetus 1's mother is patient 63 (MRN-283835), not MRN-283836 (patient 64).
+		// F-72-1's mother is patient 63 (MRN-283835), not MRN-283836 (patient 64).
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-FETUS-003",
@@ -621,7 +623,7 @@ func Test_ProcessBatch_Sample_Fetus_Wrong_Mother(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal",
-                "fetus_id": 1
+                "submitter_fetus_id": "F-72-1"
             }
         ]
         `
@@ -642,7 +644,7 @@ func Test_ProcessBatch_Sample_Fetus_Wrong_Mother(t *testing.T) {
 		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
 		if assert.Len(t, resultBatch.Report.Errors, 1) {
-			assert.Equal(t, SampleInvalidFetusForPatientCode, resultBatch.Report.Errors[0].Code)
+			assert.Equal(t, SampleFetusNotExistCode, resultBatch.Report.Errors[0].Code)
 		}
 	})
 }

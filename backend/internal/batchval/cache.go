@@ -214,6 +214,27 @@ func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(ctx contex
 	return sample, nil
 }
 
+// GetFetusByMotherAndSubmitterId shares FetusesById with GetFetusById: a batch typically resolves
+// the same fetus once per sample, and both paths key the row by its internal id.
+func (c *BatchValidationCache) GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error) {
+	for _, fetus := range c.FetusesById {
+		if fetus.MotherID == motherID && fetus.SubmitterFetusId == submitterFetusId {
+			return fetus, nil
+		}
+	}
+
+	fetus, err := c.Context.FetusRepo.GetFetusByMotherAndSubmitterId(ctx, motherID, submitterFetusId)
+	if err != nil {
+		return nil, err
+	}
+
+	if fetus != nil {
+		c.FetusesById[fetus.ID] = fetus
+	}
+
+	return fetus, nil
+}
+
 func (c *BatchValidationCache) GetFetusById(ctx context.Context, id int) (*types.Fetus, error) {
 	if fetus, ok := c.FetusesById[id]; ok {
 		return fetus, nil

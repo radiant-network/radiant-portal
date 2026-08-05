@@ -219,6 +219,7 @@ func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testin
 		payload := createBaseCasePayload("Fetus_Twins")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
 			{
+				SubmitterFetusId:   "TWIN-1",
 				SexCode:            "male",
 				LifeStatusCode:     "alive",
 				AffectedStatusCode: "unknown",
@@ -227,6 +228,7 @@ func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testin
 				},
 			},
 			{
+				SubmitterFetusId:   "TWIN-2",
 				SexCode:            "female",
 				LifeStatusCode:     "deceased",
 				AffectedStatusCode: "affected",
@@ -282,7 +284,7 @@ func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Fetus_Invalid_Sex")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
-			{SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown"},
+			{SubmitterFetusId: "F-BAD-SEX", SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown"},
 		}
 		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)

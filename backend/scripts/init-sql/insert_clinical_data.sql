@@ -2170,11 +2170,11 @@ VALUES (62, 'MRN-283835', 'mrn', 'CHUSJ', 'radiant', 'female', '1992-04-10', 'al
        (65, 'MRN-283838', 'mrn', 'CHUSJ', 'radiant', 'male', '1987-03-22', 'alive', 'Olivier', 'Bernier', 'BER8703226644')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO fetus (id, mother_id, life_status_code, sex_code, last_menstrual_period, estimated_due_date, tenant_code)
-VALUES (1, 62, 'alive',    'male',    '2026-02-01', NULL,         'radiant'),
-       (2, 63, 'alive',    'female',  NULL,         '2026-10-15', 'radiant'),
-       (3, 63, 'deceased', 'unknown', NULL,         NULL,         'radiant'),
-       (4, 64, 'alive',    'male',    '2026-03-01', NULL,         'radiant')
+INSERT INTO fetus (id, submitter_fetus_id, mother_id, life_status_code, sex_code, last_menstrual_period, estimated_due_date, tenant_code)
+VALUES (1, 'F-71-1', 62, 'alive',    'male',    '2026-02-01', NULL,         'radiant'),
+       (2, 'F-72-1', 63, 'alive',    'female',  NULL,         '2026-10-15', 'radiant'),
+       (3, 'F-72-2', 63, 'deceased', 'unknown', NULL,         NULL,         'radiant'),
+       (4, 'F-73-1', 64, 'alive',    'male',    '2026-03-01', NULL,         'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)

@@ -13,6 +13,7 @@ import (
 // Fetuses error codes
 const (
 	FetusInvalidField = "FETUS-001"
+	FetusHasSample    = "FETUS-002"
 )
 
 const RelationshipFetusCode = "fetus"
@@ -100,9 +101,12 @@ func dateISO8601ToTimePtr(d *types.DateISO8601) *time.Time {
 	return &t
 }
 
-// persistFetuses inserts one fetus row plus its family row and observations per CaseFetusBatch
-// entry, all attached to the case's proband as mother.
-func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+// persistFetuses reconciles the case's fetuses with the payload, attaching each to the case's
+// proband as mother. A submitter id already on the case is updated **in place** so its row id — and
+// therefore sample.fetus_id and the sequencing data behind it — survives; an unknown one is created.
+// Family rows and observations are always inserted: the caller has cleared the previous ones.
+// existing is nil on the create path, where every entry is new.
+func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord, existing map[string]*types.Fetus) error {
 	if len(cr.Case.Fetuses) == 0 {
 		return nil
 	}
@@ -117,6 +121,7 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 
 	for fetusIndex, fb := range cr.Case.Fetuses {
 		fetus := types.Fetus{
+			SubmitterFetusId:    fb.SubmitterFetusId.String(),
 			MotherID:            proband.ID,
 			SexCode:             fb.SexCode,
 			LifeStatusCode:      fb.LifeStatusCode,
@@ -124,7 +129,12 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 			EstimatedDueDate:    dateISO8601ToTimePtr(fb.EstimatedDueDate),
 			TenantCode:          sc.TenantCode,
 		}
-		if err := sc.FetusRepo.CreateFetus(ctx, &fetus); err != nil {
+		if previous, ok := existing[fetus.SubmitterFetusId]; ok {
+			fetus.ID = previous.ID
+			if err := sc.FetusRepo.UpdateFetus(ctx, &fetus); err != nil {
+				return fmt.Errorf("failed to update fetus %q for case %d: %w", fetus.SubmitterFetusId, cr.Index, err)
+			}
+		} else if err := sc.FetusRepo.CreateFetus(ctx, &fetus); err != nil {
 			return fmt.Errorf("failed to persist fetus %d for create_case %d: %w", fetusIndex, cr.Index, err)
 		}
 
