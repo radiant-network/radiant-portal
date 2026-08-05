@@ -1,4 +1,4 @@
-import { AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarUser } from '@/components/base/avatar/avatar.types';
 
 import { createNotAssignedUser, isNotAssignedUser } from './constants';
 

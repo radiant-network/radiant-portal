@@ -1,4 +1,4 @@
-import { PropsWithChildren, useRef } from 'react';
+import { type PropsWithChildren, useRef } from 'react';
 
 export interface LazyProps {
   visible: boolean;

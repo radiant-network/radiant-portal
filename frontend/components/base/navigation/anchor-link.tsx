@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowUpRightIcon } from 'lucide-react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 export const anchorLinkVariants = tv({
   slots: {

@@ -4,10 +4,10 @@ import { InfoIcon } from 'lucide-react';
 
 import { SqonOpEnum } from '@/api/index';
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import type { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import { Label } from '@/components/base/shadcn/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
-import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import type { Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { genesApi } from '@/utils/api';

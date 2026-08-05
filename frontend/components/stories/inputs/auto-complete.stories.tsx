@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
 
-import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
+import { AutoComplete, type Option } from '@/components/base/data-entry/auto-complete';
 
 import { StorySection } from '../story-section';
 

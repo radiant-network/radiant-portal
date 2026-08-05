@@ -1,4 +1,4 @@
-import { Aggregation, AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
+import { type Aggregation, type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
 import { RangeOperators } from '../type';
 

@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadc
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import NotesContainer, { NotesContainerProps } from './notes-container';
+import NotesContainer, { type NotesContainerProps } from './notes-container';
 
 type NotesPopoverProps = NotesContainerProps & {
   hasNotes: boolean;

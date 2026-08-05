@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { DocumentFilters, SearchCriterion } from '@/api/api';
-import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import type { DocumentFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
 const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_to_proband_code'];

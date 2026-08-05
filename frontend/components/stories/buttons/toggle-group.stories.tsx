@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bold, Italic, Underline } from 'lucide-react';
-import { VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
 
-import { toggleVariants } from '@/components/base/shadcn/toggle';
+import type { toggleVariants } from '@/components/base/shadcn/toggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
 
 import { StoryErrorField } from '../inputs/story-error-field';

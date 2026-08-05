@@ -1,7 +1,7 @@
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { tv, VariantProps } from 'tailwind-variants';
+import type * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import { tv, type VariantProps } from 'tailwind-variants';
 
-import { Checkbox, checkboxVariants } from '@/components/base/shadcn/checkbox';
+import { Checkbox, type checkboxVariants } from '@/components/base/shadcn/checkbox';
 import { Label } from '@/components/base/shadcn/label';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';

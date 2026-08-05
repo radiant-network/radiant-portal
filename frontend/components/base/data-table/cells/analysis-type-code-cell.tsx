@@ -3,7 +3,7 @@ import { Biohazard, User, Users } from 'lucide-react';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '../../badges/analysis-type-code-badge';
+import AnalysisTypeCodeBadge, { type AnalysisTypeCode } from '../../badges/analysis-type-code-badge';
 
 import EmptyCell from './empty-cell';
 

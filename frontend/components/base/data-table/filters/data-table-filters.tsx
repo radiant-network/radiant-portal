@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { ListFilter, X } from 'lucide-react';
 
-import { SearchCriterion } from '@/api/api';
-import FilterButton, { IFilterButton, IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
+import type { SearchCriterion } from '@/api/api';
+import FilterButton, {
+  type IFilterButton,
+  type IFilterButtonItem,
+  type PopoverSize,
+} from '@/components/base/buttons/filter-button';
 import { Button } from '@/components/base/shadcn/button';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import type { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
-import TableFiltersSearch, { AutocompleteApiFn } from './data-table-filter-search';
+import TableFiltersSearch, { type AutocompleteApiFn } from './data-table-filter-search';
 
 type FilterSearch = {
   placeholder?: string;

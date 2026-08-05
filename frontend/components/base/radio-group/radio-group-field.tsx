@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
-import { tv, VariantProps } from 'tailwind-variants';
+import type * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
 import { cn } from '@/components/lib/utils';

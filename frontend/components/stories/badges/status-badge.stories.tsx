@@ -2,8 +2,8 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SavedFilterType } from '@/api/api';
-import StatusBadge, { Status } from '@/components/base/badges/status-badge';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import StatusBadge, { type Status } from '@/components/base/badges/status-badge';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
 

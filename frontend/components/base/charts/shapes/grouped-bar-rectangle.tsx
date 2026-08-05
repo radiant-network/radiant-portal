@@ -1,6 +1,6 @@
 import { Bar, LabelList, Rectangle } from 'recharts';
 
-import { GroupedBarRectangleProps } from '../type';
+import type { GroupedBarRectangleProps } from '../type';
 
 /**
  * Bar + Label

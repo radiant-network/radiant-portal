@@ -1,6 +1,6 @@
-import { createContext, Dispatch, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, type Dispatch, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import { useSearchParams } from 'react-router';
-import { SWRResponse } from 'swr';
+import type { SWRResponse } from 'swr';
 
 type IDataTableContext = {
   list?: SWRResponse;

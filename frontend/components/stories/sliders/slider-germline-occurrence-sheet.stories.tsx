@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
 import { mocked } from 'storybook/test';
 
-import { GermlineSNVOccurrence, SavedFilterType } from '@/api/api';
+import { type GermlineSNVOccurrence, SavedFilterType } from '@/api/api';
 import { GermlineOccurrenceSheetContent } from '@/apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet';
 import SliderSheet from '@/components/base/slider/slider-sheet';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { caseEntityApi, httpCaseGermlineEntityApi } from '../api/api-case';

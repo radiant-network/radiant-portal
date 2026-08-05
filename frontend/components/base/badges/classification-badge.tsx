@@ -1,5 +1,5 @@
 import ConditionalWrapper from '@/components/base/conditional-wrapper';
-import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
+import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 

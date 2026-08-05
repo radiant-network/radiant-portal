@@ -1,12 +1,12 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { CaseEntity, GermlineCNVOccurrence } from '@/api/api';
+import type { CaseEntity, GermlineCNVOccurrence } from '@/api/api';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import NumberListCell from '@/components/base/data-table/cells/number-list-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 

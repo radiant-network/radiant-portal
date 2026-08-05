@@ -1,15 +1,17 @@
-import { Responsive, useContainerWidth, ResponsiveLayouts, Layout } from 'react-grid-layout';
-import GridCard, { CardLayoutItem } from './grid-card';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type Layout, Responsive, type ResponsiveLayouts, useContainerWidth } from 'react-grid-layout';
+import useSWRImmutable from 'swr/immutable';
+import useSWRMutation from 'swr/mutation';
+
+import type { UserPreference } from '@/api/api';
+import { userPreferenceApi } from '@/utils/api';
+
+import GridCard, { type CardLayoutItem } from './grid-card';
+import GridOptionsMenuSettings from './grid-options-menu-settings';
+import GridSkeleton from './grid-skeleton';
+
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import GridOptionsMenuSettings from './grid-options-menu-settings';
-import { userPreferenceApi } from '@/utils/api';
-import { UserPreference } from '@/api/api';
-
-import useSWRMutation from 'swr/mutation';
-import useSWRImmutable from 'swr/immutable';
-import GridSkeleton from './grid-skeleton';
 
 export type GridCards = {
   id: string;

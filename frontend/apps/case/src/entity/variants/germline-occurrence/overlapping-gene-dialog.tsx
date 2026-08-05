@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
+import type { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import {
   Dialog,

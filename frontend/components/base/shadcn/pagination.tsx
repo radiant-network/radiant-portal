@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ChevronsLeft, ChevronsRight, MoreHorizontal } from 'lucide-react';
 
-import { Button, ButtonProps } from '@/base/shadcn/button';
+import { Button, type ButtonProps } from '@/base/shadcn/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';

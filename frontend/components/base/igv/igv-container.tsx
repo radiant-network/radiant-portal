@@ -1,5 +1,5 @@
 import IGV from './igv';
-import { IGVTrack } from './types';
+import type { IGVTrack } from './types';
 
 interface OwnProps {
   locus: string;

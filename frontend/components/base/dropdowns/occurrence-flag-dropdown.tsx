@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Flag, LucideIcon, Pin, Star } from 'lucide-react';
+import { Flag, type LucideIcon, Pin, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import { OccurrenceFlagType } from '@/api/api';
-import { Button, ButtonProps } from '@/components/base/shadcn/button';
+import type { OccurrenceFlagType } from '@/api/api';
+import { Button, type ButtonProps } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -101,11 +101,11 @@ function OccurrenceFlagDropdown({
   const { list } = useDataTable();
   const saveFlag = useSWRMutation(
     `upsert-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    (key, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
+    (key: string, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
   );
   const deleteFlag = useSWRMutation(
     `delete-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    (key, opts: { arg: DeleteOccurrenceFlagInput }) => deleteOccurrenceFlag(key, opts, tenant),
+    (key: string, opts: { arg: DeleteOccurrenceFlagInput }) => deleteOccurrenceFlag(key, opts, tenant),
   );
   const [selectedFlag, setSelectedFlag] = useState<OccurrenceFlagType | null>(flag ?? null);
   const selectedFlagConfig = selectedFlag ? FLAGS[selectedFlag] : null;

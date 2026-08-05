@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import { IAggregationBuilder } from '@/components/base/query-builder/hooks/use-aggregation-builder';
+import type { IAggregationBuilder } from '@/components/base/query-builder/hooks/use-aggregation-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
 
 /**

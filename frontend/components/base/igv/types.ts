@@ -1,4 +1,4 @@
-import { IGVTrackEnriched } from '@/api/api';
+import type { IGVTrackEnriched } from '@/api/api';
 
 export type IGVTrack = IGVTrackEnriched & {
   /**

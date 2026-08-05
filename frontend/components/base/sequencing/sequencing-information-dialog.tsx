@@ -2,8 +2,8 @@ import { useCallback, useEffect } from 'react';
 import { formatDate } from 'date-fns';
 import useSWR from 'swr';
 
-import { SequencingExperimentDetail } from '@/api/api';
-import { Status } from '@/components/base/badges/status-badge';
+import type { SequencingExperimentDetail } from '@/api/api';
+import type { Status } from '@/components/base/badges/status-badge';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import InformationField from '@/components/base/information/information-field';
 import { Badge } from '@/components/base/shadcn/badge';

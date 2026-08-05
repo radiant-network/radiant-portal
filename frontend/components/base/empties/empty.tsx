@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChartColumn, ChartLine, ChartPie, ChartScatter, LucideIcon } from 'lucide-react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { ChartColumn, ChartLine, ChartPie, ChartScatter, type LucideIcon } from 'lucide-react';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 import { cn } from '@/components/lib/utils';
 

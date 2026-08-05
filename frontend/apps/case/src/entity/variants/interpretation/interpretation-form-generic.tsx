@@ -5,7 +5,7 @@ import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/s
 import { useI18n } from '@/components/hooks/i18n';
 
 import PubmedFormField from './pubmed-form-field';
-import { genericInterpretationFormSchema, GenericInterpretationSchemaType } from './types';
+import { genericInterpretationFormSchema, type GenericInterpretationSchemaType } from './types';
 
 function InterpretationFormGeneric() {
   const { t } = useI18n();

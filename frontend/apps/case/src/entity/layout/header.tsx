@@ -1,12 +1,12 @@
 import { Biohazard, Users } from 'lucide-react';
 
-import { CaseEntity } from '@/api/api';
-import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import type { CaseEntity } from '@/api/api';
+import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import StatusBadge, { Status } from 'components/base/badges/status-badge';
+import StatusBadge, { type Status } from 'components/base/badges/status-badge';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
   const { t } = useI18n();

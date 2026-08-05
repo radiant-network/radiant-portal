@@ -1,8 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { EllipsisVertical } from 'lucide-react';
 
-import { VariantInterpretedCase } from '@/api/api';
+import type { VariantInterpretedCase } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
@@ -10,7 +10,7 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Button } from '@/components/base/shadcn/button';
 

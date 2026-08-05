@@ -1,12 +1,12 @@
 import { Link, useParams } from 'react-router';
 import { InfoIcon } from 'lucide-react';
 
-import { VariantOverview } from '@/api/api';
+import type { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { Card, CardContent, CardProps } from '@/components/base/shadcn/card';
+import { Card, CardContent, type CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';

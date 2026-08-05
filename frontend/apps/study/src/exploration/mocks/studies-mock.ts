@@ -1,4 +1,4 @@
-import { type Study } from './study-model';
+import type { Study } from './study-model';
 
 /**
  * Mock studies

@@ -1,9 +1,9 @@
 /* eslint-disable complexity */
-import { ReactNode, useCallback } from 'react';
+import { type ReactNode, useCallback } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight, AudioLines, Diamond, Flame } from 'lucide-react';
 
-import { OmimGenePanel, VepImpact } from '@/api/api';
+import type { OmimGenePanel, VepImpact } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
-import { CaseTasksWithOccurrencesDataTypeEnum, VariantUninterpretedCase } from '@/api/api';
+import { CaseTasksWithOccurrencesDataTypeEnum, type VariantUninterpretedCase } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';

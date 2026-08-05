@@ -1,6 +1,6 @@
-import { FiltersValue } from '@/api/api';
-import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
-import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import type { FiltersValue } from '@/api/api';
+import type { IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
 /**
  * Item Priority

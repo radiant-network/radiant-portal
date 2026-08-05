@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
-import { createColumnHelper, OnChangeFn, RowSelectionState } from '@tanstack/react-table';
+import { createColumnHelper, type OnChangeFn, type RowSelectionState } from '@tanstack/react-table';
 import { User } from 'lucide-react';
 
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
-import { TableColumnDef } from '../../data-table/data-table';
+import type { TableColumnDef } from '../../data-table/data-table';
 import DisplayTable from '../../data-table/display-table';
 import { Checkbox } from '../../shadcn/checkbox';
 
-import { VennOperation } from './venn-chart';
+import type { VennOperation } from './venn-chart';
 
 const columnHelper = createColumnHelper<VennOperation>();
 

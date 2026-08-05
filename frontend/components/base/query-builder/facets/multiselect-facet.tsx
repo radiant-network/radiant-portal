@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import isEqual from 'lodash/isEqual';
 import { SearchIcon } from 'lucide-react';
 
-import { Aggregation } from '@/api/api';
+import type { Aggregation } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { useFacetConfig } from '@/components/base/query-builder/facets/hooks/use-facet-config';
@@ -14,7 +14,7 @@ import { Label } from '@/components/base/shadcn/label';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Switch } from '@/components/base/shadcn/switch';
-import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import type { Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 

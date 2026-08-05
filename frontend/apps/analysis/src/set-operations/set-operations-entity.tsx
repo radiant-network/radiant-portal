@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react';
 import { ArchiveIcon, Dna, FlaskConical, Users } from 'lucide-react';
 
-import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
+import type { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { mockSets, UserSetOption } from './mocks/user-set';
+import { mockSets, type UserSetOption } from './mocks/user-set';
 import SetOperationsEmpty from './set-operations-empty';
 import SetOperationsLanding from './set-operations-landing';
 import SetOperationsVennChart from './set-operations-venn-chart';

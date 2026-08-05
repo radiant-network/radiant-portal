@@ -1,6 +1,6 @@
-import { createContext, Dispatch, useContext, useReducer } from 'react';
+import { createContext, type Dispatch, useContext, useReducer } from 'react';
 
-import { SavedFilter, SavedFilterType } from '@/api/index';
+import { type SavedFilter, SavedFilterType } from '@/api/index';
 
 export enum SavedFiltersActionType {
   SET_SELECTED = 'set-selected',

@@ -1,7 +1,7 @@
-import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { type PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import Cookies from 'universal-cookie';
 
-import { IThemeContextProps, Theme, ThemeContext } from '@/components/base/theme-toggle/theme-context';
+import { type IThemeContextProps, Theme, ThemeContext } from '@/components/base/theme-toggle/theme-context';
 
 const persistKey = 'theme';
 const cookies = new Cookies(null, { path: '/' });

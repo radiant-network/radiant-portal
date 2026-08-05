@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import { useId, useState } from 'react';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { cn } from '@/components/lib/utils';

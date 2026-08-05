@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarIcon, ClipboardList, LibraryBig, StethoscopeIcon } from 'lucide-react';
 import useSWR from 'swr';
 
-import { InterpretationSomatic } from '@/api/api';
+import type { InterpretationSomatic } from '@/api/api';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import DateTime from '@/components/base/date/datetime';
 import EmptyField from '@/components/base/information/empty-field';

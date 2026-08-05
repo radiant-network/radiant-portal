@@ -93,16 +93,17 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
 
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);
 
+// `link` features are shortcuts rather than toggles: they carry no defaultValue.
+const buildDefaultFeatures = (): BetaFeatures =>
+  Object.entries(defaultFeatureDefinitions).reduce<BetaFeatures>(
+    (acc, [key, def]) => (def.type === 'link' ? acc : { ...acc, [key]: def.defaultValue }),
+    {},
+  );
+
 export const BetaFeatureProvider = ({ children }: { children: ReactNode }) => {
   const [features, setFeatures] = useState<BetaFeatures>(() => {
     if (typeof window === 'undefined') {
-      return Object.entries(defaultFeatureDefinitions).reduce(
-        (acc, [key, def]) => ({
-          ...acc,
-          [key]: def.defaultValue,
-        }),
-        {},
-      );
+      return buildDefaultFeatures();
     }
 
     const savedFeatures = localStorage.getItem('betaFeatures');
@@ -110,22 +111,10 @@ export const BetaFeatureProvider = ({ children }: { children: ReactNode }) => {
       try {
         return JSON.parse(savedFeatures);
       } catch {
-        return Object.entries(defaultFeatureDefinitions).reduce(
-          (acc, [key, def]) => ({
-            ...acc,
-            [key]: def.defaultValue,
-          }),
-          {},
-        );
+        return buildDefaultFeatures();
       }
     }
-    return Object.entries(defaultFeatureDefinitions).reduce(
-      (acc, [key, def]) => ({
-        ...acc,
-        [key]: def.defaultValue,
-      }),
-      {},
-    );
+    return buildDefaultFeatures();
   });
 
   useEffect(() => {

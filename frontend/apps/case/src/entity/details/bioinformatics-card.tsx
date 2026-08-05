@@ -1,12 +1,12 @@
-import { ComponentProps, useMemo } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { CaseTask } from '@/api/api';
+import type { CaseTask } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
-import { TableColumnDef } from '@/components/base/data-table/data-table';
+import type { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import {

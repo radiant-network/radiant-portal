@@ -4,9 +4,9 @@ import { Search, SearchIcon } from 'lucide-react';
 import useSWR from 'swr';
 
 import {
-  ApiError,
-  GenePanelCondition,
-  GenePanelConditions,
+  type ApiError,
+  type GenePanelCondition,
+  type GenePanelConditions,
   GetGermlineVariantConditionsPanelTypeEnum,
 } from '@/api/api';
 import Empty from '@/components/base/empties/empty';

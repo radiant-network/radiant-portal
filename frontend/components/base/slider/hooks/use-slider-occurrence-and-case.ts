@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import {
+import type {
   CaseEntity,
   CasePatientClinicalInformation,
   CaseSequencingExperiment,

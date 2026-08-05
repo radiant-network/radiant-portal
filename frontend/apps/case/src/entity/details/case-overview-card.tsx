@@ -1,8 +1,8 @@
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { formatDate } from 'date-fns';
 
-import { CaseEntity } from '@/api/api';
-import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
+import type { CaseEntity } from '@/api/api';
+import AnalysisTypeCodeBadge, { type AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';

@@ -2,9 +2,9 @@
 'use client';
 
 import * as React from 'react';
-import { type DialogProps } from '@radix-ui/react-dialog';
+import type { DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Dialog, DialogContent } from '@/components/base/shadcn/dialog';

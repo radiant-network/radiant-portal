@@ -1,4 +1,4 @@
-import { type Step } from 'react-joyride';
+import type { Step } from 'react-joyride';
 
 import OnboardingWizard from '@/components/base/onboarding/onboarding-wizard';
 import { useI18n } from '@/components/hooks/i18n';

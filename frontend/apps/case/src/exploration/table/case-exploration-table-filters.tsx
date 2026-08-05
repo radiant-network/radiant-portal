@@ -2,8 +2,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import { CaseFilters, SearchCriterion } from '@/api/api';
-import { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import type { CaseFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,
@@ -13,7 +13,7 @@ import getItemPriority from '@/components/base/data-table/filters/options/option
 import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
 type FiltersGroupFormProps = {

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { createContext, useContext } from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { tv, VariantProps } from 'tailwind-variants';
+import { tv, type VariantProps } from 'tailwind-variants';
 
 const tabsVariants = tv({
   slots: {

@@ -1,5 +1,6 @@
 import { cn } from '@/components/lib/utils';
-import { tabContentClassName } from '@/style';
+
+import { tabContentClassName } from '../../style';
 
 import MyNetworkCard from './my-network-card';
 import PublicCochortsCard from './public-cohorts-card';

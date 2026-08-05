@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 import {
   AlertDialog,
@@ -14,7 +14,7 @@ import {
 
 import { Spinner } from '../spinner';
 
-import { alertDialog, OpenAlertDialogProps } from './alert-dialog-store';
+import { alertDialog, type OpenAlertDialogProps } from './alert-dialog-store';
 
 export type AlertDialogProps = OpenAlertDialogProps & {
   isOpen: boolean;

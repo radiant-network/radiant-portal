@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import CheckboxGroupField, { CheckboxGroupFieldItem } from '@/components/base/checkboxes/checkbox-group-field';
+import CheckboxGroupField, { type CheckboxGroupFieldItem } from '@/components/base/checkboxes/checkbox-group-field';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Label } from '@/components/base/shadcn/label';
 import { Separator } from '@/components/base/shadcn/separator';

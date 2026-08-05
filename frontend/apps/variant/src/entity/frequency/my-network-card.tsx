@@ -4,10 +4,10 @@ import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
 
 import {
-  ApiError,
+  type ApiError,
   GetGermlineVariantInternalFrequenciesSplitEnum,
-  InternalFrequencies,
-  VariantInternalFrequencies,
+  type InternalFrequencies,
+  type VariantInternalFrequencies,
 } from '@/api/index';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';

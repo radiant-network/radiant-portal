@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LucideIcon, PlusCircle, Search } from 'lucide-react';
+import { type LucideIcon, PlusCircle, Search } from 'lucide-react';
 
 import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { Badge } from '@/components/base/shadcn/badge';

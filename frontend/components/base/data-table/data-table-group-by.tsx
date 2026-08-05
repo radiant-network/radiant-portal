@@ -1,4 +1,4 @@
-import { GroupingState, Table } from '@tanstack/react-table';
+import type { GroupingState, Table } from '@tanstack/react-table';
 import { CombineIcon } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';
@@ -14,7 +14,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { ColumnSettings, TableColumnDef } from './data-table';
+import type { ColumnSettings, TableColumnDef } from './data-table';
 
 type DataTableGroupByProps = {
   grouping: GroupingState;

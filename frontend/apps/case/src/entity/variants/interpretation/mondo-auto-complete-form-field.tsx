@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import capitalize from 'lodash/capitalize';
 import useSWR from 'swr';
-import { ZodObject } from 'zod';
+import type { ZodObject } from 'zod';
 
-import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
+import { AutoComplete, type Option } from '@/components/base/data-entry/auto-complete';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { useI18n } from '@/components/hooks/i18n';
@@ -13,7 +13,7 @@ import { debounce } from '@/components/hooks/useDebounce';
 import { mondoApi } from '@/utils/api';
 import MondoOptionItemLabel from 'components/base/variant/mondo-option-item-label';
 
-import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
+import type { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
 
 type MondoAutoCompleteFormFieldProps = {
   name: keyof GermlineInterpretationSchemaType | keyof SomaticInterpretationSchemaType;
