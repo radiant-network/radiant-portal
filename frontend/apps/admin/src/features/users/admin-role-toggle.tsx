@@ -22,7 +22,7 @@ type AdminRoleToggleProps = {
 /**
  * The Administrator grant, promoted out of the additive roles list onto the sheet's identity row
  * (Edit) or as a standalone row under Member details (Add). Rendered as a compact bordered "box"
- * (mirrors the role-box style): a whole-box-clickable checkbox + label. Hovering the box opens a
+ * (mirrors the member-role boxes): a whole-box-clickable checkbox + label. Hovering the box opens a
  * card (to its left) with the role description + a "View permissions" link (same dialog as the role
  * boxes). When self-guard-locked, the box is disabled with an explanatory tooltip instead.
  */
