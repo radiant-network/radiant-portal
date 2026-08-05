@@ -37,7 +37,6 @@ function MultiSelector({
   openOnFocus = false,
   multiline = false,
   renderBadge,
-  wrapBadges = false,
   ref,
   'aria-invalid': ariaInvalid,
 }: MultipleSelectorProps) {
@@ -371,7 +370,7 @@ function MultiSelector({
         }}
       >
         <div ref={badgesContainerRef} className="relative flex flex-1 flex-wrap gap-1">
-          {(wrapBadges ? selected : selected.slice(0, visibleBadgesCount)).map(option => {
+          {selected.slice(0, visibleBadgesCount).map(option => {
             if (renderBadge) {
               return renderBadge({
                 option,
@@ -385,7 +384,7 @@ function MultiSelector({
               </Badge>
             );
           })}
-          {!wrapBadges && selected.length > visibleBadgesCount && (
+          {selected.length > visibleBadgesCount && (
             <Badge
               className="cursor-pointer"
               onClick={e => {

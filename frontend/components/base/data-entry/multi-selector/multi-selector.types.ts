@@ -89,12 +89,6 @@ export interface MultipleSelectorProps {
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
 
-  /**
-   * Show ALL selected badges wrapped onto multiple rows instead of truncating to one row with a
-   * "+n" overflow badge. Default false (unchanged behavior).
-   */
-  wrapBadges?: boolean;
-
   /** Set by `FormControl` when the field is in error, turns the control red. */
   'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }
