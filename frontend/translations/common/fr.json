@@ -8,7 +8,6 @@
       "roles": "Rôles et permissions"
     },
     "users": {
-      "title": "Membres",
       "count": "{{total}} membres",
       "subtitle": "Gérez les membres et les attributions de rôles.",
       "add": "Ajouter un membre",
@@ -24,19 +23,16 @@
         "role": "Rôle",
         "organization": "Organisation"
       },
-      "edit_aria": "Modifier le membre",
-      "empty": "Aucun membre trouvé"
+      "edit_aria": "Modifier le membre"
     },
     "orgs": {
-      "title": "Organisations",
       "count": "{{total}} organisations",
       "subtitle": "Créez et modifiez les organisations.",
       "add": "Ajouter une organisation",
       "search_placeholder": "Rechercher par nom ou code",
       "col": { "name": "Nom", "category": "Catégorie" },
       "filter": { "category": "Catégorie" },
-      "edit_aria": "Modifier l'organisation",
-      "empty": "Aucune organisation trouvée"
+      "edit_aria": "Modifier l'organisation"
     },
     "org": {
       "add_title": "Ajouter une organisation",
@@ -82,7 +78,6 @@
       "can_ingest_data": { "name": "Importer des données", "description": "Soumettre des lots de données (cas, patients, échantillons, séquençage)." }
     },
     "roles_page": {
-      "title": "Rôles et permissions",
       "count": "{{total}} Rôles",
       "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances",
       "see_included": "voir ce qui est inclus",
@@ -101,8 +96,7 @@
       "orgs_count_one": "{{count}} organisation",
       "orgs_count_other": "{{count}} organisations",
       "edit_aria": "Modifier le rôle",
-      "view_aria": "Voir le rôle",
-      "empty": "Aucun rôle trouvé"
+      "view_aria": "Voir le rôle"
     },
     "role": {
       "add_title": "Ajouter un rôle",
@@ -164,8 +158,6 @@
         "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur.",
         "self_delete": "Vous ne pouvez pas supprimer votre propre compte.",
         "org_required": "Sélectionnez au moins une organisation.",
-        "name_required": "Le prénom et le nom sont obligatoires.",
-        "email_required": "Le courriel est obligatoire.",
         "email_duplicate": "Un membre avec ce courriel existe déjà dans ce réseau."
       },
       "ok": {

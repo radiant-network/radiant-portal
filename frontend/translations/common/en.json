@@ -8,7 +8,6 @@
       "roles": "Roles & Permissions"
     },
     "users": {
-      "title": "Members",
       "count": "{{total}} Members",
       "subtitle": "Manage members and role assignments.",
       "add": "Add member",
@@ -24,19 +23,16 @@
         "role": "Role",
         "organization": "Organization"
       },
-      "edit_aria": "Edit member",
-      "empty": "No members found"
+      "edit_aria": "Edit member"
     },
     "orgs": {
-      "title": "Organizations",
       "count": "{{total}} Organizations",
       "subtitle": "Create and edit organizations.",
       "add": "Add organization",
       "search_placeholder": "Search by name or code",
       "col": { "name": "Name", "category": "Category" },
       "filter": { "category": "Category" },
-      "edit_aria": "Edit organization",
-      "empty": "No organizations found"
+      "edit_aria": "Edit organization"
     },
     "org": {
       "add_title": "Add organization",
@@ -82,7 +78,6 @@
       "can_ingest_data": { "name": "Ingest data", "description": "Submit data batches (cases, patients, samples, sequencing)." }
     },
     "roles_page": {
-      "title": "Roles & Permissions",
       "count": "{{total}} Roles",
       "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base",
       "see_included": "see what's included",
@@ -101,8 +96,7 @@
       "orgs_count_one": "{{count}} organization",
       "orgs_count_other": "{{count}} organizations",
       "edit_aria": "Edit role",
-      "view_aria": "View role",
-      "empty": "No roles found"
+      "view_aria": "View role"
     },
     "role": {
       "add_title": "Add role",
@@ -164,8 +158,6 @@
         "self_admin": "You can't grant yourself the Administrator role.",
         "self_delete": "You can't delete your own account.",
         "org_required": "Select at least one organization.",
-        "name_required": "First and last name are required.",
-        "email_required": "Email is required.",
         "email_duplicate": "A member with this email already exists in this network."
       },
       "ok": {

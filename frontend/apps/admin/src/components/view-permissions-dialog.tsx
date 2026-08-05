@@ -31,8 +31,8 @@ type ViewPermissionsDialogProps = {
 
 /**
  * Read-only modal listing a role's permissions (backend "actions") with each one's scope and
- * description. Shared by the Roles page and the Member sheet. Default roles are locked (a footer
- * note explains why); custom roles can offer an Edit hand-off via `onEdit`.
+ * description. Shared by the Roles page and the Member sheet. Default roles are locked (a tooltip on
+ * the title lock icon explains why); custom roles can offer an Edit hand-off via `onEdit`.
  */
 export default function ViewPermissionsDialog({ role, open, onOpenChange, onEdit }: ViewPermissionsDialogProps) {
   const { t } = useI18n();
