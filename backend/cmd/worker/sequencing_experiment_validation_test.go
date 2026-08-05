@@ -36,6 +36,10 @@ func (m *mockSampleDAO) GetTypeCodes() ([]string, error) {
 	return nil, nil
 }
 
+func (m *mockSampleDAO) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
+	return nil, nil
+}
+
 func (m *mockSampleDAO) GetSampleById(_ context.Context, id int) (*types.Sample, error) {
 	args := m.Called(id)
 	if s, ok := args.Get(0).(*types.Sample); ok {

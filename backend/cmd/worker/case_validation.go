@@ -1526,7 +1526,7 @@ func persistCaseRecords(
 		if err := persistFamily(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist family for create_case %d: %w", record.Index, err)
 		}
-		if err := persistFetuses(ctx, sc, record); err != nil {
+		if err := persistFetuses(ctx, sc, record, nil); err != nil {
 			return fmt.Errorf("failed to persist fetuses for create_case %d: %w", record.Index, err)
 		}
 		if err := persistObservationCategorical(ctx, sc, record); err != nil {

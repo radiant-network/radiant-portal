@@ -42,6 +42,8 @@ type familyStore interface {
 
 type fetusReader interface {
 	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
+	GetFetusesByCaseID(ctx context.Context, caseID int) ([]*types.Fetus, error)
+	GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error)
 }
 
 type organizationReader interface {
@@ -59,6 +61,7 @@ type projectReader interface {
 type sampleReader interface {
 	GetSampleById(ctx context.Context, id int) (*types.Sample, error)
 	GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error)
+	GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error)
 }
 
 type valueSetsReader interface {

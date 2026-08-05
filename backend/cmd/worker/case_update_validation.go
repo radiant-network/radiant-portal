@@ -34,6 +34,12 @@ type UpdateCaseValidationRecord struct {
 	// TaskRecord is the synthetic record the task attachment reuses at persist time (nil when
 	// the payload carries no tasks — existing tasks are then left untouched).
 	TaskRecord *CaseValidationRecord
+	// ExistingFetuses maps the case's current fetuses by submitter id, so the persist phase can
+	// update a matching one in place instead of recreating it.
+	ExistingFetuses map[string]*types.Fetus
+	// FetusIDsToDelete are the case's fetuses the payload dropped. Validation refuses the batch when
+	// a sample still points at one of them.
+	FetusIDsToDelete []int
 }
 
 func (r *UpdateCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -92,6 +98,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		OrderingPhysician:          update.OrderingPhysician,
 		OrderingOrganizationCode:   update.OrderingOrganizationCode,
 		Patients:                   update.Patients,
+		Fetuses:                    update.Fetuses,
 	}
 	cr := NewCaseValidationRecord(bv, cache, syntheticCase, index)
 	cr.ProjectID = &project.ID
@@ -113,6 +120,43 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	cr.validateCaseCommonFields(batchval.FormatPath(cr, ""))
 	if err := cr.validateCasePatients(); err != nil {
 		return nil, fmt.Errorf("failed to validate case patients: %w", err)
+	}
+	if err := cr.validateCaseFetuses(); err != nil {
+		return nil, fmt.Errorf("failed to validate case fetuses: %w", err)
+	}
+
+	// Reconcile the fetuses by submitter id: a key the payload still carries is updated in place, a
+	// key it dropped is deleted. Deleting is the only destructive half, and sample.fetus_id has no
+	// ON DELETE CASCADE — so refuse it here as a reportable error rather than let the persist phase
+	// die on a raw FK violation. Updating a fetus that has a sample is fine, which is the point of
+	// matching by key rather than recreating.
+	existingFetuses, fetusErr := bv.FetusRepo.GetFetusesByCaseID(ctx, *r.CaseID)
+	if fetusErr != nil {
+		return nil, fmt.Errorf("get fetuses for case %d: %w", *r.CaseID, fetusErr)
+	}
+	r.ExistingFetuses = make(map[string]*types.Fetus, len(existingFetuses))
+	for _, f := range existingFetuses {
+		r.ExistingFetuses[f.SubmitterFetusId] = f
+	}
+	carried := make(map[string]bool, len(update.Fetuses))
+	for _, fb := range update.Fetuses {
+		if fb != nil {
+			carried[fb.SubmitterFetusId.String()] = true
+		}
+	}
+	for _, f := range existingFetuses {
+		if !carried[f.SubmitterFetusId] {
+			r.FetusIDsToDelete = append(r.FetusIDsToDelete, f.ID)
+		}
+	}
+	blocked, sampleErr := bv.SampleRepo.GetFetusIDsWithSamples(ctx, r.FetusIDsToDelete)
+	if sampleErr != nil {
+		return nil, fmt.Errorf("check samples for fetuses of case %d: %w", *r.CaseID, sampleErr)
+	}
+	if len(blocked) > 0 {
+		r.AddErrors(fmt.Sprintf(
+			"Cannot remove fetus %v from update case %d: a sample is still attached to it. Keep it in \"fetuses\" to update it instead.",
+			blocked, index), FetusHasSample, r.path())
 	}
 
 	r.Errors = append(r.Errors, cr.Errors...)
@@ -253,6 +297,9 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		return fmt.Errorf("failed to update case scalars: %w", err)
 	}
 
+	// Clinical children are wiped and rewritten from the payload. The fetus ROWS are deliberately
+	// not part of that: they are reconciled by submitter id below, so their ids — and therefore
+	// sample.fetus_id — survive. Only the family and observation rows pointing at them are rewritten.
 	if err := sc.FamilyRepo.DeleteFamilyByCaseID(ctx, caseID); err != nil {
 		return fmt.Errorf("failed to delete family for case %d: %w", caseID, err)
 	}
@@ -277,6 +324,15 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 	}
 	if err := persistFamilyHistory(ctx, sc, rec.Record); err != nil {
 		return fmt.Errorf("failed to persist family history: %w", err)
+	}
+	// The dropped fetuses' family rows and observations are already gone with the wipe above, so the
+	// rows themselves can go now. Validation has refused any that a sample still points at.
+	if err := sc.FetusRepo.DeleteFetusesByIDs(ctx, rec.FetusIDsToDelete); err != nil {
+		return fmt.Errorf("failed to delete fetuses dropped from case %d: %w", caseID, err)
+	}
+	// After persistFamily: persistFetuses resolves the proband from the patients it just wrote.
+	if err := persistFetuses(ctx, sc, rec.Record, rec.ExistingFetuses); err != nil {
+		return fmt.Errorf("failed to persist fetuses: %w", err)
 	}
 
 	// Merge-if-present: attach the sequencing experiment links and tasks the payload carried
