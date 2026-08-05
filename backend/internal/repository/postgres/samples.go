@@ -20,6 +20,24 @@ func NewSamplesRepository(db database.PostgresDB) *SamplesRepository {
 	return &SamplesRepository{db: db.DB}
 }
 
+// GetFetusIDsWithSamples narrows fetusIDs down to those a sample still points at. A fetus cannot be
+// deleted while one does: sample.fetus_id has no ON DELETE CASCADE, so the delete would fail as a
+// raw FK violation instead of a reportable validation error.
+func (r *SamplesRepository) GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error) {
+	if len(fetusIDs) == 0 {
+		return nil, nil
+	}
+	var found []int
+	if err := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Distinct().
+		Where("fetus_id IN ?", fetusIDs).
+		Pluck("fetus_id", &found).Error; err != nil {
+		return nil, fmt.Errorf("error while checking samples for fetuses %v: %w", fetusIDs, err)
+	}
+	return found, nil
+}
+
 func (r *SamplesRepository) GetSampleById(ctx context.Context, id int) (*Sample, error) {
 	var sample Sample
 	tx := r.db.WithContext(ctx).Table(types.SampleTable.Name).Where("id = ?", id)

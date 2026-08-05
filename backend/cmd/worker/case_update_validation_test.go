@@ -14,10 +14,13 @@ import (
 
 func newCacheUpdate(repo *CaseValidationMockRepo) (*batchval.BatchValidationCache, *batchval.BatchValidationContext) {
 	ctx := &batchval.BatchValidationContext{
-		ProjectRepo:   repo,
-		CasesRepo:     repo,
-		OrgRepo:       repo,
-		PatientRepo:   repo,
+		ProjectRepo: repo,
+		CasesRepo:   repo,
+		OrgRepo:     repo,
+		PatientRepo: repo,
+		// The update validator reconciles fetuses, so it reads both of these on every record.
+		FetusRepo:     &FetusMockRepo{},
+		SampleRepo:    &SamplesMockRepo{},
 		ValueSetsRepo: &CodesMockRepo{},
 	}
 	return batchval.NewBatchValidationCache(ctx), ctx
