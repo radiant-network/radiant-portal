@@ -30,7 +30,14 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
           <span>
             Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : <EmptyField />}
           </span>
-          {data.dna_change && <span>{data.dna_change}</span>}
+          {data.dna_change && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="font-mono min-w-0 max-w-56 truncate">{data.dna_change}</div>
+              </TooltipTrigger>
+              <TooltipContent className="font-mono break-all">{data.dna_change}</TooltipContent>
+            </Tooltip>
+          )}
           <div>
             <Tooltip>
               <TooltipTrigger>{data.aa_change && <span>{data.aa_change}</span>}</TooltipTrigger>
