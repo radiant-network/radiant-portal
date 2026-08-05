@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,7 +13,7 @@ import type { Organization } from '../../mock/types';
 
 import type { OrgFormValues } from './org-form.types';
 import OrgSheet from './org-sheet';
-import OrgsTableFilters, { OrgsFilterState } from './orgs-table-filters';
+import OrgsTableFilters, { type OrgsFilterState } from './orgs-table-filters';
 import { getOrgsColumns, getOrgsColumnSettings } from './orgs-table-settings';
 
 const EMPTY_FILTERS: OrgsFilterState = { search: '', categories: [] };

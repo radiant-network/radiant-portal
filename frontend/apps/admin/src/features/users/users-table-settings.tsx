@@ -1,8 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { Pencil } from 'lucide-react';
 
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 
 import type { AdminUser } from '../../mock/types';

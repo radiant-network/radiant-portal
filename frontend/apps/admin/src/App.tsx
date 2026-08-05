@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import AdminLayout from './components/admin-layout';
-import { AdminSectionId } from './components/admin-sidebar';
+import type { AdminSectionId } from './components/admin-sidebar';
 import OrgsPage from './features/orgs/orgs-page';
 import RolesPage from './features/roles/roles-page';
 import UsersPage from './features/users/users-page';

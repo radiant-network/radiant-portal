@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { AdminSectionId, AdminSectionSelect, AdminSidebar } from './admin-sidebar';
+import { type AdminSectionId, AdminSectionSelect, AdminSidebar } from './admin-sidebar';
 
 type AdminLayoutProps = {
   /** Tenant display name (shown uppercase), e.g. "CBTN". */

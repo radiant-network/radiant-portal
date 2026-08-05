@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import AdminLayout from '@/apps/admin/src/components/admin-layout';
-import { AdminSectionId } from '@/apps/admin/src/components/admin-sidebar';
+import type { AdminSectionId } from '@/apps/admin/src/components/admin-sidebar';
 import UsersPage from '@/apps/admin/src/features/users/users-page';
 import { MOCK_TENANT } from '@/apps/admin/src/mock/data';
 import { Toaster } from '@/components/base/shadcn/sonner';

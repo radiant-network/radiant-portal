@@ -1,6 +1,6 @@
-import { ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { Lock, Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,7 +18,7 @@ import type { Role } from '../../mock/types';
 
 import type { RoleFormValues } from './role-form.types';
 import RoleSheet from './role-sheet';
-import RolesTableFilters, { RolesFilterState } from './roles-table-filters';
+import RolesTableFilters, { type RolesFilterState } from './roles-table-filters';
 import { getRolesColumns, getRolesColumnSettings } from './roles-table-settings';
 
 const EMPTY_FILTERS: RolesFilterState = { search: '', customOnly: false };

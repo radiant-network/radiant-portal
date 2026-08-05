@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { Building2, LucideIcon, Shield, Users } from 'lucide-react';
+import { Building2, type LucideIcon, Shield, Users } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import {

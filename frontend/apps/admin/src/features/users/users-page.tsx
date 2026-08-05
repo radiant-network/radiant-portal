@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,7 +13,7 @@ import type { AdminUser, AssignedRole } from '../../mock/types';
 
 import type { UserFormValues } from './user-form.types';
 import UserSheet from './user-sheet';
-import UsersTableFilters, { UsersFilterState } from './users-table-filters';
+import UsersTableFilters, { type UsersFilterState } from './users-table-filters';
 import { getUsersColumns, getUsersColumnSettings } from './users-table-settings';
 
 const EMPTY_FILTERS: UsersFilterState = { search: '', roles: [], orgs: [] };

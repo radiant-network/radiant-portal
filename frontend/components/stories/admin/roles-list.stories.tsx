@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import AdminLayout from '@/apps/admin/src/components/admin-layout';
-import { AdminSectionId } from '@/apps/admin/src/components/admin-sidebar';
+import type { AdminSectionId } from '@/apps/admin/src/components/admin-sidebar';
 import OrgsPage from '@/apps/admin/src/features/orgs/orgs-page';
 import RolesPage from '@/apps/admin/src/features/roles/roles-page';
 import UsersPage from '@/apps/admin/src/features/users/users-page';

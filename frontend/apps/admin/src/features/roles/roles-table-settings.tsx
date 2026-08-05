@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { Badge } from '@/components/base/shadcn/badge';
 
 import { getRoleScopes, roleName, SCOPE_BADGE_VARIANT } from '../../mock/data';
