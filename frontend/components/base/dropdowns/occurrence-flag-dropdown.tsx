@@ -101,11 +101,11 @@ function OccurrenceFlagDropdown({
   const { list } = useDataTable();
   const saveFlag = useSWRMutation(
     `upsert-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    (key, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
+    (key: string, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
   );
   const deleteFlag = useSWRMutation(
     `delete-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    (key, opts: { arg: DeleteOccurrenceFlagInput }) => deleteOccurrenceFlag(key, opts, tenant),
+    (key: string, opts: { arg: DeleteOccurrenceFlagInput }) => deleteOccurrenceFlag(key, opts, tenant),
   );
   const [selectedFlag, setSelectedFlag] = useState<OccurrenceFlagType | null>(flag ?? null);
   const selectedFlagConfig = selectedFlag ? FLAGS[selectedFlag] : null;

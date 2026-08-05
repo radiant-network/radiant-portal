@@ -1,15 +1,17 @@
-import { HttpStatusCode } from "axios";
-import type { Route } from "./+types/occurrences";
-import { refreshAccessToken } from "~/utils/auth.server";
+import { HttpStatusCode } from 'axios';
 
-export async function action({ request }: Route.LoaderArgs) {
-  if (request.method === "POST") {
+import type { Route } from './+types/refresh-token';
+
+import { refreshAccessToken } from '~/utils/auth.server';
+
+export async function action({ request }: Route.ActionArgs) {
+  if (request.method === 'POST') {
     const results = await refreshAccessToken(request);
 
     return new Response(JSON.stringify({ success: true }), {
       status: HttpStatusCode.Ok,
       headers: {
-        "Set-Cookie": results.cookie,
+        'Set-Cookie': results.cookie,
       },
     });
   }

@@ -6,9 +6,10 @@ import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
-import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
+
+import { SELECTED_VARIANT_PARAM } from '../../constants';
 
 type OccurrenceActionsMenuProps = {
   row: Row<GermlineSNVOccurrence>;

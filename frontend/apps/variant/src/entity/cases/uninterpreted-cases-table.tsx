@@ -13,10 +13,10 @@ import type {
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpreted-case-sheet';
-import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
 import { variantsApi } from '@/utils/api';
 
+import SliderUninterpretedCaseSheet from './slider/slider-uninterpreted-case-sheet';
+import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
 import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
 import {
   getUninterpretedCasesColumns,

@@ -54,7 +54,7 @@ function FilesArchiveList() {
     <DataTable
       id="files-archive-list"
       columns={columns}
-      TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={false} />}
+      TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} />}
       data={data?.list ?? []}
       defaultColumnSettings={defaultSettings}
       hasError={!!error}

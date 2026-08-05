@@ -6,8 +6,9 @@ import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
+
+import { tabContentClassName } from '../../style';
 
 import AssociatedConditionsCard from './associated-conditions-card';
 import ClassificationCard from './classification-card';

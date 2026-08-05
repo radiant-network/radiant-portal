@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
+
+import { tabContentClassName } from '../../style';
 
 import { CasesFiltersProvider } from './table/filters/cases-filters-context';
 import InterpretedCasesTable from './interpreted-cases-table';
