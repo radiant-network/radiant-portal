@@ -185,7 +185,6 @@ jobs:
             [ "$RUNNING" = "0" ] && break
             sleep 60
           done
-          TOTAL_FAILS=0
           REPORT_LINKS=""
           ALL_PASSED=true
           mkdir -p /tmp/all_screenshots
@@ -193,26 +192,27 @@ jobs:
             R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null || echo "{\"exit_code\":1,\"report_url\":\"\",\"failure_count\":0}")
             RURL=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(JSON.parse(d).report_url||\"\")}catch(e){}})" 2>/dev/null || true)
             EC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).exit_code||0))}catch(e){process.stdout.write(\"1\")}})" 2>/dev/null || echo 1)
-            FC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).failure_count||0))}catch(e){process.stdout.write(\"0\")}})" 2>/dev/null || echo 0)
-            [ "$EC" != "0" ] && ALL_PASSED=false
-            FC=${FC:-0}
-            TOTAL_FAILS=$((TOTAL_FAILS + FC))
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
             [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
             [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${RURL}|Shard ${i}>  "
           done
+          # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d " ")
+          NEW_FAILS=${NEW_FAILS:-0}
+          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d " ")
+          TOTAL_FAILS=${TOTAL_FAILS:-0}
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
             COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 86400)
           fi
-          $ALL_PASSED && STATUS="All passed ✅" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${TOTAL_FAILS} new fails 🐛" || STATUS="Failed 🐛"; }
+          $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
           $ALL_PASSED && COLOR="good" || COLOR="danger"
           TITLE="Ferlease - $RELEASE - Cypress Test Results: $STATUS"
           BODY_PARTS=()
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
-          [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Rapports: $REPORT_LINKS")
+          [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Reports: $REPORT_LINKS")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
           PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
