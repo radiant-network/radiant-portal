@@ -1,4 +1,172 @@
 {
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "group": "Network settings",
+      "users": "Members",
+      "organizations": "Organizations",
+      "roles": "Roles & Permissions"
+    },
+    "users": {
+      "count": "{{total}} Members",
+      "subtitle": "Manage members and role assignments.",
+      "add": "Add member",
+      "search_placeholder": "Search by name or email",
+      "you": "You",
+      "member": "Member",
+      "all_orgs": "All orgs",
+      "col": {
+        "user": "Name",
+        "roles": "Roles & Access"
+      },
+      "filter": {
+        "role": "Role",
+        "organization": "Organization"
+      },
+      "edit_aria": "Edit member"
+    },
+    "orgs": {
+      "count": "{{total}} Organizations",
+      "subtitle": "Create and edit organizations.",
+      "add": "Add organization",
+      "search_placeholder": "Search by name or code",
+      "col": { "name": "Name", "category": "Category" },
+      "filter": { "category": "Category" },
+      "edit_aria": "Edit organization"
+    },
+    "org": {
+      "add_title": "Add organization",
+      "edit_title": "Edit organization",
+      "description": "Members can be granted roles scoped to specific organizations.",
+      "name": "Name",
+      "code": "Code",
+      "code_hint": "Can't be changed after creation. Lowercase letters, numbers, and underscores.",
+      "category": "Category",
+      "category_placeholder": "Select a category",
+      "category_hint": "Can't be changed after creation.",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "create": "Create organization",
+      "ok": { "created": "Organization created.", "updated": "Organization updated." }
+    },
+    "org_categories": {
+      "diagnostic_laboratory": "Diagnostic Laboratory",
+      "healthcare_provider": "Healthcare Provider",
+      "research_institute": "Research Institute",
+      "sequencing_center": "Sequencing Center"
+    },
+    "roles": {
+      "scope": { "tenant": "Network", "org": "Organization" },
+      "tenant_admin": { "name": "Administrator", "description": "Full administrative access to this network: manage members, organizations, and roles." },
+      "member": { "name": "Member", "description": "Baseline access for everyone: search cases and browse the knowledge base (genes, variants, phenotypes, population frequencies)." },
+      "geneticist": { "name": "Geneticist", "description": "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s)." },
+      "data_manager": { "name": "Data Manager", "description": "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s)." },
+      "clinical_reviewer": { "name": "Clinical Reviewer", "description": "Review and interpret variants and browse the knowledge base, at the selected organization(s)." },
+      "org_manager": { "name": "Org Manager", "description": "Create and edit organizations in this network." }
+    },
+    "permissions": {
+      "can_manage_user": { "name": "Manage members", "description": "Create, edit, and delete members; assign and unassign roles." },
+      "can_manage_org": { "name": "Manage organizations", "description": "Create and edit organizations in the network." },
+      "can_manage_role": { "name": "Manage roles", "description": "Create, edit, and delete custom roles in the network." },
+      "can_search_case": { "name": "Search cases", "description": "Search and view cases across the network. PHI is masked unless you have Read PHI." },
+      "can_view_kb": { "name": "View knowledge base", "description": "Browse the network's de-identified knowledge base: genes, variants, phenotype/disease terms, and population frequencies." },
+      "can_read_pii": { "name": "Read PHI", "description": "View protected health information (PHI) for patients." },
+      "can_interpret_variant": { "name": "Interpret variants", "description": "Create or update variant interpretations." },
+      "can_comment_variant": { "name": "Comment on variants", "description": "Add, edit, or delete notes on variant occurrences." },
+      "can_flag_variant": { "name": "Flag variants", "description": "Flag variant occurrences." },
+      "can_download_file": { "name": "Download files", "description": "Download case documents." },
+      "can_ingest_data": { "name": "Ingest data", "description": "Submit data batches (cases, patients, samples, sequencing)." }
+    },
+    "roles_page": {
+      "count": "{{total}} Roles",
+      "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base",
+      "see_included": "see what's included",
+      "add": "Add role",
+      "search_placeholder": "Search by role name",
+      "custom_only": "Custom roles only",
+      "footer_note": "Default roles can't be edited or deleted.",
+      "lock_tooltip": "Can't be edited or deleted",
+      "col": { "role": "Role", "scope": "Scope", "permissions": "Permissions", "members": "Assigned to" },
+      "action": { "view": "View", "edit": "Edit", "duplicate": "Duplicate", "delete": "Delete" },
+      "actions_aria": "Role actions",
+      "permissions_count_one": "{{count}} permission",
+      "permissions_count_other": "{{count}} permissions",
+      "members_count_one": "{{count}} member",
+      "members_count_other": "{{count}} members",
+      "orgs_count_one": "{{count}} organization",
+      "orgs_count_other": "{{count}} organizations",
+      "edit_aria": "Edit role",
+      "view_aria": "View role"
+    },
+    "role": {
+      "add_title": "Add role",
+      "edit_title": "Edit role",
+      "description": "A role is a named bundle of permissions. Assign it to members to grant those actions—roles only add access, never remove it.",
+      "name": "Name",
+      "name_placeholder": "Role name",
+      "description_label": "Description",
+      "description_placeholder": "What is this role for? (optional)",
+      "permissions_label": "Permissions",
+      "permissions_hint": "Select at least one. Network and Organization permissions can be mixed.",
+      "duplicate_suffix": "(copy)",
+      "cancel": "Cancel",
+      "close": "Close",
+      "save": "Save changes",
+      "create": "Create role",
+      "duplicate": "Duplicate",
+      "delete": "Delete role",
+      "delete_title": "Delete this role?",
+      "delete_body": "This role is assigned to <b>{{members}}</b> across <b>{{orgs}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+      "delete_body_no_orgs": "This role is assigned to <b>{{members}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+      "delete_body_empty": "<b>{{name}}</b> is unassigned. It will be permanently deleted.",
+      "delete_confirm": "Delete role",
+      "err": {
+        "at_least_one_permission": "Select at least one permission."
+      },
+      "ok": { "created": "Role created.", "updated": "Role updated.", "deleted": "Role deleted." }
+    },
+    "user": {
+      "add_title": "Add member",
+      "edit_title": "Edit member",
+      "user_details": "Member details",
+      "assign_roles": "Member roles",
+      "baseline": "Every member can search cases and browse the knowledge base",
+      "baseline_link": "see what's included",
+      "admin_access": "Full administrative access to this network",
+      "admin_access_link": "view permissions",
+      "assign_roles_subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
+      "view_permissions": "View permissions",
+      "permissions_modal_subtitle": "Permission descriptions and scope for this role",
+      "orgs_label": "At these organizations",
+      "orgs_placeholder": "Organizations",
+      "all_orgs": "All current and future organizations",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "email_note": "Email is the sign-in identity and can't be changed. To fix a wrong email, delete the member and create a new one.",
+      "delete": "Delete member",
+      "delete_title": "Delete this member?",
+      "delete_body": "<b>{{name}}</b> will be removed from the <b>{{tenant}} network</b> and all of its organizations.",
+      "delete_confirm": "Delete member",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "create": "Create member",
+      "err": {
+        "last_admin_title": "This network needs an Administrator",
+        "last_admin": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
+        "last_admin_delete": "{{name}} is the only Administrator in {{tenant}} and can't be removed. Assign the Administrator role to someone else before deleting this account.",
+        "self_admin": "You can't grant yourself the Administrator role.",
+        "self_delete": "You can't delete your own account.",
+        "org_required": "Select at least one organization.",
+        "email_duplicate": "A member with this email already exists in this network."
+      },
+      "ok": {
+        "created": "Member created.",
+        "updated": "Member updated.",
+        "deleted": "Member removed from this network."
+      }
+    }
+  },
   "analysis": {
     "title": "Analysis",
     "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",
@@ -89,7 +257,11 @@
       "errors": {
         "required": "This field is required",
         "min_2": "Min 2 characters",
-        "max_50": "Max 50 characters"
+        "max_50": "Max 50 characters",
+        "invalid_email": "Enter a valid email.",
+        "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
+        "code_duplicate": "An organization with this code already exists.",
+        "role_name_duplicate": "A role with this name already exists."
       }
     },
     "editor": {

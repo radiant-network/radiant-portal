@@ -1,4 +1,172 @@
 {
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "group": "Paramètres du réseau",
+      "users": "Membres",
+      "organizations": "Organisations",
+      "roles": "Rôles et permissions"
+    },
+    "users": {
+      "count": "{{total}} membres",
+      "subtitle": "Gérez les membres et les attributions de rôles.",
+      "add": "Ajouter un membre",
+      "search_placeholder": "Rechercher par nom ou courriel",
+      "you": "Vous",
+      "member": "Membre",
+      "all_orgs": "Toutes les orgs",
+      "col": {
+        "user": "Nom",
+        "roles": "Rôles et accès"
+      },
+      "filter": {
+        "role": "Rôle",
+        "organization": "Organisation"
+      },
+      "edit_aria": "Modifier le membre"
+    },
+    "orgs": {
+      "count": "{{total}} organisations",
+      "subtitle": "Créez et modifiez les organisations.",
+      "add": "Ajouter une organisation",
+      "search_placeholder": "Rechercher par nom ou code",
+      "col": { "name": "Nom", "category": "Catégorie" },
+      "filter": { "category": "Catégorie" },
+      "edit_aria": "Modifier l'organisation"
+    },
+    "org": {
+      "add_title": "Ajouter une organisation",
+      "edit_title": "Modifier l'organisation",
+      "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+      "name": "Nom",
+      "code": "Code",
+      "code_hint": "Ne peut pas être modifié après la création. Lettres minuscules, chiffres et traits de soulignement.",
+      "category": "Catégorie",
+      "category_placeholder": "Sélectionnez une catégorie",
+      "category_hint": "Ne peut pas être modifiée après la création.",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "create": "Créer l'organisation",
+      "ok": { "created": "Organisation créée.", "updated": "Organisation mise à jour." }
+    },
+    "org_categories": {
+      "diagnostic_laboratory": "Laboratoire de diagnostic",
+      "healthcare_provider": "Établissement de santé",
+      "research_institute": "Institut de recherche",
+      "sequencing_center": "Centre de séquençage"
+    },
+    "roles": {
+      "scope": { "tenant": "Réseau", "org": "Organisation" },
+      "tenant_admin": { "name": "Administrateur", "description": "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles." },
+      "member": { "name": "Membre", "description": "Accès de base pour tous : rechercher des cas et consulter la base de connaissances (gènes, variants, phénotypes, fréquences populationnelles)." },
+      "geneticist": { "name": "Généticien", "description": "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées." },
+      "data_manager": { "name": "Gestionnaire de données", "description": "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées." },
+      "clinical_reviewer": { "name": "Réviseur clinique", "description": "Réviser et interpréter les variants et consulter la base de connaissances, dans les organisations sélectionnées." },
+      "org_manager": { "name": "Gestionnaire d'organisation", "description": "Créer et modifier les organisations de ce réseau." }
+    },
+    "permissions": {
+      "can_manage_user": { "name": "Gérer les membres", "description": "Créer, modifier et supprimer des membres; attribuer et retirer des rôles." },
+      "can_manage_org": { "name": "Gérer les organisations", "description": "Créer et modifier les organisations du réseau." },
+      "can_manage_role": { "name": "Gérer les rôles", "description": "Créer, modifier et supprimer des rôles personnalisés dans le réseau." },
+      "can_search_case": { "name": "Rechercher des cas", "description": "Rechercher et consulter les cas du réseau. Les RPS sont masqués sauf si vous détenez « Consulter les RPS »." },
+      "can_view_kb": { "name": "Consulter la base de connaissances", "description": "Parcourir la base de connaissances dépersonnalisée du réseau : gènes, variants, termes phénotypiques/de maladies et fréquences populationnelles." },
+      "can_read_pii": { "name": "Consulter les renseignements personnels", "description": "Consulter les renseignements personnels sur la santé (RPS) des patients." },
+      "can_interpret_variant": { "name": "Interpréter les variants", "description": "Créer ou mettre à jour des interprétations de variants." },
+      "can_comment_variant": { "name": "Commenter les variants", "description": "Ajouter, modifier ou supprimer des notes sur les occurrences de variants." },
+      "can_flag_variant": { "name": "Signaler les variants", "description": "Signaler des occurrences de variants." },
+      "can_download_file": { "name": "Télécharger les fichiers", "description": "Télécharger les documents de cas." },
+      "can_ingest_data": { "name": "Importer des données", "description": "Soumettre des lots de données (cas, patients, échantillons, séquençage)." }
+    },
+    "roles_page": {
+      "count": "{{total}} Rôles",
+      "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances",
+      "see_included": "voir ce qui est inclus",
+      "add": "Ajouter un rôle",
+      "search_placeholder": "Rechercher par nom de rôle",
+      "custom_only": "Rôles personnalisés seulement",
+      "footer_note": "Les rôles par défaut ne peuvent pas être modifiés ni supprimés.",
+      "lock_tooltip": "Non modifiable ni supprimable",
+      "col": { "role": "Rôle", "scope": "Portée", "permissions": "Permissions", "members": "Attribué à" },
+      "action": { "view": "Voir", "edit": "Modifier", "duplicate": "Dupliquer", "delete": "Supprimer" },
+      "actions_aria": "Actions du rôle",
+      "permissions_count_one": "{{count}} permission",
+      "permissions_count_other": "{{count}} permissions",
+      "members_count_one": "{{count}} membre",
+      "members_count_other": "{{count}} membres",
+      "orgs_count_one": "{{count}} organisation",
+      "orgs_count_other": "{{count}} organisations",
+      "edit_aria": "Modifier le rôle",
+      "view_aria": "Voir le rôle"
+    },
+    "role": {
+      "add_title": "Ajouter un rôle",
+      "edit_title": "Modifier le rôle",
+      "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
+      "name": "Nom",
+      "name_placeholder": "Nom du rôle",
+      "description_label": "Description",
+      "description_placeholder": "À quoi sert ce rôle? (facultatif)",
+      "permissions_label": "Permissions",
+      "permissions_hint": "Sélectionnez-en au moins une. Les permissions Réseau et Organisation peuvent être combinées.",
+      "duplicate_suffix": "(copie)",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "save": "Enregistrer les modifications",
+      "create": "Créer le rôle",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer le rôle",
+      "delete_title": "Supprimer ce rôle?",
+      "delete_body": "Ce rôle est attribué à <b>{{members}}</b> dans <b>{{orgs}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+      "delete_body_no_orgs": "Ce rôle est attribué à <b>{{members}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+      "delete_body_empty": "<b>{{name}}</b> n'est attribué à aucun membre. Il sera définitivement supprimé.",
+      "delete_confirm": "Supprimer le rôle",
+      "err": {
+        "at_least_one_permission": "Sélectionnez au moins une permission."
+      },
+      "ok": { "created": "Rôle créé.", "updated": "Rôle mis à jour.", "deleted": "Rôle supprimé." }
+    },
+    "user": {
+      "add_title": "Ajouter un membre",
+      "edit_title": "Modifier le membre",
+      "user_details": "Détails du membre",
+      "assign_roles": "Rôles du membre",
+      "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances",
+      "baseline_link": "voir le détail",
+      "admin_access": "Accès administratif complet à ce réseau",
+      "admin_access_link": "voir les permissions",
+      "assign_roles_subtitle": "Attribuez des rôles pour permettre des actions supplémentaires — les rôles ajoutent des permissions, sans jamais en retirer.",
+      "view_permissions": "Voir les permissions",
+      "permissions_modal_subtitle": "Descriptions des permissions et portée de ce rôle",
+      "orgs_label": "Dans ces organisations",
+      "orgs_placeholder": "Organisations",
+      "all_orgs": "Toutes les organisations actuelles et futures",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "email": "Courriel",
+      "email_note": "Le courriel est l'identifiant de connexion et ne peut être modifié. Pour corriger un courriel erroné, supprimez le membre et créez-en un nouveau.",
+      "delete": "Supprimer le membre",
+      "delete_title": "Supprimer ce membre?",
+      "delete_body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations.",
+      "delete_confirm": "Supprimer le membre",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "create": "Créer le membre",
+      "err": {
+        "last_admin_title": "Ce réseau doit conserver un administrateur",
+        "last_admin": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de le retirer ici.",
+        "last_admin_delete": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de supprimer ce compte.",
+        "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur.",
+        "self_delete": "Vous ne pouvez pas supprimer votre propre compte.",
+        "org_required": "Sélectionnez au moins une organisation.",
+        "email_duplicate": "Un membre avec ce courriel existe déjà dans ce réseau."
+      },
+      "ok": {
+        "created": "Membre créé.",
+        "updated": "Membre mis à jour.",
+        "deleted": "Membre retiré de ce réseau."
+      }
+    }
+  },
   "analysis": {
     "title": "Analyses",
     "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",
@@ -89,7 +257,11 @@
       "errors": {
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
-        "max_50": "50 caractères maximum"
+        "max_50": "50 caractères maximum",
+        "invalid_email": "Saisissez une adresse courriel valide.",
+        "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
+        "code_duplicate": "Une organisation avec ce code existe déjà.",
+        "role_name_duplicate": "Un rôle avec ce nom existe déjà."
       }
     },
     "editor": {
