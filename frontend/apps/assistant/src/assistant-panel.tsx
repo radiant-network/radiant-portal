@@ -46,7 +46,7 @@ export function AssistantPanel() {
               <p className="text-sm text-muted-foreground">Ask a question to get started.</p>
             </div>
           ) : (
-            <MessageScrollerProvider>
+            <MessageScrollerProvider autoScroll>
               <MessageScroller>
                 <MessageScrollerViewport className="p-4">
                   <MessageScrollerContent className="gap-4">
