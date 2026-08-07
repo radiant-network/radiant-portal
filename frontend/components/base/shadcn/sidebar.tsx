@@ -10,6 +10,7 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
 import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
 
@@ -161,6 +162,7 @@ function Sidebar({
   collapsible?: 'offcanvas' | 'icon' | 'none';
   brand?: boolean;
 }) {
+  const { t } = useI18n();
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
   if (collapsible === 'none') {
@@ -196,8 +198,8 @@ function Sidebar({
           side={side}
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+            <SheetTitle>{t('a11y.sidebar.title')}</SheetTitle>
+            <SheetDescription>{t('a11y.sidebar.description')}</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -251,6 +253,7 @@ function Sidebar({
 Sidebar.displayName = 'Sidebar';
 
 function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
+  const { t } = useI18n();
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -266,7 +269,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t('a11y.sidebar.toggle')}</span>
     </Button>
   );
 }

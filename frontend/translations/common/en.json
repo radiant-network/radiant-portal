@@ -1,4 +1,25 @@
 {
+  "a11y": {
+    "breadcrumb": {
+      "more": "More"
+    },
+    "carousel": {
+      "next_slide": "Next slide",
+      "previous_slide": "Previous slide"
+    },
+    "message_scroller": {
+      "scroll_to_end": "Scroll to end",
+      "scroll_to_start": "Scroll to start"
+    },
+    "sidebar": {
+      "description": "Displays the mobile sidebar.",
+      "title": "Sidebar",
+      "toggle": "Toggle Sidebar"
+    },
+    "spinner": {
+      "loading": "Loading"
+    }
+  },
   "analysis": {
     "title": "Analysis",
     "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",

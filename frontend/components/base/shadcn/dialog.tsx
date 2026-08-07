@@ -4,6 +4,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 const dialogVariants = tv({
@@ -83,6 +84,7 @@ export type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPri
   VariantProps<typeof dialogVariants>;
 
 function DialogContent({ className, children, variant, size = 'md', ...props }: DialogContentProps) {
+  const { t } = useI18n();
   const style = dialogVariants({ variant, size });
 
   return (
@@ -93,7 +95,7 @@ function DialogContent({ className, children, variant, size = 'md', ...props }: 
           {children}
           <DialogPrimitive.Close className={style.close()}>
             <X className="bg-background" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('common.close')}</span>
           </DialogPrimitive.Close>
         </DialogPrimitive.Content>
       </DialogContext.Provider>
