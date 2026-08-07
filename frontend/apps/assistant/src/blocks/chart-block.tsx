@@ -17,7 +17,7 @@ export function ChartBlock({ block }: { block: ChartBlockData }) {
   return (
     <div className="w-full rounded-md border p-3">
       {block.title && <p className="mb-2 text-xs font-medium text-muted-foreground">{block.title}</p>}
-      <div className="h-48 w-full">
+      <div className="w-full">
         <HorizontalBarChart
           data={block.data}
           axis={{
