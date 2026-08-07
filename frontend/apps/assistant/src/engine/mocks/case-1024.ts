@@ -1,4 +1,4 @@
-import { type ChartDatum, type TableBlock } from '../../types';
+import type { ChartDatum, TableBlock } from '../../types';
 
 /**
  * Mocked data for the demo scenario: pediatric case 1024 (epilepsy panel).

@@ -1,6 +1,6 @@
 import HorizontalBarChart from '@/components/base/charts/bar-charts/horizontal-bar-chart';
 
-import { type ChartBlock as ChartBlockData } from '../types';
+import type { ChartBlock as ChartBlockData } from '../types';
 
 /**
  * Renders a chart block as a single-series horizontal bar chart.

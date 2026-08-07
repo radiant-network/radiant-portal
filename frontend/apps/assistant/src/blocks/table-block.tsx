@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 
-import { type TableBlock as TableBlockData } from '../types';
+import type { TableBlock as TableBlockData } from '../types';
 
 /** Renders a table block with the simple shadcn Table (scrolls horizontally if wide). */
 export function TableBlock({ block }: { block: TableBlockData }) {

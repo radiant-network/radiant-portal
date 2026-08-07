@@ -1,6 +1,6 @@
 import { Bubble, BubbleContent } from '@/components/base/shadcn/bubble';
 
-import { type TextBlock as TextBlockData } from '../types';
+import type { TextBlock as TextBlockData } from '../types';
 
 /** Renders a text block as a chat bubble. */
 export function TextBlock({ block, align }: { block: TextBlockData; align: 'start' | 'end' }) {
