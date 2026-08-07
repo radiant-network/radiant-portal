@@ -29,7 +29,7 @@ export function AssistantPanel() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
         <SheetHeader className="flex-row items-center gap-2 border-b p-4 text-left">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
             <Cat className="size-4" />
