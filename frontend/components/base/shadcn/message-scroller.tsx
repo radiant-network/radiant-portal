@@ -8,6 +8,7 @@ import {
 import { ArrowDownIcon } from 'lucide-react';
 
 import { Button } from '@/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 function MessageScrollerProvider(props: React.ComponentProps<typeof MessageScrollerPrimitive.Provider>) {
@@ -78,6 +79,8 @@ function MessageScrollerButton({
   ...props
 }: React.ComponentProps<typeof MessageScrollerPrimitive.Button> &
   Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>) {
+  const { t } = useI18n();
+
   return (
     <MessageScrollerPrimitive.Button
       data-slot="message-scroller-button"
@@ -95,7 +98,11 @@ function MessageScrollerButton({
       {children ?? (
         <>
           <ArrowDownIcon />
-          <span className="sr-only">{direction === 'end' ? 'Scroll to end' : 'Scroll to start'}</span>
+          <span className="sr-only">
+            {direction === 'end'
+              ? t('a11y.message_scroller.scroll_to_end')
+              : t('a11y.message_scroller.scroll_to_start')}
+          </span>
         </>
       )}
     </MessageScrollerPrimitive.Button>
