@@ -563,7 +563,7 @@ INSERT INTO tenant (code, name)
 VALUES ('qlin', 'QLIN')
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO public.role (tenant_code, code, name, description) VALUES
+INSERT INTO public.role (tenant_code, code, name_en, description_en) VALUES
     ('qlin', 'member',       'Member',       'Search cases and view the knowledge base.'),
     ('qlin', 'geneticist',   'Geneticist',   'Read PII, download files, and interpret, comment on, and flag variants.'),
     ('qlin', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing).')
@@ -2160,6 +2160,118 @@ VALUES (1, '1000', 1, 1, 'flag','radiant'),
        (7, '2000', 19, 19, 'pin','radiant')
 ON CONFLICT (case_id, occurrence_id, seq_id, task_id) DO NOTHING;
 
+-- Prenatal examples: solo pregnancy (case 71), twins with one deceased (72), trio with the
+-- father (73). A fetus has no administrative identity — no name, no submitter_patient_id.
+-- Samples carry both patient_id (the mother) and fetus_id (whose genome was sequenced).
+INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+VALUES (62, 'MRN-283835', 'mrn', 'CHUSJ', 'radiant', 'female', '1992-04-10', 'alive', 'Camille', 'Dubé', 'DUB9204106543'),
+       (63, 'MRN-283836', 'mrn', 'CHUSJ', 'radiant', 'female', '1988-11-02', 'alive', 'Rosalie', 'Girard', 'GIR8811026621'),
+       (64, 'MRN-283837', 'mrn', 'CHUSJ', 'radiant', 'female', '1990-06-15', 'alive', 'Léa', 'Bernier', 'BER9006157788'),
+       (65, 'MRN-283838', 'mrn', 'CHUSJ', 'radiant', 'male', '1987-03-22', 'alive', 'Olivier', 'Bernier', 'BER8703226644')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO fetus (id, mother_id, life_status_code, sex_code, last_menstrual_period, estimated_due_date, tenant_code)
+VALUES (1, 62, 'alive',    'male',    '2026-02-01', NULL,         'radiant'),
+       (2, 63, 'alive',    'female',  NULL,         '2026-10-15', 'radiant'),
+       (3, 63, 'deceased', 'unknown', NULL,         NULL,         'radiant'),
+       (4, 64, 'alive',    'male',    '2026-03-01', NULL,         'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
+VALUES (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — solo pregnancy', '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:71'),
+       (72, 63, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — twin pregnancy', '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:72'),
+       (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — trio (mother + father + fetus)', '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:73')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "family" (id, case_id, family_member_id, fetus_id, relationship_to_proband_code, affected_status_code, tenant_code)
+VALUES (63, 71, 62,   NULL, 'proband',      'affected',     'radiant'),
+       (64, 71, NULL, 1,    'fetus',        'unknown',      'radiant'),
+       (65, 72, 63,   NULL, 'proband',      'affected',     'radiant'),
+       (66, 72, NULL, 2,    'fetus',        'unknown',      'radiant'),
+       (67, 72, NULL, 3,    'fetus',        'unknown',      'radiant'),
+       (68, 73, 64,   NULL, 'proband',      'affected',     'radiant'),
+       (69, 73, 65,   NULL, 'father',       'non_affected', 'radiant'),
+       (70, 73, NULL, 4,    'fetus',        'unknown',      'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, fetus_id, organization_code, tenant_code)
+VALUES (125, 'dna', NULL, NULL, 'normal', 'S-PRENAT-71',   62, 1, 'CQGC', 'radiant'),
+       (126, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72-A', 63, 2, 'CQGC', 'radiant'),
+       (127, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72-B', 63, 3, 'CQGC', 'radiant'),
+       (128, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73',   64, 4, 'CQGC', 'radiant'),
+       -- The parents' own genomes: same patient_id as the mother's fetal sample above, fetus_id
+       -- NULL, so a task covering both counts two distinct sequenced individuals.
+       (129, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72-MOTHER', 63, NULL, 'CQGC', 'radiant'),
+       (130, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73-MOTHER', 64, NULL, 'CQGC', 'radiant'),
+       (131, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73-FATHER', 65, NULL, 'CQGC', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "sequencing_experiment" (id, sample_id, status_code, aliquot,
+                                     sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on,
+                                     updated_on, experimental_strategy_code, sequencing_read_technology_code,
+                                     platform_code)
+VALUES (73, 125, 'completed', 'PRENAT71',  'CQGC', 'radiant', 1801, 'A00516_0301', '2026-04-01', 'SureSelect Custom DNA Target',
+        '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (74, 126, 'completed', 'PRENAT72A', 'CQGC', 'radiant', 1802, 'A00516_0302', '2026-04-02', 'SureSelect Custom DNA Target',
+        '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (75, 127, 'completed', 'PRENAT72B', 'CQGC', 'radiant', 1803, 'A00516_0303', '2026-04-02', 'SureSelect Custom DNA Target',
+        '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (76, 128, 'completed', 'PRENAT73',  'CQGC', 'radiant', 1804, 'A00516_0304', '2026-04-03', 'SureSelect Custom DNA Target',
+        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (77, 129, 'completed', 'PRENAT72MOM', 'CQGC', 'radiant', 1805, 'A00516_0305', '2026-04-02', 'SureSelect Custom DNA Target',
+        '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (78, 130, 'completed', 'PRENAT73MOM', 'CQGC', 'radiant', 1806, 'A00516_0306', '2026-04-03', 'SureSelect Custom DNA Target',
+        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (79, 131, 'completed', 'PRENAT73DAD', 'CQGC', 'radiant', 1807, 'A00516_0307', '2026-04-03', 'SureSelect Custom DNA Target',
+        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "case_has_sequencing_experiment" (sequencing_experiment_id, case_id)
+VALUES (73, 71),
+       (74, 72),
+       (75, 72),
+       (77, 72),
+       (76, 73),
+       (78, 73),
+       (79, 73)
+ON CONFLICT (case_id, sequencing_experiment_id) DO NOTHING;
+
+-- One alignment task per sequencing (case_id NULL — it belongs to the sequencing), plus one
+-- case-scoped annotation task per case. The annotation task id is what makes variants
+-- reachable, and init_starrocks.sql must use these very ids.
+INSERT INTO "task" (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on, tenant_code)
+VALUES (77, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
+       (78, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
+       (79, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
+       (80, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
+       (81, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
+       (82, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
+       (83, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
+       (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
+       (85, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
+       (86, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "task_context" (task_id, sequencing_experiment_id, case_id)
+VALUES (77, 73, NULL),
+       (78, 74, NULL),
+       (79, 75, NULL),
+       (80, 76, NULL),
+       (81, 77, NULL),
+       (82, 78, NULL),
+       (83, 79, NULL),
+
+       (84, 73, 71),
+
+       (85, 74, 72),
+       (85, 75, 72),
+       (85, 77, 72),
+
+       (86, 76, 73),
+       (86, 78, 73),
+       (86, 79, 73)
+ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
+
 -- Reset sequences to prevent duplicate key errors when inserting new records
 SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));
 SELECT setval('project_id_seq', (SELECT MAX(id) FROM project));
@@ -2172,3 +2284,4 @@ SELECT setval('observation_coding_id_seq', (SELECT MAX(id) FROM obs_categorical)
 SELECT setval('obs_string_id_seq', (SELECT MAX(id) FROM obs_string));
 SELECT setval('family_history_id_seq', (SELECT MAX(id) FROM family_history));
 SELECT setval('sequencing_experiment_id_seq', (SELECT MAX(id) FROM sequencing_experiment));
+SELECT setval('fetus_id_seq', (SELECT MAX(id) FROM fetus));

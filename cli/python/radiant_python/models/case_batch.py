@@ -20,6 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
+from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
 from radiant_python.models.case_task_batch import CaseTaskBatch
@@ -33,6 +34,7 @@ class CaseBatch(BaseModel):
     analysis_code: StrictStr
     category_code: StrictStr
     diagnostic_lab_code: StrictStr
+    fetuses: Optional[List[CaseFetusBatch]] = None
     note: Optional[StrictStr] = None
     ordering_organization_code: StrictStr
     ordering_physician: Optional[StrictStr] = None
@@ -47,7 +49,7 @@ class CaseBatch(BaseModel):
     submitter_case_id: Optional[StrictStr] = None
     tasks: List[CaseTaskBatch]
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
+    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
 
     @field_validator('category_code')
     def category_code_validate_enum(cls, value):
@@ -102,6 +104,13 @@ class CaseBatch(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in fetuses (list)
+        _items = []
+        if self.fetuses:
+            for _item_fetuses in self.fetuses:
+                if _item_fetuses:
+                    _items.append(_item_fetuses.to_dict())
+            _dict['fetuses'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in patients (list)
         _items = []
         if self.patients:
@@ -138,6 +147,7 @@ class CaseBatch(BaseModel):
             "analysis_code": obj.get("analysis_code"),
             "category_code": obj.get("category_code"),
             "diagnostic_lab_code": obj.get("diagnostic_lab_code"),
+            "fetuses": [CaseFetusBatch.from_dict(_item) for _item in obj["fetuses"]] if obj.get("fetuses") is not None else None,
             "note": obj.get("note"),
             "ordering_organization_code": obj.get("ordering_organization_code"),
             "ordering_physician": obj.get("ordering_physician"),

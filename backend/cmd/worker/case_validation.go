@@ -145,6 +145,7 @@ type StorageContext struct {
 	ObsStringRepo     *postgres.ObservationStringRepository
 	FamilyHistoryRepo *postgres.FamilyHistoryRepository
 	FamilyRepo        *postgres.FamilyRepository
+	FetusRepo         *postgres.FetusRepository
 	TaskRepo          *postgres.TaskRepository
 	TenantCode        string
 }
@@ -157,6 +158,7 @@ func NewStorageContext(db *gorm.DB) *StorageContext {
 		ObsStringRepo:     postgres.NewObservationStringRepository(database.PostgresDB{DB: db}),
 		FamilyHistoryRepo: postgres.NewFamilyHistoryRepository(database.PostgresDB{DB: db}),
 		FamilyRepo:        postgres.NewFamilyRepository(database.PostgresDB{DB: db}),
+		FetusRepo:         postgres.NewFetusRepository(database.PostgresDB{DB: db}),
 		TaskRepo:          postgres.NewTaskRepository(database.PostgresDB{DB: db}),
 	}
 }
@@ -187,6 +189,8 @@ type CaseValidationRecord struct {
 	DocumentDataCategoryCodes         []string
 	DocumentDataTypeCodes             []string
 	DocumentFormatCodes               []string
+	SexCodes                          []string
+	LifeStatusCodes                   []string
 
 	OutputDocuments map[string]struct{}
 
@@ -327,7 +331,11 @@ func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
 	}
-	r.PatientRelationshipToProbandCodes = relationshipToProbandCodes
+	// "fetus" is set by persistFetuses, never submitted — a patient's relation_to_proband can't
+	// take it, so drop it from the codes accepted here.
+	r.PatientRelationshipToProbandCodes = slices.DeleteFunc(relationshipToProbandCodes, func(code string) bool {
+		return code == RelationshipFetusCode
+	})
 	return nil
 }
 
@@ -389,6 +397,9 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 	}
 	if err := r.fetchDocumentCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve document codes: %w", err)
+	}
+	if err := r.fetchFetusCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve fetus codes: %w", err)
 	}
 	return nil
 }
@@ -673,26 +684,42 @@ func (cr *CaseValidationRecord) observationValueCodes(code string) []string {
 	}
 }
 
+// addNullObservationError flags a null array entry, e.g. `"observations_text": [null]`. `dive`
+// without `required` accepts one, so the payload binds at the API and reaches the worker, which
+// would nil-deref on it. Tightening the tag to `dive,required` is NOT an option: swag v2 reads any
+// `required` in a binding tag as "this field is required" and would wrongly mark these optional
+// arrays required in the generated OpenAPI spec (and in the TS/Python clients).
+func (cr *CaseValidationRecord) addNullObservationError(res, path string) {
+	cr.AddErrors(fmt.Sprintf("Invalid observation for %s. Reason: entry is null.", res), ObservationInvalidField, path)
+}
+
+func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.ObservationCategoricalBatch, obsPath, res string) {
+	if obs == nil {
+		cr.addNullObservationError(res, obsPath)
+		return
+	}
+	onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
+	interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
+
+	cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+	cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
+	cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, interpretationRequired)
+
+	cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+	if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
+		cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
+	} else {
+		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+	}
+	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
+}
+
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsCategorical {
 		obsPath := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
 		obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 		res := fmt.Sprintf("create_case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
-
-		onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
-		interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
-
-		cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
-		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
-		cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, interpretationRequired)
-
-		cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
-		if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
-			cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
-		} else {
-			cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
-		}
-		cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
+		cr.validateObservationCategoricalItem(obs, obsPath, res)
 	}
 	return nil
 }
@@ -1334,6 +1361,11 @@ func validateCaseRecord(
 		return nil, fmt.Errorf("error during case patients validation: %v", err)
 	}
 
+	// 2b. Validate Case Fetuses
+	if err := cr.validateCaseFetuses(); err != nil {
+		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
+	}
+
 	// 3. Validate Case Sequencing Experiments
 	if err := cr.validateCaseSequencingExperiments(ctx); err != nil {
 		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
@@ -1494,6 +1526,9 @@ func persistCaseRecords(
 		if err := persistFamily(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist family for create_case %d: %w", record.Index, err)
 		}
+		if err := persistFetuses(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist fetuses for create_case %d: %w", record.Index, err)
+		}
 		if err := persistObservationCategorical(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist observations categorical for create_case %d: %w", record.Index, err)
 		}
@@ -1520,7 +1555,7 @@ func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRe
 		}
 		familyMember := types.Family{
 			CaseID:                    *cr.CaseID,
-			FamilyMemberID:            patient.ID,
+			FamilyMemberID:            utils.IntPtr(patient.ID),
 			RelationshipToProbandCode: p.RelationToProbandCode,
 			AffectedStatusCode:        p.AffectedStatusCode,
 			TenantCode:                sc.TenantCode,
@@ -1544,7 +1579,7 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 		for _, o := range p.ObservationsCategorical {
 			obs := types.ObsCategorical{
 				CaseID:             *cr.CaseID,
-				PatientID:          patient.ID,
+				PatientID:          utils.IntPtr(patient.ID),
 				ObservationCode:    o.Code,
 				CodingSystem:       o.System,
 				CodeValue:          o.Value,
@@ -1554,7 +1589,6 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 				ExamCode:           utils.NilIfEmpty(o.ExamCode),
 				TenantCode:         sc.TenantCode,
 			}
-
 			if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
@@ -1575,14 +1609,13 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 		for _, o := range p.ObservationsText {
 			obs := types.ObsString{
 				CaseID:             *cr.CaseID,
-				PatientID:          patient.ID,
+				PatientID:          utils.IntPtr(patient.ID),
 				ObservationCode:    o.Code,
 				Value:              o.Value,
 				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
 				ExamCode:           utils.NilIfEmpty(o.ExamCode),
 				TenantCode:         sc.TenantCode,
 			}
-
 			if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation text for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}

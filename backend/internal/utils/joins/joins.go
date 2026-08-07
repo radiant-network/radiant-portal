@@ -96,12 +96,25 @@ func (j Joiner) SeqExpWithSample(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", j.name(types.SampleTable, tx), types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }
 
+// A fetus's sample must match its own family row, not its mother's: sample.patient_id is always
+// the mother, so match on fetus_id when the sample carries one.
+func SampleToFamilyJoinCondition(caseIDColumn string) string {
+	return fmt.Sprintf(
+		"%s.case_id = %s AND ((%s.fetus_id IS NULL AND %s.family_member_id = %s.patient_id) OR (%s.fetus_id IS NOT NULL AND %s.fetus_id = %s.fetus_id))",
+		types.FamilyTable.Alias, caseIDColumn,
+		types.SampleTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias,
+		types.SampleTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias,
+	)
+}
+
 func (j Joiner) SampleAndCaseHasSeqExpWithFamily(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", j.name(types.FamilyTable, tx), types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
+	caseIDColumn := fmt.Sprintf("%s.case_id", types.CaseHasSequencingExperimentTable.Alias)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s", j.name(types.FamilyTable, tx), types.FamilyTable.Alias, SampleToFamilyJoinCondition(caseIDColumn)))
 }
 
 func (j Joiner) SampleAndCaseWithFamily(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.id", j.name(types.FamilyTable, tx), types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias))
+	caseIDColumn := fmt.Sprintf("%s.id", types.CaseTable.Alias)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s", j.name(types.FamilyTable, tx), types.FamilyTable.Alias, SampleToFamilyJoinCondition(caseIDColumn)))
 }
 
 func (j Joiner) CaseWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
@@ -142,6 +155,18 @@ func (j Joiner) TaskHasDocWithDocument(tx *gorm.DB) *gorm.DB {
 
 func (j Joiner) FamilyWithPatient(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.id", j.name(types.PatientTable, tx), types.PatientTable.Alias, types.FamilyTable.Alias, types.PatientTable.Alias))
+}
+
+func (j Joiner) FamilyWithFetus(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.fetus_id=%s.id", j.name(types.FetusTable, tx), types.FetusTable.Alias, types.FamilyTable.Alias, types.FetusTable.Alias))
+}
+
+func (j Joiner) SampleWithPatient(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.id=%s.patient_id", j.name(types.PatientTable, tx), types.PatientTable.Alias, types.PatientTable.Alias, types.SampleTable.Alias))
+}
+
+func (j Joiner) SampleWithFetus(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.id=%s.fetus_id", j.name(types.FetusTable, tx), types.FetusTable.Alias, types.FetusTable.Alias, types.SampleTable.Alias))
 }
 
 func (j Joiner) PatientWithManagingOrg(tx *gorm.DB) *gorm.DB {

@@ -285,6 +285,12 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 
 	case postgres.ValueSetFileFormat:
 		return []string{"cram", "crai", "vcf", "tbi", "csv", "tsv", "gvcf"}, nil
+
+	case postgres.ValueSetSex:
+		return []string{"male", "female", "unknown"}, nil
+
+	case postgres.ValueSetLifeStatus:
+		return []string{"alive", "deceased", "unknown"}, nil
 	default:
 		return nil, nil
 	}

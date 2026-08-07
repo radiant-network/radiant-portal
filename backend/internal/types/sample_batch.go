@@ -12,6 +12,9 @@ type SampleBatch struct {
 	HistologyCode           string        `json:"histology_code" toml:"histology_code" binding:"required,oneof=tumoral normal"`
 	SubmitterSampleId       TrimmedString `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
 	SampleOrganizationCode  string        `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
+	// Not mutually exclusive with the patient: the sample is drawn from the mother
+	// (SubmitterPatientId) but its sequencing data is the fetus's genome.
+	FetusId *int `json:"fetus_id,omitempty" toml:"fetus_id,omitempty"`
 }
 
 // CreateSampleBatchBody represents the body required to create a sample batch
