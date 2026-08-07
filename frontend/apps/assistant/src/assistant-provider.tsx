@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { mockEngine } from './engine/mock-engine';
-import { type Message } from './types';
+import type { Message } from './types';
 
 const STORAGE_KEY = 'radiant.assistant.conversation';
 

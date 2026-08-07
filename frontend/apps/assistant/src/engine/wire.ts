@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { type Block } from '../types';
+import type { Block } from '../types';
 
 // Code dormant pour le moment juste pour expliquer le futur fonctionnement
 

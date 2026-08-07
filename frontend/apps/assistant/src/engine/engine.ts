@@ -1,4 +1,4 @@
-import { type Block } from '../types';
+import type { Block } from '../types';
 
 /**
  * The seam between the chat UI and the "brain".

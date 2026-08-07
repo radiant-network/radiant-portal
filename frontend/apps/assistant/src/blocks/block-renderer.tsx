@@ -1,4 +1,4 @@
-import { type Block } from '../types';
+import type { Block } from '../types';
 
 import { ChartBlock } from './chart-block';
 import { TableBlock } from './table-block';
