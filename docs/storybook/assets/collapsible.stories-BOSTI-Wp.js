@@ -1,0 +1,11 @@
+import{j as e}from"./iframe-DiGfbfp3.js";import{S as t}from"./api-43ChDoPP.js";import{B as n}from"./button-Bo0DQutg.js";import{a as i,b as s,C as l}from"./collapsible-kcdBeB19.js";import{C as c,A as r}from"./applications-config-3zgw8Mk1.js";import{a as p}from"./story-section-DME95Whn.js";import{B as _}from"./chunk-QUQL4437-Deci752E.js";import"./preload-helper-PPVm8Dsz.js";import"./action-button-De4ur-7I.js";import"./dropdown-menu-CNdkncgA.js";import"./index-D8Osr2Vx.js";import"./index-BZGt5Ho_.js";import"./check-IkDt6mIM.js";import"./circle-BTr0m0BF.js";import"./separator-Dj9939qF.js";import"./i18n-uvvEETAD.js";import"./index-Cn_qWDha.js";import"./index-JnBOVQG8.js";const m={variant_entity:{app_id:r.variant_entity},germline_snv_occurrence:{app_id:r.germline_snv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:r.germline_cnv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:r.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:r.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:r.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:"admin",app_id:r.admin},portal:{name:"",navigation:{}}},I={title:"Components/Collapsibles/Collapsible",component:i,args:{},decorators:[a=>e.jsx(_,{children:e.jsx(c,{config:m,children:e.jsx(a,{})})})]},o={args:{},render:a=>e.jsx(p,{title:"Default",children:e.jsxs(i,{...a,children:[e.jsx(s,{asChild:!0,children:e.jsx(n,{variant:"outline",children:"Trigger"})}),e.jsx(l,{className:"flex flex-col gap-2",children:"Content"})]})})};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {},
+  render: args => <StorySection title="Default">
+      <Collapsible {...args}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline">Trigger</Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="flex flex-col gap-2">Content</CollapsibleContent>
+      </Collapsible>
+    </StorySection>
+}`,...o.parameters?.docs?.source}}};const A=["Default"];export{o as Default,A as __namedExportsOrder,I as default};
