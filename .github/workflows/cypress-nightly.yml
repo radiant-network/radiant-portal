@@ -160,9 +160,10 @@ jobs:
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/mochawesome.json" "/tmp/shard_${i}_moch.json" 2>/dev/null || true
           done
           # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
-          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d " ")
+          attemptMax=3
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | grep -v "SJRA-" | wc -l | tr -d " ")
           NEW_FAILS=${NEW_FAILS:-0}
-          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d " ")
+          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | wc -l | tr -d " ")
           TOTAL_FAILS=${TOTAL_FAILS:-0}
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
