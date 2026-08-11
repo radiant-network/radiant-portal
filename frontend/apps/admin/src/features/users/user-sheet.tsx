@@ -169,6 +169,15 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
       setSubmitAttempted(true);
       return;
     }
+    // Add only: email must be unique within the tenant (Edit keeps email read-only). Compared
+    // case-insensitively + trimmed, mirroring the org-code duplicate check.
+    if (!isEdit) {
+      const email = values.email.trim().toLowerCase();
+      if (users.some(u => u.email.trim().toLowerCase() === email)) {
+        form.setError('email', { message: 'email_duplicate' }, { shouldFocus: true });
+        return;
+      }
+    }
     if (isEdit && !isDirty) {
       onOpenChange(false);
       return;
@@ -223,7 +232,13 @@ export default function UserSheet({ open, onOpenChange, user, users, onSave, onD
         }}
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onValid, onInvalid)} className="flex h-full flex-col overflow-hidden">
+          {/* noValidate hands validation to zod/RHF — otherwise the browser's native type="email"
+              bubble preempts our localized FormMessage on submit. */}
+          <form
+            noValidate
+            onSubmit={form.handleSubmit(onValid, onInvalid)}
+            className="flex h-full flex-col overflow-hidden"
+          >
             <SheetHeader className="space-y-0 border-b px-6 py-4">
               <SheetTitle className="text-lg">
                 {isEdit ? t('admin.user.edit_title') : t('admin.user.add_title')}

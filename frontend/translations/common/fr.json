@@ -156,8 +156,7 @@
         "last_admin_delete": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de supprimer ce compte.",
         "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur.",
         "self_delete": "Vous ne pouvez pas supprimer votre propre compte.",
-        "org_required": "Sélectionnez au moins une organisation.",
-        "email_duplicate": "Un membre avec ce courriel existe déjà dans ce réseau."
+        "org_required": "Sélectionnez au moins une organisation."
       },
       "ok": {
         "created": "Membre créé.",
@@ -260,6 +259,7 @@
         "invalid_email": "Saisissez une adresse courriel valide.",
         "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
         "code_duplicate": "Une organisation avec ce code existe déjà.",
+        "email_duplicate": "Un membre avec ce courriel existe déjà",
         "role_name_duplicate": "Un rôle avec ce nom existe déjà."
       }
     },

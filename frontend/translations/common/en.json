@@ -156,8 +156,7 @@
         "last_admin_delete": "{{name}} is the only Administrator in {{tenant}} and can't be removed. Assign the Administrator role to someone else before deleting this account.",
         "self_admin": "You can't grant yourself the Administrator role.",
         "self_delete": "You can't delete your own account.",
-        "org_required": "Select at least one organization.",
-        "email_duplicate": "A member with this email already exists in this network."
+        "org_required": "Select at least one organization."
       },
       "ok": {
         "created": "Member created.",
@@ -260,6 +259,7 @@
         "invalid_email": "Enter a valid email.",
         "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
         "code_duplicate": "An organization with this code already exists.",
+        "email_duplicate": "A member with this email already exists",
         "role_name_duplicate": "A role with this name already exists."
       }
     },
