@@ -148,21 +148,23 @@ jobs:
             [ "$RUNNING" = "0" ] && break
             sleep 60
           done
-          TOTAL_FAILS=0
           ALL_PASSED=true
           mkdir -p /tmp/all_screenshots
           for i in $(seq 0 $((SHARDS_COUNT - 1))); do
             R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null || echo "{\"exit_code\":1,\"failure_count\":0}")
             EC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).exit_code||0))}catch(e){process.stdout.write(\"1\")}})" 2>/dev/null || echo 1)
-            FC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).failure_count||0))}catch(e){process.stdout.write(\"0\")}})" 2>/dev/null || echo 0)
             [ "$EC" != "0" ] && ALL_PASSED=false
-            FC=${FC:-0}
-            TOTAL_FAILS=$((TOTAL_FAILS + FC))
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
             [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/results.xml" "/tmp/shard_${i}.xml" 2>/dev/null || true
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/mochawesome.json" "/tmp/shard_${i}_moch.json" 2>/dev/null || true
           done
+          # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
+          attemptMax=3
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | grep -v "SJRA-" | wc -l | tr -d " ")
+          NEW_FAILS=${NEW_FAILS:-0}
+          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | wc -l | tr -d " ")
+          TOTAL_FAILS=${TOTAL_FAILS:-0}
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
@@ -197,13 +199,13 @@ jobs:
               fi
             fi
           fi
-          $ALL_PASSED && STATUS="All passed ✅" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${TOTAL_FAILS} new fails 🐛" || STATUS="Failed 🐛"; }
+          $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐛 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🆗 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
           $ALL_PASSED && COLOR="good" || COLOR="danger"
           TITLE="Radiant - Cypress Test Results: $STATUS"
           BODY_PARTS=()
-          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
-          [ -n "$COMBINED_RURL" ] && BODY_PARTS+=("Rapport HTML: <${COMBINED_RURL}|View Report>")
-          [ -n "$COMBINED_XURL" ] && BODY_PARTS+=("Rapport XML: <${COMBINED_XURL}|Download>")
+          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|Download>")
+          [ -n "$COMBINED_RURL" ] && BODY_PARTS+=("Report HTML: <${COMBINED_RURL}|View Report>")
+          [ -n "$COMBINED_XURL" ] && BODY_PARTS+=("Report XML: <${COMBINED_XURL}|View Results>")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
           PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true

@@ -168,6 +168,27 @@
       }
     }
   },
+  "a11y": {
+    "breadcrumb": {
+      "more": "Plus"
+    },
+    "carousel": {
+      "next_slide": "Diapositive suivante",
+      "previous_slide": "Diapositive précédente"
+    },
+    "message_scroller": {
+      "scroll_to_end": "Défiler vers la fin",
+      "scroll_to_start": "Défiler vers le début"
+    },
+    "sidebar": {
+      "description": "Affiche la barre latérale mobile.",
+      "title": "Barre latérale",
+      "toggle": "Basculer la barre latérale"
+    },
+    "spinner": {
+      "loading": "Chargement en cours"
+    }
+  },
   "analysis": {
     "title": "Analyses",
     "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",

@@ -3,6 +3,7 @@ import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-reac
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 import { Button } from '@/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -157,6 +158,7 @@ function CarouselPrevious({
   size = 'sm',
   ...props
 }: React.ComponentProps<typeof Button>) {
+  const { t } = useI18n();
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
   return (
@@ -177,12 +179,13 @@ function CarouselPrevious({
       {...props}
     >
       <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">{t('a11y.carousel.previous_slide')}</span>
     </Button>
   );
 }
 
 function CarouselNext({ className, variant = 'outline', size = 'sm', ...props }: React.ComponentProps<typeof Button>) {
+  const { t } = useI18n();
   const { orientation, scrollNext, canScrollNext } = useCarousel();
 
   return (
@@ -203,7 +206,7 @@ function CarouselNext({ className, variant = 'outline', size = 'sm', ...props }:
       {...props}
     >
       <ArrowRight />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">{t('a11y.carousel.next_slide')}</span>
     </Button>
   );
 }
