@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Copy } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
@@ -120,6 +121,7 @@ export default function RoleSheet({
           {t('admin.role.delete')}
         </Button>
         <Button type="button" variant="ghost" onClick={() => onDuplicate(role!)}>
+          <Copy />
           {t('admin.role.duplicate')}
         </Button>
       </div>
@@ -146,7 +148,7 @@ export default function RoleSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:w-[560px] sm:max-w-[560px]"
+        className="flex w-full flex-col gap-0 p-0 sm:w-[680px] sm:max-w-[680px]"
         // Dismissing a stacked delete-confirm dialog must not also close the sheet.
         onInteractOutside={e => {
           if (isAlertDialogOpen()) e.preventDefault();
