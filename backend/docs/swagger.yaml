@@ -2655,6 +2655,52 @@ components:
       - content
       - key
       type: object
+    UserResult:
+      description: Line representing a user in the tenant users list, with the roles
+        granted to them in that tenant
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/UserRoleResult'
+          type: array
+          uniqueItems: false
+        user_id:
+          type: string
+      required:
+      - roles
+      - user_id
+      type: object
+    UserRoleResult:
+      description: Role granted to a user in a tenant, with the organizations it applies
+        at
+      properties:
+        name:
+          type: string
+        org_codes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        role_code:
+          type: string
+        scope:
+          enum:
+          - tenant
+          - org
+          - mixed
+          type: string
+      required:
+      - name
+      - org_codes
+      - role_code
+      - scope
+      type: object
     UserSet:
       properties:
         active:
@@ -2674,6 +2720,19 @@ components:
           type: string
         user_id:
           type: string
+      type: object
+    UsersSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/UserResult'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
       type: object
     ValueSetItem:
       description: 'A value-set option: the stored code and its English label.'
@@ -7608,6 +7667,82 @@ paths:
       summary: Update existing sequencing experiments (batch)
       tags:
       - sequencing
+  /{tenant}/users:
+    get:
+      description: |-
+        Returns the users holding at least one role in the tenant in the path, each with the
+        roles granted to them there and the organizations those roles apply at. Requires the
+        `can_manage_user` action. `count` is the total matching `search`, before pagination.
+      operationId: listUsers
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case-insensitive substring of the user's name or email
+        in: query
+        name: search
+        schema:
+          type: string
+      - description: Page size (default 25, capped at 200)
+        in: query
+        name: limit
+        schema:
+          type: integer
+      - description: Number of users to skip
+        in: query
+        name: offset
+        schema:
+          type: integer
+      - description: Page to return, as an alternative to offset
+        in: query
+        name: page_index
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the tenant's users
+      tags:
+      - users
   /{tenant}/variants/germline/{locus_id}/cases/count:
     get:
       description: Retrieve cases count for a given locus id

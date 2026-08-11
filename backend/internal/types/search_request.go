@@ -154,3 +154,4 @@ type VariantInterpretedCasesSearchResponse = SearchResponse[VariantInterpretedCa
 type VariantUninterpretedCasesSearchResponse = SearchResponse[VariantUninterpretedCase]
 type CasesSearchResponse = SearchResponse[CaseResult]
 type DocumentsSearchResponse = SearchResponse[DocumentResult]
+type UsersSearchResponse = SearchResponse[UserResult]
