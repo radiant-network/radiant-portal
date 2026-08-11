@@ -154,7 +154,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 		"spl.submitter_sample_id as submitter_sample_id, " +
 		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
 
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 
 	var variantInterpretedCases []VariantInterpretedCase
 	if err := tx.Find(&variantInterpretedCases).Error; err != nil {
@@ -231,7 +231,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 
 	tx = tx.Select(columns)
 
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 
 	var variantUninterpretedCases []VariantUninterpretedCase
 	if err := tx.Find(&variantUninterpretedCases).Error; err != nil {

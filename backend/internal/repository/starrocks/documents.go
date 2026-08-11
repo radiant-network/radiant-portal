@@ -43,7 +43,7 @@ func (r *DocumentsRepository) SearchDocuments(ctx context.Context, userQuery typ
 	}
 
 	tx = tx.Select(columns)
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 
 	if err := tx.Find(&documents).Error; err != nil {
 		return nil, nil, fmt.Errorf("error fetching documents: %w", err)
