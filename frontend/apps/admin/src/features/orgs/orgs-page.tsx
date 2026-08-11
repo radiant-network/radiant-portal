@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import type { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,9 +35,9 @@ export default function OrgsPage() {
   const { t } = useI18n();
   const [orgs, setOrgs] = useState<Organization[]>(MOCK_ORGS);
   const [filters, setFilters] = useState<OrgsFilterState>(EMPTY_FILTERS);
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+  // Org list is small (no pagination) — the whole set renders at once.
 
   // Default order: alphabetical by full name. The Name/Category headers can override with asc/desc.
   const rows = useMemo(
@@ -71,7 +70,6 @@ export default function OrgsPage() {
 
   const handleFilterChange = (next: OrgsFilterState) => {
     setFilters(next);
-    setPagination(prev => ({ ...prev, pageIndex: 0 }));
   };
 
   return (
@@ -96,7 +94,7 @@ export default function OrgsPage() {
           loadingStates={{ total: false, list: false }}
           total={rows.length}
           TableFilters={<OrgsTableFilters value={filters} onChange={handleFilterChange} />}
-          pagination={{ type: 'locale', state: pagination, onPaginationChange: setPagination }}
+          pagination={{ type: 'hidden' }}
           enableColumnOrdering
           enableFullscreen
           tableIndexResultPosition="bottom"

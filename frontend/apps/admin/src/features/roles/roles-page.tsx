@@ -1,6 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
-import type { PaginationState } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { Lock, Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -68,7 +67,6 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
   const { t } = useI18n();
   const [roles, setRoles] = useState<Role[]>(MOCK_ROLES);
   const [filters, setFilters] = useState<RolesFilterState>(EMPTY_FILTERS);
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeRole, setActiveRole] = useState<Role | null>(null);
   // Read-only permissions dialog (default roles, the "see what's included" link, and every
@@ -213,7 +211,6 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
 
   const handleFilterChange = (next: RolesFilterState) => {
     setFilters(next);
-    setPagination(prev => ({ ...prev, pageIndex: 0 }));
   };
 
   return (
@@ -250,7 +247,7 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
             loadingStates={{ total: false, list: false }}
             total={rows.length}
             TableFilters={<RolesTableFilters value={filters} onChange={handleFilterChange} />}
-            pagination={{ type: 'locale', state: pagination, onPaginationChange: setPagination }}
+            pagination={{ type: 'hidden' }}
             enableColumnOrdering
             enableFullscreen
             tableIndexResultPosition="bottom"

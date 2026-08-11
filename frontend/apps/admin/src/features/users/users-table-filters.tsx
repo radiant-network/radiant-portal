@@ -5,14 +5,11 @@ import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { MOCK_ORGS, MOCK_ROLES } from '../../mock/data';
-
-import { OrgOptionLabel } from './org-option-label';
+import { MOCK_ROLES } from '../../mock/data';
 
 export type UsersFilterState = {
   search: string;
   roles: string[];
-  orgs: string[];
 };
 
 type UsersTableFiltersProps = {
@@ -34,11 +31,10 @@ export default function UsersTableFilters({ value, onChange }: UsersTableFilters
     ...MOCK_ROLES.filter(r => r.code !== 'member').map(r => ({ key: r.code, label: t(`admin.roles.${r.code}.name`) })),
     { key: 'member', label: t('admin.users.member') },
   ];
-  const orgOptions = MOCK_ORGS.map(o => ({ key: o.code, label: <OrgOptionLabel code={o.code} name={o.name} /> }));
 
-  const hasActiveFilters = value.search.length > 0 || value.roles.length > 0 || value.orgs.length > 0;
+  const hasActiveFilters = value.search.length > 0 || value.roles.length > 0;
 
-  const clearAll = () => onChange({ search: '', roles: [], orgs: [] });
+  const clearAll = () => onChange({ search: '', roles: [] });
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -55,14 +51,6 @@ export default function UsersTableFilters({ value, onChange }: UsersTableFilters
         selected={value.roles}
         onSelect={roles => onChange({ ...value, roles })}
         dataCy="users-role"
-      />
-      <FilterButton
-        label={t('admin.users.filter.organization')}
-        options={orgOptions}
-        selected={value.orgs}
-        onSelect={orgs => onChange({ ...value, orgs })}
-        popoverSize="md"
-        dataCy="users-org"
       />
       {hasActiveFilters && (
         <Button data-cy="users-filters-clear" variant="link" onClick={clearAll} className="h-8 px-3 py-2 text-sm">

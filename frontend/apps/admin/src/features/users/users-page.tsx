@@ -16,7 +16,7 @@ import UserSheet from './user-sheet';
 import UsersTableFilters, { type UsersFilterState } from './users-table-filters';
 import { getUsersColumns, getUsersColumnSettings } from './users-table-settings';
 
-const EMPTY_FILTERS: UsersFilterState = { search: '', roles: [], orgs: [] };
+const EMPTY_FILTERS: UsersFilterState = { search: '', roles: [] };
 
 function matchesFilters(user: AdminUser, filters: UsersFilterState): boolean {
   const query = filters.search.trim().toLowerCase();
@@ -30,9 +30,6 @@ function matchesFilters(user: AdminUser, filters: UsersFilterState): boolean {
     const matchesBaselineOnly = filters.roles.includes('member') && user.roles.length === 0;
     const matchesAssignedRole = user.roles.some(r => filters.roles.includes(r.roleCode));
     if (!matchesBaselineOnly && !matchesAssignedRole) return false;
-  }
-  if (filters.orgs.length && !user.roles.some(r => (r.orgCodes ?? []).some(org => filters.orgs.includes(org)))) {
-    return false;
   }
   return true;
 }

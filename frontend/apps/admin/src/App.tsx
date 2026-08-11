@@ -21,7 +21,7 @@ export default function App() {
 
   // From the Roles table: open the Members section pre-filtered to a single role.
   const viewMembersForRole = (roleCode: string) => {
-    setUsersInitialFilters({ search: '', roles: [roleCode], orgs: [] });
+    setUsersInitialFilters({ search: '', roles: [roleCode] });
     setSection('users');
   };
 

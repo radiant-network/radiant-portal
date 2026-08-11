@@ -20,8 +20,7 @@
         "roles": "Rôles et accès"
       },
       "filter": {
-        "role": "Rôle",
-        "organization": "Organisation"
+        "role": "Rôle"
       },
       "edit_aria": "Modifier le membre"
     },

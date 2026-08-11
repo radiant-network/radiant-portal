@@ -25,7 +25,7 @@ function AdminRolesScreen() {
     setSection(next);
   };
   const viewMembersForRole = (roleCode: string) => {
-    setUsersInitialFilters({ search: '', roles: [roleCode], orgs: [] });
+    setUsersInitialFilters({ search: '', roles: [roleCode] });
     setSection('users');
   };
 
