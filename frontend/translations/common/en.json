@@ -119,6 +119,9 @@
       "delete_body_no_orgs": "This role is assigned to <b>{{members}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
       "delete_body_empty": "<b>{{name}}</b> is unassigned. It will be permanently deleted.",
       "delete_confirm": "Delete role",
+      "edit_impact_title": "Edit this role?",
+      "edit_impact_body": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b> across <b>{{orgs}}</b>.",
+      "edit_impact_body_no_orgs": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b>.",
       "err": {
         "at_least_one_permission": "Select at least one permission."
       },

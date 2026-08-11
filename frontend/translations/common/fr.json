@@ -119,6 +119,9 @@
       "delete_body_no_orgs": "Ce rôle est attribué à <b>{{members}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
       "delete_body_empty": "<b>{{name}}</b> n'est attribué à aucun membre. Il sera définitivement supprimé.",
       "delete_confirm": "Supprimer le rôle",
+      "edit_impact_title": "Modifier ce rôle?",
+      "edit_impact_body": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b> dans <b>{{orgs}}</b>.",
+      "edit_impact_body_no_orgs": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b>.",
       "err": {
         "at_least_one_permission": "Sélectionnez au moins une permission."
       },

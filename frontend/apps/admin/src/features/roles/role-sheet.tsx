@@ -103,8 +103,9 @@ export default function RoleSheet({
       onOpenChange(false);
       return;
     }
+    // The page owns closing after save: a straight save closes the sheet, while editing an assigned
+    // role's permissions opens a confirm dialog first and closes only once it's confirmed.
     onSave(values, role?.code);
-    onOpenChange(false);
   };
 
   const onInvalid = () => setSubmitAttempted(true);

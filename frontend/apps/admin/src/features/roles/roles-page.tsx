@@ -41,6 +41,11 @@ function defaultSortRank(role: Role): number {
   return role.isDefault ? 1 : 2;
 }
 
+/** Order-independent equality of two permission-code lists — did the role's actions actually change? */
+function samePermissions(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every(code => b.includes(code));
+}
+
 /** Slugify a new custom role's code from its name (ES2020-safe `.replace`, not `String.replaceAll`). */
 function makeRoleCode(name: string, roles: Role[]): string {
   const base =
@@ -113,17 +118,20 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
     setSheetOpen(true);
   };
 
+  // Apply a custom-role edit + success toast — shared by the direct save and the confirmed save.
+  const applyRoleUpdate = (values: RoleFormValues, roleCode: string) => {
+    setRoles(prev =>
+      prev.map(r =>
+        r.code === roleCode
+          ? { ...r, label: values.name, description: values.description, permissions: values.permissions }
+          : r,
+      ),
+    );
+    toast.success(t('admin.role.ok.updated'));
+  };
+
   const handleSave = (values: RoleFormValues, roleCode?: string) => {
-    if (roleCode) {
-      setRoles(prev =>
-        prev.map(r =>
-          r.code === roleCode
-            ? { ...r, label: values.name, description: values.description, permissions: values.permissions }
-            : r,
-        ),
-      );
-      toast.success(t('admin.role.ok.updated'));
-    } else {
+    if (!roleCode) {
       const code = makeRoleCode(values.name, roles);
       setRoles(prev => [
         {
@@ -136,7 +144,47 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
         ...prev,
       ]);
       toast.success(t('admin.role.ok.created'));
+      setSheetOpen(false);
+      return;
     }
+
+    const original = roles.find(r => r.code === roleCode);
+    const permissionsChanged = !!original && !samePermissions(original.permissions, values.permissions);
+    const { members, orgs } = original ? getRoleUsage(original, MOCK_USERS) : { members: 0, orgs: 0 };
+
+    // Changing an *assigned* role's permissions rewrites every holder's access, so it takes an
+    // impact-count confirmation first (mirrors Delete). Name/description-only edits, and any edit to
+    // an unassigned role, save straight away.
+    if (permissionsChanged && members > 0) {
+      alertDialog.open({
+        type: 'warning',
+        title: t('admin.role.edit_impact_title'),
+        description: (
+          <Trans
+            i18nKey={orgs > 0 ? 'admin.role.edit_impact_body' : 'admin.role.edit_impact_body_no_orgs'}
+            values={{
+              name: values.name,
+              members: t('admin.roles_page.members_count', { count: members }),
+              orgs: t('admin.roles_page.orgs_count', { count: orgs }),
+            }}
+            components={{ b: <strong /> }}
+          />
+        ),
+        cancelProps: { children: t('admin.role.cancel') },
+        actionProps: {
+          dataCy: 'edit-role-confirm',
+          children: t('admin.role.save'),
+          onClick: async () => {
+            applyRoleUpdate(values, roleCode);
+            setSheetOpen(false);
+          },
+        },
+      });
+      return;
+    }
+
+    applyRoleUpdate(values, roleCode);
+    setSheetOpen(false);
   };
 
   const handleDelete = (role: Role) => {
