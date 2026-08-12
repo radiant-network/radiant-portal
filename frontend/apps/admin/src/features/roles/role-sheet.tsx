@@ -45,14 +45,28 @@ const BLANK: RoleFormValues = { name: '', code: '', description: '', permissions
 const isAlertDialogOpen = () => typeof document !== 'undefined' && !!document.querySelector('[role="alertdialog"]');
 
 /**
- * Suggest a code slug from the name: lowercase, non-alphanumerics → underscore, collapsed, forced
- * to start with a letter, and capped at 50 (backend rule `[a-z][a-z0-9_]*`, max 50). Only a
- * starting point — the user can edit it. Uses `.replace(/…/g)` (not `String.replaceAll`) to stay
- * ES2020-safe. Mirrors the org sheet's `slugifyCode`.
+ * Fold accented letters onto the `[a-z0-9_]` code charset and lowercase them, so French input
+ * normalizes as the user types (Éléphant → elephant, Cœur → coeur). NFD splits an accented
+ * character into base + combining mark, which we strip; the œ/æ ligatures don't decompose, so
+ * they're expanded explicitly. ES2020-safe. Mirrors the org sheet's `toCodeChars`.
+ */
+function toCodeChars(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // strip combining diacritics left by NFD (é→e, ç→c)
+    .replace(/œ/gi, 'oe')
+    .replace(/æ/gi, 'ae')
+    .toLowerCase();
+}
+
+/**
+ * Suggest a code slug from the name: fold accents + lowercase, non-alphanumerics → underscore,
+ * collapsed, forced to start with a letter, and capped at 50 (backend rule `[a-z][a-z0-9_]*`,
+ * max 50). Only a starting point — the user can edit it. Uses `.replace(/…/g)` (not
+ * `String.replaceAll`) to stay ES2020-safe. Mirrors the org sheet's `slugifyCode`.
  */
 function slugifyCode(name: string): string {
-  return name
-    .toLowerCase()
+  return toCodeChars(name)
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/_+/g, '_')
     .replace(/^[^a-z]+/, '')
@@ -241,10 +255,12 @@ export default function RoleSheet({
                       <FormControl>
                         <Input
                           {...field}
-                          // Codes are stored lowercase; keep the field lowercase as the user types.
+                          // Normalize to the code charset as the user types: fold accents +
+                          // lowercase (Éléphant → elephant). Invalid chars (spaces, hyphens) are
+                          // left for validation to flag, matching the prior lowercase-only behavior.
                           onChange={e => {
                             setCodeTouched(true);
-                            field.onChange(e.target.value.toLowerCase());
+                            field.onChange(toCodeChars(e.target.value));
                           }}
                           className={cn(fieldState.error && 'border-destructive')}
                         />
