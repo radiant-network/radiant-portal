@@ -231,6 +231,53 @@ func Test_validateFetusDates_InvalidWhenDeceasedWithFutureLastMenstrualPeriod(t 
 	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
 }
 
+func Test_validateFetusUniquenessInBatch_FirstOccurrence(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
+	seen := map[FetusKey]struct{}{}
+	cr.validateFetusUniquenessInBatch(0, "ORG1", seen)
+	assert.Empty(t, cr.Errors)
+	assert.Contains(t, seen, FetusKey{OrganizationCode: "ORG1", SubmitterFetusId: "F-1"})
+}
+
+func Test_validateFetusUniquenessInBatch_Duplicate(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
+	seen := map[FetusKey]struct{}{{OrganizationCode: "ORG1", SubmitterFetusId: "F-1"}: {}}
+	cr.validateFetusUniquenessInBatch(0, "ORG1", seen)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusDuplicateInBatchCode, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+}
+
+// Uniqueness is scoped by organization, so the same key under a different org is not a conflict.
+func Test_validateFetusUniquenessInBatch_SameKeyDifferentOrg_NoConflict(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
+	seen := map[FetusKey]struct{}{{OrganizationCode: "ORG2", SubmitterFetusId: "F-1"}: {}}
+	cr.validateFetusUniquenessInBatch(0, "ORG1", seen)
+	assert.Empty(t, cr.Errors)
+}
+
+// End-to-end through validateCaseFetuses: the org is resolved from the proband, so two fetuses
+// reusing a key under the same case's mother must be caught even without a pre-seeded map.
+func Test_validateCaseFetuses_DuplicateSubmitterFetusIdAcrossFetuses(t *testing.T) {
+	lmp := types.DateISO8601(time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
+		{SubmitterFetusId: "F-1", SexCode: "male", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
+		{SubmitterFetusId: "F-1", SexCode: "female", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
+	})
+	cr.Case.Patients = []*types.CasePatientBatch{
+		{SubmitterPatientId: "MRN-001", PatientOrganizationCode: "ORG1", RelationToProbandCode: "proband", AffectedStatusCode: "affected"},
+	}
+	cr.Patients = map[batchval.PatientKey]*types.Patient{
+		{OrganizationCode: "ORG1", SubmitterPatientId: "MRN-001"}: {ID: 1, OrganizationCode: "ORG1"},
+	}
+
+	err := cr.validateCaseFetuses(map[FetusKey]struct{}{})
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusDuplicateInBatchCode, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[1]", cr.Errors[0].Path)
+}
+
 func Test_validateFetusObservationsCategorical_Valid(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{
 		ObservationsCategorical: []*types.ObservationCategoricalBatch{
@@ -277,7 +324,7 @@ func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
 		{SexCode: "male", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
 		{SexCode: "not-a-sex", LifeStatusCode: "not-a-status", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
 	})
-	err := cr.validateCaseFetuses()
+	err := cr.validateCaseFetuses(map[FetusKey]struct{}{})
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 2)
 	assert.Equal(t, "create_case[0].fetuses[1].sex_code", cr.Errors[0].Path)
@@ -288,7 +335,7 @@ func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
 // validation error rather than nil-deref on it.
 func Test_validateCaseFetuses_NullEntry(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{nil})
-	err := cr.validateCaseFetuses()
+	err := cr.validateCaseFetuses(map[FetusKey]struct{}{})
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
@@ -329,7 +376,7 @@ func Test_validateCaseFetuses_NullObservationEntries(t *testing.T) {
 			ObservationsText:        []*types.ObservationTextBatch{nil},
 		},
 	})
-	err := cr.validateCaseFetuses()
+	err := cr.validateCaseFetuses(map[FetusKey]struct{}{})
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 2)
 	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)

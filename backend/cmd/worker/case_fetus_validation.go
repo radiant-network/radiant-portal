@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -12,9 +13,19 @@ import (
 
 // Fetuses error codes
 const (
-	FetusInvalidField = "FETUS-001"
-	FetusHasSample    = "FETUS-002"
+	FetusInvalidField         = "FETUS-001"
+	FetusHasSample            = "FETUS-002"
+	FetusDuplicateInBatchCode = "FETUS-003"
 )
+
+// FetusKey scopes submitter_fetus_id uniqueness to the organization, mirroring
+// patient.submitter_patient_id — a fetus has no organization of its own so it is resolved
+// through its mother, but two different mothers submitted by the same organization cannot
+// reuse a key.
+type FetusKey struct {
+	OrganizationCode string
+	SubmitterFetusId string
+}
 
 const RelationshipFetusCode = "fetus"
 const LifeStatusDeceased = "deceased"
@@ -109,7 +120,14 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	}
 }
 
-func (cr *CaseValidationRecord) validateCaseFetuses() error {
+// validateCaseFetuses validates every fetus of the case, deduping submitter_fetus_id against
+// seenFetuses — a map shared across the whole request so two cases in the same payload cannot
+// create a fetus under the same organization with the same key, even under different mothers.
+// The org is resolved from the proband; a case whose proband didn't resolve (already reported by
+// validateCasePatients) skips the dedup rather than failing here on an unrelated error.
+func (cr *CaseValidationRecord) validateCaseFetuses(seenFetuses map[FetusKey]struct{}) error {
+	proband, _ := cr.getProbandFromPatients()
+
 	for fetusIndex := range cr.Case.Fetuses {
 		if cr.Case.Fetuses[fetusIndex] == nil {
 			path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
@@ -123,8 +141,23 @@ func (cr *CaseValidationRecord) validateCaseFetuses() error {
 		cr.validateFetusDates(fetusIndex)
 		cr.validateFetusObservationsCategorical(fetusIndex)
 		cr.validateFetusObservationsText(fetusIndex)
+		if proband != nil {
+			cr.validateFetusUniquenessInBatch(fetusIndex, proband.OrganizationCode, seenFetuses)
+		}
 	}
 	return nil
+}
+
+func (cr *CaseValidationRecord) validateFetusUniquenessInBatch(fetusIndex int, organizationCode string, seenFetuses map[FetusKey]struct{}) {
+	submitterFetusId := cr.Case.Fetuses[fetusIndex].SubmitterFetusId.String()
+	key := FetusKey{OrganizationCode: organizationCode, SubmitterFetusId: submitterFetusId}
+	if _, exists := seenFetuses[key]; exists {
+		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
+		message := batchval.FormatDuplicateInBatch(cr.GetResourceType(), []string{organizationCode, submitterFetusId})
+		cr.AddErrors(message, FetusDuplicateInBatchCode, path)
+		return
+	}
+	seenFetuses[key] = struct{}{}
 }
 
 func dateISO8601ToTimePtr(d *types.DateISO8601) *time.Time {

@@ -56,7 +56,7 @@ func (r *UpdateCaseValidationRecord) path() string {
 // CaseValidationRecord — for the scalar field formats and clinical patient data (family,
 // observations, family history), which apply identically whether the case is being
 // created or updated.
-func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, update types.UpdateCaseBatch, index int) (*UpdateCaseValidationRecord, error) {
+func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, update types.UpdateCaseBatch, index int, seenFetuses map[FetusKey]struct{}) (*UpdateCaseValidationRecord, error) {
 	r := &UpdateCaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: bv, Cache: cache, Index: index, ResourceType: types.UpdateCaseBatchType},
 		Update:               update,
@@ -121,7 +121,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	if err := cr.validateCasePatients(); err != nil {
 		return nil, fmt.Errorf("failed to validate case patients: %w", err)
 	}
-	if err := cr.validateCaseFetuses(); err != nil {
+	if err := cr.validateCaseFetuses(seenFetuses); err != nil {
 		return nil, fmt.Errorf("failed to validate case fetuses: %w", err)
 	}
 
@@ -193,13 +193,14 @@ func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCo
 	var records []*UpdateCaseValidationRecord
 	cache := batchval.NewBatchValidationCache(bv)
 	visited := map[CaseKey]struct{}{}
+	seenFetuses := map[FetusKey]struct{}{}
 
 	for idx, u := range updates {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
 
-		record, err := validateUpdateCaseRecord(ctx, bv, cache, u, idx)
+		record, err := validateUpdateCaseRecord(ctx, bv, cache, u, idx, seenFetuses)
 		if err != nil {
 			return nil, fmt.Errorf("error during update case validation: %v", err)
 		}

@@ -1336,6 +1336,7 @@ func validateCaseRecord(
 	cache *batchval.BatchValidationCache,
 	c types.CaseBatch,
 	index int,
+	seenFetuses map[FetusKey]struct{},
 ) (*CaseValidationRecord, error) {
 	cr := NewCaseValidationRecord(bv, cache, c, index)
 
@@ -1362,7 +1363,7 @@ func validateCaseRecord(
 	}
 
 	// 2b. Validate Case Fetuses
-	if err := cr.validateCaseFetuses(); err != nil {
+	if err := cr.validateCaseFetuses(seenFetuses); err != nil {
 		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
 	}
 
@@ -1739,6 +1740,7 @@ func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext,
 	cache := batchval.NewBatchValidationCache(bv)
 
 	visited := map[CaseKey]struct{}{}
+	seenFetuses := map[FetusKey]struct{}{}
 
 	for idx, c := range cases {
 		if err := ctx.Err(); err != nil {
@@ -1749,7 +1751,7 @@ func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext,
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(ctx, bv, cache, c, idx)
+		record, err := validateCaseRecord(ctx, bv, cache, c, idx, seenFetuses)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
