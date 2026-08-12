@@ -2080,6 +2080,7 @@
       "sign_out": "Se déconnecter"
     },
     "links": {
+      "admin": "Admin",
       "analysis": "Analyse",
       "cases": "Cas",
       "files": "Fichiers",

@@ -71,9 +71,13 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
             <div className="flex flex-col md:hidden absolute z-50 left-0 right-0 bottom-0 bg-background h-[calc(100vh-56px)]">
               <div className="flex flex-col grow overflow-x-auto">
                 <div className="p-2 flex flex-col">
-                  {links.map(link => (
-                    <MainNavbarItem key={link.title} {...link} />
-                  ))}
+                  {links.map((link, index) =>
+                    link.separator ? (
+                      <Separator key={`separator-${index}`} className="my-2 -mx-2 w-auto" />
+                    ) : (
+                      <MainNavbarItem key={link.title} {...link} />
+                    ),
+                  )}
                   {betaSuperModeItem}
                 </div>
                 <Separator />
@@ -104,9 +108,13 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
             </div>
             <MainNavbarTenantSwitcher />
             <div className="flex flex-1 gap-1 items-center ml-2">
-              {links.map(link => (
-                <MainNavbarItem key={link.title} {...link} />
-              ))}
+              {links.map((link, index) =>
+                link.separator ? (
+                  <Separator key={`separator-${index}`} orientation="vertical" className="h-5 mx-1" />
+                ) : (
+                  <MainNavbarItem key={link.title} {...link} />
+                ),
+              )}
               {betaSuperModeItem}
             </div>
             <div className="flex items-center gap-4">

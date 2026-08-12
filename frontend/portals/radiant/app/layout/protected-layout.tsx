@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Link, Outlet, useLoaderData, useLocation, useNavigate } from 'react-router';
 import logo from '@assets/logo/header.svg';
-import { ArchiveIcon, FolderIcon } from 'lucide-react';
+import { ArchiveIcon, FolderIcon, SettingsIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import MainNavbar from '@/components/base/navbar/main-navbar';
@@ -74,6 +74,14 @@ const _ProtectedLayout = () => {
                   to: '/file',
                   as: Link,
                   active: pathname === '/file',
+                },
+                { separator: true },
+                {
+                  title: t('main_navbar.links.admin'),
+                  icon: <SettingsIcon />,
+                  to: '/admin',
+                  as: Link,
+                  active: pathname === '/admin',
                 },
               ]}
               actions={

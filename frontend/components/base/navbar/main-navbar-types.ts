@@ -1,8 +1,10 @@
 import type { MainNavbarItemProps } from './main-navbar-item';
 
+export type MainNavbarEntry = (MainNavbarItemProps & { separator?: never }) | { separator: true };
+
 export interface BaseMainNavbarProps {
   logo: React.ReactNode;
-  links: MainNavbarItemProps[];
+  links: MainNavbarEntry[];
   actions: MainNavbarItemProps[];
   userDetails: {
     id: string;

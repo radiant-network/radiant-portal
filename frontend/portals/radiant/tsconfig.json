@@ -18,6 +18,7 @@
       "@/lib/*": ["../../components/lib/*"],
       "@/hooks/*": ["../../components/hooks/*"],
       "@assets/*": ["../../themes/radiant/assets/*"],
+      "admin/*": ["../../apps/admin/src/*"],
       "analysis/*": ["../../apps/analysis/src/*"],
       "case/*": ["../../apps/case/src/*"],
       "community/*": ["../../apps/community/src/*"],

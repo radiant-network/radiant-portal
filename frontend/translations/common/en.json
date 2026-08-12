@@ -2076,6 +2076,7 @@
       "sign_out": "Sign out"
     },
     "links": {
+      "admin": "Admin",
       "analysis": "Analysis",
       "cases": "Cases",
       "files": "Files",
