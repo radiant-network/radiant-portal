@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FileText, FlaskConical, Users } from 'lucide-react';
+import { BookOpenText, FileText, FlaskConical, User, Users, UsersRound } from 'lucide-react';
 
 import StatItem, { StatItemLayout } from '@/components/base/stat-item/stat-item';
 
 import { StorySection, StoryShowcase } from '../story-section';
 
 const meta = {
-  title: 'Components/Stat Item/Stat Item',
+  title: 'Components/Stat Item',
   component: StatItem,
   args: {
     icon: <Users />,
@@ -18,6 +18,14 @@ const meta = {
 export default meta;
 
 type Story = StoryObj<typeof meta>;
+
+const dataExplorationStats = [
+  { icon: <BookOpenText />, value: '7', label: 'Studies' },
+  { icon: <User />, value: '8,559', label: 'Participants' },
+  { icon: <UsersRound />, value: '2,322', label: 'Families' },
+  { icon: <FlaskConical />, value: '13.2K', label: 'Biospecimens' },
+  { icon: <FileText />, value: '313K', label: 'Data Files' },
+];
 
 export const AllVariants: Story = {
   render: () => (
@@ -61,6 +69,28 @@ export const AllVariants: Story = {
             iconClassName="text-primary-foreground"
             labelClassName="text-primary-foreground/90"
           />
+        </div>
+      </StorySection>
+
+      <StorySection
+        title="In bordered cells on a dark panel"
+        description="Data exploration band: each stat gets its own bordered cell, the icon keeping an accent distinct from the value."
+      >
+        <div className="bg-primary text-primary-foreground w-full space-y-3 rounded-md p-4">
+          <span className="text-sm font-semibold">Data Exploration</span>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            {dataExplorationStats.map(stat => (
+              <div key={stat.label} className="border-primary-foreground/20 rounded-sm border p-3">
+                <StatItem
+                  icon={stat.icon}
+                  value={stat.value}
+                  label={stat.label}
+                  iconClassName="text-primary-foreground"
+                  labelClassName="text-primary-foreground/90"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </StorySection>
     </StoryShowcase>
