@@ -42,9 +42,9 @@ function toFormValues(org?: Organization | null): OrgFormValues {
 }
 
 /**
- * Suggest a code slug from the name: lowercase, non-alphanumerics → underscore, collapsed, and
- * forced to start with a letter (backend rule `[a-z][a-z0-9_]*`). Only a starting point — the user
- * can edit it. Uses `.replace(/…/g)` (not `String.replaceAll`) to stay ES2020-safe.
+ * Suggest a code slug from the name: lowercase, non-alphanumerics → underscore, collapsed, forced
+ * to start with a letter, and capped at 50 (backend rule `[a-z][a-z0-9_]*`, max 50). Only a starting
+ * point — the user can edit it. Uses `.replace(/…/g)` (not `String.replaceAll`) to stay ES2020-safe.
  */
 function slugifyCode(name: string): string {
   return name
@@ -52,7 +52,8 @@ function slugifyCode(name: string): string {
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/_+/g, '_')
     .replace(/^[^a-z]+/, '')
-    .replace(/_+$/, '');
+    .replace(/_+$/, '')
+    .slice(0, 50);
 }
 
 export default function OrgSheet({ open, onOpenChange, org, orgs, onSave }: OrgSheetProps) {
