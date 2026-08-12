@@ -2,6 +2,11 @@
 
 A small TCP proxy that lets **Go / GORM** clients authenticate to StarRocks as a **JWT user**.
 
+> Looking for **human** access from DBeaver or the `mysql` CLI, with a Keycloak username and
+> password instead of a token? That is [`mysql-gateway`](../mysql-gateway) — same wire-protocol
+> code (both are thin mains over [`internal/mysqlproxy`](../../internal/mysqlproxy)), different
+> `Authenticator`. This one is the API's loopback sidecar and takes a JWT as-is.
+
 Go's `go-sql-driver/mysql` implements a fixed set of auth plugins and has no extension point,
 so it can't speak StarRocks' `authentication_openid_connect_client` plugin — the driver would
 have to be forked. Instead this proxy translates during the login handshake:

@@ -1,4 +1,4 @@
-package main
+package mysqlproxy
 
 import (
 	"bytes"
@@ -242,4 +242,23 @@ func Test_errPacket_EncodesCodeStateAndMessage(t *testing.T) {
 	assert.Equal(t, uint16(1045), binary.LittleEndian.Uint16(out[1:3]))
 	assert.Equal(t, byte('#'), out[3])
 	assert.Equal(t, "28000nope", string(out[4:]))
+}
+
+func Test_isSSLRequest_DetectsBareUpgradeRequest(t *testing.T) {
+	pkt := buildSSLRequest(clientProtocol41, 0x21)
+	require.Len(t, pkt, 32, "an SSLRequest is exactly the 32-byte fixed header")
+	assert.True(t, isSSLRequest(pkt))
+}
+
+func Test_isSSLRequest_RejectsFullHandshakeResponse(t *testing.T) {
+	// Same CLIENT_SSL bit, but a username follows — so it is a HandshakeResponse41, not an
+	// upgrade request. Length is what tells them apart.
+	resp := testClientHello(clientProtocol41|clientSSL, 0x21, "alice", []byte{}, "")
+	assert.False(t, isSSLRequest(resp))
+}
+
+func Test_isSSLRequest_RejectsThirtyTwoBytesWithoutSSLBit(t *testing.T) {
+	pkt := buildSSLRequest(clientProtocol41, 0x21)
+	binary.LittleEndian.PutUint32(pkt[0:4], clientProtocol41) // clear CLIENT_SSL
+	assert.False(t, isSSLRequest(pkt))
 }
