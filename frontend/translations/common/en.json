@@ -283,7 +283,7 @@
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
         "invalid_email": "Enter a valid email.",
-        "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
+        "code_invalid": "Lowercase letters, numbers, and underscores; start with a letter.",
         "code_duplicate": "An organization with this code already exists.",
         "email_duplicate": "A member with this email already exists",
         "role_name_duplicate": "A role with this name already exists.",

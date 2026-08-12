@@ -283,7 +283,7 @@
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
         "invalid_email": "Saisissez une adresse courriel valide.",
-        "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
+        "code_invalid": "Lettres minuscules, chiffres et traits de soulignement; commencez par une lettre.",
         "code_duplicate": "Une organisation avec ce code existe déjà.",
         "email_duplicate": "Un membre avec ce courriel existe déjà",
         "role_name_duplicate": "Un rôle avec ce nom existe déjà.",
