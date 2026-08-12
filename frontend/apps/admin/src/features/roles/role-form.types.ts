@@ -4,6 +4,8 @@
  */
 export type RoleFormValues = {
   name: string;
+  /** URL/system id, immutable after creation. `[a-z][a-z0-9_]*`, max 50; unique within the tenant. */
+  code: string;
   description: string;
   permissions: string[];
 };

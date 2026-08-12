@@ -103,6 +103,8 @@
       "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
       "name": "Nom",
       "name_placeholder": "Nom du rôle",
+      "code": "Code",
+      "code_hint": "Ne peut pas être modifié après la création. Lettres minuscules, chiffres et traits de soulignement.",
       "description_label": "Description",
       "description_placeholder": "À quoi sert ce rôle? (facultatif)",
       "permissions_label": "Permissions",
@@ -284,7 +286,8 @@
         "code_invalid": "Utilisez des lettres minuscules, des chiffres et des traits de soulignement; commencez par une lettre.",
         "code_duplicate": "Une organisation avec ce code existe déjà.",
         "email_duplicate": "Un membre avec ce courriel existe déjà",
-        "role_name_duplicate": "Un rôle avec ce nom existe déjà."
+        "role_name_duplicate": "Un rôle avec ce nom existe déjà.",
+        "role_code_duplicate": "Un rôle avec ce code existe déjà."
       }
     },
     "editor": {

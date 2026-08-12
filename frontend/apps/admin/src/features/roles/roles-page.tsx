@@ -46,22 +46,6 @@ function samePermissions(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every(code => b.includes(code));
 }
 
-/** Slugify a new custom role's code from its name (ES2020-safe `.replace`, not `String.replaceAll`). */
-function makeRoleCode(name: string, roles: Role[]): string {
-  const base =
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^[^a-z]+/, '')
-      .replace(/_+$/, '') || 'role';
-  const taken = new Set(roles.map(r => r.code));
-  let code = base;
-  let n = 2;
-  while (taken.has(code)) code = `${base}_${n++}`;
-  return code;
-}
-
 type RolesPageProps = {
   /** Deep-link: switch to the Members section filtered to this role. */
   onViewMembers: (roleCode: string) => void;
@@ -112,6 +96,9 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
     setActiveRole(null);
     setInitialValues({
       name: `${roleName(role, t)} ${t('admin.role.duplicate_suffix')}`,
+      // Blank so the sheet auto-suggests a fresh code from the "(copy)" name — a duplicate can't
+      // reuse the source role's code.
+      code: '',
       description: roleDescription(role, t),
       permissions: role.permissions,
     });
@@ -132,10 +119,10 @@ export default function RolesPage({ onViewMembers }: RolesPageProps) {
 
   const handleSave = (values: RoleFormValues, roleCode?: string) => {
     if (!roleCode) {
-      const code = makeRoleCode(values.name, roles);
+      // The code is author-typed now (validated + de-duped in the sheet), so use it verbatim.
       setRoles(prev => [
         {
-          code,
+          code: values.code,
           label: values.name,
           description: values.description,
           isDefault: false,

@@ -103,6 +103,8 @@
       "description": "A role is a named bundle of permissions. Assign it to members to grant those actions—roles only add access, never remove it.",
       "name": "Name",
       "name_placeholder": "Role name",
+      "code": "Code",
+      "code_hint": "Can't be changed after creation. Lowercase letters, numbers, and underscores.",
       "description_label": "Description",
       "description_placeholder": "What is this role for? (optional)",
       "permissions_label": "Permissions",
@@ -284,7 +286,8 @@
         "code_invalid": "Use lowercase letters, numbers, and underscores; start with a letter.",
         "code_duplicate": "An organization with this code already exists.",
         "email_duplicate": "A member with this email already exists",
-        "role_name_duplicate": "A role with this name already exists."
+        "role_name_duplicate": "A role with this name already exists.",
+        "role_code_duplicate": "A role with this code already exists."
       }
     },
     "editor": {

@@ -39,15 +39,32 @@ type RoleSheetProps = {
   onRequestDelete: (role: Role) => void;
 };
 
-const BLANK: RoleFormValues = { name: '', description: '', permissions: [] };
+const BLANK: RoleFormValues = { name: '', code: '', description: '', permissions: [] };
 
 /** True while a warning/confirmation AlertDialog is mounted (it uses role="alertdialog"). */
 const isAlertDialogOpen = () => typeof document !== 'undefined' && !!document.querySelector('[role="alertdialog"]');
+
+/**
+ * Suggest a code slug from the name: lowercase, non-alphanumerics → underscore, collapsed, forced
+ * to start with a letter, and capped at 50 (backend rule `[a-z][a-z0-9_]*`, max 50). Only a
+ * starting point — the user can edit it. Uses `.replace(/…/g)` (not `String.replaceAll`) to stay
+ * ES2020-safe. Mirrors the org sheet's `slugifyCode`.
+ */
+function slugifyCode(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^[^a-z]+/, '')
+    .replace(/_+$/, '')
+    .slice(0, 50);
+}
 
 function toFormValues(role: Role | null | undefined, initialValues: RoleFormValues | undefined): RoleFormValues {
   if (role) {
     return {
       name: role.label,
+      code: role.code,
       description: role.description ?? '',
       permissions: role.permissions,
     };
@@ -74,6 +91,21 @@ export default function RoleSheet({
   });
 
   const permissions = form.watch('permissions');
+
+  // On Add, auto-fill the code from the name until the user edits the code themselves; then leave
+  // it alone. Reset the "touched" flag whenever the sheet (re)opens. (Mirrors the org sheet.)
+  const [codeTouched, setCodeTouched] = useState(false);
+  useEffect(() => {
+    if (open) setCodeTouched(isEdit);
+  }, [open, isEdit]);
+
+  const name = form.watch('name');
+  useEffect(() => {
+    if (!isEdit && !codeTouched) {
+      form.setValue('code', slugifyCode(name), { shouldValidate: false });
+    }
+  }, [name, codeTouched, isEdit, form]);
+
   // Read isDirty during render so RHF's formState Proxy actually tracks it; accessed only inside the
   // submit handler it stays stale (false), which wrongly short-circuits every edit as a no-op.
   const { isDirty } = form.formState;
@@ -93,9 +125,16 @@ export default function RoleSheet({
     }
     if (!isEdit) {
       // Create: enforce a unique display name within the tenant (case-insensitive).
-      const isDuplicate = roles.some(r => roleName(r, t).trim().toLowerCase() === values.name.trim().toLowerCase());
-      if (isDuplicate) {
+      const nameTaken = roles.some(r => roleName(r, t).trim().toLowerCase() === values.name.trim().toLowerCase());
+      if (nameTaken) {
         form.setError('name', { message: 'role_name_duplicate' }, { shouldFocus: true });
+        return;
+      }
+      // And a unique code (backend 409 on the (code, tenant) PK) — clashes with a default role's
+      // code count too, since defaults live in the same `roles` set.
+      const codeTaken = roles.some(r => r.code.toLowerCase() === values.code.trim().toLowerCase());
+      if (codeTaken) {
+        form.setError('code', { message: 'role_code_duplicate' }, { shouldFocus: true });
         return;
       }
     }
@@ -183,6 +222,38 @@ export default function RoleSheet({
                   </FormItem>
                 )}
               />
+
+              {isEdit ? (
+                // Code is immutable after creation → read-only. Shown as-is (lowercase); unlike org
+                // codes it's never surfaced elsewhere, so no uppercase display transform.
+                <div className="flex flex-col gap-2.5">
+                  <FormLabel className="text-foreground">{t('admin.role.code')}</FormLabel>
+                  <Input value={role!.code} readOnly disabled />
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="code"
+                  schema={roleFormSchema}
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>{t('admin.role.code')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          // Codes are stored lowercase; keep the field lowercase as the user types.
+                          onChange={e => {
+                            setCodeTouched(true);
+                            field.onChange(e.target.value.toLowerCase());
+                          }}
+                          className={cn(fieldState.error && 'border-destructive')}
+                        />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">{t('admin.role.code_hint')}</p>
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
