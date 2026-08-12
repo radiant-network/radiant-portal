@@ -15,8 +15,13 @@ Go backend for the Radiant Portal — a medical/genomic data platform. Exposes a
 cmd/
   api/         - API server entry point, router setup, integration tests
   worker/      - Batch validation worker, validation logic per entity type
+  mysql-proxy/   - Loopback sidecar: Go/GORM clients log in to StarRocks as a JWT user
+  mysql-gateway/ - Human-facing endpoint: any MySQL client logs in with a Keycloak
+                   username + password (TLS required); it does the token exchange
 internal/
   authorization/ - Keycloak authorization (RBAC middleware)
+  mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
+                 cmd/mysql-gateway; the Authenticator seam is the only difference
   batchval/    - Batch validation context, caching, record validation
   client/      - External clients (PubMed)
   database/    - DB connection setup (postgres.go, starrocks.go)

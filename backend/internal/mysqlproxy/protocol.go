@@ -1,7 +1,5 @@
-package main
-
-// This file implements the MySQL wire-protocol translation that lets a Go client
-// (go-sql-driver, which can't speak StarRocks' JWT auth plugin) log in as a JWT user.
+// Package mysqlproxy implements the MySQL wire-protocol translation that lets a client which
+// cannot speak StarRocks' JWT auth plugin log in as a JWT user anyway.
 //
 // The MySQL login handshake is a scripted exchange of "packets". Each packet is a 4-byte
 // header — 3 bytes little-endian payload length + 1 byte sequence number — followed by the
@@ -11,23 +9,22 @@ package main
 //
 // The proxy speaks two different dialects on its two sides during that handshake:
 //
-//	Go client  ──cleartext (mysql_clear_password: the JWT sent as a "password")──▶  proxy
-//	proxy      ──TLS + authentication_openid_connect_client (the JWT as auth data)──▶  StarRocks
+//	client ──cleartext (mysql_clear_password: a secret sent as a "password")──▶ proxy
+//	proxy  ──TLS + authentication_openid_connect_client (a JWT as auth data)──▶ StarRocks
 //
-// Once login succeeds it stops translating and just copies bytes both ways (see pipe).
+// What that client-side secret *is* — an already-minted JWT, or a Keycloak password the proxy
+// exchanges for one — is the Authenticator's business (see auth.go). Once login succeeds the
+// proxy stops translating and just copies bytes both ways (see pipe).
+//
+// This file holds the packet framing and the pure, unit-tested protocol helpers.
+package mysqlproxy
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"io"
-	"log/slog"
 	"net"
-	"runtime/debug"
-	"strings"
-	"sync"
-	"time"
 )
 
 // MySQL capability flags — a bitfield where each bit advertises one feature. We only need
@@ -164,6 +161,14 @@ func parseClientHello(resp []byte) (clientHello, error) {
 		}
 	}
 	return h, nil
+}
+
+// isSSLRequest reports whether a client packet is an SSLRequest rather than a full
+// HandshakeResponse41. They share the same 32-byte fixed header, but SSLRequest stops there
+// (no username follows) and sets CLIENT_SSL — so a client asking to upgrade sends exactly 32
+// bytes with the bit on.
+func isSSLRequest(resp []byte) bool {
+	return len(resp) == 32 && binary.LittleEndian.Uint32(resp[0:4])&clientSSL != 0
 }
 
 // readLenEncInt decodes a MySQL length-encoded integer, returning the value and the number of
@@ -349,189 +354,4 @@ func errPacket(code uint16, sqlState, msg string) []byte {
 	b = append(b, '#')
 	b = append(b, sqlState...)
 	return append(b, msg...)
-}
-
-// ---------------------------------------------------------------------------
-// Connection handling.
-// ---------------------------------------------------------------------------
-
-// proxy carries the backend target and TLS config shared across all connections.
-type proxy struct {
-	backendAddr string
-	tlsCfg      *tls.Config
-	// authTimeout bounds the login phase so a stalled peer can't pin a goroutine forever;
-	// it is cleared once the transparent pipe starts (piped sessions are long-lived).
-	authTimeout time.Duration
-}
-
-// handle performs the two-sided login translation for one client connection, then pipes.
-// The numbered steps are the login script described at the top of this file.
-func (p *proxy) handle(clientConn net.Conn) {
-	// Recover per connection: each runs in its own goroutine, and an unrecovered panic in any
-	// goroutine crashes the whole process — one malformed connection must not take the proxy
-	// down. Logged and dropped here; the deferred Close calls still run during unwinding.
-	defer recoverConn(clientConn.RemoteAddr().String())
-	defer func() { _ = clientConn.Close() }()
-	log := slog.With("remote", clientConn.RemoteAddr().String())
-
-	backendTCP, err := net.DialTimeout("tcp", p.backendAddr, p.authTimeout)
-	if err != nil {
-		log.Error("backend connect failed", "error", err)
-		return
-	}
-	defer func() { _ = backendTCP.Close() }()
-
-	deadline := time.Now().Add(p.authTimeout)
-	_ = clientConn.SetDeadline(deadline)
-	_ = backendTCP.SetDeadline(deadline)
-
-	backend := &packetConn{conn: backendTCP}
-	client := &packetConn{conn: clientConn}
-
-	// 1. Read StarRocks' opening handshake; it must offer TLS or the OIDC hop can't happen.
-	_, hs, err := backend.read()
-	if err != nil {
-		log.Error("read backend handshake failed", "error", err)
-		return
-	}
-	if serverCapabilities(hs)&clientSSL == 0 {
-		log.Error("backend does not advertise CLIENT_SSL — enable TLS on the StarRocks FE")
-		return
-	}
-
-	// 2. Forward the handshake to the Go client, but with CLIENT_SSL stripped so it stays
-	//    cleartext and hands us the raw JWT. Copy first — removeCapability mutates in place.
-	if err := client.write(0, removeCapability(append([]byte(nil), hs...), clientSSL)); err != nil {
-		log.Error("send handshake to client failed", "error", err)
-		return
-	}
-
-	// 3. Read the client's response: its capabilities, charset, username and — when the DSN
-	//    carries one — the default database, all mirrored toward StarRocks below.
-	_, clientResp, err := client.read()
-	if err != nil {
-		log.Error("read client response failed", "error", err)
-		return
-	}
-	hello, err := parseClientHello(clientResp)
-	if err != nil {
-		log.Warn("malformed client handshake response", "error", err)
-		_ = client.write(2, errPacket(1045, "28000", "malformed handshake response"))
-		return
-	}
-
-	// 4. Ask the client to switch to cleartext so it resends the "password" (the JWT) raw.
-	if err := client.write(2, authSwitchPacket()); err != nil {
-		log.Error("auth switch to client failed", "error", err)
-		return
-	}
-
-	// 5. Read the JWT (a cleartext-plugin payload is the password + a trailing NUL).
-	_, jwtPayload, err := client.read()
-	if err != nil {
-		log.Error("read JWT failed", "error", err)
-		return
-	}
-	jwt := strings.TrimRight(string(jwtPayload), "\x00")
-	if !strings.HasPrefix(jwt, "ey") { // every JWT starts with base64url({"alg"... → "ey"
-		log.Warn("client did not send a JWT", "user", hello.username)
-		_ = client.write(4, errPacket(1045, "28000", "expected JWT as password"))
-		return
-	}
-
-	// 6. Tell StarRocks we want TLS (mirroring the client's capabilities so both hops agree on
-	//    the post-auth wire format), then upgrade the proxy→backend socket.
-	caps := backendCaps(hello.caps, hello.database)
-	charset := hello.charset
-	if charset == 0 {
-		charset = charsetFromHandshake(hs)
-	}
-	if err := backend.write(1, buildSSLRequest(caps, charset)); err != nil {
-		log.Error("send SSL request failed", "error", err)
-		return
-	}
-	tlsConn := tls.Client(backendTCP, p.tlsCfg)
-	if err := tlsConn.Handshake(); err != nil {
-		log.Error("backend TLS handshake failed", "error", err)
-		return
-	}
-	backend.conn = tlsConn
-
-	// 7. Log in to StarRocks with native_password + empty auth; it will ask us to switch.
-	if err := backend.write(2, buildNativeHandshakeResponse(caps, charset, hello.username, hello.database)); err != nil {
-		log.Error("send auth to backend failed", "error", err)
-		return
-	}
-	seq, authResult, err := backend.read()
-	if err != nil {
-		log.Error("read backend auth result failed", "error", err)
-		return
-	}
-
-	// 8. On the AuthSwitchRequest (0xfe), send the JWT in OIDC format and read the verdict.
-	if len(authResult) > 0 && authResult[0] == 0xfe {
-		if plugin := authSwitchPluginName(authResult); plugin != oidcPlugin {
-			// Non-JWT user (or misconfigured FE): our OIDC-formatted reply would only produce a
-			// confusing backend error, so fail fast with a clear one.
-			log.Error("backend requested unsupported auth plugin", "plugin", plugin, "user", hello.username)
-			_ = client.write(4, errPacket(1045, "28000", "backend requested unsupported auth plugin: "+plugin))
-			return
-		}
-		if err := backend.write(seq+1, buildOIDCAuthResponse([]byte(jwt))); err != nil {
-			log.Error("send OIDC auth response failed", "error", err)
-			return
-		}
-		if _, authResult, err = backend.read(); err != nil {
-			log.Error("read final auth result failed", "error", err)
-			return
-		}
-	}
-
-	// 9. Relay StarRocks' verdict (OK or ERR) back to the client.
-	if err := client.write(4, authResult); err != nil {
-		log.Error("forward auth result failed", "error", err)
-		return
-	}
-	if len(authResult) > 0 && authResult[0] == 0xff { // 0xff = ERR
-		code := uint16(0)
-		if len(authResult) >= 3 { // ERR = 0xff + 2-byte code; guard a truncated packet
-			code = uint16(authResult[1]) | uint16(authResult[2])<<8
-		}
-		log.Warn("backend auth failed", "user", hello.username, "code", code)
-		return
-	}
-	log.Info("authenticated, piping", "user", hello.username)
-
-	// 10. Login done. Clear the deadline (sessions are long-lived) and become a dumb tube.
-	_ = clientConn.SetDeadline(time.Time{})
-	_ = backend.conn.SetDeadline(time.Time{})
-	pipe(clientConn, backend.conn)
-	log.Info("connection closed", "user", hello.username)
-}
-
-// recoverConn swallows a panic from a connection handler so one bad connection can't crash the
-// proxy process. Deferred at the top of handle; logs the panic and stack for the given peer.
-func recoverConn(remote string) {
-	if r := recover(); r != nil {
-		slog.Error("recovered from panic in connection handler",
-			"remote", remote, "panic", r, "stack", string(debug.Stack()))
-	}
-}
-
-// pipe copies bytes in both directions until either side closes, then closes both so the
-// other copy goroutine unblocks and returns.
-func pipe(a, b net.Conn) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	copyOneWay := func(dst, src net.Conn) {
-		defer wg.Done()
-		if _, err := io.Copy(dst, src); err != nil && !errors.Is(err, net.ErrClosed) {
-			slog.Debug("pipe copy ended", "error", err)
-		}
-		_ = dst.Close()
-		_ = src.Close()
-	}
-	go copyOneWay(a, b)
-	go copyOneWay(b, a)
-	wg.Wait()
 }
