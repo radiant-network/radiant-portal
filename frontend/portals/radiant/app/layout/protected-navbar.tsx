@@ -5,7 +5,7 @@ import { ArchiveIcon, FolderIcon, SettingsIcon } from 'lucide-react';
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import type { MainNavbarEntry } from '@/components/base/navbar/main-navbar-types';
 import { useI18n } from '@/components/hooks/i18n';
-import { ADMIN_TENANT_ACTIONS, useHasAnyTenantAction } from '@/components/hooks/use-tenant';
+import { useCanAdministerTenant } from '@/components/hooks/use-tenant';
 
 type ProtectedNavbarProps = {
   placement: 'left' | 'right' | 'top';
@@ -20,7 +20,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const { t } = useI18n();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const canAdministerTenant = useHasAnyTenantAction(ADMIN_TENANT_ACTIONS);
+  const canAdministerTenant = useCanAdministerTenant();
 
   const adminLinks: MainNavbarEntry[] = canAdministerTenant
     ? [
