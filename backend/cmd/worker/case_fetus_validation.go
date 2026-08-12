@@ -16,6 +16,7 @@ const (
 	FetusInvalidField         = "FETUS-001"
 	FetusHasSample            = "FETUS-002"
 	FetusDuplicateInBatchCode = "FETUS-003"
+	FetusOrgConflictCode      = "FETUS-004"
 )
 
 // FetusKey scopes submitter_fetus_id uniqueness to the organization, mirroring
@@ -120,12 +121,14 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	}
 }
 
-// validateCaseFetuses validates every fetus of the case, deduping submitter_fetus_id against
-// seenFetuses — a map shared across the whole request so two cases in the same payload cannot
-// create a fetus under the same organization with the same key, even under different mothers.
-// The org is resolved from the proband; a case whose proband didn't resolve (already reported by
-// validateCasePatients) skips the dedup rather than failing here on an unrelated error.
-func (cr *CaseValidationRecord) validateCaseFetuses(seenFetuses map[FetusKey]struct{}) error {
+// validateCaseFetuses validates every fetus of the case. seenFetuses dedupes submitter_fetus_id
+// across the whole request (two cases in the same payload can't create a fetus under the same
+// organization with the same key, even under different mothers); existingOnCase exempts a key
+// already attached to this case from the org-uniqueness check below, since that's an update in
+// place, not a collision (empty on create, where nothing is exempt yet). The org is resolved from
+// the proband; a case whose proband didn't resolve (already reported by validateCasePatients)
+// skips both checks rather than failing here on an unrelated error.
+func (cr *CaseValidationRecord) validateCaseFetuses(ctx context.Context, seenFetuses map[FetusKey]struct{}, existingOnCase map[string]*types.Fetus) error {
 	proband, _ := cr.getProbandFromPatients()
 
 	for fetusIndex := range cr.Case.Fetuses {
@@ -143,6 +146,9 @@ func (cr *CaseValidationRecord) validateCaseFetuses(seenFetuses map[FetusKey]str
 		cr.validateFetusObservationsText(fetusIndex)
 		if proband != nil {
 			cr.validateFetusUniquenessInBatch(fetusIndex, proband.OrganizationCode, seenFetuses)
+			if err := cr.validateFetusOrgUniqueness(ctx, fetusIndex, proband.OrganizationCode, existingOnCase); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -158,6 +164,28 @@ func (cr *CaseValidationRecord) validateFetusUniquenessInBatch(fetusIndex int, o
 		return
 	}
 	seenFetuses[key] = struct{}{}
+}
+
+// validateFetusOrgUniqueness rejects a submitter_fetus_id that already belongs to a fetus of
+// another case/mother under the same organization — the fetus_org_submitter_id_key constraint a
+// create would otherwise violate with a raw duplicate-key error. existingOnCase exempts a key
+// already attached to this case, since resolving it there means updating that row in place.
+func (cr *CaseValidationRecord) validateFetusOrgUniqueness(ctx context.Context, fetusIndex int, organizationCode string, existingOnCase map[string]*types.Fetus) error {
+	submitterFetusId := cr.Case.Fetuses[fetusIndex].SubmitterFetusId.String()
+	if _, ok := existingOnCase[submitterFetusId]; ok {
+		return nil
+	}
+	conflicting, err := cr.Context.FetusRepo.GetFetusByOrganizationAndSubmitterId(ctx, organizationCode, submitterFetusId)
+	if err != nil {
+		return fmt.Errorf("check fetus organization uniqueness for %q: %w", submitterFetusId, err)
+	}
+	if conflicting != nil {
+		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
+		res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+		message := fmt.Sprintf("Invalid fetus for %s. Reason: submitter_fetus_id %q already exists for organization %q.", res, submitterFetusId, organizationCode)
+		cr.AddErrors(message, FetusOrgConflictCode, path)
+	}
+	return nil
 }
 
 func dateISO8601ToTimePtr(d *types.DateISO8601) *time.Time {

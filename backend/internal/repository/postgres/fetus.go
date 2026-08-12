@@ -54,6 +54,26 @@ func (r *FetusRepository) GetFetusByMotherAndSubmitterId(ctx context.Context, mo
 	return &fetus, nil
 }
 
+// GetFetusByOrganizationAndSubmitterId resolves the submitter's key against the organization,
+// hitting the UNIQUE (organization_code, submitter_fetus_id) constraint. Used to catch a collision
+// with another mother's fetus before insert, rather than letting the worker die on a raw
+// duplicate-key error.
+func (r *FetusRepository) GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId string) (*Fetus, error) {
+	var fetus Fetus
+	err := r.db.WithContext(ctx).
+		Table(types.FetusTable.Name).
+		Scopes(WithTenant(ctx)).
+		Where("organization_code = ? AND submitter_fetus_id = ?", organizationCode, submitterFetusId).
+		First(&fetus).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching fetus %q for organization %q: %w", submitterFetusId, organizationCode, err)
+		}
+		return nil, nil
+	}
+	return &fetus, nil
+}
+
 // GetFetusesByCaseID returns the case's fetuses. fetus carries no case reference of its own, so
 // they are resolved through the family rows that attach them to the case.
 func (r *FetusRepository) GetFetusesByCaseID(ctx context.Context, caseID int) ([]*Fetus, error) {

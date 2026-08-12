@@ -326,7 +326,8 @@ func (m *SamplesMockRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]
 }
 
 type FetusMockRepo struct {
-	GetFetusesByCaseIDFunc func(caseID int) ([]*types.Fetus, error)
+	GetFetusesByCaseIDFunc                   func(caseID int) ([]*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterIdFunc func(organizationCode, submitterFetusId string) (*types.Fetus, error)
 }
 
 func (m *FetusMockRepo) GetFetusById(_ context.Context, _ int) (*types.Fetus, error) {
@@ -341,6 +342,13 @@ func (m *FetusMockRepo) GetFetusesByCaseID(_ context.Context, caseID int) ([]*ty
 }
 
 func (m *FetusMockRepo) GetFetusByMotherAndSubmitterId(_ context.Context, _ int, _ string) (*types.Fetus, error) {
+	return nil, nil
+}
+
+func (m *FetusMockRepo) GetFetusByOrganizationAndSubmitterId(_ context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error) {
+	if m.GetFetusByOrganizationAndSubmitterIdFunc != nil {
+		return m.GetFetusByOrganizationAndSubmitterIdFunc(organizationCode, submitterFetusId)
+	}
 	return nil, nil
 }
 

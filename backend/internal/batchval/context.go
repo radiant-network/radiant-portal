@@ -44,6 +44,7 @@ type fetusReader interface {
 	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
 	GetFetusesByCaseID(ctx context.Context, caseID int) ([]*types.Fetus, error)
 	GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error)
 }
 
 type organizationReader interface {

@@ -121,15 +121,9 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	if err := cr.validateCasePatients(); err != nil {
 		return nil, fmt.Errorf("failed to validate case patients: %w", err)
 	}
-	if err := cr.validateCaseFetuses(seenFetuses); err != nil {
-		return nil, fmt.Errorf("failed to validate case fetuses: %w", err)
-	}
 
-	// Reconcile the fetuses by submitter id: a key the payload still carries is updated in place, a
-	// key it dropped is deleted. Deleting is the only destructive half, and sample.fetus_id has no
-	// ON DELETE CASCADE — so refuse it here as a reportable error rather than let the persist phase
-	// die on a raw FK violation. Updating a fetus that has a sample is fine, which is the point of
-	// matching by key rather than recreating.
+	// Fetched before validateCaseFetuses so its org-uniqueness check can exempt a key already on
+	// this case (an update in place, not a collision with another mother's fetus).
 	existingFetuses, fetusErr := bv.FetusRepo.GetFetusesByCaseID(ctx, *r.CaseID)
 	if fetusErr != nil {
 		return nil, fmt.Errorf("get fetuses for case %d: %w", *r.CaseID, fetusErr)
@@ -138,6 +132,16 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	for _, f := range existingFetuses {
 		r.ExistingFetuses[f.SubmitterFetusId] = f
 	}
+
+	if err := cr.validateCaseFetuses(ctx, seenFetuses, r.ExistingFetuses); err != nil {
+		return nil, fmt.Errorf("failed to validate case fetuses: %w", err)
+	}
+
+	// Reconcile the fetuses by submitter id: a key the payload still carries is updated in place, a
+	// key it dropped is deleted. Deleting is the only destructive half, and sample.fetus_id has no
+	// ON DELETE CASCADE — so refuse it here as a reportable error rather than let the persist phase
+	// die on a raw FK violation. Updating a fetus that has a sample is fine, which is the point of
+	// matching by key rather than recreating.
 	carried := make(map[string]bool, len(update.Fetuses))
 	for _, fb := range update.Fetuses {
 		if fb != nil {

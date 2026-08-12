@@ -1363,7 +1363,7 @@ func validateCaseRecord(
 	}
 
 	// 2b. Validate Case Fetuses
-	if err := cr.validateCaseFetuses(seenFetuses); err != nil {
+	if err := cr.validateCaseFetuses(ctx, seenFetuses, nil); err != nil {
 		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
 	}
 
