@@ -32,12 +32,12 @@ type userGrant struct {
 // tables in Postgres directly, like the other authorization queries.
 func (r *UsersRepository) ListTenantUsers(ctx context.Context, tenantCode string, query types.ListUsersQuery) ([]types.UserResult, int64, error) {
 	var count int64
-	if err := r.tenantUsers(ctx, tenantCode, query.Search).Count(&count).Error; err != nil {
+	if err := r.tenantUsers(ctx, tenantCode, query).Count(&count).Error; err != nil {
 		return nil, 0, fmt.Errorf("error counting users of tenant %q: %w", tenantCode, err)
 	}
 
 	users := []types.UserResult{}
-	tx := r.tenantUsers(ctx, tenantCode, query.Search).
+	tx := r.tenantUsers(ctx, tenantCode, query).
 		Select("u.user_id, u.email, u.first_name, u.last_name").
 		// user_id breaks ties so a page stays stable across limit/offset calls.
 		Order("u.last_name, u.first_name, u.user_id")
@@ -67,15 +67,26 @@ func (r *UsersRepository) ListTenantUsers(ctx context.Context, tenantCode string
 	return users, count, nil
 }
 
-func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode, search string) *gorm.DB {
+// tenantUsers selects the users holding at least one grant in the tenant. A role filter narrows
+// that same grant — a user is kept when one of their grants matches, and their other roles are
+// unaffected — so combining it with search reads as search AND (any of the roles).
+func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode string, query types.ListUsersQuery) *gorm.DB {
+	grant := "SELECT 1 FROM user_role ur WHERE ur.user_id = u.user_id AND ur.tenant_code = ?"
+	args := []any{tenantCode}
+	if len(query.Roles) > 0 {
+		grant += " AND ur.role_code IN ?"
+		args = append(args, query.Roles)
+	}
+
 	tx := r.db.WithContext(ctx).
 		Table("users u").
-		Where("EXISTS (SELECT 1 FROM user_role ur WHERE ur.user_id = u.user_id AND ur.tenant_code = ?)", tenantCode)
-	if search != "" {
-		pattern := "%" + search + "%"
-		// The names are COALESCE'd because concatenating a NULL yields NULL, which would hide a
-		// user who has only one of the two from a search matching the other.
-		tx = tx.Where("(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')) ILIKE ? OR u.email ILIKE ?", pattern, pattern)
+		Where("EXISTS ("+grant+")", args...)
+	if query.Search != "" {
+		pattern := "%" + query.Search + "%"
+		// Parenthesized explicitly so the OR cannot absorb another filter's predicate, and the
+		// names are COALESCE'd because concatenating a NULL yields NULL, which would hide a user
+		// who has only one of the two from a search matching the other.
+		tx = tx.Where("((COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')) ILIKE ? OR u.email ILIKE ?)", pattern, pattern)
 	}
 	return tx
 }

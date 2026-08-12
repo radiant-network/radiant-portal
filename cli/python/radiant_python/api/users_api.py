@@ -44,6 +44,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
         page_index: Annotated[Optional[StrictInt], Field(description="Page to return, as an alternative to offset")] = None,
@@ -68,6 +69,8 @@ class UsersApi:
         :type tenant: str
         :param search: Case-insensitive substring of the user's name or email
         :type search: str
+        :param roles: Comma-separated role codes; keeps users holding any of them
+        :type roles: str
         :param limit: Page size (default 25, capped at 200)
         :type limit: int
         :param offset: Number of users to skip
@@ -99,6 +102,7 @@ class UsersApi:
         _param = self._list_users_serialize(
             tenant=tenant,
             search=search,
+            roles=roles,
             limit=limit,
             offset=offset,
             page_index=page_index,
@@ -131,6 +135,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
         page_index: Annotated[Optional[StrictInt], Field(description="Page to return, as an alternative to offset")] = None,
@@ -155,6 +160,8 @@ class UsersApi:
         :type tenant: str
         :param search: Case-insensitive substring of the user's name or email
         :type search: str
+        :param roles: Comma-separated role codes; keeps users holding any of them
+        :type roles: str
         :param limit: Page size (default 25, capped at 200)
         :type limit: int
         :param offset: Number of users to skip
@@ -186,6 +193,7 @@ class UsersApi:
         _param = self._list_users_serialize(
             tenant=tenant,
             search=search,
+            roles=roles,
             limit=limit,
             offset=offset,
             page_index=page_index,
@@ -218,6 +226,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
         page_index: Annotated[Optional[StrictInt], Field(description="Page to return, as an alternative to offset")] = None,
@@ -242,6 +251,8 @@ class UsersApi:
         :type tenant: str
         :param search: Case-insensitive substring of the user's name or email
         :type search: str
+        :param roles: Comma-separated role codes; keeps users holding any of them
+        :type roles: str
         :param limit: Page size (default 25, capped at 200)
         :type limit: int
         :param offset: Number of users to skip
@@ -273,6 +284,7 @@ class UsersApi:
         _param = self._list_users_serialize(
             tenant=tenant,
             search=search,
+            roles=roles,
             limit=limit,
             offset=offset,
             page_index=page_index,
@@ -300,6 +312,7 @@ class UsersApi:
         self,
         tenant,
         search,
+        roles,
         limit,
         offset,
         page_index,
@@ -330,6 +343,10 @@ class UsersApi:
         if search is not None:
             
             _query_params.append(('search', search))
+            
+        if roles is not None:
+            
+            _query_params.append(('roles', roles))
             
         if limit is not None:
             

@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **list_users**
-> UsersSearchResponse list_users(tenant, search=search, limit=limit, offset=offset, page_index=page_index)
+> UsersSearchResponse list_users(tenant, search=search, roles=roles, limit=limit, offset=offset, page_index=page_index)
 
 List the tenant's users
 
@@ -48,13 +48,14 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.UsersApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     search = 'search_example' # str | Case-insensitive substring of the user's name or email (optional)
+    roles = 'roles_example' # str | Comma-separated role codes; keeps users holding any of them (optional)
     limit = 56 # int | Page size (default 25, capped at 200) (optional)
     offset = 56 # int | Number of users to skip (optional)
     page_index = 56 # int | Page to return, as an alternative to offset (optional)
 
     try:
         # List the tenant's users
-        api_response = api_instance.list_users(tenant, search=search, limit=limit, offset=offset, page_index=page_index)
+        api_response = api_instance.list_users(tenant, search=search, roles=roles, limit=limit, offset=offset, page_index=page_index)
         print("The response of UsersApi->list_users:\n")
         pprint(api_response)
     except Exception as e:
@@ -70,6 +71,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **search** | **str**| Case-insensitive substring of the user&#39;s name or email | [optional] 
+ **roles** | **str**| Comma-separated role codes; keeps users holding any of them | [optional] 
  **limit** | **int**| Page size (default 25, capped at 200) | [optional] 
  **offset** | **int**| Number of users to skip | [optional] 
  **page_index** | **int**| Page to return, as an alternative to offset | [optional] 

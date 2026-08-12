@@ -198,3 +198,81 @@ func Test_UsersRepository_ListTenantUsers_SortsByName(t *testing.T) {
 		assert.IsNonDecreasing(t, lastNames)
 	})
 }
+
+func withRoles(search string, roles string) types.ListUsersQuery {
+	query := wholeTenant(search)
+	query.Roles = types.ListUsersParams{Roles: roles}.ToQuery().Roles
+	return query
+}
+
+func Test_UsersRepository_ListTenantUsers_FiltersByRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "geneticist"))
+		require.NoError(t, err)
+
+		// alice, wendy, dan and carol are radiant's geneticists; nobody else holds the role.
+		assert.Equal(t, int64(4), count)
+		require.Len(t, users, 4)
+		for _, user := range users {
+			assert.NotNil(t, roleByCode(&user, "geneticist"), "%s was returned without the filtered role", user.UserID)
+		}
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_FiltersByAnyOfSeveralRoles(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "member,tenant_admin"))
+		require.NoError(t, err)
+
+		// mike holds member, tara holds tenant_admin — the two roles are ORed, not ANDed.
+		require.Len(t, users, 2)
+		assert.NotNil(t, userByID(users, mikeID))
+		assert.NotNil(t, userByID(users, taraID))
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_RoleFilterKeepsTheUsersOtherRoles(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "researcher"))
+		require.NoError(t, err)
+
+		alice := userByID(users, aliceID)
+		require.NotNil(t, alice, "alice holds researcher")
+		assert.NotNil(t, roleByCode(alice, "geneticist"), "filtering selects users, it must not prune their roles")
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_RoleFilterCombinesWithSearch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		matching, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("wendy", "geneticist"))
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), count, "search AND role, not search OR role")
+		require.Len(t, matching, 1)
+		assert.Equal(t, wendyID, matching[0].UserID)
+
+		// wendy is a geneticist but not a member, so the two filters exclude each other.
+		none, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("wendy", "member"))
+		require.NoError(t, err)
+		assert.Equal(t, int64(0), count)
+		assert.Empty(t, none)
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_UnknownRoleReturnsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "no_such_role"))
+		require.NoError(t, err)
+		assert.Empty(t, users)
+		assert.Equal(t, int64(0), count)
+	})
+}

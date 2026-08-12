@@ -380,6 +380,11 @@
                   "disabled": true
                 },
                 {
+                  "key": "roles",
+                  "value": "member,geneticist",
+                  "disabled": true
+                },
+                {
                   "key": "limit",
                   "value": "25"
                 },

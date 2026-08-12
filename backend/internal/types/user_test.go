@@ -42,3 +42,20 @@ func Test_ListUsersParams_ToQuery_OmittedLimitFallsBackToDefaultPage(t *testing.
 		t.Errorf("ToQuery().Pagination.Limit = %d; want the API-wide default of 25", query.Pagination.Limit)
 	}
 }
+
+func Test_ListUsersParams_ToQuery_SplitsRoles(t *testing.T) {
+	query := ListUsersParams{Roles: "member, geneticist"}.ToQuery()
+
+	if len(query.Roles) != 2 || query.Roles[0] != "member" || query.Roles[1] != "geneticist" {
+		t.Errorf("ToQuery(roles=%q).Roles = %v; want [member geneticist]", "member, geneticist", query.Roles)
+	}
+}
+
+func Test_ListUsersParams_ToQuery_BlankRolesIsNoFilter(t *testing.T) {
+	for _, raw := range []string{"", ",", " , "} {
+		query := ListUsersParams{Roles: raw}.ToQuery()
+		if len(query.Roles) != 0 {
+			t.Errorf("ToQuery(roles=%q).Roles = %v; want no filter", raw, query.Roles)
+		}
+	}
+}

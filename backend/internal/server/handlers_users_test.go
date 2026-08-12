@@ -116,3 +116,20 @@ func Test_ListUsersHandler_RepoError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+func Test_ListUsersHandler_ForwardsRoleFilterToRepo(t *testing.T) {
+	repo := &mockUsersReader{users: []types.UserResult{}}
+	w := serveListUsers(repo, "?search=chen&roles=member,geneticist")
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "chen", repo.gotQuery.Search)
+	assert.Equal(t, []string{"member", "geneticist"}, repo.gotQuery.Roles)
+}
+
+func Test_ListUsersHandler_BlankRoleFilterIsNoFilter(t *testing.T) {
+	repo := &mockUsersReader{users: []types.UserResult{}}
+	w := serveListUsers(repo, "?roles=")
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, repo.gotQuery.Roles)
+}

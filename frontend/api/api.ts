@@ -13911,13 +13911,14 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
          * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
          * @param {number} [pageIndex] Page to return, as an alternative to offset
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listUsers: async (tenant: string, search?: string, limit?: number, offset?: number, pageIndex?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listUsers: async (tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
             assertParamExists('listUsers', 'tenant', tenant)
             const localVarPath = `/{tenant}/users`
@@ -13939,6 +13940,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
             if (search !== undefined) {
                 localVarQueryParameter['search'] = search;
+            }
+
+            if (roles !== undefined) {
+                localVarQueryParameter['roles'] = roles;
             }
 
             if (limit !== undefined) {
@@ -13979,14 +13984,15 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
          * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
          * @param {number} [pageIndex] Page to return, as an alternative to offset
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listUsers(tenant: string, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsersSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listUsers(tenant, search, limit, offset, pageIndex, options);
+        async listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsersSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listUsers(tenant, search, roles, limit, offset, pageIndex, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.listUsers']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -14006,14 +14012,15 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
          * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
          * @param {number} [pageIndex] Page to return, as an alternative to offset
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listUsers(tenant: string, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): AxiosPromise<UsersSearchResponse> {
-            return localVarFp.listUsers(tenant, search, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
+        listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): AxiosPromise<UsersSearchResponse> {
+            return localVarFp.listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -14030,6 +14037,7 @@ export class UsersApi extends BaseAPI {
      * @summary List the tenant\'s users
      * @param {string} tenant Tenant code
      * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+     * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
      * @param {number} [limit] Page size (default 25, capped at 200)
      * @param {number} [offset] Number of users to skip
      * @param {number} [pageIndex] Page to return, as an alternative to offset
@@ -14037,8 +14045,8 @@ export class UsersApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public listUsers(tenant: string, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).listUsers(tenant, search, limit, offset, pageIndex, options).then((request) => request(this.axios, this.basePath));
+    public listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

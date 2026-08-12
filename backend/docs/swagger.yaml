@@ -7686,6 +7686,11 @@ paths:
         name: search
         schema:
           type: string
+      - description: Comma-separated role codes; keeps users holding any of them
+        in: query
+        name: roles
+        schema:
+          type: string
       - description: Page size (default 25, capped at 200)
         in: query
         name: limit

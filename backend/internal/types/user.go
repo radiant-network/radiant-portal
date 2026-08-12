@@ -1,10 +1,16 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// ListUsersParams is the query string of the tenant users list.
+// ListUsersParams is the query string of the tenant users list. Roles is comma-separated
+// (?roles=member,geneticist) and keeps a user holding any one of them, so a request combining
+// both filters reads as search AND (member OR geneticist).
 type ListUsersParams struct {
 	Search    string `form:"search"`
+	Roles     string `form:"roles"`
 	Limit     int    `form:"limit"`
 	Offset    int    `form:"offset"`
 	PageIndex int    `form:"page_index"`
@@ -19,12 +25,30 @@ func (p ListUsersParams) Validate() error {
 }
 
 func (p ListUsersParams) ToQuery() ListUsersQuery {
-	return ListUsersQuery{Search: p.Search, Pagination: ResolvePagination(p.Limit, p.Offset, p.PageIndex)}
+	return ListUsersQuery{
+		Search:     p.Search,
+		Roles:      splitCodes(p.Roles),
+		Pagination: ResolvePagination(p.Limit, p.Offset, p.PageIndex),
+	}
+}
+
+// splitCodes parses a comma-separated query value, dropping blanks so a bare ?roles= reads as no
+// filter. It mirrors utils.SplitRemoveEmptyString, which types cannot import (utils depends on
+// types), and additionally trims each code.
+func splitCodes(value string) []string {
+	codes := []string{}
+	for _, code := range strings.Split(value, ",") {
+		if trimmed := strings.TrimSpace(code); trimmed != "" {
+			codes = append(codes, trimmed)
+		}
+	}
+	return codes
 }
 
 // ListUsersQuery is the resolved tenant users list request handed to the repository.
 type ListUsersQuery struct {
 	Search     string
+	Roles      []string
 	Pagination *Pagination
 }
 
