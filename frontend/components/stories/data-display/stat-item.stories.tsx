@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BookOpenText, FileText, FlaskConical, User, Users, UsersRound } from 'lucide-react';
 
-import StatItem, { StatItemLayout } from '@/components/base/stat-item/stat-item';
+import StatItem, { StatItemAlign, StatItemLayout } from '@/components/base/stat-item/stat-item';
 
-import { StorySection, StoryShowcase } from '../story-section';
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
 
 const meta = {
   title: 'Components/Stat Item',
@@ -49,6 +49,35 @@ export const AllVariants: Story = {
         </div>
       </StorySection>
 
+      <StorySection
+        title="Icon alignment (center default / start)"
+        description="Start aligns the icon with the first line — the value — instead of centering it across the value and label. Shown at both sizes: the shift grows with the value."
+      >
+        <div className="flex flex-col gap-6">
+          {(['md', 'lg'] as const).map(size => (
+            <div key={size} className="flex flex-col gap-2">
+              <StoryLabel>{size}</StoryLabel>
+              <div className="flex items-start gap-12">
+                <div className="flex flex-col gap-2">
+                  <StoryLabel>center</StoryLabel>
+                  <StatItem size={size} icon={<Users />} value="13,500" label="Participants" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <StoryLabel>start</StoryLabel>
+                  <StatItem
+                    size={size}
+                    icon={<Users />}
+                    value="13,500"
+                    label="Participants"
+                    align={StatItemAlign.Start}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </StorySection>
+
       <StorySection title="In a grid">
         <div className="grid grid-cols-3 gap-6">
           <StatItem icon={<Users />} value="13,500" label="Participants" />
@@ -85,7 +114,8 @@ export const AllVariants: Story = {
                   icon={stat.icon}
                   value={stat.value}
                   label={stat.label}
-                  iconClassName="text-primary-foreground"
+                  align={StatItemAlign.Start}
+                  iconClassName="text-[var(--color-radiant-400)]"
                   labelClassName="text-primary-foreground/90"
                 />
               </div>

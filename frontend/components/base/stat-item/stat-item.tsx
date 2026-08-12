@@ -8,6 +8,11 @@ export enum StatItemLayout {
   Inline = 'inline',
 }
 
+export enum StatItemAlign {
+  Center = 'center',
+  Start = 'start',
+}
+
 const statItemVariants = tv({
   slots: {
     icon: 'text-primary shrink-0',
@@ -33,6 +38,7 @@ type StatItemProps = ComponentProps<'div'> &
     iconClassName?: string;
     labelClassName?: string;
     layout?: StatItemLayout;
+    align?: StatItemAlign;
   };
 
 /**
@@ -46,6 +52,7 @@ function StatItem({
   iconClassName,
   labelClassName,
   layout = StatItemLayout.Stacked,
+  align = StatItemAlign.Center,
   size,
   ...props
 }: StatItemProps) {
@@ -64,7 +71,10 @@ function StatItem({
   }
 
   return (
-    <div className={cn('flex items-center gap-3', className)} {...props}>
+    <div
+      className={cn('flex gap-3', align === StatItemAlign.Start ? 'items-start' : 'items-center', className)}
+      {...props}
+    >
       {icon && <div className={styles.icon({ className: iconClassName })}>{icon}</div>}
       <div className="flex flex-col">
         <span className={styles.value()}>{value}</span>
