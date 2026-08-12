@@ -22,11 +22,12 @@ func Test_GetFetusById_NotFound(t *testing.T) {
 func Test_CreateFetus_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		newFetus := &types.Fetus{
-			ID:             9999,
-			MotherID:       1,
-			SexCode:        "male",
-			LifeStatusCode: "alive",
-			TenantCode:     types.DefaultTenantCode,
+			ID:               9999,
+			MotherID:         1,
+			OrganizationCode: "CHUSJ",
+			SexCode:          "male",
+			LifeStatusCode:   "alive",
+			TenantCode:       types.DefaultTenantCode,
 		}
 
 		repo := NewFetusRepository(database.PostgresDB{DB: env.Postgres})
@@ -51,6 +52,7 @@ func Test_CreateFetus_WithGestationalDates_OK(t *testing.T) {
 		newFetus := &types.Fetus{
 			ID:                  9998,
 			MotherID:            1,
+			OrganizationCode:    "CHUSJ",
 			SexCode:             "female",
 			LifeStatusCode:      "alive",
 			LastMenstrualPeriod: &lmp,
@@ -81,11 +83,12 @@ func Test_CreateFetus_NilError(t *testing.T) {
 func Test_CreateFetus_InvalidSexCode(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		newFetus := &types.Fetus{
-			ID:             4242,
-			MotherID:       1,
-			SexCode:        "not-a-sex",
-			LifeStatusCode: "alive",
-			TenantCode:     types.DefaultTenantCode,
+			ID:               4242,
+			MotherID:         1,
+			OrganizationCode: "CHUSJ",
+			SexCode:          "not-a-sex",
+			LifeStatusCode:   "alive",
+			TenantCode:       types.DefaultTenantCode,
 		}
 
 		repo := NewFetusRepository(database.PostgresDB{DB: env.Postgres})

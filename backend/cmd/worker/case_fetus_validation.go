@@ -152,6 +152,7 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 		fetus := types.Fetus{
 			SubmitterFetusId:    fb.SubmitterFetusId.String(),
 			MotherID:            proband.ID,
+			OrganizationCode:    proband.OrganizationCode,
 			SexCode:             fb.SexCode,
 			LifeStatusCode:      fb.LifeStatusCode,
 			LastMenstrualPeriod: dateISO8601ToTimePtr(fb.LastMenstrualPeriod),

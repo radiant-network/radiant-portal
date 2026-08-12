@@ -3,9 +3,11 @@ CREATE TABLE public.fetus (
     -- The submitter's own identifier, mirroring patient.submitter_patient_id: it is what makes a
     -- fetus addressable across batches, so an update can resolve and modify one in place instead of
     -- deleting and recreating it (which sample.fetus_id, having no ON DELETE CASCADE, would block).
-    -- Scoped to the mother rather than an organization: a fetus has none of its own.
+    -- Scoped to the mother's organization, mirroring patient.submitter_patient_id: a fetus has no
+    -- organization of its own, so it inherits the mother's at creation.
     submitter_fetus_id text NOT NULL,
     mother_id integer NOT NULL REFERENCES public.patient(id),
+    organization_code text NOT NULL,
     life_status_code text NOT NULL REFERENCES public.life_status(code),
     sex_code text NOT NULL REFERENCES public.sex(code),
     last_menstrual_period date,
@@ -26,7 +28,12 @@ ALTER TABLE ONLY public.fetus
     ADD CONSTRAINT fetus_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.fetus
-    ADD CONSTRAINT fetus_mother_submitter_id_key UNIQUE (mother_id, submitter_fetus_id);
+    ADD CONSTRAINT fetus_org_submitter_id_key UNIQUE (organization_code, submitter_fetus_id);
+
+ALTER TABLE public.fetus
+    ADD CONSTRAINT fetus_organization_fkey
+        FOREIGN KEY (organization_code, tenant_code)
+        REFERENCES public.organization(code, tenant_code);
 
 CREATE INDEX ix_fetus_tenant_code ON public.fetus (tenant_code);
 CREATE INDEX ix_fetus_mother_id ON public.fetus (mother_id);

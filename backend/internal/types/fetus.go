@@ -6,11 +6,15 @@ import "time"
 // proband) — it has no administrative identity of its own.
 type Fetus struct {
 	ID int `gorm:"unique;primaryKey;autoIncrement"`
-	// SubmitterFetusId is the fetus's identity across batches — unique per mother. The internal ID
-	// never appears in a payload, mirroring patient.SubmitterPatientId.
-	SubmitterFetusId    string
-	MotherID            int
-	Mother              Patient `gorm:"foreignKey:ID;references:MotherID"`
+	// SubmitterFetusId is the fetus's identity across batches — unique per organization, like
+	// patient.SubmitterPatientId. The internal ID never appears in a payload.
+	SubmitterFetusId string
+	MotherID         int
+	Mother           Patient `gorm:"foreignKey:ID;references:MotherID"`
+	// OrganizationCode has no submitted field of its own — a fetus inherits it from its mother's
+	// PatientOrganizationCode at creation.
+	OrganizationCode    string
+	Organization        Organization `gorm:"foreignKey:OrganizationCode,TenantCode;references:Code,TenantCode"`
 	LifeStatusCode      string
 	LifeStatus          LifeStatus `gorm:"foreignKey:Code;references:LifeStatusCode"`
 	SexCode             string
