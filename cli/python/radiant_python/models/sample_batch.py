@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,12 +29,13 @@ class SampleBatch(BaseModel):
     histology_code: StrictStr
     patient_organization_code: StrictStr
     sample_organization_code: StrictStr
+    submitter_fetus_id: Optional[StrictStr] = Field(default=None, description="Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus's genome. Identified by the submitter's own key, resolved against the mother — the internal fetus id stays out of the API, as it does for patients and samples.")
     submitter_parent_sample_id: Optional[StrictStr] = None
     submitter_patient_id: StrictStr
     submitter_sample_id: StrictStr
     tissue_site: Optional[StrictStr] = None
     type_code: StrictStr
-    __properties: ClassVar[List[str]] = ["histology_code", "patient_organization_code", "sample_organization_code", "submitter_parent_sample_id", "submitter_patient_id", "submitter_sample_id", "tissue_site", "type_code"]
+    __properties: ClassVar[List[str]] = ["histology_code", "patient_organization_code", "sample_organization_code", "submitter_fetus_id", "submitter_parent_sample_id", "submitter_patient_id", "submitter_sample_id", "tissue_site", "type_code"]
 
     @field_validator('histology_code')
     def histology_code_validate_enum(cls, value):
@@ -97,6 +98,7 @@ class SampleBatch(BaseModel):
             "histology_code": obj.get("histology_code"),
             "patient_organization_code": obj.get("patient_organization_code"),
             "sample_organization_code": obj.get("sample_organization_code"),
+            "submitter_fetus_id": obj.get("submitter_fetus_id"),
             "submitter_parent_sample_id": obj.get("submitter_parent_sample_id"),
             "submitter_patient_id": obj.get("submitter_patient_id"),
             "submitter_sample_id": obj.get("submitter_sample_id"),

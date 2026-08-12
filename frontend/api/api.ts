@@ -354,6 +354,12 @@ export interface CaseBatch {
     'diagnostic_lab_code': string;
     /**
      * 
+     * @type {Array<CaseFetusBatch>}
+     * @memberof CaseBatch
+     */
+    'fetuses'?: Array<CaseFetusBatch>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseBatch
      */
@@ -654,6 +660,84 @@ export interface CaseEntity {
 /**
  * 
  * @export
+ * @interface CaseFetusBatch
+ */
+export interface CaseFetusBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'affected_status_code': CaseFetusBatchAffectedStatusCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'estimated_due_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'last_menstrual_period'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'life_status_code': CaseFetusBatchLifeStatusCodeEnum;
+    /**
+     * 
+     * @type {Array<ObservationCategoricalBatch>}
+     * @memberof CaseFetusBatch
+     */
+    'observations_categorical'?: Array<ObservationCategoricalBatch>;
+    /**
+     * 
+     * @type {Array<ObservationTextBatch>}
+     * @memberof CaseFetusBatch
+     */
+    'observations_text'?: Array<ObservationTextBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'sex_code': CaseFetusBatchSexCodeEnum;
+    /**
+     * SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like submitter_patient_id: without it an update could not resolve which fetus to modify and would have to delete and recreate — which sample.fetus_id forbids once a sample is attached.
+     * @type {string}
+     * @memberof CaseFetusBatch
+     */
+    'submitter_fetus_id': string;
+}
+
+export const CaseFetusBatchAffectedStatusCodeEnum = {
+    Affected: 'affected',
+    NonAffected: 'non_affected',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchAffectedStatusCodeEnum = typeof CaseFetusBatchAffectedStatusCodeEnum[keyof typeof CaseFetusBatchAffectedStatusCodeEnum];
+export const CaseFetusBatchLifeStatusCodeEnum = {
+    Alive: 'alive',
+    Deceased: 'deceased',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchLifeStatusCodeEnum = typeof CaseFetusBatchLifeStatusCodeEnum[keyof typeof CaseFetusBatchLifeStatusCodeEnum];
+export const CaseFetusBatchSexCodeEnum = {
+    Male: 'male',
+    Female: 'female',
+    Unknown: 'unknown'
+} as const;
+
+export type CaseFetusBatchSexCodeEnum = typeof CaseFetusBatchSexCodeEnum[keyof typeof CaseFetusBatchSexCodeEnum];
+
+/**
+ * 
+ * @export
  * @interface CaseFilters
  */
 export interface CaseFilters {
@@ -818,6 +902,12 @@ export interface CasePatientClinicalInformation {
     'ethnicity_codes'?: Array<string>;
     /**
      * 
+     * @type {number}
+     * @memberof CasePatientClinicalInformation
+     */
+    'fetus_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
@@ -869,7 +959,7 @@ export interface CasePatientClinicalInformation {
      * @type {number}
      * @memberof CasePatientClinicalInformation
      */
-    'patient_id': number;
+    'patient_id'?: number;
     /**
      * 
      * @type {string}
@@ -3104,6 +3194,12 @@ export interface IGVTrackEnriched {
     'family_role'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'fetus_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof IGVTrackEnriched
      */
@@ -4111,6 +4207,12 @@ export interface SampleBatch {
      * @memberof SampleBatch
      */
     'sample_organization_code': string;
+    /**
+     * Not mutually exclusive with the patient: the sample is drawn from the mother (SubmitterPatientId) but its sequencing data is the fetus\'s genome. Identified by the submitter\'s own key, resolved against the mother — the internal fetus id stays out of the API, as it does for patients and samples.
+     * @type {string}
+     * @memberof SampleBatch
+     */
+    'submitter_fetus_id'?: string;
     /**
      * 
      * @type {string}
@@ -5157,6 +5259,12 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'diagnostic_lab_code': string;
+    /**
+     * Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already on the case is updated in place, a new key is created, and a key the payload drops is deleted — refused when a sample still points at it.
+     * @type {Array<CaseFetusBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'fetuses'?: Array<CaseFetusBatch>;
     /**
      * 
      * @type {string}

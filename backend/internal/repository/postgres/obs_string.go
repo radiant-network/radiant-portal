@@ -33,6 +33,12 @@ func (r *ObservationStringRepository) GetById(ctx context.Context, observationId
 }
 
 func (r *ObservationStringRepository) CreateObservationString(ctx context.Context, observation *ObservationString) error {
+	if observation == nil {
+		return fmt.Errorf("create obs_string: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(observation.PatientID, observation.FetusID); err != nil {
+		return fmt.Errorf("create obs_string for case %d: %w", observation.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(observation).Error
 }
 

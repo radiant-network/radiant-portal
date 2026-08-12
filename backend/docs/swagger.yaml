@@ -164,6 +164,11 @@ components:
           type: string
         diagnostic_lab_code:
           type: string
+        fetuses:
+          items:
+            $ref: '#/components/schemas/CaseFetusBatch'
+          type: array
+          uniqueItems: false
         note:
           type: string
         ordering_organization_code:
@@ -315,6 +320,56 @@ components:
       - tasks
       - updated_on
       type: object
+    CaseFetusBatch:
+      properties:
+        affected_status_code:
+          enum:
+          - affected
+          - non_affected
+          - unknown
+          type: string
+        estimated_due_date:
+          example: "2026-11-08"
+          format: date
+          type: string
+        last_menstrual_period:
+          example: "2026-02-01"
+          format: date
+          type: string
+        life_status_code:
+          enum:
+          - alive
+          - deceased
+          - unknown
+          type: string
+        observations_categorical:
+          items:
+            $ref: '#/components/schemas/ObservationCategoricalBatch'
+          type: array
+          uniqueItems: false
+        observations_text:
+          items:
+            $ref: '#/components/schemas/ObservationTextBatch'
+          type: array
+          uniqueItems: false
+        sex_code:
+          enum:
+          - male
+          - female
+          - unknown
+          type: string
+        submitter_fetus_id:
+          description: |-
+            SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like
+            submitter_patient_id: without it an update could not resolve which fetus to modify and would
+            have to delete and recreate — which sample.fetus_id forbids once a sample is attached.
+          type: string
+      required:
+      - affected_status_code
+      - life_status_code
+      - sex_code
+      - submitter_fetus_id
+      type: object
     CaseFilters:
       properties:
         analysis_catalog_code:
@@ -440,6 +495,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        fetus_id:
+          type: integer
         first_name:
           type: string
         jhn:
@@ -473,7 +530,6 @@ components:
       required:
       - affected_status_code
       - life_status_code
-      - patient_id
       - relationship_to_proband
       - sex_code
       type: object
@@ -1539,6 +1595,8 @@ components:
       properties:
         family_role:
           type: string
+        fetus_id:
+          type: integer
         format:
           type: string
         indexURL:
@@ -1995,6 +2053,13 @@ components:
         patient_organization_code:
           type: string
         sample_organization_code:
+          type: string
+        submitter_fetus_id:
+          description: |-
+            Not mutually exclusive with the patient: the sample is drawn from the mother
+            (SubmitterPatientId) but its sequencing data is the fetus's genome. Identified by the
+            submitter's own key, resolved against the mother — the internal fetus id stays out of the API,
+            as it does for patients and samples.
           type: string
         submitter_parent_sample_id:
           type: string
@@ -2491,6 +2556,15 @@ components:
           type: string
         diagnostic_lab_code:
           type: string
+        fetuses:
+          description: |-
+            Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already
+            on the case is updated in place, a new key is created, and a key the payload drops is deleted
+            — refused when a sample still points at it.
+          items:
+            $ref: '#/components/schemas/CaseFetusBatch'
+          type: array
+          uniqueItems: false
         note:
           type: string
         ordering_organization_code:

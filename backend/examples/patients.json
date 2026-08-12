@@ -29,6 +29,26 @@
       "sex_code": "male",
       "life_status_code": "alive",
       "patient_organization_code": "CHUSJ"
+    },
+    {
+      "submitter_patient_id": "MRN-004",
+      "submitter_patient_id_type": "MRN",
+      "first_name": "Léa",
+      "last_name": "Bernier",
+      "date_of_birth": "1990-06-15",
+      "sex_code": "female",
+      "life_status_code": "alive",
+      "patient_organization_code": "CHUSJ"
+    },
+    {
+      "submitter_patient_id": "MRN-005",
+      "submitter_patient_id_type": "MRN",
+      "first_name": "Olivier",
+      "last_name": "Bernier",
+      "date_of_birth": "1987-03-22",
+      "sex_code": "male",
+      "life_status_code": "alive",
+      "patient_organization_code": "CHUSJ"
     }
   ]
 }

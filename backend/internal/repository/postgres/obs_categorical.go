@@ -33,6 +33,12 @@ func (r *ObservationCategoricalRepository) GetById(ctx context.Context, observat
 }
 
 func (r *ObservationCategoricalRepository) CreateObservationCategorical(ctx context.Context, observation *ObservationCategorical) error {
+	if observation == nil {
+		return fmt.Errorf("create obs_categorical: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(observation.PatientID, observation.FetusID); err != nil {
+		return fmt.Errorf("create obs_categorical for case %d: %w", observation.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(observation).Error
 }
 

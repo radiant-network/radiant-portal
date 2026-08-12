@@ -12,6 +12,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -29,6 +30,10 @@ const (
 	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
 	SampleDuplicateInBatchCode               = "SAMPLE-008"
 	SampleNotExistForUpdateCode              = "SAMPLE-009"
+	SampleFetusNotExistCode                  = "SAMPLE-010"
+	// SAMPLE-011 was "fetus does not belong to this patient". Resolving submitter_fetus_id against
+	// the mother made it unreachable: an unrelated key is simply not found. Not reused, so an old
+	// report stays readable.
 )
 
 type SampleKey struct {
@@ -42,6 +47,7 @@ type SampleValidationRecord struct {
 	PatientId        int
 	OrganizationCode string
 	ParentSampleId   *int
+	FetusId          *int
 }
 
 func (r *SampleValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -64,6 +70,26 @@ func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 	} else {
 		r.PatientId = patient.ID
 	}
+}
+
+// validateFetus checks the optional submitter_fetus_id, when provided. The caller resolves it
+// against the sample's own patient (the mother), so a key belonging to another patient's fetus is
+// simply not found — there is no separate "wrong patient" case to report, and no way to probe
+// whether a key exists elsewhere. On success the internal id is what gets stored on the sample.
+func (r *SampleValidationRecord) validateFetus(fetus *types.Fetus) {
+	if r.Sample.SubmitterFetusId == "" {
+		return
+	}
+
+	if fetus == nil {
+		path := r.getFormattedPath("submitter_fetus_id")
+		message := fmt.Sprintf("Fetus %s for sample %s does not exist for patient %s.",
+			r.Sample.SubmitterFetusId, r.Sample.SubmitterSampleId, r.Sample.SubmitterPatientId)
+		r.AddErrors(message, SampleFetusNotExistCode, path)
+		return
+	}
+
+	r.FetusId = utils.IntPtr(fetus.ID)
 }
 
 func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
@@ -225,6 +251,7 @@ func insertSampleRecords(ctx context.Context, records []*SampleValidationRecord,
 				TenantCode:        tenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
+				FetusID:           record.FetusId,
 			}
 			newSample, err := repo.CreateSample(ctx, &sample)
 			if err != nil {
@@ -382,6 +409,18 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		}
 		record.validatePatient(patient)
 
+		// 3b. Validate fetus, if referenced. Resolved against the mother, so the lookup needs the
+		// patient: when that one is missing its own error is the root cause and stands alone.
+		var fetus *types.Fetus
+		if sample.SubmitterFetusId != "" && patient != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+			record.validateFetus(fetus)
+		}
+
 		// 4. Validate organization
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
 		if orgErr != nil {
@@ -494,6 +533,7 @@ func updateSampleRecords(ctx context.Context, records []*SampleValidationRecord,
 				TenantCode:        tenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    record.ParentSampleId,
+				FetusID:           record.FetusId,
 			}
 			if err := repo.UpdateSample(ctx, &sample); err != nil {
 				return err
@@ -552,6 +592,17 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
 		record.validatePatient(patient)
+
+		// Resolved against the mother, see the create path above.
+		var fetus *types.Fetus
+		if sample.SubmitterFetusId != "" && patient != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+			record.validateFetus(fetus)
+		}
 
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
 		if orgErr != nil {

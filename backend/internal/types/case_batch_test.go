@@ -3,9 +3,12 @@ package types
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_CaseBatch_ToJSON(t *testing.T) {
@@ -142,4 +145,28 @@ func Test_ObservationRequiresOnsetAndInterpretation_Exam(t *testing.T) {
 	// exam is not exempt: it still requires an interpretation_code. Onset is exempted
 	// separately at the call site whenever the row carries an exam_code
 	assert.True(t, ObservationRequiresOnsetAndInterpretation(ObsCodeExam))
+}
+
+// swag's IsRequired() scans the binding tag token by token and treats a bare `required` as "this
+// field is required" — even when it is meant for the elements after a `dive`. These three arrays
+// are optional, so a bare `required` would make the generated OpenAPI spec (and the TS/Python
+// clients derived from it) mark them required. They use the custom `notnull` validation instead —
+// see notnull in internal/server/validators.go.
+func Test_OptionalBatchArrays_UseNotnullRatherThanRequired(t *testing.T) {
+	for _, tc := range []struct {
+		typ   reflect.Type
+		field string
+	}{
+		{reflect.TypeOf(CaseBatch{}), "Fetuses"},
+		{reflect.TypeOf(CaseFetusBatch{}), "ObservationsCategorical"},
+		{reflect.TypeOf(CaseFetusBatch{}), "ObservationsText"},
+	} {
+		name := tc.typ.Name() + "." + tc.field
+		f, ok := tc.typ.FieldByName(tc.field)
+		require.True(t, ok, "%s does not exist", name)
+
+		tokens := strings.Split(f.Tag.Get("binding"), ",")
+		assert.Contains(t, tokens, "notnull", "%s must carry notnull", name)
+		assert.NotContains(t, tokens, "required", "%s must not carry a bare required token", name)
+	}
 }

@@ -127,4 +127,15 @@ VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 'CQGC', 'radiant'),
        (126,  'dna', 125, 'brain', 'tumoral', 'SRX1091647',62, 'LDM-CHUSJ', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
+-- prenatal fixtures: drawn from the mother (patient_id), attributed to her fetus (fetus_id) —
+-- both set here, unlike the XOR tables.
+INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, fetus_id, organization_code, tenant_code)
+VALUES (127, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72', 63, 1, 'CQGC', 'radiant'),
+       (128, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73', 64, 2, 'CQGC', 'radiant'),
+       (129, 'dna', NULL, NULL, 'normal', 'S-PRENAT-74', 65, 4, 'CQGC', 'radiant'),
+       -- The mother's own genome (case 72), distinct from her fetus's sample above — same
+       -- patient_id (63), fetus_id NULL, used to test distinct-individual counting.
+       (130, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72-MOTHER', 63, NULL, 'CQGC', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
 ALTER TABLE sample ALTER COLUMN id RESTART WITH 1000;

@@ -40,6 +40,13 @@ type familyStore interface {
 	CreateFamily(ctx context.Context, family *types.Family) error
 }
 
+type fetusReader interface {
+	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
+	GetFetusesByCaseID(ctx context.Context, caseID int) ([]*types.Fetus, error)
+	GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error)
+}
+
 type organizationReader interface {
 	GetOrganizationByCode(ctx context.Context, organizationCode string) (*types.Organization, error)
 }
@@ -55,6 +62,7 @@ type projectReader interface {
 type sampleReader interface {
 	GetSampleById(ctx context.Context, id int) (*types.Sample, error)
 	GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error)
+	GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error)
 }
 
 type valueSetsReader interface {
@@ -66,6 +74,7 @@ type BatchValidationContext struct {
 	CasesRepo     casesReader
 	DocRepo       documentsReader
 	FamilyRepo    familyStore
+	FetusRepo     fetusReader
 	OrgRepo       organizationReader
 	PatientRepo   patientReader
 	ProjectRepo   projectReader
@@ -96,6 +105,7 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		CasesRepo:     postgres.NewCasesRepository(postgresDB),
 		DocRepo:       postgres.NewDocumentsRepository(postgresDB),
 		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
+		FetusRepo:     postgres.NewFetusRepository(postgresDB),
 		TaskRepo:      postgres.NewTaskRepository(postgresDB),
 		S3FS:          s3fs,
 	}, nil

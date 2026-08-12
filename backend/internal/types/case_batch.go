@@ -37,6 +37,7 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
+	Fetuses                    []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive,notnull"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
@@ -49,6 +50,22 @@ type CasePatientBatch struct {
 	SubmitterPatientId      string                         `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`
 	PatientOrganizationCode string                         `json:"patient_organization_code" toml:"patient_organization_code" binding:"required"`
 	RelationToProbandCode   string                         `json:"relation_to_proband_code" toml:"relation_to_proband_code" binding:"required,oneof=mother father brother sister sibling proband"`
+}
+
+// A case's fetuses always belong to its proband, so — unlike CasePatientBatch — no mother
+// reference or relation-to-proband is carried here.
+type CaseFetusBatch struct {
+	// SubmitterFetusId identifies the fetus across batches, scoped to its mother. Required, like
+	// submitter_patient_id: without it an update could not resolve which fetus to modify and would
+	// have to delete and recreate — which sample.fetus_id forbids once a sample is attached.
+	SubmitterFetusId        TrimmedString                  `json:"submitter_fetus_id" toml:"submitter_fetus_id" binding:"required"`
+	SexCode                 string                         `json:"sex_code" toml:"sex_code" binding:"required,oneof=male female unknown"`
+	LifeStatusCode          string                         `json:"life_status_code" toml:"life_status_code" binding:"required,oneof=alive deceased unknown"`
+	AffectedStatusCode      string                         `json:"affected_status_code" toml:"affected_status_code" binding:"required,oneof=affected non_affected unknown"`
+	LastMenstrualPeriod     *DateISO8601                   `json:"last_menstrual_period,omitempty" toml:"last_menstrual_period" swaggertype:"string" format:"date" example:"2026-02-01"`
+	EstimatedDueDate        *DateISO8601                   `json:"estimated_due_date,omitempty" toml:"estimated_due_date" swaggertype:"string" format:"date" example:"2026-11-08"`
+	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" toml:"observations_categorical" binding:"dive,notnull"`
+	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" toml:"observations_text" binding:"dive,notnull"`
 }
 
 type FamilyHistoryBatch struct {
@@ -124,23 +141,27 @@ type PatchCaseBatchBody struct {
 // the payload carries them they are attached like the POST path does; when omitted/empty they
 // are left untouched (never cleared) — see PutCaseBatchHandler.
 type UpdateCaseBatch struct {
-	ProjectCode                string                           `json:"project_code" toml:"project_code" binding:"required"`
-	SubmitterCaseId            string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
-	Type                       string                           `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
-	StatusCode                 string                           `json:"status_code" toml:"status_code" binding:"required"`
-	DiagnosticLabCode          string                           `json:"diagnostic_lab_code" toml:"diagnostic_lab_code" binding:"required"`
-	PrimaryConditionCodeSystem string                           `json:"primary_condition_code_system,omitempty" toml:"primary_condition_code_system"`
-	PrimaryConditionValue      string                           `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
-	PriorityCode               string                           `json:"priority_code,omitempty" toml:"priority_code"`
-	CategoryCode               string                           `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
-	AnalysisCode               string                           `json:"analysis_code" toml:"analysis_code" binding:"required"`
-	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
-	Note                       string                           `json:"note,omitempty" toml:"note"`
-	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
-	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
-	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
-	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive"`
-	Tasks                      []*CaseTaskBatch                 `json:"tasks,omitempty" toml:"tasks" binding:"omitempty,dive"`
+	ProjectCode                string              `json:"project_code" toml:"project_code" binding:"required"`
+	SubmitterCaseId            string              `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
+	Type                       string              `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
+	StatusCode                 string              `json:"status_code" toml:"status_code" binding:"required"`
+	DiagnosticLabCode          string              `json:"diagnostic_lab_code" toml:"diagnostic_lab_code" binding:"required"`
+	PrimaryConditionCodeSystem string              `json:"primary_condition_code_system,omitempty" toml:"primary_condition_code_system"`
+	PrimaryConditionValue      string              `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
+	PriorityCode               string              `json:"priority_code,omitempty" toml:"priority_code"`
+	CategoryCode               string              `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
+	AnalysisCode               string              `json:"analysis_code" toml:"analysis_code" binding:"required"`
+	ResolutionStatusCode       string              `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
+	Note                       string              `json:"note,omitempty" toml:"note"`
+	OrderingOrganizationCode   string              `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
+	OrderingPhysician          string              `json:"ordering_physician,omitempty" toml:"ordering_physician"`
+	Patients                   []*CasePatientBatch `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
+	// Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already
+	// on the case is updated in place, a new key is created, and a key the payload drops is deleted
+	// — refused when a sample still points at it.
+	Fetuses               []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive,notnull"`
+	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive"`
+	Tasks                 []*CaseTaskBatch                 `json:"tasks,omitempty" toml:"tasks" binding:"omitempty,dive"`
 }
 
 type UpdateCaseBatchBody struct {

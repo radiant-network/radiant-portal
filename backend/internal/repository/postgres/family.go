@@ -33,6 +33,12 @@ func (r *FamilyRepository) GetFamilyById(ctx context.Context, familyId int) (*Fa
 }
 
 func (r *FamilyRepository) CreateFamily(ctx context.Context, family *Family) error {
+	if family == nil {
+		return fmt.Errorf("create family: %w", ErrNilRecord)
+	}
+	if err := validateSubjectXOR(family.FamilyMemberID, family.FetusID); err != nil {
+		return fmt.Errorf("create family for case %d: %w", family.CaseID, err)
+	}
 	return r.db.WithContext(ctx).Create(family).Error
 }
 

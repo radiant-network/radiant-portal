@@ -118,5 +118,13 @@ VALUES (1, 1, NULL),
        (76, 74, NULL),
 
        -- Task 82 is tumor-only: the same tumoral seq 74, with no normal counterpart.
-       (82, 74, 71)
+       (82, 74, 71),
+
+       -- prenatal fixture: alignment task for the fetus's own sequencing (case 72).
+       (83, 75, 72),
+
+       -- Task 84 covers both the fetus's sequencing (75) and the mother's own (78), so
+       -- patient_count must be 2. Kept off task 83 so it doesn't fan out into its IGV fixtures.
+       (84, 75, 72),
+       (84, 78, 72)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

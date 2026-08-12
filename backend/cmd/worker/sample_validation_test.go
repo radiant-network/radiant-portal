@@ -61,6 +61,10 @@ func (m *MockSamplesRepository) GetSampleById(_ context.Context, id int) (*types
 	return nil, nil
 }
 
+func (m *MockSamplesRepository) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
+	return nil, nil
+}
+
 func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
 		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
@@ -257,6 +261,35 @@ func Test_ValidatePatient_NotFound(t *testing.T) {
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SamplePatientNotExistCode, rec.Errors[0].Code)
 	assert.Equal(t, "create_sample[0].submitter_patient_id", rec.Errors[0].Path)
+}
+
+func Test_ValidateFetus_NotProvided(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1"}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec.validateFetus(nil)
+	assert.Empty(t, rec.Errors)
+	assert.Nil(t, rec.FetusId)
+}
+
+// A key that belongs to another patient's fetus lands here too: the caller resolves it against the
+// mother, so it is simply not found — there is no distinct "wrong patient" outcome any more.
+func Test_ValidateFetus_NotFound(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283836", SubmitterFetusId: "F-UNKNOWN"}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec.validateFetus(nil)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, SampleFetusNotExistCode, rec.Errors[0].Code)
+	assert.Equal(t, "create_sample[0].submitter_fetus_id", rec.Errors[0].Path)
+	assert.Nil(t, rec.FetusId)
+}
+
+func Test_ValidateFetus_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283835", SubmitterFetusId: "F-1"}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec.validateFetus(&types.Fetus{ID: 1, SubmitterFetusId: "F-1", MotherID: 63})
+	assert.Empty(t, rec.Errors)
+	require.NotNil(t, rec.FetusId)
+	assert.Equal(t, 1, *rec.FetusId)
 }
 
 func Test_ValidateOrganization_NotFound(t *testing.T) {
@@ -737,5 +770,53 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		assert.Equal(t, "dna", sample.TypeCode)
 		assert.Equal(t, "tumoral", sample.HistologyCode)
 		assert.Equal(t, 1, sample.PatientID, "patient_id must not change on update — the sample's owning patient is immutable")
+	})
+}
+
+func Test_Persist_Batch_And_Update_Sample_Records_SetsFetusId(t *testing.T) {
+	// ExclusivePostgres: writes directly into "sample" (id >= 1000), a table other parallel
+	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		require.NoError(t, db.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1003, 'blood', NULL, 'normal', 'S-WORKER-UPDATE-FETUS-1', 63, 'CHUSJ', 'radiant')
+		`).Error)
+
+		var id string
+		require.NoError(t, db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+			VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
+			RETURNING id;
+		`, "{}", types.UpdateSampleBatchType).Scan(&id).Error)
+
+		batch := types.Batch{
+			ID:        id,
+			BatchType: types.UpdateSampleBatchType,
+			Payload:   "[]",
+			Status:    types.BatchStatusSuccess,
+			DryRun:    false,
+		}
+		fetusId := 1
+		records := []*SampleValidationRecord{{
+			Sample: types.SampleBatch{
+				SubmitterSampleId: "S-WORKER-UPDATE-FETUS-1",
+				TypeCode:          "dna",
+				HistologyCode:     "tumoral",
+			},
+			OrganizationCode: "CHUSJ",
+			PatientId:        63,
+			FetusId:          &fetusId,
+		}}
+
+		err := persistBatchAndUpdateSampleRecords(t.Context(), db, &batch, records)
+		require.NoError(t, err)
+
+		repo := postgres.NewSamplesRepository(database.PostgresDB{DB: db})
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CHUSJ", "S-WORKER-UPDATE-FETUS-1")
+		require.NoError(t, err)
+		require.NotNil(t, sample)
+		require.NotNil(t, sample.FetusID)
+		assert.Equal(t, fetusId, *sample.FetusID)
 	})
 }

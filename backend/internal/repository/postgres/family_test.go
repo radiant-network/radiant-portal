@@ -5,6 +5,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func Test_GetFamilyById_OK(t *testing.T) {
 		expected := &types.Family{
 			ID:                        1,
 			CaseID:                    1,
-			FamilyMemberID:            1,
+			FamilyMemberID:            utils.IntPtr(1),
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
 			TenantCode:                types.DefaultTenantCode,
@@ -42,7 +43,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 		newFamily := &types.Family{
 			ID:                        999,
 			CaseID:                    1,
-			FamilyMemberID:            1,
+			FamilyMemberID:            utils.IntPtr(1),
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
 			TenantCode:                types.DefaultTenantCode,
@@ -64,7 +65,36 @@ func Test_CreateFamily_NilError(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateFamily(t.Context(), nil)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, ErrNilRecord)
+	})
+}
+
+// The subject guard rejects before any SQL runs, so these need no write.
+func Test_CreateFamily_RejectsBothSubjectsSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateFamily(t.Context(), &Family{
+			CaseID:                    1,
+			FamilyMemberID:            utils.IntPtr(1),
+			FetusID:                   utils.IntPtr(1),
+			RelationshipToProbandCode: "proband",
+			AffectedStatusCode:        "affected",
+			TenantCode:                "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
+	})
+}
+
+func Test_CreateFamily_RejectsNoSubjectSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewFamilyRepository(database.PostgresDB{DB: env.Postgres})
+		err := repo.CreateFamily(t.Context(), &Family{
+			CaseID:                    1,
+			RelationshipToProbandCode: "proband",
+			AffectedStatusCode:        "affected",
+			TenantCode:                "radiant",
+		})
+		assert.ErrorIs(t, err, ErrInvalidSubject)
 	})
 }
 

@@ -478,7 +478,21 @@ INSERT OVERWRITE germline__snv__occurrence (part, seq_id, task_id, locus_id, gq,
 VALUES
     (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.9, 0.8),
     (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
-    (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
+    (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9),
+    -- Prenatal cases 71-73 of insert_clinical_data.sql. task_id is the case-scoped
+    -- radiant_germline_annotation task there (84/85/86), not the alignment task — the API reads
+    -- occurrences on the (seq_id, task_id) pair it resolves from Postgres task_context.
+    -- part=1 so the loci already covered by snv__consequence_filter_partitioned apply as-is.
+    (1, 73, 84, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.72, 0.65),  -- case 71, fetus 1
+    (1, 73, 84, 2000, 120, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1', 'PM2'], 0.88, 0.79),
+    (1, 74, 85, 1000, 110, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.70, 0.64),  -- case 72, twin fetus 2
+    (1, 74, 85, 2000, 130, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.86, 0.77),
+    (1, 75, 85, 1000, 105, 'PASS', 'HOM', 0.5, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.91, 0.84),      -- case 72, twin fetus 3
+    (1, 77, 85, 1000, 140, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.68, 0.61),  -- case 72, mother
+    (1, 76, 86, 1000, 115, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.71, 0.66),  -- case 73, fetus 4
+    (1, 76, 86, 2000, 125, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.87, 0.78),
+    (1, 78, 86, 1000, 135, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.69, 0.62),  -- case 73, mother
+    (1, 79, 86, 2000, 145, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.85, 0.76);      -- case 73, father
 
 INSERT OVERWRITE snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, somatic_pc_tn_wgs, somatic_pn_tn_wgs, somatic_pf_tn_wgs, somatic_pc_to_wgs, somatic_pn_to_wgs, somatic_pf_to_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
@@ -494,7 +508,17 @@ VALUES
     (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
     (19, 19, 7,'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
     (62, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral'),
-    (63, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal');
+    (63, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal'),
+    -- Prenatal cases 71-73. A row here with a non-null ingested_at is what flips has_variants
+    -- on the case's sequencing experiments, and its `part` is the partition the occurrence
+    -- queries look up by seq_id — so it must match the germline__snv__occurrence rows above.
+    (73, 84, 71, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (74, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (75, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (77, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (76, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (78, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (79, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal');
 
 INSERT OVERWRITE omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES
