@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -26,10 +27,11 @@ func seedPrenatalCase(t *testing.T, env *testutils.Env, submitterCaseId string) 
 	payload[0].CategoryCode = "prenatal"
 	payload[0].Fetuses = []*types.CaseFetusBatch{
 		{
-			SubmitterFetusId:   fetusKey(submitterCaseId),
-			SexCode:            "male",
-			LifeStatusCode:     "alive",
-			AffectedStatusCode: "affected",
+			SubmitterFetusId:    fetusKey(submitterCaseId),
+			SexCode:             "male",
+			LifeStatusCode:      "alive",
+			AffectedStatusCode:  "affected",
+			LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1),
 			ObservationsCategorical: []*types.ObservationCategoricalBatch{
 				{Code: "phenotype", System: "HPO", Value: "HP:0001631", OnsetCode: "antenatal", InterpretationCode: "positive"},
 			},
@@ -113,10 +115,11 @@ func Test_ProcessBatch_UpdateCase_Fetuses_ReplacesThem(t *testing.T) {
 		updates := prenatalUpdate(submitterCaseId)
 		updates[0].Fetuses = []*types.CaseFetusBatch{
 			{
-				SubmitterFetusId:   fetusKey(submitterCaseId),
-				SexCode:            "female",
-				LifeStatusCode:     "alive",
-				AffectedStatusCode: "affected",
+				SubmitterFetusId:    fetusKey(submitterCaseId),
+				SexCode:             "female",
+				LifeStatusCode:      "alive",
+				AffectedStatusCode:  "affected",
+				LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1),
 				ObservationsCategorical: []*types.ObservationCategoricalBatch{
 					{Code: "phenotype", System: "HPO", Value: "HP:0001561", OnsetCode: "antenatal", InterpretationCode: "positive"},
 				},
@@ -201,7 +204,7 @@ func Test_ProcessBatch_UpdateCase_FetusWithSample_StillUpdatableUnderSameKey(t *
 
 		updates := prenatalUpdate(submitterCaseId)
 		updates[0].Fetuses = []*types.CaseFetusBatch{
-			{SubmitterFetusId: fetusKey(submitterCaseId), SexCode: "female", LifeStatusCode: "alive", AffectedStatusCode: "affected"},
+			{SubmitterFetusId: fetusKey(submitterCaseId), SexCode: "female", LifeStatusCode: "alive", AffectedStatusCode: "affected", LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1)},
 		}
 		processUpdateExpectingSuccess(t, db, updates)
 
@@ -233,7 +236,7 @@ func Test_ProcessBatch_UpdateCase_FetusWithSample_RefusedWhenKeyDropped(t *testi
 		// A different key: F-A is dropped, which means deleted — and it has a sample.
 		updates := prenatalUpdate(submitterCaseId)
 		updates[0].Fetuses = []*types.CaseFetusBatch{
-			{SubmitterFetusId: fetusKey(submitterCaseId) + "-OTHER", SexCode: "female", LifeStatusCode: "alive", AffectedStatusCode: "affected"},
+			{SubmitterFetusId: fetusKey(submitterCaseId) + "-OTHER", SexCode: "female", LifeStatusCode: "alive", AffectedStatusCode: "affected", LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1)},
 		}
 		updateBytes, _ := json.Marshal(updates)
 		id := insertPayloadAndProcessBatch(db, string(updateBytes), types.BatchStatusPending, types.UpdateCaseBatchType, false, "user123", "2025-12-07")

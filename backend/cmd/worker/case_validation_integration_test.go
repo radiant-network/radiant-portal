@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -17,6 +18,11 @@ import (
 )
 
 var emptyMsgs []types.BatchMessage
+
+func dateISO8601Ptr(year int, month time.Month, day int) *types.DateISO8601 {
+	d := types.DateISO8601(time.Date(year, month, day, 0, 0, 0, 0, time.UTC))
+	return &d
+}
 
 func createBaseCasePayload(submitterCaseId string) []*types.CaseBatch {
 	scenario, err := testutils.LoadScenario("base")
@@ -219,10 +225,11 @@ func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testin
 		payload := createBaseCasePayload("Fetus_Twins")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
 			{
-				SubmitterFetusId:   "TWIN-1",
-				SexCode:            "male",
-				LifeStatusCode:     "alive",
-				AffectedStatusCode: "unknown",
+				SubmitterFetusId:    "TWIN-1",
+				SexCode:             "male",
+				LifeStatusCode:      "alive",
+				AffectedStatusCode:  "unknown",
+				LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1),
 				ObservationsCategorical: []*types.ObservationCategoricalBatch{
 					{Code: "phenotype", System: "HPO", Value: "HP:0001631", OnsetCode: "antenatal", InterpretationCode: "positive"},
 				},
@@ -284,7 +291,7 @@ func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Fetus_Invalid_Sex")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
-			{SubmitterFetusId: "F-BAD-SEX", SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown"},
+			{SubmitterFetusId: "F-BAD-SEX", SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1)},
 		}
 		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)

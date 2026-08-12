@@ -17,6 +17,7 @@ const (
 )
 
 const RelationshipFetusCode = "fetus"
+const LifeStatusDeceased = "deceased"
 
 func (r *CaseValidationRecord) fetchFetusCodes(ctx context.Context) error {
 	sexCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSex)
@@ -55,6 +56,38 @@ func (cr *CaseValidationRecord) validateFetusAffectedStatusCode(fetusIndex int) 
 	cr.ValidateCode(res, path, "affected_status_code", FetusInvalidField, cr.Case.Fetuses[fetusIndex].AffectedStatusCode, cr.PatientAffectedStatusCodes, []string{}, true)
 }
 
+// todayUTC returns midnight UTC for the current day, so a date-only value (DateISO8601 carries no
+// time of day) compares against "today" rather than against the current instant — a due date of
+// today must not read as "in the past" just because it's now afternoon.
+func todayUTC() time.Time {
+	now := time.Now().UTC()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func (cr *CaseValidationRecord) validateFetusDates(fetusIndex int) {
+	fb := cr.Case.Fetuses[fetusIndex]
+	res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+	today := todayUTC()
+
+	if fb.LastMenstrualPeriod != nil && time.Time(*fb.LastMenstrualPeriod).After(today) {
+		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".last_menstrual_period"
+		cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: last_menstrual_period cannot be in the future.", res), FetusInvalidField, path)
+	}
+	if fb.EstimatedDueDate != nil && time.Time(*fb.EstimatedDueDate).Before(today) {
+		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".estimated_due_date"
+		cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: estimated_due_date cannot be in the past.", res), FetusInvalidField, path)
+	}
+
+	if fb.LifeStatusCode == LifeStatusDeceased {
+		return
+	}
+	if fb.LastMenstrualPeriod != nil || fb.EstimatedDueDate != nil {
+		return
+	}
+	path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
+	cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: either last_menstrual_period or estimated_due_date is required when the fetus is not deceased.", res), FetusInvalidField, path)
+}
+
 func (cr *CaseValidationRecord) validateFetusObservationsCategorical(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsCategorical {
 		obsPath := cr.formatFetusesFieldPath(&fetusIndex, "observations_categorical", &obsIndex)
@@ -87,6 +120,7 @@ func (cr *CaseValidationRecord) validateCaseFetuses() error {
 		cr.validateFetusSexCode(fetusIndex)
 		cr.validateFetusLifeStatusCode(fetusIndex)
 		cr.validateFetusAffectedStatusCode(fetusIndex)
+		cr.validateFetusDates(fetusIndex)
 		cr.validateFetusObservationsCategorical(fetusIndex)
 		cr.validateFetusObservationsText(fetusIndex)
 	}

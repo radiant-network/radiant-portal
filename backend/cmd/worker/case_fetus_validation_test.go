@@ -144,6 +144,93 @@ func Test_validateFetusAffectedStatusCode_Invalid(t *testing.T) {
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
 }
 
+func Test_validateFetusDates_ValidWithLastMenstrualPeriod(t *testing.T) {
+	lmp := types.DateISO8601(time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", LastMenstrualPeriod: &lmp}})
+	cr.validateFetusDates(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusDates_ValidWithEstimatedDueDate(t *testing.T) {
+	edd := types.DateISO8601(time.Date(2026, time.November, 8, 0, 0, 0, 0, time.UTC))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "unknown", EstimatedDueDate: &edd}})
+	cr.validateFetusDates(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusDates_ValidWhenDeceasedWithNoDates(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "deceased"}})
+	cr.validateFetusDates(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusDates_InvalidWhenAliveWithNoDates(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive"}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+}
+
+func Test_validateFetusDates_InvalidWhenUnknownLifeStatusWithNoDates(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "unknown"}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
+}
+
+func Test_validateFetusDates_InvalidWhenLastMenstrualPeriodInFuture(t *testing.T) {
+	future := types.DateISO8601(todayUTC().AddDate(0, 0, 1))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", LastMenstrualPeriod: &future}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
+}
+
+func Test_validateFetusDates_ValidWhenLastMenstrualPeriodIsToday(t *testing.T) {
+	today := types.DateISO8601(todayUTC())
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", LastMenstrualPeriod: &today}})
+	cr.validateFetusDates(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusDates_InvalidWhenEstimatedDueDateInPast(t *testing.T) {
+	past := types.DateISO8601(todayUTC().AddDate(0, 0, -1))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", EstimatedDueDate: &past}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "create_case[0].fetuses[0].estimated_due_date", cr.Errors[0].Path)
+}
+
+func Test_validateFetusDates_ValidWhenEstimatedDueDateIsToday(t *testing.T) {
+	today := types.DateISO8601(todayUTC())
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", EstimatedDueDate: &today}})
+	cr.validateFetusDates(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusDates_InvalidWhenBothDatesOutOfRange(t *testing.T) {
+	future := types.DateISO8601(todayUTC().AddDate(0, 0, 1))
+	past := types.DateISO8601(todayUTC().AddDate(0, 0, -1))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", LastMenstrualPeriod: &future, EstimatedDueDate: &past}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 2)
+	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
+	assert.Equal(t, "create_case[0].fetuses[0].estimated_due_date", cr.Errors[1].Path)
+}
+
+// A deceased fetus is exempt from "at least one date" but not from range checks: a recorded date
+// still has to be a real date, whatever the life status.
+func Test_validateFetusDates_InvalidWhenDeceasedWithFutureLastMenstrualPeriod(t *testing.T) {
+	future := types.DateISO8601(todayUTC().AddDate(0, 0, 1))
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "deceased", LastMenstrualPeriod: &future}})
+	cr.validateFetusDates(0)
+	assert.Len(t, cr.Errors, 1)
+	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
+}
+
 func Test_validateFetusObservationsCategorical_Valid(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{
 		ObservationsCategorical: []*types.ObservationCategoricalBatch{
@@ -185,9 +272,10 @@ func Test_validateFetusObservationsText_InvalidCode(t *testing.T) {
 }
 
 func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
+	lmp := types.DateISO8601(time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC))
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
-		{SexCode: "male", LifeStatusCode: "alive", AffectedStatusCode: "unknown"},
-		{SexCode: "not-a-sex", LifeStatusCode: "not-a-status", AffectedStatusCode: "unknown"},
+		{SexCode: "male", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
+		{SexCode: "not-a-sex", LifeStatusCode: "not-a-status", AffectedStatusCode: "unknown", LastMenstrualPeriod: &lmp},
 	})
 	err := cr.validateCaseFetuses()
 	assert.NoError(t, err)
@@ -230,11 +318,13 @@ func Test_validateFetusObservationsText_NullEntry(t *testing.T) {
 // A valid fetus whose observation entries are null: validateCaseFetuses reaches both arrays in the
 // same pass, so it must survive them together.
 func Test_validateCaseFetuses_NullObservationEntries(t *testing.T) {
+	lmp := types.DateISO8601(time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC))
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{
 		{
 			SexCode:                 "male",
 			LifeStatusCode:          "alive",
 			AffectedStatusCode:      "affected",
+			LastMenstrualPeriod:     &lmp,
 			ObservationsCategorical: []*types.ObservationCategoricalBatch{nil},
 			ObservationsText:        []*types.ObservationTextBatch{nil},
 		},
