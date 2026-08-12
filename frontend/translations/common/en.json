@@ -81,7 +81,7 @@
       "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base",
       "see_included": "see what's included",
       "add": "Add role",
-      "search_placeholder": "Search by role name",
+      "search_placeholder": "Search by name or description",
       "custom_only": "Custom roles only",
       "footer_note": "Default roles can't be edited or deleted.",
       "lock_tooltip": "Can't be edited or deleted",

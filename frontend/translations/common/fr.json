@@ -81,7 +81,7 @@
       "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances",
       "see_included": "voir ce qui est inclus",
       "add": "Ajouter un rôle",
-      "search_placeholder": "Rechercher par nom de rôle",
+      "search_placeholder": "Rechercher par nom ou description",
       "custom_only": "Rôles personnalisés seulement",
       "footer_note": "Les rôles par défaut ne peuvent pas être modifiés ni supprimés.",
       "lock_tooltip": "Non modifiable ni supprimable",
