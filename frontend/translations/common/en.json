@@ -44,7 +44,7 @@
       "category_placeholder": "Select a category",
       "category_hint": "Can't be changed after creation.",
       "cancel": "Cancel",
-      "save": "Save changes",
+      "save": "Save",
       "create": "Create organization",
       "ok": { "created": "Organization created.", "updated": "Organization updated." }
     },
@@ -112,7 +112,7 @@
       "duplicate_suffix": "(copy)",
       "cancel": "Cancel",
       "close": "Close",
-      "save": "Save changes",
+      "save": "Save",
       "create": "Create role",
       "duplicate": "Duplicate",
       "delete": "Delete role",
@@ -153,7 +153,7 @@
       "delete_body": "<b>{{name}}</b> will be removed from the <b>{{tenant}} network</b> and all of its organizations.",
       "delete_confirm": "Delete member",
       "cancel": "Cancel",
-      "save": "Save changes",
+      "save": "Save",
       "create": "Create member",
       "err": {
         "last_admin_title": "This network needs an Administrator",

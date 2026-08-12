@@ -44,7 +44,7 @@
       "category_placeholder": "Sélectionnez une catégorie",
       "category_hint": "Ne peut pas être modifiée après la création.",
       "cancel": "Annuler",
-      "save": "Enregistrer les modifications",
+      "save": "Enregistrer",
       "create": "Créer l'organisation",
       "ok": { "created": "Organisation créée.", "updated": "Organisation mise à jour." }
     },
@@ -112,7 +112,7 @@
       "duplicate_suffix": "(copie)",
       "cancel": "Annuler",
       "close": "Fermer",
-      "save": "Enregistrer les modifications",
+      "save": "Enregistrer",
       "create": "Créer le rôle",
       "duplicate": "Dupliquer",
       "delete": "Supprimer le rôle",
@@ -153,7 +153,7 @@
       "delete_body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations.",
       "delete_confirm": "Supprimer le membre",
       "cancel": "Annuler",
-      "save": "Enregistrer les modifications",
+      "save": "Enregistrer",
       "create": "Créer le membre",
       "err": {
         "last_admin_title": "Ce réseau doit conserver un administrateur",
