@@ -17,20 +17,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CaseSequencingExperimentBatch(BaseModel):
+class CaseSequencingRequestBatch(BaseModel):
     """
-    CaseSequencingExperimentBatch
+    CaseSequencingRequestBatch
     """ # noqa: E501
-    aliquot: StrictStr
-    sample_organization_code: StrictStr
-    submitter_sample_id: StrictStr
-    submitter_sequencing_request_id: Optional[StrictStr] = Field(default=None, description="Optional. The sequencing request of the same case this experiment fulfills, if any.")
-    __properties: ClassVar[List[str]] = ["aliquot", "sample_organization_code", "submitter_sample_id", "submitter_sequencing_request_id"]
+    patient_organization_code: StrictStr
+    service_code: StrictStr
+    status_code: StrictStr
+    submitter_patient_id: StrictStr
+    submitter_sequencing_request_id: StrictStr
+    __properties: ClassVar[List[str]] = ["patient_organization_code", "service_code", "status_code", "submitter_patient_id", "submitter_sequencing_request_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +51,7 @@ class CaseSequencingExperimentBatch(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CaseSequencingExperimentBatch from a JSON string"""
+        """Create an instance of CaseSequencingRequestBatch from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,7 +76,7 @@ class CaseSequencingExperimentBatch(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CaseSequencingExperimentBatch from a dict"""
+        """Create an instance of CaseSequencingRequestBatch from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +84,10 @@ class CaseSequencingExperimentBatch(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "aliquot": obj.get("aliquot"),
-            "sample_organization_code": obj.get("sample_organization_code"),
-            "submitter_sample_id": obj.get("submitter_sample_id"),
+            "patient_organization_code": obj.get("patient_organization_code"),
+            "service_code": obj.get("service_code"),
+            "status_code": obj.get("status_code"),
+            "submitter_patient_id": obj.get("submitter_patient_id"),
             "submitter_sequencing_request_id": obj.get("submitter_sequencing_request_id")
         })
         return _obj

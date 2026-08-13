@@ -419,6 +419,12 @@ export interface CaseBatch {
      */
     'sequencing_experiments': Array<CaseSequencingExperimentBatch>;
     /**
+     * Optional. Sequencing services ordered for this case\'s members, delivered or not.
+     * @type {Array<CaseSequencingRequestBatch>}
+     * @memberof CaseBatch
+     */
+    'sequencing_requests'?: Array<CaseSequencingRequestBatch>;
+    /**
      * 
      * @type {string}
      * @memberof CaseBatch
@@ -430,6 +436,12 @@ export interface CaseBatch {
      * @memberof CaseBatch
      */
     'submitter_case_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
+    'supervisor'?: string;
     /**
      * 
      * @type {Array<CaseTaskBatch>}
@@ -640,10 +652,22 @@ export interface CaseEntity {
     'sequencing_experiments': Array<CaseSequencingExperiment>;
     /**
      * 
+     * @type {Array<CaseSequencingRequest>}
+     * @memberof CaseEntity
+     */
+    'sequencing_requests': Array<CaseSequencingRequest>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseEntity
      */
     'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
+    'supervisor'?: string;
     /**
      * 
      * @type {Array<CaseTask>}
@@ -1234,6 +1258,12 @@ export interface CaseSequencingExperiment {
     'seq_id': number;
     /**
      * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'sequencing_request_id'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof CaseSequencingExperiment
      */
@@ -1269,6 +1299,116 @@ export interface CaseSequencingExperimentBatch {
      * @memberof CaseSequencingExperimentBatch
      */
     'submitter_sample_id': string;
+    /**
+     * Optional. The sequencing request of the same case this experiment fulfills, if any.
+     * @type {string}
+     * @memberof CaseSequencingExperimentBatch
+     */
+    'submitter_sequencing_request_id'?: string;
+}
+/**
+ * Sequencing service requested for a case member, whether or not it has been delivered yet
+ * @export
+ * @interface CaseSequencingRequest
+ */
+export interface CaseSequencingRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'affected_status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'created_on': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingRequest
+     */
+    'id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingRequest
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'relationship_to_proband': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'service_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'service_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'submitter_sequencing_request_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequest
+     */
+    'updated_on': string;
+}
+/**
+ * 
+ * @export
+ * @interface CaseSequencingRequestBatch
+ */
+export interface CaseSequencingRequestBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequestBatch
+     */
+    'patient_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequestBatch
+     */
+    'service_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequestBatch
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequestBatch
+     */
+    'submitter_patient_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingRequestBatch
+     */
+    'submitter_sequencing_request_id': string;
 }
 /**
  * 
@@ -5327,6 +5467,12 @@ export interface UpdateCaseBatch {
     'sequencing_experiments'?: Array<CaseSequencingExperimentBatch>;
     /**
      * 
+     * @type {Array<CaseSequencingRequestBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'sequencing_requests'?: Array<CaseSequencingRequestBatch>;
+    /**
+     * 
      * @type {string}
      * @memberof UpdateCaseBatch
      */
@@ -5337,6 +5483,12 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'submitter_case_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'supervisor'?: string;
     /**
      * 
      * @type {Array<CaseTaskBatch>}

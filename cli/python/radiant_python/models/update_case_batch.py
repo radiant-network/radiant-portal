@@ -23,6 +23,7 @@ from typing_extensions import Annotated
 from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
+from radiant_python.models.case_sequencing_request_batch import CaseSequencingRequestBatch
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from typing import Optional, Set
 from typing_extensions import Self
@@ -45,11 +46,13 @@ class UpdateCaseBatch(BaseModel):
     project_code: StrictStr
     resolution_status_code: Optional[StrictStr] = None
     sequencing_experiments: Optional[List[CaseSequencingExperimentBatch]] = None
+    sequencing_requests: Optional[List[CaseSequencingRequestBatch]] = None
     status_code: StrictStr
     submitter_case_id: StrictStr
+    supervisor: Optional[StrictStr] = None
     tasks: Optional[List[CaseTaskBatch]] = None
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
+    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "sequencing_requests", "status_code", "submitter_case_id", "supervisor", "tasks", "type"]
 
     @field_validator('category_code')
     def category_code_validate_enum(cls, value):
@@ -125,6 +128,13 @@ class UpdateCaseBatch(BaseModel):
                 if _item_sequencing_experiments:
                     _items.append(_item_sequencing_experiments.to_dict())
             _dict['sequencing_experiments'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sequencing_requests (list)
+        _items = []
+        if self.sequencing_requests:
+            for _item_sequencing_requests in self.sequencing_requests:
+                if _item_sequencing_requests:
+                    _items.append(_item_sequencing_requests.to_dict())
+            _dict['sequencing_requests'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in tasks (list)
         _items = []
         if self.tasks:
@@ -158,8 +168,10 @@ class UpdateCaseBatch(BaseModel):
             "project_code": obj.get("project_code"),
             "resolution_status_code": obj.get("resolution_status_code"),
             "sequencing_experiments": [CaseSequencingExperimentBatch.from_dict(_item) for _item in obj["sequencing_experiments"]] if obj.get("sequencing_experiments") is not None else None,
+            "sequencing_requests": [CaseSequencingRequestBatch.from_dict(_item) for _item in obj["sequencing_requests"]] if obj.get("sequencing_requests") is not None else None,
             "status_code": obj.get("status_code"),
             "submitter_case_id": obj.get("submitter_case_id"),
+            "supervisor": obj.get("supervisor"),
             "tasks": [CaseTaskBatch.from_dict(_item) for _item in obj["tasks"]] if obj.get("tasks") is not None else None,
             "type": obj.get("type")
         })

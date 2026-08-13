@@ -74,6 +74,11 @@ func BuildViewStatements(tenantCode string, columns map[string][]string) ([]stri
 	}
 	db := types.TenantDatabase(tenantCode)
 	stmts := []string{fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", db)}
+	// Dropping a table from ViewTables never removes the view it already created, so a
+	// renamed table would leave a view pointing at a table that no longer exists.
+	for _, t := range types.ObsoleteViewTables {
+		stmts = append(stmts, fmt.Sprintf("DROP VIEW IF EXISTS `%s`.`%s`", db, t))
+	}
 	for _, t := range types.ViewTables {
 		cols := columns[t]
 		if len(cols) == 0 {

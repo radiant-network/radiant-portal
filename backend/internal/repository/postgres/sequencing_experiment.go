@@ -47,6 +47,20 @@ func (r *SequencingExperimentRepository) UpdateSequencingExperiment(ctx context.
 	return nil
 }
 
+// SetSequencingExperimentRequestID claims a sequencing request from a delivered experiment. It is
+// its own narrow method rather than a field of UpdateSequencingExperiment because the link is set
+// from the case batch paths, which do not otherwise touch the experiment's own columns.
+func (r *SequencingExperimentRepository) SetSequencingExperimentRequestID(ctx context.Context, seqExpID int, sequencingRequestID int) error {
+	tx := r.db.WithContext(ctx).
+		Table(types.SequencingExperimentTable.Name).
+		Where("id = ?", seqExpID).
+		Update("sequencing_request_id", sequencingRequestID)
+	if tx.Error != nil {
+		return fmt.Errorf("link sequencing experiment %d to sequencing request %d: %w", seqExpID, sequencingRequestID, tx.Error)
+	}
+	return nil
+}
+
 func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(ctx context.Context, sampleID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
 	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)

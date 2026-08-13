@@ -10,6 +10,7 @@
       "priority_code": "routine",
       "ordering_organization_code": "CHUSJ",
       "ordering_physician": "Dr. Dupont",
+      "supervisor": "Dr. Tremblay",
       "diagnostic_lab_code": "CHUSJ-LAB",
       "primary_condition_value": "MONDO:0700092",
       "primary_condition_code_system": "MONDO",
@@ -70,11 +71,35 @@
           "family_history": []
         }
       ],
+      "sequencing_requests": [
+        {
+          "submitter_sequencing_request_id": "SR-001",
+          "service_code": "75022",
+          "submitter_patient_id": "MRN-001",
+          "patient_organization_code": "CHUSJ",
+          "status_code": "submitted"
+        },
+        {
+          "submitter_sequencing_request_id": "SR-002",
+          "service_code": "75022",
+          "submitter_patient_id": "MRN-002",
+          "patient_organization_code": "CHUSJ",
+          "status_code": "submitted"
+        },
+        {
+          "submitter_sequencing_request_id": "SR-003",
+          "service_code": "75022",
+          "submitter_patient_id": "MRN-003",
+          "patient_organization_code": "CHUSJ",
+          "status_code": "submitted"
+        }
+      ],
       "sequencing_experiments": [
         {
           "submitter_sample_id": "SP-PROBAND-001",
           "sample_organization_code": "CHUSJ",
-          "aliquot": "ALQ-PROBAND-001"
+          "aliquot": "ALQ-PROBAND-001",
+          "submitter_sequencing_request_id": "SR-001"
         },
         {
           "submitter_sample_id": "SP-MOTHER-001",

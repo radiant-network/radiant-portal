@@ -13,7 +13,7 @@ type ValueSetType string
 
 const (
 	ValueSetAffectedStatus            ValueSetType = "affected_status"
-	ValueSetAnalysisCatalog           ValueSetType = "analysis_catalog"
+	ValueSetServiceCatalog            ValueSetType = "service_catalog"
 	ValueSetAncestry                  ValueSetType = "ancestry"
 	ValueSetCaseCategory              ValueSetType = "case_category"
 	ValueSetCaseType                  ValueSetType = "case_type"
@@ -48,7 +48,7 @@ type ValueSetsRepository struct {
 func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
 	tableNameMap := map[ValueSetType]string{
 		ValueSetAffectedStatus:            types.AffectedStatusTable.Name,
-		ValueSetAnalysisCatalog:           types.AnalysisCatalogTable.Name,
+		ValueSetServiceCatalog:            types.ServiceCatalogTable.Name,
 		ValueSetAncestry:                  types.AncestryTable.Name,
 		ValueSetCaseCategory:              types.CaseCategoryTable.Name,
 		ValueSetCaseType:                  types.CaseTypeTable.Name,

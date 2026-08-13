@@ -16,23 +16,23 @@ func Test_CreateCases(t *testing.T) {
 		orgCode := "CHOP"
 		labCode := "CQGC"
 		newCase := &types.Case{
-			ID:                       999,
-			ProbandID:                3,
-			ProjectID:                1,
-			StatusCode:               "in_progress",
-			PrimaryCondition:         "MONDO:0000001",
-			DiagnosisLabCode:         &labCode,
-			Note:                     "This is a test",
-			AnalysisCatalogID:        1,
-			AnalysisCatalog:          types.AnalysisCatalog{},
-			PriorityCode:             "routine",
-			CaseTypeCode:             "germline",
-			CaseCategoryCode:         "postnatal",
-			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
-			OrderingPhysician:        "Dr. Test",
-			OrderingOrganizationCode: &orgCode,
-			TenantCode:               types.DefaultTenantCode,
+			ID:                        999,
+			ProbandID:                 3,
+			ProjectID:                 1,
+			StatusCode:                "in_progress",
+			PrimaryCondition:          "MONDO:0000001",
+			DiagnosisLabCode:          &labCode,
+			Note:                      "This is a test",
+			ServiceID:                 1,
+			Service:                   types.ServiceCatalog{},
+			PriorityCode:              "routine",
+			CaseTypeCode:              "germline",
+			CaseCategoryCode:          "postnatal",
+			ConditionCodeSystem:       "MONDO",
+			ResolutionStatusCode:      "unsolved",
+			Requester:                 "Dr. Test",
+			RequesterOrganizationCode: &orgCode,
+			TenantCode:                types.DefaultTenantCode,
 		}
 		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)
@@ -42,7 +42,7 @@ func Test_CreateCases(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 999, c.ID)
 		assert.Equal(t, 3, c.ProbandID)
-		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
+		assert.Equal(t, "Dr. Test", c.Requester)
 
 		env.Postgres.Exec("DELETE FROM cases WHERE id = 999")
 	})
@@ -56,22 +56,22 @@ func Test_UpdateCase_OK(t *testing.T) {
 		diagLab := "CQGC"
 		orgCode := "CQGC"
 		original := &types.Case{
-			ID:                       100010,
-			ProbandID:                1,
-			ProjectID:                1,
-			StatusCode:               "in_progress",
-			PrimaryCondition:         "MONDO:0000001",
-			DiagnosisLabCode:         &diagLab,
-			Note:                     "original note",
-			AnalysisCatalogID:        1,
-			PriorityCode:             "routine",
-			CaseTypeCode:             "germline",
-			CaseCategoryCode:         "postnatal",
-			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
-			OrderingPhysician:        "Dr. Original",
-			OrderingOrganizationCode: &orgCode,
-			TenantCode:               types.DefaultTenantCode,
+			ID:                        100010,
+			ProbandID:                 1,
+			ProjectID:                 1,
+			StatusCode:                "in_progress",
+			PrimaryCondition:          "MONDO:0000001",
+			DiagnosisLabCode:          &diagLab,
+			Note:                      "original note",
+			ServiceID:                 1,
+			PriorityCode:              "routine",
+			CaseTypeCode:              "germline",
+			CaseCategoryCode:          "postnatal",
+			ConditionCodeSystem:       "MONDO",
+			ResolutionStatusCode:      "unsolved",
+			Requester:                 "Dr. Original",
+			RequesterOrganizationCode: &orgCode,
+			TenantCode:                types.DefaultTenantCode,
 		}
 		require.NoError(t, repo.CreateCase(t.Context(), original))
 		t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = 100010") })
@@ -79,18 +79,18 @@ func Test_UpdateCase_OK(t *testing.T) {
 		newDiagLab := "CHUSJ"
 		newOrgCode := "CHUSJ"
 		update := &types.Case{
-			CaseTypeCode:             "somatic",
-			StatusCode:               "completed",
-			DiagnosisLabCode:         &newDiagLab,
-			ConditionCodeSystem:      "OMIM",
-			PrimaryCondition:         "OMIM:0000002",
-			PriorityCode:             "urgent",
-			CaseCategoryCode:         "prenatal",
-			AnalysisCatalogID:        1,
-			ResolutionStatusCode:     "solved",
-			Note:                     "updated note",
-			OrderingOrganizationCode: &newOrgCode,
-			OrderingPhysician:        "Dr. Updated",
+			CaseTypeCode:              "somatic",
+			StatusCode:                "completed",
+			DiagnosisLabCode:          &newDiagLab,
+			ConditionCodeSystem:       "OMIM",
+			PrimaryCondition:          "OMIM:0000002",
+			PriorityCode:              "urgent",
+			CaseCategoryCode:          "prenatal",
+			ServiceID:                 1,
+			ResolutionStatusCode:      "solved",
+			Note:                      "updated note",
+			RequesterOrganizationCode: &newOrgCode,
+			Requester:                 "Dr. Updated",
 		}
 		err := repo.UpdateCase(t.Context(), 100010, update)
 		assert.NoError(t, err)
@@ -107,8 +107,8 @@ func Test_UpdateCase_OK(t *testing.T) {
 		assert.Equal(t, "prenatal", result.CaseCategoryCode)
 		assert.Equal(t, "solved", result.ResolutionStatusCode)
 		assert.Equal(t, "updated note", result.Note)
-		assert.Equal(t, "CHUSJ", *result.OrderingOrganizationCode)
-		assert.Equal(t, "Dr. Updated", result.OrderingPhysician)
+		assert.Equal(t, "CHUSJ", *result.RequesterOrganizationCode)
+		assert.Equal(t, "Dr. Updated", result.Requester)
 
 		// Immutable identity fields untouched.
 		assert.Equal(t, 1, result.ProbandID)
@@ -117,22 +117,45 @@ func Test_UpdateCase_OK(t *testing.T) {
 	})
 }
 
-func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
+func Test_GetServiceByCodeAndType_Case(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA")
+		service, err := repo.GetServiceByCodeAndType(t.Context(), "WGA", types.ServiceTypeCase)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, analysisCatalog.ID)
-		assert.Equal(t, "WGA", analysisCatalog.Code)
+		assert.Equal(t, 1, service.ID)
+		assert.Equal(t, "WGA", service.Code)
+		assert.Equal(t, types.ServiceTypeCase, service.Type)
 	})
 }
 
-func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
+func Test_GetServiceByCodeAndType_Sequencing(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE")
+		// Seeded by migration 000023 (MSSS sequencing-request-code 75022 = genome).
+		service, err := repo.GetServiceByCodeAndType(t.Context(), "75022", types.ServiceTypeSequencing)
 		assert.NoError(t, err)
-		assert.Nil(t, analysisCatalog)
+		assert.Equal(t, "75022", service.Code)
+		assert.Equal(t, types.ServiceTypeSequencing, service.Type)
+		assert.Equal(t, "Normal Genome Sequencing", service.NameEn)
+	})
+}
+
+// The type filter is what stops an analysis code resolving as a sequencing service.
+func Test_GetServiceByCodeAndType_WrongType(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		service, err := repo.GetServiceByCodeAndType(t.Context(), "WGA", types.ServiceTypeSequencing)
+		assert.NoError(t, err)
+		assert.Nil(t, service)
+	})
+}
+
+func Test_GetServiceByCodeAndType_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		service, err := repo.GetServiceByCodeAndType(t.Context(), "NON_EXISTENT_CODE", types.ServiceTypeCase)
+		assert.NoError(t, err)
+		assert.Nil(t, service)
 	})
 }
 
@@ -143,23 +166,23 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 		diagLab := "CQGC"
 		orgCode := "CQGC"
 		newCase := &types.Case{
-			ID:                       1000,
-			ProbandID:                3,
-			ProjectID:                1,
-			StatusCode:               "in_progress",
-			PrimaryCondition:         "MONDO:0000001",
-			DiagnosisLabCode:         &diagLab,
-			Note:                     "This is a test",
-			AnalysisCatalogID:        1,
-			PriorityCode:             "routine",
-			CaseTypeCode:             "germline",
-			CaseCategoryCode:         "postnatal",
-			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
-			OrderingPhysician:        "Dr. Test",
-			OrderingOrganizationCode: &orgCode,
-			TenantCode:               types.DefaultTenantCode,
-			SubmitterCaseID:          "1:1", // Duplicate submitter_case_id
+			ID:                        1000,
+			ProbandID:                 3,
+			ProjectID:                 1,
+			StatusCode:                "in_progress",
+			PrimaryCondition:          "MONDO:0000001",
+			DiagnosisLabCode:          &diagLab,
+			Note:                      "This is a test",
+			ServiceID:                 1,
+			PriorityCode:              "routine",
+			CaseTypeCode:              "germline",
+			CaseCategoryCode:          "postnatal",
+			ConditionCodeSystem:       "MONDO",
+			ResolutionStatusCode:      "unsolved",
+			Requester:                 "Dr. Test",
+			RequesterOrganizationCode: &orgCode,
+			TenantCode:                types.DefaultTenantCode,
+			SubmitterCaseID:           "1:1", // Duplicate submitter_case_id
 		}
 		err := repo.CreateCase(t.Context(), newCase)
 		assert.Error(t, err)
@@ -179,23 +202,23 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 		diagLab := "CQGC"
 		orgCode := "CQGC"
 		newCase := &types.Case{
-			ID:                       1000,
-			ProbandID:                3,
-			ProjectID:                1,
-			StatusCode:               "in_progress",
-			PrimaryCondition:         "MONDO:0000001",
-			DiagnosisLabCode:         &diagLab,
-			Note:                     "This is a test",
-			AnalysisCatalogID:        1,
-			PriorityCode:             "routine",
-			CaseTypeCode:             "germline",
-			CaseCategoryCode:         "postnatal",
-			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
-			OrderingPhysician:        "Dr. Test",
-			OrderingOrganizationCode: &orgCode,
-			TenantCode:               types.DefaultTenantCode,
-			SubmitterCaseID:          "",
+			ID:                        1000,
+			ProbandID:                 3,
+			ProjectID:                 1,
+			StatusCode:                "in_progress",
+			PrimaryCondition:          "MONDO:0000001",
+			DiagnosisLabCode:          &diagLab,
+			Note:                      "This is a test",
+			ServiceID:                 1,
+			PriorityCode:              "routine",
+			CaseTypeCode:              "germline",
+			CaseCategoryCode:          "postnatal",
+			ConditionCodeSystem:       "MONDO",
+			ResolutionStatusCode:      "unsolved",
+			Requester:                 "Dr. Test",
+			RequesterOrganizationCode: &orgCode,
+			TenantCode:                types.DefaultTenantCode,
+			SubmitterCaseID:           "",
 		}
 		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)

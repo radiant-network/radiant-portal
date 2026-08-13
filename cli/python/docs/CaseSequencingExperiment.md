@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **sample_submitter_id** | **str** |  | [optional] 
 **sample_type_code** | **str** |  | [optional] 
 **seq_id** | **int** |  | 
+**sequencing_request_id** | **int** |  | [optional] 
 **status_code** | **str** |  | 
 **updated_on** | **str** |  | 
 

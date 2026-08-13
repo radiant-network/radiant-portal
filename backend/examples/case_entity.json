@@ -19,6 +19,33 @@
   "note": "Germline trio analysis for epilepsy workup",
   "project_code": "N1",
   "project_name": "Project N1",
+  "supervisor": "Dr. Tremblay",
+  "sequencing_requests": [
+    {
+      "id": 1,
+      "submitter_sequencing_request_id": "SR-001",
+      "service_code": "75022",
+      "service_name": "Normal Genome Sequencing",
+      "patient_id": 1,
+      "relationship_to_proband": "proband",
+      "affected_status_code": "affected",
+      "status_code": "completed",
+      "created_on": "2024-01-10T08:00:00Z",
+      "updated_on": "2024-01-15T08:00:00Z"
+    },
+    {
+      "id": 4,
+      "submitter_sequencing_request_id": "SR-004",
+      "service_code": "75020",
+      "service_name": "Normal Exome Sequencing",
+      "patient_id": 4,
+      "relationship_to_proband": "brother",
+      "affected_status_code": "non_affected",
+      "status_code": "submitted",
+      "created_on": "2024-01-10T08:00:00Z",
+      "updated_on": "2024-01-10T08:00:00Z"
+    }
+  ],
   "sequencing_experiments": [
     {
       "seq_id": 1,
@@ -31,6 +58,7 @@
       "histology_code": "normal",
       "experimental_strategy_code": "wgs",
       "status_code": "completed",
+      "sequencing_request_id": 1,
       "updated_on": "2024-01-15T08:00:00Z",
       "has_variants": true
     },

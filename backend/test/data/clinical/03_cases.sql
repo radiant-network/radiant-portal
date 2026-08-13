@@ -1,4 +1,4 @@
-INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
+INSERT INTO "cases" (id, proband_id, project_id, service_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, requester, requester_organization_code, submitter_case_id)
 VALUES
     (1, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:1'),
     (2, 4, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 'CHUSJ', '1:2'),

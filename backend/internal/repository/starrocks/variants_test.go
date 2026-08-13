@@ -361,7 +361,7 @@ func Test_GetVariantUninterpretedCases_WithCaseAnalysisCriteria_NoPagination_Def
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		criteria := []types.SearchCriterion{
-			{FieldName: types.AnalysisCatalogCodeField.Alias, Value: []interface{}{"IDGD"}, Operator: "in"},
+			{FieldName: types.ServiceCatalogCodeField.Alias, Value: []interface{}{"IDGD"}, Operator: "in"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(t.Context(), 1000, query)

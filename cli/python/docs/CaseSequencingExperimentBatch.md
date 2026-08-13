@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **aliquot** | **str** |  | 
 **sample_organization_code** | **str** |  | 
 **submitter_sample_id** | **str** |  | 
+**submitter_sequencing_request_id** | **str** | Optional. The sequencing request of the same case this experiment fulfills, if any. | [optional] 
 
 ## Example
 

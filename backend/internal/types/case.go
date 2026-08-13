@@ -3,35 +3,36 @@ package types
 import "time"
 
 type Case struct {
-	ID                       int `gorm:"unique;primaryKey;autoIncrement"`
-	ProbandID                int
-	Proband                  Patient `gorm:"foreignKey:ID;references:ProbandID"`
-	ProjectID                int
-	Project                  Project `gorm:"foreignKey:ID;references:ProjectID"`
-	AnalysisCatalogID        int
-	AnalysisCatalog          AnalysisCatalog `gorm:"foreignKey:ID;references:AnalysisCatalogID"`
-	CaseTypeCode             string
-	CaseType                 CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
-	CaseCategoryCode         string
-	CaseCategory             CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
-	PriorityCode             string       `gorm:"default:routine"`
-	Priority                 Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
-	StatusCode               string
-	Status                   Status           `gorm:"foreignKey:Code;references:StatusCode"`
-	ResolutionStatusCode     string           `gorm:"default:unsolved"`
-	ResolutionStatus         ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
-	PrimaryCondition         string
-	ConditionCodeSystem      string
-	OrderingPhysician        string
-	TenantCode               string
-	OrderingOrganizationCode *string
-	OrderingOrganization     Organization `gorm:"foreignKey:OrderingOrganizationCode,TenantCode;references:Code,TenantCode"`
-	DiagnosisLabCode         *string
-	DiagnosisLab             Organization `gorm:"foreignKey:DiagnosisLabCode,TenantCode;references:Code,TenantCode"`
-	SubmitterCaseID          string
-	Note                     string
-	CreatedOn                time.Time `gorm:"autoCreateTime"`
-	UpdatedOn                time.Time `gorm:"autoUpdateTime:milli"`
+	ID                        int `gorm:"unique;primaryKey;autoIncrement"`
+	ProbandID                 int
+	Proband                   Patient `gorm:"foreignKey:ID;references:ProbandID"`
+	ProjectID                 int
+	Project                   Project `gorm:"foreignKey:ID;references:ProjectID"`
+	ServiceID                 int
+	Service                   ServiceCatalog `gorm:"foreignKey:ID;references:ServiceID"`
+	CaseTypeCode              string
+	CaseType                  CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
+	CaseCategoryCode          string
+	CaseCategory              CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
+	PriorityCode              string       `gorm:"default:routine"`
+	Priority                  Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
+	StatusCode                string
+	Status                    Status           `gorm:"foreignKey:Code;references:StatusCode"`
+	ResolutionStatusCode      string           `gorm:"default:unsolved"`
+	ResolutionStatus          ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
+	PrimaryCondition          string
+	ConditionCodeSystem       string
+	Requester                 string
+	Supervisor                string
+	TenantCode                string
+	RequesterOrganizationCode *string
+	RequesterOrganization     Organization `gorm:"foreignKey:RequesterOrganizationCode,TenantCode;references:Code,TenantCode"`
+	DiagnosisLabCode          *string
+	DiagnosisLab              Organization `gorm:"foreignKey:DiagnosisLabCode,TenantCode;references:Code,TenantCode"`
+	SubmitterCaseID           string
+	Note                      string
+	CreatedOn                 time.Time `gorm:"autoCreateTime"`
+	UpdatedOn                 time.Time `gorm:"autoUpdateTime:milli"`
 }
 
 // CaseResult - Search cases result
@@ -99,7 +100,9 @@ type CaseEntity struct {
 	ProjectName              string                                    `json:"project_name,omitempty"`
 	PanelCode                string                                    `json:"panel_code,omitempty"`
 	PanelName                string                                    `json:"panel_name,omitempty"`
+	Supervisor               string                                    `json:"supervisor,omitempty"`
 	SequencingExperiments    JsonArray[CaseSequencingExperiment]       `json:"sequencing_experiments" validate:"required"`
+	SequencingRequests       JsonArray[CaseSequencingRequest]          `json:"sequencing_requests" validate:"required"`
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
 	HasIGVFiles              bool                                      `json:"has_igv_files" validate:"required"`
@@ -119,6 +122,7 @@ type CaseSequencingExperiment struct {
 	HistologyCode            string    `json:"histology_code,omitempty"`
 	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
 	StatusCode               string    `json:"status_code" validate:"required"`
+	SequencingRequestID      *int      `json:"sequencing_request_id,omitempty"`
 	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
 	HasVariants              bool      `json:"has_variants" validate:"required"`
 }
@@ -191,15 +195,15 @@ var CasesFields = []Field{
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,
-	AnalysisCatalogCodeField,
-	AnalysisCatalogNameField,
+	ServiceCatalogCodeField,
+	ServiceCatalogNameField,
 	CasePrimaryConditionIdField,
 	CasePrimaryConditionNameField,
 	ProjectCodeField,
 	ProjectNameField,
 	CaseCreatedOnField,
 	CaseUpdatedOnField,
-	CaseOrderingPhysicianField,
+	CaseRequesterField,
 	CaseOrderingOrganizationNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseDiagnosisLabCodeField,
@@ -224,8 +228,8 @@ var CasesDefaultFields = []Field{
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,
-	AnalysisCatalogCodeField,
-	AnalysisCatalogNameField,
+	ServiceCatalogCodeField,
+	ServiceCatalogNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
 	ProjectCodeField,
@@ -344,8 +348,8 @@ var CaseTypeCodeField = Field{
 	Table:         CaseTable,
 }
 
-var CaseOrderingPhysicianField = Field{
-	Name:          "ordering_physician",
+var CaseRequesterField = Field{
+	Name:          "requester",
 	Alias:         "prescriber",
 	CanBeSelected: true,
 	CanBeFiltered: true,

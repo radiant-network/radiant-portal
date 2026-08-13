@@ -69,6 +69,16 @@ const (
 	SequencingExperimentNotFound = "SEQ-007"
 )
 
+// Sequencing Requests error codes
+const (
+	SequencingRequestInvalidField     = "SEQREQ-001"
+	SequencingRequestUnknownService   = "SEQREQ-002"
+	SequencingRequestPatientNotInCase = "SEQREQ-003"
+	SequencingRequestUnknownStatus    = "SEQREQ-004"
+	SequencingRequestDuplicateInBatch = "SEQREQ-005"
+	SequencingRequestNotFoundInCase   = "SEQREQ-006"
+)
+
 // Tasks error codes
 const (
 	TaskInvalidField                            = "TASK-001"
@@ -140,6 +150,8 @@ type DocumentRelation struct {
 
 type StorageContext struct {
 	CasesRepo         *postgres.CasesRepository
+	SeqExpRepo        *postgres.SequencingExperimentRepository
+	SeqReqRepo        *postgres.SequencingRequestRepository
 	DocRepo           *postgres.DocumentsRepository
 	ObsCatRepo        *postgres.ObservationCategoricalRepository
 	ObsStringRepo     *postgres.ObservationStringRepository
@@ -153,6 +165,8 @@ type StorageContext struct {
 func NewStorageContext(db *gorm.DB) *StorageContext {
 	return &StorageContext{
 		CasesRepo:         postgres.NewCasesRepository(database.PostgresDB{DB: db}),
+		SeqExpRepo:        postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: db}),
+		SeqReqRepo:        postgres.NewSequencingRequestRepository(database.PostgresDB{DB: db}),
 		DocRepo:           postgres.NewDocumentsRepository(database.PostgresDB{DB: db}),
 		ObsCatRepo:        postgres.NewObservationCategoricalRepository(database.PostgresDB{DB: db}),
 		ObsStringRepo:     postgres.NewObservationStringRepository(database.PostgresDB{DB: db}),
@@ -169,7 +183,7 @@ type CaseValidationRecord struct {
 	CaseID                     *int
 	ProjectID                  *int
 	SubmitterCaseID            string
-	AnalysisCatalogID          *int
+	ServiceID                  *int
 	OrderingOrganizationExists bool
 	DiagnosisLabExists         bool
 
@@ -197,9 +211,21 @@ type CaseValidationRecord struct {
 	// Necessary to persist the case
 	Patients              map[batchval.PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
-	Documents             map[string]*types.Document
-	DocumentsInTasks      map[string][]*DocumentRelation
-	TaskContexts          map[int][]*types.TaskContext
+	// SequencingRequests holds the resolved requests of the payload block, keyed by their
+	// submitter id, which is also what a sequencing experiment names to claim one.
+	SequencingRequests map[string]*ResolvedSequencingRequest
+	Documents          map[string]*types.Document
+	DocumentsInTasks   map[string][]*DocumentRelation
+	TaskContexts       map[int][]*types.TaskContext
+}
+
+// ResolvedSequencingRequest carries what validation resolved for one payload entry. ID is only
+// set once the row is persisted, which is what lets an experiment be linked to it.
+type ResolvedSequencingRequest struct {
+	Batch     *types.CaseSequencingRequestBatch
+	ServiceID *int
+	PatientID *int
+	ID        *int
 }
 
 func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, c types.CaseBatch, index int) *CaseValidationRecord {
@@ -214,6 +240,7 @@ func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchv
 		OutputDocuments:       make(map[string]struct{}),
 		Patients:              make(map[batchval.PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
+		SequencingRequests:    make(map[string]*ResolvedSequencingRequest),
 		Documents:             make(map[string]*types.Document),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		TaskContexts:          make(map[int][]*types.TaskContext),
@@ -424,13 +451,46 @@ func (r *CaseValidationRecord) fetchProject(ctx context.Context) error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx context.Context) error {
-	a, err := r.Cache.GetCaseAnalysisCatalogByCode(ctx, r.Case.AnalysisCode)
+func (r *CaseValidationRecord) fetchCaseService(ctx context.Context) error {
+	a, err := r.Cache.GetCaseServiceByCode(ctx, r.Case.AnalysisCode)
 	if err != nil {
-		return fmt.Errorf("get analysis catalog by code %q: %w", r.Case.AnalysisCode, err)
+		return fmt.Errorf("get case service by code %q: %w", r.Case.AnalysisCode, err)
 	}
 	if a != nil {
-		r.AnalysisCatalogID = &a.ID
+		r.ServiceID = &a.ID
+	}
+	return nil
+}
+
+// fetchSequencingRequests resolves each requested service against the sequencing half of the
+// catalog and each named patient against the patients already resolved for this case. A missing
+// resolution is left nil for validateCaseSequencingRequests to report.
+func (r *CaseValidationRecord) fetchSequencingRequests(ctx context.Context) error {
+	for _, sr := range r.Case.SequencingRequests {
+		if sr == nil {
+			continue
+		}
+
+		resolved := &ResolvedSequencingRequest{Batch: sr}
+
+		if sr.ServiceCode != "" {
+			service, err := r.Cache.GetSequencingServiceByCode(ctx, sr.ServiceCode)
+			if err != nil {
+				return fmt.Errorf("get sequencing service by code %q: %w", sr.ServiceCode, err)
+			}
+			if service != nil {
+				resolved.ServiceID = &service.ID
+			}
+		}
+
+		key := batchval.PatientKey{OrganizationCode: sr.PatientOrganizationCode, SubmitterPatientId: sr.SubmitterPatientId}
+		if patient, ok := r.Patients[key]; ok {
+			resolved.PatientID = &patient.ID
+		}
+
+		// A duplicate submitter id overwrites here; validateCaseSequencingRequests reports it
+		// from the payload slice, which still holds both entries.
+		r.SequencingRequests[sr.SubmitterSequencingRequestId] = resolved
 	}
 	return nil
 }
@@ -596,14 +656,18 @@ func (cr *CaseValidationRecord) fetchValidationInfos(ctx context.Context) error 
 	if err := cr.fetchProject(ctx); err != nil {
 		return fmt.Errorf("failed to resolve project: %w", err)
 	}
-	if err := cr.fetchAnalysisCatalog(ctx); err != nil {
-		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
+	if err := cr.fetchCaseService(ctx); err != nil {
+		return fmt.Errorf("failed to resolve case service: %w", err)
 	}
 	if err := cr.resolveOrganizations(ctx); err != nil {
 		return fmt.Errorf("failed to resolve organizations: %w", err)
 	}
 	if err := cr.fetchPatients(ctx); err != nil {
 		return fmt.Errorf("failed to resolve patients: %w", err)
+	}
+	// After the patients: a request names a patient of the same case.
+	if err := cr.fetchSequencingRequests(ctx); err != nil {
+		return fmt.Errorf("failed to resolve sequencing requests: %w", err)
 	}
 	if err := cr.fetchFromSequencingExperiments(ctx); err != nil {
 		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
@@ -643,6 +707,10 @@ func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex *int, colle
 
 func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
 	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
+}
+
+func (cr *CaseValidationRecord) formatSeqReqFieldPath(seqReqIndex *int) string {
+	return cr.formatFieldPath("sequencing_requests", seqReqIndex, "", nil)
 }
 
 // Family History validation
@@ -938,6 +1006,74 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Co
 	return nil
 }
 
+// validateCaseSequencingRequests runs after the patients are resolved, because a request names a
+// patient of the same case, and before the sequencing experiments, because an experiment may
+// name one of these requests.
+func (cr *CaseValidationRecord) validateCaseSequencingRequests() {
+	seenSubmitterIds := make(map[string]struct{}, len(cr.Case.SequencingRequests))
+
+	for seqReqIndex, sr := range cr.Case.SequencingRequests {
+		if sr == nil {
+			continue
+		}
+		path := cr.formatSeqReqFieldPath(&seqReqIndex)
+		resourceType := fmt.Sprintf("%s %d - sequencing request %d", cr.GetResourceType(), cr.Index, seqReqIndex)
+
+		cr.ValidateStringField(sr.SubmitterSequencingRequestId, "submitter_sequencing_request_id", path, SequencingRequestInvalidField, resourceType, TextMaxLength, ExternalIdRegexpCompiled, []string{}, true)
+
+		if _, duplicate := seenSubmitterIds[sr.SubmitterSequencingRequestId]; duplicate && sr.SubmitterSequencingRequestId != "" {
+			message := fmt.Sprintf("Sequencing request %q appears more than once in create_case %d.", sr.SubmitterSequencingRequestId, cr.Index)
+			cr.AddErrors(message, SequencingRequestDuplicateInBatch, path)
+		}
+		seenSubmitterIds[sr.SubmitterSequencingRequestId] = struct{}{}
+
+		cr.ValidateCode(resourceType, path, "status_code", SequencingRequestUnknownStatus, sr.StatusCode, cr.StatusCodes, []string{}, true)
+
+		resolved := cr.SequencingRequests[sr.SubmitterSequencingRequestId]
+		if resolved == nil {
+			continue
+		}
+
+		if resolved.ServiceID == nil {
+			message := fmt.Sprintf("Sequencing service %q for create_case %d - sequencing request %d does not exist.", sr.ServiceCode, cr.Index, seqReqIndex)
+			cr.AddErrors(message, SequencingRequestUnknownService, path)
+		}
+
+		if resolved.PatientID == nil {
+			message := fmt.Sprintf("Patient (%s / %s) of sequencing request %q does not belong to create_case %d.",
+				sr.PatientOrganizationCode,
+				sr.SubmitterPatientId,
+				sr.SubmitterSequencingRequestId,
+				cr.Index,
+			)
+			cr.AddErrors(message, SequencingRequestPatientNotInCase, path)
+		}
+	}
+}
+
+// validateSeqExpSequencingRequests checks that every request named by an experiment of this
+// payload was also declared in the payload's sequencing_requests block. The POST path has no
+// persisted requests to fall back on: the case itself does not exist yet.
+func (cr *CaseValidationRecord) validateSeqExpSequencingRequests() {
+	for seqExpIndex, se := range cr.Case.SequencingExperiments {
+		if se == nil || se.SubmitterSequencingRequestId == "" {
+			continue
+		}
+		if _, ok := cr.SequencingRequests[se.SubmitterSequencingRequestId]; ok {
+			continue
+		}
+		path := cr.formatSeqExpFieldPath(&seqExpIndex)
+		message := fmt.Sprintf("Sequencing request %q named by sequencing experiment (%s / %s / %s) is not declared in create_case %d.",
+			se.SubmitterSequencingRequestId,
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+			cr.Index,
+		)
+		cr.AddErrors(message, SequencingRequestNotFoundInCase, path)
+	}
+}
+
 func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
 	cr.ValidateStringField(value, fieldName, path, CaseInvalidField, fmt.Sprintf("%s %d", cr.GetResourceType(), cr.Index), maxLength, regExp, []string{}, required)
 }
@@ -988,7 +1124,7 @@ func (cr *CaseValidationRecord) validateCaseCommonFields(path string) {
 		message := fmt.Sprintf("Diagnostic lab %q for create_case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
 	}
-	if cr.AnalysisCatalogID == nil {
+	if cr.ServiceID == nil {
 		message := fmt.Sprintf("Analysis %q for create_case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
 	}
@@ -1367,17 +1503,21 @@ func validateCaseRecord(
 		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
 	}
 
-	// 3. Validate Case Sequencing Experiments
+	// 3. Validate Case Sequencing Requests
+	cr.validateCaseSequencingRequests()
+
+	// 4. Validate Case Sequencing Experiments
 	if err := cr.validateCaseSequencingExperiments(ctx); err != nil {
 		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
 	}
+	cr.validateSeqExpSequencingRequests()
 
-	// 4. Validate Case Tasks
+	// 5. Validate Case Tasks
 	if err := cr.validateTasks(); err != nil {
 		return nil, fmt.Errorf("error during case tasks validation: %v", err)
 	}
 
-	// 5. Validate Case Documents
+	// 6. Validate Case Documents
 	if err := cr.validateDocuments(); err != nil {
 		return nil, fmt.Errorf("error validating documents: %w", err)
 	}
@@ -1444,8 +1584,8 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 		return fmt.Errorf("project ID is nil for create_case %d", cr.Index)
 	}
 
-	if cr.AnalysisCatalogID == nil {
-		return fmt.Errorf("analysis catalog ID is nil for case %q", cr.Case.SubmitterCaseId)
+	if cr.ServiceID == nil {
+		return fmt.Errorf("service ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
 	if !cr.OrderingOrganizationExists {
@@ -1465,22 +1605,23 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 	}
 
 	c := types.Case{
-		ProbandID:                proband.ID,
-		ProjectID:                *cr.ProjectID,
-		AnalysisCatalogID:        *cr.AnalysisCatalogID,
-		CaseTypeCode:             cr.Case.Type,
-		CaseCategoryCode:         cr.Case.CategoryCode,
-		PriorityCode:             cr.Case.PriorityCode,
-		StatusCode:               cr.Case.StatusCode,
-		ResolutionStatusCode:     cr.Case.ResolutionStatusCode,
-		PrimaryCondition:         cr.Case.PrimaryConditionValue,
-		ConditionCodeSystem:      cr.Case.PrimaryConditionCodeSystem,
-		OrderingPhysician:        cr.Case.OrderingPhysician,
-		SubmitterCaseID:          cr.Case.SubmitterCaseId,
-		Note:                     cr.Case.Note,
-		TenantCode:               sc.TenantCode,
-		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
-		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
+		ProbandID:                 proband.ID,
+		ProjectID:                 *cr.ProjectID,
+		ServiceID:                 *cr.ServiceID,
+		CaseTypeCode:              cr.Case.Type,
+		CaseCategoryCode:          cr.Case.CategoryCode,
+		PriorityCode:              cr.Case.PriorityCode,
+		StatusCode:                cr.Case.StatusCode,
+		ResolutionStatusCode:      cr.Case.ResolutionStatusCode,
+		PrimaryCondition:          cr.Case.PrimaryConditionValue,
+		ConditionCodeSystem:       cr.Case.PrimaryConditionCodeSystem,
+		Requester:                 cr.Case.OrderingPhysician,
+		Supervisor:                cr.Case.Supervisor,
+		SubmitterCaseID:           cr.Case.SubmitterCaseId,
+		Note:                      cr.Case.Note,
+		TenantCode:                sc.TenantCode,
+		RequesterOrganizationCode: &cr.Case.OrderingOrganizationCode,
+		DiagnosisLabCode:          &cr.Case.DiagnosticLabCode,
 	}
 
 	if err := sc.CasesRepo.CreateCase(ctx, &c); err != nil {
@@ -1489,7 +1630,77 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 
 	cr.CaseID = &c.ID
 
+	// Requests first: linking a delivered experiment to the request it fulfills needs the
+	// request's id.
+	if err := persistSequencingRequests(ctx, sc, cr); err != nil {
+		return err
+	}
+
 	return persistCaseHasSequencingExperiments(ctx, sc, cr)
+}
+
+func persistSequencingRequests(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	if cr.CaseID == nil {
+		return fmt.Errorf("case ID is nil when persisting sequencing requests for create_case %d", cr.Index)
+	}
+	for _, sr := range cr.Case.SequencingRequests {
+		if sr == nil {
+			continue
+		}
+		resolved := cr.SequencingRequests[sr.SubmitterSequencingRequestId]
+		if resolved == nil || resolved.ServiceID == nil || resolved.PatientID == nil {
+			return fmt.Errorf("sequencing request %q of create_case %d is unresolved", sr.SubmitterSequencingRequestId, cr.Index)
+		}
+
+		row := types.SequencingRequest{
+			ServiceID:                    *resolved.ServiceID,
+			CaseID:                       *cr.CaseID,
+			PatientID:                    *resolved.PatientID,
+			StatusCode:                   sr.StatusCode,
+			SubmitterSequencingRequestID: sr.SubmitterSequencingRequestId,
+			TenantCode:                   sc.TenantCode,
+		}
+		if err := sc.SeqReqRepo.UpsertSequencingRequest(ctx, &row); err != nil {
+			return fmt.Errorf("failed to persist sequencing request %q for create_case %d: %w", sr.SubmitterSequencingRequestId, cr.Index, err)
+		}
+		resolved.ID = &row.ID
+	}
+	return nil
+}
+
+// linkSequencingExperimentsToRequests writes sequencing_experiment.sequencing_request_id for the
+// payload experiments that named a request. resolveRequestID maps a submitter request id to the
+// persisted row and differs per path: the payload block on create/update, the database on patch.
+// resolvedSeqExps is keyed by experiment id, so the payload entry is matched back on its aliquot.
+func linkSequencingExperimentsToRequests(
+	ctx context.Context,
+	sc *StorageContext,
+	seqExps []*types.CaseSequencingExperimentBatch,
+	resolvedSeqExps map[int]*types.SequencingExperiment,
+	resolveRequestID func(string) (*int, error),
+) error {
+	for _, se := range seqExps {
+		if se == nil || se.SubmitterSequencingRequestId == "" {
+			continue
+		}
+		requestID, err := resolveRequestID(se.SubmitterSequencingRequestId)
+		if err != nil {
+			return err
+		}
+		if requestID == nil {
+			return fmt.Errorf("sequencing request %q is unresolved when linking sequencing experiment (%s / %s / %s)", se.SubmitterSequencingRequestId, se.SampleOrganizationCode, se.SubmitterSampleId, se.Aliquot)
+		}
+		for _, seqExp := range resolvedSeqExps {
+			if seqExp.Aliquot != se.Aliquot {
+				continue
+			}
+			if err := sc.SeqExpRepo.SetSequencingExperimentRequestID(ctx, seqExp.ID, *requestID); err != nil {
+				return fmt.Errorf("failed to link sequencing experiment %d to sequencing request %q: %w", seqExp.ID, se.SubmitterSequencingRequestId, err)
+			}
+			break
+		}
+	}
+	return nil
 }
 
 func persistCaseHasSequencingExperiments(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
@@ -1506,7 +1717,13 @@ func persistCaseHasSequencingExperiments(ctx context.Context, sc *StorageContext
 			return fmt.Errorf("failed to persist case has sequencing experiment for create_case %d and sequencing experiment %q: %w", cr.Index, se.ID, err)
 		}
 	}
-	return nil
+
+	return linkSequencingExperimentsToRequests(ctx, sc, cr.Case.SequencingExperiments, cr.SequencingExperiments, func(submitterID string) (*int, error) {
+		if resolved, ok := cr.SequencingRequests[submitterID]; ok {
+			return resolved.ID, nil
+		}
+		return nil, nil
+	})
 }
 
 func persistCaseRecords(

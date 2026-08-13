@@ -128,7 +128,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	tx = r.joiner.GermlineInterpretationWithCase(tx)
 	tx = r.joiner.SeqExpWithSample(tx)
 	tx = r.joiner.SampleAndCaseWithFamily(tx)
-	tx = r.joiner.CaseWithAnalysisCatalog(tx)
+	tx = r.joiner.CaseWithServiceCatalog(tx)
 	tx = r.joiner.CaseWithDiagnosisLab(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s mondo ON mondo.id = ig.condition", types.MondoTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND ((spl.fetus_id IS NULL AND agg_phenotypes.patient_id = spl.patient_id) OR (spl.fetus_id IS NOT NULL AND agg_phenotypes.fetus_id = spl.fetus_id))", txAggPhenotypes)
@@ -149,7 +149,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	tx = tx.Select("s.id as seq_id, c.id as case_id, spl.patient_id as patient_id, ig.transcript_id as transcript_id, " +
 		"ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, " +
 		"ig.classification as classification_code, g_snv_o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
-		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, " +
+		"sc.code as analysis_catalog_code, sc.name_en as analysis_catalog_name, c.status_code, " +
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, " +
 		"spl.submitter_sample_id as submitter_sample_id, " +
 		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
@@ -199,7 +199,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s g_snv_o ON g_snv_o.seq_id = tctx.sequencing_experiment_id AND g_snv_o.task_id = tctx.task_id", types.GermlineSNVOccurrenceTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s c ON c.id = tctx.case_id", types.CaseTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s s ON s.id = tctx.sequencing_experiment_id", types.SequencingExperimentTable.TenantQualifiedName(ctx)))
-	tx = r.joiner.CaseWithAnalysisCatalog(tx)
+	tx = r.joiner.CaseWithServiceCatalog(tx)
 	tx = r.joiner.CaseWithDiagnosisLab(tx)
 	tx = r.joiner.SeqExpWithSample(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s f ON %s", types.FamilyTable.TenantQualifiedName(ctx), joins.SampleToFamilyJoinCondition("tctx.case_id")))
@@ -308,7 +308,9 @@ func (r *VariantsRepository) GetVariantCasesCount(ctx context.Context, locusId i
 
 func (r *VariantsRepository) GetVariantCasesFilters(ctx context.Context) (*VariantCasesFilters, error) {
 	db := r.db.WithContext(ctx)
-	analysisCatalog, err := utils.GetFilter(db, types.AnalysisCatalogTable, "name", nil)
+	// Only case-level services are a case facet; the catalog also holds sequencing ones.
+	isCaseServiceCondition := fmt.Sprintf("%s.type = '%s'", types.ServiceCatalogTable.Alias, types.ServiceTypeCase)
+	analysisCatalog, err := utils.GetFilter(db, types.ServiceCatalogTable, "name_en", &isCaseServiceCondition)
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +453,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 	sample := types.SampleTable.TenantQualifiedName(ctx)
 	occurrence := types.GermlineSNVOccurrenceTable.TenantQualifiedName(ctx)
 	project := types.ProjectTable.TenantQualifiedName(ctx)
-	analysisCatalog := types.AnalysisCatalogTable.TenantQualifiedName(ctx)
+	serviceCatalog := types.ServiceCatalogTable.TenantQualifiedName(ctx)
 
 	switch splitType {
 	case types.SPLIT_BY_PROJECT:
@@ -466,9 +468,9 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 		joinToRetrieveSplitName = fmt.Sprintf("JOIN %s m on m.id = split_code", types.MondoTable.TenantQualifiedName(ctx))
 	case types.SPLIT_BY_ANALYSIS:
 		splitCodeColumn = "ac.code"
-		splitNameColumn = "ac.name"
-		joinToRetrieveSplitCode = fmt.Sprintf("JOIN %s ac ON ac.id = c.analysis_catalog_id", analysisCatalog)
-		joinToRetrieveSplitName = fmt.Sprintf("JOIN %s ac ON ac.code = split_code", analysisCatalog)
+		splitNameColumn = "ac.name_en"
+		joinToRetrieveSplitCode = fmt.Sprintf("JOIN %s ac ON ac.id = c.service_id", serviceCatalog)
+		joinToRetrieveSplitName = fmt.Sprintf("JOIN %s ac ON ac.code = split_code", serviceCatalog)
 	default:
 		return nil, fmt.Errorf("unsupported split type")
 	}

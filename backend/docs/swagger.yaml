@@ -196,9 +196,18 @@ components:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
           type: array
           uniqueItems: false
+        sequencing_requests:
+          description: Optional. Sequencing services ordered for this case's members,
+            delivered or not.
+          items:
+            $ref: '#/components/schemas/CaseSequencingRequestBatch'
+          type: array
+          uniqueItems: false
         status_code:
           type: string
         submitter_case_id:
+          type: string
+        supervisor:
           type: string
         tasks:
           items:
@@ -299,7 +308,14 @@ components:
             $ref: '#/components/schemas/CaseSequencingExperiment'
           type: array
           uniqueItems: false
+        sequencing_requests:
+          items:
+            $ref: '#/components/schemas/CaseSequencingRequest'
+          type: array
+          uniqueItems: false
         status_code:
+          type: string
+        supervisor:
           type: string
         tasks:
           items:
@@ -316,6 +332,7 @@ components:
       - has_igv_files
       - members
       - sequencing_experiments
+      - sequencing_requests
       - status_code
       - tasks
       - updated_on
@@ -626,6 +643,8 @@ components:
           type: string
         seq_id:
           type: integer
+        sequencing_request_id:
+          type: integer
         status_code:
           type: string
         updated_on:
@@ -649,10 +668,68 @@ components:
           type: string
         submitter_sample_id:
           type: string
+        submitter_sequencing_request_id:
+          description: Optional. The sequencing request of the same case this experiment
+            fulfills, if any.
+          type: string
       required:
       - aliquot
       - sample_organization_code
       - submitter_sample_id
+      type: object
+    CaseSequencingRequest:
+      description: Sequencing service requested for a case member, whether or not
+        it has been delivered yet
+      properties:
+        affected_status_code:
+          type: string
+        created_on:
+          type: string
+        id:
+          type: integer
+        patient_id:
+          type: integer
+        relationship_to_proband:
+          type: string
+        service_code:
+          type: string
+        service_name:
+          type: string
+        status_code:
+          type: string
+        submitter_sequencing_request_id:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - affected_status_code
+      - created_on
+      - id
+      - patient_id
+      - relationship_to_proband
+      - service_code
+      - status_code
+      - submitter_sequencing_request_id
+      - updated_on
+      type: object
+    CaseSequencingRequestBatch:
+      properties:
+        patient_organization_code:
+          type: string
+        service_code:
+          type: string
+        status_code:
+          type: string
+        submitter_patient_id:
+          type: string
+        submitter_sequencing_request_id:
+          type: string
+      required:
+      - patient_organization_code
+      - service_code
+      - status_code
+      - submitter_patient_id
+      - submitter_sequencing_request_id
       type: object
     CaseTask:
       properties:
@@ -2592,9 +2669,16 @@ components:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
           type: array
           uniqueItems: false
+        sequencing_requests:
+          items:
+            $ref: '#/components/schemas/CaseSequencingRequestBatch'
+          type: array
+          uniqueItems: false
         status_code:
           type: string
         submitter_case_id:
+          type: string
+        supervisor:
           type: string
         tasks:
           items:

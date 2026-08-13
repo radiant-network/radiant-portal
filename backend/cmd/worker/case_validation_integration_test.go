@@ -95,10 +95,13 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run").First(&ca)
 
 		assert.NotNil(t, ca)
-		assert.Equal(t, 1000, ca.ID)
+		// Ids are only asserted to be above the seed watermark: the identity sequences are shared
+		// with every other test in the package and are never reset, so an exact value would only
+		// hold for whichever test happens to insert first.
+		assert.GreaterOrEqual(t, ca.ID, 1000)
 		assert.Equal(t, 1, ca.ProbandID)
 		assert.Equal(t, 1, ca.ProjectID)
-		assert.Equal(t, "Dr. Test", ca.OrderingPhysician)
+		assert.Equal(t, "Dr. Test", ca.Requester)
 
 		var chse []*types.CaseHasSequencingExperiment
 		env.Postgres.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&chse)
@@ -109,28 +112,28 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 			return a.SequencingExperimentID - b.SequencingExperimentID
 		})
 
-		assert.Equal(t, 1000, chse[0].CaseID)
+		assert.Equal(t, ca.ID, chse[0].CaseID)
 		assert.Equal(t, 2, chse[0].SequencingExperimentID)
 		assert.Equal(t, 71, chse[1].SequencingExperimentID)
 
 		var fa []*types.Family
 		env.Postgres.Table("family").Where("case_id = ?", ca.ID).Find(&fa)
 		assert.Len(t, fa, 1)
-		assert.Equal(t, 1000, fa[0].ID)
+		assert.GreaterOrEqual(t, fa[0].ID, 1000)
 		assert.Equal(t, utils.IntPtr(1), fa[0].FamilyMemberID)
 		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
 
 		var obscat []*types.ObsCategorical
 		env.Postgres.Table("obs_categorical").Where("case_id = ?", ca.ID).Find(&obscat)
 		assert.Len(t, obscat, 1)
-		assert.Equal(t, 1000, obscat[0].ID)
+		assert.GreaterOrEqual(t, obscat[0].ID, 1000)
 		assert.Equal(t, utils.IntPtr(1), obscat[0].PatientID)
 		assert.Equal(t, "TEST:12345", obscat[0].CodeValue)
 
 		var obsstr []*types.ObsString
 		env.Postgres.Table("obs_string").Where("case_id = ?", ca.ID).Order("id").Find(&obsstr)
 		assert.Len(t, obsstr, 2)
-		assert.Equal(t, 1000, obsstr[0].ID)
+		assert.GreaterOrEqual(t, obsstr[0].ID, 1000)
 		assert.Equal(t, utils.IntPtr(1), obsstr[0].PatientID)
 		assert.Equal(t, "TEST:678901", obsstr[0].Value)
 		assert.Nil(t, obsstr[0].ExamCode)
@@ -143,12 +146,25 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		var famhist []*types.FamilyHistory
 		env.Postgres.Table("family_history").Where("case_id = ?", ca.ID).Find(&famhist)
 		assert.Len(t, famhist, 1)
-		assert.Equal(t, 1000, famhist[0].ID)
+		assert.GreaterOrEqual(t, famhist[0].ID, 1000)
 		assert.Equal(t, 1, famhist[0].PatientID)
 		assert.Equal(t, "Seizure", famhist[0].Condition)
 
+		// The task is reached through its own output document, whose URL is unique to this test:
+		// task_context.case_id is NULL here (alignment_germline_variant_calling is not one of the
+		// case-related task types) and the ids are sequence-dependent.
+		var doc *types.Document
+		env.Postgres.Table("document").Where("url = ?", "s3://test-bucket/Not_Dry_Run.recal.crai").First(&doc)
+		assert.NotNil(t, doc)
+		assert.GreaterOrEqual(t, doc.ID, 1000)
+
+		var thd []*types.TaskHasDocument
+		env.Postgres.Table("task_has_document").Where("document_id = ?", doc.ID).Find(&thd)
+		assert.Len(t, thd, 1)
+		taskID := thd[0].TaskID
+
 		var tc []*types.TaskContext
-		env.Postgres.Table("task_context").Where("task_id = 1000").Find(&tc)
+		env.Postgres.Table("task_context").Where("task_id = ?", taskID).Find(&tc)
 		assert.Len(t, tc, 2)
 
 		slices.SortFunc(tc, func(a, b *types.TaskContext) int {
@@ -159,20 +175,11 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, 71, tc[1].SequencingExperimentID)
 
 		var ta *types.Task
-		env.Postgres.Table("task").Where("id = 1000").First(&ta)
+		env.Postgres.Table("task").Where("id = ?", taskID).First(&ta)
 		assert.Equal(t, "alignment_germline_variant_calling", ta.TaskTypeCode)
 		assert.Equal(t, "Dragen", ta.PipelineName)
 		assert.Equal(t, "4.4.4", ta.PipelineVersion)
 		assert.Equal(t, "GRch38", ta.GenomeBuild)
-
-		var thd []*types.TaskHasDocument
-		env.Postgres.Table("task_has_document").Where("task_id = 1000").Find(&thd)
-		assert.Len(t, thd, 1)
-		assert.Equal(t, 1000, thd[0].DocumentID)
-
-		var doc *types.Document
-		env.Postgres.Table("document").Where("id = ?", thd[0].DocumentID).First(&doc)
-		assert.NotNil(t, doc)
 
 		assert.Equal(t, "Not_Dry_Run.recal.crai", doc.Name)
 		assert.Equal(t, int64(11), doc.Size)
@@ -369,12 +376,12 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca []*types.Case
-		env.Postgres.Table("cases").Where("project_id = ? AND ordering_physician = ?", 1, "Not Dry Run No SubmitterCaseId").Find(&ca)
+		env.Postgres.Table("cases").Where("project_id = ? AND requester = ?", 1, "Not Dry Run No SubmitterCaseId").Find(&ca)
 
 		assert.NotNil(t, ca)
 		assert.Len(t, ca, 2)
 		assert.GreaterOrEqual(t, ca[0].ID, 1000)
-		assert.Equal(t, "Not Dry Run No SubmitterCaseId", ca[0].OrderingPhysician)
+		assert.Equal(t, "Not Dry Run No SubmitterCaseId", ca[0].Requester)
 		assert.Equal(t, "", ca[0].SubmitterCaseID)
 	})
 }

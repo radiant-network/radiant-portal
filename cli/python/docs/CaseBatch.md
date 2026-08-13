@@ -19,8 +19,10 @@ Name | Type | Description | Notes
 **project_code** | **str** |  | 
 **resolution_status_code** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | 
+**sequencing_requests** | [**List[CaseSequencingRequestBatch]**](CaseSequencingRequestBatch.md) | Optional. Sequencing services ordered for this case&#39;s members, delivered or not. | [optional] 
 **status_code** | **str** |  | 
 **submitter_case_id** | **str** |  | [optional] 
+**supervisor** | **str** |  | [optional] 
 **tasks** | [**List[CaseTaskBatch]**](CaseTaskBatch.md) |  | 
 **type** | **str** |  | 
 

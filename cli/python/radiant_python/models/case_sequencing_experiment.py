@@ -36,9 +36,10 @@ class CaseSequencingExperiment(BaseModel):
     sample_submitter_id: Optional[StrictStr] = None
     sample_type_code: Optional[StrictStr] = None
     seq_id: StrictInt
+    sequencing_request_id: Optional[StrictInt] = None
     status_code: StrictStr
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["affected_status_code", "experimental_strategy_code", "has_variants", "histology_code", "patient_id", "relationship_to_proband", "sample_id", "sample_submitter_id", "sample_type_code", "seq_id", "status_code", "updated_on"]
+    __properties: ClassVar[List[str]] = ["affected_status_code", "experimental_strategy_code", "has_variants", "histology_code", "patient_id", "relationship_to_proband", "sample_id", "sample_submitter_id", "sample_type_code", "seq_id", "sequencing_request_id", "status_code", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,6 +102,7 @@ class CaseSequencingExperiment(BaseModel):
             "sample_submitter_id": obj.get("sample_submitter_id"),
             "sample_type_code": obj.get("sample_type_code"),
             "seq_id": obj.get("seq_id"),
+            "sequencing_request_id": obj.get("sequencing_request_id"),
             "status_code": obj.get("status_code"),
             "updated_on": obj.get("updated_on")
         })

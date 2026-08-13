@@ -601,43 +601,43 @@ VALUES (1, 'N1', 'NeuroDev Phase I', 'Phase one NeuroDev cases','radiant'),
        (3, 'QLIN', 'Quebec Clinical Genomic Center', 'Centre québécois de génomique clinique','radiant')
 ON CONFLICT (id) DO NOTHING;
 
-SELECT setval(pg_get_serial_sequence('analysis_catalog', 'id'), (SELECT COALESCE(MAX(id), 1) FROM analysis_catalog));
-INSERT INTO analysis_catalog (code, name, tenant_code) VALUES
-  ('MMG',   'Global Muscular Diseases','radiant'),
-  ('DYSM',  'Muscular Dystrophies','radiant'),
-  ('RHAB',  'Rhabdomyolysis','radiant'),
-  ('MITN',  'Nuclear Mitochondriopathies','radiant'),
-  ('MYOC',  'Congenital Myopathies','radiant'),
-  ('MYAC',  'Congenital Myasthenia','radiant'),
-  ('HYPM',  'Malignant Hyperthermia','radiant'),
-  ('RGDI',  'Global Developmental Delay / Intellectual Disability (Trio)','radiant'),
-  ('POLYM', 'Polymalformation Postnatal Context','radiant'),
-  ('TRATU', 'Tumoral Transcriptome','radiant'),
-  ('TUHEM', 'Hematological Malignancies Predisposition','radiant'),
-  ('TUPED', 'Pediatric Cancer Predisposition','radiant'),
-  ('EXTUM', 'Tumoral Analysis','radiant'),
-  ('SHEMA', 'Leukemia (Somatic)','radiant'),
-  ('SCID',  'Severe Combined Immune Deficiency','radiant'),
-  ('STMO',  'Soft Tissue and Bone Sarcoma','radiant'),
-  ('FEAN',  'Fetal Anomalies','radiant'),
-  ('DPSO',  'Superoxide Production Defect','radiant'),
-  ('EIDC',  'Inherited Complement Errors','radiant'),
-  ('EIDI',  'Inborn Errors of Immunity','radiant'),
-  ('EIII',  'Inherited Errors of Intrinsic Immunity','radiant'),
-  ('EPIL',  'Epilepsy Without Intellectual Disability','radiant'),
-  ('HDIP',  'Hypogammaglobulinemia and Primary Immune Dysregulation','radiant'),
-  ('HLEB',  'Lymphohistiocytic Hemophagocytosis and Chronic Active Epstein-Barr Virus Infection','radiant'),
-  ('HLH',   'Hemophagocytic Lymphohistiocytosis','radiant'),
-  ('MAI',   'Autoinflammatory Diseases','radiant'),
-  ('MSMD',  'Mendelian Susceptibility to Mycobacterial Diseases','radiant'),
-  ('NPC',   'Congenital Neutropenia','radiant'),
-  ('RETINO','Retinopathy','radiant'),
-  ('SHIGE', 'Hyper-IgE Syndrome','radiant'),
-  ('SLA',   'Amyotrophic Lateral Sclerosis','radiant'),
-  ('SURD',  'Hearing Loss','radiant'),
-  ('VEOIB', 'Very Early Onset Intestinal Bowl Disease','radiant'),
-  ('GENOR', 'Whole Genome Sequencing - Non-Specific','radiant'),
-  ('NEUTP', 'Congenital Neutropenia','radiant')
+SELECT setval(pg_get_serial_sequence('service_catalog', 'id'), (SELECT COALESCE(MAX(id), 1) FROM service_catalog));
+INSERT INTO service_catalog (code, type, name_en, tenant_code) VALUES
+  ('MMG', 'case', 'Global Muscular Diseases','radiant'),
+  ('DYSM', 'case', 'Muscular Dystrophies','radiant'),
+  ('RHAB', 'case', 'Rhabdomyolysis','radiant'),
+  ('MITN', 'case', 'Nuclear Mitochondriopathies','radiant'),
+  ('MYOC', 'case', 'Congenital Myopathies','radiant'),
+  ('MYAC', 'case', 'Congenital Myasthenia','radiant'),
+  ('HYPM', 'case', 'Malignant Hyperthermia','radiant'),
+  ('RGDI', 'case', 'Global Developmental Delay / Intellectual Disability (Trio)','radiant'),
+  ('POLYM', 'case', 'Polymalformation Postnatal Context','radiant'),
+  ('TRATU', 'case', 'Tumoral Transcriptome','radiant'),
+  ('TUHEM', 'case', 'Hematological Malignancies Predisposition','radiant'),
+  ('TUPED', 'case', 'Pediatric Cancer Predisposition','radiant'),
+  ('EXTUM', 'case', 'Tumoral Analysis','radiant'),
+  ('SHEMA', 'case', 'Leukemia (Somatic)','radiant'),
+  ('SCID', 'case', 'Severe Combined Immune Deficiency','radiant'),
+  ('STMO', 'case', 'Soft Tissue and Bone Sarcoma','radiant'),
+  ('FEAN', 'case', 'Fetal Anomalies','radiant'),
+  ('DPSO', 'case', 'Superoxide Production Defect','radiant'),
+  ('EIDC', 'case', 'Inherited Complement Errors','radiant'),
+  ('EIDI', 'case', 'Inborn Errors of Immunity','radiant'),
+  ('EIII', 'case', 'Inherited Errors of Intrinsic Immunity','radiant'),
+  ('EPIL', 'case', 'Epilepsy Without Intellectual Disability','radiant'),
+  ('HDIP', 'case', 'Hypogammaglobulinemia and Primary Immune Dysregulation','radiant'),
+  ('HLEB', 'case', 'Lymphohistiocytic Hemophagocytosis and Chronic Active Epstein-Barr Virus Infection','radiant'),
+  ('HLH', 'case', 'Hemophagocytic Lymphohistiocytosis','radiant'),
+  ('MAI', 'case', 'Autoinflammatory Diseases','radiant'),
+  ('MSMD', 'case', 'Mendelian Susceptibility to Mycobacterial Diseases','radiant'),
+  ('NPC', 'case', 'Congenital Neutropenia','radiant'),
+  ('RETINO', 'case', 'Retinopathy','radiant'),
+  ('SHIGE', 'case', 'Hyper-IgE Syndrome','radiant'),
+  ('SLA', 'case', 'Amyotrophic Lateral Sclerosis','radiant'),
+  ('SURD', 'case', 'Hearing Loss','radiant'),
+  ('VEOIB', 'case', 'Very Early Onset Intestinal Bowl Disease','radiant'),
+  ('GENOR', 'case', 'Whole Genome Sequencing - Non-Specific','radiant'),
+  ('NEUTP', 'case', 'Congenital Neutropenia','radiant')
 ON CONFLICT (code, tenant_code) DO NOTHING;
 
 
@@ -1230,7 +1230,7 @@ VALUES (1, 27, 'output'),
        (76, 271, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;
 
-INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
+INSERT INTO "cases" (id, proband_id, project_id, service_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, requester, requester_organization_code, submitter_case_id)
 VALUES
     (1, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:1'),
     (2, 4, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 'CHUSJ', '1:2'),

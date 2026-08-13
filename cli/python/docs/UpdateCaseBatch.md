@@ -19,8 +19,10 @@ Name | Type | Description | Notes
 **project_code** | **str** |  | 
 **resolution_status_code** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | [optional] 
+**sequencing_requests** | [**List[CaseSequencingRequestBatch]**](CaseSequencingRequestBatch.md) |  | [optional] 
 **status_code** | **str** |  | 
 **submitter_case_id** | **str** |  | 
+**supervisor** | **str** |  | [optional] 
 **tasks** | [**List[CaseTaskBatch]**](CaseTaskBatch.md) |  | [optional] 
 **type** | **str** |  | 
 
