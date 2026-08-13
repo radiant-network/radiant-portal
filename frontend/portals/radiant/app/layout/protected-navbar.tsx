@@ -12,10 +12,6 @@ type ProtectedNavbarProps = {
   userDetails: { id: string; name: string; email: string };
 };
 
-/**
- * Must be rendered below `TenantProvider` so the tenant-scoped actions gating the
- * admin link are read from a populated context rather than the default value.
- */
 const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const { t } = useI18n();
   const { pathname } = useLocation();
