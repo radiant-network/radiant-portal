@@ -37,6 +37,8 @@ func (r *UsersRepository) ListTenantUsers(ctx context.Context, tenantCode string
 		return nil, 0, fmt.Errorf("error counting users of tenant %q: %w", tenantCode, err)
 	}
 
+	// Roles are loaded by tenantGrants below, which is why UserResult tags them gorm:"-": left
+	// parsable, GORM reads the slice as an association and errors out on every scan.
 	users := []types.UserResult{}
 	tx := r.tenantUsers(ctx, tenantCode, query).
 		Select("u.user_id, u.email, u.first_name, u.last_name").

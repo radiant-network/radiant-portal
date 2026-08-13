@@ -61,7 +61,7 @@ type UserResult struct {
 	Email     string           `json:"email,omitempty"`
 	FirstName string           `json:"first_name,omitempty"`
 	LastName  string           `json:"last_name,omitempty"`
-	Roles     []UserRoleResult `json:"roles" validate:"required"`
+	Roles     []UserRoleResult `gorm:"-" json:"roles" validate:"required"`
 }
 
 // UserRoleResult is one role granted to a user in a tenant. OrgCodes carries the grant's
