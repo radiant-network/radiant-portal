@@ -129,19 +129,30 @@ func Test_UsersRepository_ListTenantUsers_UnknownTenantReturnsEmpty(t *testing.T
 	})
 }
 
-func Test_UsersRepository_ListTenantUsers_SearchMatchesFullName(t *testing.T) {
+func Test_UsersRepository_ListTenantUsers_SearchMatchesFirstNamePrefix(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
-		users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant("ice ada"))
+		users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant("ALI"))
 		require.NoError(t, err)
 		assert.Equal(t, int64(1), count)
 		require.Len(t, users, 1)
-		assert.Equal(t, aliceID, users[0].UserID)
+		assert.Equal(t, aliceID, users[0].UserID, "a case-insensitive prefix of the first name matches")
 	})
 }
 
-func Test_UsersRepository_ListTenantUsers_SearchMatchesEmailCaseInsensitively(t *testing.T) {
+func Test_UsersRepository_ListTenantUsers_SearchMatchesLastNamePrefix(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant("ada"))
+		require.NoError(t, err)
+		require.Len(t, users, 1)
+		assert.Equal(t, aliceID, users[0].UserID, "Alice Adams matches on her last name")
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_SearchMatchesEmailPrefixCaseInsensitively(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
@@ -149,6 +160,33 @@ func Test_UsersRepository_ListTenantUsers_SearchMatchesEmailCaseInsensitively(t 
 		require.NoError(t, err)
 		require.Len(t, users, 1)
 		assert.Equal(t, mikeID, users[0].UserID)
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_SearchDoesNotMatchMidWord(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		// "dams" and "lice" sit inside Adams / Alice: a StartsWith filter must miss them.
+		for _, search := range []string{"dams", "lice", "est.authz"} {
+			users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant(search))
+			require.NoError(t, err)
+			assert.Emptyf(t, users, "search %q matched mid-word", search)
+			assert.Equalf(t, int64(0), count, "search %q matched mid-word", search)
+		}
+	})
+}
+
+func Test_UsersRepository_ListTenantUsers_SearchTreatsWildcardsLiterally(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		// Unescaped, "%" and "_" would be ILIKE wildcards and match every user.
+		for _, search := range []string{"%", "_"} {
+			users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant(search))
+			require.NoError(t, err)
+			assert.Emptyf(t, users, "search %q was treated as a wildcard", search)
+		}
 	})
 }
 

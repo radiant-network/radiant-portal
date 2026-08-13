@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -82,13 +83,20 @@ func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode string, qu
 		Table("users u").
 		Where("EXISTS ("+grant+")", args...)
 	if query.Search != "" {
-		pattern := "%" + query.Search + "%"
-		// Parenthesized explicitly so the OR cannot absorb another filter's predicate, and the
-		// names are COALESCE'd because concatenating a NULL yields NULL, which would hide a user
-		// who has only one of the two from a search matching the other.
-		tx = tx.Where("((COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')) ILIKE ? OR u.email ILIKE ?)", pattern, pattern)
+		prefix := likePrefix(query.Search)
+		// Parenthesized explicitly so the OR cannot absorb another filter's predicate.
+		tx = tx.Where("(u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.email ILIKE ?)", prefix, prefix, prefix)
 	}
 	return tx
+}
+
+// likeEscaper neutralizes the ILIKE wildcards so the term matches literally — an email or a name
+// can contain an underscore, which would otherwise match any character.
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+
+// likePrefix builds a case-insensitive StartsWith pattern for ILIKE.
+func likePrefix(search string) string {
+	return likeEscaper.Replace(search) + "%"
 }
 
 // tenantGrants returns the users' grants in the tenant, each carrying the scopes its role's actions

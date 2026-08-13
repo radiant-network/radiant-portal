@@ -7681,7 +7681,8 @@ paths:
         required: true
         schema:
           type: string
-      - description: Case-insensitive substring of the user's name or email
+      - description: Case-insensitive prefix of the user's first name, last name or
+          email
         in: query
         name: search
         schema:

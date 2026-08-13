@@ -13910,7 +13910,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
-         * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
          * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
@@ -13983,7 +13983,7 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
-         * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
          * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
@@ -14011,7 +14011,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
-         * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
          * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
          * @param {number} [limit] Page size (default 25, capped at 200)
          * @param {number} [offset] Number of users to skip
@@ -14036,7 +14036,7 @@ export class UsersApi extends BaseAPI {
      * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
      * @summary List the tenant\'s users
      * @param {string} tenant Tenant code
-     * @param {string} [search] Case-insensitive substring of the user\&#39;s name or email
+     * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
      * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
      * @param {number} [limit] Page size (default 25, capped at 200)
      * @param {number} [offset] Number of users to skip

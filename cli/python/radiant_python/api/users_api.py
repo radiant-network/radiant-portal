@@ -43,7 +43,7 @@ class UsersApi:
     def list_users(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive prefix of the user's first name, last name or email")] = None,
         roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
@@ -67,7 +67,7 @@ class UsersApi:
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param search: Case-insensitive substring of the user's name or email
+        :param search: Case-insensitive prefix of the user's first name, last name or email
         :type search: str
         :param roles: Comma-separated role codes; keeps users holding any of them
         :type roles: str
@@ -134,7 +134,7 @@ class UsersApi:
     def list_users_with_http_info(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive prefix of the user's first name, last name or email")] = None,
         roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
@@ -158,7 +158,7 @@ class UsersApi:
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param search: Case-insensitive substring of the user's name or email
+        :param search: Case-insensitive prefix of the user's first name, last name or email
         :type search: str
         :param roles: Comma-separated role codes; keeps users holding any of them
         :type roles: str
@@ -225,7 +225,7 @@ class UsersApi:
     def list_users_without_preload_content(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring of the user's name or email")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive prefix of the user's first name, last name or email")] = None,
         roles: Annotated[Optional[StrictStr], Field(description="Comma-separated role codes; keeps users holding any of them")] = None,
         limit: Annotated[Optional[StrictInt], Field(description="Page size (default 25, capped at 200)")] = None,
         offset: Annotated[Optional[StrictInt], Field(description="Number of users to skip")] = None,
@@ -249,7 +249,7 @@ class UsersApi:
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param search: Case-insensitive substring of the user's name or email
+        :param search: Case-insensitive prefix of the user's first name, last name or email
         :type search: str
         :param roles: Comma-separated role codes; keeps users holding any of them
         :type roles: str

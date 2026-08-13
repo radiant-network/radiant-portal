@@ -47,7 +47,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.UsersApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
-    search = 'search_example' # str | Case-insensitive substring of the user's name or email (optional)
+    search = 'search_example' # str | Case-insensitive prefix of the user's first name, last name or email (optional)
     roles = 'roles_example' # str | Comma-separated role codes; keeps users holding any of them (optional)
     limit = 56 # int | Page size (default 25, capped at 200) (optional)
     offset = 56 # int | Number of users to skip (optional)
@@ -70,7 +70,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
- **search** | **str**| Case-insensitive substring of the user&#39;s name or email | [optional] 
+ **search** | **str**| Case-insensitive prefix of the user&#39;s first name, last name or email | [optional] 
  **roles** | **str**| Comma-separated role codes; keeps users holding any of them | [optional] 
  **limit** | **int**| Page size (default 25, capped at 200) | [optional] 
  **offset** | **int**| Number of users to skip | [optional] 

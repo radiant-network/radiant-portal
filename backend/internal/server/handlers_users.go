@@ -21,7 +21,7 @@ type usersReader interface {
 // @Tags users
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
-// @Param search query string false "Case-insensitive substring of the user's name or email"
+// @Param search query string false "Case-insensitive prefix of the user's first name, last name or email"
 // @Param roles query string false "Comma-separated role codes; keeps users holding any of them"
 // @Param limit query int false "Page size (default 25, capped at 200)"
 // @Param offset query int false "Number of users to skip"
