@@ -20,6 +20,24 @@ func NewSamplesRepository(db database.PostgresDB) *SamplesRepository {
 	return &SamplesRepository{db: db.DB}
 }
 
+// GetFetusIDsWithSamples narrows fetusIDs down to those a sample still points at. A fetus cannot be
+// deleted while one does: sample.fetus_id has no ON DELETE CASCADE, so the delete would fail as a
+// raw FK violation instead of a reportable validation error.
+func (r *SamplesRepository) GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error) {
+	if len(fetusIDs) == 0 {
+		return nil, nil
+	}
+	var found []int
+	if err := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Distinct().
+		Where("fetus_id IN ?", fetusIDs).
+		Pluck("fetus_id", &found).Error; err != nil {
+		return nil, fmt.Errorf("error while checking samples for fetuses %v: %w", fetusIDs, err)
+	}
+	return found, nil
+}
+
 func (r *SamplesRepository) GetSampleById(ctx context.Context, id int) (*Sample, error) {
 	var sample Sample
 	tx := r.db.WithContext(ctx).Table(types.SampleTable.Name).Where("id = ?", id)
@@ -57,6 +75,9 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 	// updated; neither is tenant_code. patient_id is the resolved owning patient — it is
 	// deliberately NOT updated here: a sample must not be re-pointed to a different patient
 	// (equivalent to changing submitter_patient_id), which is immutable across updates.
+	// fetus_id, unlike patient_id, is updatable — it's often attached after creation. Careful:
+	// this is a full replace, not a merge, so a batch that omits fetus_id clears it (like
+	// parent_sample_id).
 	tx := r.db.WithContext(ctx).
 		Table(types.SampleTable.Name).
 		Where("organization_code = ? AND submitter_sample_id = ?", sample.OrganizationCode, sample.SubmitterSampleId).
@@ -65,6 +86,7 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 			"tissue_site":      sample.TissueSite,
 			"histology_code":   sample.HistologyCode,
 			"parent_sample_id": sample.ParentSampleID,
+			"fetus_id":         sample.FetusID,
 		})
 	if tx.Error != nil {
 		return fmt.Errorf("error updating sample: %w", tx.Error)

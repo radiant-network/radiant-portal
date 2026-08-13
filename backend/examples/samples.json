@@ -26,6 +26,34 @@
       "type_code": "dna",
       "histology_code": "normal",
       "tissue_site": "blood"
+    },
+    {
+      "submitter_sample_id": "SP-PRENATAL-MOTHER-FETAL-001",
+      "submitter_patient_id": "MRN-004",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood",
+      "submitter_fetus_id": "FETUS-001"
+    },
+    {
+      "submitter_sample_id": "SP-PRENATAL-MOTHER-001",
+      "submitter_patient_id": "MRN-004",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood"
+    },
+    {
+      "submitter_sample_id": "SP-PRENATAL-FATHER-001",
+      "submitter_patient_id": "MRN-005",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood"
     }
   ]
 }

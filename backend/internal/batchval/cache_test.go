@@ -30,6 +30,9 @@ func (m *mockSampleRepo) GetSampleById(_ context.Context, id int) (*types.Sample
 func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, orgCode string, submitterSampleId string) (*types.Sample, error) {
 	return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(orgCode, submitterSampleId)
 }
+func (m *mockSampleRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
+	return nil, nil
+}
 
 type mockValueSetsRepo struct {
 	GetCodesFunc func(vsType postgres.ValueSetType) ([]string, error)

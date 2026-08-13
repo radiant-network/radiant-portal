@@ -173,7 +173,18 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
        (73, 124, 'completed', 'NSRX1091646', 'CQGC', 'radiant', 1678, 'NSRX1091646_1678', '2026-03-08', 'SureSelect Custom DNA Target',
         '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (74, 126, 'completed', 'TSRX1091647', 'CQGC', 'radiant', 1679, 'TSRX1091647_1679', '2026-03-08', 'SureSelect Custom DNA Target',
-        '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+        '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       -- prenatal fixtures: one fetal sequencing per case.
+       (75, 127, 'completed', 'PRENAT72', 'CQGC', 'radiant', 1701, 'A00516_0201', '2026-04-01', 'SureSelect Custom DNA Target',
+        '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'wxs', 'short_read', 'illumina'),
+       (76, 128, 'completed', 'PRENAT73', 'CQGC', 'radiant', 1702, 'A00516_0202', '2026-04-02', 'SureSelect Custom DNA Target',
+        '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'wxs', 'short_read', 'illumina'),
+       (77, 129, 'completed', 'PRENAT74', 'CQGC', 'radiant', 1703, 'A00516_0203', '2026-04-03', 'SureSelect Custom DNA Target',
+        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wxs', 'short_read', 'illumina'),
+       -- The mother's own sequencing for case 72 — a task covering both this and seq_exp 75 must
+       -- count 2 distinct individuals despite both samples sharing patient_id 63.
+       (78, 130, 'completed', 'PRENAT72-MOTHER', 'CQGC', 'radiant', 1704, 'A00516_0204', '2026-04-01', 'SureSelect Custom DNA Target',
+        '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE sequencing_experiment ALTER COLUMN id RESTART WITH 1000;

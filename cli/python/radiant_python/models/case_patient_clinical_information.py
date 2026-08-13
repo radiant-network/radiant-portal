@@ -30,6 +30,7 @@ class CasePatientClinicalInformation(BaseModel):
     affected_status_code: StrictStr
     date_of_birth: Optional[StrictStr] = None
     ethnicity_codes: Optional[List[StrictStr]] = Field(default=None, description="TODO")
+    fetus_id: Optional[StrictInt] = None
     first_name: Optional[StrictStr] = None
     jhn: Optional[StrictStr] = None
     last_name: Optional[StrictStr] = None
@@ -38,11 +39,11 @@ class CasePatientClinicalInformation(BaseModel):
     observed_phenotypes: Optional[List[Term]] = None
     organization_code: Optional[StrictStr] = None
     organization_name: Optional[StrictStr] = None
-    patient_id: StrictInt
+    patient_id: Optional[StrictInt] = None
     relationship_to_proband: StrictStr
     sex_code: StrictStr
     submitter_patient_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["affected_status_code", "date_of_birth", "ethnicity_codes", "first_name", "jhn", "last_name", "life_status_code", "non_observed_phenotypes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "relationship_to_proband", "sex_code", "submitter_patient_id"]
+    __properties: ClassVar[List[str]] = ["affected_status_code", "date_of_birth", "ethnicity_codes", "fetus_id", "first_name", "jhn", "last_name", "life_status_code", "non_observed_phenotypes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "relationship_to_proband", "sex_code", "submitter_patient_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -112,6 +113,7 @@ class CasePatientClinicalInformation(BaseModel):
             "affected_status_code": obj.get("affected_status_code"),
             "date_of_birth": obj.get("date_of_birth"),
             "ethnicity_codes": obj.get("ethnicity_codes"),
+            "fetus_id": obj.get("fetus_id"),
             "first_name": obj.get("first_name"),
             "jhn": obj.get("jhn"),
             "last_name": obj.get("last_name"),

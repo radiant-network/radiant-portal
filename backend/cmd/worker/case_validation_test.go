@@ -285,6 +285,12 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 
 	case postgres.ValueSetFileFormat:
 		return []string{"cram", "crai", "vcf", "tbi", "csv", "tsv", "gvcf"}, nil
+
+	case postgres.ValueSetSex:
+		return []string{"male", "female", "unknown"}, nil
+
+	case postgres.ValueSetLifeStatus:
+		return []string{"alive", "deceased", "unknown"}, nil
 	default:
 		return nil, nil
 	}
@@ -312,6 +318,37 @@ func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Conte
 }
 
 func (m *SamplesMockRepo) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
+	return nil, nil
+}
+
+func (m *SamplesMockRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
+	return nil, nil
+}
+
+type FetusMockRepo struct {
+	GetFetusesByCaseIDFunc                   func(caseID int) ([]*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterIdFunc func(organizationCode, submitterFetusId string) (*types.Fetus, error)
+}
+
+func (m *FetusMockRepo) GetFetusById(_ context.Context, _ int) (*types.Fetus, error) {
+	return nil, nil
+}
+
+func (m *FetusMockRepo) GetFetusesByCaseID(_ context.Context, caseID int) ([]*types.Fetus, error) {
+	if m.GetFetusesByCaseIDFunc != nil {
+		return m.GetFetusesByCaseIDFunc(caseID)
+	}
+	return nil, nil
+}
+
+func (m *FetusMockRepo) GetFetusByMotherAndSubmitterId(_ context.Context, _ int, _ string) (*types.Fetus, error) {
+	return nil, nil
+}
+
+func (m *FetusMockRepo) GetFetusByOrganizationAndSubmitterId(_ context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error) {
+	if m.GetFetusByOrganizationAndSubmitterIdFunc != nil {
+		return m.GetFetusByOrganizationAndSubmitterIdFunc(organizationCode, submitterFetusId)
+	}
 	return nil, nil
 }
 

@@ -41,6 +41,7 @@ type BatchValidationCache struct {
 	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id
 	SamplesById                    map[int]*types.Sample                                   // Key: ID
 	SamplesByKey                   map[SampleKey]*types.Sample                             // Key: org_code + submitter_sample_id
+	FetusesById                    map[int]*types.Fetus                                    // Key: ID
 	SequencingExperimentsByAliquot map[string][]types.SequencingExperiment                 // Key: aliquot
 	SequencingExperimentsByKey     map[SequencingExperimentKey]*types.SequencingExperiment // Key: org_code + submitter_sample_id + aliquot
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
@@ -59,6 +60,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		Patients:                       make(map[PatientKey]*types.Patient),
 		SamplesById:                    make(map[int]*types.Sample),
 		SamplesByKey:                   make(map[SampleKey]*types.Sample),
+		FetusesById:                    make(map[int]*types.Fetus),
 		SequencingExperimentsByAliquot: make(map[string][]types.SequencingExperiment),
 		SequencingExperimentsByKey:     make(map[SequencingExperimentKey]*types.SequencingExperiment),
 		TaskContext:                    make(map[int][]*types.TaskContext),
@@ -210,6 +212,44 @@ func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(ctx contex
 	}
 
 	return sample, nil
+}
+
+// GetFetusByMotherAndSubmitterId shares FetusesById with GetFetusById: a batch typically resolves
+// the same fetus once per sample, and both paths key the row by its internal id.
+func (c *BatchValidationCache) GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error) {
+	for _, fetus := range c.FetusesById {
+		if fetus.MotherID == motherID && fetus.SubmitterFetusId == submitterFetusId {
+			return fetus, nil
+		}
+	}
+
+	fetus, err := c.Context.FetusRepo.GetFetusByMotherAndSubmitterId(ctx, motherID, submitterFetusId)
+	if err != nil {
+		return nil, err
+	}
+
+	if fetus != nil {
+		c.FetusesById[fetus.ID] = fetus
+	}
+
+	return fetus, nil
+}
+
+func (c *BatchValidationCache) GetFetusById(ctx context.Context, id int) (*types.Fetus, error) {
+	if fetus, ok := c.FetusesById[id]; ok {
+		return fetus, nil
+	}
+
+	fetus, err := c.Context.FetusRepo.GetFetusById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if fetus != nil {
+		c.FetusesById[id] = fetus
+	}
+
+	return fetus, nil
 }
 
 func (c *BatchValidationCache) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]types.SequencingExperiment, error) {

@@ -7,8 +7,10 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var allCasesFields = sliceutils.Map(types.CasesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -47,7 +49,7 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(26), *count)
 		assert.Equal(t, "somatic", (*cases)[0].CaseTypeCode)
 		assert.Equal(t, "somatic", (*cases)[0].CaseType)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
@@ -210,7 +212,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(26), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -237,7 +239,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(21), *count)
+		assert.Equal(t, int64(24), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -264,7 +266,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(17), *count)
+		assert.Equal(t, int64(20), *count)
 	})
 }
 
@@ -280,7 +282,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, int64(26), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -318,7 +320,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(0), *count)
+		assert.Equal(t, int64(3), *count)
 	})
 }
 
@@ -334,7 +336,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(25), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -383,6 +385,28 @@ func Test_SearchCases_OnSubmitterCaseId_NoResult(t *testing.T) {
 		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
+	})
+}
+
+func Test_SearchCases_PrenatalSoloCase_CountsMotherAndFetusAsTwoMembers(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
+				Value:     []interface{}{"1:72"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
+		assert.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		assert.NoError(t, err)
+		require.Equal(t, int64(1), *count)
+		require.Len(t, *cases, 1)
+		// Case 72 is a solo prenatal case: one family row for the mother (proband) and one for
+		// her fetus — two distinct members, so it must get the "_family" suffix like any other
+		// case with more than one member, not be misclassified as a singleton.
+		assert.Equal(t, "germline_family", (*cases)[0].CaseType)
 	})
 }
 
@@ -575,7 +599,9 @@ func Test_RetrieveCasePatients(t *testing.T) {
 
 		// Proband first
 		assert.Equal(t, "proband", (*members)[0].RelationshipToProband)
-		assert.Equal(t, 3, (*members)[0].PatientID)
+		require.NotNil(t, (*members)[0].PatientID)
+		assert.Equal(t, 3, *(*members)[0].PatientID)
+		assert.Nil(t, (*members)[0].FetusID)
 		assert.Equal(t, "Marie", (*members)[0].FirstName)
 		assert.Equal(t, "Lambert", (*members)[0].LastName)
 		assert.Equal(t, "affected", (*members)[0].AffectedStatusCode)
@@ -597,7 +623,8 @@ func Test_RetrieveCasePatients(t *testing.T) {
 
 		// Affected then non_affected
 		assert.Equal(t, "mother", (*members)[1].RelationshipToProband)
-		assert.Equal(t, 1, (*members)[1].PatientID)
+		require.NotNil(t, (*members)[1].PatientID)
+		assert.Equal(t, 1, *(*members)[1].PatientID)
 		assert.Equal(t, "Juliette", (*members)[1].FirstName)
 		assert.Equal(t, "Gagnon", (*members)[1].LastName)
 		assert.Equal(t, "affected", (*members)[1].AffectedStatusCode)
@@ -612,7 +639,8 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Len(t, (*members)[1].NonObservedPhenotypes, 0)
 
 		assert.Equal(t, "father", (*members)[2].RelationshipToProband)
-		assert.Equal(t, 2, (*members)[2].PatientID)
+		require.NotNil(t, (*members)[2].PatientID)
+		assert.Equal(t, 2, *(*members)[2].PatientID)
 		assert.Equal(t, "Antoine", (*members)[2].FirstName)
 		assert.Equal(t, "Lefebvre", (*members)[2].LastName)
 		assert.Equal(t, "non_affected", (*members)[2].AffectedStatusCode)
@@ -625,6 +653,65 @@ func Test_RetrieveCasePatients(t *testing.T) {
 		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*members)[2].OrganizationName)
 		assert.Len(t, (*members)[2].ObservedPhenotypes, 0)
 		assert.Len(t, (*members)[2].NonObservedPhenotypes, 0)
+	})
+}
+
+func Test_RetrieveCasePatients_TwinFetusCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		members, err := repo.retrieveCasePatients(t.Context(), 73)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(*members))
+
+		// affected_status_code/relationship_to_proband_code tie between the two fetuses, so their
+		// relative order is undefined SQL-side — look up by FetusID rather than by position.
+		findByFetusID := func(fetusID int) *types.CasePatientClinicalInformation {
+			for i := range *members {
+				if (*members)[i].FetusID != nil && *(*members)[i].FetusID == fetusID {
+					return &(*members)[i]
+				}
+			}
+			return nil
+		}
+
+		var mother *types.CasePatientClinicalInformation
+		for i := range *members {
+			if (*members)[i].RelationshipToProband == "proband" {
+				mother = &(*members)[i]
+			}
+		}
+		require.NotNil(t, mother)
+		require.NotNil(t, mother.PatientID)
+		assert.Equal(t, 64, *mother.PatientID)
+		assert.Nil(t, mother.FetusID)
+		assert.Equal(t, "female", mother.SexCode)
+
+		fetus2 := findByFetusID(2)
+		require.NotNil(t, fetus2)
+		assert.Nil(t, fetus2.PatientID)
+		require.NotNil(t, fetus2.FetusID)
+		assert.Equal(t, 2, *fetus2.FetusID)
+		assert.Equal(t, "alive", fetus2.LifeStatusCode)
+		assert.Equal(t, "female", fetus2.SexCode)
+		assert.Empty(t, fetus2.SubmitterPatientId)
+		assert.Empty(t, fetus2.Jhn)
+		// HP:0001631 has no matching hpo_term row in this fixture set — phenotype_name comes
+		// back empty, confirming the join tolerates an unmatched code without erroring.
+		assert.Len(t, fetus2.ObservedPhenotypes, 1)
+		assert.Equal(t, "HP:0001631", fetus2.ObservedPhenotypes[0].ID)
+		assert.Empty(t, fetus2.ObservedPhenotypes[0].Name)
+
+		fetus3 := findByFetusID(3)
+		require.NotNil(t, fetus3)
+		assert.Nil(t, fetus3.PatientID)
+		require.NotNil(t, fetus3.FetusID)
+		assert.Equal(t, 3, *fetus3.FetusID)
+		assert.Equal(t, "deceased", fetus3.LifeStatusCode)
+		assert.Equal(t, "unknown", fetus3.SexCode)
+		assert.Len(t, fetus3.ObservedPhenotypes, 1)
+		assert.Equal(t, "HP:0001561", fetus3.ObservedPhenotypes[0].ID)
+		assert.Equal(t, "Polyhydramnios", fetus3.ObservedPhenotypes[0].Name)
+		assert.Equal(t, "antenatal", fetus3.ObservedPhenotypes[0].OnsetCode)
 	})
 }
 
@@ -665,4 +752,50 @@ func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
 		assert.Equal(t, 1, len((*tasks)[0].Patients))
 		assert.True(t, slices.Contains((*tasks)[0].Patients, "proband"))
 	})
+}
+
+func Test_RetrieveCaseTasks_PrenatalCase_CountsMotherAndFetusAsTwoDistinctIndividuals(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		tasks, err := repo.retrieveCaseTasks(t.Context(), 72)
+		assert.NoError(t, err)
+		require.Len(t, *tasks, 2)
+
+		fetusOnlyTask := (*tasks)[0]
+		assert.Equal(t, 83, fetusOnlyTask.ID)
+		assert.Equal(t, int64(1), fetusOnlyTask.PatientCount)
+		assert.Equal(t, 1, len(fetusOnlyTask.Patients))
+		assert.True(t, slices.Contains(fetusOnlyTask.Patients, "fetus"))
+
+		// Task 84 covers both the fetus's sequencing (sample 127) and the mother's own,
+		// separate sequencing (sample 130) — both samples share patient_id 63, but must still
+		// count as 2 distinct individuals, not 1.
+		motherAndFetusTask := (*tasks)[1]
+		assert.Equal(t, 84, motherAndFetusTask.ID)
+		assert.Equal(t, int64(2), motherAndFetusTask.PatientCount)
+		assert.True(t, slices.Contains(motherAndFetusTask.Patients, "fetus"))
+		assert.True(t, slices.Contains(motherAndFetusTask.Patients, "proband"))
+	})
+}
+
+func Test_subjectKey_FetusRowTaggedAsFetus(t *testing.T) {
+	assert.Equal(t, "f:7", subjectKey(nil, utils.IntPtr(7)))
+}
+
+func Test_subjectKey_PatientRowTaggedAsPatient(t *testing.T) {
+	assert.Equal(t, "p:7", subjectKey(utils.IntPtr(7), nil))
+}
+
+// A patient id and a fetus id can be the same integer — the tag is what keeps their rows apart.
+func Test_subjectKey_SameIdDifferentSubjectsDoNotCollide(t *testing.T) {
+	assert.NotEqual(t, subjectKey(utils.IntPtr(7), nil), subjectKey(nil, utils.IntPtr(7)))
+}
+
+// Neither set means a data anomaly (dangling FK, unresolved federated join). It must not panic,
+// and must not be mistaken for a real subject.
+func Test_subjectKey_NeitherSetDoesNotPanic(t *testing.T) {
+	key := subjectKey(nil, nil)
+	assert.Equal(t, "unresolved", key)
+	assert.NotEqual(t, subjectKey(utils.IntPtr(0), nil), key)
+	assert.NotEqual(t, subjectKey(nil, utils.IntPtr(0)), key)
 }

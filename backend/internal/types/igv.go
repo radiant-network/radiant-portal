@@ -5,6 +5,7 @@ type IGVTrack struct {
 	SampleId               string `json:"sample_id"`
 	HistologyCode          string `json:"histology_code"`
 	PatientId              int    `json:"patient_id"`
+	FetusId                *int   `json:"fetus_id,omitempty"`
 	FamilyRole             string `json:"family_role"`
 	SexCode                string `json:"sexcode"`
 	DataTypeCode           string `json:"datatype_code"`
@@ -14,6 +15,7 @@ type IGVTrack struct {
 
 type IGVTrackEnriched struct {
 	PatientId        int    `json:"patient_id"`
+	FetusId          *int   `json:"fetus_id,omitempty"`
 	FamilyRole       string `json:"family_role"`
 	Sex              string `json:"sex"`
 	Type             string `json:"type"`

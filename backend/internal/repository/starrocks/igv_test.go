@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_IGVInternal_GetIGV(t *testing.T) {
@@ -38,6 +39,23 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 			FormatCode:             "cram",
 			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
 		}, igvInternal[1])
+	})
+}
+
+func Test_IGVInternal_GetIGV_FetusSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+		igvInternal, err := repo.GetIGV(t.Context(), 72)
+		assert.NoError(t, err)
+		require.Len(t, igvInternal, 2)
+
+		for _, track := range igvInternal {
+			assert.Equal(t, 63, track.PatientId, "patient_id stays the mother — a sample is always physically drawn from her body")
+			require.NotNil(t, track.FetusId, "fetus_id says whose genome the sample's sequencing represents")
+			assert.Equal(t, 1, *track.FetusId)
+			assert.Equal(t, "male", track.SexCode, "fetus 1's own sex, not the mother's")
+			assert.Equal(t, "fetus", track.FamilyRole, "the sample's own family row, not the mother's proband row")
+		}
 	})
 }
 
@@ -157,6 +175,20 @@ func Test_prepareIgvTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
 	assert.NotNil(t, result)
 	assert.Equal(t, "presigned.s3://example.com/file1.cram", result.Alignment[0].URL)
 	assert.NotZero(t, result.Alignment[0].URLExpireAt)
+}
+
+func Test_prepareIgvTracks_threadsFetusId(t *testing.T) {
+	fetusId := 1
+	internalTracks := []IGVTrack{
+		{PatientId: 63, FetusId: &fetusId, SequencingExperimentId: 1, SampleId: "S-PRENAT-72", FamilyRole: "fetus", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/fetus.cram"},
+	}
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+
+	assert.NoError(t, err)
+	require.Len(t, result.Alignment, 1)
+	assert.Equal(t, 63, result.Alignment[0].PatientId)
+	require.NotNil(t, result.Alignment[0].FetusId)
+	assert.Equal(t, fetusId, *result.Alignment[0].FetusId)
 }
 
 func Test_prepareIgvTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {

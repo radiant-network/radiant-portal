@@ -5,10 +5,12 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GetVariantHeader(t *testing.T) {
@@ -541,13 +543,15 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 
 		assert.Equal(t, "N1", project1.SplitValueCode)
 		assert.Equal(t, "NeuroDev Phase I", project1.SplitValueName)
+		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
+		// no occurrence at locus 1000.
 		assert.Equal(t, 5, *(project1.Frequencies.PcAll))
-		assert.Equal(t, 5, *(project1.Frequencies.PnAll))
-		assert.Equal(t, 1.0, *(project1.Frequencies.PfAll))
+		assert.Equal(t, 7, *(project1.Frequencies.PnAll))
+		assert.Equal(t, 5.0/7.0, *(project1.Frequencies.PfAll))
 		assert.Equal(t, 2, *(project1.Frequencies.HomAll))
 		assert.Equal(t, 4, *(project1.Frequencies.PcAffected))
-		assert.Equal(t, 4, *(project1.Frequencies.PnAffected))
-		assert.Equal(t, 1.0, *(project1.Frequencies.PfAffected))
+		assert.Equal(t, 6, *(project1.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/6.0, *(project1.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.PcNonAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.PnNonAffected))
@@ -599,13 +603,15 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 
 		assert.Equal(t, "MONDO:0700092", mondo0700092.SplitValueCode)
 		assert.Equal(t, "neurodevelopmental disorder", mondo0700092.SplitValueName)
+		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
+		// no occurrence at locus 1000.
 		assert.Equal(t, 5, *(mondo0700092.Frequencies.PcAll))
-		assert.Equal(t, 6, *(mondo0700092.Frequencies.PnAll))
-		assert.Equal(t, 0.8333333333333334, *(mondo0700092.Frequencies.PfAll))
+		assert.Equal(t, 8, *(mondo0700092.Frequencies.PnAll))
+		assert.Equal(t, 5.0/8.0, *(mondo0700092.Frequencies.PfAll))
 		assert.Equal(t, 2, *(mondo0700092.Frequencies.HomAll))
 		assert.Equal(t, 4, *(mondo0700092.Frequencies.PcAffected))
-		assert.Equal(t, 4, *(mondo0700092.Frequencies.PnAffected))
-		assert.Equal(t, 1.0, *(mondo0700092.Frequencies.PfAffected))
+		assert.Equal(t, 6, *(mondo0700092.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/6.0, *(mondo0700092.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(mondo0700092.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(mondo0700092.Frequencies.PcNonAffected))
 		assert.Equal(t, 2, *(mondo0700092.Frequencies.PnNonAffected))
@@ -642,18 +648,52 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 
 		assert.Equal(t, "WGA", WGA.SplitValueCode)
 		assert.Equal(t, "Whole Genome Analysis", WGA.SplitValueName)
+		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
+		// no occurrence at locus 1000.
 		assert.Equal(t, 5, *(WGA.Frequencies.PcAll))
-		assert.Equal(t, 6, *(WGA.Frequencies.PnAll))
-		assert.Equal(t, 0.8333333333333334, *(WGA.Frequencies.PfAll))
+		assert.Equal(t, 8, *(WGA.Frequencies.PnAll))
+		assert.Equal(t, 5.0/8.0, *(WGA.Frequencies.PfAll))
 		assert.Equal(t, 2, *(WGA.Frequencies.HomAll))
 		assert.Equal(t, 4, *(WGA.Frequencies.PcAffected))
-		assert.Equal(t, 4, *(WGA.Frequencies.PnAffected))
-		assert.Equal(t, 1.0, *(WGA.Frequencies.PfAffected))
+		assert.Equal(t, 6, *(WGA.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/6.0, *(WGA.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(WGA.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(WGA.Frequencies.PcNonAffected))
 		assert.Equal(t, 2, *(WGA.Frequencies.PnNonAffected))
 		assert.Equal(t, 0.5, *(WGA.Frequencies.PfNonAffected))
 		assert.Equal(t, 1, *(WGA.Frequencies.HomNonAffected))
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctIndividuals(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Locus 3000 is reached only by case 72: once via seq_exp 75 (fetus 1) and once via
+		// seq_exp 78 (the mother's own sequencing). Both share patient_id 63 but differ by
+		// sample.fetus_id, so they must count as 2. pn covers every sequenced individual in the
+		// project, hence baseline 5 plus these 2; only pc/hom are locus-specific.
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 3000, types.SPLIT_BY_PROJECT)
+		assert.NoError(t, err)
+		require.NotNil(t, splitRows)
+
+		var n1 *types.InternalFrequenciesSplitBy
+		for i := range *splitRows {
+			if (*splitRows)[i].SplitValueCode == "N1" {
+				n1 = &(*splitRows)[i]
+			}
+		}
+		require.NotNil(t, n1, "project N1 must be present")
+		assert.Equal(t, "NeuroDev Phase I", n1.SplitValueName)
+		require.NotNil(t, n1.Frequencies.PnAll)
+		assert.Equal(t, 7, *n1.Frequencies.PnAll)
+		require.NotNil(t, n1.Frequencies.PcAll)
+		assert.Equal(t, 2, *n1.Frequencies.PcAll, "only case 72's mother+fetus have an occurrence at locus 3000")
+		require.NotNil(t, n1.Frequencies.HomAll)
+		assert.Equal(t, 0, *n1.Frequencies.HomAll)
+		require.NotNil(t, n1.Frequencies.PnAffected)
+		assert.Equal(t, 6, *n1.Frequencies.PnAffected)
+		require.NotNil(t, n1.Frequencies.PcAffected)
+		assert.Equal(t, 2, *n1.Frequencies.PcAffected)
 	})
 }
 
@@ -663,5 +703,42 @@ func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSplit(t *testing.T) {
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, "incorrect")
 		assert.Nil(t, splitRows)
 		assert.Error(t, err)
+	})
+}
+
+func Test_GetAggregatedPhenotypes_DistinguishesPatientAndFetus(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		type aggregatedPhenotypeRow struct {
+			CaseID         int
+			PatientID      *int
+			FetusID        *int
+			PhenotypesTerm string
+		}
+
+		var rows []aggregatedPhenotypeRow
+		tx := utils.GetAggregatedPhenotypes(env.Starrocks).Where("case_id IN (73, 74)")
+		require.NoError(t, tx.Find(&rows).Error)
+
+		// Case 73's fetus 3 (deceased twin) has a positively-interpreted phenotype
+		// (HP:0001561, Polyhydramnios) — must be grouped under fetus_id, not patient_id.
+		var fetus3Row *aggregatedPhenotypeRow
+		// Case 74's mother (patient 65) has her own independent positively-interpreted
+		// finding (HP:0000822) — must be grouped under patient_id, not fetus_id.
+		var motherRow *aggregatedPhenotypeRow
+		for i := range rows {
+			if rows[i].CaseID == 73 && rows[i].FetusID != nil && *rows[i].FetusID == 3 {
+				fetus3Row = &rows[i]
+			}
+			if rows[i].CaseID == 74 && rows[i].PatientID != nil && *rows[i].PatientID == 65 {
+				motherRow = &rows[i]
+			}
+		}
+
+		require.NotNil(t, fetus3Row, "fetus 3's phenotype must be grouped under fetus_id")
+		assert.Nil(t, fetus3Row.PatientID)
+		assert.Contains(t, fetus3Row.PhenotypesTerm, "Polyhydramnios")
+
+		require.NotNil(t, motherRow, "the mother's own phenotype must be grouped under patient_id")
+		assert.Nil(t, motherRow.FetusID)
 	})
 }
