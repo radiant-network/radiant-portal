@@ -32,6 +32,8 @@ func cleanUp(gormDb *gorm.DB) {
 	db.Exec("DELETE FROM patient WHERE id >= 1000")
 	db.Exec("DELETE FROM sample WHERE id >= 1000")
 	db.Exec("DELETE FROM sequencing_experiment WHERE id >= 1000")
+	// Between the two: sequencing_experiment points at sequencing_request, which points at cases.
+	db.Exec("DELETE FROM sequencing_request WHERE id >= 1000")
 	db.Exec("DELETE FROM cases WHERE id >= 1000")
 	db.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id >= 1000")
 	db.Exec("DELETE FROM family WHERE id >= 1000")

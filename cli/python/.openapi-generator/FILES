@@ -24,6 +24,8 @@ docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
 docs/CaseSequencingExperiment.md
 docs/CaseSequencingExperimentBatch.md
+docs/CaseSequencingRequest.md
+docs/CaseSequencingRequestBatch.md
 docs/CaseTask.md
 docs/CaseTaskBatch.md
 docs/CasesApi.md
@@ -185,6 +187,8 @@ radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
 radiant_python/models/case_sequencing_experiment.py
 radiant_python/models/case_sequencing_experiment_batch.py
+radiant_python/models/case_sequencing_request.py
+radiant_python/models/case_sequencing_request_batch.py
 radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py

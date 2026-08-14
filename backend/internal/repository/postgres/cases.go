@@ -12,7 +12,7 @@ import (
 )
 
 type Case = types.Case
-type AnalysisCatalog = types.AnalysisCatalog
+type ServiceCatalog = types.ServiceCatalog
 
 type CasesRepository struct {
 	db *gorm.DB
@@ -42,16 +42,17 @@ func (r *CasesRepository) UpdateCaseDiagnosisLabCode(ctx context.Context, caseID
 // empty value leaves the existing column untouched instead of clearing it.
 func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) error {
 	updates := map[string]any{
-		"case_type_code":             c.CaseTypeCode,
-		"status_code":                c.StatusCode,
-		"diagnosis_lab_code":         c.DiagnosisLabCode,
-		"condition_code_system":      c.ConditionCodeSystem,
-		"primary_condition":          c.PrimaryCondition,
-		"case_category_code":         c.CaseCategoryCode,
-		"analysis_catalog_id":        c.AnalysisCatalogID,
-		"note":                       c.Note,
-		"ordering_organization_code": c.OrderingOrganizationCode,
-		"ordering_physician":         c.OrderingPhysician,
+		"case_type_code":              c.CaseTypeCode,
+		"status_code":                 c.StatusCode,
+		"diagnosis_lab_code":          c.DiagnosisLabCode,
+		"condition_code_system":       c.ConditionCodeSystem,
+		"primary_condition":           c.PrimaryCondition,
+		"case_category_code":          c.CaseCategoryCode,
+		"service_id":                  c.ServiceID,
+		"note":                        c.Note,
+		"requester_organization_code": c.RequesterOrganizationCode,
+		"requester":                   c.Requester,
+		"supervisor":                  c.Supervisor,
 	}
 	if c.PriorityCode != "" {
 		updates["priority_code"] = c.PriorityCode
@@ -76,16 +77,19 @@ func (r *CasesRepository) CreateCaseHasSequencingExperiment(ctx context.Context,
 		Create(caseHasSeqExp).Error
 }
 
-func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string) (*AnalysisCatalog, error) {
-	var analysisCatalog AnalysisCatalog
-	tx := r.db.WithContext(ctx).Table(types.AnalysisCatalogTable.Name).Where("code = ?", code)
-	if err := tx.First(&analysisCatalog).Error; err != nil {
+// GetServiceByCodeAndType resolves a catalog code within one service type. The type filter is
+// what keeps a sequencing code from resolving as a case analysis and vice versa: codes are
+// unique per tenant across both types, so without it a lookup would silently cross over.
+func (r *CasesRepository) GetServiceByCodeAndType(ctx context.Context, code string, serviceType string) (*ServiceCatalog, error) {
+	var service ServiceCatalog
+	tx := r.db.WithContext(ctx).Table(types.ServiceCatalogTable.Name).Where("code = ? AND type = ?", code, serviceType)
+	if err := tx.First(&service).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &analysisCatalog, nil
+	return &service, nil
 }
 
 func (r *CasesRepository) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*Case, error) {

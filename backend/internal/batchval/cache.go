@@ -29,6 +29,11 @@ type SampleKey struct {
 	SubmitterSampleId string
 }
 
+type SequencingRequestKey struct {
+	CaseId                       int
+	SubmitterSequencingRequestId string
+}
+
 type BatchValidationCache struct {
 	Context *BatchValidationContext
 
@@ -47,7 +52,9 @@ type BatchValidationCache struct {
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
 	Documents                      map[string]*types.Document                              // Key: URL
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
-	AnalysisCatalogs               map[string]*types.AnalysisCatalog                       // Key: code
+	CaseServices                   map[string]*types.ServiceCatalog                        // Key: code
+	SequencingServices             map[string]*types.ServiceCatalog                        // Key: code
+	SequencingRequests             map[SequencingRequestKey]*types.SequencingRequest       // Key: case_id + submitter_sequencing_request_id
 	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id
 }
 
@@ -66,7 +73,9 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		TaskContext:                    make(map[int][]*types.TaskContext),
 		Documents:                      make(map[string]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
-		AnalysisCatalogs:               make(map[string]*types.AnalysisCatalog),
+		CaseServices:                   make(map[string]*types.ServiceCatalog),
+		SequencingServices:             make(map[string]*types.ServiceCatalog),
+		SequencingRequests:             make(map[SequencingRequestKey]*types.SequencingRequest),
 		Cases:                          make(map[CaseKey]*types.Case),
 	}
 }
@@ -77,18 +86,47 @@ func getCopy[T any](input []T) []T {
 	return out
 }
 
-func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(ctx context.Context, code string) (*types.AnalysisCatalog, error) {
-	if ac, ok := c.AnalysisCatalogs[code]; ok {
-		return ac, nil
+func (c *BatchValidationCache) GetCaseServiceByCode(ctx context.Context, code string) (*types.ServiceCatalog, error) {
+	if s, ok := c.CaseServices[code]; ok {
+		return s, nil
 	}
 
-	ac, err := c.Context.CasesRepo.GetCaseAnalysisCatalogIdByCode(ctx, code)
+	s, err := c.Context.CasesRepo.GetServiceByCodeAndType(ctx, code, types.ServiceTypeCase)
 	if err != nil {
 		return nil, err
 	}
 
-	c.AnalysisCatalogs[code] = ac
-	return ac, nil
+	c.CaseServices[code] = s
+	return s, nil
+}
+
+func (c *BatchValidationCache) GetSequencingServiceByCode(ctx context.Context, code string) (*types.ServiceCatalog, error) {
+	if s, ok := c.SequencingServices[code]; ok {
+		return s, nil
+	}
+
+	s, err := c.Context.CasesRepo.GetServiceByCodeAndType(ctx, code, types.ServiceTypeSequencing)
+	if err != nil {
+		return nil, err
+	}
+
+	c.SequencingServices[code] = s
+	return s, nil
+}
+
+func (c *BatchValidationCache) GetSequencingRequestByCaseIdAndSubmitterId(ctx context.Context, caseId int, submitterSequencingRequestId string) (*types.SequencingRequest, error) {
+	key := SequencingRequestKey{caseId, submitterSequencingRequestId}
+	if sr, ok := c.SequencingRequests[key]; ok {
+		return sr, nil
+	}
+
+	sr, err := c.Context.SeqReqRepo.GetSequencingRequestByCaseIdAndSubmitterId(ctx, caseId, submitterSequencingRequestId)
+	if err != nil {
+		return nil, err
+	}
+
+	c.SequencingRequests[key] = sr
+	return sr, nil
 }
 
 func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error) {

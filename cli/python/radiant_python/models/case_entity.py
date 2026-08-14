@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
+from radiant_python.models.case_sequencing_request import CaseSequencingRequest
 from radiant_python.models.case_task import CaseTask
 from typing import Optional, Set
 from typing_extensions import Self
@@ -52,10 +53,12 @@ class CaseEntity(BaseModel):
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
     sequencing_experiments: List[CaseSequencingExperiment]
+    sequencing_requests: List[CaseSequencingRequest]
     status_code: StrictStr
+    supervisor: Optional[StrictStr] = None
     tasks: List[CaseTask]
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "sequencing_requests", "status_code", "supervisor", "tasks", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,6 +113,13 @@ class CaseEntity(BaseModel):
                 if _item_sequencing_experiments:
                     _items.append(_item_sequencing_experiments.to_dict())
             _dict['sequencing_experiments'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sequencing_requests (list)
+        _items = []
+        if self.sequencing_requests:
+            for _item_sequencing_requests in self.sequencing_requests:
+                if _item_sequencing_requests:
+                    _items.append(_item_sequencing_requests.to_dict())
+            _dict['sequencing_requests'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in tasks (list)
         _items = []
         if self.tasks:
@@ -152,7 +162,9 @@ class CaseEntity(BaseModel):
             "project_code": obj.get("project_code"),
             "project_name": obj.get("project_name"),
             "sequencing_experiments": [CaseSequencingExperiment.from_dict(_item) for _item in obj["sequencing_experiments"]] if obj.get("sequencing_experiments") is not None else None,
+            "sequencing_requests": [CaseSequencingRequest.from_dict(_item) for _item in obj["sequencing_requests"]] if obj.get("sequencing_requests") is not None else None,
             "status_code": obj.get("status_code"),
+            "supervisor": obj.get("supervisor"),
             "tasks": [CaseTask.from_dict(_item) for _item in obj["tasks"]] if obj.get("tasks") is not None else None,
             "updated_on": obj.get("updated_on")
         })

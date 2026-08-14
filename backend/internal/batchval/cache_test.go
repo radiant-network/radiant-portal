@@ -51,15 +51,23 @@ func (m *mockProjectRepo) GetProjectByCode(_ context.Context, code string) (*typ
 }
 
 type mockCasesRepo struct {
-	GetAnalysisCatalogFunc func(code string) (*types.AnalysisCatalog, error)
+	GetServiceFunc         func(code string, serviceType string) (*types.ServiceCatalog, error)
 	GetCaseBySubmitterFunc func(submitterCaseId string, projectId int) (*types.Case, error)
 }
 
-func (m *mockCasesRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
-	return m.GetAnalysisCatalogFunc(code)
+func (m *mockCasesRepo) GetServiceByCodeAndType(_ context.Context, code string, serviceType string) (*types.ServiceCatalog, error) {
+	return m.GetServiceFunc(code, serviceType)
 }
 func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
 	return m.GetCaseBySubmitterFunc(submitterCaseId, projectId)
+}
+
+type mockSequencingRequestRepo struct {
+	GetByCaseAndSubmitterFunc func(caseID int, submitterSequencingRequestID string) (*types.SequencingRequest, error)
+}
+
+func (m *mockSequencingRequestRepo) GetSequencingRequestByCaseIdAndSubmitterId(_ context.Context, caseID int, submitterSequencingRequestID string) (*types.SequencingRequest, error) {
+	return m.GetByCaseAndSubmitterFunc(caseID, submitterSequencingRequestID)
 }
 
 type mockPatientRepo struct {
@@ -297,31 +305,105 @@ func TestBatchValidationCache_GetDocumentByUrl(t *testing.T) {
 	assert.Equal(t, doc, result)
 }
 
-func TestBatchValidationCache_GetCaseAnalysisCatalogByCode(t *testing.T) {
+func TestBatchValidationCache_GetCaseServiceByCode(t *testing.T) {
 	mockRepo := &mockCasesRepo{}
 	ctx := &BatchValidationContext{CasesRepo: mockRepo}
 	cache := NewBatchValidationCache(ctx)
 
-	ac := &types.AnalysisCatalog{ID: 1, Code: "WGS"}
+	ac := &types.ServiceCatalog{ID: 1, Code: "RGDI", Type: types.ServiceTypeCase}
 
 	// Test cache miss
-	mockRepo.GetAnalysisCatalogFunc = func(code string) (*types.AnalysisCatalog, error) {
-		assert.Equal(t, "WGS", code)
+	mockRepo.GetServiceFunc = func(code string, serviceType string) (*types.ServiceCatalog, error) {
+		assert.Equal(t, "RGDI", code)
+		assert.Equal(t, types.ServiceTypeCase, serviceType)
 		return ac, nil
 	}
-	result, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
+	result, err := cache.GetCaseServiceByCode(t.Context(), "RGDI")
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
-	assert.Equal(t, ac, cache.AnalysisCatalogs["WGS"])
+	assert.Equal(t, ac, cache.CaseServices["RGDI"])
 
 	// Test cache hit
-	mockRepo.GetAnalysisCatalogFunc = func(code string) (*types.AnalysisCatalog, error) {
+	mockRepo.GetServiceFunc = func(code string, serviceType string) (*types.ServiceCatalog, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
+	result, err = cache.GetCaseServiceByCode(t.Context(), "RGDI")
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
+}
+
+func TestBatchValidationCache_GetSequencingServiceByCode(t *testing.T) {
+	mockRepo := &mockCasesRepo{}
+	ctx := &BatchValidationContext{CasesRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	service := &types.ServiceCatalog{ID: 42, Code: "75022", Type: types.ServiceTypeSequencing}
+
+	mockRepo.GetServiceFunc = func(code string, serviceType string) (*types.ServiceCatalog, error) {
+		assert.Equal(t, "75022", code)
+		assert.Equal(t, types.ServiceTypeSequencing, serviceType)
+		return service, nil
+	}
+	result, err := cache.GetSequencingServiceByCode(t.Context(), "75022")
+	assert.NoError(t, err)
+	assert.Equal(t, service, result)
+	assert.Equal(t, service, cache.SequencingServices["75022"])
+
+	mockRepo.GetServiceFunc = func(code string, serviceType string) (*types.ServiceCatalog, error) {
+		t.Fatal("Repo should not be called on cache hit")
+		return nil, nil
+	}
+	result, err = cache.GetSequencingServiceByCode(t.Context(), "75022")
+	assert.NoError(t, err)
+	assert.Equal(t, service, result)
+}
+
+// A negative lookup is memoized too, so an unknown code hits the repository once.
+func TestBatchValidationCache_GetSequencingServiceByCode_UnknownCodeMemoized(t *testing.T) {
+	mockRepo := &mockCasesRepo{}
+	ctx := &BatchValidationContext{CasesRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	calls := 0
+	mockRepo.GetServiceFunc = func(code string, serviceType string) (*types.ServiceCatalog, error) {
+		calls++
+		return nil, nil
+	}
+
+	result, err := cache.GetSequencingServiceByCode(t.Context(), "NOPE")
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	result, err = cache.GetSequencingServiceByCode(t.Context(), "NOPE")
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+	assert.Equal(t, 1, calls)
+}
+
+func TestBatchValidationCache_GetSequencingRequestByCaseIdAndSubmitterId(t *testing.T) {
+	mockRepo := &mockSequencingRequestRepo{}
+	ctx := &BatchValidationContext{SeqReqRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	request := &types.SequencingRequest{ID: 7, CaseID: 3, SubmitterSequencingRequestID: "SR-001"}
+
+	mockRepo.GetByCaseAndSubmitterFunc = func(caseID int, submitterID string) (*types.SequencingRequest, error) {
+		assert.Equal(t, 3, caseID)
+		assert.Equal(t, "SR-001", submitterID)
+		return request, nil
+	}
+	result, err := cache.GetSequencingRequestByCaseIdAndSubmitterId(t.Context(), 3, "SR-001")
+	assert.NoError(t, err)
+	assert.Equal(t, request, result)
+
+	mockRepo.GetByCaseAndSubmitterFunc = func(caseID int, submitterID string) (*types.SequencingRequest, error) {
+		t.Fatal("Repo should not be called on cache hit")
+		return nil, nil
+	}
+	result, err = cache.GetSequencingRequestByCaseIdAndSubmitterId(t.Context(), 3, "SR-001")
+	assert.NoError(t, err)
+	assert.Equal(t, request, result)
 }
 
 func TestBatchValidationCache_GetCaseBySubmitterCaseIdAndProjectId(t *testing.T) {

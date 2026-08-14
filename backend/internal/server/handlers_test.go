@@ -34,8 +34,8 @@ func (m *MockRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.
 	return nil
 }
 
-func (m *MockRepository) GetCaseAnalysisCatalogIdByCode(code string) (*types.AnalysisCatalog, error) {
-	return &types.AnalysisCatalog{}, nil
+func (m *MockRepository) GetCaseAnalysisCatalogIdByCode(code string) (*types.ServiceCatalog, error) {
+	return &types.ServiceCatalog{}, nil
 }
 
 func (m *MockRepository) CheckDatabaseConnection() string {

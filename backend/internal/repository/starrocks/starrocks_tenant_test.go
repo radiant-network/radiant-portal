@@ -1,6 +1,7 @@
 package starrocks
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -58,11 +59,30 @@ func Test_BuildViewStatements_FirstStatementCreatesTenantDatabaseWithSuffix(t *t
 	assert.Equal(t, "CREATE DATABASE IF NOT EXISTS `demo_tenant`", stmts[0])
 }
 
-func Test_BuildViewStatements_EmptyColumns_OnlyCreatesDatabase(t *testing.T) {
+func Test_BuildViewStatements_EmptyColumns_OnlyCreatesDatabaseAndPrunes(t *testing.T) {
 	stmts, err := BuildViewStatements("demo", map[string][]string{})
 	require.NoError(t, err)
-	assert.Equal(t, []string{"CREATE DATABASE IF NOT EXISTS `demo_tenant`"}, stmts,
-		"no columns for any table → just the database, no views")
+
+	expected := []string{"CREATE DATABASE IF NOT EXISTS `demo_tenant`"}
+	for _, table := range types.ObsoleteViewTables {
+		expected = append(expected, fmt.Sprintf("DROP VIEW IF EXISTS `demo_tenant`.`%s`", table))
+	}
+	assert.Equal(t, expected, stmts,
+		"no columns for any table → the database plus the obsolete-view prune, no views")
+}
+
+// A renamed table leaves its old view behind: CREATE OR REPLACE never removes it, and dropping
+// the entry from ViewTables is not enough. ObsoleteViewTables is what cleans it up.
+func Test_BuildViewStatements_DropsObsoleteViews(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", testColumns())
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+
+	for _, table := range types.ObsoleteViewTables {
+		assert.Contains(t, joined, fmt.Sprintf("DROP VIEW IF EXISTS `demo_tenant`.`%s`", table))
+		assert.NotContains(t, joined, fmt.Sprintf("CREATE OR REPLACE VIEW `demo_tenant`.`%s` AS", table),
+			"an obsolete view must not be recreated")
+	}
 }
 
 // --- BuildViewStatements: templated path (patient) ---------------------------
@@ -144,14 +164,27 @@ func Test_BuildViewStatements_CoversEveryViewTable(t *testing.T) {
 
 // --- BuildViewStatements: idempotency & validation ---------------------------
 
-func Test_BuildViewStatements_ViewsAreCreateOrReplaceWithNoDrop(t *testing.T) {
+// Live views are never dropped and recreated (no window where the view is missing); only the
+// obsolete ones from ObsoleteViewTables get a DROP.
+func Test_BuildViewStatements_LiveViewsAreCreateOrReplace(t *testing.T) {
 	stmts, err := BuildViewStatements("demo", testColumns())
 	require.NoError(t, err)
 	for _, s := range stmts {
-		assert.NotContains(t, s, "DROP VIEW", "views are CREATE OR REPLACE; no DROP step")
-		if strings.Contains(s, " VIEW ") {
-			assert.Contains(t, s, "CREATE OR REPLACE VIEW", "every view is idempotent via CREATE OR REPLACE: %q", s)
+		if !strings.Contains(s, " VIEW ") {
+			continue
 		}
+		if strings.HasPrefix(s, "DROP VIEW IF EXISTS") {
+			obsolete := false
+			for _, table := range types.ObsoleteViewTables {
+				if strings.HasSuffix(s, fmt.Sprintf("`%s`", table)) {
+					obsolete = true
+					break
+				}
+			}
+			assert.True(t, obsolete, "only obsolete views may be dropped: %q", s)
+			continue
+		}
+		assert.Contains(t, s, "CREATE OR REPLACE VIEW", "every view is idempotent via CREATE OR REPLACE: %q", s)
 	}
 }
 

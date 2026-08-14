@@ -26,8 +26,8 @@ func ValidateTenantCode(code string) error {
 var ViewTables = []string{
 	// Tenant-scoped clinical data.
 	"patient",
-	"organization", "cases", "sample", "sequencing_experiment",
-	"analysis_catalog", "document", "exam", "family", "family_history", "fetus",
+	"organization", "cases", "sample", "sequencing_experiment", "sequencing_request",
+	"service_catalog", "document", "exam", "family", "family_history", "fetus",
 	"interpretation_germline", "interpretation_germline_history",
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
@@ -40,4 +40,12 @@ var ViewTables = []string{
 	"histology_type", "life_status", "obs_interpretation", "observation", "onset",
 	"organization_category", "panel_type", "platform", "priority", "resolution_status",
 	"sample_type", "sequencing_read_technology", "sex", "status", "task_type",
+}
+
+// ObsoleteViewTables are views a previous release created that no longer have a backing
+// PostgreSQL table. Dropping a table from ViewTables does not remove the view it already
+// created — BuildViewStatements only ever emits CREATE OR REPLACE — so a renamed table
+// leaves a view pointing at nothing until it is named here.
+var ObsoleteViewTables = []string{
+	"analysis_catalog", // renamed to service_catalog in migration 000022
 }

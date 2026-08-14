@@ -29,7 +29,9 @@ Name | Type | Description | Notes
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperiment]**](CaseSequencingExperiment.md) |  | 
+**sequencing_requests** | [**List[CaseSequencingRequest]**](CaseSequencingRequest.md) |  | 
 **status_code** | **str** |  | 
+**supervisor** | **str** |  | [optional] 
 **tasks** | [**List[CaseTask]**](CaseTask.md) |  | 
 **updated_on** | **str** |  | 
 

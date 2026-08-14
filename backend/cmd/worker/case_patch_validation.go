@@ -82,6 +82,10 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 	}
 	r.SequencingExperiments = seqExps
 
+	if err := validateSeqExpSequencingRequestsForAttach(ctx, cache, *r.CaseID, patch.SequencingExperiments, nil, &r.BaseValidationRecord, r.path()); err != nil {
+		return nil, err
+	}
+
 	if len(patch.Tasks) > 0 {
 		if err := validatePatchTasks(ctx, bv, cache, patch, index, r); err != nil {
 			return nil, err
@@ -118,6 +122,64 @@ func resolveSequencingExperimentsForAttach(ctx context.Context, cache *batchval.
 		resolved[seqExp.ID] = seqExp
 	}
 	return resolved, nil
+}
+
+// validateSeqExpSequencingRequestsForAttach reports SEQREQ-006 when an incoming experiment names a
+// sequencing request that is neither declared in this payload (declared, PUT only) nor already
+// persisted on the case. Shared by the PATCH and PUT flows, where the case already exists and its
+// requests may live in the database rather than the payload.
+func validateSeqExpSequencingRequestsForAttach(
+	ctx context.Context,
+	cache *batchval.BatchValidationCache,
+	caseID int,
+	seqExps []*types.CaseSequencingExperimentBatch,
+	declared map[string]*ResolvedSequencingRequest,
+	base *batchval.BaseValidationRecord,
+	pathPrefix string,
+) error {
+	for j, se := range seqExps {
+		if se == nil || se.SubmitterSequencingRequestId == "" {
+			continue
+		}
+		if _, ok := declared[se.SubmitterSequencingRequestId]; ok {
+			continue
+		}
+		request, err := cache.GetSequencingRequestByCaseIdAndSubmitterId(ctx, caseID, se.SubmitterSequencingRequestId)
+		if err != nil {
+			return fmt.Errorf("get sequencing request %q of case %d: %w", se.SubmitterSequencingRequestId, caseID, err)
+		}
+		if request == nil {
+			base.AddErrors(
+				fmt.Sprintf("Sequencing request %q named by sequencing experiment (%s / %s / %s) does not exist on this case.", se.SubmitterSequencingRequestId, se.SampleOrganizationCode, se.SubmitterSampleId, se.Aliquot),
+				SequencingRequestNotFoundInCase,
+				fmt.Sprintf("%s.sequencing_experiments[%d]", pathPrefix, j),
+			)
+		}
+	}
+	return nil
+}
+
+// linkAttachedSequencingExperiments writes the experiment→request links for the PATCH and PUT
+// persist paths. It reads through the transaction's own repository rather than the validation
+// cache: on PUT a request declared in the same payload was only just inserted, and the cache may
+// still hold the nil it saw during validation.
+func linkAttachedSequencingExperiments(
+	ctx context.Context,
+	sc *StorageContext,
+	caseID int,
+	seqExps []*types.CaseSequencingExperimentBatch,
+	resolvedSeqExps map[int]*types.SequencingExperiment,
+) error {
+	return linkSequencingExperimentsToRequests(ctx, sc, seqExps, resolvedSeqExps, func(submitterID string) (*int, error) {
+		request, err := sc.SeqReqRepo.GetSequencingRequestByCaseIdAndSubmitterId(ctx, caseID, submitterID)
+		if err != nil {
+			return nil, err
+		}
+		if request == nil {
+			return nil, nil
+		}
+		return &request.ID, nil
+	})
 }
 
 // validatePatchTasks reuses the POST /cases/batch task machinery to validate the patch's
@@ -279,6 +341,9 @@ func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *ty
 				if err := casesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
 					return fmt.Errorf("failed to attach sequencing experiment %d to case %d: %w", se.ID, *rec.CaseID, err)
 				}
+			}
+			if err := linkAttachedSequencingExperiments(ctx, storageCtx, *rec.CaseID, rec.Patch.SequencingExperiments, rec.SequencingExperiments); err != nil {
+				return fmt.Errorf("failed to link sequencing experiments to requests for patch case %d: %w", *rec.CaseID, err)
 			}
 			// Attach tasks + documents (task / task_context / document / task_has_document),
 			// reusing the POST persist logic via the synthetic record built at validation time.

@@ -17,7 +17,7 @@ type batchProcessor interface {
 }
 
 type casesReader interface {
-	GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string) (*types.AnalysisCatalog, error)
+	GetServiceByCodeAndType(ctx context.Context, code string, serviceType string) (*types.ServiceCatalog, error)
 	GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error)
 }
 
@@ -29,6 +29,10 @@ type sequencingExperimentReader interface {
 	GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]types.SequencingExperiment, error)
 	GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error)
 	GetSequencingExperimentsByCaseId(ctx context.Context, caseID int) ([]types.SequencingExperiment, error)
+}
+
+type sequencingRequestReader interface {
+	GetSequencingRequestByCaseIdAndSubmitterId(ctx context.Context, caseID int, submitterSequencingRequestID string) (*types.SequencingRequest, error)
 }
 
 type taskReader interface {
@@ -80,6 +84,7 @@ type BatchValidationContext struct {
 	ProjectRepo   projectReader
 	SampleRepo    sampleReader
 	SeqExpRepo    sequencingExperimentReader
+	SeqReqRepo    sequencingRequestReader
 	TaskRepo      taskReader
 	ValueSetsRepo valueSetsReader
 	S3FS          utils.FileMetadataGetter
@@ -101,6 +106,7 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		ProjectRepo:   postgres.NewProjectRepository(postgresDB),
 		SampleRepo:    postgres.NewSamplesRepository(postgresDB),
 		SeqExpRepo:    postgres.NewSequencingExperimentRepository(postgresDB),
+		SeqReqRepo:    postgres.NewSequencingRequestRepository(postgresDB),
 		ValueSetsRepo: postgres.NewValueSetsRepository(postgresDB),
 		CasesRepo:     postgres.NewCasesRepository(postgresDB),
 		DocRepo:       postgres.NewDocumentsRepository(postgresDB),

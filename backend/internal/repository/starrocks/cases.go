@@ -122,7 +122,10 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		return nil, err
 	}
 
-	analysisCatalog, err := utils.GetFilter(db, types.AnalysisCatalogTable, "name", nil)
+	// The catalog now also holds sequencing-level services; only case-level ones are a
+	// case facet.
+	isCaseServiceCondition := fmt.Sprintf("%s.type = '%s'", types.ServiceCatalogTable.Alias, types.ServiceTypeCase)
+	analysisCatalog, err := utils.GetFilter(db, types.ServiceCatalogTable, "name_en", &isCaseServiceCondition)
 	if err != nil {
 		return nil, err
 	}
@@ -195,6 +198,12 @@ func (r *CasesRepository) GetCaseEntity(ctx context.Context, caseId int) (*CaseE
 	}
 	caseEntity.SequencingExperiments = *sequencingExperiments
 
+	sequencingRequests, err := r.retrieveCaseSequencingRequests(ctx, caseId)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching sequencing requests data: %w", err)
+	}
+	caseEntity.SequencingRequests = *sequencingRequests
+
 	members, err := r.retrieveCasePatients(ctx, caseId)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching members data: %w", err)
@@ -216,13 +225,13 @@ func (r *CasesRepository) GetCaseEntity(ctx context.Context, caseId int) (*CaseE
 func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(ctx), types.CaseTable.Alias))
 	tx = r.joiner.CaseWithProband(tx, userQuery)
-	tx = r.joiner.CaseWithAnalysisCatalog(tx)
+	tx = r.joiner.CaseWithServiceCatalog(tx)
 	tx = r.joiner.CaseWithProject(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
 		if userQuery.HasFieldFromTables(types.PanelTable) {
-			tx = r.joiner.AnalysisCatalogWithPanel(tx)
+			tx = r.joiner.ServiceCatalogWithPanel(tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.OrderingOrganizationTable) {
@@ -252,14 +261,14 @@ func (r *CasesRepository) retrieveCaseLevelData(ctx context.Context, caseId int)
 	var caseEntity CaseEntity
 
 	txCase := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(ctx), types.CaseTable.Alias))
-	txCase = r.joiner.CaseWithAnalysisCatalog(txCase)
+	txCase = r.joiner.CaseWithServiceCatalog(txCase)
 	txCase = r.joiner.CaseWithCaseCategory(txCase)
-	txCase = r.joiner.AnalysisCatalogWithPanel(txCase)
+	txCase = r.joiner.ServiceCatalogWithPanel(txCase)
 	txCase = r.joiner.CaseWithMondoTerm(txCase)
 	txCase = r.joiner.CaseWithDiagnosisLab(txCase)
 	txCase = r.joiner.CaseWithOrderingOrganization(txCase)
 	txCase = r.joiner.CaseWithProject(txCase)
-	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.created_on, c.updated_on, c.note, c.case_category_code, case_cat.name_en as case_category_name, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.ordering_physician as prescriber, prj.code as project_code, prj.name as project_name, panel.code as panel_code, panel.name as panel_name")
+	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, sc.code as analysis_catalog_code, sc.name_en as analysis_catalog_name, c.created_on, c.updated_on, c.note, c.case_category_code, case_cat.name_en as case_category_name, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.requester as prescriber, c.supervisor, prj.code as project_code, prj.name as project_name, panel.code as panel_code, panel.name as panel_name")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case entity: %w", err)
@@ -283,13 +292,30 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context,
 		Select("DISTINCT(seq_id)").
 		Where("ingested_at is not null and (task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral')) and case_id = ?", caseId)
 	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)
-	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.sequencing_request_id, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
 	return &sequencingExperiments, nil
+}
+
+// retrieveCaseSequencingRequests lists what was ordered for the case, delivered or not. It is
+// a separate query from the experiments because a request exists before any experiment does.
+func (r *CasesRepository) retrieveCaseSequencingRequests(ctx context.Context, caseId int) (*[]types.CaseSequencingRequest, error) {
+	sequencingRequests := []types.CaseSequencingRequest{}
+
+	txSeqReq := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingRequestTable.TenantQualifiedName(ctx), types.SequencingRequestTable.Alias))
+	txSeqReq = r.joiner.SequencingRequestWithServiceCatalog(txSeqReq)
+	txSeqReq = r.joiner.SequencingRequestWithFamily(txSeqReq)
+	txSeqReq = txSeqReq.Select("sr.id, sr.submitter_sequencing_request_id, sc.code as service_code, sc.name_en as service_name, sr.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, sr.status_code, sr.created_on, sr.updated_on")
+	txSeqReq = txSeqReq.Where("sr.case_id = ?", caseId)
+	txSeqReq = txSeqReq.Order("affected_status_code asc, relationship_to_proband desc, sr.id asc")
+	if err := txSeqReq.Find(&sequencingRequests).Error; err != nil {
+		return nil, fmt.Errorf("error fetching sequencing requests: %w", err)
+	}
+	return &sequencingRequests, nil
 }
 
 func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) (*[]CasePatientClinicalInformation, error) {

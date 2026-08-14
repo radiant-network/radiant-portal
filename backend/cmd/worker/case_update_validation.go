@@ -96,9 +96,11 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		ResolutionStatusCode:       update.ResolutionStatusCode,
 		Note:                       update.Note,
 		OrderingPhysician:          update.OrderingPhysician,
+		Supervisor:                 update.Supervisor,
 		OrderingOrganizationCode:   update.OrderingOrganizationCode,
 		Patients:                   update.Patients,
 		Fetuses:                    update.Fetuses,
+		SequencingRequests:         update.SequencingRequests,
 	}
 	cr := NewCaseValidationRecord(bv, cache, syntheticCase, index)
 	cr.ProjectID = &project.ID
@@ -107,8 +109,8 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	if err := cr.fetchCodeInfos(ctx); err != nil {
 		return nil, fmt.Errorf("failed to retrieve code infos: %w", err)
 	}
-	if err := cr.fetchAnalysisCatalog(ctx); err != nil {
-		return nil, fmt.Errorf("failed to resolve analysis catalog: %w", err)
+	if err := cr.fetchCaseService(ctx); err != nil {
+		return nil, fmt.Errorf("failed to resolve case service: %w", err)
 	}
 	if err := cr.resolveOrganizations(ctx); err != nil {
 		return nil, fmt.Errorf("failed to resolve organizations: %w", err)
@@ -116,11 +118,15 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	if err := cr.fetchPatients(ctx); err != nil {
 		return nil, fmt.Errorf("failed to resolve patients: %w", err)
 	}
+	if err := cr.fetchSequencingRequests(ctx); err != nil {
+		return nil, fmt.Errorf("failed to resolve sequencing requests: %w", err)
+	}
 
 	cr.validateCaseCommonFields(batchval.FormatPath(cr, ""))
 	if err := cr.validateCasePatients(); err != nil {
 		return nil, fmt.Errorf("failed to validate case patients: %w", err)
 	}
+	cr.validateCaseSequencingRequests()
 
 	// Fetched before validateCaseFetuses so its org-uniqueness check can exempt a key already on
 	// this case (an update in place, not a collision with another mother's fetus).
@@ -176,6 +182,10 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		return nil, err
 	}
 	r.SequencingExperiments = seqExps
+
+	if err := validateSeqExpSequencingRequestsForAttach(ctx, cache, *r.CaseID, update.SequencingExperiments, cr.SequencingRequests, &r.BaseValidationRecord, r.path()); err != nil {
+		return nil, err
+	}
 
 	if len(update.Tasks) > 0 {
 		taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, update.SubmitterCaseId, update.ProjectCode, *r.CaseID, update.SequencingExperiments, update.Tasks, index)
@@ -286,18 +296,19 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 	u := rec.Update
 
 	if err := casesRepo.UpdateCase(ctx, caseID, &types.Case{
-		CaseTypeCode:             u.Type,
-		StatusCode:               u.StatusCode,
-		DiagnosisLabCode:         &u.DiagnosticLabCode,
-		ConditionCodeSystem:      u.PrimaryConditionCodeSystem,
-		PrimaryCondition:         u.PrimaryConditionValue,
-		PriorityCode:             u.PriorityCode,
-		CaseCategoryCode:         u.CategoryCode,
-		AnalysisCatalogID:        *rec.Record.AnalysisCatalogID,
-		ResolutionStatusCode:     u.ResolutionStatusCode,
-		Note:                     u.Note,
-		OrderingOrganizationCode: &u.OrderingOrganizationCode,
-		OrderingPhysician:        u.OrderingPhysician,
+		CaseTypeCode:              u.Type,
+		StatusCode:                u.StatusCode,
+		DiagnosisLabCode:          &u.DiagnosticLabCode,
+		ConditionCodeSystem:       u.PrimaryConditionCodeSystem,
+		PrimaryCondition:          u.PrimaryConditionValue,
+		PriorityCode:              u.PriorityCode,
+		CaseCategoryCode:          u.CategoryCode,
+		ServiceID:                 *rec.Record.ServiceID,
+		ResolutionStatusCode:      u.ResolutionStatusCode,
+		Note:                      u.Note,
+		RequesterOrganizationCode: &u.OrderingOrganizationCode,
+		Requester:                 u.OrderingPhysician,
+		Supervisor:                u.Supervisor,
 	}); err != nil {
 		return fmt.Errorf("failed to update case scalars: %w", err)
 	}
@@ -340,6 +351,13 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		return fmt.Errorf("failed to persist fetuses: %w", err)
 	}
 
+	// The case row exists, so its id is known before the requests are written — unlike the POST
+	// path, where the requests wait on the freshly inserted case.
+	rec.Record.CaseID = &caseID
+	if err := persistSequencingRequests(ctx, sc, rec.Record); err != nil {
+		return fmt.Errorf("failed to persist sequencing requests for case %d: %w", caseID, err)
+	}
+
 	// Merge-if-present: attach the sequencing experiment links and tasks the payload carried
 	// (mirrors the PATCH persist). When the payload omitted them these are empty/nil, so the
 	// case's existing links and tasks stay untouched.
@@ -348,6 +366,9 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		if err := casesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
 			return fmt.Errorf("failed to attach sequencing experiment %d to case %d: %w", se.ID, caseID, err)
 		}
+	}
+	if err := linkAttachedSequencingExperiments(ctx, sc, caseID, u.SequencingExperiments, rec.SequencingExperiments); err != nil {
+		return fmt.Errorf("failed to link sequencing experiments to requests for case %d: %w", caseID, err)
 	}
 	if rec.TaskRecord != nil {
 		if err := persistTask(ctx, sc, rec.TaskRecord); err != nil {

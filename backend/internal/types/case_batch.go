@@ -35,11 +35,14 @@ type CaseBatch struct {
 	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string                           `json:"note,omitempty" toml:"note"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
+	Supervisor                 string                           `json:"supervisor,omitempty" toml:"supervisor"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
 	Fetuses                    []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive,notnull"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
-	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
+	// Optional. Sequencing services ordered for this case's members, delivered or not.
+	SequencingRequests []*CaseSequencingRequestBatch `json:"sequencing_requests,omitempty" toml:"sequencing_requests" binding:"omitempty,dive"` // no `required` in the dive: swaggo would then mark the whole field required
+	Tasks              []*CaseTaskBatch              `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
 
 type CasePatientBatch struct {
@@ -90,10 +93,24 @@ type ObservationTextBatch struct {
 	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"omitempty,oneof=positive negative abnormal normal"`
 }
 
+// This struct is shared by the create, patch and update paths, so
+// SubmitterSequencingRequestId makes the delivery loop available on all three endpoints.
 type CaseSequencingExperimentBatch struct {
 	Aliquot                string `json:"aliquot" toml:"aliquot" binding:"required"`
 	SampleOrganizationCode string `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
 	SubmitterSampleId      string `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
+	// Optional. The sequencing request of the same case this experiment fulfills, if any.
+	SubmitterSequencingRequestId string `json:"submitter_sequencing_request_id,omitempty" toml:"submitter_sequencing_request_id"`
+}
+
+// CaseSequencingRequestBatch is a sequencing service ordered for a case member. No requester
+// fields: they belong to the case and are read by join through the mandatory case_id.
+type CaseSequencingRequestBatch struct {
+	SubmitterSequencingRequestId string `json:"submitter_sequencing_request_id" toml:"submitter_sequencing_request_id" binding:"required"`
+	ServiceCode                  string `json:"service_code" toml:"service_code" binding:"required"`
+	SubmitterPatientId           string `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`
+	PatientOrganizationCode      string `json:"patient_organization_code" toml:"patient_organization_code" binding:"required"`
+	StatusCode                   string `json:"status_code" toml:"status_code" binding:"required"`
 }
 
 type CaseTaskBatch struct {
@@ -155,12 +172,14 @@ type UpdateCaseBatch struct {
 	Note                       string              `json:"note,omitempty" toml:"note"`
 	OrderingOrganizationCode   string              `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	OrderingPhysician          string              `json:"ordering_physician,omitempty" toml:"ordering_physician"`
+	Supervisor                 string              `json:"supervisor,omitempty" toml:"supervisor"`
 	Patients                   []*CasePatientBatch `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
 	// Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already
 	// on the case is updated in place, a new key is created, and a key the payload drops is deleted
 	// — refused when a sample still points at it.
 	Fetuses               []*CaseFetusBatch                `json:"fetuses,omitempty" toml:"fetuses" binding:"omitempty,dive,notnull"`
 	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive"`
+	SequencingRequests    []*CaseSequencingRequestBatch    `json:"sequencing_requests,omitempty" toml:"sequencing_requests" binding:"omitempty,dive"`
 	Tasks                 []*CaseTaskBatch                 `json:"tasks,omitempty" toml:"tasks" binding:"omitempty,dive"`
 }
 

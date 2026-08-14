@@ -52,8 +52,8 @@ func (j Joiner) CaseWithPatients(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(joinWithFamily).Joins(joinWithPatientSql)
 }
 
-func (j Joiner) CaseWithAnalysisCatalog(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.analysis_catalog_id=%s.id", j.name(types.AnalysisCatalogTable, tx), types.AnalysisCatalogTable.Alias, types.CaseTable.Alias, types.AnalysisCatalogTable.Alias))
+func (j Joiner) CaseWithServiceCatalog(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.service_id=%s.id", j.name(types.ServiceCatalogTable, tx), types.ServiceCatalogTable.Alias, types.CaseTable.Alias, types.ServiceCatalogTable.Alias))
 }
 
 func (j Joiner) CaseWithCaseCategory(tx *gorm.DB) *gorm.DB {
@@ -64,8 +64,8 @@ func (j Joiner) OrganizationWithCategory(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.category_code=%s.code", j.name(types.OrganizationCategoryTable, tx), types.OrganizationCategoryTable.Alias, types.OrganizationTable.Alias, types.OrganizationCategoryTable.Alias))
 }
 
-func (j Joiner) AnalysisCatalogWithPanel(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.panel_id=%s.id", j.name(types.PanelTable, tx), types.PanelTable.Alias, types.AnalysisCatalogTable.Alias, types.PanelTable.Alias))
+func (j Joiner) ServiceCatalogWithPanel(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.panel_id=%s.id", j.name(types.PanelTable, tx), types.PanelTable.Alias, types.ServiceCatalogTable.Alias, types.PanelTable.Alias))
 }
 
 func (j Joiner) CaseWithProject(tx *gorm.DB) *gorm.DB {
@@ -118,7 +118,17 @@ func (j Joiner) SampleAndCaseWithFamily(tx *gorm.DB) *gorm.DB {
 }
 
 func (j Joiner) CaseWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_code=%s.code AND %s.tenant_code=%s.tenant_code", j.name(types.OrderingOrganizationTable, tx), types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.requester_organization_code=%s.code AND %s.tenant_code=%s.tenant_code", j.name(types.OrderingOrganizationTable, tx), types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
+}
+
+func (j Joiner) SequencingRequestWithServiceCatalog(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.service_id=%s.id", j.name(types.ServiceCatalogTable, tx), types.ServiceCatalogTable.Alias, types.SequencingRequestTable.Alias, types.ServiceCatalogTable.Alias))
+}
+
+// SequencingRequestWithFamily carries relationship_to_proband / affected_status_code onto a
+// request the same way SampleAndCaseHasSeqExpWithFamily does for a delivered experiment.
+func (j Joiner) SequencingRequestWithFamily(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id=%s.case_id", j.name(types.FamilyTable, tx), types.FamilyTable.Alias, types.FamilyTable.Alias, types.SequencingRequestTable.Alias, types.FamilyTable.Alias, types.SequencingRequestTable.Alias))
 }
 
 func (j Joiner) SeqExpWithSequencingLab(tx *gorm.DB) *gorm.DB {

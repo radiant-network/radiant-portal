@@ -111,6 +111,8 @@ func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilter
 	return &result, nil
 }
 
+func intPtr(v int) *int { return &v }
+
 func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error) {
 	return &types.CaseEntity{
 		CaseID:              1,
@@ -134,8 +136,13 @@ func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.
 		ProjectName:              "NeuroDev Phase I",
 		PanelCode:                "EPILEP",
 		PanelName:                "Epilepsy",
+		Supervisor:               "Sam Attic",
+		SequencingRequests: types.JsonArray[types.CaseSequencingRequest]{
+			{ID: 1, SubmitterSequencingRequestID: "SR-1-PROBAND", ServiceCode: "75022", ServiceName: "Normal Genome Sequencing", PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", StatusCode: "completed"},
+			{ID: 2, SubmitterSequencingRequestID: "SR-1-MOTHER", ServiceCode: "75022", ServiceName: "Normal Genome Sequencing", PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", StatusCode: "submitted"},
+		},
 		SequencingExperiments: types.JsonArray[types.CaseSequencingExperiment]{
-			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true, SequencingRequestID: intPtr(1)},
 			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
 			{SeqID: 3, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
@@ -291,8 +298,13 @@ func Test_CaseEntityHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
+		"supervisor":"Sam Attic",
+		"sequencing_requests":[
+			{"id":1, "submitter_sequencing_request_id":"SR-1-PROBAND", "service_code":"75022", "service_name":"Normal Genome Sequencing", "patient_id":3, "relationship_to_proband":"proband", "affected_status_code":"affected", "status_code":"completed", "created_on":"0001-01-01T00:00:00Z", "updated_on":"0001-01-01T00:00:00Z"},
+			{"id":2, "submitter_sequencing_request_id":"SR-1-MOTHER", "service_code":"75022", "service_name":"Normal Genome Sequencing", "patient_id":1, "relationship_to_proband":"mother", "affected_status_code":"affected", "status_code":"submitted", "created_on":"0001-01-01T00:00:00Z", "updated_on":"0001-01-01T00:00:00Z"}
+		],
 		"sequencing_experiments":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "sequencing_request_id":1, "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
 		],

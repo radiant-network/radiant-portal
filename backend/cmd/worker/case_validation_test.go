@@ -22,7 +22,8 @@ import (
 // -----------------------------------------------------------------------------
 
 type CaseValidationMockRepo struct {
-	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*types.Case, error)
+	GetCaseBySubmitterCaseIdAndProjectIdFunc       func(submitterCaseId string, projectId int) (*types.Case, error)
+	GetSequencingRequestByCaseIdAndSubmitterIdFunc func(caseID int, submitterSequencingRequestID string) (*types.SequencingRequest, error)
 }
 
 func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
@@ -85,11 +86,22 @@ func (m *CaseValidationMockRepo) GetById(id int) (*types.Document, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
-	if code == "WGA" {
-		return &types.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
-	} else if strings.Contains(code, "ERROR") {
+func (m *CaseValidationMockRepo) GetServiceByCodeAndType(_ context.Context, code string, serviceType string) (*types.ServiceCatalog, error) {
+	if strings.Contains(code, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
+	}
+	if serviceType == types.ServiceTypeCase && code == "WGA" {
+		return &types.ServiceCatalog{ID: 1, Code: code, Type: serviceType, NameEn: "Whole Genome Analysis"}, nil
+	}
+	if serviceType == types.ServiceTypeSequencing && code == "75022" {
+		return &types.ServiceCatalog{ID: 90, Code: code, Type: serviceType, NameEn: "Normal Genome Sequencing"}, nil
+	}
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetSequencingRequestByCaseIdAndSubmitterId(_ context.Context, caseID int, submitterSequencingRequestID string) (*types.SequencingRequest, error) {
+	if m.GetSequencingRequestByCaseIdAndSubmitterIdFunc != nil {
+		return m.GetSequencingRequestByCaseIdAndSubmitterIdFunc(caseID, submitterSequencingRequestID)
 	}
 	return nil, nil
 }
@@ -268,7 +280,7 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 	case postgres.ValueSetCaseCategory:
 		return []string{"prenatal", "postnatal"}, nil
 
-	case postgres.ValueSetAnalysisCatalog:
+	case postgres.ValueSetServiceCatalog:
 		return []string{"WGA", "WES", "Panel"}, nil
 
 	case postgres.ValueSetAffectedStatus:
@@ -910,7 +922,7 @@ func Test_fetchProject_Error(t *testing.T) {
 	assert.Nil(t, record.ProjectID)
 }
 
-func Test_fetchAnalysisCatalog_OK(t *testing.T) {
+func Test_fetchCaseService_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		CasesRepo: &mockRepo,
@@ -926,13 +938,13 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(t.Context())
+	err := record.fetchCaseService(t.Context())
 	assert.NoError(t, err)
-	assert.NotNil(t, record.AnalysisCatalogID)
-	assert.Equal(t, 1, *record.AnalysisCatalogID)
+	assert.NotNil(t, record.ServiceID)
+	assert.Equal(t, 1, *record.ServiceID)
 }
 
-func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
+func Test_fetchCaseService_NotFound(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		CasesRepo: &mockRepo,
@@ -948,12 +960,12 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(t.Context())
+	err := record.fetchCaseService(t.Context())
 	assert.NoError(t, err)
-	assert.Nil(t, record.AnalysisCatalogID)
+	assert.Nil(t, record.ServiceID)
 }
 
-func Test_fetchAnalysisCatalog_Error(t *testing.T) {
+func Test_fetchCaseService_Error(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		CasesRepo: &mockRepo,
@@ -969,9 +981,9 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(t.Context())
+	err := record.fetchCaseService(t.Context())
 	assert.Error(t, err)
-	assert.Nil(t, record.AnalysisCatalogID)
+	assert.Nil(t, record.ServiceID)
 }
 
 func Test_ResolveOrganizations_OK(t *testing.T) {
@@ -1224,7 +1236,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	err := record.fetchValidationInfos(t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
-	assert.Equal(t, 1, *record.AnalysisCatalogID)
+	assert.Equal(t, 1, *record.ServiceID)
 	assert.True(t, record.OrderingOrganizationExists)
 	assert.True(t, record.DiagnosisLabExists)
 	assert.Len(t, record.Documents, 0)
@@ -1248,7 +1260,7 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	err := record.fetchValidationInfos(t.Context())
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
-	assert.Nil(t, record.AnalysisCatalogID)
+	assert.Nil(t, record.ServiceID)
 	assert.False(t, record.OrderingOrganizationExists)
 	assert.False(t, record.DiagnosisLabExists)
 	assert.Empty(t, record.Documents)
@@ -1671,7 +1683,7 @@ func Test_validateCase_Valid(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed", "unknown"},
@@ -1716,7 +1728,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 		},
 		ProjectID:                  nil,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -1761,7 +1773,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         false,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -1804,7 +1816,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          nil,
+		ServiceID:                  nil,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -1847,7 +1859,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: false,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -1891,7 +1903,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed", "pending"},
@@ -1933,7 +1945,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -1984,7 +1996,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -2020,7 +2032,7 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         false,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
@@ -2067,7 +2079,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 		},
 		ProjectID:                  &projectID,
 		DiagnosisLabExists:         true,
-		AnalysisCatalogID:          &analysisID,
+		ServiceID:                  &analysisID,
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "",
 		StatusCodes:                []string{"completed", "unknown"},

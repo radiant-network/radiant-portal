@@ -1,0 +1,66 @@
+# scenarios/cases_sequencing_requests.toml
+#
+# The order-time payload: QLIN emits the sequencing ServiceRequests when the clinician orders
+# them, so the case arrives with requests and with no sequencing_experiments and no tasks at all.
+# That is the state that had no representation in Radiant before the sequencing_request table.
+#
+# service_code values are the MSSS codes of the FHIR CodeSystem sequencing-request-code seeded by
+# migration 000022: 75022 is genome, 75020 is exome.
+
+[[cases]]
+submitter_case_id = "CASE-SEQREQ-TRIO"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "ordered, nothing sequenced yet"
+ordering_physician = "Dr. Test"
+supervisor = "Dr. Supervisor"
+ordering_organization_code = "CHUSJ"
+tasks = []
+sequencing_experiments = []
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283773"
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283774"
+  affected_status_code = "non_affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "father"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283775"
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "mother"
+
+  [[cases.sequencing_requests]]
+  submitter_sequencing_request_id = "SR-PROBAND"
+  service_code = "75022"
+  submitter_patient_id = "MRN-283773"
+  patient_organization_code = "CHUSJ"
+  status_code = "submitted"
+
+  [[cases.sequencing_requests]]
+  submitter_sequencing_request_id = "SR-FATHER"
+  service_code = "75022"
+  submitter_patient_id = "MRN-283774"
+  patient_organization_code = "CHUSJ"
+  status_code = "submitted"
+
+  [[cases.sequencing_requests]]
+  submitter_sequencing_request_id = "SR-MOTHER"
+  service_code = "75020"
+  submitter_patient_id = "MRN-283775"
+  patient_organization_code = "CHUSJ"
+  status_code = "draft"
