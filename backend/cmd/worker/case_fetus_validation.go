@@ -175,7 +175,7 @@ func (cr *CaseValidationRecord) validateFetusOrgUniqueness(ctx context.Context, 
 	if _, ok := existingOnCase[submitterFetusId]; ok {
 		return nil
 	}
-	conflicting, err := cr.Context.FetusRepo.GetFetusByOrganizationAndSubmitterId(ctx, organizationCode, submitterFetusId)
+	conflicting, err := cr.Context.FetusRepo.GetFetusByOrganizationAndSubmitterId(ctx, organizationCode, submitterFetusId, cr.TenantCode)
 	if err != nil {
 		return fmt.Errorf("check fetus organization uniqueness for %q: %w", submitterFetusId, err)
 	}

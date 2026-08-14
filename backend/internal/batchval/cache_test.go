@@ -63,11 +63,11 @@ func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, 
 }
 
 type mockPatientRepo struct {
-	GetByOrgAndSubmitterFunc func(orgCode string, submitterPatientId string) (*types.Patient, error)
+	GetByOrgAndSubmitterFunc func(orgCode string, submitterPatientId string, tenantCode string) (*types.Patient, error)
 }
 
-func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, orgCode string, submitterPatientId string) (*types.Patient, error) {
-	return m.GetByOrgAndSubmitterFunc(orgCode, submitterPatientId)
+func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, orgCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+	return m.GetByOrgAndSubmitterFunc(orgCode, submitterPatientId, tenantCode)
 }
 
 type mockSeqExpRepo struct {
@@ -220,27 +220,53 @@ func TestBatchValidationCache_GetPatientByOrgCodeAndSubmitterPatientId(t *testin
 	cache := NewBatchValidationCache(ctx)
 
 	patient := &types.Patient{ID: 100, SubmitterPatientId: "PAT1"}
-	key := PatientKey{"ORG1", "PAT1"}
+	key := PatientKey{OrganizationCode: "ORG1", SubmitterPatientId: "PAT1", TenantCode: "tenant1"}
 
 	// Test cache miss
-	mockRepo.GetByOrgAndSubmitterFunc = func(orgCode string, submitterPatientId string) (*types.Patient, error) {
+	mockRepo.GetByOrgAndSubmitterFunc = func(orgCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 		assert.Equal(t, "ORG1", orgCode)
 		assert.Equal(t, "PAT1", submitterPatientId)
+		assert.Equal(t, "tenant1", tenantCode)
 		return patient, nil
 	}
-	result, err := cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1")
+	result, err := cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1", "tenant1")
 	assert.NoError(t, err)
 	assert.Equal(t, patient, result)
 	assert.Equal(t, patient, cache.Patients[key])
 
 	// Test cache hit
-	mockRepo.GetByOrgAndSubmitterFunc = func(orgCode string, submitterPatientId string) (*types.Patient, error) {
+	mockRepo.GetByOrgAndSubmitterFunc = func(orgCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1")
+	result, err = cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1", "tenant1")
 	assert.NoError(t, err)
 	assert.Equal(t, patient, result)
+}
+
+func TestBatchValidationCache_GetPatientByOrgCodeAndSubmitterPatientId_TenantScoped(t *testing.T) {
+	mockRepo := &mockPatientRepo{}
+	ctx := &BatchValidationContext{PatientRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	patientTenant1 := &types.Patient{ID: 100, SubmitterPatientId: "PAT1", TenantCode: "tenant1"}
+	patientTenant2 := &types.Patient{ID: 200, SubmitterPatientId: "PAT1", TenantCode: "tenant2"}
+
+	mockRepo.GetByOrgAndSubmitterFunc = func(_ string, _ string, tenantCode string) (*types.Patient, error) {
+		if tenantCode == "tenant1" {
+			return patientTenant1, nil
+		}
+		return patientTenant2, nil
+	}
+
+	result1, err := cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1", "tenant1")
+	assert.NoError(t, err)
+	assert.Equal(t, patientTenant1, result1)
+
+	result2, err := cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1", "tenant2")
+	assert.NoError(t, err)
+	assert.Equal(t, patientTenant2, result2)
+	assert.NotEqual(t, result1, result2, "same org_code/submitter_patient_id in different tenants must not collide in cache")
 }
 
 func TestBatchValidationCache_GetSequencingExperimentByAliquot(t *testing.T) {

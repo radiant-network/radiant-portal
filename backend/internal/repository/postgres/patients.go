@@ -20,11 +20,11 @@ func NewPatientsRepository(db database.PostgresDB) *PatientsRepository {
 	return &PatientsRepository{db: db.DB}
 }
 
-func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string) (*Patient, error) {
+func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.WithContext(ctx).
 		Table("patient").
-		Where("submitter_patient_id = ? AND organization_code = ?", submitterPatientId, organizationCode)
+		Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, organizationCode, tenantCode)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
@@ -43,7 +43,7 @@ func (r *PatientsRepository) CreatePatient(ctx context.Context, newPatient *Pati
 func (r *PatientsRepository) UpdatePatient(ctx context.Context, patient *Patient) error {
 	tx := r.db.WithContext(ctx).
 		Table("patient").
-		Where("organization_code = ? AND submitter_patient_id = ?", patient.OrganizationCode, patient.SubmitterPatientId).
+		Where("organization_code = ? AND submitter_patient_id = ? AND tenant_code = ?", patient.OrganizationCode, patient.SubmitterPatientId, patient.TenantCode).
 		Updates(map[string]any{
 			"submitter_patient_id_type": patient.SubmitterPatientIdType,
 			"sex_code":                  patient.SexCode,

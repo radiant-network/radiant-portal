@@ -56,7 +56,7 @@ func (r *UpdateCaseValidationRecord) path() string {
 // CaseValidationRecord — for the scalar field formats and clinical patient data (family,
 // observations, family history), which apply identically whether the case is being
 // created or updated.
-func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, update types.UpdateCaseBatch, index int, seenFetuses map[FetusKey]struct{}) (*UpdateCaseValidationRecord, error) {
+func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, update types.UpdateCaseBatch, index int, seenFetuses map[FetusKey]struct{}, tenantCode string) (*UpdateCaseValidationRecord, error) {
 	r := &UpdateCaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: bv, Cache: cache, Index: index, ResourceType: types.UpdateCaseBatchType},
 		Update:               update,
@@ -100,7 +100,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		Patients:                   update.Patients,
 		Fetuses:                    update.Fetuses,
 	}
-	cr := NewCaseValidationRecord(bv, cache, syntheticCase, index)
+	cr := NewCaseValidationRecord(bv, cache, syntheticCase, index, tenantCode)
 	cr.ProjectID = &project.ID
 	cr.CaseID = r.CaseID
 
@@ -178,7 +178,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	r.SequencingExperiments = seqExps
 
 	if len(update.Tasks) > 0 {
-		taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, update.SubmitterCaseId, update.ProjectCode, *r.CaseID, update.SequencingExperiments, update.Tasks, index)
+		taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, update.SubmitterCaseId, update.ProjectCode, *r.CaseID, update.SequencingExperiments, update.Tasks, index, tenantCode)
 		if err != nil {
 			return nil, err
 		}
@@ -193,7 +193,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	return r, nil
 }
 
-func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, updates []types.UpdateCaseBatch) ([]*UpdateCaseValidationRecord, error) {
+func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, updates []types.UpdateCaseBatch, tenantCode string) ([]*UpdateCaseValidationRecord, error) {
 	var records []*UpdateCaseValidationRecord
 	cache := batchval.NewBatchValidationCache(bv)
 	visited := map[CaseKey]struct{}{}
@@ -204,7 +204,7 @@ func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCo
 			return nil, err
 		}
 
-		record, err := validateUpdateCaseRecord(ctx, bv, cache, u, idx, seenFetuses)
+		record, err := validateUpdateCaseRecord(ctx, bv, cache, u, idx, seenFetuses, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("error during update case validation: %v", err)
 		}
@@ -226,7 +226,7 @@ func processUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		return nil
 	}
 
-	records, unexpectedErr := validateUpdateCaseBatch(ctx, bv, updates)
+	records, unexpectedErr := validateUpdateCaseBatch(ctx, bv, updates, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr

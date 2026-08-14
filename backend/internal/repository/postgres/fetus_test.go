@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GetFetusById_NotFound(t *testing.T) {
@@ -77,6 +78,65 @@ func Test_CreateFetus_NilError(t *testing.T) {
 		repo := NewFetusRepository(database.PostgresDB{DB: env.Postgres})
 		err := repo.CreateFetus(t.Context(), nil)
 		assert.Error(t, err)
+	})
+}
+
+// Test_GetFetusByOrganizationAndSubmitterId_TenantIsolation reproduces CLIN-6157 for fetus: the
+// same (organization_code, submitter_fetus_id) can belong to a different mother's fetus in a
+// different tenant, and the pre-insert uniqueness check must not treat it as a conflict.
+func Test_GetFetusByOrganizationAndSubmitterId_TenantIsolation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const orgCode = "TENANT-ISO-FETUS-ORG"
+		const submitterFetusId = "F-TENANT-ISO-1"
+
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Fetus Test Org (radiant)', 'healthcare_provider', 'radiant')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Fetus Test Org (tenant_b)', 'healthcare_provider', 'tenant_b')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error)
+		defer env.Postgres.Exec(`DELETE FROM organization WHERE code = ?`, orgCode)
+		defer env.Postgres.Exec(`DELETE FROM fetus WHERE organization_code = ?`, orgCode)
+
+		repo := NewFetusRepository(database.PostgresDB{DB: env.Postgres})
+
+		fetusA := &types.Fetus{
+			ID:               9997,
+			SubmitterFetusId: submitterFetusId,
+			MotherID:         1,
+			OrganizationCode: orgCode,
+			SexCode:          "male",
+			LifeStatusCode:   "alive",
+			TenantCode:       "radiant",
+		}
+		require.NoError(t, repo.CreateFetus(t.Context(), fetusA))
+
+		// Same key, a different tenant: must not resolve to tenant "radiant"'s fetus.
+		conflict, err := repo.GetFetusByOrganizationAndSubmitterId(t.Context(), orgCode, submitterFetusId, "tenant_b")
+		require.NoError(t, err)
+		assert.Nil(t, conflict, "must not find another tenant's fetus as a conflict")
+
+		// The widened fetus_org_submitter_id_key must accept a second fetus under the same key.
+		fetusB := &types.Fetus{
+			ID:               9996,
+			SubmitterFetusId: submitterFetusId,
+			MotherID:         1,
+			OrganizationCode: orgCode,
+			SexCode:          "female",
+			LifeStatusCode:   "alive",
+			TenantCode:       "tenant_b",
+		}
+		require.NoError(t, repo.CreateFetus(t.Context(), fetusB))
+
+		found, err := repo.GetFetusByOrganizationAndSubmitterId(t.Context(), orgCode, submitterFetusId, "tenant_b")
+		require.NoError(t, err)
+		if assert.NotNil(t, found) {
+			assert.Equal(t, fetusB.ID, found.ID)
+		}
 	})
 }
 

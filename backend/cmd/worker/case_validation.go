@@ -194,6 +194,10 @@ type CaseValidationRecord struct {
 
 	OutputDocuments map[string]struct{}
 
+	// TenantCode is the tenant of the batch being processed; patient lookups must be scoped to it
+	// (org_code + submitter_patient_id alone is not unique across tenants).
+	TenantCode string
+
 	// Necessary to persist the case
 	Patients              map[batchval.PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
@@ -202,7 +206,7 @@ type CaseValidationRecord struct {
 	TaskContexts          map[int][]*types.TaskContext
 }
 
-func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, c types.CaseBatch, index int) *CaseValidationRecord {
+func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, c types.CaseBatch, index int, tenantCode string) *CaseValidationRecord {
 	return &CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context:      ctx,
@@ -211,6 +215,7 @@ func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchv
 			ResourceType: types.CreateCaseBatchType,
 		},
 		Case:                  c,
+		TenantCode:            tenantCode,
 		OutputDocuments:       make(map[string]struct{}),
 		Patients:              make(map[batchval.PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
@@ -230,7 +235,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 			continue
 		}
 
-		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: r.TenantCode}
 		if patient, ok := r.Patients[key]; ok {
 			return patient, nil
 		}
@@ -461,12 +466,12 @@ func (r *CaseValidationRecord) resolveOrganizations(ctx context.Context) error {
 
 func (r *CaseValidationRecord) fetchPatients(ctx context.Context) error {
 	for _, cp := range r.Case.Patients {
-		patient, err := r.Cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, cp.PatientOrganizationCode, cp.SubmitterPatientId)
+		patient, err := r.Cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, cp.PatientOrganizationCode, cp.SubmitterPatientId, r.TenantCode)
 		if err != nil {
 			return fmt.Errorf("failed to get patient by org code %q and submitter patient id %q: %w", cp.PatientOrganizationCode, cp.SubmitterPatientId, err)
 		}
 
-		key := batchval.PatientKey{OrganizationCode: cp.PatientOrganizationCode, SubmitterPatientId: cp.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: cp.PatientOrganizationCode, SubmitterPatientId: cp.SubmitterPatientId, TenantCode: r.TenantCode}
 		if patient != nil {
 			r.Patients[key] = patient
 		}
@@ -750,7 +755,7 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error
 
 func (cr *CaseValidationRecord) validatePatient(patientIndex int) {
 	p := cr.Case.Patients[patientIndex]
-	_, exists := cr.Patients[batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}]
+	_, exists := cr.Patients[batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}]
 	if !exists {
 		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
 		message := fmt.Sprintf("Patient (%s / %s) for create_case %d - patient %d does not exist.",
@@ -768,6 +773,7 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 	patientKey := batchval.PatientKey{
 		OrganizationCode:   p.PatientOrganizationCode,
 		SubmitterPatientId: p.SubmitterPatientId,
+		TenantCode:         cr.TenantCode,
 	}
 	if _, exists := visited[patientKey]; exists {
 		path := cr.formatPatientsFieldPath(nil, "", nil)
@@ -1337,8 +1343,9 @@ func validateCaseRecord(
 	c types.CaseBatch,
 	index int,
 	seenFetuses map[FetusKey]struct{},
+	tenantCode string,
 ) (*CaseValidationRecord, error) {
-	cr := NewCaseValidationRecord(bv, cache, c, index)
+	cr := NewCaseValidationRecord(bv, cache, c, index, tenantCode)
 
 	// TODO: optimize by fetching all codes at once outside of the record
 	if err := cr.fetchCodeInfos(ctx); err != nil {
@@ -1394,7 +1401,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		return nil
 	}
 
-	records, unexpectedErr := validateCaseBatch(ctx, bv, caseBatches)
+	records, unexpectedErr := validateCaseBatch(ctx, bv, caseBatches, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
@@ -1549,7 +1556,7 @@ func persistCaseRecords(
 func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
-		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
 		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for family member %q in case %d", p.SubmitterPatientId, cr.Index)
@@ -1571,7 +1578,7 @@ func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRe
 func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
-		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
 		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for observations categorical for patient %s in case %d", p.SubmitterPatientId, cr.Index)
@@ -1601,7 +1608,7 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
-		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
 		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for observations text for patient %s in case %d", p.SubmitterPatientId, cr.Index)
@@ -1628,7 +1635,7 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 func persistFamilyHistory(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
-		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
 		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for family history for patient %s in case %d", p.SubmitterPatientId, cr.Index)
@@ -1735,7 +1742,7 @@ func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 	return nil
 }
 
-func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, cases []types.CaseBatch, tenantCode string) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
 	cache := batchval.NewBatchValidationCache(bv)
 
@@ -1751,7 +1758,7 @@ func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext,
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(ctx, bv, cache, c, idx, seenFetuses)
+		record, err := validateCaseRecord(ctx, bv, cache, c, idx, seenFetuses, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}

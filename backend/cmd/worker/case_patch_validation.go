@@ -34,7 +34,7 @@ func (r *PatchCaseValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
 
-func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*PatchCaseValidationRecord, error) {
+func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, tenantCode string) (*PatchCaseValidationRecord, error) {
 	r := &PatchCaseValidationRecord{
 		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index, ResourceType: types.PatchCaseBatchType},
 		Patch:                 patch,
@@ -83,7 +83,7 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 	r.SequencingExperiments = seqExps
 
 	if len(patch.Tasks) > 0 {
-		if err := validatePatchTasks(ctx, bv, cache, patch, index, r); err != nil {
+		if err := validatePatchTasks(ctx, bv, cache, patch, index, r, tenantCode); err != nil {
 			return nil, err
 		}
 	}
@@ -125,11 +125,11 @@ func resolveSequencingExperimentsForAttach(ctx context.Context, cache *batchval.
 // (same package, same helpers) and merges its messages back onto the patch record so the
 // batch report is identical to the POST path. The synthetic record is stored on
 // r.Record for the persist phase. Tasks are only validated when the case exists.
-func validatePatchTasks(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord) error {
+func validatePatchTasks(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord, tenantCode string) error {
 	if r.CaseID == nil {
 		return nil // case missing — CASE-012 already raised; nothing to attach tasks to.
 	}
-	taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, patch.SubmitterCaseId, patch.ProjectCode, *r.CaseID, patch.SequencingExperiments, patch.Tasks, index)
+	taskRecord, err := validateCaseTaskAttachments(ctx, bv, cache, patch.SubmitterCaseId, patch.ProjectCode, *r.CaseID, patch.SequencingExperiments, patch.Tasks, index, tenantCode)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func validatePatchTasks(ctx context.Context, bv *batchval.BatchValidationContext
 // and those already attached to the case. Returns the synthetic record (whose Errors/Warnings/Infos
 // the caller merges, and which the persist phase reuses via persistTask), or nil when there are no
 // tasks to attach. Shared by the PATCH and PUT (merge-if-present) case flows.
-func validateCaseTaskAttachments(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, submitterCaseId, projectCode string, caseID int, incomingSeqExps []*types.CaseSequencingExperimentBatch, incomingTasks []*types.CaseTaskBatch, index int) (*CaseValidationRecord, error) {
+func validateCaseTaskAttachments(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, submitterCaseId, projectCode string, caseID int, incomingSeqExps []*types.CaseSequencingExperimentBatch, incomingTasks []*types.CaseTaskBatch, index int, tenantCode string) (*CaseValidationRecord, error) {
 	// Drop null array entries up front — binding is omitempty,dive (no element-level required),
 	// so the validators below (which assume non-nil) stay safe.
 	tasks := make([]*types.CaseTaskBatch, 0, len(incomingTasks))
@@ -189,7 +189,7 @@ func validateCaseTaskAttachments(ctx context.Context, bv *batchval.BatchValidati
 		SequencingExperiments: seqExps,
 		Tasks:                 tasks,
 	}
-	taskRecord := NewCaseValidationRecord(bv, cache, taskCase, index)
+	taskRecord := NewCaseValidationRecord(bv, cache, taskCase, index, tenantCode)
 	taskRecord.CaseID = &caseID
 
 	if err := taskRecord.fetchTaskTypeCodes(ctx); err != nil {
@@ -228,7 +228,7 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		rec, err := validatePatchCaseRecord(ctx, bv, cache, p, i)
+		rec, err := validatePatchCaseRecord(ctx, bv, cache, p, i, batch.TenantCode)
 		if err != nil {
 			batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error validating patch_case batch: %v", err), bv.BatchRepo)
 			return nil
