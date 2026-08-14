@@ -185,7 +185,7 @@ func (p *Proxy) Handle(ctx context.Context, clientConn net.Conn) {
 			// Non-JWT user (or misconfigured FE): our OIDC-formatted reply would only produce a
 			// confusing backend error, so fail fast with a clear one.
 			log.Error("backend requested unsupported auth plugin", "plugin", plugin)
-			_ = client.write(seq+2, errPacket(1045, "28000", "backend requested unsupported auth plugin: "+plugin))
+			_ = client.write(seq+1, errPacket(1045, "28000", "backend requested unsupported auth plugin: "+plugin))
 			return
 		}
 		if err := backend.write(backendSeq+1, buildOIDCAuthResponse([]byte(jwt))); err != nil {
@@ -198,8 +198,11 @@ func (p *Proxy) Handle(ctx context.Context, clientConn net.Conn) {
 		}
 	}
 
-	// 10. Relay StarRocks' verdict (OK or ERR) back to the client.
-	if err := client.write(seq+2, authResult); err != nil {
+	// 10. Relay StarRocks' verdict (OK or ERR) back to the client. seq is the client's
+	//      auth-switch response, so its reply is seq+1 — the client tracks sequence numbers on
+	//      its own hop and rejects any gap with "commands out of sync" (ErrPktSyncMul). The
+	//      backend's numbering is one ahead (it also carried the SSLRequest) and must not leak here.
+	if err := client.write(seq+1, authResult); err != nil {
 		log.Error("forward auth result failed", "error", err)
 		return
 	}
