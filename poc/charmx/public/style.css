@@ -1,0 +1,191 @@
+/*
+ * Served at the relative path `assets/style.css`.
+ *
+ * If you see unstyled HTML inside the portal iframe, the proxy is not passing
+ * static assets through (or CharmX emitted an absolute asset URL).
+ */
+
+:root {
+  --fg: #10151f;
+  --muted: #5b6779;
+  --line: #dfe4ec;
+  --accent: #2f6feb;
+  --proxy: #0f766e;
+  --sso: #7c3aed;
+  --error: #b91c1c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 1.5rem;
+  font:
+    14px/1.55 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  color: var(--fg);
+  background: #fff;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+h1 small {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+h2 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+header {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.75rem;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+.badge {
+  display: inline-block;
+  margin: 0.35rem 0 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.badge-proxy {
+  background: var(--proxy);
+}
+
+.badge-sso {
+  background: var(--sso);
+}
+
+table.claims {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 44rem;
+}
+
+table.claims th,
+table.claims td {
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+table.claims th {
+  width: 12rem;
+  background: #f6f8fb;
+  font-weight: 600;
+}
+
+code {
+  font:
+    12px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  word-break: break-all;
+}
+
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.9rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font:
+    12px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+
+form {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 26rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+input[type='text'],
+textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+}
+
+button,
+.button {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  justify-self: start;
+}
+
+ul.patients {
+  padding-left: 1.1rem;
+}
+
+.pager {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.error {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.ok {
+  color: var(--proxy);
+  font-weight: 600;
+}
+
+footer {
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+  color: var(--muted);
+  font-size: 12px;
+}

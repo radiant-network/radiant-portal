@@ -544,6 +544,44 @@
       "fullScopeAllowed": true
     },
     {
+      "clientId": "charmx",
+      "name": "CharmX embedded app (POC)",
+      "description": "poc/charmx solution 2 — CharmX runs its own authorization-code flow so the portal can iframe it directly. The audience mapper below is what makes its tokens carry aud/azp=charmx, which is how the downstream service tells solution 2 apart from solution 1.",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "charmx-poc-secret",
+      "redirectUris": ["http://localhost:8091/*"],
+      "webOrigins": ["http://localhost:8091"],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:8091/*",
+        "backchannel.logout.session.required": "true"
+      },
+      "fullScopeAllowed": true,
+      "protocolMappers": [
+        {
+          "name": "charmx-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "charmx",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "basic", "email"],
+      "optionalClientScopes": ["address", "phone", "organization", "offline_access", "microprofile-jwt"]
+    },
+    {
       "id": "71dd3aff-390a-4c0b-b42f-b05104e03373",
       "clientId": "CBTN",
       "name": "CBTN",
