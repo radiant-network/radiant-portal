@@ -94,7 +94,7 @@ export const data = {
     },
     clinvar_classifications: ['Likely_benign', 'Benign'],
     clinvar_evidence: {
-      evaluated: '2020-07-07',
+      evaluated: /2020-07-0(7|8)/,
       condition: 'HPSE2-related disorder',
       classification: 'LB',
       submission_count: '1',
