@@ -307,7 +307,8 @@
       "father": "Père",
       "sister": "Sœur",
       "brother": "Frère",
-      "sibling": "Fratrie"
+      "sibling": "Fratrie",
+      "fetus": "Fœtus"
     },
     "toolbar": {
       "combine": "Combiner",

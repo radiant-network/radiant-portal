@@ -23,7 +23,7 @@ type ClinicalCardProps = ComponentProps<'div'> & {
 function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
-  const proband = data.members[0];
+  const proband = data.members.find(member => member.relationship_to_proband === PROBAND);
   const family = data.members.filter(
     member => member.relationship_to_proband && member.relationship_to_proband != PROBAND,
   );
@@ -77,7 +77,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </CardTitle>
 
             <ExpandableList
-              items={(proband.observed_phenotypes ?? []).map(item => (
+              items={(proband?.observed_phenotypes ?? []).map(item => (
                 <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
               ))}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
@@ -92,7 +92,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </CardTitle>
 
             <ExpandableList
-              items={(proband.non_observed_phenotypes ?? []).map(item => (
+              items={(proband?.non_observed_phenotypes ?? []).map(item => (
                 <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
               ))}
               visibleCount={PHENOTYPES_VISIBLE_COUNT}
@@ -118,7 +118,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
               {family.map(member => (
                 <Card key={getMemberKey(member)} className="p-4 gap-4 flex shadow-none">
                   {/* Relationship */}
-                  <CardTitle className="capitalize">{member.relationship_to_proband}</CardTitle>
+                  <CardTitle>{t(`common.relationships.${member.relationship_to_proband}`)}</CardTitle>
 
                   {/* Affected Status Code */}
                   {member.affected_status_code && (

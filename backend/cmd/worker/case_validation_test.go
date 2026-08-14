@@ -2437,6 +2437,31 @@ func Test_validateCondition_TooLong(t *testing.T) {
 	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
+func Test_validateCondition_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					FamilyHistory: []*types.FamilyHistoryBatch{
+						{
+							FamilyMemberCode: "mother",
+							Condition:        "Grand-mère paternelle : épilepsie (crises généralisées) + 50% d'atteinte",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateCondition(0, 0)
+	assert.Empty(t, record.Errors)
+}
+
 func Test_validateFamilyHistory_NoHistory(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
@@ -2687,6 +2712,31 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "create_case[0].patients[0].observations_text[0]", record.Errors[0].Path)
+}
+
+func Test_validateObsTextValue_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code:  "note",
+							Value: "Patiente d'origine québécoise ; suivi obstétrical à l'hôpital (OBS-001) : 50% de réponse",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsTextValue(0, 0)
+	assert.Empty(t, record.Errors)
 }
 
 func Test_validateObservationsText_Valid(t *testing.T) {
@@ -3695,6 +3745,27 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 	assert.Equal(t, expected, record.Errors[0])
 }
 
+// Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText locks in that TextRegExpCompiled
+// (used for pipeline_version, aliquots, type_code, genome_build, pipeline_name) stays strict: widening
+// FreeTextRegExpCompiled for clinical free text must not loosen validation of these technical fields.
+func Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record.validateTaskTextField("pipeline-v1.2 (été)", "pipeline_version", 0, TextRegExpCompiled, true)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "TASK-001", record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+}
+
+func Test_validateTaskTextField_AliquotRegex_RejectsAccentedText(t *testing.T) {
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record.validateTaskTextField("ALIQUOT-é(1)", "aliquots", 0, TextRegExpCompiled, true)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "TASK-001", record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+}
+
 func Test_validateTaskTypeCode_OK(t *testing.T) {
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
 	record.TaskTypeCodes = []string{"foo"}
@@ -4268,6 +4339,26 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 		Message: "Invalid field test_field for create_case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "create_case[0].tasks[0].documents[1]",
 	})
+}
+
+// Test_validateDocumentTextField_HashRegex_RejectsAccentedText locks in that TextRegExpCompiled
+// (used for document hash/name) stays strict: widening FreeTextRegExpCompiled for clinical free
+// text must not loosen validation of these technical fields.
+func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) {
+	mockContext := batchval.BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
+	}
+
+	record.validateDocumentTextField("hash-é(1)", "hash", "create_case[0].tasks[0].documents[1]", 0, 1, TextRegExpCompiled, true)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "DOCUMENT-001", record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 }
 
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
