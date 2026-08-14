@@ -2276,6 +2276,40 @@ VALUES (77, 73, NULL),
        (87, 62, 22)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
 
+-- Phenotypes for the prenatal cases. Every member carries a distinct set: the mother's own signs
+-- are hers, the fetus's come from ultrasound, and the twins differ from each other — so the case
+-- page can be checked to attribute each set to the right member rather than pooling them.
+-- A row belongs to the mother (patient_id) XOR to a fetus (fetus_id), never both.
+-- Codes are taken from the 15 terms init_starrocks.sql loads into hpo_term, so the UI resolves a
+-- label instead of showing a bare HP id.
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system,
+                               code_value, onset_code, interpretation_code, note, tenant_code)
+VALUES
+       -- Case 71, solo pregnancy — mother Camille Dubé (62): both terms are named "Maternal ...",
+       -- so a set landing on the wrong member is obvious on screen
+       (464, 71, 62,   NULL, 'phenotype', 'HPO', 'HP:0009800', 'young_adult', 'positive', NULL, 'radiant'),
+       (465, 71, 62,   NULL, 'phenotype', 'HPO', 'HP:0100622', 'young_adult', 'positive', NULL, 'radiant'),
+       -- ... and her fetus (1) carries ultrasound findings only
+       (466, 71, NULL, 1,    'phenotype', 'HPO', 'HP:0001561', 'antenatal',   'positive', NULL, 'radiant'),
+       (467, 71, NULL, 1,    'phenotype', 'HPO', 'HP:0010519', 'antenatal',   'positive', NULL, 'radiant'),
+       (468, 71, NULL, 1,    'phenotype', 'HPO', 'HP:0000003', 'antenatal',   'positive', NULL, 'radiant'),
+
+       -- Case 72, twin pregnancy — mother Rosalie Girard (63)
+       (469, 72, 63,   NULL, 'phenotype', 'HPO', 'HP:0009800', 'young_adult', 'positive', NULL, 'radiant'),
+       -- The twins get opposite amniotic-fluid findings — polyhydramnios vs oligohydramnios —
+       -- so the two fetal sets can never be mistaken for one another
+       (470, 72, NULL, 2,    'phenotype', 'HPO', 'HP:0001561', 'antenatal',   'positive', NULL, 'radiant'),
+       (471, 72, NULL, 2,    'phenotype', 'HPO', 'HP:0012443', 'antenatal',   'positive', NULL, 'radiant'),
+       (472, 72, NULL, 3,    'phenotype', 'HPO', 'HP:0001562', 'antenatal',   'positive', NULL, 'radiant'),
+       (473, 72, NULL, 3,    'phenotype', 'HPO', 'HP:0004325', 'antenatal',   'positive', NULL, 'radiant'),
+
+       -- Case 73, trio — mother Léa Bernier (64), father Olivier Bernier (65), fetus (4)
+       (474, 73, 64,   NULL, 'phenotype', 'HPO', 'HP:0100622', 'young_adult', 'positive', NULL, 'radiant'),
+       (475, 73, 65,   NULL, 'phenotype', 'HPO', 'HP:0010818', 'young_adult', 'positive', NULL, 'radiant'),
+       (476, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0007068', 'antenatal',   'positive', NULL, 'radiant'),
+       (477, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0002011', 'antenatal',   'positive', NULL, 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
 -- Reset sequences to prevent duplicate key errors when inserting new records
 SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));
 SELECT setval('project_id_seq', (SELECT MAX(id) FROM project));
