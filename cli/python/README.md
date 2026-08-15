@@ -135,9 +135,11 @@ Class | Method | HTTP request | Description
 *OccurrenceNotesApi* | [**put_occurrence_note**](docs/OccurrenceNotesApi.md#put_occurrence_note) | **PUT** /{tenant}/notes/{id} | Update a note on an occurrence
 *OccurrencesApi* | [**aggregate_germline_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline CNV occurrences
 *OccurrencesApi* | [**aggregate_germline_snv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline SNV occurrences
+*OccurrencesApi* | [**aggregate_somatic_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic CNV occurrences
 *OccurrencesApi* | [**aggregate_somatic_snv_occurrences**](docs/OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic SNV occurrences
 *OccurrencesApi* | [**count_germline_cnv_occurrences**](docs/OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count | Count germline CNV occurrences
 *OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count | Count germline SNV occurrences
+*OccurrencesApi* | [**count_somatic_cnv_occurrences**](docs/OccurrencesApi.md#count_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/count | Count somatic CNV occurrences
 *OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 *OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
@@ -145,9 +147,12 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 *OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
 *OccurrencesApi* | [**list_germline_snv_occurrences**](docs/OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
+*OccurrencesApi* | [**list_somatic_cnv_genes_overlap**](docs/OccurrencesApi.md#list_somatic_cnv_genes_overlap) | **GET** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a somatic CNV with a given ID
+*OccurrencesApi* | [**list_somatic_cnv_occurrences**](docs/OccurrencesApi.md#list_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list | List somatic CNV occurrences
 *OccurrencesApi* | [**list_somatic_snv_occurrences**](docs/OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
 *OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
+*OccurrencesApi* | [**statistics_somatic_cnv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic CNV occurrences
 *OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
 *OrganizationsApi* | [**create_organization**](docs/OrganizationsApi.md#create_organization) | **POST** /{tenant}/organizations | Create an organization
 *OrganizationsApi* | [**list_organizations**](docs/OrganizationsApi.md#list_organizations) | **GET** /{tenant}/organizations | List the tenant&#39;s organizations
@@ -268,6 +273,7 @@ Class | Method | HTTP request | Description
  - [SearchCriterion](docs/SearchCriterion.md)
  - [SequencingExperimentBatch](docs/SequencingExperimentBatch.md)
  - [SequencingExperimentDetail](docs/SequencingExperimentDetail.md)
+ - [SomaticCNVOccurrence](docs/SomaticCNVOccurrence.md)
  - [SomaticSNVOccurrence](docs/SomaticSNVOccurrence.md)
  - [SortBody](docs/SortBody.md)
  - [Sqon](docs/Sqon.md)

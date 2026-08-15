@@ -12,6 +12,7 @@ const (
 	ExomiserTaskTypeCode                        = "exomiser"
 	AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
 	AlignmentSomaticVariantCallingTaskTypeCode  = "alignment_somatic_variant_calling"
+	TumorOnlyVariantCallingTaskTypeCode         = "tumor_only_variant_calling"
 )
 
 // TaskOccurrenceType is a row of GET /cases/{case_id}/{seq_id}/tasks_with_occurrences —

@@ -239,7 +239,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
-// @Param data_type query string true "Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort." Enums(germline_snv, germline_cnv, somatic_snv, somatic_snv_tn, somatic_snv_to)
+// @Param data_type query string true "Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort." Enums(germline_snv, germline_cnv, somatic_snv, somatic_snv_tn, somatic_snv_to, somatic_cnv)
 // @Produce json
 // @Success 200 {array} types.TaskOccurrenceType
 // @Failure 400 {object} types.ApiError

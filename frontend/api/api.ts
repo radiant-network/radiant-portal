@@ -4652,6 +4652,257 @@ export interface SequencingExperimentDetail {
     'updated_on'?: string;
 }
 /**
+ * SomaticCNVOccurrence represents a somatic CNV occurrence
+ * @export
+ * @interface SomaticCNVOccurrence
+ */
+export interface SomaticCNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'ascn_as'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'bc'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'calls'?: Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'ciend'?: Array<number>;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cipos'?: Array<number>;
+    /**
+     * DRAGEN allele-specific copy number (ASCN). 3.10.8 does not emit these at all and 4.2.4 declares but omits them per record, so expect them to be mostly NULL.
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cn'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cnf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cnq'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cnv_id': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'cytoband'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'end': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof SomaticCNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
+    /**
+     * NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment correctly matches nothing.
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'gnomad_sc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'gnomad_sf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'gnomad_sn'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SomaticCNVOccurrence
+     */
+    'has_note': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'length': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'maf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'mcn'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'mcnf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'mcnq'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'nb_genes'?: number;
+    /**
+     * Counts somatic SNVs, unlike germline CNV\'s identically named column, which counts germline ones. Never pool or compare the two.
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'nb_snv'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'pe'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'quality'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'reflen'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'sd'?: number;
+    /**
+     * The tumor sequencing id. Somatic CNV spells this seq_id, not tumor_seq_id as somatic SNV does, and has no normal_seq_id.
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'sm'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'start': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'svlen'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'svtype'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SomaticCNVOccurrence
+     */
+    'symbol'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticCNVOccurrence
+     */
+    'type': SomaticCNVOccurrenceTypeEnum;
+}
+
+export const SomaticCNVOccurrenceTypeEnum = {
+    Gain: 'GAIN',
+    Loss: 'LOSS',
+    Cnloh: 'CNLOH',
+    Gainloh: 'GAINLOH'
+} as const;
+
+export type SomaticCNVOccurrenceTypeEnum = typeof SomaticCNVOccurrenceTypeEnum[keyof typeof SomaticCNVOccurrenceTypeEnum];
+
+/**
  * 
  * @export
  * @interface SomaticSNVOccurrence
@@ -7573,7 +7824,8 @@ export const CaseTasksWithOccurrencesDataTypeEnum = {
     GermlineCnv: 'germline_cnv',
     SomaticSnv: 'somatic_snv',
     SomaticSnvTn: 'somatic_snv_tn',
-    SomaticSnvTo: 'somatic_snv_to'
+    SomaticSnvTo: 'somatic_snv_to',
+    SomaticCnv: 'somatic_cnv'
 } as const;
 export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
 
@@ -10503,6 +10755,67 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Aggregate somatic CNV occurrences for a given tumor sequence ID
+         * @summary Aggregate somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aggregateSomaticCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('aggregateSomaticCNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('aggregateSomaticCNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('aggregateSomaticCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('aggregateSomaticCNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
+            assertParamExists('aggregateSomaticCNVOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
+            const localVarPath = `/{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/aggregate`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (withDictionary !== undefined) {
+                localVarQueryParameter['with_dictionary'] = withDictionary;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(aggregationBodyWithSqon, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -10642,6 +10955,62 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // verify required parameter 'countBodyWithSqon' is not null or undefined
             assertParamExists('countGermlineSNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
             const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(countBodyWithSqon, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Counts somatic CNV occurrences for a given tumor sequence ID
+         * @summary Count somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countSomaticCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('countSomaticCNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('countSomaticCNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('countSomaticCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('countSomaticCNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'countBodyWithSqon' is not null or undefined
+            assertParamExists('countSomaticCNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
+            const localVarPath = `/{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/count`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
@@ -11049,6 +11418,116 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * List genes overlapping a somatic CNV with a given ID
+         * @summary List genes overlapping a somatic CNV with a given ID
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} cnvId CNV ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSomaticCNVGenesOverlap: async (tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listSomaticCNVGenesOverlap', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('listSomaticCNVGenesOverlap', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('listSomaticCNVGenesOverlap', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('listSomaticCNVGenesOverlap', 'taskId', taskId)
+            // verify required parameter 'cnvId' is not null or undefined
+            assertParamExists('listSomaticCNVGenesOverlap', 'cnvId', cnvId)
+            const localVarPath = `/{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"cnv_id"}}`, encodeURIComponent(String(cnvId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List somatic CNV occurrences for a given tumor sequence ID
+         * @summary List somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSomaticCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listSomaticCNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('listSomaticCNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('listSomaticCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('listSomaticCNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'listBodyWithSqon' is not null or undefined
+            assertParamExists('listSomaticCNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
+            const localVarPath = `/{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithSqon, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11217,6 +11696,62 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Return statistics about a field for a given tumor sequence ID
+         * @summary Statistics of somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        statisticsSomaticCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('statisticsSomaticCNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('statisticsSomaticCNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('statisticsSomaticCNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('statisticsSomaticCNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'statisticsBodyWithSqon' is not null or undefined
+            assertParamExists('statisticsSomaticCNVOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
+            const localVarPath = `/{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(statisticsBodyWithSqon, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11319,6 +11854,24 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Aggregate somatic CNV occurrences for a given tumor sequence ID
+         * @summary Aggregate somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async aggregateSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateSomaticCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateSomaticCNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11368,6 +11921,23 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Counts somatic CNV occurrences for a given tumor sequence ID
+         * @summary Count somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countSomaticCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countSomaticCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11487,6 +12057,40 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * List genes overlapping a somatic CNV with a given ID
+         * @summary List genes overlapping a somatic CNV with a given ID
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} cnvId CNV ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSomaticCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CNVGeneOverlap>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSomaticCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listSomaticCNVGenesOverlap']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List somatic CNV occurrences for a given tumor sequence ID
+         * @summary List somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SomaticCNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSomaticCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listSomaticCNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11535,6 +12139,23 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Return statistics about a field for a given tumor sequence ID
+         * @summary Statistics of somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async statisticsSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsSomaticCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsSomaticCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11595,6 +12216,21 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.aggregateGermlineSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
+         * Aggregate somatic CNV occurrences for a given tumor sequence ID
+         * @summary Aggregate somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        aggregateSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateSomaticCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11636,6 +12272,20 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
             return localVarFp.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Counts somatic CNV occurrences for a given tumor sequence ID
+         * @summary Count somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countSomaticCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts somatic SNV occurrences for a given sequence ID
@@ -11733,6 +12383,34 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
+         * List genes overlapping a somatic CNV with a given ID
+         * @summary List genes overlapping a somatic CNV with a given ID
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} cnvId CNV ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSomaticCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CNVGeneOverlap>> {
+            return localVarFp.listSomaticCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List somatic CNV occurrences for a given tumor sequence ID
+         * @summary List somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {ListBodyWithSqon} listBodyWithSqon List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<SomaticCNVOccurrence>> {
+            return localVarFp.listSomaticCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
          * @param {string} tenant Tenant code
@@ -11773,6 +12451,20 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         statisticsGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
             return localVarFp.statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return statistics about a field for a given tumor sequence ID
+         * @summary Statistics of somatic CNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor Sequence ID
+         * @param {number} taskId Task ID
+         * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        statisticsSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsSomaticCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
@@ -11833,6 +12525,23 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
+     * Aggregate somatic CNV occurrences for a given tumor sequence ID
+     * @summary Aggregate somatic CNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor Sequence ID
+     * @param {number} taskId Task ID
+     * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+     * @param {boolean} [withDictionary] Whether to include all possible facet values
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public aggregateSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateSomaticCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Aggregate somatic SNV occurrences for a given sequence ID
      * @summary Aggregate somatic SNV occurrences
      * @param {string} tenant Tenant code
@@ -11879,6 +12588,22 @@ export class OccurrencesApi extends BaseAPI {
      */
     public countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Counts somatic CNV occurrences for a given tumor sequence ID
+     * @summary Count somatic CNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor Sequence ID
+     * @param {number} taskId Task ID
+     * @param {CountBodyWithSqon} countBodyWithSqon Count Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countSomaticCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -11991,6 +12716,38 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
+     * List genes overlapping a somatic CNV with a given ID
+     * @summary List genes overlapping a somatic CNV with a given ID
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor Sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} cnvId CNV ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public listSomaticCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listSomaticCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List somatic CNV occurrences for a given tumor sequence ID
+     * @summary List somatic CNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor Sequence ID
+     * @param {number} taskId Task ID
+     * @param {ListBodyWithSqon} listBodyWithSqon List Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public listSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listSomaticCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * List somatic SNV occurrences for a given sequence ID
      * @summary List somatic SNV occurrences
      * @param {string} tenant Tenant code
@@ -12036,6 +12793,22 @@ export class OccurrencesApi extends BaseAPI {
      */
     public statisticsGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Return statistics about a field for a given tumor sequence ID
+     * @summary Statistics of somatic CNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor Sequence ID
+     * @param {number} taskId Task ID
+     * @param {StatisticsBodyWithSqon} statisticsBodyWithSqon Statistics Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public statisticsSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsSomaticCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

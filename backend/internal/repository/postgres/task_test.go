@@ -311,6 +311,38 @@ func Test_ListTasksByCaseAndSequencing_SomaticTumorNormal_ExcludesTumorOnlyTaskO
 	})
 }
 
+func Test_ListTasksByCaseAndSequencing_SomaticCNV_ReturnsTumorOnlyVariantCallingTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
+
+		selector, _ := types.OccurrenceTypeSomaticCNV.TaskSelector()
+		result, err := repo.ListTasksByCaseAndSequencing(t.Context(), 71, 74, selector)
+
+		// Task 85 hangs off the same tumoral seq 74 as the somatic SNV tasks 74 and 82; only
+		// the task type tells them apart, since this selector carries no cohort predicate.
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Equal(t, 85, result[0].ID)
+		assert.Equal(t, types.TumorOnlyVariantCallingTaskTypeCode, result[0].TaskTypeCode)
+		assert.Equal(t, "Somatic Variant Calling by Tumor-Only Sample", result[0].TaskTypeName)
+	})
+}
+
+func Test_ListTasksByCaseAndSequencing_SomaticCNV_ExcludedFromSomaticSNVCohorts(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
+
+		// The CNV task carries a tumoral sequencing and no normal one, so it would satisfy the
+		// tumor-only cohort predicate — the task type is what keeps it out of the SNV tab.
+		selector, _ := types.OccurrenceTypeSomaticSNVTumorOnly.TaskSelector()
+		result, err := repo.ListTasksByCaseAndSequencing(t.Context(), 71, 74, selector)
+
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Equal(t, 82, result[0].ID)
+	})
+}
+
 func Test_ListTasksByCaseAndSequencing_DeprecatedSomaticSNVAlias_MatchesTumorNormal(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})

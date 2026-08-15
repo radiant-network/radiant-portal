@@ -1687,6 +1687,43 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Tasks With Occurrences (Somatic CNV)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/22/62/tasks_with_occurrences?data_type=somatic_cnv",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "22",
+                "62",
+                "tasks_with_occurrences"
+              ],
+              "query": [
+                {
+                  "key": "data_type",
+                  "value": "somatic_cnv"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -3308,6 +3345,218 @@
                 "74",
                 "-8318226658347712512",
                 "expanded"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Somatic CNV Occurrences",
+      "item": [
+        {
+          "name": "Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/cnv/22/62/87/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "cnv",
+                "22",
+                "62",
+                "87",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n        \"cn\", \"cnf\", \"cnq\", \"mcn\", \"mcnf\", \"mcnq\", \"maf\", \"sd\", \"ascn_as\"\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/cnv/22/62/87/list",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "cnv",
+                "22",
+                "62",
+                "87",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aggregate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\": \"type\",\n    \"limit\": 10,\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"type\",\n\t\t\t\t\t\"value\": [\"PASS\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/cnv/22/62/87/aggregate",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "cnv",
+                "22",
+                "62",
+                "87",
+                "aggregate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"length\",\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"filter\",\n\t\t\t\t\t\"value\": [\"PASS\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/cnv/22/62/87/statistics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "cnv",
+                "22",
+                "62",
+                "87",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Genes Overlap",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/somatic/cnv/22/62/87/1/genes_overlap",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "cnv",
+                "22",
+                "62",
+                "87",
+                "1",
+                "genes_overlap"
               ]
             }
           },

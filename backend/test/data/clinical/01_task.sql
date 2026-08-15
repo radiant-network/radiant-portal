@@ -83,7 +83,9 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        -- prenatal fixture: alignment task for the fetus's own sequencing (case 72).
        (83, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
        -- Covers both the fetus's and the mother's own sequencing for case 72 (Fix 7 test).
-       (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant')
+       (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
+       -- Somatic CNV: tumor-only by definition, on the same tumoral seq 74 as tasks 74 and 82.
+       (85, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE task ALTER COLUMN id RESTART WITH 1000;

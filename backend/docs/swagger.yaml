@@ -2276,6 +2276,134 @@ components:
       required:
       - patient_id
       type: object
+    SomaticCNVOccurrence:
+      description: SomaticCNVOccurrence represents a somatic CNV occurrence
+      properties:
+        aliquot:
+          type: string
+        ascn_as:
+          type: integer
+        bc:
+          type: integer
+        calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        chromosome:
+          type: string
+        ciend:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        cipos:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        cn:
+          description: |-
+            DRAGEN allele-specific copy number (ASCN). 3.10.8 does not emit these at all and 4.2.4
+            declares but omits them per record, so expect them to be mostly NULL.
+          type: integer
+        cnf:
+          type: number
+        cnq:
+          type: number
+        cnv_id:
+          type: string
+        cytoband:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        end:
+          type: integer
+        filter:
+          type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
+        gnomad_sc:
+          description: |-
+            NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment
+            correctly matches nothing.
+          type: integer
+        gnomad_sf:
+          type: number
+        gnomad_sn:
+          type: integer
+        has_note:
+          type: boolean
+        length:
+          type: integer
+        maf:
+          type: number
+        mcn:
+          type: integer
+        mcnf:
+          type: number
+        mcnq:
+          type: number
+        name:
+          type: string
+        nb_genes:
+          type: integer
+        nb_snv:
+          description: |-
+            Counts somatic SNVs, unlike germline CNV's identically named column, which counts germline
+            ones. Never pool or compare the two.
+          type: integer
+        pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        quality:
+          type: number
+        reflen:
+          type: integer
+        sd:
+          type: number
+        seq_id:
+          description: |-
+            The tumor sequencing id. Somatic CNV spells this seq_id, not tumor_seq_id as somatic SNV
+            does, and has no normal_seq_id.
+          type: integer
+        sm:
+          type: number
+        start:
+          type: integer
+        svlen:
+          type: integer
+        svtype:
+          type: string
+        symbol:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        task_id:
+          type: integer
+        type:
+          enum:
+          - GAIN
+          - LOSS
+          - CNLOH
+          - GAINLOH
+          type: string
+      required:
+      - chromosome
+      - cnv_id
+      - end
+      - has_note
+      - length
+      - name
+      - seq_id
+      - start
+      - task_id
+      - type
+      type: object
     SomaticSNVOccurrence:
       properties:
         aa_change:
@@ -3301,6 +3429,7 @@ paths:
           - somatic_snv
           - somatic_snv_tn
           - somatic_snv_to
+          - somatic_cnv
           type: string
       responses:
         "200":
@@ -6591,6 +6720,431 @@ paths:
       security:
       - bearerauth: []
       summary: Get germline SNV facets dictionary
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap:
+    get:
+      description: List genes overlapping a somatic CNV with a given ID
+      operationId: listSomaticCNVGenesOverlap
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: CNV ID
+        in: path
+        name: cnv_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CNVGeneOverlap'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List genes overlapping a somatic CNV with a given ID
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/aggregate:
+    post:
+      description: Aggregate somatic CNV occurrences for a given tumor sequence ID
+      operationId: aggregateSomaticCNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Whether to include all possible facet values
+        in: query
+        name: with_dictionary
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AggregationBodyWithSqon'
+        description: Aggregation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Aggregation'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Aggregate somatic CNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/count:
+    post:
+      description: Counts somatic CNV occurrences for a given tumor sequence ID
+      operationId: countSomaticCNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountBodyWithSqon'
+        description: Count Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Count somatic CNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list:
+    post:
+      description: List somatic CNV occurrences for a given tumor sequence ID
+      operationId: listSomaticCNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithSqon'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SomaticCNVOccurrence'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List somatic CNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics:
+    post:
+      description: Return statistics about a field for a given tumor sequence ID
+      operationId: statisticsSomaticCNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatisticsBodyWithSqon'
+        description: Statistics Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Statistics of somatic CNV occurrences
       tags:
       - occurrences
   /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:

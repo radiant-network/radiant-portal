@@ -60,6 +60,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoGenes := starrocks.NewGenesRepository(starrocksDB)
 	repoGermlineCNVOccurrences := starrocks.NewGermlineCNVOccurrencesRepository(starrocksDB)
 	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
+	repoSomaticCNVOccurrences := starrocks.NewSomaticCNVOccurrencesRepository(starrocksDB)
 	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
 	repoTerms := starrocks.NewTermsRepository(starrocksDB)
 	repoCases := starrocks.NewCasesRepository(starrocksDB)
@@ -196,6 +197,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
 	occurrencesGermlineSNVGroup.GET("/dictionary", requireAction(types.ActionSearchCase), server.GetGermlineSNVDictionary(repoFacets))
+
+	occurrencesSomaticCNVGroup := occurrencesSomaticGroup.Group("/cnv")
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVCountHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVListHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVAggregateHandler(repoSomaticCNVOccurrences, repoFacets))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVStatisticsHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVGenesOverlapHandler(repoSomaticCNVOccurrences))
 
 	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVCountHandler(repoSomaticSNVOccurrences))

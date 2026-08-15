@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,12 +35,6 @@ func (m *MockCNVRepository) GetStatisticsOccurrences(context.Context, int, int, 
 }
 
 func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
-	quality := float32(99.5)
-	bc := 10
-	cn := 2
-	sm := float32(0.95)
-	svLen := 4000
-	refLen := 4000
 	return []types.GermlineCNVOccurrence{
 		{
 			SeqID:      1,
@@ -52,16 +47,16 @@ func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types
 			Type:       "deletion",
 			Length:     4000,
 			Name:       "CNV_1",
-			Quality:    &quality,
+			Quality:    utils.Float32Ptr(99.5),
 			Calls:      types.JsonArray[int]{1, 0, 1},
 			Filter:     "PASS",
-			BC:         &bc,
-			CN:         &cn,
+			BC:         utils.IntPtr(10),
+			CN:         utils.IntPtr(2),
 			PE:         types.JsonArray[int]{5, 3},
-			SM:         &sm,
+			SM:         utils.Float32Ptr(0.95),
 			SVType:     "DEL",
-			SVLen:      &svLen,
-			RefLen:     &refLen,
+			SVLen:      utils.IntPtr(4000),
+			RefLen:     utils.IntPtr(4000),
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
 			NbSNV:      1,
@@ -79,16 +74,16 @@ func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types
 			Type:       "deletion",
 			Length:     4000,
 			Name:       "CNV_2",
-			Quality:    &quality,
+			Quality:    utils.Float32Ptr(99.5),
 			Calls:      types.JsonArray[int]{1, 0, 1},
 			Filter:     "PASS",
-			BC:         &bc,
-			CN:         &cn,
+			BC:         utils.IntPtr(10),
+			CN:         utils.IntPtr(2),
 			PE:         types.JsonArray[int]{5, 3},
-			SM:         &sm,
+			SM:         utils.Float32Ptr(0.95),
 			SVType:     "DEL",
-			SVLen:      &svLen,
-			RefLen:     &refLen,
+			SVLen:      utils.IntPtr(4000),
+			RefLen:     utils.IntPtr(4000),
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
 			NbSNV:      0,
