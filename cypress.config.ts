@@ -1,5 +1,5 @@
 import { defineConfig } from "cypress";
-import { getDateTime } from "./cypress/pom/shared/Utils";
+import { getDateTime, isFerlease } from "./cypress/pom/shared/Utils";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -8,20 +8,13 @@ dotenv.config();
 
 const { strDate, strTime } = getDateTime();
 
-const getName = (url = "", parallel = "") => {
-  if (url.includes("sjra-")) {
+const getName = (url = '', parallel = '') => {
+  if (isFerlease()) {
     return (
-      url
-        .replace("https://", "")
-        .split(".")[0]
-        .split("-")
-        .splice(2, 4)
-        .join("-") +
-      "/" +
-      parallel
+      url.replace('https://', '').split('.')[0].split('-').splice(1).join('-') + '/' + parallel
     );
   } else {
-    return "QA/" + parallel;
+    return 'QA/' + parallel;
   }
 };
 

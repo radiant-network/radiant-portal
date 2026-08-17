@@ -360,6 +360,16 @@ export const isEmpty = (value: unknown): boolean => {
 };
 
 /**
+ * Checks if the current environment is a FERLEASE environment.
+ * Determines this by checking if CYPRESS_BASE_URL contains 'sjra-', 'clin-'.
+ * @returns True if running in a FERLEASE environment, false otherwise.
+ */
+export const isFerlease = (): boolean => {
+  const url = process.env.CYPRESS_BASE_URL !== undefined ? process.env.CYPRESS_BASE_URL : '';
+  return (url.includes('sjra-') || url.includes('clin-'));
+};
+
+/**
  * Recursively normalizes a SQON captured from a `/count` request so it can be
  * compared structurally, independently of the data (QB-3 SQON validation).
  * Every group/pill `id` is dropped (group ids are volatile uuids) and every leaf
