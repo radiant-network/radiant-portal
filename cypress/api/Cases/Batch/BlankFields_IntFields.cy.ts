@@ -87,6 +87,6 @@ describe('Cases - Batch - Blank fields - Int fields', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.UnmarshalStringToInt64('OutputDocumentBatch.cases.tasks.output_documents.size'));
+    cy.validateMessage(response, apiMessages.UnmarshalStringTo('OutputDocumentBatch.cases.tasks.output_documents.size', 'int64'));
   });
 });
