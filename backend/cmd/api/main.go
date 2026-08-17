@@ -82,6 +82,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoBatches := postgres.NewBatchRepository(postgresDB)
 	repoTasks := postgres.NewTaskRepository(postgresDB)
 	repoAuth := postgres.NewAuthRepository(postgresDB)
+	repoUsers := postgres.NewUsersRepository(postgresDB)
 
 	r := newEngine()
 
@@ -212,6 +213,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
 	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
 	organizationsGroup.PUT("/:code", requireAction(types.ActionManageOrg), server.PutOrganizationHandler(repoOrganizationsWrite))
+
+	// Tenant users administration, gated by can_manage_user. Distinct from the global /users group
+	// below, which serves the caller's own saved filters, sets and preferences.
+	tenantUsersGroup := tenantRoutes.Group("/users")
+	tenantUsersGroup.GET("", requireAction(types.ActionManageUser), server.ListUsersHandler(repoUsers))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

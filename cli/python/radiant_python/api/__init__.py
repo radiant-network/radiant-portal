@@ -22,6 +22,7 @@ from radiant_python.api.sequencing_api import SequencingApi
 from radiant_python.api.status_api import StatusApi
 from radiant_python.api.user_preferences_api import UserPreferencesApi
 from radiant_python.api.user_sets_api import UserSetsApi
+from radiant_python.api.users_api import UsersApi
 from radiant_python.api.value_sets_api import ValueSetsApi
 from radiant_python.api.variant_api import VariantApi
 

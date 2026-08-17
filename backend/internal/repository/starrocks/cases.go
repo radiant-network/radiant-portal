@@ -73,7 +73,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
 	tx = tx.Select(columns)
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 
 	if err = tx.Find(&cases).Error; err != nil {
 		return nil, nil, fmt.Errorf("error fetching cases: %w", err)

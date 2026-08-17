@@ -6,6 +6,15 @@ const (
 	ActionScopeTenant = "tenant"
 )
 
+// Role scopes are derived from a role's actions and never stored: a role holding any org-scoped
+// action must be granted at an org, one holding only tenant-scoped actions applies tenant-wide,
+// and a role mixing both does both (ADR §5.4).
+const (
+	RoleScopeOrg    = ActionScopeOrg
+	RoleScopeTenant = ActionScopeTenant
+	RoleScopeMixed  = "mixed"
+)
+
 // DefaultTenantCode is the launch tenant created by migration 000009 and used to backfill
 // existing rows in 000013. Write paths now derive tenant_code from the request: API handlers
 // read the active tenant via GetTenant (the /:tenant path segment) and the worker reads it

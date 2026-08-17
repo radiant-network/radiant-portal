@@ -37,26 +37,23 @@ func AddWhere(userQuery types.Query, tx *gorm.DB) {
 	}
 }
 
-func AddLimit(tx *gorm.DB, userQuery types.ListQuery) {
-	if userQuery.Pagination() != nil {
-		var l int
-		if userQuery.Pagination().Limit < MaxLimit {
-			l = userQuery.Pagination().Limit
-		} else {
-			l = MaxLimit
-		}
-		if userQuery.Pagination().PageIndex != 0 {
-			tx.Limit(l).Offset(userQuery.Pagination().PageIndex * l)
-		} else {
-			tx.Limit(l).Offset(userQuery.Pagination().Offset)
-		}
-	} else {
+// AddPagination applies a resolved pagination to any query, whether or not it comes from the
+// sqon/criteria machinery. Limit is capped at MaxLimit.
+func AddPagination(tx *gorm.DB, pagination *types.Pagination) {
+	if pagination == nil {
 		tx.Limit(MinLimit)
+		return
+	}
+	l := min(pagination.Limit, MaxLimit)
+	if pagination.PageIndex != 0 {
+		tx.Limit(l).Offset(pagination.PageIndex * l)
+	} else {
+		tx.Limit(l).Offset(pagination.Offset)
 	}
 }
 
-func AddLimitAndSort(tx *gorm.DB, userQuery types.ListQuery) {
-	AddLimit(tx, userQuery)
+func AddPaginationAndSort(tx *gorm.DB, userQuery types.ListQuery) {
+	AddPagination(tx, userQuery.Pagination())
 	AddSort(tx, userQuery)
 }
 

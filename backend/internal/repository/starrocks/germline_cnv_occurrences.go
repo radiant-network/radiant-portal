@@ -66,7 +66,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 		utils.AddSort(tx, userQuery)
 	}
 
-	utils.AddLimit(tx, userQuery)
+	utils.AddPagination(tx, userQuery.Pagination())
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching CNV occurrences: %w", err)

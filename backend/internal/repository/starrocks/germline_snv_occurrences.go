@@ -45,7 +45,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	columns = append(columns, "flag.flag_type")
 	columns = append(columns, "v.locus")
 
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 	// we build a TOP-N query like :
 	// SELECT g_snv_o.locus_id, g_snv_o.quality, g_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
 	// FROM (germline__snv__occurrence o, snv__variant v)

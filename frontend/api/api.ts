@@ -5423,6 +5423,83 @@ export interface UserPreference {
     'key': string;
 }
 /**
+ * Line representing a user in the tenant users list, with the roles granted to them in that tenant
+ * @export
+ * @interface UserResult
+ */
+export interface UserResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserResult
+     */
+    'email'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserResult
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserResult
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {Array<UserRoleResult>}
+     * @memberof UserResult
+     */
+    'roles': Array<UserRoleResult>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserResult
+     */
+    'user_id': string;
+}
+/**
+ * Role granted to a user in a tenant, with the organizations it applies at
+ * @export
+ * @interface UserRoleResult
+ */
+export interface UserRoleResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserRoleResult
+     */
+    'name': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserRoleResult
+     */
+    'org_codes': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserRoleResult
+     */
+    'role_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserRoleResult
+     */
+    'scope': UserRoleResultScopeEnum;
+}
+
+export const UserRoleResultScopeEnum = {
+    Tenant: 'tenant',
+    Org: 'org',
+    Mixed: 'mixed'
+} as const;
+
+export type UserRoleResultScopeEnum = typeof UserRoleResultScopeEnum[keyof typeof UserRoleResultScopeEnum];
+
+/**
  * 
  * @export
  * @interface UserSet
@@ -5470,6 +5547,25 @@ export interface UserSet {
      * @memberof UserSet
      */
     'user_id'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface UsersSearchResponse
+ */
+export interface UsersSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof UsersSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<UserResult>}
+     * @memberof UsersSearchResponse
+     */
+    'list': Array<UserResult>;
 }
 /**
  * 
@@ -13799,6 +13895,158 @@ export class UserSetsApi extends BaseAPI {
      */
     public getUserSet(userSetId: string, options?: RawAxiosRequestConfig) {
         return UserSetsApiFp(this.configuration).getUserSet(userSetId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UsersApi - axios parameter creator
+ * @export
+ */
+export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
+         * @summary List the tenant\'s users
+         * @param {string} tenant Tenant code
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
+         * @param {number} [limit] Page size (default 25, capped at 200)
+         * @param {number} [offset] Number of users to skip
+         * @param {number} [pageIndex] Page to return, as an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listUsers: async (tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listUsers', 'tenant', tenant)
+            const localVarPath = `/{tenant}/users`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+            if (roles !== undefined) {
+                localVarQueryParameter['roles'] = roles;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (pageIndex !== undefined) {
+                localVarQueryParameter['page_index'] = pageIndex;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UsersApi - functional programming interface
+ * @export
+ */
+export const UsersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
+         * @summary List the tenant\'s users
+         * @param {string} tenant Tenant code
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
+         * @param {number} [limit] Page size (default 25, capped at 200)
+         * @param {number} [offset] Number of users to skip
+         * @param {number} [pageIndex] Page to return, as an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsersSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listUsers(tenant, search, roles, limit, offset, pageIndex, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.listUsers']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UsersApi - factory interface
+ * @export
+ */
+export const UsersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UsersApiFp(configuration)
+    return {
+        /**
+         * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
+         * @summary List the tenant\'s users
+         * @param {string} tenant Tenant code
+         * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
+         * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
+         * @param {number} [limit] Page size (default 25, capped at 200)
+         * @param {number} [offset] Number of users to skip
+         * @param {number} [pageIndex] Page to return, as an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): AxiosPromise<UsersSearchResponse> {
+            return localVarFp.listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UsersApi - object-oriented interface
+ * @export
+ * @class UsersApi
+ * @extends {BaseAPI}
+ */
+export class UsersApi extends BaseAPI {
+    /**
+     * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
+     * @summary List the tenant\'s users
+     * @param {string} tenant Tenant code
+     * @param {string} [search] Case-insensitive prefix of the user\&#39;s first name, last name or email
+     * @param {string} [roles] Comma-separated role codes; keeps users holding any of them
+     * @param {number} [limit] Page size (default 25, capped at 200)
+     * @param {number} [offset] Number of users to skip
+     * @param {number} [pageIndex] Page to return, as an alternative to offset
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

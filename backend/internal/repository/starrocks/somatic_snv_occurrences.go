@@ -40,7 +40,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	columns = append(columns, "flag.flag_type")
 	columns = append(columns, "v.locus")
 
-	utils.AddLimitAndSort(tx, userQuery)
+	utils.AddPaginationAndSort(tx, userQuery)
 	// we build a TOP-N query like :
 	// SELECT s_snv_o.locus_id, s_snv_o.quality, s_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
 	// FROM (somatic__snv__occurrence o, snv__variant v)

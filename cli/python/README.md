@@ -168,6 +168,7 @@ Class | Method | HTTP request | Description
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
+*UsersApi* | [**list_users**](docs/UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
 *ValueSetsApi* | [**list_value_set**](docs/ValueSetsApi.md#list_value_set) | **GET** /value_sets/{type} | List a value set
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /{tenant}/variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
 *VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /{tenant}/variants/germline/cases/filters | Get cases filters for germline variant entity
@@ -282,7 +283,10 @@ Class | Method | HTTP request | Description
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)
  - [UpdateOrganizationRequest](docs/UpdateOrganizationRequest.md)
  - [UserPreference](docs/UserPreference.md)
+ - [UserResult](docs/UserResult.md)
+ - [UserRoleResult](docs/UserRoleResult.md)
  - [UserSet](docs/UserSet.md)
+ - [UsersSearchResponse](docs/UsersSearchResponse.md)
  - [UtilsPreSignedURL](docs/UtilsPreSignedURL.md)
  - [ValueSetItem](docs/ValueSetItem.md)
  - [VariantCasesCount](docs/VariantCasesCount.md)
