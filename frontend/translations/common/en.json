@@ -22,6 +22,21 @@
   },
   "admin": {
     "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Add organization",
+      "count_one": "{{count}} organization",
+      "count_other": "{{count}} organizations",
+      "filters": {
+        "category": "Category",
+        "search_placeholder": "Search by name or code"
+      },
+      "subtitle": "Create and edit organizations.",
+      "table": {
+        "category": "Category",
+        "edit": "Edit organization",
+        "name": "Name"
+      }
+    },
     "sections": {
       "group_label": "Network settings",
       "organizations": "Organizations",

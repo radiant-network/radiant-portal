@@ -22,6 +22,21 @@
   },
   "admin": {
     "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Ajouter une organisation",
+      "count_one": "{{count}} organisation",
+      "count_other": "{{count}} organisations",
+      "filters": {
+        "category": "Catégorie",
+        "search_placeholder": "Rechercher par nom ou code"
+      },
+      "subtitle": "Créez et modifiez les organisations.",
+      "table": {
+        "category": "Catégorie",
+        "edit": "Modifier l'organisation",
+        "name": "Nom"
+      }
+    },
     "sections": {
       "group_label": "Paramètres du réseau",
       "organizations": "Organisations",
