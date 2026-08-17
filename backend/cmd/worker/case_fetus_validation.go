@@ -85,10 +85,6 @@ func (cr *CaseValidationRecord) validateFetusDates(fetusIndex int) {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".last_menstrual_period"
 		cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: last_menstrual_period cannot be in the future.", res), FetusInvalidField, path)
 	}
-	if fb.EstimatedDueDate != nil && time.Time(*fb.EstimatedDueDate).Before(today) {
-		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".estimated_due_date"
-		cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: estimated_due_date cannot be in the past.", res), FetusInvalidField, path)
-	}
 
 	if fb.LifeStatusCode == LifeStatusDeceased {
 		return
