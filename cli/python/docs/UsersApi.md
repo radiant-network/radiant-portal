@@ -4,8 +4,100 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**create_user**](UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
 [**list_users**](UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
 
+
+# **create_user**
+> object create_user(tenant, create_user_request)
+
+Add a user to the tenant
+
+Provisions the user across the identity provider and the data stores, then grants
+them the requested roles in the tenant in the path. Requires the `can_manage_user`
+action. The `member` role is granted tenant-wide automatically and must not be
+listed. Whether a role needs organizations is derived from its actions: a role
+holding only tenant-scoped actions must come with no `org_codes`, one holding any
+org-scoped action needs at least one (`*` meaning every organization). No password
+is ever set — the identity provider links the account by email at first sign-in.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.create_user_request import CreateUserRequest
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.UsersApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    create_user_request = radiant_python.CreateUserRequest() # CreateUserRequest | User to add
+
+    try:
+        # Add a user to the tenant
+        api_response = api_instance.create_user(tenant, create_user_request)
+        print("The response of UsersApi->create_user:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling UsersApi->create_user: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **create_user_request** | [**CreateUserRequest**](CreateUserRequest.md)| User to add | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**201** | Created |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**409** | Conflict |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_users**
 > UsersSearchResponse list_users(tenant, search=search, roles=roles, limit=limit, offset=offset, page_index=page_index)

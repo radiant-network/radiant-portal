@@ -1,7 +1,9 @@
 package types
 
 import (
+	"errors"
 	"fmt"
+	"net/mail"
 	"strings"
 )
 
@@ -62,6 +64,67 @@ type UserResult struct {
 	FirstName string           `json:"first_name,omitempty"`
 	LastName  string           `json:"last_name,omitempty"`
 	Roles     []UserRoleResult `gorm:"-" json:"roles" validate:"required"`
+}
+
+// Errors returned by the create-user path so a handler can map them to a status code without
+// depending on the DB driver or on the provisioning internals.
+// The wording of each is chosen so the caller can prefix or suffix the offending code and read as
+// one sentence, e.g. fmt.Errorf("role %q %w", code, ErrRoleRequiresOrg).
+var (
+	ErrUserAlreadyInTenant  = errors.New("a user with this email already has access to this tenant")
+	ErrUnknownRole          = errors.New("unknown role")
+	ErrUnknownOrganizations = errors.New("unknown organizations")
+	ErrRoleRequiresOrg      = errors.New("must be granted at one or more organizations")
+	ErrRoleNotOrgScoped     = errors.New("applies to the whole tenant and cannot be granted at an organization")
+)
+
+// CreateUserRequest is the Add-user payload. The member role is granted tenant-wide by the
+// server and is never listed here; email is the Keycloak username, so it is also the identity
+// the identity provider links the account by on first sign-in.
+// @Description Payload to add a user to a tenant, with the roles to grant them.
+type CreateUserRequest struct {
+	Email     string           `json:"email" binding:"required"`
+	FirstName string           `json:"first_name" binding:"required"`
+	LastName  string           `json:"last_name" binding:"required"`
+	Roles     []CreateUserRole `json:"roles"`
+} // @name CreateUserRequest
+
+// CreateUserRole is one role to grant. OrgCodes follows the user_role semantics: empty for a
+// role whose actions are all tenant-scoped, otherwise the organizations the role applies at
+// ('*' meaning every organization in the tenant). Whether it must be empty or non-empty is
+// derived from the role's actions server-side, never chosen by the caller.
+// @Description Role to grant to a user, with the organizations it applies at.
+type CreateUserRole struct {
+	RoleCode string   `json:"role_code" binding:"required"`
+	OrgCodes []string `json:"org_codes"`
+} // @name CreateUserRole
+
+func (r CreateUserRequest) Validate() error {
+	// The email is sent to Keycloak as the username verbatim, so only the bare address form is
+	// accepted — ParseAddress would otherwise also let through `Grace Chen <grace@chop.edu>`.
+	parsed, err := mail.ParseAddress(r.Email)
+	if err != nil || parsed.Address != r.Email {
+		return fmt.Errorf("email %q is not a valid address", r.Email)
+	}
+	if strings.TrimSpace(r.FirstName) == "" || strings.TrimSpace(r.LastName) == "" {
+		return fmt.Errorf("first_name and last_name must not be blank")
+	}
+	seen := map[string]bool{}
+	for _, role := range r.Roles {
+		if strings.TrimSpace(role.RoleCode) == "" {
+			return fmt.Errorf("role_code must not be blank")
+		}
+		if seen[role.RoleCode] {
+			return fmt.Errorf("role %q is listed more than once", role.RoleCode)
+		}
+		seen[role.RoleCode] = true
+		for _, org := range role.OrgCodes {
+			if strings.TrimSpace(org) == "" {
+				return fmt.Errorf("role %q has a blank org_code", role.RoleCode)
+			}
+		}
+	}
+	return nil
 }
 
 // UserRoleResult is one role granted to a user in a tenant. OrgCodes carries the grant's

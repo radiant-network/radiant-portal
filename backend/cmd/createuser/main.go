@@ -31,10 +31,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"golang.org/x/term"
 
-	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository/postgres"
-	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
+	"github.com/radiant-network/radiant-api/internal/provisioning"
 	"github.com/radiant-network/radiant-api/internal/service"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -132,7 +130,8 @@ func promptPassword() (string, error) {
 	return string(b), nil
 }
 
-// buildDeps wires the per-system provisioners from environment configuration.
+// buildDeps opens the database handles this command needs and hands them to the shared provisioning
+// wiring, so the CLI and the API provision users identically.
 //
 // The Postgres and StarRocks handles come from database.NewPostgresDB/NewStarrocksDB,
 // which read their connection settings from the environment (loaded from `.env` via
@@ -147,10 +146,5 @@ func buildDeps() (service.AdminDeps, error) {
 	if err != nil {
 		return service.AdminDeps{}, fmt.Errorf("connect starrocks: %w", err)
 	}
-	return service.AdminDeps{
-		Keycloak:  client.NewKeycloakAdminClient(client.KeycloakConfigFromEnv()),
-		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
-		Starrocks: starrocks.NewStarrocksUserRepository(database.StarrocksDB{DB: sr}, starrocks.StarrocksJWTConfigFromEnv()),
-		Auth:      postgres.NewAuthRepository(database.PostgresDB{DB: pg}),
-	}, nil
+	return provisioning.NewAdminDeps(database.PostgresDB{DB: pg}, database.StarrocksDB{DB: sr}), nil
 }

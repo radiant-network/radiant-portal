@@ -23,10 +23,12 @@ internal/
   mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
                  cmd/mysql-gateway; the Authenticator seam is the only difference
   batchval/    - Batch validation context, caching, record validation
-  client/      - External clients (PubMed)
+  client/      - External clients (PubMed, Keycloak admin, Ranger admin)
   database/    - DB connection setup (postgres.go, starrocks.go)
+  provisioning/- Wires service.AdminDeps from env config; shared by cmd/api and cmd/createuser
   repository/  - Data access layer, split by DB target into postgres/ and starrocks/ subpackages
   server/      - HTTP handlers grouped by resource; middlewares
+  service/     - Cross-system orchestration (user provisioning, tenant setup, Ranger policies)
   types/       - Domain models, filters, facets, OpenAPI annotations
   utils/       - Auth, S3, mappers, env helpers, collection utilities
 scripts/
@@ -176,6 +178,10 @@ Copy `.env.template` → `.env`. Key variables:
 | `API_PORT` | API listen port | 8090 |
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
+| `KEYCLOAK_ADMIN_CLIENT_ID/SECRET` | Service-account client (needs realm-management roles) the Keycloak **admin** client authenticates with via client_credentials. Required by any process that provisions users — `cmd/createuser`, `cmd/create-tenant`, and now `POST /{tenant}/users` in the API. Read lazily, so a deployment that never provisions is unaffected. | — |
+| `KEYCLOAK_DEFAULT_GROUP` | Keycloak group every newly provisioned user joins (all paths go through `service.ProvisionUser`). Empty = no group assignment; a configured group that does not exist is an error, not a silent skip. | — (none) |
+| `RANGER_URL/ADMIN_USER/ADMIN_PASSWORD` | Ranger admin API used to create the user and add them to the tenant's `<code>_user` role during provisioning. Same lazy-read note as the Keycloak admin credentials. | — |
+| `STARROCKS_JWT_JWKS_URL/REQUIRED_ISSUER/REQUIRED_AUDIENCE` | `authentication_jwt` parameters baked into each StarRocks user created during provisioning. | — |
 | `VIEW_REFRESH_ON_STARTUP_ENABLED` | On every API startup, recreate every tenant's StarRocks views (CREATE OR REPLACE, idempotent; advisory-locked across replicas so one runs it per deploy; fatal on error — a build must not serve against stale views). Off by default. Tenant *creation* (which needs Ranger) stays in the `cmd/create-tenant` CLI/task. | false |
 | `TENANT_VIEWS_READ_ENABLED` | When on, `RequireTenantAccess` binds the active tenant to the request context so the read path resolves the tenant's view database (`<code>_tenant`) via `types.TenantSchema` instead of the `radiant_jdbc` federation. Off by default: with no tenant bound, reads stay on `radiant_jdbc.public` (unchanged). Flip on only after every tenant's views exist and are populated (`cmd/create-tenant` / `cmd/refresh-tenants`). | false |
 | `STARROCKS_PROXY_READ_ENABLED` | When on, `/:tenant` routes run their StarRocks reads **as the calling user** through `mysql-proxy` (`server.BindStarrocksUserPool`): a per-request pool opens via `STARROCKS_PROXY_ADDR` with the user's JWT and default DB `<code>_tenant`, bound to the request context; the shared handle's `routingConnPool` routes those queries to it, so Ranger enforces per-user masking / row-filter / access. Off by default → the routing pool falls back to the root (`root`) connection (today's behavior). Enable **together with** `TENANT_VIEWS_READ_ENABLED` (the per-user connection targets the tenant view DB) and only once the StarRocks FE has `access_control = ranger`, the proxy is deployed (sidecar), and every tenant's Ranger policies/role memberships exist. | false |

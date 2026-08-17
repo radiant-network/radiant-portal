@@ -24,6 +24,17 @@ func userPoolFromContext(ctx context.Context) (*sql.DB, bool) {
 	return pool, ok && pool != nil
 }
 
+// ContextWithRootPool routes StarRocks queries made with ctx to the root pool even inside a request
+// that bound a per-user pool. It is for administrative statements that are *about* a user rather
+// than reads *for* one — CREATE USER, which the caller's own connection has no privilege to run.
+//
+// This is the deliberate exception to the fail-open warning on routingConnPool: it must never be
+// used to read tenant data, because that would bypass Ranger. Reserve it for DDL whose privileges
+// belong to the deployment, not the caller.
+func ContextWithRootPool(ctx context.Context) context.Context {
+	return context.WithValue(ctx, userPoolKey{}, (*sql.DB)(nil))
+}
+
 // routingConnPool is the gorm.ConnPool backing the shared StarRocks handle. Per query it picks
 // the per-request user pool bound to the context, falling back to the root pool when none is
 // bound (the worker, /status, unauthenticated paths, and the proxy-read flag being off).

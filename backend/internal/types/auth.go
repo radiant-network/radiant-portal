@@ -15,6 +15,15 @@ const (
 	RoleScopeMixed  = "mixed"
 )
 
+// WildcardOrg is the user_role.org_code value meaning "every organization in the tenant". It is
+// stored verbatim rather than expanded, so a grant keeps meaning "all orgs" as orgs are added.
+const WildcardOrg = "*"
+
+// RoleMember is the baseline role every user of a tenant holds: it is granted tenant-wide at
+// creation and never appears in a create/edit payload, guaranteeing ≥1 role and the
+// can_search_case + can_view_kb floor for everyone (seeded by migration 000012).
+const RoleMember = "member"
+
 // DefaultTenantCode is the launch tenant created by migration 000009 and used to backfill
 // existing rows in 000013. Write paths now derive tenant_code from the request: API handlers
 // read the active tenant via GetTenant (the /:tenant path segment) and the worker reads it

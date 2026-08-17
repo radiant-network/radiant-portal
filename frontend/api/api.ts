@@ -1651,6 +1651,56 @@ export interface CreateSequencingExperimentBatchBody {
     'sequencing_experiments': Array<SequencingExperimentBatch>;
 }
 /**
+ * Payload to add a user to a tenant, with the roles to grant them.
+ * @export
+ * @interface CreateUserRequest
+ */
+export interface CreateUserRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateUserRequest
+     */
+    'email': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateUserRequest
+     */
+    'first_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateUserRequest
+     */
+    'last_name': string;
+    /**
+     * 
+     * @type {Array<CreateUserRole>}
+     * @memberof CreateUserRequest
+     */
+    'roles'?: Array<CreateUserRole>;
+}
+/**
+ * Role to grant to a user, with the organizations it applies at.
+ * @export
+ * @interface CreateUserRole
+ */
+export interface CreateUserRole {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CreateUserRole
+     */
+    'org_codes'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateUserRole
+     */
+    'role_code': string;
+}
+/**
  * 
  * @export
  * @interface DocumentFilters
@@ -14680,6 +14730,50 @@ export class UserSetsApi extends BaseAPI {
 export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Provisions the user across the identity provider and the data stores, then grants them the requested roles in the tenant in the path. Requires the `can_manage_user` action. The `member` role is granted tenant-wide automatically and must not be listed. Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization). No password is ever set — the identity provider links the account by email at first sign-in.
+         * @summary Add a user to the tenant
+         * @param {string} tenant Tenant code
+         * @param {CreateUserRequest} createUserRequest User to add
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUser: async (tenant: string, createUserRequest: CreateUserRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('createUser', 'tenant', tenant)
+            // verify required parameter 'createUserRequest' is not null or undefined
+            assertParamExists('createUser', 'createUserRequest', createUserRequest)
+            const localVarPath = `/{tenant}/users`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createUserRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -14753,6 +14847,20 @@ export const UsersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
     return {
         /**
+         * Provisions the user across the identity provider and the data stores, then grants them the requested roles in the tenant in the path. Requires the `can_manage_user` action. The `member` role is granted tenant-wide automatically and must not be listed. Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization). No password is ever set — the identity provider links the account by email at first sign-in.
+         * @summary Add a user to the tenant
+         * @param {string} tenant Tenant code
+         * @param {CreateUserRequest} createUserRequest User to add
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createUser(tenant: string, createUserRequest: CreateUserRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createUser(tenant, createUserRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.createUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -14781,6 +14889,17 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = UsersApiFp(configuration)
     return {
         /**
+         * Provisions the user across the identity provider and the data stores, then grants them the requested roles in the tenant in the path. Requires the `can_manage_user` action. The `member` role is granted tenant-wide automatically and must not be listed. Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization). No password is ever set — the identity provider links the account by email at first sign-in.
+         * @summary Add a user to the tenant
+         * @param {string} tenant Tenant code
+         * @param {CreateUserRequest} createUserRequest User to add
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUser(tenant: string, createUserRequest: CreateUserRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.createUser(tenant, createUserRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -14805,6 +14924,19 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
  * @extends {BaseAPI}
  */
 export class UsersApi extends BaseAPI {
+    /**
+     * Provisions the user across the identity provider and the data stores, then grants them the requested roles in the tenant in the path. Requires the `can_manage_user` action. The `member` role is granted tenant-wide automatically and must not be listed. Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization). No password is ever set — the identity provider links the account by email at first sign-in.
+     * @summary Add a user to the tenant
+     * @param {string} tenant Tenant code
+     * @param {CreateUserRequest} createUserRequest User to add
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public createUser(tenant: string, createUserRequest: CreateUserRequest, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).createUser(tenant, createUserRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
      * @summary List the tenant\'s users

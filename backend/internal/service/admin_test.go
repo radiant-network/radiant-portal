@@ -14,9 +14,13 @@ import (
 type mockKeycloak struct {
 	sub string
 	err error
+
+	gotUsername string
+	gotPassword string
 }
 
-func (m *mockKeycloak) UpsertUser(_ context.Context, _, _, _, _, _ string) (string, error) {
+func (m *mockKeycloak) UpsertUser(_ context.Context, username, _, _, _, password string) (string, error) {
+	m.gotUsername, m.gotPassword = username, password
 	return m.sub, m.err
 }
 
@@ -208,4 +212,38 @@ func Test_ProvisionUser_ReturnsSubEvenWhenLaterStepFails(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, kc.sub, sub, "sub is returned so a re-run/caller can still see it")
+}
+
+func Test_ProvisionUser_WritesNoGrantsWhenStarrocksFails(t *testing.T) {
+	_, rg, _, auth, deps := newMockDeps()
+	deps.Starrocks = &mockStarrocks{err: errors.New("access denied; you need GRANT on SYSTEM")}
+
+	_, err := ProvisionUser(context.Background(), deps, types.UserInput{
+		Username: "alice", Email: "a@b.c",
+		Grants: []types.Grant{{TenantCode: "radiant", OrgCode: "*", RoleCode: "geneticist"}},
+	}, "createuser")
+
+	// Grants are what a caller's "already a member" check keys on, so leaving any behind here would
+	// turn every retry into a conflict and strand the user half-provisioned.
+	assert.Error(t, err)
+	assert.Empty(t, auth.grants, "a StarRocks failure must leave the tenant membership unwritten so a retry converges")
+	assert.Empty(t, auth.users)
+	assert.Empty(t, rg.roleAdds)
+}
+
+func Test_ProvisionUser_GrantsRangerAccessOnlyAfterPostgres(t *testing.T) {
+	kc, rg, sr, _, _ := newMockDeps()
+	auth := &mockAuthStore{err: errors.New("connection reset")}
+	deps := AdminDeps{Keycloak: kc, Ranger: rg, Starrocks: sr, Auth: auth}
+
+	_, err := ProvisionUser(context.Background(), deps, types.UserInput{
+		Username: "alice", Email: "a@b.c",
+		Grants: []types.Grant{{TenantCode: "radiant", OrgCode: "*", RoleCode: "geneticist"}},
+	}, "createuser")
+
+	// Ranger membership is the actual data access, so a Postgres failure must not have handed it
+	// out — nobody should hold tenant data access the authorization store knows nothing about.
+	assert.Error(t, err)
+	assert.Empty(t, auth.grants)
+	assert.Empty(t, rg.roleAdds, "no tenant-role membership without a matching Postgres grant")
 }

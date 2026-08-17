@@ -39,6 +39,8 @@ docs/CreateOrganizationRequest.md
 docs/CreatePatientBatchBody.md
 docs/CreateSampleBatchBody.md
 docs/CreateSequencingExperimentBatchBody.md
+docs/CreateUserRequest.md
+docs/CreateUserRole.md
 docs/DocumentFilters.md
 docs/DocumentResult.md
 docs/DocumentsApi.md
@@ -206,6 +208,8 @@ radiant_python/models/create_organization_request.py
 radiant_python/models/create_patient_batch_body.py
 radiant_python/models/create_sample_batch_body.py
 radiant_python/models/create_sequencing_experiment_batch_body.py
+radiant_python/models/create_user_request.py
+radiant_python/models/create_user_role.py
 radiant_python/models/document_filters.py
 radiant_python/models/document_result.py
 radiant_python/models/documents_search_response.py

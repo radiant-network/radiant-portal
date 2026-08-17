@@ -24,9 +24,11 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/provisioning"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/service"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
@@ -84,6 +86,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoTasks := postgres.NewTaskRepository(postgresDB)
 	repoAuth := postgres.NewAuthRepository(postgresDB)
 	repoUsers := postgres.NewUsersRepository(postgresDB)
+
+	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
+	// cmd/createuser does. The clients are lazy, so the Keycloak/Ranger settings only have to be
+	// present in a deployment that actually exposes user administration.
+	userAdmin := service.NewUserAdmin(repoUsers, repoOrganizationsWrite, provisioning.NewAdminDeps(postgresDB, starrocksDB))
 
 	r := newEngine()
 
@@ -226,6 +233,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// below, which serves the caller's own saved filters, sets and preferences.
 	tenantUsersGroup := tenantRoutes.Group("/users")
 	tenantUsersGroup.GET("", requireAction(types.ActionManageUser), server.ListUsersHandler(repoUsers))
+	tenantUsersGroup.POST("", requireAction(types.ActionManageUser), server.PostUserHandler(userAdmin, auth))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))

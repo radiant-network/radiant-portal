@@ -314,3 +314,95 @@ func Test_UsersRepository_ListTenantUsers_UnknownRoleReturnsEmpty(t *testing.T) 
 		assert.Equal(t, int64(0), count)
 	})
 }
+
+func Test_UsersRepository_EmailHasTenantGrant_FindsGrantedUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		exists, err := repo.EmailHasTenantGrant(t.Context(), types.DefaultTenantCode, "alice@test.authz")
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+}
+
+func Test_UsersRepository_EmailHasTenantGrant_IsCaseInsensitive(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		exists, err := repo.EmailHasTenantGrant(t.Context(), types.DefaultTenantCode, "Alice@Test.Authz")
+		require.NoError(t, err)
+		assert.True(t, exists, "an email differing only in case is the same account")
+	})
+}
+
+func Test_UsersRepository_EmailHasTenantGrant_IgnoresUnknownEmail(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		exists, err := repo.EmailHasTenantGrant(t.Context(), types.DefaultTenantCode, "nobody@test.authz")
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func Test_UsersRepository_EmailHasTenantGrant_IsScopedToTheTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		// alice is granted in radiant only; carol is granted in both tenants.
+		alice, err := repo.EmailHasTenantGrant(t.Context(), "tenant_b", "alice@test.authz")
+		require.NoError(t, err)
+		assert.False(t, alice, "a grant in another tenant is not access to this one")
+
+		carol, err := repo.EmailHasTenantGrant(t.Context(), "tenant_b", "carol@test.authz")
+		require.NoError(t, err)
+		assert.True(t, carol)
+	})
+}
+
+func Test_UsersRepository_RoleScopes_DerivesScopeFromActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		scopes, err := repo.RoleScopes(t.Context(), types.DefaultTenantCode,
+			[]string{"geneticist", "researcher", "practitioner"})
+		require.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			"geneticist":   types.RoleScopeOrg,
+			"researcher":   types.RoleScopeTenant,
+			"practitioner": types.RoleScopeMixed,
+		}, scopes)
+	})
+}
+
+func Test_UsersRepository_RoleScopes_OmitsUnknownRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		scopes, err := repo.RoleScopes(t.Context(), types.DefaultTenantCode, []string{"member", "no_such_role"})
+		require.NoError(t, err)
+		assert.Equal(t, map[string]string{"member": types.RoleScopeTenant}, scopes,
+			"an unknown role is absent rather than defaulting to a scope")
+	})
+}
+
+func Test_UsersRepository_RoleScopes_IsScopedToTheTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		// practitioner exists in radiant only; tenant_b defines its own geneticist.
+		scopes, err := repo.RoleScopes(t.Context(), "tenant_b", []string{"geneticist", "practitioner"})
+		require.NoError(t, err)
+		assert.Equal(t, map[string]string{"geneticist": types.RoleScopeOrg}, scopes)
+	})
+}
+
+func Test_UsersRepository_RoleScopes_NoRolesRequestedIsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		scopes, err := repo.RoleScopes(t.Context(), types.DefaultTenantCode, nil)
+		require.NoError(t, err)
+		assert.Empty(t, scopes)
+	})
+}

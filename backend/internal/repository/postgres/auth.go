@@ -162,7 +162,7 @@ func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenan
 				slog.String("tenant", grant.TenantCode),
 			)
 			return
-		} else if *grant.OrgCode == "*" {
+		} else if *grant.OrgCode == types.WildcardOrg {
 			// Wildcard: the action applies at every org in the tenant.
 			membership.OrgsByAction[grant.ActionCode] = tenantOrgs
 		} else {

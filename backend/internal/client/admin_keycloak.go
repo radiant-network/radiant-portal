@@ -23,6 +23,7 @@ type KeycloakConfig struct {
 	Realm        string // realm the users live in and the client is defined in, e.g. CQDG
 	ClientID     string // confidential client with a service account (realm-management roles)
 	ClientSecret string
+	DefaultGroup string // group every provisioned user joins; empty = no group assignment
 }
 
 // KeycloakConfigFromEnv builds a KeycloakConfig from the environment, defaulting
@@ -34,6 +35,7 @@ func KeycloakConfigFromEnv() KeycloakConfig {
 		Realm:        os.Getenv("KEYCLOAK_REALM"),
 		ClientID:     os.Getenv("KEYCLOAK_ADMIN_CLIENT_ID"),
 		ClientSecret: os.Getenv("KEYCLOAK_ADMIN_CLIENT_SECRET"),
+		DefaultGroup: os.Getenv("KEYCLOAK_DEFAULT_GROUP"),
 	}
 }
 
@@ -59,6 +61,11 @@ type keycloakUser struct {
 	Enabled         bool     `json:"enabled"`
 	EmailVerified   bool     `json:"emailVerified"`
 	RequiredActions []string `json:"requiredActions"`
+}
+
+type keycloakGroup struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // UpsertUser creates or updates the user and returns the Keycloak user id — which
@@ -117,6 +124,12 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 	// is no local credential to set.
 	if password != "" {
 		if err := c.resetPassword(ctx, token, id, password); err != nil {
+			return "", err
+		}
+	}
+
+	if c.cfg.DefaultGroup != "" {
+		if err := c.addToGroup(ctx, token, id, c.cfg.DefaultGroup); err != nil {
 			return "", err
 		}
 	}
@@ -220,6 +233,52 @@ func (c *KeycloakAdminClient) resetPassword(ctx context.Context, token, id, pass
 		return fmt.Errorf("reset password failed: HTTP %d: %s", status, string(body))
 	}
 	return nil
+}
+
+// addToGroup makes the user a member of the named group. Idempotent: Keycloak
+// answers 204 whether or not the membership already existed.
+//
+// A configured group that does not exist is an error rather than a silent skip —
+// silently dropping it would provision users without the access the group confers.
+func (c *KeycloakAdminClient) addToGroup(ctx context.Context, token, userID, group string) error {
+	groupID, err := c.findGroupIDByName(ctx, token, group)
+	if err != nil {
+		return err
+	}
+	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s/groups/%s", c.cfg.BaseURL, c.cfg.Realm, userID, groupID)
+	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, nil)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusNoContent && status != http.StatusOK {
+		return fmt.Errorf("add user to group %q failed: HTTP %d: %s", group, status, string(body))
+	}
+	return nil
+}
+
+// findGroupIDByName resolves a group name to its id. The search endpoint matches
+// substrings and returns top-level groups with their subgroups nested, so the
+// name is re-checked exactly on the way out rather than trusting the first hit.
+func (c *KeycloakAdminClient) findGroupIDByName(ctx context.Context, token, group string) (string, error) {
+	endpoint := fmt.Sprintf("%s/admin/realms/%s/groups?search=%s&exact=true",
+		c.cfg.BaseURL, c.cfg.Realm, url.QueryEscape(group))
+	status, body, err := c.adminRequest(ctx, http.MethodGet, endpoint, token, nil)
+	if err != nil {
+		return "", err
+	}
+	if status != http.StatusOK {
+		return "", fmt.Errorf("find group %q failed: HTTP %d: %s", group, status, string(body))
+	}
+	var groups []keycloakGroup
+	if err := json.Unmarshal(body, &groups); err != nil {
+		return "", fmt.Errorf("parse group search for %q: %w", group, err)
+	}
+	for _, g := range groups {
+		if g.Name == group {
+			return g.ID, nil
+		}
+	}
+	return "", fmt.Errorf("group %q not found in realm %q", group, c.cfg.Realm)
 }
 
 // adminRequest issues a bearer-authenticated admin request, JSON-encoding body when

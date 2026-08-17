@@ -49,12 +49,18 @@ func NewStarrocksUserRepository(db database.StarrocksDB, cfg StarrocksJWTConfig)
 // The username can't be a bound parameter (it's DDL), so sub is validated as a
 // UUID before being interpolated — this both matches the Keycloak id format and
 // closes the door to injection when this path is later driven by the API.
+//
+// Pinned to the root pool: when this runs inside an API request with
+// STARROCKS_PROXY_READ_ENABLED on, the shared handle would otherwise route the
+// statement to the caller's own StarRocks connection, which holds no GRANT
+// privilege on SYSTEM. CREATE USER is a deployment privilege, not the acting
+// admin's — see database.ContextWithRootPool.
 func (p *StarrocksUserRepository) EnsureJWTUser(ctx context.Context, sub string) error {
 	stmt, err := buildCreateJWTUserStmt(sub, p.cfg)
 	if err != nil {
 		return err
 	}
-	if err := p.db.WithContext(ctx).Exec(stmt).Error; err != nil {
+	if err := p.db.WithContext(database.ContextWithRootPool(ctx)).Exec(stmt).Error; err != nil {
 		return fmt.Errorf("create starrocks user %q: %w", sub, err)
 	}
 	return nil

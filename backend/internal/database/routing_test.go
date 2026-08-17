@@ -45,3 +45,15 @@ func Test_routingConnPool_GetDBConn_ReturnsRoot(t *testing.T) {
 	require.NoError(t, err)
 	assert.Same(t, root, got, "db.DB() (health pings) must reach the root pool")
 }
+
+func Test_routingConnPool_resolve_RootPoolOverridesABoundUserPool(t *testing.T) {
+	root := openLazy(t, "127.0.0.1:9999")
+	user := openLazy(t, "127.0.0.1:9998")
+	r := &routingConnPool{root: root}
+
+	// Administrative DDL inside a request that bound a per-user pool: CREATE USER needs the
+	// deployment's privileges, not the caller's.
+	ctx := ContextWithRootPool(ContextWithUserPool(context.Background(), user))
+
+	assert.Same(t, root, r.resolve(ctx).(*sql.DB))
+}
