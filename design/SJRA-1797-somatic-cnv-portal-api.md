@@ -134,17 +134,28 @@ micro-optimisation, and any change here should change both tables at once:
 
 ## 4. Changes, file by file
 
-Structure follows germline CNV, **duplicated rather than shared**. The row DTO and the field registry
-differ by 8 columns, so a parameterised repository would have to be generic over the row type to buy back
-roughly 250 lines — not worth it, and it would put the working germline slice at risk. This also matches
-the existing precedent: somatic SNV duplicates germline SNV.
+Structure follows germline CNV. The row DTO and the field registry genuinely differ by 8 columns and
+stay separate, but the **repository is shared** — see the revision note below.
+
+> **Revised in review (PR #1550).** This section originally called for duplicating the repository
+> rather than sharing it. Review disagreed, and was right: the two repositories came out line-for-line
+> identical apart from the table var, the alias literal (`cnvo`/`scnvo`) and the row type. The five
+> query bodies now live once in `internal/repository/starrocks/cnv_occurrences.go`, parameterised on
+> `cnvTable types.Table`, with only the list helper generic over the row type
+> (`listCNVOccurrences[T]`). Each repository is ~40 lines of delegation.
+>
+> It is also *simpler* than the SNV precedent it was measured against: `AddImplicitSNVOccurrencesFilters`
+> needs a `switch` on the table because somatic SNV keys on `tumor_seq_id`, whereas both CNV tables key
+> on plain `seq_id` (§3) — so the CNV helper needs no per-table branching at all. The field registries
+> and the two test files stay per-type.
 
 ### 4.1 New files
 
 | File | Contents |
 |---|---|
 | `internal/types/somatic_cnv_occurrence.go` | Row struct, `SomaticCNVOccurrenceTable` (`somatic__cnv__occurrence`, new alias, `PerTenant: true`), one `Field` per column, and the `Fields` / `DefaultFields` / `DefaultSort` / `QueryConfig` registries. Model on `germline_cnv_occurrence.go`. |
-| `internal/repository/starrocks/somatic_cnv_occurrences.go` | `SomaticCNVOccurrencesRepository` + constructor taking `database.StarrocksDB`, and the five methods. Model on `germline_cnv_occurrences.go`. |
+| `internal/repository/starrocks/somatic_cnv_occurrences.go` | `SomaticCNVOccurrencesRepository` + constructor taking `database.StarrocksDB`, and the five methods, each delegating to the shared helper below. |
+| `internal/repository/starrocks/cnv_occurrences.go` | The shared CNV query layer used by both CNV repositories, parameterised on `cnvTable types.Table`: `prepareCNVQuery`, `listCNVOccurrences[T]`, `countCNVOccurrences`, `aggregateCNVOccurrences`, `cnvOccurrencesStatistics`, plus `cnvGenesOverlap` (this file is the renamed `cnv_genes_overlap.go`). |
 | `internal/server/handlers_somatic_cnv_occurrences.go` | Consumer-side unexported `somaticCNVOccurrencesReader` interface + five handlers with full swagger blocks and new `@Id`s. |
 | `test/data/sql/somatic__cnv__occurrence.sql` | Test DDL. |
 | `test/data/{simple,gene_panels,multiple}/somatic__cnv__occurrence.tsv` | Fixture rows. Cover at least one `CNLOH` and one `GAINLOH` row, and one row with the ASCN block entirely NULL. |
@@ -191,8 +202,8 @@ Checked against the current tree. Each of these needs **no work**.
   `somatic_cnv_occurrence` and `somatic_cnv_variant`, already in the swagger enum and the Python client.
 - **`types.CNVGeneOverlap` is reusable as-is**, and the genes-overlap CTE
   (`germline_cnv_occurrences.go:189-241`) depends only on the segment's `chromosome/start/end/length` — no
-  coupling to either table's column set. If duplicating that ~80-line query bothers a reviewer, it is the
-  one piece here that could safely be extracted to a shared helper. Optional; not required by this ticket.
+  coupling to either table's column set, so it extracts cleanly to a shared helper. It did: `cnvGenesOverlap`
+  in `cnv_occurrences.go`, alongside the rest of the shared CNV query layer (§4.1).
 - **`utils.GetSequencingPart(seqId, …)` works unchanged** — `seq_id` is a real sequencing experiment id.
 - **No production StarRocks migration.** The production schema is owned by the pipeline; the portal only
   maintains its dev and test copies (§4).

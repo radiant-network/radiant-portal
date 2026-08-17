@@ -16,6 +16,7 @@ const (
 	OccurrenceTypeSomaticSNV            OccurrenceType = "somatic_snv"
 	OccurrenceTypeSomaticSNVTumorNormal OccurrenceType = "somatic_snv_tn"
 	OccurrenceTypeSomaticSNVTumorOnly   OccurrenceType = "somatic_snv_to"
+	OccurrenceTypeSomaticCNV            OccurrenceType = "somatic_cnv"
 )
 
 // AllOccurrenceTypes lists every accepted value of the data_type query param.
@@ -28,6 +29,7 @@ var AllOccurrenceTypes = []OccurrenceType{
 	OccurrenceTypeSomaticSNV,
 	OccurrenceTypeSomaticSNVTumorNormal,
 	OccurrenceTypeSomaticSNVTumorOnly,
+	OccurrenceTypeSomaticCNV,
 }
 
 // SomaticCohort narrows a somatic task list to one tumor/normal arrangement. Tumor-only and
@@ -62,6 +64,8 @@ func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorNormal}, nil
 	case OccurrenceTypeSomaticSNVTumorOnly:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorOnly}, nil
+	case OccurrenceTypeSomaticCNV:
+		return TaskSelector{TaskTypeCode: TumorOnlyVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, nil
 	default:
 		return TaskSelector{}, fmt.Errorf("unknown occurrence type %q", string(o))
 	}

@@ -16,6 +16,10 @@ func IntPtr(i int) *int {
 	return &i
 }
 
+func Float32Ptr(f float32) *float32 {
+	return &f
+}
+
 func TimePtr(t time.Time) *time.Time {
 	return &t
 }

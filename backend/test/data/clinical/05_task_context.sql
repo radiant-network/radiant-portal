@@ -126,5 +126,8 @@ VALUES (1, 1, NULL),
        -- Task 84 covers both the fetus's sequencing (75) and the mother's own (78), so
        -- patient_count must be 2. Kept off task 83 so it doesn't fan out into its IGV fixtures.
        (84, 75, 72),
-       (84, 78, 72)
+       (84, 78, 72),
+
+       -- Somatic CNV task on the tumoral seq 74 of case 71.
+       (85, 74, 71)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

@@ -97,6 +97,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/occurrences/somatic/snv/1/1/1/aggregate",
 			"radiant/occurrences/somatic/snv/1/1/1/statistics",
 			"radiant/occurrences/germline/cnv/1/1/1/list",
+			"radiant/occurrences/somatic/cnv/1/1/1/list",
 			"radiant/occurrences/flags/1/1/1/10000",
 			"users/preferences/table_1",
 			"radiant/variants/germline/1/cases/interpreted",

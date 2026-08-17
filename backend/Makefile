@@ -55,10 +55,10 @@ test:
 itest:
 	@echo "Running integration tests..."
 	@if command -v gotestsum > /dev/null; then \
-		gotestsum --format testname -- ./internal/repository; \
+		gotestsum --format testname -- ./internal/repository/...; \
 	else \
 		echo "gotestsum not installed — falling back to 'go test'. Install: go install gotest.tools/gotestsum@latest"; \
-		go test ./internal/repository; \
+		go test ./internal/repository/...; \
 	fi
 
 # Format the code (gofmt); the CI golangci-lint job verifies this formatting

@@ -1,0 +1,363 @@
+package server
+
+import (
+	"context"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+)
+
+type somaticCNVOccurrencesReader interface {
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticCNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
+	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
+	GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
+}
+
+// OccurrencesSomaticCNVListHandler handles list of somatic CNV occurrences
+// @Summary List somatic CNV occurrences
+// @Id listSomaticCNVOccurrences
+// @Description List somatic CNV occurrences for a given tumor sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor Sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param			message	body		types.ListBodyWithSqon	true	"List Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.SomaticCNVOccurrence
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list [post]
+func OccurrencesSomaticCNVListHandler(repo somaticCNVOccurrencesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body  types.ListBodyWithSqon
+			query types.ListQuery
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromSqon(types.SomaticCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		occurrences, err := repo.GetOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, occurrences)
+	}
+}
+
+// OccurrencesSomaticCNVCountHandler handles counting somatic CNV occurrences
+// @Summary Count somatic CNV occurrences
+// @Id countSomaticCNVOccurrences
+// @Description Counts somatic CNV occurrences for a given tumor sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor Sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.Count
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/count [post]
+func OccurrencesSomaticCNVCountHandler(repo somaticCNVOccurrencesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body  types.CountBodyWithSqon
+			query types.CountQuery
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		query, err := types.NewCountQueryFromSqon(body.Sqon, types.SomaticCNVOccurrencesFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		countResponse := types.Count{Count: count}
+		c.JSON(http.StatusOK, countResponse)
+	}
+}
+
+// OccurrencesSomaticCNVAggregateHandler handles aggregation of somatic CNV occurrences
+// @Summary Aggregate somatic CNV occurrences
+// @Id aggregateSomaticCNVOccurrences
+// @Description Aggregate somatic CNV occurrences for a given tumor sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor Sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param with_dictionary query bool false "Whether to include all possible facet values" default(false)
+// @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
+// @Accept json
+// @Produce json
+// @Success 200 {array} types.Aggregation
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/aggregate [post]
+func OccurrencesSomaticCNVAggregateHandler(repo somaticCNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body       types.AggregationBodyWithSqon
+			query      types.AggQuery
+			queryParam types.AggregationQueryParam
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+
+		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.SomaticCNVOccurrencesFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		aggregation, err := repo.AggregateOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		if err := c.ShouldBindQuery(&queryParam); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		if queryParam.WithDictionary {
+			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			if len(facets) == 0 {
+				HandleNotFoundError(c, "facet")
+				return
+			}
+
+			existingBuckets := make(map[string]struct{}, len(aggregation))
+			for _, agg := range aggregation {
+				existingBuckets[agg.Bucket] = struct{}{}
+			}
+
+			for _, facet := range facets { // Should be only one facet for now
+				for _, facetValue := range facet.Values {
+					if _, found := existingBuckets[facetValue]; !found {
+						aggregation = append(aggregation, types.Aggregation{
+							Bucket: facetValue,
+							Count:  0,
+						})
+					}
+				}
+			}
+		}
+
+		c.JSON(http.StatusOK, aggregation)
+	}
+}
+
+// OccurrencesSomaticCNVStatisticsHandler handles statistics of somatic CNV occurrences
+// @Summary Statistics of somatic CNV occurrences
+// @Id statisticsSomaticCNVOccurrences
+// @Description Return statistics about a field for a given tumor sequence ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor Sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.Statistics
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics [post]
+func OccurrencesSomaticCNVStatisticsHandler(repo somaticCNVOccurrencesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body  types.StatisticsBodyWithSqon
+			query types.StatisticsQuery
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+
+		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.SomaticCNVOccurrencesFields)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		statistics, err := repo.GetStatisticsOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, statistics)
+	}
+}
+
+// OccurrencesSomaticCNVGenesOverlapHandler handles list genes overlapping a somatic CNV with a given ID
+// @Summary List genes overlapping a somatic CNV with a given ID
+// @Id listSomaticCNVGenesOverlap
+// @Description List genes overlapping a somatic CNV with a given ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor Sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param cnv_id path string true "CNV ID"
+// @Produce json
+// @Success 200 {array} types.CNVGeneOverlap
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap [get]
+func OccurrencesSomaticCNVGenesOverlapHandler(repo somaticCNVOccurrencesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqId, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskId, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		cnvId, err := strconv.Atoi(c.Param("cnv_id"))
+		if err != nil {
+			HandleNotFoundError(c, "cnv_id")
+			return
+		}
+
+		genesOverlap, err := repo.GetGenesOverlap(c.Request.Context(), caseId, seqId, taskId, cnvId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, genesOverlap)
+	}
+}

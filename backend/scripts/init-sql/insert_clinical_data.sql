@@ -2249,7 +2249,9 @@ VALUES (77, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '
        (83, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
        (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
        (85, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
-       (86, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant')
+       (86, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
+       -- Somatic CNV on the tumoral seq 62 of case 22, alongside somatic SNV task 74.
+       (87, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "task_context" (task_id, sequencing_experiment_id, case_id)
@@ -2269,7 +2271,9 @@ VALUES (77, 73, NULL),
 
        (86, 76, 73),
        (86, 78, 73),
-       (86, 79, 73)
+       (86, 79, 73),
+
+       (87, 62, 22)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
 
 -- Reset sequences to prevent duplicate key errors when inserting new records

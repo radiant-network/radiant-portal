@@ -393,6 +393,57 @@ CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
 
+-- seq_id holds the tumor sequencing id: somatic CNV has no tumor_seq_id/normal_seq_id pair.
+CREATE TABLE IF NOT EXISTS `somatic__cnv__occurrence` (
+     part int(11) NOT NULL,
+     seq_id int(11) NULL,
+     task_id int(11) NOT NULL,
+     cnv_id bigint(20) NOT NULL,
+     aliquot varchar(50) NULL,
+     chromosome varchar(20) NULL,
+     alternate varchar(20) NULL,
+     start int(11) NULL,
+     end int(11) NULL,
+     type varchar(10) NULL,
+     length int(11) NULL,
+     name varchar(1048576) NULL,
+     quality FLOAT NULL,
+     calls array<int(11)> NULL,
+     filter varchar(255) NULL,
+     bc int(11) NULL,
+     pe array<int(11)> NULL,
+     sm FLOAT NULL,
+     svtype varchar(20) NULL,
+     svlen int(11) NULL,
+     reflen int(11) NULL,
+     ciend array<int(11)> NULL,
+     cipos array<int(11)> NULL,
+     phased boolean NULL,
+     -- DRAGEN allele-specific copy number: absent on 3.10.8, declared but omitted per record
+     -- on 4.2.4, so expect these to be NULL on older files.
+     cn int(11) NULL,
+     cnf FLOAT NULL,
+     cnq FLOAT NULL,
+     mcn int(11) NULL,
+     mcnf FLOAT NULL,
+     mcnq FLOAT NULL,
+     maf FLOAT NULL,
+     sd FLOAT NULL,
+     ascn_as int(11) NULL,
+     cytoband array<varchar(10)> NULL,
+     symbol array<varchar(128)> NULL,
+     nb_genes int(11) NULL,
+     nb_snv int(11) NULL,
+     gnomad_af FLOAT NULL,
+     gnomad_sc int(11) NULL,
+     gnomad_sn int(11) NULL,
+     gnomad_sf FLOAT NULL,
+     gnomad_sc_hom int(11) NULL,
+     gnomad_sc_het int(11) NULL
+) ENGINE=OLAP
+DUPLICATE KEY(part, seq_id, task_id, cnv_id)
+PARTITION BY (part);
+
 CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
 (
     part                            INT    NOT NULL,
@@ -590,6 +641,17 @@ VALUES
     (1, 1, 1, 1, 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150], NULL),
     (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], 1),
     (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], 1);
+
+-- Task 87 is the tumor_only_variant_calling task on tumoral seq 62 of case 22 — the same tumor
+-- sequencing the somatic SNV rows below use. CNV3 is CNLOH: copy-neutral, so its gnomad_* stay
+-- NULL by design, and it carries no ASCN block at all.
+INSERT OVERWRITE test_db.somatic__cnv__occurrence
+(part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, alternate, length, name, quality, calls, filter, bc, pe, sm,
+svtype, svlen, reflen, ciend, cipos, cn, cnf, cnq, mcn, mcnf, mcnq, maf, sd, ascn_as, nb_snv, gnomad_sf)
+VALUES
+    (1, 62, 87, 1, 'aliquot1', '1', 1000, 2000, 'GAIN', '<DUP>', 1000, 'SCNV1', 0.999, [1, 2, 3], 'PASS', 2, [1, 2], 0.5, 'DUP', 1000, 1000, [100, 200], [50, 150], 3, 3.12, 42.5, 1, 1.04, 30.2, 0.42, 0.11, 2, 4, 0.012),
+    (1, 62, 87, 2, 'aliquot1', '2', 2000, 3000, 'LOSS', '<DEL>', 1000, 'SCNV2', 0.888, [4, 5, 6], 'PASS', 3, [3, 4], 0.6, 'DEL', 1000, 1000, [200, 300], [150, 250], 1, 1.05, 38.0, 0, 0.02, 25.0, 0.01, 0.14, 1, 2, 0.004),
+    (1, 62, 87, 3, 'aliquot1', 'X', 3000, 4000, 'CNLOH', '<LOH>', 1000, 'SCNV3', 0.777, [7, 8, 9], 'PASS', 4, [5, 6], 0.7, 'LOH', 1000, 1000, [300, 400], [250, 350], NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL);
 
 INSERT OVERWRITE test_db.somatic__snv__occurrence (
     part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,
