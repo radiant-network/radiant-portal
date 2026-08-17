@@ -1,0 +1,319 @@
+import { type ReactNode, useMemo, useState } from 'react';
+import { Trans } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { Lock, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+
+import DataTable from '@/components/base/data-table/data-table';
+import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
+import { Alert, AlertContent, AlertDescription, AlertTitle } from '@/components/base/shadcn/alert';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardContent } from '@/components/base/shadcn/card';
+import { useI18n } from '@/components/hooks/i18n';
+
+import ViewPermissionsDialog from '../../components/view-permissions-dialog';
+import { getRoleUsage, MEMBER_ROLE, MOCK_ROLES, MOCK_USERS, roleDescription, roleName } from '../../mock/data';
+import type { Role } from '../../mock/types';
+
+import type { RoleFormValues } from './role-form.types';
+import RoleSheet from './role-sheet';
+import RolesTableFilters, { type RolesFilterState } from './roles-table-filters';
+import { getRolesColumns, getRolesColumnSettings } from './roles-table-settings';
+
+const EMPTY_FILTERS: RolesFilterState = { search: '', customOnly: false };
+
+function matchesFilters(role: Role, filters: RolesFilterState, t: TFunction<string, undefined>): boolean {
+  const query = filters.search.trim().toLowerCase();
+  if (query) {
+    const haystack = `${roleName(role, t)} ${roleDescription(role, t)}`.toLowerCase();
+    if (!haystack.includes(query)) return false;
+  }
+  if (filters.customOnly && role.isDefault) return false;
+  return true;
+}
+
+/**
+ * Default sort: Administrator first, then the remaining default roles, then custom roles — each
+ * group alphabetical by name. The Role/Scope headers can override with asc/desc.
+ */
+function defaultSortRank(role: Role): number {
+  if (role.code === 'tenant_admin') return 0;
+  return role.isDefault ? 1 : 2;
+}
+
+/** Order-independent equality of two permission-code lists — did the role's actions actually change? */
+function samePermissions(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every(code => b.includes(code));
+}
+
+type RolesPageProps = {
+  /** Deep-link: switch to the Members section filtered to this role. */
+  onViewMembers: (roleCode: string) => void;
+};
+
+/** The Roles & Permissions section: count header + Add role, the roles table, and the sheet (mock data). */
+export default function RolesPage({ onViewMembers }: RolesPageProps) {
+  const { t } = useI18n();
+  const [roles, setRoles] = useState<Role[]>(MOCK_ROLES);
+  const [filters, setFilters] = useState<RolesFilterState>(EMPTY_FILTERS);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [activeRole, setActiveRole] = useState<Role | null>(null);
+  // Read-only permissions dialog (default roles, the "see what's included" link, and every
+  // permissions-count click). Independent of the create/edit sheet.
+  const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
+  // Add-mode prefill for Duplicate (undefined = a blank Add).
+  const [initialValues, setInitialValues] = useState<RoleFormValues | undefined>(undefined);
+
+  // The baseline `member` role is implicit and unactionable, so it's excluded from the list (its
+  // permissions stay reachable via the "see what's included" link in the header).
+  const listedRoles = useMemo(() => roles.filter(r => r.code !== 'member'), [roles]);
+
+  const rows = useMemo(
+    () =>
+      listedRoles
+        .filter(role => matchesFilters(role, filters, t))
+        .sort((a, b) => defaultSortRank(a) - defaultSortRank(b) || roleName(a, t).localeCompare(roleName(b, t))),
+    [listedRoles, filters, t],
+  );
+
+  const openAdd = () => {
+    setActiveRole(null);
+    setInitialValues(undefined);
+    setSheetOpen(true);
+  };
+  const openRole = (role: Role) => {
+    setInitialValues(undefined);
+    setActiveRole(role);
+    setSheetOpen(true);
+  };
+  const openPermissions = (role: Role) => setPermissionsRole(role);
+  // Edit hand-off from the dialog (custom roles): close the dialog, open the edit sheet.
+  const editFromDialog = (role: Role) => {
+    setPermissionsRole(null);
+    openRole(role);
+  };
+  const openDuplicate = (role: Role) => {
+    setActiveRole(null);
+    setInitialValues({
+      name: `${roleName(role, t)} ${t('admin.role.duplicate_suffix')}`,
+      // Blank so the sheet auto-suggests a fresh code from the "(copy)" name — a duplicate can't
+      // reuse the source role's code.
+      code: '',
+      description: roleDescription(role, t),
+      permissions: role.permissions,
+    });
+    setSheetOpen(true);
+  };
+
+  // Apply a custom-role edit + success toast — shared by the direct save and the confirmed save.
+  const applyRoleUpdate = (values: RoleFormValues, roleCode: string) => {
+    setRoles(prev =>
+      prev.map(r =>
+        r.code === roleCode
+          ? { ...r, label: values.name, description: values.description, permissions: values.permissions }
+          : r,
+      ),
+    );
+    toast.success(t('admin.role.ok.updated'));
+  };
+
+  const handleSave = (values: RoleFormValues, roleCode?: string) => {
+    if (!roleCode) {
+      // The code is author-typed now (validated + de-duped in the sheet), so use it verbatim.
+      setRoles(prev => [
+        {
+          code: values.code,
+          label: values.name,
+          description: values.description,
+          isDefault: false,
+          permissions: values.permissions,
+        },
+        ...prev,
+      ]);
+      toast.success(t('admin.role.ok.created'));
+      setSheetOpen(false);
+      return;
+    }
+
+    const original = roles.find(r => r.code === roleCode);
+    const permissionsChanged = !!original && !samePermissions(original.permissions, values.permissions);
+    const { members, orgs } = original ? getRoleUsage(original, MOCK_USERS) : { members: 0, orgs: 0 };
+
+    // Changing an *assigned* role's permissions rewrites every holder's access, so it takes an
+    // impact-count confirmation first (mirrors Delete). Name/description-only edits, and any edit to
+    // an unassigned role, save straight away.
+    if (permissionsChanged && members > 0) {
+      alertDialog.open({
+        type: 'warning',
+        title: t('admin.role.edit_impact_title'),
+        description: (
+          <Trans
+            i18nKey={orgs > 0 ? 'admin.role.edit_impact_body' : 'admin.role.edit_impact_body_no_orgs'}
+            values={{
+              name: values.name,
+              members: t('admin.roles_page.members_count', { count: members }),
+              orgs: t('admin.roles_page.orgs_count', { count: orgs }),
+            }}
+            components={{ b: <strong /> }}
+          />
+        ),
+        cancelProps: { children: t('admin.role.cancel') },
+        actionProps: {
+          dataCy: 'edit-role-confirm',
+          children: t('admin.role.save'),
+          onClick: async () => {
+            applyRoleUpdate(values, roleCode);
+            setSheetOpen(false);
+          },
+        },
+      });
+      return;
+    }
+
+    applyRoleUpdate(values, roleCode);
+    setSheetOpen(false);
+  };
+
+  const handleDelete = (role: Role) => {
+    setRoles(prev => prev.filter(r => r.code !== role.code));
+    toast.success(t('admin.role.ok.deleted'));
+  };
+
+  // Delete confirm lives at the page so both the row menu and the Edit-sheet footer share it.
+  const requestDelete = (role: Role) => {
+    const { members, orgs } = getRoleUsage(role, MOCK_USERS);
+    // Unassigned → plain sentence. Assigned → an error Alert callout stating the impact; the
+    // "across N organizations" clause is dropped for network-scoped roles (orgs === 0), mirroring
+    // the "Assigned to" cell.
+    let description: ReactNode;
+    if (members === 0) {
+      description = (
+        <Trans
+          i18nKey="admin.role.delete_body_empty"
+          values={{ name: roleName(role, t) }}
+          components={{ b: <strong /> }}
+        />
+      );
+    } else {
+      description = (
+        <Alert variant="error" bordered>
+          <AlertContent>
+            <AlertTitle>{roleName(role, t)}</AlertTitle>
+            <AlertDescription>
+              <Trans
+                i18nKey={orgs > 0 ? 'admin.role.delete_body' : 'admin.role.delete_body_no_orgs'}
+                values={{
+                  members: t('admin.roles_page.members_count', { count: members }),
+                  orgs: t('admin.roles_page.orgs_count', { count: orgs }),
+                }}
+                components={{ b: <strong /> }}
+              />
+            </AlertDescription>
+          </AlertContent>
+        </Alert>
+      );
+    }
+    alertDialog.open({
+      type: 'error',
+      title: t('admin.role.delete_title'),
+      description,
+      cancelProps: { children: t('admin.role.cancel') },
+      actionProps: {
+        variant: 'destructive',
+        dataCy: 'delete-role-confirm',
+        children: t('admin.role.delete_confirm'),
+        onClick: async () => {
+          handleDelete(role);
+          setSheetOpen(false);
+        },
+      },
+    });
+  };
+
+  const columns = useMemo(
+    () =>
+      getRolesColumns(t, {
+        users: MOCK_USERS,
+        onOpen: openRole,
+        onViewPermissions: openPermissions,
+        onViewMembers: role => onViewMembers(role.code),
+        onDuplicate: openDuplicate,
+        onDelete: requestDelete,
+      }),
+    [t, onViewMembers],
+  );
+  const columnSettings = useMemo(() => getRolesColumnSettings(t), [t]);
+
+  const handleFilterChange = (next: RolesFilterState) => {
+    setFilters(next);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Card className="h-auto w-full">
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold">{t('admin.roles_page.count', { total: listedRoles.length })}</h2>
+              <p className="max-w-3xl text-sm text-muted-foreground">
+                {t('admin.roles_page.subtitle')} (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 align-baseline text-sm"
+                  onClick={() => openPermissions(MEMBER_ROLE)}
+                >
+                  {t('admin.roles_page.see_included')}
+                </Button>
+                ).
+              </p>
+            </div>
+            <Button onClick={openAdd}>
+              <Plus />
+              {t('admin.roles_page.add')}
+            </Button>
+          </div>
+
+          <DataTable
+            id="admin-roles"
+            columns={columns}
+            data={rows}
+            defaultColumnSettings={columnSettings}
+            loadingStates={{ total: false, list: false }}
+            total={rows.length}
+            TableFilters={<RolesTableFilters value={filters} onChange={handleFilterChange} />}
+            pagination={{ type: 'hidden' }}
+            enableColumnOrdering
+            enableFullscreen
+            tableIndexResultPosition="bottom"
+          />
+        </CardContent>
+
+        <RoleSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          role={activeRole}
+          initialValues={initialValues}
+          roles={roles}
+          onSave={handleSave}
+          onDuplicate={openDuplicate}
+          onRequestDelete={requestDelete}
+        />
+
+        {/* Read-only permissions dialog. `onEdit` gives custom roles an Edit hand-off to the sheet. */}
+        <ViewPermissionsDialog
+          role={permissionsRole}
+          open={!!permissionsRole}
+          onOpenChange={open => !open && setPermissionsRole(null)}
+          onEdit={editFromDialog}
+        />
+      </Card>
+
+      {/* Table footnote sits outside the card (defaults are locked). */}
+      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Lock className="size-3.5" />
+        {t('admin.roles_page.footer_note')}
+      </p>
+    </div>
+  );
+}
