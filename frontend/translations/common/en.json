@@ -20,6 +20,15 @@
       "loading": "Loading"
     }
   },
+  "admin": {
+    "title": "{{tenant}} - Administration",
+    "sections": {
+      "group_label": "Network settings",
+      "organizations": "Organizations",
+      "roles": "Roles & Permissions",
+      "users": "Members"
+    }
+  },
   "analysis": {
     "title": "Analysis",
     "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",
@@ -2076,6 +2085,7 @@
       "sign_out": "Sign out"
     },
     "links": {
+      "admin": "Admin",
       "analysis": "Analysis",
       "cases": "Cases",
       "files": "Files",

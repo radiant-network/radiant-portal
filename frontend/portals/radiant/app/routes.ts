@@ -12,6 +12,7 @@ export default [
     route('community/', './routes/community/list.tsx'),
     route('analysis', './routes/analysis/list.tsx'),
     route('analysis/set-operations', './routes/analysis/set-operations.tsx'),
+    route('admin/', './routes/admin/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
   // QA preview only: two explicit URLs let both landing variants be viewed in a single build.

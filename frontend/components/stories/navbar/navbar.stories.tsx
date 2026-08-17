@@ -9,6 +9,7 @@ import {
   LayoutDashboardIcon,
   LightbulbIcon,
   MailIcon,
+  SettingsIcon,
   TelescopeIcon,
   UsersIcon,
 } from 'lucide-react';
@@ -90,6 +91,13 @@ export const MultiTenant: Story = {
       {
         title: 'Analysis',
         icon: <BlendIcon />,
+        as: 'a',
+        href: 'https://google.com',
+      },
+      { separator: true },
+      {
+        title: 'Admin',
+        icon: <SettingsIcon />,
         as: 'a',
         href: 'https://google.com',
       },

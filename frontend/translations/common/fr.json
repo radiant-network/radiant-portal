@@ -20,6 +20,15 @@
       "loading": "Chargement en cours"
     }
   },
+  "admin": {
+    "title": "{{tenant}} - Administration",
+    "sections": {
+      "group_label": "Paramètres du réseau",
+      "organizations": "Organisations",
+      "roles": "Rôles et permissions",
+      "users": "Membres"
+    }
+  },
   "analysis": {
     "title": "Analyses",
     "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",
@@ -2080,6 +2089,7 @@
       "sign_out": "Se déconnecter"
     },
     "links": {
+      "admin": "Admin",
       "analysis": "Analyse",
       "cases": "Cas",
       "files": "Fichiers",

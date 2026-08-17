@@ -62,16 +62,20 @@ function MainSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {links.map(item => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton tooltip={item.title} asChild variant="default">
-                  <div>
-                    {item.icon}
-                    <span>{item.title}</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {links.map((item, index) =>
+              item.separator ? (
+                <SidebarSeparator key={`separator-${index}`} />
+              ) : (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton tooltip={item.title} asChild variant="default">
+                    <div>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ),
+            )}
             {betaSuperMode && (
               <SidebarMenuItem key="beta">
                 <SidebarMenuButton
