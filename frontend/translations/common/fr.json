@@ -53,7 +53,7 @@
         "category_hint": "Ne peut pas être modifiée après la création.",
         "category_placeholder": "Sélectionner une catégorie",
         "code": "Code",
-        "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres et traits de soulignement.",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
         "name": "Nom"
       },
       "filters": {
@@ -165,7 +165,7 @@
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
-        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres et des traits de soulignement.",
+        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
         "organization_code_exists": "Une organisation avec ce code existe déjà."
       }
     },

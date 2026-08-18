@@ -16,7 +16,7 @@ export const MAX_CODE_LENGTH = 50;
  */
 export function toCodeCharset(value: string) {
   return stripAccents(value)
-    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/[^a-zA-Z0-9-]+/g, '_')
     .slice(0, MAX_CODE_LENGTH);
 }
 
@@ -24,5 +24,5 @@ export function toCodeCharset(value: string) {
 export function toOrganizationCode(name: string) {
   return toCodeCharset(name)
     .replace(/^[^a-zA-Z]+/, '')
-    .replace(/_+$/, '');
+    .replace(/[_-]+$/, '');
 }

@@ -53,7 +53,7 @@
         "category_hint": "Can't be changed after creation.",
         "category_placeholder": "Select a category",
         "code": "Code",
-        "code_hint": "Can't be changed after creation. Letters, numbers, and underscores.",
+        "code_hint": "Can't be changed after creation. Letters, numbers, underscores, and dashes.",
         "name": "Name"
       },
       "filters": {
@@ -165,7 +165,7 @@
         "required": "This field is required",
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
-        "invalid_code": "Must start with a letter and contain only letters, numbers and underscores",
+        "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
         "organization_code_exists": "An organization with this code already exists."
       }
     },

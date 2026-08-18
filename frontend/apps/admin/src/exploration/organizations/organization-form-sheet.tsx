@@ -25,7 +25,7 @@ import { organizationsApi } from '@/utils/api';
 import { MAX_CODE_LENGTH, toCodeCharset, toOrganizationCode } from './organizations-utils';
 import { useOrganizationCategories } from './use-organization-categories';
 
-const ORGANIZATION_CODE_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+const ORGANIZATION_CODE_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
 
 const createFormSchema = z.object({
   name: z.string().min(1, 'required'),
