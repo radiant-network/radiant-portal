@@ -25,7 +25,7 @@ export function getOrganizationsColumns(t: TFunction<string, undefined>) {
             variant="secondary"
             size="sm"
             external={false}
-            className="w-fit font-semibold"
+            className="w-fit font-semibold uppercase"
             onClick={() => {}}
           >
             {info.getValue()}

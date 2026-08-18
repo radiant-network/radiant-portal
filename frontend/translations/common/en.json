@@ -26,6 +26,25 @@
       "add": "Add organization",
       "count_one": "{{count}} organization",
       "count_other": "{{count}} organizations",
+      "create": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "fields": {
+          "category": "Category",
+          "category_hint": "Can't be changed after creation.",
+          "category_placeholder": "Select a category",
+          "code": "Code",
+          "code_hint": "Can't be changed after creation. Letters, numbers, and underscores.",
+          "name": "Name"
+        },
+        "notifications": {
+          "errors": {
+            "default": "Unable to create organization."
+          },
+          "success": "Organization created."
+        },
+        "submit": "Create organization",
+        "title": "Add organization"
+      },
       "filters": {
         "category": "Category",
         "search_placeholder": "Search by name or code"
@@ -134,7 +153,9 @@
       "errors": {
         "required": "This field is required",
         "min_2": "Min 2 characters",
-        "max_50": "Max 50 characters"
+        "max_50": "Max 50 characters",
+        "invalid_code": "Must start with a letter and contain only lowercase letters, numbers and underscores",
+        "organization_code_exists": "An organization with this code already exists."
       }
     },
     "editor": {

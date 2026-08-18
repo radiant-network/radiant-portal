@@ -1,20 +1,12 @@
 import { Search, X } from 'lucide-react';
-import useSWR from 'swr';
 
-import type { ValueSetItem } from '@/api/api';
 import FilterButton, { type IFilterButtonItem } from '@/components/base/buttons/filter-button';
 import { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
-import { valueSetsApi } from '@/utils/api';
 
-const CATEGORY_VALUE_SET = 'organization_category';
-
-async function fetchCategories() {
-  const response = await valueSetsApi.listValueSet(CATEGORY_VALUE_SET);
-  return response.data;
-}
+import { useOrganizationCategories } from './use-organization-categories';
 
 type OrganizationsFiltersProps = {
   search: string;
@@ -26,10 +18,7 @@ type OrganizationsFiltersProps = {
 function OrganizationsFilters({ search, onSearchChange, categories, onCategoriesChange }: OrganizationsFiltersProps) {
   const { t } = useI18n();
 
-  const { data } = useSWR<ValueSetItem[]>(`value-set-${CATEGORY_VALUE_SET}`, fetchCategories, {
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-  });
+  const { data } = useOrganizationCategories();
 
   const options: IFilterButtonItem[] = sortOptions((data ?? []).map(({ code, name }) => ({ key: code, label: name })));
 

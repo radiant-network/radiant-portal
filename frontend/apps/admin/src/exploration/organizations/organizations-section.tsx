@@ -11,20 +11,14 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { organizationsApi } from '@/utils/api';
 
+import CreateOrganizationSheet from './create-organization-sheet';
 import OrganizationsFilters from './organizations-filters';
 import { getOrganizationsColumns, organizationsDefaultSettings } from './organizations-table-settings';
+import { normalize } from './organizations-utils';
 
 async function fetchOrganizations(tenant: string) {
   const response = await organizationsApi.listOrganizations(tenant);
   return response.data;
-}
-
-/** Lowercased and accent-stripped, so "Hopital" matches "Hôpital". */
-function normalize(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
 }
 
 export default function OrganizationsSection() {
@@ -32,15 +26,16 @@ export default function OrganizationsSection() {
   const { tenant } = useTenant();
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const { data: organizations, isLoading } = useSWR<OrganizationResponse[], ApiError>(
-    `admin-organizations-${tenant}`,
-    () => fetchOrganizations(tenant),
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const {
+    data: organizations,
+    isLoading,
+    mutate,
+  } = useSWR<OrganizationResponse[], ApiError>(`admin-organizations-${tenant}`, () => fetchOrganizations(tenant), {
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+  });
 
   const columns = useMemo(() => getOrganizationsColumns(t), [t]);
 
@@ -68,7 +63,7 @@ export default function OrganizationsSection() {
         </CardTitle>
         <CardDescription>{t('admin.organizations.subtitle')}</CardDescription>
         <CardAction>
-          <Button onClick={() => {}}>
+          <Button onClick={() => setIsCreateOpen(true)}>
             <Plus />
             {t('admin.organizations.add')}
           </Button>
@@ -95,6 +90,9 @@ export default function OrganizationsSection() {
           enableFullscreen
           tableIndexResultPosition="hidden"
         />
+        {isCreateOpen && (
+          <CreateOrganizationSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} onCreated={() => mutate()} />
+        )}
       </CardContent>
     </Card>
   );

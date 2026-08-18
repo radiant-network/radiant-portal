@@ -26,6 +26,25 @@
       "add": "Ajouter une organisation",
       "count_one": "{{count}} organisation",
       "count_other": "{{count}} organisations",
+      "create": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "fields": {
+          "category": "Catégorie",
+          "category_hint": "Ne peut pas être modifiée après la création.",
+          "category_placeholder": "Sélectionner une catégorie",
+          "code": "Code",
+          "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres et traits de soulignement.",
+          "name": "Nom"
+        },
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer l'organisation."
+          },
+          "success": "Organisation créée."
+        },
+        "submit": "Créer l'organisation",
+        "title": "Ajouter une organisation"
+      },
       "filters": {
         "category": "Catégorie",
         "search_placeholder": "Rechercher par nom ou code"
@@ -134,7 +153,9 @@
       "errors": {
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
-        "max_50": "50 caractères maximum"
+        "max_50": "50 caractères maximum",
+        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres minuscules, des chiffres et des tirets bas",
+        "organization_code_exists": "Une organisation avec ce code existe déjà."
       }
     },
     "editor": {
