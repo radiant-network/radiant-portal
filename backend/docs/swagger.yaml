@@ -888,6 +888,38 @@ components:
       required:
       - sequencing_experiments
       type: object
+    CreateUserRequest:
+      description: Payload to add a user to a tenant, with the roles to grant them.
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/CreateUserRole'
+          type: array
+          uniqueItems: false
+      required:
+      - email
+      - first_name
+      - last_name
+      type: object
+    CreateUserRole:
+      description: Role to grant to a user, with the organizations it applies at.
+      properties:
+        org_codes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        role_code:
+          type: string
+      required:
+      - role_code
+      type: object
     DocumentFilters:
       properties:
         data_type_code:
@@ -8301,6 +8333,78 @@ paths:
       security:
       - bearerauth: []
       summary: List the tenant's users
+      tags:
+      - users
+    post:
+      description: |-
+        Provisions the user across the identity provider and the data stores, then grants
+        them the requested roles in the tenant in the path. Requires the `can_manage_user`
+        action. The `member` role is granted tenant-wide automatically and must not be
+        listed. Whether a role needs organizations is derived from its actions: a role
+        holding only tenant-scoped actions must come with no `org_codes`, one holding any
+        org-scoped action needs at least one (`*` meaning every organization). No password
+        is ever set — the identity provider links the account by email at first sign-in.
+      operationId: createUser
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        description: User to add
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Add a user to the tenant
       tags:
       - users
   /{tenant}/variants/germline/{locus_id}/cases/count:

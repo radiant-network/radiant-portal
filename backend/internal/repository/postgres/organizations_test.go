@@ -96,3 +96,33 @@ func Test_CreateOrganization_UnknownCategory(t *testing.T) {
 		assert.ErrorIs(t, err, types.ErrOrganizationUnknownCategory)
 	})
 }
+
+func Test_ExistingOrgCodes_ReturnsOnlyTheCodesThatExist(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		existing, err := repo.ExistingOrgCodes(t.Context(), types.DefaultTenantCode, []string{"CHOP", "no_such_org"})
+		assert.NoError(t, err)
+		assert.Equal(t, []string{"CHOP"}, existing)
+	})
+}
+
+func Test_ExistingOrgCodes_ExcludesAnotherTenantsOrg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		existing, err := repo.ExistingOrgCodes(t.Context(), types.DefaultTenantCode, []string{"TENANT_B_ORG"})
+		assert.NoError(t, err)
+		assert.Empty(t, existing, "TENANT_B_ORG belongs to tenant_b, so it is not grantable in radiant")
+	})
+}
+
+func Test_ExistingOrgCodes_NoCodesRequestedIsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		existing, err := repo.ExistingOrgCodes(t.Context(), types.DefaultTenantCode, nil)
+		assert.NoError(t, err)
+		assert.Empty(t, existing)
+	})
+}

@@ -3,11 +3,14 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -132,4 +135,113 @@ func Test_ListUsersHandler_BlankRoleFilterIsNoFilter(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	assert.Empty(t, repo.gotQuery.Roles)
+}
+
+// --- POST /:tenant/users ----------------------------------------------------
+//
+// The handler only maps HTTP to service.UserAdmin; grant composition and the scope rules are
+// exercised in internal/service/users_test.go.
+
+type mockUserCreator struct {
+	err error
+
+	got       types.CreateUserRequest
+	gotTenant string
+	gotActor  string
+	calls     int
+}
+
+func (m *mockUserCreator) CreateTenantUser(_ context.Context, tenantCode string, req types.CreateUserRequest, actor string) error {
+	m.got, m.gotTenant, m.gotActor, m.calls = req, tenantCode, actor, m.calls+1
+	return m.err
+}
+
+func servePostUser(svc userCreator, body string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.POST("/:tenant/users", PostUserHandler(svc, &testutils.MockAuth{Id: "acting-admin-sub"}))
+	req, _ := http.NewRequest("POST", "/radiant/users", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PostUserHandler_ForwardsRequestAndAnswers201(t *testing.T) {
+	svc := &mockUserCreator{}
+
+	w := servePostUser(svc, `{
+		"email":"grace.chen@chop.edu","first_name":"Grace","last_name":"Chen",
+		"roles":[{"role_code":"geneticist","org_codes":["CHOP"]}]
+	}`)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, "radiant", svc.gotTenant)
+	assert.Equal(t, "acting-admin-sub", svc.gotActor, "granted_by is the acting admin")
+	assert.Equal(t, types.CreateUserRequest{
+		Email:     "grace.chen@chop.edu",
+		FirstName: "Grace",
+		LastName:  "Chen",
+		Roles:     []types.CreateUserRole{{RoleCode: "geneticist", OrgCodes: []string{"CHOP"}}},
+	}, svc.got)
+}
+
+func Test_PostUserHandler_MissingRequiredFieldIsRejected(t *testing.T) {
+	for _, body := range []string{
+		`{"first_name":"Grace","last_name":"Chen"}`,
+		`{"email":"grace.chen@chop.edu","last_name":"Chen"}`,
+		`{"email":"grace.chen@chop.edu","first_name":"Grace"}`,
+	} {
+		svc := &mockUserCreator{}
+		w := servePostUser(svc, body)
+		assert.Equal(t, http.StatusBadRequest, w.Code, "body %s", body)
+		assert.Zero(t, svc.calls, "nothing is provisioned when the payload is rejected")
+	}
+}
+
+func Test_PostUserHandler_MalformedBodyIsRejected(t *testing.T) {
+	w := servePostUser(&mockUserCreator{}, `{"email":`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostUserHandler_MalformedEmailIsRejected(t *testing.T) {
+	svc := &mockUserCreator{}
+
+	w := servePostUser(svc, `{"email":"not-an-email","first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"email \"not-an-email\" is not a valid address"}`, w.Body.String())
+	assert.Zero(t, svc.calls)
+}
+
+func Test_PostUserHandler_ExistingTenantUserIsConflict(t *testing.T) {
+	svc := &mockUserCreator{err: types.ErrUserAlreadyInTenant}
+
+	w := servePostUser(svc, `{"email":"grace.chen@chop.edu","first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"a user with this email already has access to this tenant"}`, w.Body.String())
+}
+
+func Test_PostUserHandler_ScopeViolationIsBadRequest(t *testing.T) {
+	for _, sentinel := range []error{
+		types.ErrRoleRequiresOrg, types.ErrRoleNotOrgScoped,
+		types.ErrUnknownRole, types.ErrUnknownOrganizations,
+	} {
+		svc := &mockUserCreator{err: fmt.Errorf("role %q %w", "geneticist", sentinel)}
+		w := servePostUser(svc, `{"email":"grace.chen@chop.edu","first_name":"Grace","last_name":"Chen"}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code, "sentinel %v", sentinel)
+		assert.Contains(t, w.Body.String(), sentinel.Error(), "the reason reaches the caller")
+	}
+}
+
+func Test_PostUserHandler_ProvisioningErrorIsRedacted(t *testing.T) {
+	svc := &mockUserCreator{err: errors.New("keycloak: connection refused")}
+
+	w := servePostUser(svc, `{"email":"grace.chen@chop.edu","first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }

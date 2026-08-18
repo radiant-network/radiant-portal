@@ -396,6 +396,43 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Create user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"grace.chen@chop.edu\",\n  \"first_name\": \"Grace\",\n  \"last_name\": \"Chen\",\n  \"roles\": [\n    {\n      \"role_code\": \"geneticist\",\n      \"org_codes\": [\"CHOP\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/users",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "users"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

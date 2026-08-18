@@ -173,6 +173,7 @@ Class | Method | HTTP request | Description
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
+*UsersApi* | [**create_user**](docs/UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
 *UsersApi* | [**list_users**](docs/UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
 *ValueSetsApi* | [**list_value_set**](docs/ValueSetsApi.md#list_value_set) | **GET** /value_sets/{type} | List a value set
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /{tenant}/variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
@@ -226,6 +227,8 @@ Class | Method | HTTP request | Description
  - [CreatePatientBatchBody](docs/CreatePatientBatchBody.md)
  - [CreateSampleBatchBody](docs/CreateSampleBatchBody.md)
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
+ - [CreateUserRequest](docs/CreateUserRequest.md)
+ - [CreateUserRole](docs/CreateUserRole.md)
  - [DocumentFilters](docs/DocumentFilters.md)
  - [DocumentResult](docs/DocumentResult.md)
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)

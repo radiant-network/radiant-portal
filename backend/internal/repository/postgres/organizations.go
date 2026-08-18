@@ -47,6 +47,24 @@ func (r *OrganizationRepository) CreateOrganization(ctx context.Context, org typ
 	return nil
 }
 
+// ExistingOrgCodes returns the subset of codes that exist in the tenant, so a caller can name the
+// ones that don't. user_role.org_code carries no FK (it also holds NULL and the '*' wildcard), so
+// this is the only thing standing between a typo and a grant that silently matches nothing.
+func (r *OrganizationRepository) ExistingOrgCodes(ctx context.Context, tenantCode string, codes []string) ([]string, error) {
+	existing := []string{}
+	if len(codes) == 0 {
+		return existing, nil
+	}
+	err := r.db.WithContext(ctx).
+		Table(types.OrganizationTable.Name).
+		Where("tenant_code = ? AND code IN ?", tenantCode, codes).
+		Pluck("code", &existing).Error
+	if err != nil {
+		return nil, fmt.Errorf("error checking organizations %v in tenant %q: %w", codes, tenantCode, err)
+	}
+	return existing, nil
+}
+
 // UpdateOrganization updates an organization's name within the tenant. Code and category are
 // immutable, so only name is written. A code that does not exist in the tenant (or belongs to
 // another tenant) affects no rows and maps to types.ErrOrganizationNotFound → 404.

@@ -49,17 +49,31 @@ func RangerTenantRole(tenantCode string) string {
 
 // ProvisionUser creates the user across all four systems and returns its `sub`.
 //
-// Order matters: Keycloak first (it mints the sub every other system keys on),
-// then Postgres (the auth source of truth), then Ranger membership and the
-// StarRocks login that authorization rides on. Every step is idempotent, so a
-// re-run converges.
+// Every step is idempotent, so a re-run converges — and the order is chosen so that a caller CAN
+// re-run after a failure. Postgres is written second-to-last on purpose: a grant in `user_role` is
+// what makes the user a member of the tenant, so callers key their "already exists" checks on it
+// (see POST /{tenant}/users, which answers 409 from it). Writing it before the Keycloak/StarRocks
+// steps would mean a failure in those steps left grants behind that turn every retry into a
+// conflict, stranding the user half-provisioned with no way to finish through the API.
 //
-// When in.Sub is set the identity already exists, so Keycloak is skipped entirely
-// and that sub is used as-is for the remaining three systems.
+// Within that constraint the steps are ordered so access is granted last:
 //
-// grantedBy records audit attribution for the role grants (who performed the
-// provisioning) — the createuser CLI passes "createuser"; a POST /users handler
-// would pass the acting admin's identity.
+//  1. Keycloak — mints the sub every other system keys on, so it has to be first.
+//  2. StarRocks — creates the JWT login. On its own it confers nothing; Ranger decides what it can
+//     read, so an orphan from a failed run is inert.
+//  3. Postgres — the authorization source of truth; the API gates every request on it.
+//  4. Ranger — tenant-role membership, i.e. the actual data access. Last so that a failure leaves
+//     the user with less access than intended rather than more.
+//
+// The residual gap is a Postgres failure partway through its own grant loop, or a Ranger failure
+// after them: both leave grants behind, so a retry sees a conflict. Ranger failing is the benign
+// direction (no data access granted); the Postgres loop would need a transaction to close fully.
+//
+// When in.Sub is set the identity already exists, so Keycloak is skipped entirely and that sub is
+// used as-is for the remaining three systems.
+//
+// grantedBy records audit attribution for the role grants (who performed the provisioning) — the
+// createuser CLI passes "createuser"; the POST /{tenant}/users handler passes the acting admin.
 func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, grantedBy string) (string, error) {
 	sub := in.Sub
 	if sub == "" {
@@ -69,9 +83,13 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, gran
 			return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
 		}
 	} else if _, err := uuid.Parse(sub); err != nil {
-		// Validate up front: the StarRocks DDL guard is the last step, so a malformed
-		// sub would otherwise leave Postgres rows and a Ranger user behind.
+		// Validated up front so a malformed sub can't reach the StarRocks DDL guard after the
+		// other systems have already been written.
 		return "", fmt.Errorf("sub %q is not a valid UUID: %w", sub, err)
+	}
+
+	if err := deps.Starrocks.EnsureJWTUser(ctx, sub); err != nil {
+		return sub, fmt.Errorf("starrocks: ensure jwt user %q: %w", sub, err)
 	}
 
 	if err := deps.Auth.UpsertUser(ctx, sub, in.Email, in.FirstName, in.LastName); err != nil {
@@ -91,10 +109,6 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, gran
 		if err := deps.Ranger.AddUserToRole(ctx, role, sub); err != nil {
 			return sub, fmt.Errorf("ranger: add %q to role %q: %w", sub, role, err)
 		}
-	}
-
-	if err := deps.Starrocks.EnsureJWTUser(ctx, sub); err != nil {
-		return sub, fmt.Errorf("starrocks: ensure jwt user %q: %w", sub, err)
 	}
 
 	return sub, nil

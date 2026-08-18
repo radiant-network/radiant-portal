@@ -70,6 +70,60 @@ func (r *UsersRepository) ListTenantUsers(ctx context.Context, tenantCode string
 	return users, count, nil
 }
 
+// EmailHasTenantGrant reports whether a user with this email already holds a role in the tenant.
+// Identity is keyed on user_id, so the same email can legitimately exist in the registry while
+// having no access here — only a grant in this tenant counts as "already a user of this tenant".
+func (r *UsersRepository) EmailHasTenantGrant(ctx context.Context, tenantCode, email string) (bool, error) {
+	var exists bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM users u
+			JOIN user_role ur ON ur.user_id = u.user_id
+			WHERE lower(u.email) = lower(?) AND ur.tenant_code = ?
+		)`, email, tenantCode).Scan(&exists).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking email %q in tenant %q: %w", email, tenantCode, err)
+	}
+	return exists, nil
+}
+
+// RoleScopes maps each of the tenant's requested roles to the scope derived from its actions. A
+// role absent from the result does not exist in the tenant — the caller decides what that means,
+// rather than this returning a zero scope that would read as tenant-wide.
+func (r *UsersRepository) RoleScopes(ctx context.Context, tenantCode string, roleCodes []string) (map[string]string, error) {
+	scopes := map[string]string{}
+	if len(roleCodes) == 0 {
+		return scopes, nil
+	}
+
+	var rows []struct {
+		RoleCode  string
+		HasTenant bool
+		HasOrg    bool
+	}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT r.code AS role_code, rs.has_tenant, rs.has_org
+		FROM role r
+		LEFT JOIN (
+			SELECT ra.role_code,
+			       bool_or(a.scope = ?) AS has_tenant,
+			       bool_or(a.scope = ?) AS has_org
+			FROM role_action ra
+			JOIN action a ON a.code = ra.action_code
+			WHERE ra.tenant_code = ?
+			GROUP BY ra.role_code
+		) rs ON rs.role_code = r.code
+		WHERE r.tenant_code = ? AND r.code IN ?`,
+		types.ActionScopeTenant, types.ActionScopeOrg, tenantCode, tenantCode, roleCodes).Scan(&rows).Error
+	if err != nil {
+		return nil, fmt.Errorf("error loading scopes of roles %v in tenant %q: %w", roleCodes, tenantCode, err)
+	}
+	for _, row := range rows {
+		scopes[row.RoleCode] = roleScope(row.HasTenant, row.HasOrg)
+	}
+	return scopes, nil
+}
+
 // tenantUsers selects the users holding at least one grant in the tenant. A role filter narrows
 // that same grant — a user is kept when one of their grants matches, and their other roles are
 // unaffected — so combining it with search reads as search AND (any of the roles).

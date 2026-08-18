@@ -2,14 +2,21 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 type usersReader interface {
 	ListTenantUsers(ctx context.Context, tenantCode string, query types.ListUsersQuery) ([]types.UserResult, int64, error)
+}
+
+// userCreator adds a user to the tenant across every store. Implemented by service.UserAdmin.
+type userCreator interface {
+	CreateTenantUser(ctx context.Context, tenantCode string, req types.CreateUserRequest, actor string) error
 }
 
 // ListUsersHandler
@@ -57,5 +64,65 @@ func ListUsersHandler(repo usersReader) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, types.UsersSearchResponse{List: users, Count: count})
+	}
+}
+
+// PostUserHandler
+// @Summary Add a user to the tenant
+// @Id createUser
+// @Description Provisions the user across the identity provider and the data stores, then grants
+// @Description them the requested roles in the tenant in the path. Requires the `can_manage_user`
+// @Description action. The `member` role is granted tenant-wide automatically and must not be
+// @Description listed. Whether a role needs organizations is derived from its actions: a role
+// @Description holding only tenant-scoped actions must come with no `org_codes`, one holding any
+// @Description org-scoped action needs at least one (`*` meaning every organization). No password
+// @Description is ever set — the identity provider links the account by email at first sign-in.
+// @Tags users
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param message body types.CreateUserRequest true "User to add"
+// @Accept json
+// @Produce json
+// @Success 201
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 409 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/users [post]
+func PostUserHandler(svc userCreator, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req types.CreateUserRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := req.Validate(); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		actor, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		switch err := svc.CreateTenantUser(c.Request.Context(), *tenant, req, *actor); {
+		case err == nil:
+			c.Status(http.StatusCreated)
+		case errors.Is(err, types.ErrUserAlreadyInTenant):
+			HandleConflictError(c, err.Error())
+		case errors.Is(err, types.ErrUnknownRole), errors.Is(err, types.ErrUnknownOrganizations),
+			errors.Is(err, types.ErrRoleRequiresOrg), errors.Is(err, types.ErrRoleNotOrgScoped):
+			HandleValidationError(c, err)
+		default:
+			HandleError(c, err)
+		}
 	}
 }

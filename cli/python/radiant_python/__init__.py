@@ -89,6 +89,8 @@ from radiant_python.models.create_organization_request import CreateOrganization
 from radiant_python.models.create_patient_batch_body import CreatePatientBatchBody
 from radiant_python.models.create_sample_batch_body import CreateSampleBatchBody
 from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
+from radiant_python.models.create_user_request import CreateUserRequest
+from radiant_python.models.create_user_role import CreateUserRole
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.document_result import DocumentResult
 from radiant_python.models.documents_search_response import DocumentsSearchResponse

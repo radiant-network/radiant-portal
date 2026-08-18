@@ -84,6 +84,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// POST requests
 		for _, route := range []string{
 			"radiant/organizations",
+			"radiant/users",
 			"radiant/cases/search",
 			"radiant/genes/search",
 			"radiant/interpretations/germline/1/1/1",
