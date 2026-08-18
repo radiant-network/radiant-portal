@@ -55,15 +55,15 @@ func (r *FetusRepository) GetFetusByMotherAndSubmitterId(ctx context.Context, mo
 }
 
 // GetFetusByOrganizationAndSubmitterId resolves the submitter's key against the organization,
-// hitting the UNIQUE (organization_code, submitter_fetus_id) constraint. Used to catch a collision
-// with another mother's fetus before insert, rather than letting the worker die on a raw
-// duplicate-key error.
-func (r *FetusRepository) GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId string) (*Fetus, error) {
+// hitting the UNIQUE (organization_code, tenant_code, submitter_fetus_id) constraint. Used to
+// catch a collision with another mother's fetus before insert, rather than letting the worker die
+// on a raw duplicate-key error.
+func (r *FetusRepository) GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId, tenantCode string) (*Fetus, error) {
 	var fetus Fetus
 	err := r.db.WithContext(ctx).
 		Table(types.FetusTable.Name).
 		Scopes(WithTenant(ctx)).
-		Where("organization_code = ? AND submitter_fetus_id = ?", organizationCode, submitterFetusId).
+		Where("organization_code = ? AND submitter_fetus_id = ? AND tenant_code = ?", organizationCode, submitterFetusId, tenantCode).
 		First(&fetus).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {

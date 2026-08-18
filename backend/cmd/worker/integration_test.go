@@ -1615,6 +1615,105 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 	})
 }
 
+func insertPayloadAndProcessBatchForTenant(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string, tenantCode string) string {
+	var id string
+	initErr := db.Raw(`
+   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+   		VALUES (?, ?, ?, ?, ?, ?, ?)
+   		RETURNING id;
+		`, payload, string(status), batchType, dryRun, username, createdOn, tenantCode).Scan(&id).Error
+	if initErr != nil {
+		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
+	}
+	ctx, _ := batchval.NewBatchValidationContext(db)
+	processBatch(context.Background(), db, ctx)
+	return id
+}
+
+// Test_ProcessBatch_Patient_TenantIsolation_CreatesSeparatePatientPerTenant reproduces CLIN-6157:
+// (organization_code, submitter_patient_id) is not unique across tenants, so a patient batch for
+// tenant_b must not resolve to a patient already created under the same natural key by "radiant".
+// The payload also carries a jhn shared by both tenants: patient_jhn_key was global (no
+// tenant_code) until it was widened, so without that fix tenant_b's insert would fail outright on
+// a raw duplicate-key error instead of creating its own patient row.
+func Test_ProcessBatch_Patient_TenantIsolation_CreatesSeparatePatientPerTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const orgCode = "TENANT-ISO-ORG"
+		const submitterPatientId = "MRN-TENANT-ISO-1"
+		const sharedJhn = "JHN-TENANT-ISO-1"
+
+		// Both tenants need their own (code, tenant_code) organization row — organization is
+		// (code, tenant_code) keyed, and patient.organization_code has a compound FK to it.
+		if err := env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Test Org (radiant)', 'healthcare_provider', 'radiant')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error; err != nil {
+			t.Fatal("failed to insert radiant organization:", err)
+		}
+		if err := env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Test Org (tenant_b)', 'healthcare_provider', 'tenant_b')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error; err != nil {
+			t.Fatal("failed to insert tenant_b organization:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM organization WHERE code = ?`, orgCode)
+		defer env.Postgres.Exec(`DELETE FROM patient WHERE organization_code = ? AND submitter_patient_id = ?`, orgCode, submitterPatientId)
+
+		payload := fmt.Sprintf(`[
+			{
+				"submitter_patient_id": %q,
+				"submitter_patient_id_type": "mrn",
+				"patient_organization_code": %q,
+				"jhn": %q,
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"
+			}
+		]`, submitterPatientId, orgCode, sharedJhn)
+
+		idA := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", types.DefaultTenantCode)
+		batchA := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idA).Scan(&batchA)
+		assert.Equal(t, types.BatchStatusSuccess, batchA.Status)
+		assert.Len(t, batchA.Report.Errors, 0)
+
+		var patientA postgres.Patient
+		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, types.DefaultTenantCode).First(&patientA).Error; err != nil {
+			t.Fatal("failed to find patient created for tenant radiant:", err)
+		}
+
+		// Same (organization_code, submitter_patient_id), a different tenant: must create a new
+		// patient, not silently resolve to tenant "radiant"'s row.
+		idB := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", "tenant_b")
+		batchB := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idB).Scan(&batchB)
+		assert.Equal(t, types.BatchStatusSuccess, batchB.Status)
+		assert.Len(t, batchB.Report.Errors, 0)
+		assert.Len(t, batchB.Report.Infos, 0, "must not be reported as already-existing — it belongs to a different tenant")
+
+		var patientB postgres.Patient
+		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, "tenant_b").First(&patientB).Error; err != nil {
+			t.Fatal("failed to find patient created for tenant tenant_b:", err)
+		}
+		assert.NotEqual(t, patientA.ID, patientB.ID, "each tenant must get its own patient row")
+
+		// Non-regression: resubmitting within the SAME tenant must still reuse the existing row.
+		idB2 := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", "tenant_b")
+		batchB2 := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idB2).Scan(&batchB2)
+		assert.Equal(t, 1, batchB2.Summary.Skipped)
+		if assert.Len(t, batchB2.Report.Infos, 1) {
+			assert.Equal(t, PatientAlreadyExistCode, batchB2.Report.Infos[0].Code)
+		}
+
+		var countB int64
+		env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, "tenant_b").Count(&countB)
+		assert.Equal(t, int64(1), countB, "resubmitting within the same tenant must not create a duplicate")
+	})
+}
+
 func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		payload := `[

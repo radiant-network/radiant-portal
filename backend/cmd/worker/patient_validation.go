@@ -195,7 +195,7 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		return nil
 	}
 
-	records, unexpectedErr := validatePatientsBatch(ctx, bv, patients)
+	records, unexpectedErr := validatePatientsBatch(ctx, bv, patients, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
@@ -268,7 +268,7 @@ func insertPatientRecords(ctx context.Context, records []*PatientValidationRecor
 	return nil
 }
 
-func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
+func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch, tenantCode string) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
 	cache := batchval.NewBatchValidationCache(bv)
 	seenPatients := map[batchval.PatientKey]struct{}{}
@@ -276,7 +276,7 @@ func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		record, err := validatePatientRecord(ctx, bv, cache, patient, index, seenPatients)
+		record, err := validatePatientRecord(ctx, bv, cache, patient, index, seenPatients, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}
@@ -285,7 +285,7 @@ func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationCont
 	return records, nil
 }
 
-func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
+func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}, tenantCode string) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context:      bv,
@@ -313,6 +313,7 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 		batchval.PatientKey{
 			OrganizationCode:   patient.PatientOrganizationCode,
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
+			TenantCode:         tenantCode,
 		},
 		seenPatients,
 		PatientDuplicateInBatchCode,
@@ -326,7 +327,7 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String())
+		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {
@@ -345,7 +346,7 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		return nil
 	}
 
-	records, unexpectedErr := validateUpdatePatientsBatch(ctx, bv, patients)
+	records, unexpectedErr := validateUpdatePatientsBatch(ctx, bv, patients, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
@@ -417,7 +418,7 @@ func updatePatientRecords(ctx context.Context, records []*PatientValidationRecor
 	return nil
 }
 
-func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
+func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch, tenantCode string) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
 	cache := batchval.NewBatchValidationCache(bv)
 	seenPatients := map[batchval.PatientKey]struct{}{}
@@ -425,7 +426,7 @@ func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidati
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		record, err := validateUpdatePatientRecord(ctx, bv, cache, patient, index, seenPatients)
+		record, err := validateUpdatePatientRecord(ctx, bv, cache, patient, index, seenPatients, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("error during update patient validation: %v", err)
 		}
@@ -434,7 +435,7 @@ func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidati
 	return records, nil
 }
 
-func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
+func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}, tenantCode string) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context:      bv,
@@ -462,6 +463,7 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 		batchval.PatientKey{
 			OrganizationCode:   patient.PatientOrganizationCode,
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
+			TenantCode:         tenantCode,
 		},
 		seenPatients,
 		PatientDuplicateInBatchCode,
@@ -475,7 +477,7 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String())
+		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}

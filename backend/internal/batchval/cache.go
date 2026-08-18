@@ -11,6 +11,7 @@ import (
 type PatientKey struct {
 	OrganizationCode   string
 	SubmitterPatientId string
+	TenantCode         string
 }
 
 type SequencingExperimentKey struct {
@@ -143,13 +144,13 @@ func (c *BatchValidationCache) GetOrganizationByCode(ctx context.Context, code s
 	return org, nil
 }
 
-func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, orgCode string, submitterPatientId string) (*types.Patient, error) {
-	key := PatientKey{orgCode, submitterPatientId}
+func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, orgCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+	key := PatientKey{OrganizationCode: orgCode, SubmitterPatientId: submitterPatientId, TenantCode: tenantCode}
 	if patient, ok := c.Patients[key]; ok {
 		return patient, nil
 	}
 
-	patient, err := c.Context.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, orgCode, submitterPatientId)
+	patient, err := c.Context.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, orgCode, submitterPatientId, tenantCode)
 	if err != nil {
 		return nil, err
 	}

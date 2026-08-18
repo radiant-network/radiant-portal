@@ -25,14 +25,14 @@ func (m *MockOrganizationRepository) GetOrganizationByCode(_ context.Context, co
 }
 
 type MockPatientsRepository struct {
-	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
+	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error)
 	UpdatePatientFunc                            func(patient *types.Patient) error
 	UpdatedPatients                              []types.Patient
 }
 
-func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error) {
+func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 	if m.GetPatientByOrgCodeAndSubmitterPatientIdFunc != nil {
-		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId)
+		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId, tenantCode)
 	}
 	return nil, nil
 }
@@ -340,7 +340,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			if orgCode == "CHUSJ" && submitterPatientId == "P1" {
 				return patient, nil
 			}
@@ -378,7 +378,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                     // 7. The grandparent for S3
 	}
 
-	records, err := validateSamplesBatch(t.Context(), mockContext, cache, samples)
+	records, err := validateSamplesBatch(t.Context(), mockContext, cache, samples, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Len(t, records, 7) // Updated from 6 to 7 to include P-BATCH2
 
@@ -601,7 +601,7 @@ func Test_ValidateUpdateSamplesBatch_MissingSampleReportsError(t *testing.T) {
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			return patient, nil
 		},
 	}
@@ -622,7 +622,7 @@ func Test_ValidateUpdateSamplesBatch_MissingSampleReportsError(t *testing.T) {
 		{SubmitterSampleId: "S-MISSING", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},
 	}
 
-	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples)
+	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	require.Len(t, records, 1)
 	assert.True(t, records[0].Skipped)
@@ -640,7 +640,7 @@ func Test_ValidateUpdateSamplesBatch_ExistingSampleNotSkipped(t *testing.T) {
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			return patient, nil
 		},
 	}
@@ -664,7 +664,7 @@ func Test_ValidateUpdateSamplesBatch_ExistingSampleNotSkipped(t *testing.T) {
 		{SubmitterSampleId: "S-EXISTING", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},
 	}
 
-	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples)
+	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	require.Len(t, records, 1)
 	assert.False(t, records[0].Skipped)
@@ -681,7 +681,7 @@ func Test_ValidateUpdateSamplesBatch_MissingParentSampleReportsError(t *testing.
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			return patient, nil
 		},
 	}
@@ -705,7 +705,7 @@ func Test_ValidateUpdateSamplesBatch_MissingParentSampleReportsError(t *testing.
 		{SubmitterSampleId: "S-EXISTING", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal", SubmitterParentSampleId: "P-MISSING"},
 	}
 
-	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples)
+	records, err := validateUpdateSamplesBatch(t.Context(), mockContext, cache, samples, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	require.Len(t, records, 1)
 	assert.False(t, records[0].Skipped)

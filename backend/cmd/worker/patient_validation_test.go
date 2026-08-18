@@ -456,7 +456,7 @@ func Test_ValidateUpdatePatientsBatch_MissingPatientReportsError(t *testing.T) {
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			return nil, nil
 		},
 	}
@@ -476,7 +476,7 @@ func Test_ValidateUpdatePatientsBatch_MissingPatientReportsError(t *testing.T) {
 		DateOfBirth:             &dob,
 	}}
 
-	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients)
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Len(t, records, 1)
 	assert.True(t, records[0].Skipped)
@@ -493,7 +493,7 @@ func Test_ValidateUpdatePatientsBatch_ExistingPatientNotSkipped(t *testing.T) {
 		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 			return existing, nil
 		},
 	}
@@ -513,7 +513,7 @@ func Test_ValidateUpdatePatientsBatch_ExistingPatientNotSkipped(t *testing.T) {
 		DateOfBirth:             &dob,
 	}}
 
-	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients)
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Len(t, records, 1)
 	assert.False(t, records[0].Skipped)
@@ -551,11 +551,12 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 		`, "{}", types.UpdatePatientBatchType).Scan(&id).Error)
 
 		batch := types.Batch{
-			ID:        id,
-			BatchType: types.UpdatePatientBatchType,
-			Payload:   "[]",
-			Status:    types.BatchStatusSuccess,
-			DryRun:    false,
+			ID:         id,
+			BatchType:  types.UpdatePatientBatchType,
+			Payload:    "[]",
+			Status:     types.BatchStatusSuccess,
+			DryRun:     false,
+			TenantCode: types.DefaultTenantCode,
 		}
 		records := []*PatientValidationRecord{{
 			Patient: types.PatientBatch{
@@ -573,7 +574,7 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 		require.NoError(t, err)
 
 		repo := postgres.NewPatientsRepository(database.PostgresDB{DB: db})
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, patient)
 		assert.Equal(t, "female", patient.SexCode)

@@ -56,7 +56,7 @@ func Test_validateUpdateCaseRecord_Success(t *testing.T) {
 	}
 	cache, ctx := newCacheUpdate(mockRepo)
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, validCaseUpdate(), 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, validCaseUpdate(), 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.False(t, rec.Skipped)
@@ -73,7 +73,7 @@ func Test_validateUpdateCaseRecord_UnknownProject(t *testing.T) {
 	update := validCaseUpdate()
 	update.ProjectCode = "PROJ-UNKNOWN"
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.True(t, hasErrorCode(rec.Errors, CaseUnknownProject))
 	assert.Nil(t, rec.CaseID)
@@ -90,7 +90,7 @@ func Test_validateUpdateCaseRecord_CaseNotFound(t *testing.T) {
 	update := validCaseUpdate()
 	update.SubmitterCaseId = "CASE-MISSING"
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseNotFoundForUpdate, rec.Errors[0].Code)
@@ -111,7 +111,7 @@ func Test_validateUpdateCaseRecord_PatientNotFound(t *testing.T) {
 		RelationToProbandCode:   "proband",
 	}}
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.True(t, hasErrorCode(rec.Errors, PatientNotFound), "expected %s, got %+v", PatientNotFound, rec.Errors)
 }
@@ -123,7 +123,7 @@ func Test_validateUpdateCaseRecord_UnknownDiagnosticLab(t *testing.T) {
 	update := validCaseUpdate()
 	update.DiagnosticLabCode = "LAB-UNKNOWN"
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.True(t, hasErrorCode(rec.Errors, CaseUnknownDiagnosticLab), "expected %s, got %+v", CaseUnknownDiagnosticLab, rec.Errors)
 }
@@ -135,7 +135,7 @@ func Test_validateUpdateCaseRecord_UnknownAnalysisCode(t *testing.T) {
 	update := validCaseUpdate()
 	update.AnalysisCode = "UNKNOWN-CODE"
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.True(t, hasErrorCode(rec.Errors, CaseUnknownAnalysisCode), "expected %s, got %+v", CaseUnknownAnalysisCode, rec.Errors)
 }
@@ -147,7 +147,7 @@ func Test_validateUpdateCaseRecord_UnknownOrderingOrganization(t *testing.T) {
 	update := validCaseUpdate()
 	update.OrderingOrganizationCode = "ORG-UNKNOWN"
 
-	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{})
+	rec, err := validateUpdateCaseRecord(t.Context(), ctx, cache, update, 0, map[FetusKey]struct{}{}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.True(t, hasErrorCode(rec.Errors, CaseUnknownOrderingOrganization), "expected %s, got %+v", CaseUnknownOrderingOrganization, rec.Errors)
 }

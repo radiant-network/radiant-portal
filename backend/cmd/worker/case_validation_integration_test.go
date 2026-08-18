@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -216,6 +217,62 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 		// would reject an empty string.
 		assert.Nil(t, ancestry.OnsetCode)
 		assert.Nil(t, ancestry.InterpretationCode)
+	})
+}
+
+// Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient reproduces
+// CLIN-6157: a proband resolved by (organization_code, submitter_patient_id) alone would silently
+// match a patient belonging to a different tenant sharing the same natural key. Patient MRN-283773
+// / CHUSJ only exists under "radiant" (test/data/clinical/02_patient.sql); a create_case batch for
+// tenant_b referencing the same key as its proband must report the patient as not found, not
+// resolve it across tenants.
+func Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// project.id is a plain IDENTITY column and fixtures insert explicit low ids (1, 2)
+		// without advancing the sequence, so an unqualified INSERT can collide with them —
+		// use an explicit high id, matching the id >= 1000 convention used elsewhere.
+		const projectID = 9000
+		if err := env.Postgres.Exec(`
+			INSERT INTO project (id, code, name, description, tenant_code)
+			VALUES (?, 'TENANT-ISO-PROJ', 'Tenant Isolation Test Project', '', 'tenant_b')
+			ON CONFLICT (id) DO NOTHING;
+		`, projectID).Error; err != nil {
+			t.Fatal("failed to insert tenant_b project:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM project WHERE id = ?`, projectID)
+
+		payload := []types.CaseBatch{{
+			Type:                     "germline",
+			StatusCode:               "in_progress",
+			ProjectCode:              "TENANT-ISO-PROJ",
+			CategoryCode:             "postnatal",
+			AnalysisCode:             "WGA",
+			SubmitterCaseId:          "TENANT-ISO-CASE",
+			DiagnosticLabCode:        "TENANT_B_ORG",
+			OrderingOrganizationCode: "TENANT_B_ORG",
+			Patients: []*types.CasePatientBatch{
+				{
+					SubmitterPatientId:      "MRN-283773",
+					PatientOrganizationCode: "CHUSJ",
+					AffectedStatusCode:      "affected",
+					RelationToProbandCode:   "proband",
+				},
+			},
+		}}
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatchForTenant(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04", "tenant_b")
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, PatientNotFound, resultBatch.Report.Errors[0].Code)
+		}
+
+		var count int64
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", projectID, "TENANT-ISO-CASE").Count(&count)
+		assert.Equal(t, int64(0), count, "the case must not be created when its proband cannot be resolved for this tenant")
 	})
 }
 

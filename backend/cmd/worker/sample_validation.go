@@ -177,7 +177,7 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		return nil
 	}
 
-	records, unexpectedErr := validateSamplesBatch(ctx, bv, cache, samplesbatch)
+	records, unexpectedErr := validateSamplesBatch(ctx, bv, cache, samplesbatch, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
@@ -358,7 +358,7 @@ func (r *SampleValidationRecord) validateHistologyCode(ctx context.Context) erro
 	return nil
 }
 
-func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch, tenantCode string) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
 	seenSamples := make(map[SampleKey]struct{})
@@ -403,7 +403,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		)
 
 		// 3. Validate patient
-		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
@@ -475,7 +475,7 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		return nil
 	}
 
-	records, unexpectedErr := validateUpdateSamplesBatch(ctx, bv, cache, samplesBatch)
+	records, unexpectedErr := validateUpdateSamplesBatch(ctx, bv, cache, samplesBatch, batch.TenantCode)
 	if unexpectedErr != nil {
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
@@ -546,7 +546,7 @@ func updateSampleRecords(ctx context.Context, records []*SampleValidationRecord,
 // validateUpdateSamplesBatch mirrors validateSamplesBatch, but a referenced parent sample must
 // already exist in the database — an update batch never creates rows, so there is no in-batch
 // parent to reorder against.
-func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch, tenantCode string) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	seenSamples := make(map[SampleKey]struct{})
 
@@ -587,7 +587,7 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 			[]string{sample.SampleOrganizationCode, sample.SubmitterSampleId.String()},
 		)
 
-		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}

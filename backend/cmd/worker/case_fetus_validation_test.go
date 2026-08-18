@@ -294,7 +294,7 @@ func Test_validateCaseFetuses_OrgConflictWithAnotherMother(t *testing.T) {
 		{OrganizationCode: "ORG1", SubmitterPatientId: "MRN-001"}: {ID: 1, OrganizationCode: "ORG1"},
 	}
 	cr.Context = &batchval.BatchValidationContext{FetusRepo: &FetusMockRepo{
-		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId string) (*types.Fetus, error) {
+		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
 			return &types.Fetus{ID: 55, MotherID: 999, SubmitterFetusId: submitterFetusId, OrganizationCode: organizationCode}, nil
 		},
 	}}
@@ -314,10 +314,30 @@ func Test_validateFetusOrgUniqueness_NoConflict(t *testing.T) {
 	assert.Empty(t, cr.Errors)
 }
 
+// Test_validateFetusOrgUniqueness_ScopesLookupToRecordTenant reproduces CLIN-6157 for fetus: the
+// pre-check must scope its lookup to the batch's own tenant, so a same-key fetus resolved by the
+// repo for another tenant (simulated here as "not found", per the widened
+// fetus_org_submitter_id_key) is not reported as FETUS-004.
+func Test_validateFetusOrgUniqueness_ScopesLookupToRecordTenant(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
+	cr.TenantCode = "tenant_b"
+	var gotTenantCode string
+	cr.Context = &batchval.BatchValidationContext{FetusRepo: &FetusMockRepo{
+		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
+			gotTenantCode = tenantCode
+			return nil, nil
+		},
+	}}
+	err := cr.validateFetusOrgUniqueness(t.Context(), 0, "ORG1", nil)
+	assert.NoError(t, err)
+	assert.Empty(t, cr.Errors)
+	assert.Equal(t, "tenant_b", gotTenantCode)
+}
+
 func Test_validateFetusOrgUniqueness_ConflictWithAnotherMother(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
 	cr.Context = &batchval.BatchValidationContext{FetusRepo: &FetusMockRepo{
-		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId string) (*types.Fetus, error) {
+		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
 			return &types.Fetus{ID: 99, MotherID: 42, SubmitterFetusId: submitterFetusId, OrganizationCode: organizationCode}, nil
 		},
 	}}
@@ -333,7 +353,7 @@ func Test_validateFetusOrgUniqueness_ConflictWithAnotherMother(t *testing.T) {
 func Test_validateFetusOrgUniqueness_ExemptWhenAlreadyOnThisCase(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
 	cr.Context = &batchval.BatchValidationContext{FetusRepo: &FetusMockRepo{
-		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId string) (*types.Fetus, error) {
+		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
 			t.Fatal("must not look up a key already exempted by existingOnCase")
 			return nil, nil
 		},
@@ -347,7 +367,7 @@ func Test_validateFetusOrgUniqueness_ExemptWhenAlreadyOnThisCase(t *testing.T) {
 func Test_validateFetusOrgUniqueness_PropagatesLookupError(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{SubmitterFetusId: "F-1"}})
 	cr.Context = &batchval.BatchValidationContext{FetusRepo: &FetusMockRepo{
-		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId string) (*types.Fetus, error) {
+		GetFetusByOrganizationAndSubmitterIdFunc: func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}}

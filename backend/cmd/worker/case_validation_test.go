@@ -139,8 +139,8 @@ func (m *CaseValidationMockRepo) GetOrganizationByCode(_ context.Context, organi
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*postgres.Patient, error) {
-	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
+func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*postgres.Patient, error) {
+	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" && tenantCode == types.DefaultTenantCode {
 		return &postgres.Patient{
 			ID:                 100,
 			SubmitterPatientId: submitterPatientId,
@@ -327,7 +327,7 @@ func (m *SamplesMockRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]
 
 type FetusMockRepo struct {
 	GetFetusesByCaseIDFunc                   func(caseID int) ([]*types.Fetus, error)
-	GetFetusByOrganizationAndSubmitterIdFunc func(organizationCode, submitterFetusId string) (*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterIdFunc func(organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error)
 }
 
 func (m *FetusMockRepo) GetFetusById(_ context.Context, _ int) (*types.Fetus, error) {
@@ -345,9 +345,9 @@ func (m *FetusMockRepo) GetFetusByMotherAndSubmitterId(_ context.Context, _ int,
 	return nil, nil
 }
 
-func (m *FetusMockRepo) GetFetusByOrganizationAndSubmitterId(_ context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error) {
+func (m *FetusMockRepo) GetFetusByOrganizationAndSubmitterId(_ context.Context, organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error) {
 	if m.GetFetusByOrganizationAndSubmitterIdFunc != nil {
-		return m.GetFetusByOrganizationAndSubmitterIdFunc(organizationCode, submitterFetusId)
+		return m.GetFetusByOrganizationAndSubmitterIdFunc(organizationCode, submitterFetusId, tenantCode)
 	}
 	return nil, nil
 }
@@ -361,12 +361,12 @@ func (m *SamplesMockRepo) GetTypeCodes() ([]string, error) {
 }
 
 type PatientsMockRepo struct {
-	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
+	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error)
 }
 
-func (m *PatientsMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error) {
+func (m *PatientsMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
 	if m.GetPatientByOrgCodeAndSubmitterPatientIdFunc != nil {
-		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId)
+		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId, tenantCode)
 	}
 	return nil, nil
 }
@@ -398,6 +398,7 @@ func Test_GetResourceType_OK(t *testing.T) {
 
 func Test_getProbandFromPatients_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: "tenant-a",
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{
 				{RelationToProbandCode: "mother", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
@@ -407,7 +408,7 @@ func Test_getProbandFromPatients_OK(t *testing.T) {
 		},
 		Patients: make(map[batchval.PatientKey]*types.Patient),
 	}
-	key := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"}
+	key := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3", TenantCode: "tenant-a"}
 	record.Patients[key] = &types.Patient{ID: 1}
 	proband, err := record.getProbandFromPatients()
 	assert.NoError(t, err)
@@ -440,7 +441,7 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\"} for create_case 0")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for create_case 0")
 	assert.Nil(t, proband)
 }
 
@@ -1070,7 +1071,8 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
-		Patients: make(map[batchval.PatientKey]*types.Patient),
+		TenantCode: types.DefaultTenantCode,
+		Patients:   make(map[batchval.PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{
 				{PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
@@ -1084,7 +1086,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 
 	assert.Len(t, record.Patients, 1)
 
-	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}
+	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }
@@ -1220,7 +1222,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 		},
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0, types.DefaultTenantCode)
 	err := record.fetchValidationInfos(t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
@@ -1231,7 +1233,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
 	assert.Len(t, record.Patients, 1)
-	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}
+	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }
@@ -1244,7 +1246,7 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(&mockContext)
 	caseBatch := types.CaseBatch{}
 	caseBatch.ProjectCode = "PROJ-ERROR"
-	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0, types.DefaultTenantCode)
 	err := record.fetchValidationInfos(t.Context())
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
@@ -1311,7 +1313,7 @@ func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
 		SeqExpRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-1"},
@@ -1329,7 +1331,7 @@ func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
 		SeqExpRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-999"},
@@ -1345,7 +1347,7 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 		SeqExpRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-ERROR"},
@@ -1362,7 +1364,7 @@ func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
 		TaskRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1381,7 +1383,7 @@ func Test_fetchInputDocumentsFromTask_NotFound(t *testing.T) {
 		DocRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1399,7 +1401,7 @@ func Test_fetchInputDocumentsFromTask_Error(t *testing.T) {
 		DocRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1418,7 +1420,7 @@ func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
 		TaskRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -1442,7 +1444,7 @@ func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
 		TaskRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -1462,7 +1464,7 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 		TaskRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0, types.DefaultTenantCode)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -2104,8 +2106,8 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 func Test_validateCaseBatch_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockPatients := PatientsMockRepo{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
-			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == types.DefaultTenantCode {
 				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
 			}
 			return nil, nil
@@ -2163,7 +2165,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -2173,8 +2175,8 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockPatients := PatientsMockRepo{
-		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string) (*types.Patient, error) {
-			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" {
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == types.DefaultTenantCode {
 				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
 			}
 			return nil, nil
@@ -2231,7 +2233,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 
-	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{batch, batch})
+	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{batch, batch}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)

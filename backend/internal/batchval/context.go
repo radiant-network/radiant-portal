@@ -44,7 +44,7 @@ type fetusReader interface {
 	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
 	GetFetusesByCaseID(ctx context.Context, caseID int) ([]*types.Fetus, error)
 	GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error)
-	GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId string) (*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error)
 }
 
 type organizationReader interface {
@@ -52,7 +52,7 @@ type organizationReader interface {
 }
 
 type patientReader interface {
-	GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error)
+	GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error)
 }
 
 type projectReader interface {
