@@ -25,7 +25,7 @@ import { organizationsApi } from '@/utils/api';
 import { MAX_CODE_LENGTH, toCodeCharset, toOrganizationCode } from './organizations-utils';
 import { useOrganizationCategories } from './use-organization-categories';
 
-const ORGANIZATION_CODE_PATTERN = /^[a-z][a-z0-9_]*$/;
+const ORGANIZATION_CODE_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]*$/;
 
 const createFormSchema = z.object({
   name: z.string().min(1, 'required'),
@@ -138,10 +138,7 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
               />
               {isEdit ? (
                 <>
-                  <ReadOnlyField
-                    label={t('admin.organizations.fields.code')}
-                    value={organization.code?.toUpperCase()}
-                  />
+                  <ReadOnlyField label={t('admin.organizations.fields.code')} value={organization.code} />
                   <ReadOnlyField label={t('admin.organizations.fields.category')} value={organization.category_name} />
                 </>
               ) : (
@@ -154,10 +151,8 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
                       <FormItem>
                         <FormLabel>{t('admin.organizations.fields.code')}</FormLabel>
                         <FormControl>
-                          {/* Stored lowercase, displayed uppercase. */}
                           <Input
                             {...field}
-                            className="uppercase"
                             maxLength={MAX_CODE_LENGTH}
                             onChange={event => {
                               setIsCodeEdited(true);

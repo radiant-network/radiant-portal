@@ -165,7 +165,7 @@
         "required": "This field is required",
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
-        "invalid_code": "Must start with a letter and contain only lowercase letters, numbers and underscores",
+        "invalid_code": "Must start with a letter and contain only letters, numbers and underscores",
         "organization_code_exists": "An organization with this code already exists."
       }
     },
