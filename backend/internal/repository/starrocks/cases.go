@@ -153,7 +153,8 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		return nil, err
 	}
 
-	orderingOrg, err := utils.GetFilter(db, types.OrderingOrganizationTable, "name", nil)
+	isOrderingOrg := fmt.Sprintf("%s.category_code IN ('healthcare_provider', 'research_institute')", types.OrderingOrganizationTable.Alias)
+	orderingOrg, err := utils.GetFilter(db, types.OrderingOrganizationTable, "name", &isOrderingOrg)
 	if err != nil {
 		return nil, err
 	}
