@@ -14,7 +14,10 @@ import { Button } from '@/components/base/shadcn/button';
 
 const columnHelper = createColumnHelper<OrganizationResponse>();
 
-export function getOrganizationsColumns(t: TFunction<string, undefined>) {
+export function getOrganizationsColumns(
+  t: TFunction<string, undefined>,
+  onEdit: (organization: OrganizationResponse) => void,
+) {
   return [
     columnHelper.accessor(row => row.code, {
       id: 'name',
@@ -26,7 +29,7 @@ export function getOrganizationsColumns(t: TFunction<string, undefined>) {
             size="sm"
             external={false}
             className="w-fit font-semibold uppercase"
-            onClick={() => {}}
+            onClick={() => onEdit(info.row.original)}
           >
             {info.getValue()}
           </AnchorLink>
@@ -46,14 +49,14 @@ export function getOrganizationsColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.display({
       id: 'actions',
-      cell: () => (
+      cell: info => (
         <div className="flex justify-center">
           <Button
             iconOnly
             size="xs"
             variant="ghost"
             aria-label={t('admin.organizations.table.edit')}
-            onClick={() => {}}
+            onClick={() => onEdit(info.row.original)}
           >
             <Pencil />
           </Button>

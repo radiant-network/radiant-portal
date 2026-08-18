@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -11,7 +11,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { organizationsApi } from '@/utils/api';
 
-import CreateOrganizationSheet from './create-organization-sheet';
+import OrganizationFormSheet from './organization-form-sheet';
 import OrganizationsFilters from './organizations-filters';
 import { getOrganizationsColumns, organizationsDefaultSettings } from './organizations-table-settings';
 import { normalize } from './organizations-utils';
@@ -27,6 +27,8 @@ export default function OrganizationsSection() {
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editedOrganization, setEditedOrganization] = useState<OrganizationResponse>();
 
   const {
     data: organizations,
@@ -37,7 +39,12 @@ export default function OrganizationsSection() {
     shouldRetryOnError: false,
   });
 
-  const columns = useMemo(() => getOrganizationsColumns(t), [t]);
+  const handleEdit = useCallback((organization: OrganizationResponse) => {
+    setEditedOrganization(organization);
+    setIsEditOpen(true);
+  }, []);
+
+  const columns = useMemo(() => getOrganizationsColumns(t, handleEdit), [t, handleEdit]);
 
   // Search and category filtering are client-side
   const filteredOrganizations = useMemo(() => {
@@ -91,7 +98,15 @@ export default function OrganizationsSection() {
           tableIndexResultPosition="hidden"
         />
         {isCreateOpen && (
-          <CreateOrganizationSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} onCreated={() => mutate()} />
+          <OrganizationFormSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} onSaved={() => mutate()} />
+        )}
+        {isEditOpen && (
+          <OrganizationFormSheet
+            open={isEditOpen}
+            onOpenChange={setIsEditOpen}
+            organization={editedOrganization}
+            onSaved={() => mutate()}
+          />
         )}
       </CardContent>
     </Card>

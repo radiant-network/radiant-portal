@@ -28,14 +28,6 @@
       "count_other": "{{count}} organisations",
       "create": {
         "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
-        "fields": {
-          "category": "Catégorie",
-          "category_hint": "Ne peut pas être modifiée après la création.",
-          "category_placeholder": "Sélectionner une catégorie",
-          "code": "Code",
-          "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres et traits de soulignement.",
-          "name": "Nom"
-        },
         "notifications": {
           "errors": {
             "default": "Impossible de créer l'organisation."
@@ -44,6 +36,25 @@
         },
         "submit": "Créer l'organisation",
         "title": "Ajouter une organisation"
+      },
+      "edit": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour l'organisation."
+          },
+          "success": "Organisation mise à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier l'organisation"
+      },
+      "fields": {
+        "category": "Catégorie",
+        "category_hint": "Ne peut pas être modifiée après la création.",
+        "category_placeholder": "Sélectionner une catégorie",
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres et traits de soulignement.",
+        "name": "Nom"
       },
       "filters": {
         "category": "Catégorie",

@@ -28,14 +28,6 @@
       "count_other": "{{count}} organizations",
       "create": {
         "description": "Members can be granted roles scoped to specific organizations.",
-        "fields": {
-          "category": "Category",
-          "category_hint": "Can't be changed after creation.",
-          "category_placeholder": "Select a category",
-          "code": "Code",
-          "code_hint": "Can't be changed after creation. Letters, numbers, and underscores.",
-          "name": "Name"
-        },
         "notifications": {
           "errors": {
             "default": "Unable to create organization."
@@ -44,6 +36,25 @@
         },
         "submit": "Create organization",
         "title": "Add organization"
+      },
+      "edit": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to update organization."
+          },
+          "success": "Organization updated."
+        },
+        "submit": "Save",
+        "title": "Edit organization"
+      },
+      "fields": {
+        "category": "Category",
+        "category_hint": "Can't be changed after creation.",
+        "category_placeholder": "Select a category",
+        "code": "Code",
+        "code_hint": "Can't be changed after creation. Letters, numbers, and underscores.",
+        "name": "Name"
       },
       "filters": {
         "category": "Category",
