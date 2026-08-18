@@ -28,7 +28,7 @@ export function getOrganizationsColumns(
             variant="secondary"
             size="sm"
             external={false}
-            className="w-fit font-semibold uppercase"
+            className="w-fit font-semibold uppercase hover:no-underline"
             onClick={() => onEdit(info.row.original)}
           >
             {info.getValue()}
