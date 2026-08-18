@@ -33,11 +33,6 @@ const createFormSchema = z.object({
   category_code: z.string().min(1, 'required'),
 });
 
-/**
- * Editing only validates the name — code and category are read-only and keep whatever the
- * server returned, which predates the stricter creation rules (`CHOP`, `LDM-CHUSJ`). Same
- * shape as the creation schema so both resolvers stay interchangeable.
- */
 const editFormSchema = createFormSchema.extend({
   code: z.string(),
   category_code: z.string(),
@@ -47,7 +42,6 @@ type FormValues = z.infer<typeof createFormSchema>;
 
 const EMPTY_FORM: FormValues = { name: '', code: '', category_code: '' };
 
-/** Code and category are immutable after creation, so editing only displays them. */
 function ReadOnlyField({ label, value }: { label: string; value?: string }) {
   return (
     <div className="space-y-2.5">
@@ -60,7 +54,6 @@ function ReadOnlyField({ label, value }: { label: string; value?: string }) {
 type OrganizationFormSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The organization to edit; absent means creation. */
   organization?: OrganizationResponse;
   onSaved: () => void;
 };
@@ -74,7 +67,6 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
   const i18nPrefix = isEdit ? 'admin.organizations.edit' : 'admin.organizations.create';
   const formSchema = isEdit ? editFormSchema : createFormSchema;
 
-  // The code follows the name until the user edits it themselves.
   const [isCodeEdited, setIsCodeEdited] = useState(false);
 
   const form = useForm<FormValues>({
@@ -83,21 +75,16 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
   });
 
   const name = form.watch('name');
-  // Read during render so the formState proxy registers the subscription.
   const { isSubmitted } = form.formState;
 
   useEffect(() => {
     if (!open) return;
-    // On edit the immutable fields are prefilled rather than dropped from the schema, so the
-    // form keeps a single shape. Only the name is ever sent.
     form.reset(organization ? { ...EMPTY_FORM, name: organization.name ?? '' } : EMPTY_FORM);
     setIsCodeEdited(false);
   }, [open, organization, form]);
 
   useEffect(() => {
     if (isEdit || isCodeEdited) return;
-    // setValue skips validation by default, which would leave a stale error on a field the
-    // user never touches. Only revalidate once submitted, matching RHF's own behaviour.
     form.setValue('code', toOrganizationCode(name), { shouldValidate: isSubmitted });
   }, [name, isEdit, isCodeEdited, isSubmitted, form]);
 
@@ -118,7 +105,6 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
       onSaved();
       onOpenChange(false);
     } catch (error: any) {
-      // The sheet stays open on failure so the user can fix the values and resubmit.
       if (!isEdit && error?.response?.status === 409) {
         form.setError('code', { message: 'organization_code_exists' });
         return;

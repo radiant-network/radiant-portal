@@ -13,7 +13,6 @@ async function fetchCategories() {
 export function useOrganizationCategories() {
   return useSWR<ValueSetItem[]>(`value-set-${CATEGORY_VALUE_SET}`, fetchCategories, {
     revalidateOnFocus: false,
-    // A value set barely ever changes: once cached, mounting another consumer must not refetch.
     revalidateIfStale: false,
     shouldRetryOnError: false,
   });
