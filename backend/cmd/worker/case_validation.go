@@ -38,6 +38,10 @@ const TextRegExp = `^[A-Za-z0-9\-\_\.\,\: ]+$`
 
 var TextRegExpCompiled = regexp.MustCompile(TextRegExp)
 
+const FreeTextRegExp = `^[A-Za-z0-9\-\_\.\,\:\;\(\)\+\/\%\?'’–— À-ÿŒœ]+$`
+
+var FreeTextRegExpCompiled = regexp.MustCompile(FreeTextRegExp)
+
 const (
 	CaseAlreadyExists               = "CASE-001"
 	CaseInvalidField                = "CASE-002"
@@ -663,7 +667,7 @@ func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int)
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "condition"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.ValidateStringField(fh.Condition, fieldName, path, PatientInvalidField, cr.GetResourceType(), TextMaxLength, TextRegExpCompiled, []string{}, true)
+	cr.ValidateStringField(fh.Condition, fieldName, path, PatientInvalidField, cr.GetResourceType(), TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
 
 }
 
@@ -714,9 +718,9 @@ func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.Ob
 	if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
 		cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
 	} else {
-		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
 	}
-	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
+	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, FreeTextRegExpCompiled, []string{}, false)
 }
 
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
@@ -736,7 +740,7 @@ func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex 
 	fieldName := "value"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
 	res := fmt.Sprintf("create_case %d - patient %d - observations_text %d - value: %q", cr.Index, patientIndex, obsIndex, obs.Value)
-	cr.ValidateStringField(obs.Value, fieldName, path, ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+	cr.ValidateStringField(obs.Value, fieldName, path, ObservationInvalidField, res, TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
 }
 
 func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {

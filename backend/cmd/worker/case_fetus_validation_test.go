@@ -195,30 +195,11 @@ func Test_validateFetusDates_ValidWhenLastMenstrualPeriodIsToday(t *testing.T) {
 	assert.Empty(t, cr.Errors)
 }
 
-func Test_validateFetusDates_InvalidWhenEstimatedDueDateInPast(t *testing.T) {
-	past := types.DateISO8601(todayUTC().AddDate(0, 0, -1))
-	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", EstimatedDueDate: &past}})
-	cr.validateFetusDates(0)
-	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].estimated_due_date", cr.Errors[0].Path)
-}
-
 func Test_validateFetusDates_ValidWhenEstimatedDueDateIsToday(t *testing.T) {
 	today := types.DateISO8601(todayUTC())
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", EstimatedDueDate: &today}})
 	cr.validateFetusDates(0)
 	assert.Empty(t, cr.Errors)
-}
-
-func Test_validateFetusDates_InvalidWhenBothDatesOutOfRange(t *testing.T) {
-	future := types.DateISO8601(todayUTC().AddDate(0, 0, 1))
-	past := types.DateISO8601(todayUTC().AddDate(0, 0, -1))
-	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "alive", LastMenstrualPeriod: &future, EstimatedDueDate: &past}})
-	cr.validateFetusDates(0)
-	assert.Len(t, cr.Errors, 2)
-	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
-	assert.Equal(t, "create_case[0].fetuses[0].estimated_due_date", cr.Errors[1].Path)
 }
 
 // A deceased fetus is exempt from "at least one date" but not from range checks: a recorded date
@@ -401,6 +382,16 @@ func Test_validateFetusObservationsCategorical_InvalidCode(t *testing.T) {
 func Test_validateFetusObservationsText_Valid(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{
 		ObservationsText: []*types.ObservationTextBatch{{Code: "note", Value: "Free text note"}},
+	}})
+	cr.validateFetusObservationsText(0)
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateFetusObservationsText_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
+	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{
+		ObservationsText: []*types.ObservationTextBatch{
+			{Code: "note", Value: "Échographie fœtale : clarté nucale élevée (OBS-001) ; suivi requis, l’œdème persiste"},
+		},
 	}})
 	cr.validateFetusObservationsText(0)
 	assert.Empty(t, cr.Errors)
