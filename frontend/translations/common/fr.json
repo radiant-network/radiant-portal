@@ -165,7 +165,7 @@
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
-        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres minuscules, des chiffres et des tirets bas",
+        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres et des traits de soulignement.",
         "organization_code_exists": "Une organisation avec ce code existe déjà."
       }
     },
