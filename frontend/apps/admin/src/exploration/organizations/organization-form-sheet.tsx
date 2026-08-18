@@ -129,7 +129,7 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex flex-col gap-0 p-0 sm:max-w-[480px]">
+      <SheetContent side="right" className="flex flex-col gap-0 p-0 max-sm:w-full sm:max-w-[480px]">
         <SheetHeader className="border-b p-6">
           <SheetTitle>{t(`${i18nPrefix}.title`)}</SheetTitle>
           <SheetDescription>{t(`${i18nPrefix}.description`)}</SheetDescription>
@@ -213,7 +213,7 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
                 </>
               )}
             </div>
-            <SheetFooter className="border-t p-6">
+            <SheetFooter className="border-t p-6 flex-row justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 {t('common.cancel')}
               </Button>
