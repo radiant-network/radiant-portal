@@ -111,7 +111,7 @@ func Test_GetFetusByOrganizationAndSubmitterId_TenantIsolation(t *testing.T) {
 			OrganizationCode: orgCode,
 			SexCode:          "male",
 			LifeStatusCode:   "alive",
-			TenantCode:       "radiant",
+			TenantCode:       types.DefaultTenantCode,
 		}
 		require.NoError(t, repo.CreateFetus(t.Context(), fetusA))
 

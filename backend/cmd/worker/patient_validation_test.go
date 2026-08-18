@@ -556,7 +556,7 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 			Payload:    "[]",
 			Status:     types.BatchStatusSuccess,
 			DryRun:     false,
-			TenantCode: "radiant",
+			TenantCode: types.DefaultTenantCode,
 		}
 		records := []*PatientValidationRecord{{
 			Patient: types.PatientBatch{
@@ -574,7 +574,7 @@ func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
 		require.NoError(t, err)
 
 		repo := postgres.NewPatientsRepository(database.PostgresDB{DB: db})
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, patient)
 		assert.Equal(t, "female", patient.SexCode)

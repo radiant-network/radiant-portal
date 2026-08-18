@@ -2107,7 +2107,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockPatients := PatientsMockRepo{
 		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
-			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == "radiant" {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == types.DefaultTenantCode {
 				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
 			}
 			return nil, nil
@@ -2165,7 +2165,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 				},
 			},
 		},
-	}, "radiant")
+	}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -2176,7 +2176,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockPatients := PatientsMockRepo{
 		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error) {
-			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == "radiant" {
+			if organizationCode == "CHUSJ" && submitterPatientId == "PAT-1" && tenantCode == types.DefaultTenantCode {
 				return &types.Patient{ID: 1, SubmitterPatientId: "PAT-1"}, nil
 			}
 			return nil, nil
@@ -2233,7 +2233,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 
-	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{batch, batch}, "radiant")
+	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{batch, batch}, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)

@@ -14,7 +14,7 @@ import (
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-283773", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-283773", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.NotNil(t, patient)
 		assert.Equal(t, 1, patient.ID)
@@ -25,7 +25,7 @@ func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UNKNOWN", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UNKNOWN", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
 	})
@@ -34,7 +34,7 @@ func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 func Test_GetPatientBySubmitterPatientId_Null_OrgId(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewPatientsRepository(database.PostgresDB{DB: env.Postgres})
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "UNKNOWN-ORG", "MRN-283773", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "UNKNOWN-ORG", "MRN-283773", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
 	})
@@ -69,7 +69,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 		updated := &types.Patient{
 			SubmitterPatientId:     "MRN-UPDATE-1",
 			OrganizationCode:       "CHUSJ",
-			TenantCode:             "radiant",
+			TenantCode:             types.DefaultTenantCode,
 			SubmitterPatientIdType: "ramq",
 			SexCode:                "female",
 			LifeStatusCode:         "deceased",
@@ -81,7 +81,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 		err = repo.UpdatePatient(t.Context(), updated)
 		require.NoError(t, err)
 
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UPDATE-1", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-UPDATE-1", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, patient)
 		assert.Equal(t, "ramq", patient.SubmitterPatientIdType)
@@ -123,7 +123,7 @@ func Test_UpdatePatient_DoesNotUpdateAnotherTenantsPatient(t *testing.T) {
 		err := repo.UpdatePatient(t.Context(), &types.Patient{
 			SubmitterPatientId: "MRN-UPDATE-2",
 			OrganizationCode:   orgCode,
-			TenantCode:         "radiant",
+			TenantCode:         types.DefaultTenantCode,
 			SexCode:            "female",
 			LifeStatusCode:     "deceased",
 		})
@@ -145,11 +145,11 @@ func Test_UpdatePatient_NotFound(t *testing.T) {
 		err := repo.UpdatePatient(t.Context(), &types.Patient{
 			SubmitterPatientId: "MRN-DOES-NOT-EXIST",
 			OrganizationCode:   "CHUSJ",
-			TenantCode:         "radiant",
+			TenantCode:         types.DefaultTenantCode,
 		})
 		assert.NoError(t, err)
 
-		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-DOES-NOT-EXIST", "radiant")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-DOES-NOT-EXIST", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
 	})

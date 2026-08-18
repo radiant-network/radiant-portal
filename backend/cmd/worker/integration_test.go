@@ -1673,14 +1673,14 @@ func Test_ProcessBatch_Patient_TenantIsolation_CreatesSeparatePatientPerTenant(t
 			}
 		]`, submitterPatientId, orgCode, sharedJhn)
 
-		idA := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", "radiant")
+		idA := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", types.DefaultTenantCode)
 		batchA := postgres.Batch{}
 		env.Postgres.Table("batch").Where("id = ?", idA).Scan(&batchA)
 		assert.Equal(t, types.BatchStatusSuccess, batchA.Status)
 		assert.Len(t, batchA.Report.Errors, 0)
 
 		var patientA postgres.Patient
-		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, "radiant").First(&patientA).Error; err != nil {
+		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, types.DefaultTenantCode).First(&patientA).Error; err != nil {
 			t.Fatal("failed to find patient created for tenant radiant:", err)
 		}
 
