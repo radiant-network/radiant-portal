@@ -2167,20 +2167,23 @@ INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organi
 VALUES (62, 'MRN-283835', 'mrn', 'CHUSJ', 'radiant', 'female', '1992-04-10', 'alive', 'Camille', 'Dubé', 'DUB9204106543'),
        (63, 'MRN-283836', 'mrn', 'CHUSJ', 'radiant', 'female', '1988-11-02', 'alive', 'Rosalie', 'Girard', 'GIR8811026621'),
        (64, 'MRN-283837', 'mrn', 'CHUSJ', 'radiant', 'female', '1990-06-15', 'alive', 'Léa', 'Bernier', 'BER9006157788'),
-       (65, 'MRN-283838', 'mrn', 'CHUSJ', 'radiant', 'male', '1987-03-22', 'alive', 'Olivier', 'Bernier', 'BER8703226644')
+       (65, 'MRN-283838', 'mrn', 'CHUSJ', 'radiant', 'male', '1987-03-22', 'alive', 'Olivier', 'Bernier', 'BER8703226644'),
+       (66, 'MRN-283839', 'mrn', 'CHUSJ', 'radiant', 'female', '1994-09-08', 'alive', 'Maude', 'Tremblay', 'TRE9409086655')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO fetus (id, submitter_fetus_id, mother_id, organization_code, life_status_code, sex_code, last_menstrual_period, estimated_due_date, tenant_code)
 VALUES (1, 'F-71-1', 62, 'CHUSJ', 'alive',    'male',    '2026-02-01', NULL,         'radiant'),
        (2, 'F-72-1', 63, 'CHUSJ', 'alive',    'female',  NULL,         '2026-10-15', 'radiant'),
        (3, 'F-72-2', 63, 'CHUSJ', 'deceased', 'unknown', NULL,         NULL,         'radiant'),
-       (4, 'F-73-1', 64, 'CHUSJ', 'alive',    'male',    '2026-03-01', NULL,         'radiant')
+       (4, 'F-73-1', 64, 'CHUSJ', 'alive',    'male',    '2026-03-01', NULL,         'radiant'),
+       (5, 'F-74-1', 66, 'CHUSJ', 'alive',    'female',  NULL,         '2026-12-05', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
 VALUES (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — solo pregnancy', '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:71'),
        (72, 63, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — twin pregnancy', '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:72'),
-       (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — trio (mother + father + fetus)', '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:73')
+       (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — trio (mother + father + fetus)', '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:73'),
+       (74, 66, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — fetus alone, no parent sequenced', '2026-04-04T13:08:00-04:00', '2026-04-04T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:74')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "family" (id, case_id, family_member_id, fetus_id, relationship_to_proband_code, affected_status_code, tenant_code)
@@ -2191,7 +2194,12 @@ VALUES (63, 71, 62,   NULL, 'proband',      'affected',     'radiant'),
        (67, 72, NULL, 3,    'fetus',        'unknown',      'radiant'),
        (68, 73, 64,   NULL, 'proband',      'affected',     'radiant'),
        (69, 73, 65,   NULL, 'father',       'non_affected', 'radiant'),
-       (70, 73, NULL, 4,    'fetus',        'unknown',      'radiant')
+       (70, 73, NULL, 4,    'fetus',        'unknown',      'radiant'),
+       -- Fetus alone (case 74): nothing about the mother is under investigation, she is only the
+       -- administrative anchor the fetus hangs off — proband, yet non_affected. The fetus is the
+       -- affected subject, which is also what hybrid sends (CaseFetusBatch is always affected).
+       (71, 74, 66,   NULL, 'proband',      'non_affected', 'radiant'),
+       (72, 74, NULL, 5,    'fetus',        'affected',     'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "sample" (id, type_code, parent_sample_id, tissue_site, histology_code, submitter_sample_id, patient_id, fetus_id, organization_code, tenant_code)
@@ -2203,7 +2211,9 @@ VALUES (125, 'dna', NULL, NULL, 'normal', 'S-PRENAT-71',   62, 1, 'CQGC', 'radia
        -- NULL, so a task covering both counts two distinct sequenced individuals.
        (129, 'dna', NULL, NULL, 'normal', 'S-PRENAT-72-MOTHER', 63, NULL, 'CQGC', 'radiant'),
        (130, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73-MOTHER', 64, NULL, 'CQGC', 'radiant'),
-       (131, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73-FATHER', 65, NULL, 'CQGC', 'radiant')
+       (131, 'dna', NULL, NULL, 'normal', 'S-PRENAT-73-FATHER', 65, NULL, 'CQGC', 'radiant'),
+       -- Case 74 sequences the fetus and nothing else — no maternal nor paternal genome.
+       (132, 'dna', NULL, NULL, 'normal', 'S-PRENAT-74',        66, 5,    'CQGC', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "sequencing_experiment" (id, sample_id, status_code, aliquot,
@@ -2223,7 +2233,9 @@ VALUES (73, 125, 'completed', 'PRENAT71',  'CQGC', 'radiant', 1801, 'A00516_0301
        (78, 130, 'completed', 'PRENAT73MOM', 'CQGC', 'radiant', 1806, 'A00516_0306', '2026-04-03', 'SureSelect Custom DNA Target',
         '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (79, 131, 'completed', 'PRENAT73DAD', 'CQGC', 'radiant', 1807, 'A00516_0307', '2026-04-03', 'SureSelect Custom DNA Target',
-        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+        '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (80, 132, 'completed', 'PRENAT74',  'CQGC', 'radiant', 1808, 'A00516_0308', '2026-04-04', 'SureSelect Custom DNA Target',
+        '2026-04-04T13:08:00-04:00', '2026-04-04T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "case_has_sequencing_experiment" (sequencing_experiment_id, case_id)
@@ -2233,7 +2245,8 @@ VALUES (73, 71),
        (77, 72),
        (76, 73),
        (78, 73),
-       (79, 73)
+       (79, 73),
+       (80, 74)
 ON CONFLICT (case_id, sequencing_experiment_id) DO NOTHING;
 
 -- One alignment task per sequencing (case_id NULL — it belongs to the sequencing), plus one
@@ -2251,7 +2264,9 @@ VALUES (77, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '
        (85, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-02 13:08:00', 'radiant'),
        (86, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-03 13:08:00', 'radiant'),
        -- Somatic CNV on the tumoral seq 62 of case 22, alongside somatic SNV task 74.
-       (87, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant')
+       (87, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant'),
+       (88, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-04 13:08:00', 'radiant'),
+       (89, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-04 13:08:00', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "task_context" (task_id, sequencing_experiment_id, case_id)
@@ -2273,13 +2288,17 @@ VALUES (77, 73, NULL),
        (86, 78, 73),
        (86, 79, 73),
 
-       (87, 62, 22)
+       (87, 62, 22),
+
+       (88, 80, NULL),
+       (89, 80, 74)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
 
 -- Phenotypes for the prenatal cases. Every member carries a distinct set: the mother's own signs
 -- are hers, the fetus's come from ultrasound, and the twins differ from each other — so the case
 -- page can be checked to attribute each set to the right member rather than pooling them.
--- A row belongs to the mother (patient_id) XOR to a fetus (fetus_id), never both.
+-- A row belongs to the mother (patient_id) XOR to a fetus (fetus_id), never both, and
+-- interpretation_code splits it: 'positive' is an observed sign, anything else a non-observed one.
 -- Codes are taken from the 15 terms init_starrocks.sql loads into hpo_term, so the UI resolves a
 -- label instead of showing a bare HP id.
 INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system,
@@ -2307,7 +2326,25 @@ VALUES
        (474, 73, 64,   NULL, 'phenotype', 'HPO', 'HP:0100622', 'young_adult', 'positive', NULL, 'radiant'),
        (475, 73, 65,   NULL, 'phenotype', 'HPO', 'HP:0010818', 'young_adult', 'positive', NULL, 'radiant'),
        (476, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0007068', 'antenatal',   'positive', NULL, 'radiant'),
-       (477, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0002011', 'antenatal',   'positive', NULL, 'radiant')
+       (477, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0002011', 'antenatal',   'positive', NULL, 'radiant'),
+
+       -- Case 74, fetus alone — everything hangs on the fetus (5); its mother (66) carries no
+       -- observation at all, which is what makes the proband column visible in its empty state.
+       (478, 74, NULL, 5,    'phenotype', 'HPO', 'HP:0001562', 'antenatal',   'positive', NULL, 'radiant'),
+       (479, 74, NULL, 5,    'phenotype', 'HPO', 'HP:0004325', 'antenatal',   'positive', NULL, 'radiant'),
+
+       -- Signs the exam ruled out. They exist on every kind of member — mother, father, fetus —
+       -- so the page has to label observed and non-observed apart per member instead of pooling
+       -- them. No onset: an absent sign never started. Twin fetus 3 and the mother of case 74 get
+       -- none on purpose, to keep the empty non-observed state visible somewhere.
+       (480, 71, 62,   NULL, 'phenotype', 'HPO', 'HP:0000479', NULL,          'negative', NULL, 'radiant'),  -- diabetic mother, retinopathy excluded
+       (481, 71, NULL, 1,    'phenotype', 'HPO', 'HP:0002011', NULL,          'negative', NULL, 'radiant'),  -- fetal CNS normal on ultrasound
+       (482, 72, 63,   NULL, 'phenotype', 'HPO', 'HP:0100622', NULL,          'negative', NULL, 'radiant'),
+       (483, 72, NULL, 2,    'phenotype', 'HPO', 'HP:0007068', NULL,          'negative', NULL, 'radiant'),  -- brain morphology abnormal, vermis intact
+       (484, 73, 64,   NULL, 'phenotype', 'HPO', 'HP:0009800', NULL,          'negative', NULL, 'radiant'),
+       (485, 73, 65,   NULL, 'phenotype', 'HPO', 'HP:0010819', NULL,          'negative', NULL, 'radiant'),  -- tonic seizures, atonic ones excluded
+       (486, 73, NULL, 4,    'phenotype', 'HPO', 'HP:0000003', NULL,          'negative', NULL, 'radiant'),
+       (487, 74, NULL, 5,    'phenotype', 'HPO', 'HP:0000003', NULL,          'negative', NULL, 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 -- Reset sequences to prevent duplicate key errors when inserting new records

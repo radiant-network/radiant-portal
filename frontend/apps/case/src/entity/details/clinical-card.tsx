@@ -17,6 +17,26 @@ import { PROBAND } from 'components/base/constants';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
 
+function PhenotypeSection({ title, phenotypes }: { title: string; phenotypes?: Term[] }) {
+  const { t } = useI18n();
+
+  return (
+    <>
+      <CardTitle size="xs" className="font-bold">
+        {title}
+      </CardTitle>
+
+      <ExpandableList
+        items={(phenotypes ?? []).map(item => (
+          <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
+        ))}
+        visibleCount={PHENOTYPES_VISIBLE_COUNT}
+        emptyMessage={<span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>}
+      />
+    </>
+  );
+}
+
 type ClinicalCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
 };
@@ -71,34 +91,14 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           <div className="flex flex-col gap-2">
             <CardTitle>{t('case_entity.details.phenotypes')}</CardTitle>
 
-            {/* Phenotypes Observed */}
-            <CardTitle size="xs" className="font-bold">
-              {t('case_entity.details.phenotypes_observed')}
-            </CardTitle>
-
-            <ExpandableList
-              items={(proband?.observed_phenotypes ?? []).map(item => (
-                <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
-              ))}
-              visibleCount={PHENOTYPES_VISIBLE_COUNT}
-              emptyMessage={
-                <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
-              }
+            <PhenotypeSection
+              title={t('case_entity.details.phenotypes_observed')}
+              phenotypes={proband?.observed_phenotypes}
             />
 
-            {/* Phenotypes Non-Observed */}
-            <CardTitle size="xs" className="font-bold">
-              {t('case_entity.details.phenotypes_non_observed')}
-            </CardTitle>
-
-            <ExpandableList
-              items={(proband?.non_observed_phenotypes ?? []).map(item => (
-                <PhenotypeConditionLink key={item.id} code={item.id} name={item.name} onsetCode={item.onset_code} />
-              ))}
-              visibleCount={PHENOTYPES_VISIBLE_COUNT}
-              emptyMessage={
-                <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
-              }
+            <PhenotypeSection
+              title={t('case_entity.details.phenotypes_non_observed')}
+              phenotypes={proband?.non_observed_phenotypes}
             />
           </div>
 
@@ -127,12 +127,18 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
                     </div>
                   )}
 
-                  {/* Phenotypes Observed */}
-                  {(member.observed_phenotypes ?? []).map(({ id, name }: Term) => (
-                    <div key={id}>
-                      <PhenotypeConditionLink code={id} name={name} />
-                    </div>
-                  ))}
+                  {/* Phenotypes */}
+                  <div className="flex flex-col gap-2">
+                    <PhenotypeSection
+                      title={t('case_entity.details.phenotypes_observed')}
+                      phenotypes={member.observed_phenotypes}
+                    />
+
+                    <PhenotypeSection
+                      title={t('case_entity.details.phenotypes_non_observed')}
+                      phenotypes={member.non_observed_phenotypes}
+                    />
+                  </div>
                 </Card>
               ))}
             </div>
