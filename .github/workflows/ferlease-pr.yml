@@ -141,7 +141,7 @@ jobs:
           SHARDS=(
             "cypress/e2e/CaseEntity/Details/**/*.cy.ts,cypress/e2e/CaseEntity/Files/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Germline/CNV/**/*.cy.ts,cypress/api/Batches/**/*.cy.ts,cypress/api/Cases/**/*.cy.ts"
             "cypress/e2e/Cases/**/*.cy.ts,cypress/e2e/CaseEntity/Variants/Somatic/**/*.cy.ts,cypress/api/Occurrences/**/*.cy.ts,cypress/api/Patients/**/*.cy.ts"
-            "cypress/e2e/VariantEntity/**/*.cy.ts,cypress/e2e/Connexion/**/*.cy.ts,cypress/e2e/Files/**/*.cy.ts"
+            "cypress/e2e/VariantEntity/**/*.cy.ts,cypress/e2e/Connexion/**/*.cy.ts,cypress/e2e/Files/**/*.cy.ts,cypress/api/Genes/**/*.cy.ts,cypress/api/Hpo/**/*.cy.ts,cypress/api/Mondo/**/*.cy.ts,cypress/api/Variants/**/*.cy.ts"
             "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
           )
 
