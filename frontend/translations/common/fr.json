@@ -1652,6 +1652,7 @@
     "header": {
       "ai_assistant": "Analyser avec l'IA",
       "ai_assistant_open_tab": "Ouvrir dans un onglet",
+      "ai_assistant_prompt": "Contexte : case {{caseId}} (tenant {{tenant}}). Charge le contexte de ce case et présente un bref résumé clinique (structure familiale, phénotypes HPO). Ensuite, attends les questions de l'utilisateur.",
       "case": "Cas",
       "cases": "Cas",
       "germline": "Germinal",

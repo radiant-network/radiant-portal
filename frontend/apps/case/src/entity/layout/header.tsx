@@ -30,10 +30,9 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
     document.cookie = `lang=${language === 'fr' ? 'fr-FR' : 'en-US'}; path=/; SameSite=Lax`;
   };
 
-  const prompt =
-    `Contexte : case ${data?.case_id} (tenant ${tenant}). ` +
-    `Charge le contexte de ce case et présente un bref résumé clinique (structure familiale, phénotypes HPO). ` +
-    `Ensuite, attends les questions de l'utilisateur.`;
+  // Prompt localisé : un utilisateur anglophone envoie le contexte en anglais,
+  // et l'agent répond dans la langue du message.
+  const prompt = t('case_entity.header.ai_assistant_prompt', { caseId: data?.case_id, tenant });
   const librechatUrl = `${LIBRECHAT_HOST}/c/new?agent_id=${LIBRECHAT_AGENT_ID}&prompt=${encodeURIComponent(prompt)}&submit=true`;
 
   return (
