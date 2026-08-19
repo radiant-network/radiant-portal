@@ -19,9 +19,16 @@ const LIBRECHAT_HOST = 'http://localhost:3080';
 const LIBRECHAT_AGENT_ID = 'agent_aGiiW9fwwps-SDeE19maA';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { tenant } = useTenant();
   const [aiOpen, setAiOpen] = useState(false);
+
+  // LibreChat résout sa langue d'interface via le cookie `lang` (prioritaire sur ses réglages) ;
+  // les cookies étant partagés entre ports d'un même hôte (et entre sous-domaines en production
+  // avec Domain parent), poser le cookie ici synchronise la langue des deux applications.
+  const syncLibrechatLanguage = () => {
+    document.cookie = `lang=${language === 'fr' ? 'fr-FR' : 'en-US'}; path=/; SameSite=Lax`;
+  };
 
   const prompt =
     `Contexte : case ${data?.case_id} (tenant ${tenant}). ` +
@@ -38,7 +45,10 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           {
             variant: 'outline',
             disabled: !data,
-            onClick: () => setAiOpen(true),
+            onClick: () => {
+              syncLibrechatLanguage();
+              setAiOpen(true);
+            },
             children: (
               <>
                 <Sparkles />
@@ -91,7 +101,10 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => window.open(librechatUrl, '_blank', 'noopener,noreferrer')}
+                onClick={() => {
+                  syncLibrechatLanguage();
+                  window.open(librechatUrl, '_blank', 'noopener,noreferrer');
+                }}
               >
                 <ExternalLink />
                 {t('case_entity.header.ai_assistant_open_tab')}
