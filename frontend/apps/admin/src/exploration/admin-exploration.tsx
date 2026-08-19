@@ -8,12 +8,7 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import OrganizationsSection from './organizations/organizations-section';
 import RolesSection from './roles/roles-section';
 import UsersSection from './users/users-section';
-import {
-  ADMIN_SECTIONS,
-  AdminSectionNavDesktop,
-  AdminSectionNavMobile,
-  DEFAULT_ADMIN_SECTION,
-} from './admin-section-nav';
+import { AdminSectionNavDesktop, AdminSectionNavMobile, useAdminSections } from './admin-section-nav';
 
 const SECTION_PARAM = 'section';
 
@@ -22,8 +17,9 @@ export default function AdminExploration() {
   const { tenant, tenants } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const sections = useAdminSections();
   const requestedSection = searchParams.get(SECTION_PARAM);
-  const section = ADMIN_SECTIONS.find(({ value }) => value === requestedSection)?.value ?? DEFAULT_ADMIN_SECTION;
+  const section = sections.find(({ value }) => value === requestedSection)?.value ?? sections[0]?.value ?? '';
 
   const selectedTenant = tenants.find(t => t.code === tenant);
 
