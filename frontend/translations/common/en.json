@@ -1648,6 +1648,8 @@
     "header": {
       "ai_assistant": "Analyze with AI",
       "ai_assistant_open_tab": "Open in a tab",
+      "ai_assistant_new": "New case analysis",
+      "ai_assistant_history": "Resume a conversation",
       "ai_assistant_prompt": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
       "case": "Case",
       "cases": "Cases",

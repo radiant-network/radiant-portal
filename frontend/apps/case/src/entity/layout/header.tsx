@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Biohazard, ExternalLink, Sparkles, Users } from 'lucide-react';
+import { Biohazard, ExternalLink, History, Sparkles, Users } from 'lucide-react';
 
 import type { CaseEntity } from '@/api/api';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
@@ -22,6 +22,9 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
   const { t, language } = useI18n();
   const { tenant } = useTenant();
   const [aiOpen, setAiOpen] = useState(false);
+  // null = choix pas encore fait ; 'new' = nouvelle analyse (prompt auto-envoyé) ;
+  // 'history' = racine LibreChat (barre latérale des conversations) sans rien lancer.
+  const [aiMode, setAiMode] = useState<'new' | 'history' | null>(null);
 
   // LibreChat résout sa langue d'interface via le cookie `lang` (prioritaire sur ses réglages) ;
   // les cookies étant partagés entre ports d'un même hôte (et entre sous-domaines en production
@@ -33,7 +36,9 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
   // Prompt localisé : un utilisateur anglophone envoie le contexte en anglais,
   // et l'agent répond dans la langue du message.
   const prompt = t('case_entity.header.ai_assistant_prompt', { caseId: data?.case_id, tenant });
-  const librechatUrl = `${LIBRECHAT_HOST}/c/new?agent_id=${LIBRECHAT_AGENT_ID}&prompt=${encodeURIComponent(prompt)}&submit=true`;
+  const newAnalysisUrl = `${LIBRECHAT_HOST}/c/new?agent_id=${LIBRECHAT_AGENT_ID}&prompt=${encodeURIComponent(prompt)}&submit=true`;
+  // Racine LibreChat : barre latérale avec l'historique des conversations, rien n'est lancé.
+  const librechatUrl = aiMode === 'history' ? LIBRECHAT_HOST : newAnalysisUrl;
 
   return (
     <>
@@ -91,7 +96,13 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           </Tooltip>,
         ]}
       />
-      <Dialog open={aiOpen} onOpenChange={setAiOpen}>
+      <Dialog
+        open={aiOpen}
+        onOpenChange={open => {
+          setAiOpen(open);
+          if (!open) setAiMode(null);
+        }}
+      >
         <DialogContent className="max-w-none w-[90vw] h-[88vh] flex flex-col p-4">
           <DialogHeader icon={<Sparkles />}>
             <DialogTitle className="flex items-center gap-2">
@@ -110,8 +121,22 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
               </Button>
             </DialogTitle>
           </DialogHeader>
-          {/* L'iframe n'est montée qu'à l'ouverture, sinon le prompt partirait au chargement de la page */}
-          {aiOpen && (
+          {/* Choix avant de monter l'iframe : « nouvelle analyse » envoie le prompt
+              (et crée une conversation) dès le chargement — on ne la monte donc
+              qu'après une décision explicite de l'utilisateur. */}
+          {aiOpen && aiMode === null && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-4">
+              <Button size="lg" onClick={() => setAiMode('new')}>
+                <Sparkles />
+                {t('case_entity.header.ai_assistant_new')}
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setAiMode('history')}>
+                <History />
+                {t('case_entity.header.ai_assistant_history')}
+              </Button>
+            </div>
+          )}
+          {aiOpen && aiMode !== null && (
             <iframe
               src={librechatUrl}
               title="LibreChat"
