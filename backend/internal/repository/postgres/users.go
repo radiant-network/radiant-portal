@@ -326,6 +326,20 @@ func (r *UsersRepository) UpdateTenantUser(ctx context.Context, tenantCode, user
 	return nil
 }
 
+// RemoveTenantUser deletes every grant the user holds in the tenant, member included — the
+// per-tenant revoke. It touches neither the users registry nor the grants the same user holds in
+// other tenants, so the identity outlives its access here. The affected row count is deliberately
+// not checked: the caller establishes the membership first, and a concurrent revoke reaching zero
+// rows has already produced the intended state.
+func (r *UsersRepository) RemoveTenantUser(ctx context.Context, tenantCode, userID string) error {
+	err := r.db.WithContext(ctx).Exec(`
+		DELETE FROM user_role WHERE tenant_code = ? AND user_id = ?`, tenantCode, userID).Error
+	if err != nil {
+		return fmt.Errorf("error removing user %q from tenant %q: %w", userID, tenantCode, err)
+	}
+	return nil
+}
+
 // revokeGrants deletes the listed (role, organization) pairs. A tenant-wide grant stores a NULL
 // org_code, which no equality test matches, so both sides are folded to ” — a value an
 // organization code can never take.

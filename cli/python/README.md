@@ -174,6 +174,7 @@ Class | Method | HTTP request | Description
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
 *UsersApi* | [**create_user**](docs/UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
+*UsersApi* | [**delete_user**](docs/UsersApi.md#delete_user) | **DELETE** /{tenant}/users/{user_id} | Remove a user from the tenant
 *UsersApi* | [**list_users**](docs/UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
 *UsersApi* | [**update_user**](docs/UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update a user of the tenant
 *ValueSetsApi* | [**list_value_set**](docs/ValueSetsApi.md#list_value_set) | **GET** /value_sets/{type} | List a value set

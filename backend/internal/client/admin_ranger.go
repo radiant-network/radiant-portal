@@ -236,16 +236,9 @@ func (c *RangerAdminClient) upsertPolicy(ctx context.Context, name string, polic
 // existing members. The role must already exist, a missing role is an error.
 // Idempotent: a user already in the role is a no-op.
 func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user string) error {
-	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+roleName, nil)
+	role, err := c.fetchRole(ctx, roleName)
 	if err != nil {
 		return err
-	}
-	if status != http.StatusOK {
-		return fmt.Errorf("get role %q: HTTP %d: %s", roleName, status, string(payload))
-	}
-	var role rangerRole
-	if err := json.Unmarshal(payload, &role); err != nil {
-		return fmt.Errorf("parse role %q: %w", roleName, err)
 	}
 
 	for _, m := range role.Users {
@@ -255,30 +248,40 @@ func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user st
 	}
 	role.Users = append(role.Users, rangerRoleMember{Name: user, IsAdmin: false})
 
-	status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
+	return c.saveRole(ctx, role)
+}
+
+// RemoveUserFromRole drops user from roleName via read-modify-write so it never clobbers the
+// other members. Idempotent: a user who is not a member is a no-op, which is what lets the
+// revoke path be retried. The role must already exist — it is created with the tenant, so its
+// absence is a provisioning fault rather than an already-satisfied removal.
+func (c *RangerAdminClient) RemoveUserFromRole(ctx context.Context, roleName, user string) error {
+	role, err := c.fetchRole(ctx, roleName)
 	if err != nil {
 		return err
 	}
-	if status != http.StatusOK && status != http.StatusCreated {
-		return fmt.Errorf("update role %q: HTTP %d: %s", roleName, status, string(payload))
+
+	kept := make([]rangerRoleMember, 0, len(role.Users))
+	for _, m := range role.Users {
+		if m.Name != user {
+			kept = append(kept, m)
+		}
 	}
-	return nil
+	if len(kept) == len(role.Users) {
+		return nil // not a member
+	}
+	role.Users = kept
+
+	return c.saveRole(ctx, role)
 }
 
 // AddRoleToRole adds child as a sub-role of parent via read-modify-write so it never
 // clobbers existing members. parent must already exist. Idempotent: a child already
 // nested is a no-op. Used to nest each tenant role under the masking-subject marker role.
 func (c *RangerAdminClient) AddRoleToRole(ctx context.Context, parent, child string) error {
-	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+parent, nil)
+	role, err := c.fetchRole(ctx, parent)
 	if err != nil {
 		return err
-	}
-	if status != http.StatusOK {
-		return fmt.Errorf("get role %q: HTTP %d: %s", parent, status, string(payload))
-	}
-	var role rangerRole
-	if err := json.Unmarshal(payload, &role); err != nil {
-		return fmt.Errorf("parse role %q: %w", parent, err)
 	}
 
 	for _, m := range role.Roles {
@@ -288,12 +291,35 @@ func (c *RangerAdminClient) AddRoleToRole(ctx context.Context, parent, child str
 	}
 	role.Roles = append(role.Roles, rangerRoleMember{Name: child, IsAdmin: false})
 
-	status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
+	return c.saveRole(ctx, role)
+}
+
+// fetchRole reads a role by name, for the membership edits that must not clobber what they did
+// not touch. A role that does not exist is an error: every caller edits the membership of a role
+// the provisioning flow was supposed to have created.
+func (c *RangerAdminClient) fetchRole(ctx context.Context, roleName string) (*rangerRole, error) {
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+roleName, nil)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, fmt.Errorf("get role %q: HTTP %d: %s", roleName, status, string(payload))
+	}
+	var role rangerRole
+	if err := json.Unmarshal(payload, &role); err != nil {
+		return nil, fmt.Errorf("parse role %q: %w", roleName, err)
+	}
+	return &role, nil
+}
+
+// saveRole writes an edited role back in place, by the id fetchRole read.
+func (c *RangerAdminClient) saveRole(ctx context.Context, role *rangerRole) error {
+	status, payload, err := c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
 	if err != nil {
 		return err
 	}
 	if status != http.StatusOK && status != http.StatusCreated {
-		return fmt.Errorf("update role %q: HTTP %d: %s", parent, status, string(payload))
+		return fmt.Errorf("update role %q: HTTP %d: %s", role.Name, status, string(payload))
 	}
 	return nil
 }

@@ -30,6 +30,10 @@ type mockTenantUserStore struct {
 	gotAdd      []types.Grant
 	gotRemove   []types.Grant
 	gotExcluded string
+
+	removed      bool
+	gotRemovedID string
+	gotRemoveErr error
 }
 
 func (m *mockTenantUserStore) TenantUser(_ context.Context, _, _ string) (*types.TenantUser, error) {
@@ -52,6 +56,14 @@ func (m *mockTenantUserStore) UpdateTenantUser(_ context.Context, _, _, firstNam
 	m.updated = true
 	m.gotFirst, m.gotLast, m.gotActor = firstName, lastName, grantedBy
 	m.gotAdd, m.gotRemove = add, remove
+	return nil
+}
+
+func (m *mockTenantUserStore) RemoveTenantUser(_ context.Context, _, userID string) error {
+	if m.gotRemoveErr != nil {
+		return m.gotRemoveErr
+	}
+	m.removed, m.gotRemovedID = true, userID
 	return nil
 }
 
@@ -451,4 +463,113 @@ func Test_UserAdmin_UpdateTenantUser_NonAdminIsUnaffectedByTheInvariant(t *testi
 
 	require.NoError(t, err)
 	assert.Empty(t, users.gotExcluded)
+}
+
+// --- RemoveTenantUser -------------------------------------------------------
+
+// removeUser runs UserAdmin's revoke path against stubbed stores, returning the Ranger stand-in so
+// the test can assert the tenant-role membership was dropped alongside the grants.
+func removeUser(t *testing.T, users *mockTenantUserStore, userID string) (*mockRanger, error) {
+	t.Helper()
+	ranger := &mockRanger{}
+	admin := NewUserAdmin(users, &mockOrgChecker{}, AdminDeps{
+		Keycloak:  &mockKeycloak{sub: "b3f1-keycloak-sub"},
+		Ranger:    ranger,
+		Starrocks: &mockStarrocks{},
+		Auth:      &mockAuthStore{},
+	})
+	return ranger, admin.RemoveTenantUser(t.Context(), "radiant", userID, "acting-admin-sub")
+}
+
+func Test_UserAdmin_RemoveTenantUser_RevokesEveryGrantAndTheRangerMembership(t *testing.T) {
+	users := &mockTenantUserStore{current: editedUser()}
+
+	ranger, err := removeUser(t, users, "b3f1-keycloak-sub")
+
+	require.NoError(t, err)
+	assert.True(t, users.removed)
+	assert.Equal(t, "b3f1-keycloak-sub", users.gotRemovedID)
+	assert.Equal(t, [][2]string{{"radiant_user", "b3f1-keycloak-sub"}}, ranger.roleRemoves,
+		"the tenant's Ranger role loses the member, so Postgres and Ranger stay aligned")
+}
+
+func Test_UserAdmin_RemoveTenantUser_LeavesTheKeycloakIdentityAlone(t *testing.T) {
+	users := &mockTenantUserStore{current: editedUser()}
+	keycloak := &mockKeycloak{sub: "b3f1-keycloak-sub"}
+	admin := NewUserAdmin(users, &mockOrgChecker{}, AdminDeps{
+		Keycloak: keycloak, Ranger: &mockRanger{}, Starrocks: &mockStarrocks{}, Auth: &mockAuthStore{},
+	})
+
+	require.NoError(t, admin.RemoveTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub", "acting-admin-sub"))
+
+	assert.Zero(t, keycloak.gotRename, "revoking tenant access is not an account deletion")
+}
+
+func Test_UserAdmin_RemoveTenantUser_RemovingYourselfIsRejected(t *testing.T) {
+	users := &mockTenantUserStore{current: editedUser()}
+
+	ranger, err := removeUser(t, users, "acting-admin-sub")
+
+	assert.ErrorIs(t, err, types.ErrCannotRemoveSelf)
+	assert.False(t, users.removed, "nothing is revoked")
+	assert.Empty(t, ranger.roleRemoves)
+}
+
+func Test_UserAdmin_RemoveTenantUser_UnknownUserIsReported(t *testing.T) {
+	users := &mockTenantUserStore{currentErr: types.ErrUserNotInTenant}
+
+	ranger, err := removeUser(t, users, "b3f1-keycloak-sub")
+
+	assert.ErrorIs(t, err, types.ErrUserNotInTenant)
+	assert.False(t, users.removed)
+	assert.Empty(t, ranger.roleRemoves)
+}
+
+func Test_UserAdmin_RemoveTenantUser_LastAdminCannotBeRemoved(t *testing.T) {
+	current := editedUser()
+	current.Grants = append(current.Grants, types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
+	users := &mockTenantUserStore{current: current, adminRoles: []string{"tenant_admin"}, otherAdmin: false}
+
+	ranger, err := removeUser(t, users, "b3f1-keycloak-sub")
+
+	assert.ErrorIs(t, err, types.ErrLastTenantAdmin)
+	assert.False(t, users.removed)
+	assert.Empty(t, ranger.roleRemoves)
+}
+
+func Test_UserAdmin_RemoveTenantUser_AdminCanBeRemovedWhenAnotherHoldsTheRole(t *testing.T) {
+	current := editedUser()
+	current.Grants = append(current.Grants, types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
+	users := &mockTenantUserStore{current: current, adminRoles: []string{"tenant_admin"}, otherAdmin: true}
+
+	_, err := removeUser(t, users, "b3f1-keycloak-sub")
+
+	require.NoError(t, err)
+	assert.True(t, users.removed)
+	assert.Equal(t, "b3f1-keycloak-sub", users.gotExcluded, "the invariant looks for an admin other than the removed user")
+}
+
+func Test_UserAdmin_RemoveTenantUser_RangerFailureLeavesTheGrantsUntouched(t *testing.T) {
+	users := &mockTenantUserStore{current: editedUser()}
+	admin := NewUserAdmin(users, &mockOrgChecker{}, AdminDeps{
+		Keycloak:  &mockKeycloak{sub: "b3f1-keycloak-sub"},
+		Ranger:    &mockRanger{err: errors.New("ranger down")},
+		Starrocks: &mockStarrocks{},
+		Auth:      &mockAuthStore{},
+	})
+
+	err := admin.RemoveTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub", "acting-admin-sub")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ranger")
+	assert.False(t, users.removed, "the grants are what a retry finds the user by, so they must survive")
+}
+
+func Test_UserAdmin_RemoveTenantUser_PropagatesStoreError(t *testing.T) {
+	users := &mockTenantUserStore{current: editedUser(), gotRemoveErr: errors.New("boom")}
+
+	_, err := removeUser(t, users, "b3f1-keycloak-sub")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "boom")
 }

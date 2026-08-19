@@ -8424,6 +8424,78 @@ paths:
       tags:
       - users
   /{tenant}/users/{user_id}:
+    delete:
+      description: |-
+        Revokes the user's access to the tenant in the path by removing every role granted
+        to them there, `member` included — so their next request no longer sees this tenant.
+        Requires the `can_manage_user` action. This is not an account deletion: the identity
+        provider account and the roles the same user holds in other tenants are untouched.
+        The last user able to manage users cannot be removed (409), and an administrator
+        cannot remove their own access (400).
+      operationId: deleteUser
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: User id (the identity provider's subject id)
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Remove a user from the tenant
+      tags:
+      - users
     put:
       description: |-
         Updates the user's name and replaces the roles granted to them in the tenant in the

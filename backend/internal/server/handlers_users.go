@@ -24,6 +24,12 @@ type userUpdater interface {
 	UpdateTenantUser(ctx context.Context, tenantCode, userID string, req types.UpdateUserRequest, actor string) error
 }
 
+// userRemover revokes a user's access to the tenant, leaving their identity in place. Implemented
+// by service.UserAdmin.
+type userRemover interface {
+	RemoveTenantUser(ctx context.Context, tenantCode, userID, actor string) error
+}
+
 // ListUsersHandler
 // @Summary List the tenant's users
 // @Id listUsers
@@ -190,6 +196,57 @@ func PutUserHandler(svc userUpdater, auth utils.Auth) gin.HandlerFunc {
 			HandleConflictError(c, err.Error())
 		case errors.Is(err, types.ErrUnknownRole), errors.Is(err, types.ErrUnknownOrganizations),
 			errors.Is(err, types.ErrRoleRequiresOrg), errors.Is(err, types.ErrRoleNotOrgScoped):
+			HandleValidationError(c, err)
+		default:
+			HandleError(c, err)
+		}
+	}
+}
+
+// DeleteUserHandler
+// @Summary Remove a user from the tenant
+// @Id deleteUser
+// @Description Revokes the user's access to the tenant in the path by removing every role granted
+// @Description to them there, `member` included — so their next request no longer sees this tenant.
+// @Description Requires the `can_manage_user` action. This is not an account deletion: the identity
+// @Description provider account and the roles the same user holds in other tenants are untouched.
+// @Description The last user able to manage users cannot be removed (409), and an administrator
+// @Description cannot remove their own access (400).
+// @Tags users
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param user_id path string true "User id (the identity provider's subject id)"
+// @Produce json
+// @Success 204
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 409 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/users/{user_id} [delete]
+func DeleteUserHandler(svc userRemover, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		actor, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		switch err := svc.RemoveTenantUser(c.Request.Context(), *tenant, c.Param("user_id"), *actor); {
+		case err == nil:
+			c.Status(http.StatusNoContent)
+		case errors.Is(err, types.ErrUserNotInTenant):
+			HandleNotFoundError(c, "user")
+		case errors.Is(err, types.ErrLastTenantAdmin):
+			HandleConflictError(c, err.Error())
+		case errors.Is(err, types.ErrCannotRemoveSelf):
 			HandleValidationError(c, err)
 		default:
 			HandleError(c, err)

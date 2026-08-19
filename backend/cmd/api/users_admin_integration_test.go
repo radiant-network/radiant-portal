@@ -91,8 +91,9 @@ func (k *stubKeycloak) UpdateUserName(_ context.Context, userID, firstName, last
 
 type noopRanger struct{}
 
-func (noopRanger) EnsureUser(context.Context, string) error            { return nil }
-func (noopRanger) AddUserToRole(context.Context, string, string) error { return nil }
+func (noopRanger) EnsureUser(context.Context, string) error                 { return nil }
+func (noopRanger) AddUserToRole(context.Context, string, string) error      { return nil }
+func (noopRanger) RemoveUserFromRole(context.Context, string, string) error { return nil }
 
 type noopStarrocks struct{}
 
@@ -367,6 +368,118 @@ func Test_UpdateUser_WithoutManageUser_Forbidden(t *testing.T) {
 
 func Test_UpdateUser_CrossTenant_Forbidden(t *testing.T) {
 	w := putUser(t, taraID, "tenant_b", editedUserID, `{"first_name":"Edit","last_name":"Target"}`, false, nil)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+// --- DELETE /:tenant/users/:user_id ------------------------------------------
+
+const (
+	deletedUserID      = "f1c2c3c4-d5d6-4e70-8f90-a1a2a3a4a5a6"
+	multiTenantUserID  = "f2c2c3c4-d5d6-4e70-8f90-a1a2a3a4a5a6"
+	forbiddenDeleteID  = "f3c2c3c4-d5d6-4e70-8f90-a1a2a3a4a5a6"
+	crossTenantDeleted = "f4c2c3c4-d5d6-4e70-8f90-a1a2a3a4a5a6"
+)
+
+// seedMultiTenantUser gives the revoke target access to a second tenant, so a test can assert the
+// revoke is scoped to the tenant in the path. tenant_b has no member role of its own
+// (test/data/auth/03_role.sql), hence researcher.
+func seedMultiTenantUser(t *testing.T, db *gorm.DB, userID string) {
+	t.Helper()
+	seedEditableUser(t, db, userID)
+	require.NoError(t, db.Exec(`
+		INSERT INTO public.user_role (user_id, tenant_code, org_code, role_code, granted_by)
+		VALUES (?, 'tenant_b', NULL, 'researcher', 'seed')`, userID).Error)
+}
+
+// seed provisions the target before the request; the tests that expect a rejection before any
+// lookup (403) and the unknown-user 404 pass nil.
+func deleteUser(t *testing.T, callerID, tenant, targetID string, seed func(*testing.T, *gorm.DB, string), run func(t *testing.T, db *gorm.DB)) *httptest.ResponseRecorder {
+	t.Helper()
+	var w *httptest.ResponseRecorder
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		if seed != nil {
+			seed(t, env.Postgres, targetID)
+		}
+		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: callerID}
+
+		router := gin.Default()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+		tenantRoutes.DELETE("/users/:user_id", server.RequireAction(auth, authRepo, types.ActionManageUser),
+			server.DeleteUserHandler(newUserAdmin(env.Postgres, &stubKeycloak{sub: targetID}), auth))
+
+		req, _ := http.NewRequest("DELETE", "/"+tenant+"/users/"+targetID, nil)
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if run != nil {
+			run(t, env.Postgres)
+		}
+	})
+	return w
+}
+
+func Test_DeleteUser_TenantAdmin_RevokesEveryGrantAndKeepsTheIdentity(t *testing.T) {
+	var roles []string
+	var identities int64
+
+	w := deleteUser(t, taraID, "radiant", deletedUserID, seedEditableUser, func(t *testing.T, db *gorm.DB) {
+		require.NoError(t, db.Raw(`
+			SELECT role_code FROM public.user_role
+			WHERE user_id = ? AND tenant_code = 'radiant'`, deletedUserID).Scan(&roles).Error)
+		require.NoError(t, db.Raw(`
+			SELECT count(*) FROM public.users WHERE user_id = ?`, deletedUserID).Scan(&identities).Error)
+	})
+
+	require.Equal(t, http.StatusNoContent, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Empty(t, roles, "member is revoked too, unlike an edit")
+	assert.Equal(t, int64(1), identities, "the identity survives — this revokes one tenant, not the account")
+}
+
+func Test_DeleteUser_LeavesTheUsersOtherTenantsAlone(t *testing.T) {
+	var elsewhere []string
+
+	w := deleteUser(t, taraID, "radiant", multiTenantUserID, seedMultiTenantUser, func(t *testing.T, db *gorm.DB) {
+		require.NoError(t, db.Raw(`
+			SELECT role_code FROM public.user_role
+			WHERE user_id = ? AND tenant_code = 'tenant_b'`, multiTenantUserID).Scan(&elsewhere).Error)
+	})
+
+	require.Equal(t, http.StatusNoContent, w.Code)
+	assert.Equal(t, []string{"researcher"}, elsewhere)
+}
+
+func Test_DeleteUser_UnknownUser_NotFound(t *testing.T) {
+	w := deleteUser(t, taraID, "radiant", "00000000-0000-4000-8000-000000000000", nil, nil)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteUser_RemovingYourself_BadRequest(t *testing.T) {
+	var roles []string
+
+	w := deleteUser(t, taraID, "radiant", taraID, nil, func(t *testing.T, db *gorm.DB) {
+		require.NoError(t, db.Raw(`
+			SELECT role_code FROM public.user_role
+			WHERE user_id = ? AND tenant_code = 'radiant'`, taraID).Scan(&roles).Error)
+	})
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, []string{"tenant_admin"}, roles, "the rejected revoke wrote nothing")
+}
+
+func Test_DeleteUser_WithoutManageUser_Forbidden(t *testing.T) {
+	// mike holds member only → the action gate 403s before the handler.
+	w := deleteUser(t, mikeID, "radiant", forbiddenDeleteID, nil, nil)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_DeleteUser_CrossTenant_Forbidden(t *testing.T) {
+	w := deleteUser(t, taraID, "tenant_b", crossTenantDeleted, nil, nil)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }

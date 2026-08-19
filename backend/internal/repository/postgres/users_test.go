@@ -104,8 +104,10 @@ func Test_UsersRepository_ListTenantUsers_DerivesMixedRoleScope(t *testing.T) {
 	})
 }
 
+// Exclusive: it asserts tenant_b holds exactly one user, and the parallel tests that check a write
+// is tenant-scoped grant themselves a second tenant_b role to prove it.
 func Test_UsersRepository_ListTenantUsers_IsolatesTenants(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		users, count, err := repo.ListTenantUsers(t.Context(), "tenant_b", wholeTenant(""))
@@ -245,8 +247,10 @@ func withRoles(search string, roles string) types.ListUsersQuery {
 	return query
 }
 
+// Exclusive for the same reason as the pagination test: it asserts an exact count over the shared
+// seed data, which the parallel grant-writing tests would perturb.
 func Test_UsersRepository_ListTenantUsers_FiltersByRole(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "geneticist"))
@@ -262,7 +266,7 @@ func Test_UsersRepository_ListTenantUsers_FiltersByRole(t *testing.T) {
 }
 
 func Test_UsersRepository_ListTenantUsers_FiltersByAnyOfSeveralRoles(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "member,tenant_admin"))
@@ -622,5 +626,60 @@ func Test_UsersRepository_UpdateTenantUser_NoDiffOnlyUpdatesIdentity(t *testing.
 		require.NoError(t, err)
 		assert.Equal(t, "Renamed", user.FirstName)
 		assert.Equal(t, []types.Grant{radiantGrant("", "member")}, user.Grants)
+	})
+}
+
+func Test_UsersRepository_RemoveTenantUser_RevokesEveryGrantIncludingMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "d6a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
+		seedTenantUser(t, env.Postgres, userID,
+			radiantGrant("", "member"), radiantGrant("CHOP", "geneticist"), radiantGrant("", "researcher"))
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		require.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
+
+		_, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, userID)
+		assert.ErrorIs(t, err, types.ErrUserNotInTenant, "member is revoked too — the user is out of the tenant")
+	})
+}
+
+func Test_UsersRepository_RemoveTenantUser_KeepsTheIdentity(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "d7a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
+		seedTenantUser(t, env.Postgres, userID, radiantGrant("", "member"))
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		require.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
+
+		var remaining int64
+		require.NoError(t, env.Postgres.Raw(`SELECT count(*) FROM users WHERE user_id = ?`, userID).Scan(&remaining).Error)
+		assert.Equal(t, int64(1), remaining, "the identity registry outlives the tenant access")
+	})
+}
+
+func Test_UsersRepository_RemoveTenantUser_LeavesOtherTenantsAlone(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "d8a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
+		seedTenantUser(t, env.Postgres, userID,
+			radiantGrant("", "member"),
+			types.Grant{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"})
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		require.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
+
+		elsewhere, err := repo.TenantUser(t.Context(), "tenant_b", userID)
+		require.NoError(t, err)
+		assert.Equal(t, []types.Grant{{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"}}, elsewhere.Grants)
+	})
+}
+
+func Test_UsersRepository_RemoveTenantUser_UserWithoutGrantsIsNotAnError(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "d9a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
+		seedTenantUser(t, env.Postgres, userID)
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		// A revoke retried after a partial failure finds nothing left to delete.
+		assert.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
 	})
 }

@@ -74,6 +74,7 @@ var (
 	ErrUserAlreadyInTenant  = errors.New("a user with this email already has access to this tenant")
 	ErrUserNotInTenant      = errors.New("this user has no access to this tenant")
 	ErrLastTenantAdmin      = errors.New("this is the last user who can manage the users of this tenant")
+	ErrCannotRemoveSelf     = errors.New("you cannot remove your own access to this tenant")
 	ErrUnknownRole          = errors.New("unknown role")
 	ErrUnknownOrganizations = errors.New("unknown organizations")
 	ErrRoleRequiresOrg      = errors.New("must be granted at one or more organizations")

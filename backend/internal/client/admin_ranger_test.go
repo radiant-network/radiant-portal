@@ -163,6 +163,65 @@ func Test_RangerAdminClient_AddUserToRole_MissingRoleIsReported(t *testing.T) {
 	assert.Contains(t, err.Error(), "get role")
 }
 
+func Test_RangerAdminClient_RemoveUserFromRole_DropsTheMember(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["tenant_a_user"] = &rangerRole{
+		ID: 7, Name: "tenant_a_user",
+		Users: []rangerRoleMember{{Name: "the-sub"}},
+	}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).RemoveUserFromRole(context.Background(), "tenant_a_user", "the-sub")
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.lastPutRole)
+	assert.Empty(t, fake.lastPutRole.Users)
+}
+
+func Test_RangerAdminClient_RemoveUserFromRole_PreservesTheOtherMembers(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["tenant_a_user"] = &rangerRole{
+		ID: 7, Name: "tenant_a_user",
+		Users: []rangerRoleMember{{Name: "wendy-sub"}, {Name: "the-sub"}, {Name: "grace-sub"}},
+	}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).RemoveUserFromRole(context.Background(), "tenant_a_user", "the-sub")
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.lastPutRole)
+	assert.Equal(t, []rangerRoleMember{{Name: "wendy-sub"}, {Name: "grace-sub"}}, fake.lastPutRole.Users)
+}
+
+func Test_RangerAdminClient_RemoveUserFromRole_IsIdempotent(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["tenant_a_user"] = &rangerRole{
+		ID: 7, Name: "tenant_a_user",
+		Users: []rangerRoleMember{{Name: "wendy-sub"}},
+	}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).RemoveUserFromRole(context.Background(), "tenant_a_user", "the-sub")
+
+	require.NoError(t, err)
+	assert.Nil(t, fake.lastPutRole, "no PUT when the user is not a member — a retried revoke must not rewrite the role")
+}
+
+func Test_RangerAdminClient_RemoveUserFromRole_MissingRoleIsReported(t *testing.T) {
+	fake := newFakeRanger()
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).RemoveUserFromRole(context.Background(), "no_such_role", "the-sub")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no_such_role")
+	assert.Nil(t, fake.lastPutRole)
+}
+
 func Test_RangerAdminClient_AddRoleToRole_NestsNewChild(t *testing.T) {
 	fake := newFakeRanger()
 	fake.roles["user_role"] = &rangerRole{ID: 3, Name: "user_role", Roles: []rangerRoleMember{}}
