@@ -22,6 +22,51 @@
   },
   "admin": {
     "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Add organization",
+      "count_one": "{{count}} organization",
+      "count_other": "{{count}} organizations",
+      "create": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to create organization."
+          },
+          "success": "Organization created."
+        },
+        "submit": "Create organization",
+        "title": "Add organization"
+      },
+      "edit": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to update organization."
+          },
+          "success": "Organization updated."
+        },
+        "submit": "Save",
+        "title": "Edit organization"
+      },
+      "fields": {
+        "category": "Category",
+        "category_hint": "Can't be changed after creation.",
+        "category_placeholder": "Select a category",
+        "code": "Code",
+        "code_hint": "Can't be changed after creation. Letters, numbers, underscores, and dashes.",
+        "name": "Name"
+      },
+      "filters": {
+        "category": "Category",
+        "search_placeholder": "Search by name or code"
+      },
+      "subtitle": "Create and edit organizations.",
+      "table": {
+        "category": "Category",
+        "edit": "Edit organization",
+        "name": "Name"
+      }
+    },
     "sections": {
       "group_label": "Network settings",
       "organizations": "Organizations",
@@ -119,7 +164,9 @@
       "errors": {
         "required": "This field is required",
         "min_2": "Min 2 characters",
-        "max_50": "Max 50 characters"
+        "max_50": "Max 50 characters",
+        "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
+        "organization_code_exists": "An organization with this code already exists."
       }
     },
     "editor": {

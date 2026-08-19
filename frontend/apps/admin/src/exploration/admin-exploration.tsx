@@ -19,11 +19,13 @@ const SECTION_PARAM = 'section';
 
 export default function AdminExploration() {
   const { t } = useI18n();
-  const { tenant } = useTenant();
+  const { tenant, tenants } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const requestedSection = searchParams.get(SECTION_PARAM);
   const section = ADMIN_SECTIONS.find(({ value }) => value === requestedSection)?.value ?? DEFAULT_ADMIN_SECTION;
+
+  const selectedTenant = tenants.find(t => t.code === tenant);
 
   const handleSectionChange = (value: string) => {
     setSearchParams(params => {
@@ -34,7 +36,11 @@ export default function AdminExploration() {
 
   return (
     <>
-      <HeaderNavigation isLoading={false} title={t('admin.title', { tenant: tenant })} variant="info" />
+      <HeaderNavigation
+        isLoading={false}
+        title={t('admin.title', { tenant: selectedTenant?.name || tenant })}
+        variant="info"
+      />
       <Tabs value={section} onValueChange={handleSectionChange} orientation="vertical" className="contents">
         <div className="bg-muted p-3 md:hidden">
           <AdminSectionNavMobile value={section} onValueChange={handleSectionChange} />

@@ -22,6 +22,51 @@
   },
   "admin": {
     "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Ajouter une organisation",
+      "count_one": "{{count}} organisation",
+      "count_other": "{{count}} organisations",
+      "create": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer l'organisation."
+          },
+          "success": "Organisation créée."
+        },
+        "submit": "Créer l'organisation",
+        "title": "Ajouter une organisation"
+      },
+      "edit": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour l'organisation."
+          },
+          "success": "Organisation mise à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier l'organisation"
+      },
+      "fields": {
+        "category": "Catégorie",
+        "category_hint": "Ne peut pas être modifiée après la création.",
+        "category_placeholder": "Sélectionner une catégorie",
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
+        "name": "Nom"
+      },
+      "filters": {
+        "category": "Catégorie",
+        "search_placeholder": "Rechercher par nom ou code"
+      },
+      "subtitle": "Créez et modifiez les organisations.",
+      "table": {
+        "category": "Catégorie",
+        "edit": "Modifier l'organisation",
+        "name": "Nom"
+      }
+    },
     "sections": {
       "group_label": "Paramètres du réseau",
       "organizations": "Organisations",
@@ -119,7 +164,9 @@
       "errors": {
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
-        "max_50": "50 caractères maximum"
+        "max_50": "50 caractères maximum",
+        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
+        "organization_code_exists": "Une organisation avec ce code existe déjà."
       }
     },
     "editor": {
