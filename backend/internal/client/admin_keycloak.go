@@ -136,6 +136,18 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 	return id, nil
 }
 
+// UpdateUserName renames the user in the identity provider. Keycloak's user id is the `sub` every
+// other system keys on, so the account is addressed directly with no lookup. Only the two name
+// attributes are sent: a full representation would also carry `enabled` and the credentials'
+// required actions, and would reset them as a side effect of a rename.
+func (c *KeycloakAdminClient) UpdateUserName(ctx context.Context, userID, firstName, lastName string) error {
+	token, err := c.adminToken(ctx)
+	if err != nil {
+		return err
+	}
+	return c.updateUser(ctx, token, userID, map[string]string{"firstName": firstName, "lastName": lastName})
+}
+
 // adminToken fetches an access token for the service account via the OAuth2
 // client_credentials grant against the realm's token endpoint.
 func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
@@ -208,14 +220,16 @@ func (c *KeycloakAdminClient) createUser(ctx context.Context, token string, user
 	return nil
 }
 
-func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user keycloakUser) error {
+// updateUser sends a partial user representation: Keycloak leaves out any attribute the payload
+// omits, so a caller can send just the fields it means to change.
+func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user any) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s", c.cfg.BaseURL, c.cfg.Realm, id)
 	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, user)
 	if err != nil {
 		return err
 	}
 	if status != http.StatusNoContent && status != http.StatusOK {
-		return fmt.Errorf("update user %q failed: HTTP %d: %s", user.Username, status, string(body))
+		return fmt.Errorf("update user %q failed: HTTP %d: %s", id, status, string(body))
 	}
 	return nil
 }

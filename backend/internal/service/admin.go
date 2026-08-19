@@ -9,10 +9,12 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// KeycloakProvisioner upserts a user in the identity provider and returns its
-// stable subject id (the `sub` claim).
+// KeycloakProvisioner maintains a user in the identity provider: UpsertUser creates or converges
+// the account and returns its stable subject id (the `sub` claim), UpdateUserName renames an
+// account already keyed by that id.
 type KeycloakProvisioner interface {
 	UpsertUser(ctx context.Context, username, email, firstName, lastName, password string) (sub string, err error)
+	UpdateUserName(ctx context.Context, userID, firstName, lastName string) error
 }
 
 // RangerProvisioner manages users and their tenant-role membership in Ranger.

@@ -223,3 +223,144 @@ func roleScope(hasTenant, hasOrg bool) string {
 		return types.RoleScopeTenant
 	}
 }
+
+// TenantUser returns the user's stored state within the tenant: their identity attributes and
+// every grant they hold there. Holding no grant is what "not a user of this tenant" means, so
+// that case is reported as types.ErrUserNotInTenant rather than as an empty grant list.
+func (r *UsersRepository) TenantUser(ctx context.Context, tenantCode, userID string) (*types.TenantUser, error) {
+	var grants []struct {
+		RoleCode string
+		OrgCode  *string
+	}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT ur.role_code, ur.org_code
+		FROM user_role ur
+		WHERE ur.tenant_code = ? AND ur.user_id = ?
+		ORDER BY ur.role_code, ur.org_code`, tenantCode, userID).Scan(&grants).Error
+	if err != nil {
+		return nil, fmt.Errorf("error loading grants of user %q in tenant %q: %w", userID, tenantCode, err)
+	}
+	if len(grants) == 0 {
+		return nil, types.ErrUserNotInTenant
+	}
+
+	var identity struct {
+		Email     string
+		FirstName string
+		LastName  string
+	}
+	if err := r.db.WithContext(ctx).Raw(`
+		SELECT u.email, u.first_name, u.last_name FROM users u WHERE u.user_id = ?`, userID).
+		Scan(&identity).Error; err != nil {
+		return nil, fmt.Errorf("error loading user %q: %w", userID, err)
+	}
+
+	user := types.TenantUser{
+		UserID:    userID,
+		Email:     identity.Email,
+		FirstName: identity.FirstName,
+		LastName:  identity.LastName,
+		Grants:    make([]types.Grant, 0, len(grants)),
+	}
+	for _, grant := range grants {
+		org := ""
+		if grant.OrgCode != nil {
+			org = *grant.OrgCode
+		}
+		user.Grants = append(user.Grants, types.Grant{TenantCode: tenantCode, OrgCode: org, RoleCode: grant.RoleCode})
+	}
+	return &user, nil
+}
+
+// RolesWithAction returns the tenant's roles holding the action, which is how a caller reaches an
+// action-level invariant: grants name roles, so the roles conferring the action have to be
+// resolved before a user's grants can be read as holding it.
+func (r *UsersRepository) RolesWithAction(ctx context.Context, tenantCode, actionCode string) ([]string, error) {
+	roles := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT ra.role_code FROM role_action ra
+		WHERE ra.tenant_code = ? AND ra.action_code = ?
+		ORDER BY ra.role_code`, tenantCode, actionCode).Scan(&roles).Error
+	if err != nil {
+		return nil, fmt.Errorf("error loading roles holding %q in tenant %q: %w", actionCode, tenantCode, err)
+	}
+	return roles, nil
+}
+
+// HasOtherUserWithAnyRole reports whether someone other than userID holds one of the roles in the
+// tenant.
+func (r *UsersRepository) HasOtherUserWithAnyRole(ctx context.Context, tenantCode, userID string, roleCodes []string) (bool, error) {
+	if len(roleCodes) == 0 {
+		return false, nil
+	}
+	var exists bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM user_role ur
+			WHERE ur.tenant_code = ? AND ur.user_id <> ? AND ur.role_code IN ?
+		)`, tenantCode, userID, roleCodes).Scan(&exists).Error
+	if err != nil {
+		return false, fmt.Errorf("error looking for another holder of roles %v in tenant %q: %w", roleCodes, tenantCode, err)
+	}
+	return exists, nil
+}
+
+// UpdateTenantUser applies an edited user in one transaction: the identity attributes, then the
+// grants to revoke and the grants to add. Only the difference is written, so the grants the edit
+// left alone keep the granted_at / granted_by of their original assignment.
+func (r *UsersRepository) UpdateTenantUser(ctx context.Context, tenantCode, userID, firstName, lastName, grantedBy string, add, remove []types.Grant) error {
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(`
+			UPDATE users SET first_name = ?, last_name = ? WHERE user_id = ?`,
+			firstName, lastName, userID).Error; err != nil {
+			return err
+		}
+		if err := revokeGrants(tx, tenantCode, userID, remove); err != nil {
+			return err
+		}
+		return addGrants(tx, tenantCode, userID, grantedBy, add)
+	})
+	if err != nil {
+		return fmt.Errorf("error updating user %q in tenant %q: %w", userID, tenantCode, err)
+	}
+	return nil
+}
+
+// revokeGrants deletes the listed (role, organization) pairs. A tenant-wide grant stores a NULL
+// org_code, which no equality test matches, so both sides are folded to ” — a value an
+// organization code can never take.
+func revokeGrants(tx *gorm.DB, tenantCode, userID string, remove []types.Grant) error {
+	if len(remove) == 0 {
+		return nil
+	}
+	keys := make([]string, 0, len(remove))
+	args := []any{tenantCode, userID}
+	for _, grant := range remove {
+		keys = append(keys, "(?, ?)")
+		args = append(args, grant.RoleCode, grant.OrgCode)
+	}
+	return tx.Exec(`
+		DELETE FROM user_role
+		WHERE tenant_code = ? AND user_id = ?
+		  AND (role_code, COALESCE(org_code, '')) IN (`+strings.Join(keys, ", ")+`)`, args...).Error
+}
+
+func addGrants(tx *gorm.DB, tenantCode, userID, grantedBy string, add []types.Grant) error {
+	if len(add) == 0 {
+		return nil
+	}
+	rows := make([]string, 0, len(add))
+	args := []any{}
+	for _, grant := range add {
+		rows = append(rows, "(?, ?, ?, ?, ?)")
+		var org any
+		if grant.OrgCode != "" {
+			org = grant.OrgCode
+		}
+		args = append(args, userID, tenantCode, org, grant.RoleCode, grantedBy)
+	}
+	return tx.Exec(`
+		INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
+		VALUES `+strings.Join(rows, ", ")+`
+		ON CONFLICT DO NOTHING`, args...).Error
+}

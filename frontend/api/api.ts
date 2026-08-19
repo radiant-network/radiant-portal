@@ -5705,6 +5705,31 @@ export interface UpdateOrganizationRequest {
     'name': string;
 }
 /**
+ * Payload to update a user\'s identity and role set within a tenant.
+ * @export
+ * @interface UpdateUserRequest
+ */
+export interface UpdateUserRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserRequest
+     */
+    'first_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserRequest
+     */
+    'last_name': string;
+    /**
+     * 
+     * @type {Array<CreateUserRole>}
+     * @memberof UpdateUserRequest
+     */
+    'roles'?: Array<CreateUserRole>;
+}
+/**
  * 
  * @export
  * @interface UserPreference
@@ -14836,6 +14861,54 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Updates the user\'s name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+         * @summary Update a user of the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {UpdateUserRequest} updateUserRequest Desired state of the user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUser: async (tenant: string, userId: string, updateUserRequest: UpdateUserRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('updateUser', 'tenant', tenant)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('updateUser', 'userId', userId)
+            // verify required parameter 'updateUserRequest' is not null or undefined
+            assertParamExists('updateUser', 'updateUserRequest', updateUserRequest)
+            const localVarPath = `/{tenant}/users/{user_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateUserRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -14878,6 +14951,21 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['UsersApi.listUsers']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Updates the user\'s name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+         * @summary Update a user of the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {UpdateUserRequest} updateUserRequest Desired state of the user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateUser(tenant: string, userId: string, updateUserRequest: UpdateUserRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateUser(tenant, userId, updateUserRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.updateUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -14913,6 +15001,18 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): AxiosPromise<UsersSearchResponse> {
             return localVarFp.listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Updates the user\'s name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+         * @summary Update a user of the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {UpdateUserRequest} updateUserRequest Desired state of the user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUser(tenant: string, userId: string, updateUserRequest: UpdateUserRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.updateUser(tenant, userId, updateUserRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -14952,6 +15052,20 @@ export class UsersApi extends BaseAPI {
      */
     public listUsers(tenant: string, search?: string, roles?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).listUsers(tenant, search, roles, limit, offset, pageIndex, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Updates the user\'s name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+     * @summary Update a user of the tenant
+     * @param {string} tenant Tenant code
+     * @param {string} userId User id (the identity provider\&#39;s subject id)
+     * @param {UpdateUserRequest} updateUserRequest Desired state of the user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public updateUser(tenant: string, userId: string, updateUserRequest: UpdateUserRequest, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).updateUser(tenant, userId, updateUserRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

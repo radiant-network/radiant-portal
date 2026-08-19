@@ -2805,6 +2805,22 @@ components:
       required:
       - name
       type: object
+    UpdateUserRequest:
+      description: Payload to update a user's identity and role set within a tenant.
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/CreateUserRole'
+          type: array
+          uniqueItems: false
+      required:
+      - first_name
+      - last_name
+      type: object
     UserPreference:
       properties:
         content:
@@ -8405,6 +8421,92 @@ paths:
       security:
       - bearerauth: []
       summary: Add a user to the tenant
+      tags:
+      - users
+  /{tenant}/users/{user_id}:
+    put:
+      description: |-
+        Updates the user's name and replaces the roles granted to them in the tenant in the
+        path with the ones in the payload — a role left out is revoked. Requires the
+        `can_manage_user` action. The email is the identity the account signs in with and
+        cannot be changed here. The `member` role is kept tenant-wide whether or not it is
+        listed, and the last user able to manage users cannot lose that ability (409).
+        Whether a role needs organizations is derived from its actions: a role holding only
+        tenant-scoped actions must come with no `org_codes`, one holding any org-scoped
+        action needs at least one (`*` meaning every organization).
+      operationId: updateUser
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: User id (the identity provider's subject id)
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+        description: Desired state of the user
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update a user of the tenant
       tags:
       - users
   /{tenant}/variants/germline/{locus_id}/cases/count:

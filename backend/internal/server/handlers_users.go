@@ -19,6 +19,11 @@ type userCreator interface {
 	CreateTenantUser(ctx context.Context, tenantCode string, req types.CreateUserRequest, actor string) error
 }
 
+// userUpdater applies an edited user within the tenant. Implemented by service.UserAdmin.
+type userUpdater interface {
+	UpdateTenantUser(ctx context.Context, tenantCode, userID string, req types.UpdateUserRequest, actor string) error
+}
+
 // ListUsersHandler
 // @Summary List the tenant's users
 // @Id listUsers
@@ -117,6 +122,71 @@ func PostUserHandler(svc userCreator, auth utils.Auth) gin.HandlerFunc {
 		case err == nil:
 			c.Status(http.StatusCreated)
 		case errors.Is(err, types.ErrUserAlreadyInTenant):
+			HandleConflictError(c, err.Error())
+		case errors.Is(err, types.ErrUnknownRole), errors.Is(err, types.ErrUnknownOrganizations),
+			errors.Is(err, types.ErrRoleRequiresOrg), errors.Is(err, types.ErrRoleNotOrgScoped):
+			HandleValidationError(c, err)
+		default:
+			HandleError(c, err)
+		}
+	}
+}
+
+// PutUserHandler
+// @Summary Update a user of the tenant
+// @Id updateUser
+// @Description Updates the user's name and replaces the roles granted to them in the tenant in the
+// @Description path with the ones in the payload — a role left out is revoked. Requires the
+// @Description `can_manage_user` action. The email is the identity the account signs in with and
+// @Description cannot be changed here. The `member` role is kept tenant-wide whether or not it is
+// @Description listed, and the last user able to manage users cannot lose that ability (409).
+// @Description Whether a role needs organizations is derived from its actions: a role holding only
+// @Description tenant-scoped actions must come with no `org_codes`, one holding any org-scoped
+// @Description action needs at least one (`*` meaning every organization).
+// @Tags users
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param user_id path string true "User id (the identity provider's subject id)"
+// @Param message body types.UpdateUserRequest true "Desired state of the user"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 409 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/users/{user_id} [put]
+func PutUserHandler(svc userUpdater, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req types.UpdateUserRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := req.Validate(); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		actor, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		switch err := svc.UpdateTenantUser(c.Request.Context(), *tenant, c.Param("user_id"), req, *actor); {
+		case err == nil:
+			c.Status(http.StatusOK)
+		case errors.Is(err, types.ErrUserNotInTenant):
+			HandleNotFoundError(c, "user")
+		case errors.Is(err, types.ErrLastTenantAdmin):
 			HandleConflictError(c, err.Error())
 		case errors.Is(err, types.ErrUnknownRole), errors.Is(err, types.ErrUnknownOrganizations),
 			errors.Is(err, types.ErrRoleRequiresOrg), errors.Is(err, types.ErrRoleNotOrgScoped):

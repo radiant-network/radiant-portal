@@ -245,3 +245,131 @@ func Test_PostUserHandler_ProvisioningErrorIsRedacted(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+// --- PUT /:tenant/users/:user_id --------------------------------------------
+
+type mockUserUpdater struct {
+	err error
+
+	got       types.UpdateUserRequest
+	gotTenant string
+	gotUserID string
+	gotActor  string
+	calls     int
+}
+
+func (m *mockUserUpdater) UpdateTenantUser(_ context.Context, tenantCode, userID string, req types.UpdateUserRequest, actor string) error {
+	m.got, m.gotTenant, m.gotUserID, m.gotActor, m.calls = req, tenantCode, userID, actor, m.calls+1
+	return m.err
+}
+
+func servePutUser(svc userUpdater, body string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.PUT("/:tenant/users/:user_id", PutUserHandler(svc, &testutils.MockAuth{Id: "acting-admin-sub"}))
+	req, _ := http.NewRequest("PUT", "/radiant/users/b3f1-keycloak-sub", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PutUserHandler_ForwardsRequestAndAnswers200(t *testing.T) {
+	svc := &mockUserUpdater{}
+
+	w := servePutUser(svc, `{
+		"first_name":"Grace","last_name":"Chen",
+		"roles":[{"role_code":"geneticist","org_codes":["CHOP","CHUSJ"]}]
+	}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, "radiant", svc.gotTenant)
+	assert.Equal(t, "b3f1-keycloak-sub", svc.gotUserID)
+	assert.Equal(t, "acting-admin-sub", svc.gotActor, "granted_by is the acting admin")
+	assert.Equal(t, types.UpdateUserRequest{
+		FirstName: "Grace",
+		LastName:  "Chen",
+		Roles:     []types.CreateUserRole{{RoleCode: "geneticist", OrgCodes: []string{"CHOP", "CHUSJ"}}},
+	}, svc.got)
+}
+
+func Test_PutUserHandler_EmptyRoleSetIsForwarded(t *testing.T) {
+	svc := &mockUserUpdater{}
+
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, svc.got.Roles, "an empty set is a valid edit — it revokes everything but member")
+}
+
+func Test_PutUserHandler_MissingNameIsRejected(t *testing.T) {
+	for _, body := range []string{
+		`{"last_name":"Chen"}`,
+		`{"first_name":"Grace"}`,
+		`{"first_name":"Grace","last_name":"  "}`,
+	} {
+		svc := &mockUserUpdater{}
+		w := servePutUser(svc, body)
+		assert.Equal(t, http.StatusBadRequest, w.Code, "body %s", body)
+		assert.Zero(t, svc.calls, "nothing is written when the payload is rejected")
+	}
+}
+
+func Test_PutUserHandler_DuplicateRoleIsRejected(t *testing.T) {
+	svc := &mockUserUpdater{}
+
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen","roles":[
+		{"role_code":"geneticist","org_codes":["CHOP"]},
+		{"role_code":"geneticist","org_codes":["CHUSJ"]}
+	]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"role \"geneticist\" is listed more than once"}`, w.Body.String())
+	assert.Zero(t, svc.calls)
+}
+
+func Test_PutUserHandler_MalformedBodyIsRejected(t *testing.T) {
+	w := servePutUser(&mockUserUpdater{}, `{"first_name":`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PutUserHandler_UnknownUserIsNotFound(t *testing.T) {
+	svc := &mockUserUpdater{err: types.ErrUserNotInTenant}
+
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"user not found"}`, w.Body.String())
+}
+
+func Test_PutUserHandler_LastAdminIsConflict(t *testing.T) {
+	svc := &mockUserUpdater{err: types.ErrLastTenantAdmin}
+
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"this is the last user who can manage the users of this tenant"}`, w.Body.String())
+}
+
+func Test_PutUserHandler_ScopeViolationIsBadRequest(t *testing.T) {
+	for _, sentinel := range []error{
+		types.ErrRoleRequiresOrg, types.ErrRoleNotOrgScoped,
+		types.ErrUnknownRole, types.ErrUnknownOrganizations,
+	} {
+		svc := &mockUserUpdater{err: fmt.Errorf("role %q %w", "geneticist", sentinel)}
+		w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code, "sentinel %v", sentinel)
+		assert.Contains(t, w.Body.String(), sentinel.Error(), "the reason reaches the caller")
+	}
+}
+
+func Test_PutUserHandler_UpdateErrorIsRedacted(t *testing.T) {
+	svc := &mockUserUpdater{err: errors.New("keycloak: connection refused")}
+
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

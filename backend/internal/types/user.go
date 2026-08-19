@@ -66,12 +66,14 @@ type UserResult struct {
 	Roles     []UserRoleResult `gorm:"-" json:"roles" validate:"required"`
 }
 
-// Errors returned by the create-user path so a handler can map them to a status code without
-// depending on the DB driver or on the provisioning internals.
+// Errors returned by the user administration paths so a handler can map them to a status code
+// without depending on the DB driver or on the provisioning internals.
 // The wording of each is chosen so the caller can prefix or suffix the offending code and read as
 // one sentence, e.g. fmt.Errorf("role %q %w", code, ErrRoleRequiresOrg).
 var (
 	ErrUserAlreadyInTenant  = errors.New("a user with this email already has access to this tenant")
+	ErrUserNotInTenant      = errors.New("this user has no access to this tenant")
+	ErrLastTenantAdmin      = errors.New("this is the last user who can manage the users of this tenant")
 	ErrUnknownRole          = errors.New("unknown role")
 	ErrUnknownOrganizations = errors.New("unknown organizations")
 	ErrRoleRequiresOrg      = errors.New("must be granted at one or more organizations")
@@ -99,6 +101,37 @@ type CreateUserRole struct {
 	OrgCodes []string `json:"org_codes"`
 } // @name CreateUserRole
 
+// UpdateUserRequest is the Edit-user payload. It carries the full desired state of the user in
+// the tenant: the identity attributes an administrator may change, and the complete set of roles
+// they should end up with. Email is absent because it is the Keycloak login identity and stays
+// read-only; the user is addressed by user_id in the path.
+//
+// Roles replaces the user's grants rather than adding to them, so omitting a role removes it —
+// except member, which the server keeps tenant-wide whether or not it is listed.
+// @Description Payload to update a user's identity and role set within a tenant.
+type UpdateUserRequest struct {
+	FirstName string           `json:"first_name" binding:"required"`
+	LastName  string           `json:"last_name" binding:"required"`
+	Roles     []CreateUserRole `json:"roles"`
+} // @name UpdateUserRequest
+
+func (r UpdateUserRequest) Validate() error {
+	if strings.TrimSpace(r.FirstName) == "" || strings.TrimSpace(r.LastName) == "" {
+		return fmt.Errorf("first_name and last_name must not be blank")
+	}
+	return validateRoles(r.Roles)
+}
+
+// TenantUser is a user's stored state within one tenant: their identity attributes and every role
+// grant they hold there, at the (role, organization) grain the edit diff works on.
+type TenantUser struct {
+	UserID    string
+	Email     string
+	FirstName string
+	LastName  string
+	Grants    []Grant
+}
+
 func (r CreateUserRequest) Validate() error {
 	// The email is sent to Keycloak as the username verbatim, so only the bare address form is
 	// accepted — ParseAddress would otherwise also let through `Grace Chen <grace@chop.edu>`.
@@ -109,8 +142,16 @@ func (r CreateUserRequest) Validate() error {
 	if strings.TrimSpace(r.FirstName) == "" || strings.TrimSpace(r.LastName) == "" {
 		return fmt.Errorf("first_name and last_name must not be blank")
 	}
+	return validateRoles(r.Roles)
+}
+
+// validateRoles checks what the shape of the payload can tell on its own — a role listed twice
+// would make the requested set ambiguous, and a blank code cannot name anything. Whether the
+// roles exist and whether their scope allows the organizations is settled server-side, against
+// the tenant's role catalog.
+func validateRoles(roles []CreateUserRole) error {
 	seen := map[string]bool{}
-	for _, role := range r.Roles {
+	for _, role := range roles {
 		if strings.TrimSpace(role.RoleCode) == "" {
 			return fmt.Errorf("role_code must not be blank")
 		}

@@ -12,16 +12,26 @@ import (
 // --- mocks -----------------------------------------------------------------
 
 type mockKeycloak struct {
-	sub string
-	err error
+	sub       string
+	err       error
+	renameErr error
 
 	gotUsername string
 	gotPassword string
+	gotRename   [3]string // {userID, firstName, lastName}
 }
 
 func (m *mockKeycloak) UpsertUser(_ context.Context, username, _, _, _, password string) (string, error) {
 	m.gotUsername, m.gotPassword = username, password
 	return m.sub, m.err
+}
+
+func (m *mockKeycloak) UpdateUserName(_ context.Context, userID, firstName, lastName string) error {
+	if m.renameErr != nil {
+		return m.renameErr
+	}
+	m.gotRename = [3]string{userID, firstName, lastName}
+	return nil
 }
 
 type mockRanger struct {
