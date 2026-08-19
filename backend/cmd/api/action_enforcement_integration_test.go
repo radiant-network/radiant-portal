@@ -177,6 +177,7 @@ var membershipOnlyTenantRoutes = map[string]bool{
 var expectedTenantActions = map[string]string{
 	"GET /:tenant/users":                                                             types.ActionManageUser,
 	"POST /:tenant/users":                                                            types.ActionManageUser,
+	"PUT /:tenant/users/:user_id":                                                    types.ActionManageUser,
 	"POST /:tenant/organizations":                                                    types.ActionManageOrg,
 	"PUT /:tenant/organizations/:code":                                               types.ActionManageOrg,
 	"POST /:tenant/cases/search":                                                     types.ActionSearchCase,

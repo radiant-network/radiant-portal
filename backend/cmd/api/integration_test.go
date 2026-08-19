@@ -124,6 +124,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// PUT requests
 		for _, route := range []string{
 			"radiant/organizations/CHOP",
+			"radiant/users/b3f1-keycloak-sub",
 			"radiant/patients/batch",
 			"radiant/samples/batch",
 			"radiant/sequencing/batch",

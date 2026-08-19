@@ -4,16 +4,23 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// TenantUserStore reads what the create path has to check before writing anything: whether the
-// email is already a user of the tenant, and what scope each requested role implies.
+// TenantUserStore is the authorization store behind user administration: what the create and edit
+// paths must check before writing anything — whether the email is already a user of the tenant,
+// what scope each requested role implies, who holds the administration action — plus the edit's
+// transactional write.
 type TenantUserStore interface {
 	EmailHasTenantGrant(ctx context.Context, tenantCode, email string) (bool, error)
 	RoleScopes(ctx context.Context, tenantCode string, roleCodes []string) (map[string]string, error)
+	TenantUser(ctx context.Context, tenantCode, userID string) (*types.TenantUser, error)
+	RolesWithAction(ctx context.Context, tenantCode, actionCode string) ([]string, error)
+	HasOtherUserWithAnyRole(ctx context.Context, tenantCode, userID string, roleCodes []string) (bool, error)
+	UpdateTenantUser(ctx context.Context, tenantCode, userID, firstName, lastName, grantedBy string, add, remove []types.Grant) error
 }
 
 // OrganizationChecker resolves which of the requested organization codes exist in the tenant.
@@ -69,6 +76,110 @@ func (a *UserAdmin) CreateTenantUser(ctx context.Context, tenant string, req typ
 
 	logGrants(ctx, actor, sub, grants)
 	return nil
+}
+
+// UpdateTenantUser applies the edited user: their identity attributes, and the role set they
+// should end up with. The payload carries the whole desired set, so a role it omits is revoked —
+// except member, which resolveGrants keeps tenant-wide either way.
+//
+// actor is the acting administrator's user_id, recorded as granted_by on the rows this adds.
+func (a *UserAdmin) UpdateTenantUser(ctx context.Context, tenant, userID string, req types.UpdateUserRequest, actor string) error {
+	current, err := a.users.TenantUser(ctx, tenant, userID)
+	if err != nil {
+		return err
+	}
+	desired, err := a.resolveGrants(ctx, tenant, req.Roles)
+	if err != nil {
+		return err
+	}
+	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, current, desired); err != nil {
+		return err
+	}
+	add, remove := diffGrants(current.Grants, desired)
+
+	// Keycloak goes first because the portal serves names from Postgres: a failure here leaves
+	// nothing visibly changed and a retry converges, whereas the reverse order would commit the
+	// whole edit and still answer with an error. The rename is skipped when the name is unchanged,
+	// so editing roles alone never depends on the identity provider being reachable.
+	if req.FirstName != current.FirstName || req.LastName != current.LastName {
+		if err := a.deps.Keycloak.UpdateUserName(ctx, userID, req.FirstName, req.LastName); err != nil {
+			return fmt.Errorf("keycloak: update user %q: %w", userID, err)
+		}
+	}
+	if err := a.users.UpdateTenantUser(ctx, tenant, userID, req.FirstName, req.LastName, actor, add, remove); err != nil {
+		return err
+	}
+
+	logGrants(ctx, actor, userID, add)
+	logRevocations(ctx, actor, userID, remove)
+	return nil
+}
+
+// assertTenantKeepsAnAdmin refuses an edit that would strip the tenant of its last user able to
+// manage users. The action is only ever obtained from a role, and granting a role takes that same
+// action, so a tenant that loses its last holder cannot be recovered through the API at all.
+func (a *UserAdmin) assertTenantKeepsAnAdmin(ctx context.Context, tenant string, current *types.TenantUser, desired []types.Grant) error {
+	adminRoles, err := a.users.RolesWithAction(ctx, tenant, types.ActionManageUser)
+	if err != nil {
+		return err
+	}
+	if !holdsAnyRole(current.Grants, adminRoles) || holdsAnyRole(desired, adminRoles) {
+		return nil
+	}
+	other, err := a.users.HasOtherUserWithAnyRole(ctx, tenant, current.UserID, adminRoles)
+	if err != nil {
+		return err
+	}
+	if !other {
+		return types.ErrLastTenantAdmin
+	}
+	return nil
+}
+
+func holdsAnyRole(grants []types.Grant, roleCodes []string) bool {
+	for _, grant := range grants {
+		if slices.Contains(roleCodes, grant.RoleCode) {
+			return true
+		}
+	}
+	return false
+}
+
+// diffGrants reduces the desired set to the rows that actually have to be written, at the
+// (role, organization) grain. Leaving the unchanged rows out of both lists is what preserves their
+// granted_at / granted_by — a delete-all-then-reinsert would rewrite the audit of every grant.
+func diffGrants(current, desired []types.Grant) (add, remove []types.Grant) {
+	held := map[grantKey]bool{}
+	for _, grant := range current {
+		held[keyOf(grant)] = true
+	}
+	wanted := map[grantKey]bool{}
+	for _, grant := range desired {
+		key := keyOf(grant)
+		if wanted[key] {
+			// The same organization can be listed twice for one role; the grant is still one row.
+			continue
+		}
+		wanted[key] = true
+		if !held[key] {
+			add = append(add, grant)
+		}
+	}
+	for _, grant := range current {
+		if !wanted[keyOf(grant)] {
+			remove = append(remove, grant)
+		}
+	}
+	return add, remove
+}
+
+type grantKey struct {
+	roleCode string
+	orgCode  string
+}
+
+func keyOf(grant types.Grant) grantKey {
+	return grantKey{roleCode: grant.RoleCode, orgCode: grant.OrgCode}
 }
 
 // resolveGrants turns the requested roles into user_role rows, with the tenant-wide member grant
@@ -149,6 +260,18 @@ func (a *UserAdmin) assertOrgsExist(ctx context.Context, tenant string, codes []
 		return fmt.Errorf("%w: %s", types.ErrUnknownOrganizations, strings.Join(missing, ", "))
 	}
 	return nil
+}
+
+func logRevocations(ctx context.Context, actor, sub string, grants []types.Grant) {
+	for _, grant := range grants {
+		slog.InfoContext(ctx, "role revoked",
+			slog.String("actor", actor),
+			slog.String("user_id", sub),
+			slog.String("tenant", grant.TenantCode),
+			slog.String("org", grant.OrgCode),
+			slog.String("role", grant.RoleCode),
+		)
+	}
 }
 
 // logGrants records who granted what to whom. Permission changes are audited through the logs

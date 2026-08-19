@@ -433,6 +433,44 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Grace\",\n  \"last_name\": \"Chen\",\n  \"roles\": [\n    {\n      \"role_code\": \"geneticist\",\n      \"org_codes\": [\n        \"CHOP\",\n        \"CHUSJ\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/users/{{user_id}}",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
