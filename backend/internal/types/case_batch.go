@@ -10,6 +10,9 @@ const (
 	ObsCodeAncestry      = "ancestry"
 	ObsCodeConsanguinity = "consanguinity"
 	ObsCodeExam          = "exam"
+	ObsCodePhenotype     = "phenotype"
+	ObsCodeNote          = "note"
+	ObsCodeCondition     = "condition"
 )
 
 func ObservationRequiresOnsetAndInterpretation(code string) bool {
@@ -34,6 +37,7 @@ type CaseBatch struct {
 	AnalysisCode               string                           `json:"analysis_code" toml:"analysis_code" binding:"required"`
 	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string                           `json:"note,omitempty" toml:"note"`
+	DiagnosisHypothesis        string                           `json:"diagnosis_hypothesis,omitempty" toml:"diagnosis_hypothesis"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
@@ -153,6 +157,7 @@ type UpdateCaseBatch struct {
 	AnalysisCode               string              `json:"analysis_code" toml:"analysis_code" binding:"required"`
 	ResolutionStatusCode       string              `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string              `json:"note,omitempty" toml:"note"`
+	DiagnosisHypothesis        string              `json:"diagnosis_hypothesis,omitempty" toml:"diagnosis_hypothesis"`
 	OrderingOrganizationCode   string              `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	OrderingPhysician          string              `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	Patients                   []*CasePatientBatch `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`

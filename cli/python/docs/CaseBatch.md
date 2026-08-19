@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_code** | **str** |  | 
 **category_code** | **str** |  | 
+**diagnosis_hypothesis** | **str** |  | [optional] 
 **diagnostic_lab_code** | **str** |  | 
 **fetuses** | [**List[CaseFetusBatch]**](CaseFetusBatch.md) |  | [optional] 
 **note** | **str** |  | [optional] 

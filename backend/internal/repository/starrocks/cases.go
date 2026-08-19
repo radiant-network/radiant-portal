@@ -260,7 +260,7 @@ func (r *CasesRepository) retrieveCaseLevelData(ctx context.Context, caseId int)
 	txCase = r.joiner.CaseWithDiagnosisLab(txCase)
 	txCase = r.joiner.CaseWithOrderingOrganization(txCase)
 	txCase = r.joiner.CaseWithProject(txCase)
-	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.created_on, c.updated_on, c.note, c.case_category_code, case_cat.name_en as case_category_name, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.ordering_physician as prescriber, prj.code as project_code, prj.name as project_name, panel.code as panel_code, panel.name as panel_name")
+	txCase = txCase.Select("c.id as case_id, c.proband_id, c.case_type_code as case_type_code, ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.created_on, c.updated_on, c.note, c.diagnosis_hypothesis, c.case_category_code, case_cat.name_en as case_category_name, mondo.id as primary_condition_id, mondo.name as primary_condition_name, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, c.status_code, order_org.code as ordering_organization_code, order_org.name as ordering_organization_name, c.priority_code, c.ordering_physician as prescriber, prj.code as project_code, prj.name as project_name, panel.code as panel_code, panel.name as panel_name")
 	txCase = txCase.Where("c.id = ?", caseId)
 	if err := txCase.Find(&caseEntity).Error; err != nil {
 		return nil, fmt.Errorf("error fetching case entity: %w", err)
@@ -307,7 +307,7 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	txMembers = txMembers.Select("p.id as patient_id, fetus.id as fetus_id, " +
 		"COALESCE(p.last_name, '') as last_name, COALESCE(p.first_name, '') as first_name, " +
 		"f.affected_status_code, f.relationship_to_proband_code as relationship_to_proband, " +
-		"p.date_of_birth, " +
+		"p.date_of_birth, fetus.last_menstrual_period, fetus.estimated_due_date, " +
 		"COALESCE(p.life_status_code, fetus.life_status_code) as life_status_code, " +
 		"COALESCE(p.sex_code, fetus.sex_code) as sex_code, " +
 		"COALESCE(p.submitter_patient_id, '') as submitter_patient_id, COALESCE(p.jhn, '') as jhn, " +
@@ -352,7 +352,150 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 		}
 	}
 
+	exams, err := r.retrieveCaseExams(ctx, caseId)
+	if err != nil {
+		return nil, err
+	}
+	examsPerPatient := utils.GroupByProperty(*exams, func(e types.ExamObservation) string {
+		return subjectKey(e.PatientID, e.FetusID)
+	})
+
+	valueSets, err := r.retrieveCaseValueSetObservations(ctx, caseId)
+	if err != nil {
+		return nil, err
+	}
+	valueSetsPerPatient := utils.GroupByProperty(*valueSets, func(v types.ValueSetObsCategorical) string {
+		return subjectKey(v.PatientID, v.FetusID)
+	})
+
+	notes, err := r.retrieveCaseNotes(ctx, caseId)
+	if err != nil {
+		return nil, err
+	}
+	notesPerPatient := utils.GroupByProperty(*notes, func(n types.SubjectNote) string {
+		return subjectKey(n.PatientID, n.FetusID)
+	})
+
+	familyHistory, err := r.retrieveCaseFamilyHistory(ctx, caseId)
+	if err != nil {
+		return nil, err
+	}
+	familyHistoryPerPatient := utils.GroupByProperty(*familyHistory, func(f types.SubjectFamilyHistory) string {
+		return subjectKey(&f.PatientID, nil)
+	})
+
+	for i, m := range members {
+		key := subjectKey(m.PatientID, m.FetusID)
+
+		members[i].Exams = make(types.JsonArray[types.CaseExam], 0)
+		for _, exam := range examsPerPatient[key] {
+			members[i].Exams = append(members[i].Exams, exam.CaseExam)
+		}
+
+		members[i].Ethnicities = make(types.JsonArray[types.ValueSetItem], 0)
+		for _, valueSet := range valueSetsPerPatient[key] {
+			switch valueSet.ObservationCode {
+			case types.ObsCodeAncestry:
+				members[i].Ethnicities = append(members[i].Ethnicities, valueSet.ValueSetItem)
+			case types.ObsCodeConsanguinity:
+				// gorm:"-" on the field: GORM reads a pointer-to-struct as a relation.
+				coded := valueSet.ValueSetItem
+				members[i].Consanguinity = &coded
+			}
+		}
+
+		members[i].Notes = make(types.JsonArray[string], 0)
+		for _, note := range notesPerPatient[key] {
+			members[i].Notes = append(members[i].Notes, note.Value)
+		}
+
+		members[i].FamilyHistory = make(types.JsonArray[types.CaseFamilyHistory], 0)
+		for _, entry := range familyHistoryPerPatient[key] {
+			members[i].FamilyHistory = append(members[i].FamilyHistory, entry.CaseFamilyHistory)
+		}
+	}
+
 	return &members, nil
+}
+
+func (r *CasesRepository) retrieveCaseValueSetObservations(ctx context.Context, caseId int) (*[]types.ValueSetObsCategorical, error) {
+	var observations []types.ValueSetObsCategorical
+
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.TenantQualifiedName(ctx), types.ObsCategoricalTable.Alias))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s anc ON obs.observation_code = ? AND anc.code = obs.code_value", types.AncestryTable.TenantQualifiedName(ctx)), types.ObsCodeAncestry)
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s cons ON obs.observation_code = ? AND cons.code = obs.code_value", types.ConsanguinityTable.TenantQualifiedName(ctx)), types.ObsCodeConsanguinity)
+	tx = tx.Where("obs.observation_code IN ? AND obs.case_id = ?", []string{types.ObsCodeAncestry, types.ObsCodeConsanguinity}, caseId)
+	tx = tx.Order("obs.observation_code asc, obs.code_value asc")
+	tx = tx.Select("obs.patient_id, obs.fetus_id, obs.observation_code, " +
+		"obs.code_value as code, " +
+		"COALESCE(anc.name_en, cons.name_en) as name")
+	if err := tx.Find(&observations).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case value set observations: %w", err)
+	}
+
+	return &observations, nil
+}
+
+func (r *CasesRepository) retrieveCaseNotes(ctx context.Context, caseId int) (*[]types.SubjectNote, error) {
+	var notes []types.SubjectNote
+
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.ObsStringTable.TenantQualifiedName(ctx), types.ObsStringTable.Alias))
+	tx = tx.Where("obs_string.observation_code = ? AND obs_string.case_id = ?", types.ObsCodeNote, caseId)
+	tx = tx.Order("obs_string.id asc")
+	tx = tx.Select("obs_string.patient_id, obs_string.fetus_id, obs_string.value as value")
+	if err := tx.Find(&notes).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case notes: %w", err)
+	}
+
+	return &notes, nil
+}
+
+func (r *CasesRepository) retrieveCaseFamilyHistory(ctx context.Context, caseId int) (*[]types.SubjectFamilyHistory, error) {
+	var familyHistory []types.SubjectFamilyHistory
+
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.FamilyHistoryTable.TenantQualifiedName(ctx), types.FamilyHistoryTable.Alias))
+	tx = tx.Where("family_history.case_id = ?", caseId)
+	tx = tx.Order("family_history.family_member_code asc, family_history.condition asc")
+	tx = tx.Select("family_history.patient_id, family_history.family_member_code, family_history.condition")
+	if err := tx.Find(&familyHistory).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case family history: %w", err)
+	}
+
+	return &familyHistory, nil
+}
+
+func (r *CasesRepository) retrieveCaseExams(ctx context.Context, caseId int) (*[]types.ExamObservation, error) {
+	var exams []types.ExamObservation
+
+	db := r.db.WithContext(ctx)
+	examTable := types.ExamTable.TenantQualifiedName(ctx)
+	examJoin := fmt.Sprintf("LEFT JOIN %s %s ON %s.code = %%s.exam_code AND %s.tenant_code = %%s.tenant_code",
+		examTable, types.ExamTable.Alias, types.ExamTable.Alias, types.ExamTable.Alias)
+
+	// obs_categorical holds an abnormal exam's coded values, one row per value; obs_string the exams
+	// with nothing to code — normal, abnormal without a value, and the free-text "other".
+	subQueryCategorical := db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.TenantQualifiedName(ctx), types.ObsCategoricalTable.Alias))
+	subQueryCategorical = subQueryCategorical.Joins(fmt.Sprintf(examJoin, "obs", "obs"))
+	subQueryCategorical = subQueryCategorical.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(ctx)))
+	subQueryCategorical = subQueryCategorical.Where("obs.observation_code = ? AND obs.case_id = ?", types.ObsCodeExam, caseId)
+	subQueryCategorical = subQueryCategorical.Select("obs.patient_id, obs.fetus_id, obs.exam_code, " +
+		"exam.name_en as name, obs.interpretation_code, " +
+		"obs.code_value as value, hpo.name as value_name, obs.coding_system")
+
+	subQueryText := db.Table(fmt.Sprintf("%s %s", types.ObsStringTable.TenantQualifiedName(ctx), types.ObsStringTable.Alias))
+	subQueryText = subQueryText.Joins(fmt.Sprintf(examJoin, "obs_string", "obs_string"))
+	subQueryText = subQueryText.Where("obs_string.observation_code = ? AND obs_string.case_id = ?", types.ObsCodeExam, caseId)
+	subQueryText = subQueryText.Select("obs_string.patient_id, obs_string.fetus_id, obs_string.exam_code, " +
+		"exam.name_en as name, obs_string.interpretation_code, " +
+		"obs_string.value as value, CAST(NULL AS STRING) as value_name, CAST(NULL AS STRING) as coding_system")
+
+	tx := db.Table("(? UNION ALL ?) exams", subQueryCategorical, subQueryText)
+	tx = tx.Order("exam_code asc, value asc")
+	if err := tx.Find(&exams).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving case exams: %w", err)
+	}
+
+	return &exams, nil
 }
 
 // patient.id and fetus.id are independent sequences that can produce the same number, so tag

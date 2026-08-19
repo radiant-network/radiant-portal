@@ -387,10 +387,10 @@ func Test_validateFetusObservationsText_Valid(t *testing.T) {
 	assert.Empty(t, cr.Errors)
 }
 
-func Test_validateFetusObservationsText_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
+func Test_validateFetusObservationsText_AcceptsAnyCharacter(t *testing.T) {
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{
 		ObservationsText: []*types.ObservationTextBatch{
-			{Code: "note", Value: "Échographie fœtale : clarté nucale élevée (OBS-001) ; suivi requis, l’œdème persiste"},
+			{Code: "note", Value: "Fetal ultrasound : nuchal translucency raised (OBS-001) ; follow-up required — œdema persists"},
 		},
 	}})
 	cr.validateFetusObservationsText(0)

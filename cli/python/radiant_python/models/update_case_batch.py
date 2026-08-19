@@ -33,6 +33,7 @@ class UpdateCaseBatch(BaseModel):
     """ # noqa: E501
     analysis_code: StrictStr
     category_code: StrictStr
+    diagnosis_hypothesis: Optional[StrictStr] = None
     diagnostic_lab_code: StrictStr
     fetuses: Optional[List[CaseFetusBatch]] = Field(default=None, description="Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already on the case is updated in place, a new key is created, and a key the payload drops is deleted — refused when a sample still points at it.")
     note: Optional[StrictStr] = None
@@ -49,7 +50,7 @@ class UpdateCaseBatch(BaseModel):
     submitter_case_id: StrictStr
     tasks: Optional[List[CaseTaskBatch]] = None
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
+    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnosis_hypothesis", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
 
     @field_validator('category_code')
     def category_code_validate_enum(cls, value):
@@ -146,6 +147,7 @@ class UpdateCaseBatch(BaseModel):
         _obj = cls.model_validate({
             "analysis_code": obj.get("analysis_code"),
             "category_code": obj.get("category_code"),
+            "diagnosis_hypothesis": obj.get("diagnosis_hypothesis"),
             "diagnostic_lab_code": obj.get("diagnostic_lab_code"),
             "fetuses": [CaseFetusBatch.from_dict(_item) for _item in obj["fetuses"]] if obj.get("fetuses") is not None else None,
             "note": obj.get("note"),

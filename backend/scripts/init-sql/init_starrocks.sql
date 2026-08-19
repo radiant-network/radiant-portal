@@ -620,7 +620,10 @@ VALUES
     ('HP:0100622', 'Maternal seizure', 'HP:0100622 Maternal seizure'),
     ('HP:0000479', 'Abnormal retinal morphology', 'HP:0000479 Abnormal retinal morphology'),
     ('HP:0001562', 'Oligohydramnios', 'HP:0001562 Oligohydramnios'),
-    ('HP:0001561', 'Polyhydramnios', 'HP:0001561 Polyhydramnios');
+    ('HP:0001561', 'Polyhydramnios', 'HP:0001561 Polyhydramnios'),
+    -- Values of the seeded abnormal EMG (case 1): without them the exam shows a bare HP code.
+    ('HP:0003457', 'EMG abnormality', 'HP:0003457 EMG abnormality'),
+    ('HP:0003458', 'EMG: myopathic abnormalities', 'HP:0003458 EMG: myopathic abnormalities');
 
 INSERT OVERWRITE test_db.clinvar_rcv_summary
 (locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins, submissions, clinical_significance_count)

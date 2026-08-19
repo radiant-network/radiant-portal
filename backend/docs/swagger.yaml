@@ -162,6 +162,8 @@ components:
           - prenatal
           - postnatal
           type: string
+        diagnosis_hypothesis:
+          type: string
         diagnostic_lab_code:
           type: string
         fetuses:
@@ -261,6 +263,8 @@ components:
           type: string
         created_on:
           type: string
+        diagnosis_hypothesis:
+          type: string
         diagnosis_lab_code:
           type: string
         diagnosis_lab_name:
@@ -319,6 +323,36 @@ components:
       - status_code
       - tasks
       - updated_on
+      type: object
+    CaseExam:
+      description: Paraclinical exam observation to display in Case Entity
+      properties:
+        coding_system:
+          type: string
+        exam_code:
+          type: string
+        interpretation_code:
+          type: string
+        name:
+          type: string
+        value:
+          type: string
+        value_name:
+          type: string
+      required:
+      - exam_code
+      type: object
+    CaseFamilyHistory:
+      description: A condition reported in a member's family, and who it was reported
+        for
+      properties:
+        condition:
+          type: string
+        family_member_code:
+          type: string
+      required:
+      - condition
+      - family_member_code
       type: object
     CaseFetusBatch:
       properties:
@@ -487,12 +521,25 @@ components:
       properties:
         affected_status_code:
           type: string
+        consanguinity:
+          $ref: '#/components/schemas/ValueSetItem'
         date_of_birth:
           type: string
-        ethnicity_codes:
-          description: TODO
+        estimated_due_date:
+          type: string
+        ethnicities:
           items:
-            type: string
+            $ref: '#/components/schemas/ValueSetItem'
+          type: array
+          uniqueItems: false
+        exams:
+          items:
+            $ref: '#/components/schemas/CaseExam'
+          type: array
+          uniqueItems: false
+        family_history:
+          items:
+            $ref: '#/components/schemas/CaseFamilyHistory'
           type: array
           uniqueItems: false
         fetus_id:
@@ -501,6 +548,8 @@ components:
           type: string
         jhn:
           type: string
+        last_menstrual_period:
+          type: string
         last_name:
           type: string
         life_status_code:
@@ -508,6 +557,11 @@ components:
         non_observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'
+          type: array
+          uniqueItems: false
+        notes:
+          items:
+            type: string
           type: array
           uniqueItems: false
         observed_phenotypes:
@@ -2713,6 +2767,8 @@ components:
           enum:
           - prenatal
           - postnatal
+          type: string
+        diagnosis_hypothesis:
           type: string
         diagnostic_lab_code:
           type: string

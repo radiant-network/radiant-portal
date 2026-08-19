@@ -19,7 +19,8 @@ import (
 )
 
 const TextMaxLength = 100
-const NoteMaxLength = 1000
+
+const FreeTextMaxLength = 1000
 
 // Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
@@ -37,10 +38,6 @@ var FamilyMemberCodeRegExpCompiled = regexp.MustCompile(FamilyMemberCodeRegExp)
 const TextRegExp = `^[A-Za-z0-9\-\_\.\,\: ]+$`
 
 var TextRegExpCompiled = regexp.MustCompile(TextRegExp)
-
-const FreeTextRegExp = `^[A-Za-z0-9\-\_\.\,\:\;\(\)\+\/\%\?'’–— À-ÿŒœ]+$`
-
-var FreeTextRegExpCompiled = regexp.MustCompile(FreeTextRegExp)
 
 const (
 	CaseAlreadyExists               = "CASE-001"
@@ -667,7 +664,7 @@ func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int)
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "condition"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.ValidateStringField(fh.Condition, fieldName, path, PatientInvalidField, cr.GetResourceType(), TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
+	cr.ValidateStringField(fh.Condition, fieldName, path, PatientInvalidField, cr.GetResourceType(), FreeTextMaxLength, nil, []string{}, true)
 
 }
 
@@ -718,9 +715,9 @@ func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.Ob
 	if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
 		cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
 	} else {
-		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
+		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, true)
 	}
-	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, FreeTextRegExpCompiled, []string{}, false)
+	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, false)
 }
 
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
@@ -740,7 +737,7 @@ func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex 
 	fieldName := "value"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
 	res := fmt.Sprintf("create_case %d - patient %d - observations_text %d - value: %q", cr.Index, patientIndex, obsIndex, obs.Value)
-	cr.ValidateStringField(obs.Value, fieldName, path, ObservationInvalidField, res, TextMaxLength, FreeTextRegExpCompiled, []string{}, true)
+	cr.ValidateStringField(obs.Value, fieldName, path, ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, true)
 }
 
 func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {
@@ -948,6 +945,23 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Co
 	return nil
 }
 
+// Transitional: drop the fallback once the ingester fills DiagnosisHypothesis instead of sending a
+// 'condition' observation.
+func (cr *CaseValidationRecord) diagnosisHypothesis() string {
+	if cr.Case.DiagnosisHypothesis != "" {
+		return cr.Case.DiagnosisHypothesis
+	}
+	var legacy []string
+	for _, p := range cr.Case.Patients {
+		for _, o := range p.ObservationsText {
+			if o != nil && o.Code == types.ObsCodeCondition && o.Value != "" {
+				legacy = append(legacy, o.Value)
+			}
+		}
+	}
+	return strings.Join(legacy, "\n")
+}
+
 func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
 	cr.ValidateStringField(value, fieldName, path, CaseInvalidField, fmt.Sprintf("%s %d", cr.GetResourceType(), cr.Index), maxLength, regExp, []string{}, required)
 }
@@ -1023,7 +1037,10 @@ func (cr *CaseValidationRecord) validateCaseCommonFields(path string) {
 		cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)
 	}
 	if cr.Case.Note != "" {
-		cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)
+		cr.validateCaseField(cr.Case.Note, "note", path, nil, FreeTextMaxLength, false)
+	}
+	if cr.Case.DiagnosisHypothesis != "" {
+		cr.validateCaseField(cr.Case.DiagnosisHypothesis, "diagnosis_hypothesis", path, nil, FreeTextMaxLength, false)
 	}
 	if cr.Case.OrderingPhysician != "" {
 		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, NameRegExpCompiled, TextMaxLength, false)
@@ -1489,6 +1506,7 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 		OrderingPhysician:        cr.Case.OrderingPhysician,
 		SubmitterCaseID:          cr.Case.SubmitterCaseId,
 		Note:                     cr.Case.Note,
+		DiagnosisHypothesis:      cr.diagnosisHypothesis(),
 		TenantCode:               sc.TenantCode,
 		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
 		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
@@ -1619,6 +1637,10 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 		}
 
 		for _, o := range p.ObservationsText {
+			// Diverted to cases.diagnosis_hypothesis — see diagnosisHypothesis.
+			if o.Code == types.ObsCodeCondition {
+				continue
+			}
 			obs := types.ObsString{
 				CaseID:             *cr.CaseID,
 				PatientID:          utils.IntPtr(patient.ID),

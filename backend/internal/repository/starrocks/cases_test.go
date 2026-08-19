@@ -715,6 +715,191 @@ func Test_RetrieveCasePatients_TwinFetusCase(t *testing.T) {
 	})
 }
 
+func Test_RetrieveCasePatients_FetusGestationalDates(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		soloMembers, err := repo.retrieveCasePatients(t.Context(), 72)
+		assert.NoError(t, err)
+		fetus1 := findMemberByFetusID(*soloMembers, 1)
+		require.NotNil(t, fetus1)
+		require.NotNil(t, fetus1.LastMenstrualPeriod)
+		assert.Equal(t, "2026-02-01 00:00:00 +0000 UTC", fetus1.LastMenstrualPeriod.String())
+		assert.Nil(t, fetus1.EstimatedDueDate)
+		assert.Nil(t, fetus1.DateOfBirth)
+
+		twinMembers, err := repo.retrieveCasePatients(t.Context(), 73)
+		assert.NoError(t, err)
+
+		fetus2 := findMemberByFetusID(*twinMembers, 2)
+		require.NotNil(t, fetus2)
+		assert.Nil(t, fetus2.LastMenstrualPeriod)
+		require.NotNil(t, fetus2.EstimatedDueDate)
+		assert.Equal(t, "2026-10-15 00:00:00 +0000 UTC", fetus2.EstimatedDueDate.String())
+
+		fetus3 := findMemberByFetusID(*twinMembers, 3)
+		require.NotNil(t, fetus3)
+		assert.Nil(t, fetus3.LastMenstrualPeriod)
+		assert.Nil(t, fetus3.EstimatedDueDate)
+
+		mother := findMemberByRelationship(*twinMembers, "proband")
+		require.NotNil(t, mother)
+		assert.Nil(t, mother.LastMenstrualPeriod)
+		assert.Nil(t, mother.EstimatedDueDate)
+	})
+}
+
+func Test_RetrieveCasePatients_ParaclinicalExams(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		members, err := repo.retrieveCasePatients(t.Context(), 74)
+		assert.NoError(t, err)
+
+		mother := findMemberByRelationship(*members, "proband")
+		require.NotNil(t, mother)
+		require.Len(t, mother.Exams, 4)
+
+		assert.Equal(t, "eeg", mother.Exams[0].ExamCode)
+		assert.Equal(t, "Electroencephalogram (EEG)", mother.Exams[0].Name)
+		assert.Equal(t, "normal", mother.Exams[0].InterpretationCode)
+		assert.Equal(t, "normal", mother.Exams[0].Value)
+		assert.Empty(t, mother.Exams[0].ValueName)
+		assert.Empty(t, mother.Exams[0].CodingSystem)
+
+		assert.Equal(t, "emg", mother.Exams[1].ExamCode)
+		assert.Equal(t, "Electromyography (EMG)", mother.Exams[1].Name)
+		assert.Equal(t, "abnormal", mother.Exams[1].InterpretationCode)
+		assert.Equal(t, "HP:0003457", mother.Exams[1].Value)
+		assert.Equal(t, "EMG abnormality", mother.Exams[1].ValueName)
+		assert.Equal(t, "HPO", mother.Exams[1].CodingSystem)
+
+		assert.Equal(t, "emg", mother.Exams[2].ExamCode)
+		assert.Equal(t, "HP:0003458", mother.Exams[2].Value)
+		assert.Equal(t, "EMG: myopathic abnormalities", mother.Exams[2].ValueName)
+
+		assert.Equal(t, "other", mother.Exams[3].ExamCode)
+		assert.Equal(t, "Other", mother.Exams[3].Name)
+		assert.Equal(t, "Ophthalmology consult 2026", mother.Exams[3].Value)
+		assert.Empty(t, mother.Exams[3].InterpretationCode)
+
+		fetus := findMemberByFetusID(*members, 4)
+		require.NotNil(t, fetus)
+		require.Len(t, fetus.Exams, 2)
+
+		// Looked up by code rather than by position: where a row with no exam_code sorts is left to
+		// the database, and asserting on it would pin behaviour we do not control.
+		uncoded := findExamByCode(fetus.Exams, "")
+		require.NotNil(t, uncoded)
+		// Guards the LEFT JOIN: an INNER JOIN would drop this row with no error.
+		assert.Empty(t, uncoded.Name)
+		assert.Equal(t, "abnormal", uncoded.InterpretationCode)
+		assert.Equal(t, "Bilateral ventriculomegaly", uncoded.Value)
+
+		eeg := findExamByCode(fetus.Exams, "eeg")
+		require.NotNil(t, eeg)
+		assert.Equal(t, "abnormal", eeg.InterpretationCode)
+		assert.Equal(t, "abnormal", eeg.Value)
+	})
+}
+
+func Test_RetrieveCasePatients_ValueSetObservationsNotesAndFamilyHistory(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		members, err := repo.retrieveCasePatients(t.Context(), 74)
+		assert.NoError(t, err)
+
+		mother := findMemberByRelationship(*members, "proband")
+		require.NotNil(t, mother)
+
+		require.Len(t, mother.Ethnicities, 2)
+		assert.Equal(t, "BLK", mother.Ethnicities[0].Code)
+		assert.Equal(t, "Black", mother.Ethnicities[0].Name)
+		assert.Equal(t, "MIX", mother.Ethnicities[1].Code)
+		assert.Equal(t, "Mixed", mother.Ethnicities[1].Name)
+
+		require.NotNil(t, mother.Consanguinity)
+		assert.Equal(t, "consanguinity", mother.Consanguinity.Code)
+		assert.Equal(t, "Consanguinity in family", mother.Consanguinity.Name)
+
+		require.Len(t, mother.Notes, 1)
+		assert.Equal(t, "High-risk pregnancy follow-up", mother.Notes[0])
+
+		require.Len(t, mother.FamilyHistory, 2)
+		assert.Equal(t, "brother", mother.FamilyHistory[0].FamilyMemberCode)
+		assert.Equal(t, "Epilepsy", mother.FamilyHistory[0].Condition)
+		assert.Equal(t, "mother", mother.FamilyHistory[1].FamilyMemberCode)
+		assert.Equal(t, "Myotonic dystrophy", mother.FamilyHistory[1].Condition)
+
+		fetus := findMemberByFetusID(*members, 4)
+		require.NotNil(t, fetus)
+		require.Len(t, fetus.Notes, 1)
+		assert.Equal(t, "Findings on the second-trimester ultrasound", fetus.Notes[0])
+		assert.Empty(t, fetus.Ethnicities)
+		assert.Nil(t, fetus.Consanguinity)
+		assert.Empty(t, fetus.FamilyHistory)
+
+		father := findMemberByRelationship(*members, "father")
+		require.NotNil(t, father)
+		assert.Empty(t, father.Notes)
+		assert.Empty(t, father.Ethnicities)
+		assert.Nil(t, father.Consanguinity)
+	})
+}
+
+func Test_GetCaseEntity_DiagnosisHypothesis(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseEntity, err := repo.GetCaseEntity(t.Context(), 74)
+		assert.NoError(t, err)
+		assert.Equal(t, "Suspected congenital myotonic dystrophy", caseEntity.DiagnosisHypothesis)
+
+		withoutHypothesis, err := repo.GetCaseEntity(t.Context(), 1)
+		assert.NoError(t, err)
+		assert.Empty(t, withoutHypothesis.DiagnosisHypothesis)
+	})
+}
+
+func Test_RetrieveCasePatients_CaseWithoutExams(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		members, err := repo.retrieveCasePatients(t.Context(), 1)
+		assert.NoError(t, err)
+		require.Len(t, *members, 3)
+		for _, member := range *members {
+			assert.Empty(t, member.Exams)
+			assert.NotNil(t, member.Exams)
+		}
+	})
+}
+
+func findExamByCode(exams types.JsonArray[types.CaseExam], code string) *types.CaseExam {
+	for i := range exams {
+		if exams[i].ExamCode == code {
+			return &exams[i]
+		}
+	}
+	return nil
+}
+
+func findMemberByFetusID(members []types.CasePatientClinicalInformation, fetusID int) *types.CasePatientClinicalInformation {
+	for i := range members {
+		if members[i].FetusID != nil && *members[i].FetusID == fetusID {
+			return &members[i]
+		}
+	}
+	return nil
+}
+
+func findMemberByRelationship(members []types.CasePatientClinicalInformation, relationship string) *types.CasePatientClinicalInformation {
+	for i := range members {
+		if members[i].RelationshipToProband == relationship {
+			return &members[i]
+		}
+	}
+	return nil
+}
+
 func Test_RetrieveCaseTasks(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

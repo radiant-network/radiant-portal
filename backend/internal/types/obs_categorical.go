@@ -31,6 +31,24 @@ type PhenotypeObsCategorical struct {
 	PhenotypeName      string
 }
 
+type ValueSetObsCategorical struct {
+	PatientID       *int
+	FetusID         *int
+	ObservationCode string
+	ValueSetItem
+}
+
+type SubjectNote struct {
+	PatientID *int
+	FetusID   *int
+	Value     string
+}
+
+type SubjectFamilyHistory struct {
+	PatientID int
+	CaseFamilyHistory
+}
+
 var ObsCategoricalTable = Table{
 	Name:           "obs_categorical",
 	FederationName: "radiant_jdbc.public.obs_categorical",
