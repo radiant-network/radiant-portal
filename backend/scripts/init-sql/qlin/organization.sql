@@ -10,6 +10,6 @@ INSERT INTO organization (code, name, category_code, tenant_code) VALUES
     ('LDM-CHUQ',  'Laboratoire de diagnostic moléculaire, CHU de Québec',      'diagnostic_laboratory', 'qlin'),
     ('LDM-CHUSM', 'Laboratoire de diagnostic moléculaire, CUSM',               'diagnostic_laboratory', 'qlin'),
     ('LDM-HMR',   'Laboratoire Central Hôpital Maisonneuve-Rosemont',          'diagnostic_laboratory', 'qlin'),
-    ('LDM-CHUM',  'Laboratoire de diagnostic moléculaire, CHU Montéal',        'diagnostic_laboratory', 'qlin'),
+    ('LDM-CHUM',  'Laboratoire de diagnostic moléculaire, CHU Montréal',        'diagnostic_laboratory', 'qlin'),
     ('CQGC',      'Quebec Clinical Genomic Center',                            'sequencing_center',     'qlin')
 ON CONFLICT (code, tenant_code) DO NOTHING;
