@@ -373,3 +373,76 @@ func Test_PutUserHandler_UpdateErrorIsRedacted(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+// --- DELETE /:tenant/users/:user_id -----------------------------------------
+
+type mockUserRemover struct {
+	err error
+
+	gotTenant string
+	gotUserID string
+	gotActor  string
+	calls     int
+}
+
+func (m *mockUserRemover) RemoveTenantUser(_ context.Context, tenantCode, userID, actor string) error {
+	m.gotTenant, m.gotUserID, m.gotActor, m.calls = tenantCode, userID, actor, m.calls+1
+	return m.err
+}
+
+func serveDeleteUser(svc userRemover) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.DELETE("/:tenant/users/:user_id", DeleteUserHandler(svc, &testutils.MockAuth{Id: "acting-admin-sub"}))
+	req, _ := http.NewRequest("DELETE", "/radiant/users/b3f1-keycloak-sub", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_DeleteUserHandler_ForwardsRequestAndAnswers204(t *testing.T) {
+	svc := &mockUserRemover{}
+
+	w := serveDeleteUser(svc)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, "radiant", svc.gotTenant)
+	assert.Equal(t, "b3f1-keycloak-sub", svc.gotUserID)
+	assert.Equal(t, "acting-admin-sub", svc.gotActor, "the service compares the target to the caller")
+}
+
+func Test_DeleteUserHandler_UnknownUserIsNotFound(t *testing.T) {
+	svc := &mockUserRemover{err: types.ErrUserNotInTenant}
+
+	w := serveDeleteUser(svc)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"user not found"}`, w.Body.String())
+}
+
+func Test_DeleteUserHandler_LastAdminIsConflict(t *testing.T) {
+	svc := &mockUserRemover{err: types.ErrLastTenantAdmin}
+
+	w := serveDeleteUser(svc)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"this is the last user who can manage the users of this tenant"}`, w.Body.String())
+}
+
+func Test_DeleteUserHandler_RemovingYourselfIsBadRequest(t *testing.T) {
+	svc := &mockUserRemover{err: types.ErrCannotRemoveSelf}
+
+	w := serveDeleteUser(svc)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"you cannot remove your own access to this tenant"}`, w.Body.String())
+}
+
+func Test_DeleteUserHandler_RemoveErrorIsRedacted(t *testing.T) {
+	svc := &mockUserRemover{err: errors.New("ranger: connection refused")}
+
+	w := serveDeleteUser(svc)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

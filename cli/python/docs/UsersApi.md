@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_user**](UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
+[**delete_user**](UsersApi.md#delete_user) | **DELETE** /{tenant}/users/{user_id} | Remove a user from the tenant
 [**list_users**](UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
 [**update_user**](UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update a user of the tenant
 
@@ -95,6 +96,94 @@ Name | Type | Description  | Notes
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
+**409** | Conflict |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **delete_user**
+> delete_user(tenant, user_id)
+
+Remove a user from the tenant
+
+Revokes the user's access to the tenant in the path by removing every role granted
+to them there, `member` included — so their next request no longer sees this tenant.
+Requires the `can_manage_user` action. This is not an account deletion: the identity
+provider account and the roles the same user holds in other tenants are untouched.
+The last user able to manage users cannot be removed (409), and an administrator
+cannot remove their own access (400).
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.UsersApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    user_id = 'user_id_example' # str | User id (the identity provider's subject id)
+
+    try:
+        # Remove a user from the tenant
+        api_instance.delete_user(tenant, user_id)
+    except Exception as e:
+        print("Exception when calling UsersApi->delete_user: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **user_id** | **str**| User id (the identity provider&#39;s subject id) | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**204** | No Content |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
 **409** | Conflict |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 

@@ -35,9 +35,10 @@ func (m *mockKeycloak) UpdateUserName(_ context.Context, userID, firstName, last
 }
 
 type mockRanger struct {
-	ensured  []string
-	roleAdds [][2]string // {role, user}
-	err      error
+	ensured     []string
+	roleAdds    [][2]string // {role, user}
+	roleRemoves [][2]string // {role, user}
+	err         error
 }
 
 func (m *mockRanger) EnsureUser(_ context.Context, name string) error {
@@ -53,6 +54,14 @@ func (m *mockRanger) AddUserToRole(_ context.Context, roleName, user string) err
 		return m.err
 	}
 	m.roleAdds = append(m.roleAdds, [2]string{roleName, user})
+	return nil
+}
+
+func (m *mockRanger) RemoveUserFromRole(_ context.Context, roleName, user string) error {
+	if m.err != nil {
+		return m.err
+	}
+	m.roleRemoves = append(m.roleRemoves, [2]string{roleName, user})
 	return nil
 }
 

@@ -10,10 +10,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// TenantUserStore is the authorization store behind user administration: what the create and edit
-// paths must check before writing anything — whether the email is already a user of the tenant,
-// what scope each requested role implies, who holds the administration action — plus the edit's
-// transactional write.
+// TenantUserStore is the authorization store behind user administration: what the create, edit and
+// revoke paths must check before writing anything — whether the email is already a user of the
+// tenant, what scope each requested role implies, who holds the administration action — plus the
+// edit's transactional write and the revoke's delete.
 type TenantUserStore interface {
 	EmailHasTenantGrant(ctx context.Context, tenantCode, email string) (bool, error)
 	RoleScopes(ctx context.Context, tenantCode string, roleCodes []string) (map[string]string, error)
@@ -21,6 +21,7 @@ type TenantUserStore interface {
 	RolesWithAction(ctx context.Context, tenantCode, actionCode string) ([]string, error)
 	HasOtherUserWithAnyRole(ctx context.Context, tenantCode, userID string, roleCodes []string) (bool, error)
 	UpdateTenantUser(ctx context.Context, tenantCode, userID, firstName, lastName, grantedBy string, add, remove []types.Grant) error
+	RemoveTenantUser(ctx context.Context, tenantCode, userID string) error
 }
 
 // OrganizationChecker resolves which of the requested organization codes exist in the tenant.
@@ -115,7 +116,46 @@ func (a *UserAdmin) UpdateTenantUser(ctx context.Context, tenant, userID string,
 	return nil
 }
 
-// assertTenantKeepsAnAdmin refuses an edit that would strip the tenant of its last user able to
+// RemoveTenantUser revokes the user's access to the tenant: every grant they hold there, member
+// included. That deliberately goes further than an edit, which keeps member to guarantee the user
+// holds at least one role — the invariant applies to a user who stays in the tenant, and this
+// removes them from it. The identity survives: the account stays in the identity provider and its
+// grants in other tenants are untouched, so this offboards someone from one tenant rather than
+// deleting them.
+//
+// actor is the acting administrator's user_id. They cannot revoke their own access, which is the
+// one removal no other administrator asked for and, for the last admin, would leave the tenant
+// with nobody able to manage users.
+func (a *UserAdmin) RemoveTenantUser(ctx context.Context, tenant, userID, actor string) error {
+	if userID == actor {
+		return types.ErrCannotRemoveSelf
+	}
+	current, err := a.users.TenantUser(ctx, tenant, userID)
+	if err != nil {
+		return err
+	}
+	// The user ends up holding nothing, so the invariant is checked against an empty role set.
+	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, current, nil); err != nil {
+		return err
+	}
+
+	// Ranger goes first, mirroring ProvisionUser's rule that a partial run must err towards less
+	// access rather than more: a failure here leaves the revoke unstarted. The reverse order would
+	// also strand the membership, because deleting the grants is what makes this path answer
+	// ErrUserNotInTenant — a retry after a Ranger failure would 404 and never reach Ranger again.
+	role := RangerTenantRole(tenant)
+	if err := a.deps.Ranger.RemoveUserFromRole(ctx, role, userID); err != nil {
+		return fmt.Errorf("ranger: remove %q from role %q: %w", userID, role, err)
+	}
+	if err := a.users.RemoveTenantUser(ctx, tenant, userID); err != nil {
+		return err
+	}
+
+	logRevocations(ctx, actor, userID, current.Grants)
+	return nil
+}
+
+// assertTenantKeepsAnAdmin refuses a change that would strip the tenant of its last user able to
 // manage users. The action is only ever obtained from a role, and granting a role takes that same
 // action, so a tenant that loses its last holder cannot be recovered through the API at all.
 func (a *UserAdmin) assertTenantKeepsAnAdmin(ctx context.Context, tenant string, current *types.TenantUser, desired []types.Grant) error {

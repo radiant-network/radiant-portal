@@ -21,6 +21,7 @@ type KeycloakProvisioner interface {
 type RangerProvisioner interface {
 	EnsureUser(ctx context.Context, name string) error
 	AddUserToRole(ctx context.Context, roleName, user string) error
+	RemoveUserFromRole(ctx context.Context, roleName, user string) error
 }
 
 // StarrocksProvisioner creates the JWT-authenticated StarRocks user.

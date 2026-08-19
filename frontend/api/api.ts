@@ -14799,6 +14799,48 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Revokes the user\'s access to the tenant in the path by removing every role granted to them there, `member` included — so their next request no longer sees this tenant. Requires the `can_manage_user` action. This is not an account deletion: the identity provider account and the roles the same user holds in other tenants are untouched. The last user able to manage users cannot be removed (409), and an administrator cannot remove their own access (400).
+         * @summary Remove a user from the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteUser: async (tenant: string, userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('deleteUser', 'tenant', tenant)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('deleteUser', 'userId', userId)
+            const localVarPath = `/{tenant}/users/{user_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -14934,6 +14976,20 @@ export const UsersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Revokes the user\'s access to the tenant in the path by removing every role granted to them there, `member` included — so their next request no longer sees this tenant. Requires the `can_manage_user` action. This is not an account deletion: the identity provider account and the roles the same user holds in other tenants are untouched. The last user able to manage users cannot be removed (409), and an administrator cannot remove their own access (400).
+         * @summary Remove a user from the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteUser(tenant: string, userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteUser(tenant, userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.deleteUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -14988,6 +15044,17 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.createUser(tenant, createUserRequest, options).then((request) => request(axios, basePath));
         },
         /**
+         * Revokes the user\'s access to the tenant in the path by removing every role granted to them there, `member` included — so their next request no longer sees this tenant. Requires the `can_manage_user` action. This is not an account deletion: the identity provider account and the roles the same user holds in other tenants are untouched. The last user able to manage users cannot be removed (409), and an administrator cannot remove their own access (400).
+         * @summary Remove a user from the tenant
+         * @param {string} tenant Tenant code
+         * @param {string} userId User id (the identity provider\&#39;s subject id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteUser(tenant: string, userId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteUser(tenant, userId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns the users holding at least one role in the tenant in the path, each with the roles granted to them there and the organizations those roles apply at. Requires the `can_manage_user` action. `count` is the total matching `search`, before pagination.
          * @summary List the tenant\'s users
          * @param {string} tenant Tenant code
@@ -15035,6 +15102,19 @@ export class UsersApi extends BaseAPI {
      */
     public createUser(tenant: string, createUserRequest: CreateUserRequest, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).createUser(tenant, createUserRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Revokes the user\'s access to the tenant in the path by removing every role granted to them there, `member` included — so their next request no longer sees this tenant. Requires the `can_manage_user` action. This is not an account deletion: the identity provider account and the roles the same user holds in other tenants are untouched. The last user able to manage users cannot be removed (409), and an administrator cannot remove their own access (400).
+     * @summary Remove a user from the tenant
+     * @param {string} tenant Tenant code
+     * @param {string} userId User id (the identity provider\&#39;s subject id)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public deleteUser(tenant: string, userId: string, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).deleteUser(tenant, userId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
