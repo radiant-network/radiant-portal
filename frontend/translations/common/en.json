@@ -1646,6 +1646,8 @@
     "not_found": "Case not found",
     "not_found.button": "Back to case list",
     "header": {
+      "ai_assistant": "Analyze with AI",
+      "ai_assistant_open_tab": "Open in a tab",
       "case": "Case",
       "cases": "Cases",
       "germline": "Germline Solo",

@@ -1650,6 +1650,8 @@
     "not_found": "Cas introuvable",
     "not_found.button": "Retour à la liste de cas",
     "header": {
+      "ai_assistant": "Analyser avec l'IA",
+      "ai_assistant_open_tab": "Ouvrir dans un onglet",
       "case": "Cas",
       "cases": "Cas",
       "germline": "Germinal",
