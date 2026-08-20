@@ -145,6 +145,7 @@ jobs:
             "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
           )
 
+          PROXY_BASE=$(aws ssm get-parameter --region ca-central-1 --name /ferlease/cypress-proxy-url --query Parameter.Value --output text)
           TASK_ARNS=()
           for i in "${!SHARDS[@]}"; do
             OVERRIDES=$(jq -cn \
@@ -195,7 +196,7 @@ jobs:
             [ "$EC" != "0" ] && ALL_PASSED=false
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
             [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
-            [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${RURL}|Shard ${i}>  "
+            [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${PROXY_BASE}/?key=${RURL#s3://qlin-dev-cypress-artifacts/}|Shard ${i}>  "
           done
           # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
           NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d " ")
@@ -206,7 +207,7 @@ jobs:
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
-            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 259200)
+            COMBINED_ZURL="${PROXY_BASE}/?key=$RELEASE/combined_screenshots.zip"
           fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
           $ALL_PASSED && COLOR="good" || COLOR="danger"
@@ -225,11 +226,13 @@ jobs:
             --arg arns "${TASK_ARNS[*]}" \
             --arg count "${#TASK_ARNS[@]}" \
             --arg cmd "$AGGREGATOR_CMD" \
+            --arg proxy_base "$PROXY_BASE" \
             '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
               {name:"RELEASE",value:$release},
               {name:"SLACK_WEBHOOK",value:$slack},
               {name:"SHARD_TASK_ARNS",value:$arns},
-              {name:"SHARD_COUNT",value:$count}
+              {name:"SHARD_COUNT",value:$count},
+              {name:"PROXY_BASE",value:$proxy_base}
             ]}]}')
 
           aws ecs run-task \
