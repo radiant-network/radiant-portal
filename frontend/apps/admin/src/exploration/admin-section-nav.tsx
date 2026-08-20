@@ -11,7 +11,6 @@ export const ADMIN_SECTIONS = [
   { value: 'roles', icon: ShieldIcon, action: TENANT_ACTIONS.manageRole },
 ];
 
-/** Sections the caller may reach in the currently selected tenant, in declaration order. */
 export function useAdminSections() {
   const tenantActions = useTenantActions();
   return ADMIN_SECTIONS.filter(({ action }) => tenantActions.includes(action));
