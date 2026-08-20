@@ -66,7 +66,7 @@ const (
 )
 
 type Batch struct {
-	ID         string       `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()"`
+	ID         string       `json:"id" validate:"required" gorm:"primary_key; unique; type:uuid; column:id; default:gen_random_uuid()"`
 	DryRun     bool         `json:"dry_run"`
 	BatchType  string       `json:"batch_type"`
 	Status     BatchStatus  `json:"status"`

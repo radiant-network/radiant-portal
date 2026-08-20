@@ -12,19 +12,9 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
-
-
---
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
+-- The pgcrypto / uuid-ossp CREATE EXTENSION lines from the original pg_dump were removed:
+-- creating an extension needs CREATE on the database, which the app role doesn't have on
+-- managed Postgres. Neither was needed — gen_random_uuid() is core since Postgres 13.
 
 --
 -- Name: tp_history_func(); Type: FUNCTION; Schema: public; Owner: 
@@ -943,7 +933,7 @@ CREATE TABLE public.user_preference (
 --
 
 CREATE TABLE public.user_set (
-    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id character varying(255) NOT NULL,
     name text NOT NULL,
     type text NOT NULL,

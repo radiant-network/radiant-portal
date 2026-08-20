@@ -11,7 +11,7 @@ var OccurrenceNoteTable = Table{
 // OccurrenceNote is both the GORM model and the API response type.
 // The Deleted field is internal and never serialized to JSON.
 type OccurrenceNote struct {
-	ID           string    `gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()" json:"id" validate:"required"`
+	ID           string    `gorm:"primary_key; unique; type:uuid; column:id; default:gen_random_uuid()" json:"id" validate:"required"`
 	CaseID       int       `gorm:"column:case_id"                   json:"case_id" validate:"required"`
 	SeqID        int       `gorm:"column:seq_id"                    json:"seq_id" validate:"required"`
 	TaskID       int       `gorm:"column:task_id"                   json:"task_id" validate:"required"`
