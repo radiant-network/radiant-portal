@@ -28,12 +28,23 @@ export function useTenant() {
  * Tenant-scoped actions granting access to the admin section.
  * Backend catalog: `internal/types/auth.go`
  */
-const ADMIN_TENANT_ACTIONS = ['can_manage_user', 'can_manage_org', 'can_manage_role'];
+export const TENANT_ACTIONS = {
+  manageUser: 'can_manage_user',
+  manageOrg: 'can_manage_org',
+  manageRole: 'can_manage_role',
+} as const;
+
+const ADMIN_TENANT_ACTIONS = Object.values(TENANT_ACTIONS);
+
+/** Tenant actions held by the caller in the currently selected tenant. */
+export function useTenantActions(): readonly string[] {
+  const { tenant, tenants } = useTenant();
+  return tenants.find(membership => membership.code === tenant)?.tenant_actions ?? [];
+}
 
 /** True when the caller holds at least one of `actions` in the currently selected tenant. */
 export function useHasAnyTenantAction(actions: readonly string[]) {
-  const { tenant, tenants } = useTenant();
-  const tenantActions = tenants.find(membership => membership.code === tenant)?.tenant_actions ?? [];
+  const tenantActions = useTenantActions();
   return actions.some(action => tenantActions.includes(action));
 }
 
