@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 import { SquarePen } from 'lucide-react';
 import useSWR from 'swr';
 
-import type { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
+import type { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline, Sqon } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import OccurrenceFlagDropdown from '@/components/base/dropdowns/occurrence-flag-dropdown';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
@@ -20,7 +21,7 @@ import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton'
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { interpretationApi } from '@/utils/api';
+import { interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -52,6 +53,9 @@ type GermlineOccurrenceSliderSheetProps = {
 
 function SliderGermlineOccurrenceSheet({ patientSelected, children }: GermlineOccurrenceSliderSheetProps) {
   const { list } = useDataTable();
+  const { tenant } = useTenant();
+  const caseId = useCaseIdFromParam();
+  const [searchParams] = useSearchParams();
 
   const rowNavigation = useDataTableRowNavigation<GermlineSNVOccurrence>({
     data: list?.data ?? [],
@@ -60,15 +64,46 @@ function SliderGermlineOccurrenceSheet({ patientSelected, children }: GermlineOc
     find: target => (value: GermlineSNVOccurrence) => value.locus_id === target,
   });
 
+  /**
+   * Repli deep-link : un lien externe (ex. assistant IA) peut viser un variant
+   * absent de la page chargée du tableau — on récupère alors sa ligne par l'API
+   * (filtre SQON sur locus_id). Navigation précédent/suivant désactivée dans ce mode.
+   */
+  const target = searchParams.get(SELECTED_VARIANT_PARAM);
+  const seqIdParam = searchParams.get('seq_id');
+  const taskIdParam = searchParams.get('task_id');
+  const needsFallback = !!target && !rowNavigation.selected && !!seqIdParam && !!taskIdParam;
+  const { data: fallbackOccurrence } = useSWR<GermlineSNVOccurrence | undefined>(
+    needsFallback ? { key: 'occurrence-deeplink', caseId, seqIdParam, taskIdParam, target } : null,
+    async () => {
+      const sqon = {
+        op: 'and',
+        content: [{ op: 'in', content: { field: 'locus_id', value: [target] } }],
+      } as unknown as Sqon;
+      const response = await occurrencesApi.listGermlineSNVOccurrences(
+        tenant,
+        caseId,
+        Number(seqIdParam),
+        Number(taskIdParam),
+        { limit: 1, sqon },
+      );
+      return (response.data as GermlineSNVOccurrence[])?.[0];
+    },
+    { revalidateOnFocus: false, shouldRetryOnError: false },
+  );
+
+  const occurrence = rowNavigation.selected ?? fallbackOccurrence;
+  const fromList = !!rowNavigation.selected;
+
   return (
-    <SliderSheet trigger={children} open={!!rowNavigation.selected} setOpen={rowNavigation.handleClose}>
-      {rowNavigation.selected && (
+    <SliderSheet trigger={children} open={!!occurrence} setOpen={rowNavigation.handleClose}>
+      {occurrence && (
         <GermlineOccurrenceSheetContent
-          occurrence={rowNavigation.selected}
-          onPrevious={rowNavigation.handlePrevious}
-          onNext={rowNavigation.handleNext}
-          hasPrevious={rowNavigation.hasPrevious}
-          hasNext={rowNavigation.hasNext}
+          occurrence={occurrence}
+          onPrevious={fromList ? rowNavigation.handlePrevious : undefined}
+          onNext={fromList ? rowNavigation.handleNext : undefined}
+          hasPrevious={fromList ? rowNavigation.hasPrevious : false}
+          hasNext={fromList ? rowNavigation.hasNext : false}
           patientSelected={patientSelected}
         />
       )}
