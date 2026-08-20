@@ -113,6 +113,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
           aws-region: ca-central-1
+          role-duration-seconds: 43200
 
       - name: Upload source to S3
         env:
@@ -124,14 +125,13 @@ jobs:
           aws s3 cp /tmp/cypress-source.tar.gz \
             "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz"
 
-      - name: Run Cypress via ECS Fargate
+      - name: Launch Cypress shards
         env:
           RELEASE: ${{ needs.ferlease-release.outputs.release }}
           CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
           CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.CYPRESS_KEYCLOAK_CLIENT_SECRET }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
           SG_ID=$(aws ec2 describe-security-groups \
             --filters Name=group-name,Values=ferlease-cypress-task \
@@ -145,7 +145,6 @@ jobs:
             "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
           )
 
-          TASK_ARNS=()
           for i in "${!SHARDS[@]}"; do
             OVERRIDES=$(jq -cn \
               --arg release "$RELEASE" \
@@ -172,75 +171,78 @@ jobs:
               --overrides "$OVERRIDES" \
               --query 'tasks[0].taskArn' \
               --output text)
-            TASK_ARNS+=("$ARN")
+            echo "$ARN" >> /tmp/task_arns.txt
             echo "Shard $i launched: $ARN"
           done
+          echo "SHARD_COUNT=${#SHARDS[@]}" >> "$GITHUB_ENV"
 
-          AGGREGATOR_CMD='
-          set -e
-          ARNS=($SHARD_TASK_ARNS)
-          SHARDS_COUNT=$SHARD_COUNT
+      - name: Aggregate results and notify Slack
+        env:
+          RELEASE: ${{ needs.ferlease-release.outputs.release }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          mapfile -t TASK_ARNS < /tmp/task_arns.txt
+
           while true; do
-            RUNNING=$(aws ecs describe-tasks --cluster pipelines --tasks "${ARNS[@]}" --query "length(tasks[?lastStatus!=\`STOPPED\`])" --output text)
+            RUNNING=$(aws ecs describe-tasks \
+              --cluster pipelines \
+              --tasks "${TASK_ARNS[@]}" \
+              --query "length(tasks[?lastStatus!='STOPPED'])" \
+              --output text)
             [ "$RUNNING" = "0" ] && break
+            echo "Waiting... $RUNNING shard(s) still running"
             sleep 60
           done
+
           REPORT_LINKS=""
-          ALL_PASSED=true
           mkdir -p /tmp/all_screenshots
-          for i in $(seq 0 $((SHARDS_COUNT - 1))); do
-            R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null || echo "{\"exit_code\":1,\"report_url\":\"\",\"failure_count\":0}")
-            RURL=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(JSON.parse(d).report_url||\"\")}catch(e){}})" 2>/dev/null || true)
-            EC=$(echo "$R" | node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).exit_code||0))}catch(e){process.stdout.write(\"1\")}})" 2>/dev/null || echo 1)
-            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
-            [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
-            [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${RURL}|Shard ${i}>  "
+          for i in $(seq 0 $((SHARD_COUNT - 1))); do
+            R=$(aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/result.json" - 2>/dev/null \
+              || echo '{"exit_code":1,"report_url":"","screenshots_url":"","failure_count":0}')
+            RURL=$(echo "$R" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{process.stdout.write(JSON.parse(d).report_url||'')}catch(e){}})" 2>/dev/null || true)
+            SURL=$(echo "$R" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{process.stdout.write(JSON.parse(d).screenshots_url||'')}catch(e){}})" 2>/dev/null || true)
+            if [ -n "$RURL" ]; then
+              PRESIGNED_RURL=$(aws s3 presign "$RURL" --expires-in 43200)
+              REPORT_LINKS="${REPORT_LINKS}<${PRESIGNED_RURL}|Shard ${i}>  "
+            fi
+            if [ -n "$SURL" ]; then
+              aws s3 cp "$SURL" "/tmp/shard_${i}.zip" 2>/dev/null || true
+              [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
+            fi
           done
-          # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
-          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d " ")
+
+          # Retries=2 (default) generates "(attempt 3)" screenshots; known fails are tagged "SJRA-"
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d ' ')
+          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d ' ')
           NEW_FAILS=${NEW_FAILS:-0}
-          TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d " ")
           TOTAL_FAILS=${TOTAL_FAILS:-0}
+
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
-            read -r _AKI _SAK _ST <<<$(aws sts assume-role --role-arn "$PRESIGNER_ARN" --role-session-name presign --duration-seconds 43200 --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
-            COMBINED_ZURL=$(AWS_ACCESS_KEY_ID=$_AKI AWS_SECRET_ACCESS_KEY=$_SAK AWS_SESSION_TOKEN=$_ST aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 43200)
+            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 43200)
           fi
-          $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
-          $ALL_PASSED && COLOR="good" || COLOR="danger"
-          TITLE="Ferlease - $RELEASE - Cypress Test Results: $STATUS"
+
+          if [ "$NEW_FAILS" -gt 0 ]; then
+            STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total)"
+            COLOR="danger"
+          elif [ "$TOTAL_FAILS" -gt 0 ]; then
+            STATUS="0 new fails 🚀 (${TOTAL_FAILS} known)"
+            COLOR="warning"
+          else
+            STATUS="All passed ✅"
+            COLOR="good"
+          fi
+
           BODY_PARTS=()
-          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
-          [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Reports: $REPORT_LINKS")
+          [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Screenshots: <${COMBINED_ZURL}|Download zip>")
+          [ -n "$REPORT_LINKS" ]  && BODY_PARTS+=("Reports: $REPORT_LINKS")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
-          PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
+
+          PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" \
+            "Ferlease - $RELEASE - Cypress: $STATUS" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
-          '
-
-          AGG_OVERRIDES=$(jq -cn \
-            --arg release "$RELEASE" \
-            --arg slack "$SLACK_WEBHOOK" \
-            --arg arns "${TASK_ARNS[*]}" \
-            --arg count "${#TASK_ARNS[@]}" \
-            --arg cmd "$AGGREGATOR_CMD" \
-            '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
-              {name:"RELEASE",value:$release},
-              {name:"SLACK_WEBHOOK",value:$slack},
-              {name:"SHARD_TASK_ARNS",value:$arns},
-              {name:"SHARD_COUNT",value:$count},
-              {name:"PRESIGNER_ARN",value:"arn:aws:iam::311752058468:role/ferlease-cypress-presigner"}
-            ]}]}')
-
-          aws ecs run-task \
-            --cluster pipelines \
-            --task-definition ferlease-cypress \
-            --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
-            --overrides "$AGG_OVERRIDES" \
-            --query 'tasks[0].taskArn' \
-            --output text | xargs -I{} echo "Aggregator launched: {}"
 
   ferlease-teardown:
     if: >
