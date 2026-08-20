@@ -205,7 +205,8 @@ jobs:
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
-            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 259200)
+            read -r _AKI _SAK _ST <<<$(aws sts assume-role --role-arn "$PRESIGNER_ARN" --role-session-name presign --duration-seconds 43200 --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
+            COMBINED_ZURL=$(AWS_ACCESS_KEY_ID=$_AKI AWS_SECRET_ACCESS_KEY=$_SAK AWS_SESSION_TOKEN=$_ST aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 43200)
           fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
           $ALL_PASSED && COLOR="good" || COLOR="danger"
@@ -228,7 +229,8 @@ jobs:
               {name:"RELEASE",value:$release},
               {name:"SLACK_WEBHOOK",value:$slack},
               {name:"SHARD_TASK_ARNS",value:$arns},
-              {name:"SHARD_COUNT",value:$count}
+              {name:"SHARD_COUNT",value:$count},
+              {name:"PRESIGNER_ARN",value:"arn:aws:iam::311752058468:role/ferlease-cypress-presigner"}
             ]}]}')
 
           aws ecs run-task \
