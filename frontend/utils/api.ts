@@ -14,6 +14,7 @@ import {
   SavedFiltersApi,
   SequencingApi,
   UserPreferencesApi,
+  UsersApi,
   ValueSetsApi,
   VariantApi,
 } from '../api';
@@ -41,3 +42,4 @@ export const sequencingApi = new SequencingApi(config, BASE_PATH, axiosClient);
 export const igvApi = new IgvApi(config, BASE_PATH, axiosClient);
 export const genesApi = new GenesApi(config, BASE_PATH, axiosClient);
 export const valueSetsApi = new ValueSetsApi(config, BASE_PATH, axiosClient);
+export const usersApi = new UsersApi(config, BASE_PATH, axiosClient);

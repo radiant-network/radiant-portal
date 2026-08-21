@@ -24,8 +24,8 @@
     "title": "{{tenant}} - Administration",
     "organizations": {
       "add": "Add organization",
-      "count_one": "{{count}} organization",
-      "count_other": "{{count}} organizations",
+      "count_one": "{{count}} Organization",
+      "count_other": "{{count}} Organizations",
       "create": {
         "description": "Members can be granted roles scoped to specific organizations.",
         "notifications": {
@@ -72,6 +72,24 @@
       "organizations": "Organizations",
       "roles": "Roles & Permissions",
       "users": "Members"
+    },
+    "users": {
+      "add": "Add member",
+      "count_one": "{{count}} Member",
+      "count_other": "{{count}} Members",
+      "filters": {
+        "role": "Role",
+        "search_placeholder": "Search by name or email"
+      },
+      "subtitle": "Manage members and role assignments.",
+      "table": {
+        "all_organizations": "All orgs",
+        "baseline_role": "Member",
+        "edit": "Edit member",
+        "name": "Name",
+        "roles": "Roles & Access",
+        "you": "(You)"
+      }
     }
   },
   "analysis": {
