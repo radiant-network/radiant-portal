@@ -17,9 +17,12 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.case_exam import CaseExam
+from radiant_python.models.case_family_history import CaseFamilyHistory
 from radiant_python.models.term import Term
+from radiant_python.models.value_set_item import ValueSetItem
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,14 +31,20 @@ class CasePatientClinicalInformation(BaseModel):
     Patient clinical information to display in Case Entity
     """ # noqa: E501
     affected_status_code: StrictStr
+    consanguinity: Optional[ValueSetItem] = None
     date_of_birth: Optional[StrictStr] = None
-    ethnicity_codes: Optional[List[StrictStr]] = Field(default=None, description="TODO")
+    estimated_due_date: Optional[StrictStr] = None
+    ethnicities: Optional[List[ValueSetItem]] = None
+    exams: Optional[List[CaseExam]] = None
+    family_history: Optional[List[CaseFamilyHistory]] = None
     fetus_id: Optional[StrictInt] = None
     first_name: Optional[StrictStr] = None
     jhn: Optional[StrictStr] = None
+    last_menstrual_period: Optional[StrictStr] = None
     last_name: Optional[StrictStr] = None
     life_status_code: StrictStr
     non_observed_phenotypes: Optional[List[Term]] = None
+    notes: Optional[List[StrictStr]] = None
     observed_phenotypes: Optional[List[Term]] = None
     organization_code: Optional[StrictStr] = None
     organization_name: Optional[StrictStr] = None
@@ -43,7 +52,7 @@ class CasePatientClinicalInformation(BaseModel):
     relationship_to_proband: StrictStr
     sex_code: StrictStr
     submitter_patient_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["affected_status_code", "date_of_birth", "ethnicity_codes", "fetus_id", "first_name", "jhn", "last_name", "life_status_code", "non_observed_phenotypes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "relationship_to_proband", "sex_code", "submitter_patient_id"]
+    __properties: ClassVar[List[str]] = ["affected_status_code", "consanguinity", "date_of_birth", "estimated_due_date", "ethnicities", "exams", "family_history", "fetus_id", "first_name", "jhn", "last_menstrual_period", "last_name", "life_status_code", "non_observed_phenotypes", "notes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "relationship_to_proband", "sex_code", "submitter_patient_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,6 +93,30 @@ class CasePatientClinicalInformation(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of consanguinity
+        if self.consanguinity:
+            _dict['consanguinity'] = self.consanguinity.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in ethnicities (list)
+        _items = []
+        if self.ethnicities:
+            for _item_ethnicities in self.ethnicities:
+                if _item_ethnicities:
+                    _items.append(_item_ethnicities.to_dict())
+            _dict['ethnicities'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in exams (list)
+        _items = []
+        if self.exams:
+            for _item_exams in self.exams:
+                if _item_exams:
+                    _items.append(_item_exams.to_dict())
+            _dict['exams'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in family_history (list)
+        _items = []
+        if self.family_history:
+            for _item_family_history in self.family_history:
+                if _item_family_history:
+                    _items.append(_item_family_history.to_dict())
+            _dict['family_history'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in non_observed_phenotypes (list)
         _items = []
         if self.non_observed_phenotypes:
@@ -111,14 +144,20 @@ class CasePatientClinicalInformation(BaseModel):
 
         _obj = cls.model_validate({
             "affected_status_code": obj.get("affected_status_code"),
+            "consanguinity": ValueSetItem.from_dict(obj["consanguinity"]) if obj.get("consanguinity") is not None else None,
             "date_of_birth": obj.get("date_of_birth"),
-            "ethnicity_codes": obj.get("ethnicity_codes"),
+            "estimated_due_date": obj.get("estimated_due_date"),
+            "ethnicities": [ValueSetItem.from_dict(_item) for _item in obj["ethnicities"]] if obj.get("ethnicities") is not None else None,
+            "exams": [CaseExam.from_dict(_item) for _item in obj["exams"]] if obj.get("exams") is not None else None,
+            "family_history": [CaseFamilyHistory.from_dict(_item) for _item in obj["family_history"]] if obj.get("family_history") is not None else None,
             "fetus_id": obj.get("fetus_id"),
             "first_name": obj.get("first_name"),
             "jhn": obj.get("jhn"),
+            "last_menstrual_period": obj.get("last_menstrual_period"),
             "last_name": obj.get("last_name"),
             "life_status_code": obj.get("life_status_code"),
             "non_observed_phenotypes": [Term.from_dict(_item) for _item in obj["non_observed_phenotypes"]] if obj.get("non_observed_phenotypes") is not None else None,
+            "notes": obj.get("notes"),
             "observed_phenotypes": [Term.from_dict(_item) for _item in obj["observed_phenotypes"]] if obj.get("observed_phenotypes") is not None else None,
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),

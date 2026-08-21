@@ -176,6 +176,101 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 	})
 }
 
+func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
+	expected := `{
+		"case_id":74,
+		"case_type":"germline_family",
+		"diagnosis_hypothesis":"Suspected congenital myotonic dystrophy",
+		"analysis_catalog_code":"WGA",
+		"analysis_catalog_name":"Whole Genome Analysis",
+		"case_category_code":"prenatal",
+		"case_category_name":"Prenatal",
+		"created_on":"2019-01-03T13:08:00Z",
+		"updated_on":"2019-01-03T13:08:00Z",
+		"prescriber":"Felix Laflamme",
+		"ordering_organization_code":"CHUSJ",
+		"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
+		"diagnosis_lab_code":"CQGC",
+		"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+		"priority_code":"asap",
+		"status_code":"in_progress",
+		"primary_condition_id":"MONDO:0700092",
+		"primary_condition_name":"neurodevelopmental disorder",
+		"note":"Administrative comment",
+		"project_code":"N1",
+		"project_name":"NeuroDev Phase I",
+		"panel_code":"EPILEP",
+		"panel_name":"Epilepsy",
+		"sequencing_experiments":[
+			{"seq_id":77, "patient_id":65, "relationship_to_proband":"fetus", "sample_id":129, "sample_submitter_id":"S-PRENAT-74", "sample_type_code":"dna", "affected_status_code":"unknown", "histology_code":"normal", "experimental_strategy_code":"wxs", "status_code":"completed", "updated_on":"2026-04-03T13:08:00Z", "has_variants":false}
+		],
+		"members":[
+			{
+				"relationship_to_proband":"proband",
+				"affected_status_code":"affected",
+				"patient_id":65,
+				"first_name":"Léa",
+				"last_name":"Bernier",
+				"date_of_birth":"1990-06-15T00:00:00Z",
+				"life_status_code":"alive",
+				"sex_code":"female",
+				"submitter_patient_id":"MRN-283837",
+				"jhn":"BER9006157788",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"observed_phenotypes":[{"id":"HP:0000822", "onset_code":"unknown"}],
+				"ethnicities":[
+					{"code":"BLK", "name":"Black"},
+					{"code":"MIX", "name":"Mixed"}
+				],
+				"consanguinity":{"code":"consanguinity", "name":"Consanguinity in family"},
+				"notes":["High-risk pregnancy follow-up"],
+				"family_history":[
+					{"family_member_code":"brother", "condition":"Epilepsy"},
+					{"family_member_code":"mother", "condition":"Myotonic dystrophy"}
+				],
+				"exams":[
+					{"exam_code":"eeg", "name":"Electroencephalogram (EEG)", "interpretation_code":"normal", "value":"normal"},
+					{"exam_code":"emg", "name":"Electromyography (EMG)", "interpretation_code":"abnormal", "value":"HP:0003457", "value_name":"EMG abnormality", "coding_system":"HPO"},
+					{"exam_code":"emg", "name":"Electromyography (EMG)", "interpretation_code":"abnormal", "value":"HP:0003458", "value_name":"EMG: myopathic abnormalities", "coding_system":"HPO"},
+					{"exam_code":"other", "name":"Other", "value":"Ophthalmology consult 2026"}
+				]
+			},
+			{
+				"relationship_to_proband":"father",
+				"affected_status_code":"non_affected",
+				"patient_id":66,
+				"first_name":"Nicolas",
+				"last_name":"Fortin",
+				"date_of_birth":"1987-02-20T00:00:00Z",
+				"life_status_code":"alive",
+				"sex_code":"male",
+				"submitter_patient_id":"MRN-283838",
+				"jhn":"FOR8702204321",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine"
+			},
+			{
+				"relationship_to_proband":"fetus",
+				"affected_status_code":"unknown",
+				"fetus_id":4,
+				"last_menstrual_period":"2026-03-01T00:00:00Z",
+				"life_status_code":"alive",
+				"sex_code":"male",
+				"observed_phenotypes":[{"id":"HP:0001631", "onset_code":"antenatal"}],
+				"notes":["Findings on the second-trimester ultrasound"],
+				"exams":[
+					{"exam_code":"", "interpretation_code":"abnormal", "value":"Bilateral ventriculomegaly"},
+					{"exam_code":"eeg", "name":"Electroencephalogram (EEG)", "interpretation_code":"abnormal", "value":"abnormal"}
+				]
+			}
+		],
+		"tasks":[],
+		"has_igv_files":false
+	}`
+	assertCaseEntityHandler(t, "simple", 74, expected)
+}
+
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"sequencing_experiments":[

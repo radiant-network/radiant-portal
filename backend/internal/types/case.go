@@ -22,6 +22,7 @@ type Case struct {
 	ResolutionStatus         ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
 	PrimaryCondition         string
 	ConditionCodeSystem      string
+	DiagnosisHypothesis      string
 	OrderingPhysician        string
 	TenantCode               string
 	OrderingOrganizationCode *string
@@ -95,6 +96,7 @@ type CaseEntity struct {
 	PrimaryConditionID       string                                    `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName     string                                    `json:"primary_condition_name,omitempty"`
 	Note                     string                                    `json:"note,omitempty"`
+	DiagnosisHypothesis      string                                    `json:"diagnosis_hypothesis,omitempty"`
 	ProjectCode              string                                    `json:"project_code,omitempty"`
 	ProjectName              string                                    `json:"project_name,omitempty"`
 	PanelCode                string                                    `json:"panel_code,omitempty"`
@@ -127,22 +129,36 @@ type CaseSequencingExperiment struct {
 // @Description Patient clinical information to display in Case Entity
 // @Name CasePatientClinicalInformation
 type CasePatientClinicalInformation struct {
-	RelationshipToProband string            `json:"relationship_to_proband" validate:"required"`
-	AffectedStatusCode    string            `json:"affected_status_code" validate:"required"`
-	PatientID             *int              `json:"patient_id,omitempty"`
-	FetusID               *int              `json:"fetus_id,omitempty"`
-	FirstName             string            `json:"first_name,omitempty"`
-	LastName              string            `json:"last_name,omitempty"`
-	DateOfBirth           *time.Time        `json:"date_of_birth,omitempty"`
-	LifeStatusCode        string            `json:"life_status_code" validate:"required"`
-	SexCode               string            `json:"sex_code" validate:"required"`
-	SubmitterPatientId    string            `json:"submitter_patient_id,omitempty"`
-	Jhn                   string            `json:"jhn,omitempty"`
-	OrganizationCode      string            `json:"organization_code,omitempty"`
-	OrganizationName      string            `json:"organization_name,omitempty"`
-	EthnicityCodes        JsonArray[string] `json:"ethnicity_codes,omitempty"` // TODO
-	ObservedPhenotypes    JsonArray[Term]   `json:"observed_phenotypes,omitempty"`
-	NonObservedPhenotypes JsonArray[Term]   `json:"non_observed_phenotypes,omitempty"`
+	RelationshipToProband string                       `json:"relationship_to_proband" validate:"required"`
+	AffectedStatusCode    string                       `json:"affected_status_code" validate:"required"`
+	PatientID             *int                         `json:"patient_id,omitempty"`
+	FetusID               *int                         `json:"fetus_id,omitempty"`
+	FirstName             string                       `json:"first_name,omitempty"`
+	LastName              string                       `json:"last_name,omitempty"`
+	DateOfBirth           *time.Time                   `json:"date_of_birth,omitempty"`
+	LastMenstrualPeriod   *time.Time                   `json:"last_menstrual_period,omitempty"`
+	EstimatedDueDate      *time.Time                   `json:"estimated_due_date,omitempty"`
+	LifeStatusCode        string                       `json:"life_status_code" validate:"required"`
+	SexCode               string                       `json:"sex_code" validate:"required"`
+	SubmitterPatientId    string                       `json:"submitter_patient_id,omitempty"`
+	Jhn                   string                       `json:"jhn,omitempty"`
+	OrganizationCode      string                       `json:"organization_code,omitempty"`
+	OrganizationName      string                       `json:"organization_name,omitempty"`
+	Ethnicities           JsonArray[ValueSetItem]      `json:"ethnicities,omitempty"`
+	Consanguinity         *ValueSetItem                `json:"consanguinity,omitempty" gorm:"-"`
+	ObservedPhenotypes    JsonArray[Term]              `json:"observed_phenotypes,omitempty"`
+	NonObservedPhenotypes JsonArray[Term]              `json:"non_observed_phenotypes,omitempty"`
+	Exams                 JsonArray[CaseExam]          `json:"exams,omitempty"`
+	Notes                 JsonArray[string]            `json:"notes,omitempty"`
+	FamilyHistory         JsonArray[CaseFamilyHistory] `json:"family_history,omitempty"`
+}
+
+// CaseFamilyHistory - Family history reported for a case member
+// @Description A condition reported in a member's family, and who it was reported for
+// @Name CaseFamilyHistory
+type CaseFamilyHistory struct {
+	FamilyMemberCode string `json:"family_member_code" validate:"required"`
+	Condition        string `json:"condition" validate:"required"`
 }
 
 type CaseTask struct {

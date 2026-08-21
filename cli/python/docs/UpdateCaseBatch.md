@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_code** | **str** |  | 
 **category_code** | **str** |  | 
+**diagnosis_hypothesis** | **str** |  | [optional] 
 **diagnostic_lab_code** | **str** |  | 
 **fetuses** | [**List[CaseFetusBatch]**](CaseFetusBatch.md) | Replaced like the clinical children above, and matched by submitter_fetus_id: a fetus already on the case is updated in place, a new key is created, and a key the payload drops is deleted — refused when a sample still points at it. | [optional] 
 **note** | **str** |  | [optional] 

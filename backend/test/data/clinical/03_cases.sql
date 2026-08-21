@@ -32,3 +32,6 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE cases ALTER COLUMN id RESTART WITH 1000;
+
+-- Analysis-level free text, a column on the case rather than an observation on its proband.
+UPDATE "cases" SET diagnosis_hypothesis = 'Suspected congenital myotonic dystrophy' WHERE id = 74;

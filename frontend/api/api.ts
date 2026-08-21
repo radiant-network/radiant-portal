@@ -351,6 +351,12 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
+    'diagnosis_hypothesis'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatch
+     */
     'diagnostic_lab_code': string;
     /**
      * 
@@ -547,6 +553,12 @@ export interface CaseEntity {
      * @type {string}
      * @memberof CaseEntity
      */
+    'diagnosis_hypothesis'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseEntity
+     */
     'diagnosis_lab_code'?: string;
     /**
      * 
@@ -656,6 +668,68 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'updated_on': string;
+}
+/**
+ * Paraclinical exam observation to display in Case Entity
+ * @export
+ * @interface CaseExam
+ */
+export interface CaseExam {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'coding_system'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'exam_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'interpretation_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'value'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseExam
+     */
+    'value_name'?: string;
+}
+/**
+ * A condition reported in a member\'s family, and who it was reported for
+ * @export
+ * @interface CaseFamilyHistory
+ */
+export interface CaseFamilyHistory {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFamilyHistory
+     */
+    'condition': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseFamilyHistory
+     */
+    'family_member_code': string;
 }
 /**
  * 
@@ -890,16 +964,40 @@ export interface CasePatientClinicalInformation {
     'affected_status_code': string;
     /**
      * 
+     * @type {ValueSetItem}
+     * @memberof CasePatientClinicalInformation
+     */
+    'consanguinity'?: ValueSetItem;
+    /**
+     * 
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
     'date_of_birth'?: string;
     /**
-     * TODO
-     * @type {Array<string>}
+     * 
+     * @type {string}
      * @memberof CasePatientClinicalInformation
      */
-    'ethnicity_codes'?: Array<string>;
+    'estimated_due_date'?: string;
+    /**
+     * 
+     * @type {Array<ValueSetItem>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'ethnicities'?: Array<ValueSetItem>;
+    /**
+     * 
+     * @type {Array<CaseExam>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'exams'?: Array<CaseExam>;
+    /**
+     * 
+     * @type {Array<CaseFamilyHistory>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'family_history'?: Array<CaseFamilyHistory>;
     /**
      * 
      * @type {number}
@@ -923,6 +1021,12 @@ export interface CasePatientClinicalInformation {
      * @type {string}
      * @memberof CasePatientClinicalInformation
      */
+    'last_menstrual_period'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
     'last_name'?: string;
     /**
      * 
@@ -936,6 +1040,12 @@ export interface CasePatientClinicalInformation {
      * @memberof CasePatientClinicalInformation
      */
     'non_observed_phenotypes'?: Array<Term>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CasePatientClinicalInformation
+     */
+    'notes'?: Array<string>;
     /**
      * 
      * @type {Array<Term>}
@@ -5554,6 +5664,12 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'category_code': UpdateCaseBatchCategoryCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'diagnosis_hypothesis'?: string;
     /**
      * 
      * @type {string}

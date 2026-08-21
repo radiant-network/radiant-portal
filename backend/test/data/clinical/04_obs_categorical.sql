@@ -481,4 +481,20 @@ VALUES (465, 72, NULL, 1, 'phenotype', 'HPO', 'HP:0001631', 'antenatal', 'positi
        (468, 73, NULL, 2, 'phenotype', 'HPO', 'HP:0001631', 'antenatal', 'positive', 'Ultrasound finding', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
+-- paraclinical exam fixture (case 74): an abnormal exam's coded values land here, one row per
+-- value; its normal/valueless counterparts live in obs_string.
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system, code_value, onset_code, interpretation_code, exam_code, note, tenant_code)
+VALUES (469, 74, 65, NULL, 'exam', 'HPO', 'HP:0003457', NULL, 'abnormal', 'emg', '', 'radiant'),
+       (470, 74, 65, NULL, 'exam', 'HPO', 'HP:0003458', NULL, 'abnormal', 'emg', '', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+
+-- Value-set observations: ethnicity is a list, consanguinity a single family-level finding. Both
+-- are attached to the proband by the ingester, never to a fetus.
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system, code_value, onset_code, interpretation_code, exam_code, note, tenant_code)
+VALUES (471, 74, 65, NULL, 'ancestry',      'radiant', 'BLK',           NULL, NULL, NULL, '', 'radiant'),
+       (472, 74, 65, NULL, 'ancestry',      'radiant', 'MIX',           NULL, NULL, NULL, '', 'radiant'),
+       (473, 74, 65, NULL, 'consanguinity', 'radiant', 'consanguinity', NULL, NULL, NULL, '', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
 ALTER TABLE obs_categorical ALTER COLUMN id RESTART WITH 1000;

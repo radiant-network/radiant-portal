@@ -2347,6 +2347,86 @@ VALUES
        (487, 74, NULL, 5,    'phenotype', 'HPO', 'HP:0000003', NULL,          'negative', NULL, 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
+-- Paraclinical exams — reference catalog first. The API left-joins it, so an observation whose
+-- code is missing here still surfaces, just unlabelled. Codes and labels mirror the QLIN catalog
+-- (backend/scripts/init-sql/qlin/exam.sql) so a case ingested from qlin and a seeded one read
+-- alike; migration 000017 already seeds 'other' for this tenant.
+INSERT INTO exam (code, name_en, name_fr, tenant_code)
+VALUES ('ecar', 'Cardiac Ultrasound', 'Échographie cardiaque', 'radiant'),
+       ('eeg',  'Electroencephalogram (EEG)', 'Électroencéphalogramme (EEG)', 'radiant'),
+       ('emg',  'Electromyography (EMG)', 'Électromyographie (EMG)', 'radiant'),
+       ('irmc', 'Cerebral MRI', 'IRM cérébrale', 'radiant'),
+       ('opht', 'Ophthalmological Examination', 'Examen ophtalmologique', 'radiant')
+ON CONFLICT (code, tenant_code) DO NOTHING;
+
+-- An exam lands in one of two tables depending on what it has to report: obs_categorical when an
+-- abnormal result carries coded values — one row per value — and obs_string for everything else.
+-- Both are needed to read a member's full list. No onset_code: an exam is situated by its own
+-- result, not by an age of onset, and the worker exempts it from the requirement.
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system,
+                               code_value, onset_code, interpretation_code, exam_code, note, tenant_code)
+VALUES
+       -- Case 1, proband Marie Lambert (3) — one abnormal EMG reported as two coded findings, the
+       -- shape a consumer has to group back under a single exam.
+       (488, 1,  3,    NULL, 'exam', 'HPO',  'HP:0003457', NULL, 'abnormal', 'emg',  NULL, 'radiant'),
+       (489, 1,  3,    NULL, 'exam', 'HPO',  'HP:0003458', NULL, 'abnormal', 'emg',  NULL, 'radiant'),
+       -- Case 71, the fetus (1) — an exam carried by the fetus rather than by its mother, and a
+       -- non-HPO exam, whose values are free text under the 'exam' coding system.
+       (490, 71, NULL, 1,    'exam', 'exam', 'Ventriculomégalie bilatérale', NULL, 'abnormal', 'irmc', NULL, 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO "obs_string" (id, case_id, patient_id, fetus_id, observation_code, value,
+                          interpretation_code, exam_code, tenant_code)
+VALUES
+       -- Case 1: a normal exam and the free-text "other", which by design carries no
+       -- interpretation — both on the proband (3) ...
+       (1, 1,  3,    NULL, 'exam', 'normal', 'normal', 'ecar',  'radiant'),
+       (2, 1,  3,    NULL, 'exam', 'Consultation en neurologie prévue en septembre', NULL, 'other', 'radiant'),
+       -- ... and an abnormal one with nothing to code, on the mother (1), so exams show up on a
+       -- member who is not the proband.
+       (3, 1,  1,    NULL, 'exam', 'abnormal', 'abnormal', 'eeg', 'radiant'),
+       -- Case 71: the prenatal proband (62) carries her own exam, distinct from her fetus's above.
+       (4, 71, 62,   NULL, 'exam', 'normal', 'normal', 'opht', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+-- Ethnicity and consanguinity. Both are attached to the proband by the ingester: ethnicity is a
+-- list, consanguinity a single family-level finding. Codes come from the generic value sets
+-- migration 000015 and 000001 seed, so they resolve on any Radiant instance, not just a QLIN one.
+INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system,
+                               code_value, onset_code, interpretation_code, exam_code, note, tenant_code)
+VALUES
+       -- Case 1, proband Marie Lambert (3) — two ethnicities, and consanguinity ruled out.
+       (491, 1,  3,  NULL, 'ancestry',      'radiant', 'WHT',              NULL, NULL, NULL, NULL, 'radiant'),
+       (492, 1,  3,  NULL, 'ancestry',      'radiant', 'MENA',             NULL, NULL, NULL, NULL, 'radiant'),
+       (493, 1,  3,  NULL, 'consanguinity', 'radiant', 'no_consanguinity', NULL, NULL, NULL, NULL, 'radiant'),
+       -- Case 71, prenatal proband Camille Dubé (62) — the opposite consanguinity value, so both
+       -- states are visible somewhere in the seed.
+       (494, 71, 62, NULL, 'ancestry',      'radiant', 'LAT-AM',           NULL, NULL, NULL, NULL, 'radiant'),
+       (495, 71, 62, NULL, 'consanguinity', 'radiant', 'consanguinity',    NULL, NULL, NULL, NULL, 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+-- Clinical notes belong to a member, including a fetus. Case 1 gives one to a member who is not the
+-- proband, so the page cannot get away with rendering only the proband's.
+INSERT INTO "obs_string" (id, case_id, patient_id, fetus_id, observation_code, value,
+                          interpretation_code, exam_code, tenant_code)
+VALUES (5,  1,  3,    NULL, 'note',      'Régression du langage constatée vers 24 mois.', NULL, NULL, 'radiant'),
+       (6,  1,  1,    NULL, 'note',      'Mère porteuse asymptomatique, suivie depuis 2019.', NULL, NULL, 'radiant'),
+       (8,  71, 62,   NULL, 'note',      'Grossesse suivie à risque, échographies aux 2 semaines.', NULL, NULL, 'radiant'),
+       (9,  71, NULL, 1,    'note',      'Anomalies vues à l''échographie du deuxième trimestre.', NULL, NULL, 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
+-- The diagnostic hypothesis is a case column, not an observation: set it on the cases seeded above.
+UPDATE cases SET diagnosis_hypothesis = 'Suspicion d''encéphalopathie épileptique d''origine génétique' WHERE id = 1;
+UPDATE cases SET diagnosis_hypothesis = 'Suspicion de dystrophie myotonique congénitale (transmission maternelle)' WHERE id = 71;
+
+-- Family history hangs off a real patient — the table has no fetus_id, so on a prenatal case it is
+-- the mother who carries it.
+INSERT INTO "family_history" (id, case_id, patient_id, family_member_code, condition, tenant_code)
+VALUES (1, 1,  3,  'mother',  'Épilepsie généralisée', 'radiant'),
+       (2, 1,  3,  'brother', 'Retard global de développement', 'radiant'),
+       (3, 71, 62, 'sister',  'Dystrophie myotonique', 'radiant')
+ON CONFLICT (id) DO NOTHING;
+
 -- Reset sequences to prevent duplicate key errors when inserting new records
 SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));
 SELECT setval('project_id_seq', (SELECT MAX(id) FROM project));

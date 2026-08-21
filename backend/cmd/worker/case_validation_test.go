@@ -615,26 +615,25 @@ func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateTextLength_NoteMaxLength(t *testing.T) {
+func Test_validateTextLength_FreeTextMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
 	}
 
-	// Test with NoteMaxLength constant
-	longText := strings.Repeat("a", NoteMaxLength+1)
+	longText := strings.Repeat("a", FreeTextMaxLength+1)
 	record.ValidateTextLength(
 		"case",
 		"create_case[0].note",
 		"note",
 		longText,
 		CaseInvalidField,
-		NoteMaxLength,
+		FreeTextMaxLength,
 		[]string{},
 	)
 
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, fmt.Sprintf("maximum length allowed is %d", NoteMaxLength))
+	assert.Contains(t, record.Errors[0].Message, fmt.Sprintf("maximum length allowed is %d", FreeTextMaxLength))
 }
 
 // -----------------------------------------------------------------------------
@@ -2314,7 +2313,7 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
-							FamilyMemberCode: createString(101),
+							FamilyMemberCode: createString(FreeTextMaxLength + 1),
 							Condition:        "diabetes",
 						},
 					},
@@ -2343,7 +2342,7 @@ func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
-							FamilyMemberCode: createString(101) + "123",
+							FamilyMemberCode: createString(FreeTextMaxLength+1) + "123",
 							Condition:        "diabetes",
 						},
 					},
@@ -2381,7 +2380,7 @@ func Test_validateCondition_Valid(t *testing.T) {
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateCondition_InvalidRegex(t *testing.T) {
+func Test_validateCondition_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
 		Case: types.CaseBatch{
@@ -2394,7 +2393,7 @@ func Test_validateCondition_InvalidRegex(t *testing.T) {
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
 							FamilyMemberCode: "mother",
-							Condition:        "diabetes@invalid",
+							Condition:        "Paternal grandmother : epilepsy (generalized seizures) + 50% @ Hôpital Sainte-Justine\nsecond line",
 						},
 					},
 				},
@@ -2403,10 +2402,7 @@ func Test_validateCondition_InvalidRegex(t *testing.T) {
 	}
 
 	record.validateCondition(0, 0)
-	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
+	assert.Empty(t, record.Errors)
 }
 
 func Test_validateCondition_TooLong(t *testing.T) {
@@ -2422,7 +2418,7 @@ func Test_validateCondition_TooLong(t *testing.T) {
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
 							FamilyMemberCode: "mother",
-							Condition:        createString(101),
+							Condition:        createString(FreeTextMaxLength + 1),
 						},
 					},
 				},
@@ -2435,31 +2431,6 @@ func Test_validateCondition_TooLong(t *testing.T) {
 	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
-}
-
-func Test_validateCondition_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					FamilyHistory: []*types.FamilyHistoryBatch{
-						{
-							FamilyMemberCode: "mother",
-							Condition:        "Grand-mère paternelle : épilepsie (crises généralisées) + 50% d'atteinte",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateCondition(0, 0)
-	assert.Empty(t, record.Errors)
 }
 
 func Test_validateFamilyHistory_NoHistory(t *testing.T) {
@@ -2527,8 +2498,8 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 							Condition:        "diabetes@invalid",
 						},
 						{
-							FamilyMemberCode: createString(101),
-							Condition:        createString(101),
+							FamilyMemberCode: createString(FreeTextMaxLength + 1),
+							Condition:        createString(FreeTextMaxLength + 1),
 						},
 					},
 				},
@@ -2537,7 +2508,8 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	}
 
 	record.validateFamilyHistory(0)
-	assert.Len(t, record.Errors, 4)
+	// One fewer than before: the condition's characters are no longer validated, only its length.
+	assert.Len(t, record.Errors, 3)
 }
 
 func Test_validateObservationsCategorical_Valid(t *testing.T) {
@@ -2609,7 +2581,7 @@ func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 
 	err := record.validateObservationsCategorical(0)
 	assert.NoError(t, err)
-	assert.Len(t, record.Errors, 5) // code, system, value, onset_code, note
+	assert.Len(t, record.Errors, 3) // code, system, onset_code — value and note are free text
 }
 
 func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
@@ -2658,7 +2630,7 @@ func Test_validateObsTextValue_Valid(t *testing.T) {
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
+func Test_validateObsTextValue_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
 		Case: types.CaseBatch{
@@ -2671,7 +2643,7 @@ func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
 					ObservationsText: []*types.ObservationTextBatch{
 						{
 							Code:  "note",
-							Value: "Invalid@value",
+							Value: "Obstetric follow-up (OBS-001) : 50% response ; patient's own words — Hôpital Sainte-Justine",
 						},
 					},
 				},
@@ -2680,10 +2652,7 @@ func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
 	}
 
 	record.validateObsTextValue(0, 0)
-	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "create_case[0].patients[0].observations_text[0]", record.Errors[0].Path)
+	assert.Empty(t, record.Errors)
 }
 
 func Test_validateObsTextValue_TooLong(t *testing.T) {
@@ -2699,7 +2668,7 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 					ObservationsText: []*types.ObservationTextBatch{
 						{
 							Code:  "note",
-							Value: createString(101),
+							Value: createString(FreeTextMaxLength + 1),
 						},
 					},
 				},
@@ -2712,31 +2681,6 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "create_case[0].patients[0].observations_text[0]", record.Errors[0].Path)
-}
-
-func Test_validateObsTextValue_FreeTextWithAccentsApostropheAndParentheses(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsText: []*types.ObservationTextBatch{
-						{
-							Code:  "note",
-							Value: "Patiente d'origine québécoise ; suivi obstétrical à l'hôpital (OBS-001) : 50% de réponse",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateObsTextValue(0, 0)
-	assert.Empty(t, record.Errors)
 }
 
 func Test_validateObservationsText_Valid(t *testing.T) {
@@ -2793,7 +2737,7 @@ func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 
 	err := record.validateObservationsText(0)
 	assert.NoError(t, err)
-	assert.Len(t, record.Errors, 2) // code and note
+	assert.Len(t, record.Errors, 1) // code only — the value is free text, unrestricted
 }
 
 func Test_validateObservationsText_NoObservations(t *testing.T) {
@@ -3190,7 +3134,8 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 
 	err := record.validateCasePatients()
 	assert.NoError(t, err)
-	assert.Equal(t, 11, len(record.Errors))
+	// 9, not 11: two of these fields are clinical free text, no longer character-validated.
+	assert.Equal(t, 9, len(record.Errors))
 }
 
 // -----------------------------------------------------------------------------
