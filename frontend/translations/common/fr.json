@@ -72,6 +72,24 @@
       "organizations": "Organisations",
       "roles": "Rôles et permissions",
       "users": "Membres"
+    },
+    "users": {
+      "add": "Ajouter un membre",
+      "count_one": "{{count}} membre",
+      "count_other": "{{count}} membres",
+      "filters": {
+        "role": "Rôle",
+        "search_placeholder": "Rechercher par nom ou courriel"
+      },
+      "subtitle": "Gérez les membres et les attributions des rôles.",
+      "table": {
+        "all_organizations": "Toutes les orgs",
+        "baseline_role": "Membre",
+        "edit": "Modifier le membre",
+        "name": "Nom",
+        "roles": "Rôles et accès",
+        "you": "(Vous)"
+      }
     }
   },
   "analysis": {
