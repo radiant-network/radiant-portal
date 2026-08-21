@@ -329,6 +329,10 @@ func newEngine() *gin.Engine {
 func main() {
 	observability.Setup()
 
+	if err := database.AssertTLSRequirement(); err != nil {
+		log.Fatal(err)
+	}
+
 	database.MigrateWithEnvDefault()
 
 	// Initialize database connection
