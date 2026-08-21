@@ -66,7 +66,13 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
               {t(`common.sex.${member.sex_code}`)}
             </Badge>
             <span className="font-mono">26/12/2018</span>
-            <span>{member.ethnicity_codes ? member.ethnicity_codes.join('/') : <EmptyField />}</span>
+            <span>
+              {member.ethnicities?.length ? (
+                member.ethnicities.map(ethnicity => ethnicity.name || ethnicity.code).join('/')
+              ) : (
+                <EmptyField />
+              )}
+            </span>
           </div>
         </div>
         {isProband && (
