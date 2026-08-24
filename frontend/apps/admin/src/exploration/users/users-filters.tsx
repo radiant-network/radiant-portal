@@ -1,9 +1,14 @@
 import { Search, X } from 'lucide-react';
 
-import FilterButton from '@/components/base/buttons/filter-button';
+import FilterButton, { type IFilterButtonItem } from '@/components/base/buttons/filter-button';
+import { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
 import { Button } from '@/components/base/shadcn/button';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+
+import { useTenantRoles } from './use-tenant-roles';
+import { BASELINE_ROLE_CODE } from './user-roles';
 
 type UsersFiltersProps = {
   search: string;
@@ -14,6 +19,14 @@ type UsersFiltersProps = {
 
 function UsersFilters({ search, onSearchChange, roles, onRolesChange }: UsersFiltersProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
+  const { data: tenantRoles } = useTenantRoles(tenant);
+
+  const roleOptions: IFilterButtonItem[] = sortOptions(
+    (tenantRoles ?? [])
+      .filter(role => role.code !== BASELINE_ROLE_CODE)
+      .map(({ code, name }) => ({ key: code, label: name })),
+  );
 
   const hasActiveFilters = search.length > 0 || roles.length > 0;
 
@@ -32,13 +45,10 @@ function UsersFilters({ search, onSearchChange, roles, onRolesChange }: UsersFil
         onChange={e => onSearchChange(e.target.value)}
         className="w-72"
       />
-      {/*
-       * TODO(SJRA-1449): Options empty => waiting on back get roles
-       */}
       <FilterButton
         dataCy="role"
         label={t('admin.users.filters.role')}
-        options={[]}
+        options={roleOptions}
         selected={roles}
         onSelect={onRolesChange}
       />
