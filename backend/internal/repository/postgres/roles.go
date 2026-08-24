@@ -18,10 +18,11 @@ func NewRolesRepository(db database.PostgresDB) *RolesRepository {
 }
 
 type roleAction struct {
-	RoleCode string
-	Code     string
-	Name     string
-	Scope    string
+	RoleCode    string
+	Code        string
+	Name        string
+	Description string
+	Scope       string
 }
 
 // ListTenantRoles returns every role defined in the tenant — the seeded ones and the tenant's own
@@ -65,9 +66,10 @@ func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string
 	for _, action := range actions {
 		grouped := byRole[action.RoleCode]
 		grouped.list = append(grouped.list, types.RoleActionResult{
-			Code:  action.Code,
-			Name:  action.Name,
-			Scope: action.Scope,
+			Code:        action.Code,
+			Name:        action.Name,
+			Description: action.Description,
+			Scope:       action.Scope,
 		})
 		grouped.hasTenant = grouped.hasTenant || action.Scope == types.ActionScopeTenant
 		grouped.hasOrg = grouped.hasOrg || action.Scope == types.ActionScopeOrg
@@ -90,7 +92,7 @@ func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string
 func (r *RolesRepository) tenantRoleActions(ctx context.Context, tenantCode string) ([]roleAction, error) {
 	var actions []roleAction
 	err := r.db.WithContext(ctx).Raw(`
-		SELECT ra.role_code, a.code, a.name_en AS name, a.scope
+		SELECT ra.role_code, a.code, a.name_en AS name, a.description_en AS description, a.scope
 		FROM role_action ra
 		JOIN action a ON a.code = ra.action_code
 		WHERE ra.tenant_code = ?

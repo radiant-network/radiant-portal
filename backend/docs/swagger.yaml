@@ -2136,6 +2136,8 @@ components:
       properties:
         code:
           type: string
+        description:
+          type: string
         name:
           type: string
         scope:
@@ -2145,6 +2147,7 @@ components:
           type: string
       required:
       - code
+      - description
       - name
       - scope
       type: object

@@ -77,7 +77,8 @@ func Test_RolesRepository_ListTenantRoles_ReturnsActionsWithTheirLabels(t *testi
 			actionCodes(admin))
 		for _, action := range admin.Actions {
 			assert.Equal(t, types.ActionScopeTenant, action.Scope)
-			assert.NotEmpty(t, action.Name, "action %q carries its label so the list needs no second call", action.Code)
+			assert.NotEmpty(t, action.Name, "action %q carries its labels so the list needs no second call", action.Code)
+			assert.NotEmpty(t, action.Description, "action %q carries its labels so the list needs no second call", action.Code)
 		}
 	})
 }

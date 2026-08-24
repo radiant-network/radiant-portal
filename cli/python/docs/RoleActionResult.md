@@ -7,6 +7,7 @@ Action granted by a role
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **code** | **str** |  | 
+**description** | **str** |  | 
 **name** | **str** |  | 
 **scope** | **str** |  | 
 

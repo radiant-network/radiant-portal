@@ -4366,6 +4366,12 @@ export interface RoleActionResult {
      * @type {string}
      * @memberof RoleActionResult
      */
+    'description': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleActionResult
+     */
     'name': string;
     /**
      * 

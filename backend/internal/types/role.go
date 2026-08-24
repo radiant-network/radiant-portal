@@ -14,12 +14,13 @@ type RoleResult struct {
 	AssignedUsersCount int64              `json:"assigned_users_count"`
 }
 
-// RoleActionResult is one action a role maps, carrying its label so the roles list renders
+// RoleActionResult is one action a role maps, carrying its labels so the roles list renders
 // without a second call to the action catalog.
 // @Description Action granted by a role
 // @Name RoleActionResult
 type RoleActionResult struct {
-	Code  string `json:"code" validate:"required"`
-	Name  string `json:"name" validate:"required"`
-	Scope string `json:"scope" validate:"required" enums:"tenant,org"`
+	Code        string `json:"code" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Scope       string `json:"scope" validate:"required" enums:"tenant,org"`
 }

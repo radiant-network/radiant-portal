@@ -39,7 +39,7 @@ func Test_ListRolesHandler(t *testing.T) {
 		IsDefault:   true,
 		Scope:       types.RoleScopeOrg,
 		Actions: []types.RoleActionResult{
-			{Code: "can_read_pii", Name: "Read personal health information", Scope: types.ActionScopeOrg},
+			{Code: "can_read_pii", Name: "Read personal health information", Description: "See patient identity on cases owned by the organization.", Scope: types.ActionScopeOrg},
 		},
 		AssignedUsersCount: 12,
 	}}}
@@ -52,7 +52,12 @@ func Test_ListRolesHandler(t *testing.T) {
 		"description":"Interpret variants at the selected organizations.",
 		"is_default":true,
 		"scope":"org",
-		"actions":[{"code":"can_read_pii","name":"Read personal health information","scope":"org"}],
+		"actions":[{
+			"code":"can_read_pii",
+			"name":"Read personal health information",
+			"description":"See patient identity on cases owned by the organization.",
+			"scope":"org"
+		}],
 		"assigned_users_count":12
 	}]`, w.Body.String())
 }

@@ -27,9 +27,10 @@ class RoleActionResult(BaseModel):
     Action granted by a role
     """ # noqa: E501
     code: StrictStr
+    description: StrictStr
     name: StrictStr
     scope: StrictStr
-    __properties: ClassVar[List[str]] = ["code", "name", "scope"]
+    __properties: ClassVar[List[str]] = ["code", "description", "name", "scope"]
 
     @field_validator('scope')
     def scope_validate_enum(cls, value):
@@ -90,6 +91,7 @@ class RoleActionResult(BaseModel):
 
         _obj = cls.model_validate({
             "code": obj.get("code"),
+            "description": obj.get("description"),
             "name": obj.get("name"),
             "scope": obj.get("scope")
         })
