@@ -88,6 +88,17 @@
         "submit": "Créer le membre",
         "title": "Ajouter un membre"
       },
+      "delete": {
+        "action": "Supprimer le membre",
+        "body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations..",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le membre."
+          },
+          "success": "Membre retiré de ce réseau."
+        },
+        "title": "Supprimer ce membre ?"
+      },
       "edit": {
         "notifications": {
           "errors": {
@@ -99,8 +110,9 @@
         "title": "Modifier le membre"
       },
       "errors": {
-        "last_admin": "{{name}} est la seule personne Administrateur de {{tenant}}. Attribuez le rôle Administrateur à quelqu'un d'autre avant de le retirer ici.",
-        "last_admin_title": "Ce réseau a besoin d'une personne Administrateur"
+        "last_admin": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de supprimer ce compte.",
+        "last_admin_title": "Ce réseau a besoin d'une personne Administrateur",
+        "self_delete": "Vous ne pouvez pas supprimer votre propre compte."
       },
       "fields": {
         "email": "Courriel",

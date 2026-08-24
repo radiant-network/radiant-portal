@@ -88,6 +88,17 @@
         "submit": "Create member",
         "title": "Add member"
       },
+      "delete": {
+        "action": "Delete member",
+        "body": "<b>{{name}}</b> will be removed from the <b>{{tenant}} network</b> and all of its organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to delete member."
+          },
+          "success": "Member removed from this network."
+        },
+        "title": "Delete this member?"
+      },
       "edit": {
         "notifications": {
           "errors": {
@@ -99,8 +110,9 @@
         "title": "Edit member"
       },
       "errors": {
-        "last_admin": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
-        "last_admin_title": "This network needs an Administrator"
+        "last_admin": "{{name}} is the only Administrator in {{tenant}} and can't be removed. Assign the Administrator role to someone else before deleting this account.",
+        "last_admin_title": "This network needs an Administrator",
+        "self_delete": "You can't delete your own acount."
       },
       "fields": {
         "email": "Email",

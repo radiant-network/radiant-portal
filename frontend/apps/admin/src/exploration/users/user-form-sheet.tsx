@@ -172,18 +172,70 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
     ) : undefined,
   }));
 
+  const memberName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
+
   /** A network with no administrator can no longer be managed, so the change is vetoed outright. */
   const openLastAdminVeto = () =>
     alertDialog.open({
       type: 'warning',
       title: t('admin.users.errors.last_admin_title'),
-      description: t('admin.users.errors.last_admin', {
-        name: [user?.first_name, user?.last_name].filter(Boolean).join(' '),
-        tenant: tenantName,
-      }),
+      description: t('admin.users.errors.last_admin', { name: memberName, tenant: tenantName }),
       hideCancel: true,
       actionProps: { children: t('common.close') },
     });
+
+  const openDeleteConfirm = () => {
+    if (!user) return;
+
+    alertDialog.open({
+      type: 'error',
+      title: t('admin.users.delete.title'),
+      description: (
+        <Trans
+          i18nKey="admin.users.delete.body"
+          values={{ name: memberName, tenant: tenantName }}
+          components={{ b: <strong /> }}
+        />
+      ),
+      cancelProps: { children: t('common.cancel') },
+      actionProps: {
+        variant: 'destructive',
+        dataCy: 'delete-user-confirm',
+        children: t('admin.users.delete.action'),
+        onClick: async () => {
+          try {
+            await usersApi.deleteUser(tenant, user.user_id);
+            toast.success(t('admin.users.delete.notifications.success'));
+            onSaved();
+            onOpenChange(false);
+          } catch {
+            toast.error(t('admin.users.delete.notifications.errors.default'));
+          }
+        },
+      },
+    });
+  };
+
+  /**
+   * Removing your own access is the one removal no other administrator asked for, and the API
+   * refuses it too. Wrapped in a span: a disabled button emits no event for the tooltip to catch.
+   */
+  const deleteButton = isSelf ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex">
+          <Button type="button" variant="destructive" disabled className="pointer-events-none">
+            {t('admin.users.delete.action')}
+          </Button>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{t('admin.users.errors.self_delete')}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <Button type="button" variant="destructive" onClick={openDeleteConfirm}>
+      {t('admin.users.delete.action')}
+    </Button>
+  );
 
   const adminBox = (
     <CheckboxGroupField
@@ -406,13 +458,16 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
                 )}
               </section>
             </div>
-            <SheetFooter className="border-t p-6 flex-row justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {t(isEdit ? 'admin.users.edit.submit' : 'admin.users.create.submit')}
-              </Button>
+            <SheetFooter className="border-t p-6 flex-row items-center justify-between sm:justify-between">
+              {isEdit ? deleteButton : <span />}
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {t(isEdit ? 'admin.users.edit.submit' : 'admin.users.create.submit')}
+                </Button>
+              </div>
             </SheetFooter>
           </form>
         </Form>
