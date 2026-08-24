@@ -63,6 +63,11 @@ func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.
 		require.NoError(t, env.Postgres.Raw("SELECT count(*) FROM role_action WHERE tenant_code = ?", code).Scan(&actionCount).Error)
 		assert.EqualValues(t, len(DefaultRoles), roleCount)
 		assert.Equal(t, wantActions, actionCount)
+
+		// A new tenant's seeded roles are locked, exactly like radiant's.
+		var defaultCount int64
+		require.NoError(t, env.Postgres.Raw("SELECT count(*) FROM role WHERE tenant_code = ? AND is_default", code).Scan(&defaultCount).Error)
+		assert.EqualValues(t, len(DefaultRoles), defaultCount)
 	})
 }
 

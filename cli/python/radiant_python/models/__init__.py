@@ -92,6 +92,8 @@ from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.role_action_result import RoleActionResult
+from radiant_python.models.role_result import RoleResult
 from radiant_python.models.sample_batch import SampleBatch
 from radiant_python.models.saved_filter import SavedFilter
 from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput

@@ -109,8 +109,8 @@ Identifiers are **varchar `code` natural keys** — no integer surrogate ids —
 | `tenant` | `code` | Tenant catalog (e.g. `radiant`) |
 | `organization` | `(code, tenant_code)` | Orgs, each belonging to one tenant (pre-existing table; `id` dropped, `tenant_code` added) |
 | `users` | `user_id` | Identity registry, keyed by the Keycloak `sub` (required, unique); `email` / `first_name` / `last_name` are optional attributes |
-| `role` | `(tenant_code, code)` | Per-tenant role catalog |
-| `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`} |
+| `role` | `(tenant_code, code)` | Per-tenant role catalog; `is_default` marks a seeded role, which is locked (no edit, no delete) |
+| `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`}; `grantable` = may a custom role map it (false for `can_manage_user` alone) |
 | `role_action` | `(tenant_code, role_code, action_code)` | Role → action mapping; FK to `role` `ON DELETE CASCADE` |
 | `user_role` | `(user_id, tenant_code, org_code, role_code)` | Single grant table (`user_id` FK → `users`); `org_code` is nullable — `NULL` = not org-scoped (tenant-wide grant), `'*'` = all orgs in tenant, specific code = that org. Uniqueness enforced by two partial indexes (one for non-NULL `org_code`, one for NULL). |
 

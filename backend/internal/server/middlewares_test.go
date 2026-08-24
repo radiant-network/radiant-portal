@@ -187,6 +187,59 @@ func Test_RequireAction_LacksAction_Returns403(t *testing.T) {
 	assert.NotContains(t, w.Body.String(), types.ActionInterpretVariant)
 }
 
+// anyActionTestRouter is actionTestRouter's RequireAnyAction twin: the caller needs any one of
+// the actions.
+func anyActionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, actions ...string) *gin.Engine {
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
+	tenantGroup.GET("/cases/filters", RequireAnyAction(auth, repo, actions...), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+	return router
+}
+
+func Test_RequireAnyAction_HoldsSecondAction_Allows(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionsHeld: map[string]bool{
+		types.ActionManageUser: true,
+	}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(anyActionTestRouter(repo, auth, types.ActionManageRole, types.ActionManageUser))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_RequireAnyAction_HoldsFirstAction_SkipsTheRest(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionsHeld: map[string]bool{
+		types.ActionManageRole: true,
+	}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(anyActionTestRouter(repo, auth, types.ActionManageRole, types.ActionManageUser))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, []string{types.ActionManageRole}, repo.gotActions, "a hit must not cost a second query")
+}
+
+func Test_RequireAnyAction_HoldsNoAction_Returns403(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionsHeld: map[string]bool{}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(anyActionTestRouter(repo, auth, types.ActionManageRole, types.ActionManageUser))
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, []string{types.ActionManageRole, types.ActionManageUser}, repo.gotActions)
+	// The body must NOT name the missing actions (no permission-model disclosure).
+	assert.NotContains(t, w.Body.String(), types.ActionManageRole)
+	assert.NotContains(t, w.Body.String(), types.ActionManageUser)
+}
+
+func Test_RequireAnyAction_RepoError_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("db down")}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(anyActionTestRouter(repo, auth, types.ActionManageRole, types.ActionManageUser))
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
 func Test_RequireAction_RepoError_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("db down")}
 	auth := &testutils.MockAuth{Id: mockUserID}

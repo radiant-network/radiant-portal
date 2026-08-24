@@ -199,6 +199,14 @@ func resolveOrgCode(_ *gin.Context) (string, error) {
 // from context (RequireTenantAccess must run first). On denial the missing action is logged,
 // not returned, so the 403 body stays generic.
 func RequireAction(auth utils.Auth, repo actionChecker, action string) gin.HandlerFunc {
+	return RequireAnyAction(auth, repo, action)
+}
+
+// RequireAnyAction gates a route on holding at least one of the actions. It serves the reads
+// several admin sections share: the role catalog, for one, is read both by role management
+// (can_manage_role) and by the role picker in the user screens (can_manage_user), and neither
+// action implies the other.
+func RequireAnyAction(auth utils.Auth, repo actionChecker, actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
@@ -221,23 +229,25 @@ func RequireAction(auth utils.Auth, repo actionChecker, action string) gin.Handl
 			return
 		}
 
-		allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, orgCode, action)
-		if err != nil {
-			HandleError(c, err)
-			c.Abort()
-			return
-		}
-		if !allowed {
-			slog.WarnContext(c.Request.Context(), "forbidden: caller lacks required action",
-				slog.String("user_id", *userID),
-				slog.String("action", action),
-				slog.String("tenant", *tenant),
-			)
-			HandleForbiddenError(c)
-			c.Abort()
-			return
+		for _, action := range actions {
+			allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, orgCode, action)
+			if err != nil {
+				HandleError(c, err)
+				c.Abort()
+				return
+			}
+			if allowed {
+				c.Next()
+				return
+			}
 		}
 
-		c.Next()
+		slog.WarnContext(c.Request.Context(), "forbidden: caller lacks required action",
+			slog.String("user_id", *userID),
+			slog.Any("actions", actions),
+			slog.String("tenant", *tenant),
+		)
+		HandleForbiddenError(c)
+		c.Abort()
 	}
 }

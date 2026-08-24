@@ -26,7 +26,7 @@ func (r *AuthRepository) ListActions(ctx context.Context) ([]types.ActionRespons
 	actions := []types.ActionResponse{}
 	err := r.db.WithContext(ctx).
 		Table("action").
-		Select("code, scope, COALESCE(name_en, '') AS name, description_en AS description").
+		Select("code, scope, COALESCE(name_en, '') AS name, description_en AS description, grantable").
 		Order("scope, code").
 		Scan(&actions).Error
 	if err != nil {

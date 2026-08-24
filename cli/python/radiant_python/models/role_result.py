@@ -17,21 +17,31 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.role_action_result import RoleActionResult
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ActionResponse(BaseModel):
+class RoleResult(BaseModel):
     """
-    Action from the authorization catalog.
+    Role of a tenant, with the actions it grants and the number of users holding it
     """ # noqa: E501
-    code: Optional[StrictStr] = None
+    actions: List[RoleActionResult]
+    assigned_users_count: Optional[StrictInt] = None
+    code: StrictStr
     description: Optional[StrictStr] = None
-    grantable: Optional[StrictBool] = None
-    name: Optional[StrictStr] = None
-    scope: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["code", "description", "grantable", "name", "scope"]
+    is_default: Optional[StrictBool] = None
+    name: StrictStr
+    scope: StrictStr
+    __properties: ClassVar[List[str]] = ["actions", "assigned_users_count", "code", "description", "is_default", "name", "scope"]
+
+    @field_validator('scope')
+    def scope_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['tenant', 'org', 'mixed']):
+            raise ValueError("must be one of enum values ('tenant', 'org', 'mixed')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +61,7 @@ class ActionResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ActionResponse from a JSON string"""
+        """Create an instance of RoleResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,11 +82,18 @@ class ActionResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in actions (list)
+        _items = []
+        if self.actions:
+            for _item_actions in self.actions:
+                if _item_actions:
+                    _items.append(_item_actions.to_dict())
+            _dict['actions'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ActionResponse from a dict"""
+        """Create an instance of RoleResult from a dict"""
         if obj is None:
             return None
 
@@ -84,9 +101,11 @@ class ActionResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "actions": [RoleActionResult.from_dict(_item) for _item in obj["actions"]] if obj.get("actions") is not None else None,
+            "assigned_users_count": obj.get("assigned_users_count"),
             "code": obj.get("code"),
             "description": obj.get("description"),
-            "grantable": obj.get("grantable"),
+            "is_default": obj.get("is_default"),
             "name": obj.get("name"),
             "scope": obj.get("scope")
         })

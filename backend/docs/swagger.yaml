@@ -7,6 +7,8 @@ components:
           type: string
         description:
           type: string
+        grantable:
+          type: boolean
         name:
           type: string
         scope:
@@ -2128,6 +2130,54 @@ components:
       properties:
         format:
           type: string
+      type: object
+    RoleActionResult:
+      description: Action granted by a role
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        scope:
+          enum:
+          - tenant
+          - org
+          type: string
+      required:
+      - code
+      - name
+      - scope
+      type: object
+    RoleResult:
+      description: Role of a tenant, with the actions it grants and the number of
+        users holding it
+      properties:
+        actions:
+          items:
+            $ref: '#/components/schemas/RoleActionResult'
+          type: array
+          uniqueItems: false
+        assigned_users_count:
+          type: integer
+        code:
+          type: string
+        description:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        scope:
+          enum:
+          - tenant
+          - org
+          - mixed
+          type: string
+      required:
+      - actions
+      - code
+      - name
+      - scope
       type: object
     SampleBatch:
       properties:
@@ -8000,6 +8050,64 @@ paths:
       summary: Update existing patients (batch)
       tags:
       - patients
+  /{tenant}/roles:
+    get:
+      description: |-
+        Returns every role defined in the tenant in the path — the seeded ones and the
+        tenant's own custom ones — each with the actions it grants and the number of users
+        holding it. Requires the `can_manage_role` or the `can_manage_user` action: the
+        catalog is both the roles section's own list and the role picker the add and edit
+        user screens are built from. `is_default` marks a seeded
+        role, which is locked and can be neither edited nor deleted. `scope` is derived
+        from the actions: `tenant` when they are all tenant-scoped, `org` when they are all
+        org-scoped, `mixed` when both — it is what decides whether granting the role needs
+        organizations. The list is small and bounded, so it is returned unpaged.
+      operationId: listRoles
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RoleResult'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the tenant's roles
+      tags:
+      - roles
   /{tenant}/samples/batch:
     post:
       description: Create a new sample batch

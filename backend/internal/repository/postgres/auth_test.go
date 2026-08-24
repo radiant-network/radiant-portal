@@ -161,6 +161,10 @@ func Test_AuthRepository_ListActions(t *testing.T) {
 		assert.Equal(t, "tenant", mo.Scope)
 		assert.Equal(t, "Manage organizations", mo.Name)
 		assert.Equal(t, "Create and edit organizations in the network.", mo.Description)
+		assert.True(t, mo.Grantable, "a custom role may confer can_manage_org")
+
+		// can_manage_user is the one reserved action: it never reaches the create-role picker.
+		assert.False(t, byCode[types.ActionManageUser].Grantable)
 	})
 }
 

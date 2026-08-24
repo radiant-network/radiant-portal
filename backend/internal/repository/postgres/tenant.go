@@ -126,9 +126,11 @@ func (r *TenantRepository) SeedDefaultRoles(ctx context.Context, tenantCode stri
 	}
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, role := range DefaultRoles {
+			// is_default marks these as the locked catalog: a tenant's own custom roles are the
+			// only ones its administrators may edit or delete.
 			if err := tx.Exec(`
-				INSERT INTO public.role (tenant_code, code, name_en, description_en, name_fr, description_fr)
-				VALUES (?, ?, ?, ?, ?, ?)
+				INSERT INTO public.role (tenant_code, code, name_en, description_en, name_fr, description_fr, is_default)
+				VALUES (?, ?, ?, ?, ?, ?, true)
 				ON CONFLICT (tenant_code, code) DO NOTHING`,
 				tenantCode, role.Code, role.NameEn, role.DescriptionEn, role.NameFr, role.DescriptionFr).Error; err != nil {
 				return fmt.Errorf("seed role %s/%s: %w", tenantCode, role.Code, err)
