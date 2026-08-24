@@ -11,7 +11,12 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
 import type { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
-import { getSelectedOptionByValue, isOptionsExist, transToGroupOption } from './multi-selector.utils';
+import {
+  getGroupOptionSignature,
+  getSelectedOptionByValue,
+  isOptionsExist,
+  transToGroupOption,
+} from './multi-selector.utils';
 
 function MultiSelector({
   value,
@@ -213,7 +218,7 @@ function MultiSelector({
       return;
     }
     const newOption = transToGroupOption(arrayOptions || [], groupBy);
-    if (JSON.stringify(newOption) !== JSON.stringify(options)) {
+    if (getGroupOptionSignature(newOption) !== getGroupOptionSignature(options)) {
       setOptions(newOption);
     }
   }, [arrayDefaultOptions, arrayOptions, groupBy, onSearch, options]);
