@@ -178,8 +178,8 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
   const openLastAdminVeto = () =>
     alertDialog.open({
       type: 'warning',
-      title: t('admin.users.errors.last_admin_title'),
-      description: t('admin.users.errors.last_admin', { name: memberName, tenant: tenantName }),
+      title: t('admin.users.errors.last_admin_update_title'),
+      description: t('admin.users.errors.last_admin_update', { name: memberName, tenant: tenantName }),
       hideCancel: true,
       actionProps: { children: t('common.close') },
     });

@@ -110,8 +110,8 @@
         "title": "Modifier le membre"
       },
       "errors": {
-        "last_admin": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de supprimer ce compte.",
-        "last_admin_title": "Ce réseau a besoin d'une personne Administrateur",
+        "last_admin_update": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de le retirer ici.",
+        "last_admin_update_title": "Ce réseau doit conserver un Administrateur",
         "self_delete": "Vous ne pouvez pas supprimer votre propre compte."
       },
       "fields": {

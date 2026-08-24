@@ -110,8 +110,8 @@
         "title": "Edit member"
       },
       "errors": {
-        "last_admin": "{{name}} is the only Administrator in {{tenant}} and can't be removed. Assign the Administrator role to someone else before deleting this account.",
-        "last_admin_title": "This network needs an Administrator",
+        "last_admin_update": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
+        "last_admin_update_title": "This network needs an Administrator",
         "self_delete": "You can't delete your own acount."
       },
       "fields": {
