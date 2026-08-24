@@ -77,9 +77,47 @@
       "add": "Ajouter un membre",
       "count_one": "{{count}} membre",
       "count_other": "{{count}} membres",
+      "create": {
+        "details_title": "Détails du membre",
+        "notifications": {
+          "errors": {
+            "default": "Impossible d'ajouter le membre."
+          },
+          "success": "Membre ajouté."
+        },
+        "submit": "Créer le membre",
+        "title": "Ajouter un membre"
+      },
+      "fields": {
+        "email": "Courriel",
+        "first_name": "Prénom",
+        "last_name": "Nom"
+      },
       "filters": {
         "role": "Rôle",
         "search_placeholder": "Rechercher par nom ou courriel"
+      },
+      "roles": {
+        "admin_access": "Administrateur",
+        "all_organizations": "Toutes les organisations, actuelles et futures",
+        "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
+        "errors": {
+          "organizations_required": "Sélectionnez au moins une organisation."
+        },
+        "organizations": "Dans ces organisations",
+        "organizations_placeholder": "Organisations",
+        "permissions": {
+          "description": "Description des permissions et portée de ce rôle",
+          "empty": "Ce rôle n'accorde aucune permission.",
+          "locked": "Non modifiable ni supprimable"
+        },
+        "scope": {
+          "network": "Réseau",
+          "organization": "Organisation"
+        },
+        "subtitle": "Attribuez des rôles pour activer des actions supplémentaires — les rôles ajoutent des permissions, ils n'en retirent jamais.",
+        "title": "Rôles du membre",
+        "view_permissions": "Voir les permissions"
       },
       "subtitle": "Gérez les membres et les attributions des rôles.",
       "table": {
@@ -184,7 +222,9 @@
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
         "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
-        "organization_code_exists": "Une organisation avec ce code existe déjà."
+        "invalid_email": "Saisissez une adresse courriel valide",
+        "organization_code_exists": "Une organisation avec ce code existe déjà.",
+        "user_email_exists": "Cette personne est déjà membre de ce réseau."
       }
     },
     "editor": {

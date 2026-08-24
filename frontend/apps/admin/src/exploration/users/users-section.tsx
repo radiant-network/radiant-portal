@@ -14,6 +14,7 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { useDebounce } from '@/components/hooks/useDebounce';
 import { usersApi } from '@/utils/api';
 
+import UserFormSheet from './user-form-sheet';
 import UsersFilters from './users-filters';
 import { getUsersColumns, usersDefaultSettings } from './users-table-settings';
 
@@ -49,10 +50,11 @@ export default function UsersSection() {
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search.trim(), SEARCH_DEBOUNCE_MS);
 
-  const { data, error, isLoading } = useSWR<UsersSearchResponse, ApiError>(
+  const { data, error, isLoading, mutate } = useSWR<UsersSearchResponse, ApiError>(
     `admin-users-${tenant}-${debouncedSearch}-${roles.join(',')}-${pagination.pageIndex}-${pagination.pageSize}`,
     () => fetchUsers({ tenant, search: debouncedSearch, roles, pagination }),
     {
@@ -83,8 +85,7 @@ export default function UsersSection() {
         </CardTitle>
         <CardDescription>{t('admin.users.subtitle')}</CardDescription>
         <CardAction>
-          {/* TODO(SJRA-1449): opens the Add member sheet */}
-          <Button>
+          <Button onClick={() => setIsCreateOpen(true)}>
             <Plus />
             {t('admin.users.add')}
           </Button>
@@ -112,6 +113,7 @@ export default function UsersSection() {
           enableFullscreen
           tableIndexResultPosition="bottom"
         />
+        {isCreateOpen && <UserFormSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} onSaved={() => mutate()} />}
       </CardContent>
     </Card>
   );

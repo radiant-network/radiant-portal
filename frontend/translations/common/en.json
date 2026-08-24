@@ -77,9 +77,47 @@
       "add": "Add member",
       "count_one": "{{count}} Member",
       "count_other": "{{count}} Members",
+      "create": {
+        "details_title": "Member details",
+        "notifications": {
+          "errors": {
+            "default": "Unable to add member."
+          },
+          "success": "Member added."
+        },
+        "submit": "Create member",
+        "title": "Add member"
+      },
+      "fields": {
+        "email": "Email",
+        "first_name": "First name",
+        "last_name": "Last name"
+      },
       "filters": {
         "role": "Role",
         "search_placeholder": "Search by name or email"
+      },
+      "roles": {
+        "admin_access": "Administrator",
+        "all_organizations": "All current and future organizations",
+        "baseline": "Every member can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
+        "errors": {
+          "organizations_required": "Select at least one organization."
+        },
+        "organizations": "At these organizations",
+        "organizations_placeholder": "Organizations",
+        "permissions": {
+          "description": "Permission descriptions and scope for this role",
+          "empty": "This role grants no permission.",
+          "locked": "Can't be edited or deleted"
+        },
+        "scope": {
+          "network": "Network",
+          "organization": "Organization"
+        },
+        "subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
+        "title": "Member roles",
+        "view_permissions": "View permissions"
       },
       "subtitle": "Manage members and role assignments.",
       "table": {
@@ -184,7 +222,9 @@
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
         "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
-        "organization_code_exists": "An organization with this code already exists."
+        "invalid_email": "Enter a valid email address",
+        "organization_code_exists": "An organization with this code already exists.",
+        "user_email_exists": "This person is already a member of this network."
       }
     },
     "editor": {

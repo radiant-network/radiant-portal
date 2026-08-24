@@ -11,6 +11,7 @@ import {
   OccurrenceNotesApi,
   OccurrencesApi,
   OrganizationsApi,
+  RolesApi,
   SavedFiltersApi,
   SequencingApi,
   UserPreferencesApi,
@@ -43,3 +44,4 @@ export const igvApi = new IgvApi(config, BASE_PATH, axiosClient);
 export const genesApi = new GenesApi(config, BASE_PATH, axiosClient);
 export const valueSetsApi = new ValueSetsApi(config, BASE_PATH, axiosClient);
 export const usersApi = new UsersApi(config, BASE_PATH, axiosClient);
+export const rolesApi = new RolesApi(config, BASE_PATH, axiosClient);

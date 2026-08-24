@@ -1,25 +1,19 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import useSWR from 'swr';
 
-import type { ApiError, OrganizationResponse } from '@/api/api';
+import type { OrganizationResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { organizationsApi } from '@/utils/api';
 
 import OrganizationFormSheet from './organization-form-sheet';
 import OrganizationsFilters from './organizations-filters';
 import { getOrganizationsColumns, organizationsDefaultSettings } from './organizations-table-settings';
 import { normalize } from './organizations-utils';
-
-async function fetchOrganizations(tenant: string) {
-  const response = await organizationsApi.listOrganizations(tenant);
-  return response.data;
-}
+import { useOrganizations } from './use-organizations';
 
 export default function OrganizationsSection() {
   const { t } = useI18n();
@@ -30,14 +24,7 @@ export default function OrganizationsSection() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editedOrganization, setEditedOrganization] = useState<OrganizationResponse>();
 
-  const {
-    data: organizations,
-    isLoading,
-    mutate,
-  } = useSWR<OrganizationResponse[], ApiError>(`admin-organizations-${tenant}`, () => fetchOrganizations(tenant), {
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-  });
+  const { data: organizations, isLoading, mutate } = useOrganizations(tenant);
 
   const handleEdit = useCallback((organization: OrganizationResponse) => {
     setEditedOrganization(organization);

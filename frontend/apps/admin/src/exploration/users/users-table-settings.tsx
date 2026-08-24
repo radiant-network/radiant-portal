@@ -12,20 +12,14 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 
-const columnHelper = createColumnHelper<UserResult>();
+import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE } from './user-roles';
 
-/**
- * Baseline role, granted tenant-wide to every user, so it never appears as a badge: a member
- * holding nothing else is labelled "Member" instead.
- */
-const BASELINE_ROLE_CODE = 'member';
-const ADMIN_ROLE_CODE = 'tenant_admin';
+const columnHelper = createColumnHelper<UserResult>();
 
 function adminFirst(a: UserRoleResult, b: UserRoleResult) {
   return Number(b.role_code === ADMIN_ROLE_CODE) - Number(a.role_code === ADMIN_ROLE_CODE);
 }
 
-/** `*` is the API's "every organization" grant; any other code is a single organization. */
 function formatOrganizations(orgCodes: string[], t: TFunction<string, undefined>) {
   return orgCodes.map(code => (code === '*' ? t('admin.users.table.all_organizations') : code)).join(' • ');
 }
