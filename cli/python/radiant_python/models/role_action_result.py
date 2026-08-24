@@ -17,21 +17,27 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ActionResponse(BaseModel):
+class RoleActionResult(BaseModel):
     """
-    Action from the authorization catalog.
+    Action granted by a role
     """ # noqa: E501
-    code: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    grantable: Optional[StrictBool] = None
-    name: Optional[StrictStr] = None
-    scope: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["code", "description", "grantable", "name", "scope"]
+    code: StrictStr
+    description: StrictStr
+    name: StrictStr
+    scope: StrictStr
+    __properties: ClassVar[List[str]] = ["code", "description", "name", "scope"]
+
+    @field_validator('scope')
+    def scope_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['tenant', 'org']):
+            raise ValueError("must be one of enum values ('tenant', 'org')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +57,7 @@ class ActionResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ActionResponse from a JSON string"""
+        """Create an instance of RoleActionResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -76,7 +82,7 @@ class ActionResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ActionResponse from a dict"""
+        """Create an instance of RoleActionResult from a dict"""
         if obj is None:
             return None
 
@@ -86,7 +92,6 @@ class ActionResponse(BaseModel):
         _obj = cls.model_validate({
             "code": obj.get("code"),
             "description": obj.get("description"),
-            "grantable": obj.get("grantable"),
             "name": obj.get("name"),
             "scope": obj.get("scope")
         })

@@ -64,6 +64,7 @@ type ActionResponse struct {
 	Scope       string `json:"scope"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Grantable   bool   `json:"grantable"`
 } // @name ActionResponse
 
 // TenantMembership is the caller's effective authorization within a single tenant.

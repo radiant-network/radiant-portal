@@ -103,6 +103,38 @@ func Test_ActionEnforcement_IngestData_WithoutActionDenied(t *testing.T) {
 	assertActionEnforced(t, aliceID, types.ActionIngestData, http.StatusForbidden)
 }
 
+// assertAnyActionEnforced is assertActionEnforced's RequireAnyAction twin: holding any one of
+// the actions admits the caller.
+func assertAnyActionEnforced(t *testing.T, userID string, actions []string, expectedStatus int) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: userID}
+
+		router := gin.New()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
+		tenantRoutes.GET("/probe", server.RequireAnyAction(auth, repo, actions...), func(c *gin.Context) {
+			c.Status(http.StatusOK)
+		})
+
+		req, _ := http.NewRequest("GET", "/radiant/probe", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, expectedStatus, w.Code)
+	})
+}
+
+func Test_ActionEnforcement_AnyAction_HoldsOnlyTheSecond_Allowed(t *testing.T) {
+	// gabe holds can_ingest_data but no can_search_case — the second action is what admits him.
+	assertAnyActionEnforced(t, gabeID, []string{types.ActionSearchCase, types.ActionIngestData}, http.StatusOK)
+}
+
+func Test_ActionEnforcement_AnyAction_HoldsNone_Denied(t *testing.T) {
+	// mike is a plain member: neither management action, so the gate denies.
+	assertAnyActionEnforced(t, mikeID, []string{types.ActionManageRole, types.ActionManageUser}, http.StatusForbidden)
+}
+
 // Batch routes are gated by RequireAction (can_ingest_data).
 func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
@@ -152,13 +184,17 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 			key := route.Method + " " + route.Path
 			actual[key] = true
 			_, mapped := expectedTenantActions[key]
+			_, mappedToAny := expectedTenantAnyActions[key]
 			_, memberOnly := membershipOnlyTenantRoutes[key]
-			assert.Truef(t, mapped || memberOnly, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions, or declare it in membershipOnlyTenantRoutes if it is intentionally member-readable", key)
+			assert.Truef(t, mapped || mappedToAny || memberOnly, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions (or RequireAnyAction and expectedTenantAnyActions), or declare it in membershipOnlyTenantRoutes if it is intentionally member-readable", key)
 		}
 
 		// Reverse direction: every mapped route must still exist, so the maps can't rot.
 		for key := range expectedTenantActions {
 			assert.Truef(t, actual[key], "mapped route %q is no longer registered — remove it from expectedTenantActions", key)
+		}
+		for key := range expectedTenantAnyActions {
+			assert.Truef(t, actual[key], "mapped route %q is no longer registered — remove it from expectedTenantAnyActions", key)
 		}
 		for key := range membershipOnlyTenantRoutes {
 			assert.Truef(t, actual[key], "member-only route %q is no longer registered — remove it from membershipOnlyTenantRoutes", key)
@@ -170,6 +206,12 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 // (RequireTenantAccess) with no per-action RequireAction — referential reads any member may see.
 var membershipOnlyTenantRoutes = map[string]bool{
 	"GET /:tenant/organizations": true,
+}
+
+// expectedTenantAnyActions are /:tenant routes gated by RequireAnyAction: the caller needs any
+// one of the listed actions. These are reads shared by several admin sections.
+var expectedTenantAnyActions = map[string][]string{
+	"GET /:tenant/roles": {types.ActionManageRole, types.ActionManageUser},
 }
 
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in

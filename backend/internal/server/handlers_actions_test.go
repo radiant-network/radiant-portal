@@ -32,13 +32,13 @@ func serveListActions(repo actionsReader) *httptest.ResponseRecorder {
 
 func Test_ListActionsHandler(t *testing.T) {
 	repo := &mockActionsReader{actions: []types.ActionResponse{
-		{Code: "can_manage_org", Scope: "tenant", Name: "Manage organizations", Description: "Create and edit organizations in the network."},
+		{Code: "can_manage_org", Scope: "tenant", Name: "Manage organizations", Description: "Create and edit organizations in the network.", Grantable: true},
 	}}
 	w := serveListActions(repo)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[
-		{"code":"can_manage_org","scope":"tenant","name":"Manage organizations","description":"Create and edit organizations in the network."}
+		{"code":"can_manage_org","scope":"tenant","name":"Manage organizations","description":"Create and edit organizations in the network.","grantable":true}
 	]`, w.Body.String())
 }
 

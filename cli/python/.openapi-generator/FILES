@@ -93,6 +93,9 @@ docs/PatientBatch.md
 docs/PatientsApi.md
 docs/PubmedCitation.md
 docs/PubmedCitationDetails.md
+docs/RoleActionResult.md
+docs/RoleResult.md
+docs/RolesApi.md
 docs/SampleBatch.md
 docs/SamplesApi.md
 docs/SavedFilter.md
@@ -162,6 +165,7 @@ radiant_python/api/occurrence_notes_api.py
 radiant_python/api/occurrences_api.py
 radiant_python/api/organizations_api.py
 radiant_python/api/patients_api.py
+radiant_python/api/roles_api.py
 radiant_python/api/samples_api.py
 radiant_python/api/saved_filters_api.py
 radiant_python/api/sequencing_api.py
@@ -254,6 +258,8 @@ radiant_python/models/patch_case_batch_body.py
 radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py
+radiant_python/models/role_action_result.py
+radiant_python/models/role_result.py
 radiant_python/models/sample_batch.py
 radiant_python/models/saved_filter.py
 radiant_python/models/saved_filter_creation_input.py

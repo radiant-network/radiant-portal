@@ -86,6 +86,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoTasks := postgres.NewTaskRepository(postgresDB)
 	repoAuth := postgres.NewAuthRepository(postgresDB)
 	repoUsers := postgres.NewUsersRepository(postgresDB)
+	repoRoles := postgres.NewRolesRepository(postgresDB)
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/createuser does. The clients are lazy, so the Keycloak/Ranger settings only have to be
@@ -132,6 +133,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	requireAction := func(action string) gin.HandlerFunc {
 		return server.RequireAction(auth, repoAuth, action)
+	}
+	requireAnyAction := func(actions ...string) gin.HandlerFunc {
+		return server.RequireAnyAction(auth, repoAuth, actions...)
 	}
 
 	casesGroup := tenantRoutes.Group("/cases")
@@ -228,6 +232,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
 	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
 	organizationsGroup.PUT("/:code", requireAction(types.ActionManageOrg), server.PutOrganizationHandler(repoOrganizationsWrite))
+
+	// The tenant's role catalog. Read by role management and by the role picker the user
+	// administration screens build, so either action opens it — neither implies the other.
+	rolesGroup := tenantRoutes.Group("/roles")
+	rolesGroup.GET("", requireAnyAction(types.ActionManageRole, types.ActionManageUser), server.ListRolesHandler(repoRoles))
 
 	// Tenant users administration, gated by can_manage_user. Distinct from the global /users group
 	// below, which serves the caller's own saved filters, sets and preferences.

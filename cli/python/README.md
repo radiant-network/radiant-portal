@@ -159,6 +159,7 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
+*RolesApi* | [**list_roles**](docs/RolesApi.md#list_roles) | **GET** /{tenant}/roles | List the tenant&#39;s roles
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
 *SamplesApi* | [**put_sample_batch**](docs/SamplesApi.md#put_sample_batch) | **PUT** /{tenant}/samples/batch | Update existing samples (batch)
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
@@ -272,6 +273,8 @@ Class | Method | HTTP request | Description
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
+ - [RoleActionResult](docs/RoleActionResult.md)
+ - [RoleResult](docs/RoleResult.md)
  - [SampleBatch](docs/SampleBatch.md)
  - [SavedFilter](docs/SavedFilter.md)
  - [SavedFilterCreationInput](docs/SavedFilterCreationInput.md)

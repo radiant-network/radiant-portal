@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **code** | **str** |  | [optional] 
 **description** | **str** |  | [optional] 
+**grantable** | **bool** |  | [optional] 
 **name** | **str** |  | [optional] 
 **scope** | **str** |  | [optional] 
 

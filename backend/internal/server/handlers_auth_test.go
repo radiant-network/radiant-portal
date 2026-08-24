@@ -21,9 +21,11 @@ type mockAuthRepository struct {
 	hasTenantAccess bool
 	tenantErr       error
 	hasAction       bool
+	actionsHeld     map[string]bool // when set, answers per action instead of hasAction
 	actionErr       error
 	gotOrgCode      string
 	gotAction       string
+	gotActions      []string
 }
 
 // TenantExists defaults to reporting the tenant as present (zero-value tenantNotFound=false)
@@ -39,6 +41,10 @@ func (m *mockAuthRepository) HasTenantAccess(ctx context.Context, email, tenantC
 func (m *mockAuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error) {
 	m.gotOrgCode = orgCode
 	m.gotAction = actionCode
+	m.gotActions = append(m.gotActions, actionCode)
+	if m.actionsHeld != nil {
+		return m.actionsHeld[actionCode], m.actionErr
+	}
 	return m.hasAction, m.actionErr
 }
 

@@ -32,6 +32,7 @@ from radiant_python.api.occurrence_notes_api import OccurrenceNotesApi
 from radiant_python.api.occurrences_api import OccurrencesApi
 from radiant_python.api.organizations_api import OrganizationsApi
 from radiant_python.api.patients_api import PatientsApi
+from radiant_python.api.roles_api import RolesApi
 from radiant_python.api.samples_api import SamplesApi
 from radiant_python.api.saved_filters_api import SavedFiltersApi
 from radiant_python.api.sequencing_api import SequencingApi
@@ -132,6 +133,8 @@ from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.role_action_result import RoleActionResult
+from radiant_python.models.role_result import RoleResult
 from radiant_python.models.sample_batch import SampleBatch
 from radiant_python.models.saved_filter import SavedFilter
 from radiant_python.models.saved_filter_creation_input import SavedFilterCreationInput
