@@ -50,20 +50,24 @@ function getFullName(user: UserResult) {
   return [user.first_name, user.last_name].filter(Boolean).join(' ');
 }
 
-export function getUsersColumns(t: TFunction<string, undefined>, currentUserId: string) {
+export function getUsersColumns(
+  t: TFunction<string, undefined>,
+  currentUserId: string,
+  onEdit: (user: UserResult) => void,
+) {
   return [
     columnHelper.accessor(row => getFullName(row), {
       id: 'name',
       cell: info => (
         <div className="flex flex-col">
           <span className="flex flex-wrap items-center gap-1">
-            {/* TODO(SJRA-1449): opens the Edit member sheet */}
             <AnchorLink
               component="button"
               variant="secondary"
               size="sm"
               external={false}
               className="w-fit font-semibold hover:no-underline"
+              onClick={() => onEdit(info.row.original)}
             >
               {info.getValue()}
             </AnchorLink>
@@ -89,10 +93,15 @@ export function getUsersColumns(t: TFunction<string, undefined>, currentUserId: 
     }),
     columnHelper.display({
       id: 'actions',
-      cell: () => (
+      cell: info => (
         <div className="flex justify-center">
-          {/* TODO(SJRA-1449): opens the Edit member sheet */}
-          <Button iconOnly size="xs" variant="ghost" aria-label={t('admin.users.table.edit')}>
+          <Button
+            iconOnly
+            size="xs"
+            variant="ghost"
+            aria-label={t('admin.users.table.edit')}
+            onClick={() => onEdit(info.row.original)}
+          >
             <Pencil />
           </Button>
         </div>

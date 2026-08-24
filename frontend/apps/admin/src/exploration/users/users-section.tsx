@@ -3,7 +3,7 @@ import type { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import useSWR from 'swr';
 
-import type { ApiError, UsersSearchResponse } from '@/api/api';
+import type { ApiError, UserResult, UsersSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
@@ -51,6 +51,7 @@ export default function UsersSection() {
     pageSize: DEFAULT_PAGE_SIZE,
   });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editedUser, setEditedUser] = useState<UserResult>();
 
   const debouncedSearch = useDebounce(search.trim(), SEARCH_DEBOUNCE_MS);
 
@@ -63,7 +64,7 @@ export default function UsersSection() {
     },
   );
 
-  const columns = useMemo(() => getUsersColumns(t, sub), [t, sub]);
+  const columns = useMemo(() => getUsersColumns(t, sub, setEditedUser), [t, sub]);
 
   const resetPagination = () => setPagination(current => ({ ...current, pageIndex: 0 }));
 
@@ -114,6 +115,14 @@ export default function UsersSection() {
           tableIndexResultPosition="bottom"
         />
         {isCreateOpen && <UserFormSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} onSaved={() => mutate()} />}
+        {editedUser && (
+          <UserFormSheet
+            open={!!editedUser}
+            onOpenChange={() => setEditedUser(undefined)}
+            user={editedUser}
+            onSaved={() => mutate()}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -88,6 +88,20 @@
         "submit": "Create member",
         "title": "Add member"
       },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to update member."
+          },
+          "success": "Member updated."
+        },
+        "submit": "Save",
+        "title": "Edit member"
+      },
+      "errors": {
+        "last_admin": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
+        "last_admin_title": "This network needs an Administrator"
+      },
       "fields": {
         "email": "Email",
         "first_name": "First name",
@@ -99,10 +113,12 @@
       },
       "roles": {
         "admin_access": "Administrator",
+        "admin_hint": "Full administrative access to this network (<permissions>view permissions</permissions>)",
         "all_organizations": "All current and future organizations",
         "baseline": "Every member can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
         "errors": {
-          "organizations_required": "Select at least one organization."
+          "organizations_required": "Select at least one organization.",
+          "self_admin": "You can't grant yourself the Administrator role."
         },
         "organizations": "At these organizations",
         "organizations_placeholder": "Organizations",

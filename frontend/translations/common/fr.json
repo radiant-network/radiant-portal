@@ -88,6 +88,20 @@
         "submit": "Créer le membre",
         "title": "Ajouter un membre"
       },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le membre."
+          },
+          "success": "Membre mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le membre"
+      },
+      "errors": {
+        "last_admin": "{{name}} est la seule personne Administrateur de {{tenant}}. Attribuez le rôle Administrateur à quelqu'un d'autre avant de le retirer ici.",
+        "last_admin_title": "Ce réseau a besoin d'une personne Administrateur"
+      },
       "fields": {
         "email": "Courriel",
         "first_name": "Prénom",
@@ -99,10 +113,12 @@
       },
       "roles": {
         "admin_access": "Administrateur",
+        "admin_hint": "Accès administratif complet à ce réseau (<permissions>voir les permissions</permissions>)",
         "all_organizations": "Toutes les organisations, actuelles et futures",
         "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
         "errors": {
-          "organizations_required": "Sélectionnez au moins une organisation."
+          "organizations_required": "Sélectionnez au moins une organisation.",
+          "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur."
         },
         "organizations": "Dans ces organisations",
         "organizations_placeholder": "Organisations",
