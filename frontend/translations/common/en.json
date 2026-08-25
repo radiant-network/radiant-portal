@@ -24,8 +24,8 @@
     "title": "{{tenant}} - Administration",
     "organizations": {
       "add": "Add organization",
-      "count_one": "{{count}} organization",
-      "count_other": "{{count}} organizations",
+      "count_one": "{{count}} Organization",
+      "count_other": "{{count}} Organizations",
       "create": {
         "description": "Members can be granted roles scoped to specific organizations.",
         "notifications": {
@@ -72,6 +72,90 @@
       "organizations": "Organizations",
       "roles": "Roles & Permissions",
       "users": "Members"
+    },
+    "users": {
+      "add": "Add member",
+      "count_one": "{{count}} Member",
+      "count_other": "{{count}} Members",
+      "create": {
+        "details_title": "Member details",
+        "notifications": {
+          "errors": {
+            "default": "Unable to add member."
+          },
+          "success": "Member added."
+        },
+        "submit": "Create member",
+        "title": "Add member"
+      },
+      "delete": {
+        "action": "Delete member",
+        "body": "<b>{{name}}</b> will be removed from the <b>{{tenant}} network</b> and all of its organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to delete member."
+          },
+          "success": "Member removed from this network."
+        },
+        "title": "Delete this member?"
+      },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to update member."
+          },
+          "success": "Member updated."
+        },
+        "submit": "Save",
+        "title": "Edit member"
+      },
+      "errors": {
+        "last_admin_update": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
+        "last_admin_update_title": "This network needs an Administrator",
+        "self_delete": "You can't delete your own acount."
+      },
+      "fields": {
+        "email": "Email",
+        "first_name": "First name",
+        "last_name": "Last name"
+      },
+      "filters": {
+        "role": "Role",
+        "search_placeholder": "Search by name or email"
+      },
+      "roles": {
+        "admin_access": "Administrator",
+        "admin_hint": "Full administrative access to this network (<permissions>view permissions</permissions>)",
+        "all_organizations": "All current and future organizations",
+        "baseline": "Every member can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
+        "errors": {
+          "organizations_required": "Select at least one organization.",
+          "self_admin": "You can't grant yourself the Administrator role."
+        },
+        "organizations": "At these organizations",
+        "organizations_placeholder": "Organizations",
+        "permissions": {
+          "description": "Permission descriptions and scope for this role",
+          "empty": "This role grants no permission.",
+          "locked": "Can't be edited or deleted"
+        },
+        "scope": {
+          "network": "Network",
+          "organization": "Organization"
+        },
+        "subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
+        "title": "Member roles",
+        "view_permissions": "View permissions"
+      },
+      "subtitle": "Manage members and role assignments.",
+      "table": {
+        "all_organizations": "All orgs",
+        "baseline_role": "Member",
+        "edit": "Edit member",
+        "name": "Name",
+        "roles": "Roles & Access",
+        "you": "(You)"
+      }
     }
   },
   "analysis": {
@@ -166,7 +250,9 @@
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
         "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
-        "organization_code_exists": "An organization with this code already exists."
+        "invalid_email": "Enter a valid email address",
+        "organization_code_exists": "An organization with this code already exists.",
+        "user_email_exists": "This person is already a member of this network."
       }
     },
     "editor": {

@@ -72,6 +72,90 @@
       "organizations": "Organisations",
       "roles": "Rôles et permissions",
       "users": "Membres"
+    },
+    "users": {
+      "add": "Ajouter un membre",
+      "count_one": "{{count}} membre",
+      "count_other": "{{count}} membres",
+      "create": {
+        "details_title": "Détails du membre",
+        "notifications": {
+          "errors": {
+            "default": "Impossible d'ajouter le membre."
+          },
+          "success": "Membre ajouté."
+        },
+        "submit": "Créer le membre",
+        "title": "Ajouter un membre"
+      },
+      "delete": {
+        "action": "Supprimer le membre",
+        "body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations..",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le membre."
+          },
+          "success": "Membre retiré de ce réseau."
+        },
+        "title": "Supprimer ce membre ?"
+      },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le membre."
+          },
+          "success": "Membre mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le membre"
+      },
+      "errors": {
+        "last_admin_update": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de le retirer ici.",
+        "last_admin_update_title": "Ce réseau doit conserver un Administrateur",
+        "self_delete": "Vous ne pouvez pas supprimer votre propre compte."
+      },
+      "fields": {
+        "email": "Courriel",
+        "first_name": "Prénom",
+        "last_name": "Nom"
+      },
+      "filters": {
+        "role": "Rôle",
+        "search_placeholder": "Rechercher par nom ou courriel"
+      },
+      "roles": {
+        "admin_access": "Administrateur",
+        "admin_hint": "Accès administratif complet à ce réseau (<permissions>voir les permissions</permissions>)",
+        "all_organizations": "Toutes les organisations, actuelles et futures",
+        "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
+        "errors": {
+          "organizations_required": "Sélectionnez au moins une organisation.",
+          "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur."
+        },
+        "organizations": "Dans ces organisations",
+        "organizations_placeholder": "Organisations",
+        "permissions": {
+          "description": "Description des permissions et portée de ce rôle",
+          "empty": "Ce rôle n'accorde aucune permission.",
+          "locked": "Non modifiable ni supprimable"
+        },
+        "scope": {
+          "network": "Réseau",
+          "organization": "Organisation"
+        },
+        "subtitle": "Attribuez des rôles pour activer des actions supplémentaires — les rôles ajoutent des permissions, ils n'en retirent jamais.",
+        "title": "Rôles du membre",
+        "view_permissions": "Voir les permissions"
+      },
+      "subtitle": "Gérez les membres et les attributions des rôles.",
+      "table": {
+        "all_organizations": "Toutes les orgs",
+        "baseline_role": "Membre",
+        "edit": "Modifier le membre",
+        "name": "Nom",
+        "roles": "Rôles et accès",
+        "you": "(Vous)"
+      }
     }
   },
   "analysis": {
@@ -166,7 +250,9 @@
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
         "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
-        "organization_code_exists": "Une organisation avec ce code existe déjà."
+        "invalid_email": "Saisissez une adresse courriel valide",
+        "organization_code_exists": "Une organisation avec ce code existe déjà.",
+        "user_email_exists": "Cette personne est déjà membre de ce réseau."
       }
     },
     "editor": {

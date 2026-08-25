@@ -1,5 +1,20 @@
 import type { MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
 
+/**
+ * Identifies a set of grouped options so two sets can be compared without serializing them.
+ * Text labels are kept in the signature, so renaming an option still refreshes the list.
+ */
+export function getGroupOptionSignature(groupOption: MultiSelectorGroupOption) {
+  return Object.entries(groupOption)
+    .map(([group, options]) => {
+      const signatures = options.map(
+        option => `${option.value}~${typeof option.label === 'string' ? option.label : ''}`,
+      );
+      return `${group}:${signatures.join(',')}`;
+    })
+    .join('|');
+}
+
 export function transToGroupOption(options: MultiSelectorOption[], groupBy?: string) {
   if (options.length === 0) {
     return {};
