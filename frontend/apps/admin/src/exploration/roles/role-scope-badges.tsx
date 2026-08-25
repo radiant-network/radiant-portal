@@ -8,7 +8,7 @@ export function ScopeBadge({ scope }: { scope: RoleActionResultScopeEnum }) {
 
   return (
     <Badge variant={isTenant ? 'cyan' : 'violet'} className="font-normal">
-      {isTenant ? t('admin.users.roles.scope.network') : t('admin.users.roles.scope.organization')}
+      {isTenant ? t('admin.roles.scope.network') : t('admin.roles.scope.organization')}
     </Badge>
   );
 }

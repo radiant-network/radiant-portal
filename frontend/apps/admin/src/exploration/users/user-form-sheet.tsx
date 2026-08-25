@@ -20,15 +20,20 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLoginContext } from '@/components/hooks/use-login';
-import { useTenant } from '@/components/hooks/use-tenant';
+import { TENANT_ACTIONS, useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
 
+import RolePermissionsDialog from '../roles/role-permissions-dialog';
+import { ScopeBadges } from '../roles/role-scope-badges';
+import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE, findRole, needsOrganizations } from '../roles/roles-utils';
+import { useTenantRoles } from '../roles/use-tenant-roles';
+
 import RoleOrganizationsPicker, { NO_ORGANIZATIONS } from './role-organizations-picker';
-import RolePermissionsDialog from './role-permissions-dialog';
-import { ScopeBadges } from './role-scope-badges';
 import { useTenantAdminCount } from './use-tenant-admin-count';
-import { useTenantRoles } from './use-tenant-roles';
-import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE, findRole, getAssignableRoles, needsOrganizations } from './user-roles';
+
+function getAssignableRoles(roles: RoleResult[]) {
+  return roles.filter(role => role.code !== ADMIN_ROLE_CODE && role.code !== BASELINE_ROLE_CODE);
+}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -81,6 +86,17 @@ function toFormValues(user: UserResult): FormValues {
  * Needed to manage alert closing without impact on sheet display
  */
 const isAlertDialogOpen = () => !!document.querySelector('[role="alertdialog"]');
+
+const CASES_PATH = '/case';
+const ADMIN_ACTIONS: readonly string[] = Object.values(TENANT_ACTIONS);
+
+/**
+ * Whether the role set still grants access to the admin section. Read from the actions rather than
+ * from the role codes: a custom role can carry an administrative action too.
+ */
+function keepsAdminAccess(roleCodes: string[], roles: RoleResult[]) {
+  return roleCodes.some(code => findRole(roles, code)?.actions.some(action => ADMIN_ACTIONS.includes(action.code)));
+}
 
 /** Comparable form of a role set, so an unchanged edit can be detected. */
 function serializeRoles(roles: CreateUserRole[]) {
@@ -150,7 +166,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
 
   const viewPermissionsLink = (role: RoleResult) => (
     <AnchorLink component="button" type="button" size="sm" external={false} onClick={() => setPermissionsRole(role)}>
-      {t('admin.users.roles.view_permissions')}
+      {t('admin.roles.view_permissions')}
     </AnchorLink>
   );
 
@@ -314,10 +330,15 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
           email: values.email.trim(),
           first_name: values.first_name.trim(),
           last_name: values.last_name.trim(),
-          // `member` is granted tenant-wide by the API and must not be listed
           roles: rolePayload,
         });
       }
+      // Redirect if you remove your own admin role
+      if (isSelf && tenantRoles && !keepsAdminAccess(values.roles, tenantRoles)) {
+        window.location.assign(CASES_PATH);
+        return;
+      }
+
       toast.success(t(isEdit ? 'admin.users.edit.notifications.success' : 'admin.users.create.notifications.success'));
       onSaved();
       onOpenChange(false);
