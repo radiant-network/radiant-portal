@@ -1874,8 +1874,8 @@
       "loeuf": "LOEUF",
       "splice_ai": "SpliceAI",
       "fathmm": "FATHMM",
-      "cadd_raw": "CADD (raw)",
-      "cadd_phred": "CADD (phred)",
+      "cadd_raw": "CADD (Raw)",
+      "cadd_phred": "CADD (Phred)",
       "dann": "DANN",
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
@@ -1981,7 +1981,7 @@
         "af": "Frequency",
         "af_tooltip": "Allele Frequency",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Genomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD Genome (v3.1.2)",
         "1000_genomes": "1000 Genomes"
       }
     },
