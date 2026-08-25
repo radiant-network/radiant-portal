@@ -26,9 +26,10 @@ type roleAction struct {
 }
 
 // ListTenantRoles returns every role defined in the tenant — the seeded ones and the tenant's own
-// custom ones — each with the actions it maps and the number of users holding it. Roles are a
-// small bounded set, so the whole list is returned unpaged. The holder count covers the same
-// population as the users list, so it excludes machine-to-machine accounts too.
+// custom ones — each with the actions it maps, the number of users holding it and the number of
+// organizations it is assigned at. Roles are a small bounded set, so the whole list is returned
+// unpaged. Both counts cover the same population as the users list, so they exclude
+// machine-to-machine accounts too.
 func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string) ([]types.RoleResult, error) {
 	return r.tenantRoles(ctx, tenantCode, "")
 }
@@ -49,23 +50,33 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 }
 
 // tenantRoles loads the tenant's roles with their actions, the scope those actions derive, and
-// their holder count. An empty roleCode returns the whole catalog; a non-empty one narrows to that
-// single role, so both reads share one definition of what a role looks like.
+// their holder and organization counts. An empty roleCode returns the whole catalog; a non-empty
+// one narrows to that single role, so both reads share one definition of what a role looks like.
+//
+// The organization count is the number of the tenant's organizations where at least one user holds
+// the role, so the join expands a '*' grant to every organization of the tenant, exactly like
+// GetMemberships resolves the wildcard. A tenant-wide grant (org_code NULL) and an org_code naming
+// no existing organization both join to nothing, and COUNT(DISTINCT o.code) skips those rows.
 func (r *RolesRepository) tenantRoles(ctx context.Context, tenantCode, roleCode string) ([]types.RoleResult, error) {
 	roles := []types.RoleResult{}
 	query := `
 		SELECT r.code, r.name_en AS name, r.description_en AS description, r.is_default,
-		       COALESCE(h.holders, 0) AS assigned_users_count
+		       COALESCE(g.holders, 0) AS assigned_users_count,
+		       COALESCE(g.orgs, 0) AS assigned_orgs_count
 		FROM role r
 		LEFT JOIN (
-			SELECT ur.role_code, COUNT(DISTINCT ur.user_id) AS holders
+			SELECT ur.role_code,
+			       COUNT(DISTINCT ur.user_id) AS holders,
+			       COUNT(DISTINCT o.code) AS orgs
 			FROM user_role ur
 			JOIN users u ON u.user_id = ur.user_id
+			LEFT JOIN organization o ON o.tenant_code = ur.tenant_code
+			     AND (ur.org_code = ? OR o.code = ur.org_code)
 			WHERE ur.tenant_code = ? AND ` + personalAccount + `
 			GROUP BY ur.role_code
-		) h ON h.role_code = r.code
+		) g ON g.role_code = r.code
 		WHERE r.tenant_code = ?`
-	args := []any{tenantCode, tenantCode}
+	args := []any{types.WildcardOrg, tenantCode, tenantCode}
 	if roleCode != "" {
 		query += ` AND r.code = ?`
 		args = append(args, roleCode)

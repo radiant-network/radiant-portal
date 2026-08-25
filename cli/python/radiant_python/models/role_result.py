@@ -25,16 +25,17 @@ from typing_extensions import Self
 
 class RoleResult(BaseModel):
     """
-    Role of a tenant, with the actions it grants and the number of users holding it
+    Role of a tenant, with the actions it grants, the number of users holding it and the number of organizations it is assigned at
     """ # noqa: E501
     actions: List[RoleActionResult]
+    assigned_orgs_count: Optional[StrictInt] = None
     assigned_users_count: Optional[StrictInt] = None
     code: StrictStr
     description: Optional[StrictStr] = None
     is_default: Optional[StrictBool] = None
     name: StrictStr
     scope: StrictStr
-    __properties: ClassVar[List[str]] = ["actions", "assigned_users_count", "code", "description", "is_default", "name", "scope"]
+    __properties: ClassVar[List[str]] = ["actions", "assigned_orgs_count", "assigned_users_count", "code", "description", "is_default", "name", "scope"]
 
     @field_validator('scope')
     def scope_validate_enum(cls, value):
@@ -102,6 +103,7 @@ class RoleResult(BaseModel):
 
         _obj = cls.model_validate({
             "actions": [RoleActionResult.from_dict(_item) for _item in obj["actions"]] if obj.get("actions") is not None else None,
+            "assigned_orgs_count": obj.get("assigned_orgs_count"),
             "assigned_users_count": obj.get("assigned_users_count"),
             "code": obj.get("code"),
             "description": obj.get("description"),

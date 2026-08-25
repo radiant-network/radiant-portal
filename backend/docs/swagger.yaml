@@ -2152,14 +2152,16 @@ components:
       - scope
       type: object
     RoleResult:
-      description: Role of a tenant, with the actions it grants and the number of
-        users holding it
+      description: Role of a tenant, with the actions it grants, the number of users
+        holding it and the number of organizations it is assigned at
       properties:
         actions:
           items:
             $ref: '#/components/schemas/RoleActionResult'
           type: array
           uniqueItems: false
+        assigned_orgs_count:
+          type: integer
         assigned_users_count:
           type: integer
         code:

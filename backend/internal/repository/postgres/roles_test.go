@@ -262,6 +262,7 @@ func Test_RolesRepository_GetTenantRole_RoleWithoutActionIsTenantScoped(t *testi
 		assert.Equal(t, types.RoleScopeTenant, role.Scope, "binding to no action demands no organization")
 		assert.Equal(t, []types.RoleActionResult{}, role.Actions, "must serialize as [], not null")
 		assert.EqualValues(t, 0, role.AssignedUsersCount)
+		assert.EqualValues(t, 0, role.AssignedOrgsCount)
 	})
 }
 
@@ -301,5 +302,60 @@ func Test_RolesRepository_ListTenantRoles_RoleWithoutActionIsTenantScoped(t *tes
 		assert.Equal(t, types.RoleScopeTenant, roles[0].Scope, "binding to no action demands no organization")
 		assert.Equal(t, []types.RoleActionResult{}, roles[0].Actions, "must serialize as [], not null")
 		assert.EqualValues(t, 0, roles[0].AssignedUsersCount)
+		assert.EqualValues(t, 0, roles[0].AssignedOrgsCount)
+	})
+}
+
+// Organization counts read the same shared grant rows as the holder counts, so they run
+// exclusively too. radiant has 6 organizations (CHOP, UCSF, CHUSJ, LDM-CHUSJ, LDM-CHOP, CQGC).
+func Test_RolesRepository_ListTenantRoles_CountsOrganizationsAndExpandsWildcardGrants(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		roles, err := repo.ListTenantRoles(t.Context(), types.DefaultTenantCode)
+		require.NoError(t, err)
+
+		// wendy and carol hold geneticist at '*', which reaches every organization of the tenant.
+		geneticist := roleByCodeIn(roles, "geneticist")
+		require.NotNil(t, geneticist)
+		assert.EqualValues(t, 6, geneticist.AssignedOrgsCount)
+
+		// pat holds practitioner at CHUSJ; tw holds it tenant-wide, which is no organization.
+		practitioner := roleByCodeIn(roles, "practitioner")
+		require.NotNil(t, practitioner)
+		assert.EqualValues(t, 1, practitioner.AssignedOrgsCount, "only pat's CHUSJ grant names an org")
+
+		// alice's researcher grant is tenant-wide (org_code NULL).
+		researcher := roleByCodeIn(roles, "researcher")
+		require.NotNil(t, researcher)
+		assert.EqualValues(t, 0, researcher.AssignedOrgsCount)
+	})
+}
+
+// Exclusive for the same reason as the counts above.
+func Test_RolesRepository_ListTenantRoles_OrganizationCountStaysWithinTheTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		// carol holds tenant_b's geneticist at '*', and tenant_b owns a single organization —
+		// so the wildcard must expand within tenant_b, not over radiant's 6 orgs.
+		roles, err := repo.ListTenantRoles(t.Context(), "tenant_b")
+		require.NoError(t, err)
+
+		geneticist := roleByCodeIn(roles, "geneticist")
+		require.NotNil(t, geneticist)
+		assert.EqualValues(t, 1, geneticist.AssignedOrgsCount)
+	})
+}
+
+// Exclusive for the same reason as the counts above.
+func Test_RolesRepository_GetTenantRole_CountsOrganizationsAndExpandsWildcardGrants(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "geneticist")
+		require.NoError(t, err)
+		require.NotNil(t, role)
+		assert.EqualValues(t, 6, role.AssignedOrgsCount, "alice at CHOP, dan at CHUSJ, wendy and carol at '*'")
 	})
 }
