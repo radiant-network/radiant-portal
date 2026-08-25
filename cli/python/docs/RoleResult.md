@@ -1,12 +1,13 @@
 # RoleResult
 
-Role of a tenant, with the actions it grants and the number of users holding it
+Role of a tenant, with the actions it grants, the number of users holding it and the number of organizations it is assigned at
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **actions** | [**List[RoleActionResult]**](RoleActionResult.md) |  | 
+**assigned_orgs_count** | **int** |  | [optional] 
 **assigned_users_count** | **int** |  | [optional] 
 **code** | **str** |  | 
 **description** | **str** |  | [optional] 

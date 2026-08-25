@@ -42,6 +42,7 @@ func Test_ListRolesHandler(t *testing.T) {
 			{Code: "can_read_pii", Name: "Read personal health information", Description: "See patient identity on cases owned by the organization.", Scope: types.ActionScopeOrg},
 		},
 		AssignedUsersCount: 12,
+		AssignedOrgsCount:  3,
 	}}}
 	w := serveListRoles(repo)
 
@@ -58,7 +59,8 @@ func Test_ListRolesHandler(t *testing.T) {
 			"description":"See patient identity on cases owned by the organization.",
 			"scope":"org"
 		}],
-		"assigned_users_count":12
+		"assigned_users_count":12,
+		"assigned_orgs_count":3
 	}]`, w.Body.String())
 }
 
@@ -83,7 +85,7 @@ func Test_ListRolesHandler_OmitsEmptyDescription(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
 		"code":"researcher","name":"Researcher","is_default":false,"scope":"tenant",
-		"actions":[],"assigned_users_count":0
+		"actions":[],"assigned_users_count":0,"assigned_orgs_count":0
 	}]`, w.Body.String())
 }
 
@@ -128,6 +130,7 @@ func Test_GetRoleHandler(t *testing.T) {
 			{Code: "can_read_pii", Name: "Read personal health information", Description: "See patient identity on cases owned by the organization.", Scope: types.ActionScopeOrg},
 		},
 		AssignedUsersCount: 12,
+		AssignedOrgsCount:  3,
 	}}
 	w := serveGetRole(repo, "geneticist")
 
@@ -144,7 +147,8 @@ func Test_GetRoleHandler(t *testing.T) {
 			"description":"See patient identity on cases owned by the organization.",
 			"scope":"org"
 		}],
-		"assigned_users_count":12
+		"assigned_users_count":12,
+		"assigned_orgs_count":3
 	}`, w.Body.String())
 }
 
@@ -157,7 +161,7 @@ func Test_GetRoleHandler_PassesTenantAndCodeFromPath(t *testing.T) {
 	assert.Equal(t, "researcher", repo.gotRole)
 	assert.JSONEq(t, `{
 		"code":"researcher","name":"Researcher","is_default":false,"scope":"tenant",
-		"actions":[],"assigned_users_count":0
+		"actions":[],"assigned_users_count":0,"assigned_orgs_count":0
 	}`, w.Body.String())
 }
 

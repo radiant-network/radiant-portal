@@ -4389,7 +4389,7 @@ export const RoleActionResultScopeEnum = {
 export type RoleActionResultScopeEnum = typeof RoleActionResultScopeEnum[keyof typeof RoleActionResultScopeEnum];
 
 /**
- * Role of a tenant, with the actions it grants and the number of users holding it
+ * Role of a tenant, with the actions it grants, the number of users holding it and the number of organizations it is assigned at
  * @export
  * @interface RoleResult
  */
@@ -4400,6 +4400,12 @@ export interface RoleResult {
      * @memberof RoleResult
      */
     'actions': Array<RoleActionResult>;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleResult
+     */
+    'assigned_orgs_count'?: number;
     /**
      * 
      * @type {number}
