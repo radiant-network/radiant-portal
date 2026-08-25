@@ -262,6 +262,18 @@ func Test_RolesRepository_GetTenantRole_RoleWithoutActionIsTenantScoped(t *testi
 		assert.Equal(t, types.RoleScopeTenant, role.Scope, "binding to no action demands no organization")
 		assert.Equal(t, []types.RoleActionResult{}, role.Actions, "must serialize as [], not null")
 		assert.EqualValues(t, 0, role.AssignedUsersCount)
+// Exclusive for the same reason as the holder-count test above.
+func Test_RolesRepository_ListTenantRoles_HolderCountExcludesSystemUsers(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		roles, err := repo.ListTenantRoles(t.Context(), types.DefaultTenantCode)
+		require.NoError(t, err)
+
+		// gabe and the machine-to-machine account both hold data_manager; only gabe is counted.
+		dataManager := roleByCodeIn(roles, "data_manager")
+		require.NotNil(t, dataManager)
+		assert.EqualValues(t, 1, dataManager.AssignedUsersCount)
 	})
 }
 

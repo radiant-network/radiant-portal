@@ -124,6 +124,12 @@ func (r *UsersRepository) RoleScopes(ctx context.Context, tenantCode string, rol
 	return scopes, nil
 }
 
+// personalAccount keeps only the users an administrator manages, excluding the machine-to-machine
+// accounts provisioned from a Keycloak client's service account: those carry no email and no name.
+// Every human path (POST /{tenant}/users, createuser -email) requires an email, so its absence is
+// what distinguishes them — the registry has no dedicated flag. It assumes the users alias `u`.
+const personalAccount = "COALESCE(u.email, '') <> ''"
+
 // tenantUsers selects the users holding at least one grant in the tenant. A role filter narrows
 // that same grant — a user is kept when one of their grants matches, and their other roles are
 // unaffected — so combining it with search reads as search AND (any of the roles).
@@ -137,6 +143,7 @@ func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode string, qu
 
 	tx := r.db.WithContext(ctx).
 		Table("users u").
+		Where(personalAccount).
 		Where("EXISTS ("+grant+")", args...)
 	if query.Search != "" {
 		prefix := likePrefix(query.Search)

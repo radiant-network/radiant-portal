@@ -27,7 +27,8 @@ type roleAction struct {
 
 // ListTenantRoles returns every role defined in the tenant — the seeded ones and the tenant's own
 // custom ones — each with the actions it maps and the number of users holding it. Roles are a
-// small bounded set, so the whole list is returned unpaged.
+// small bounded set, so the whole list is returned unpaged. The holder count covers the same
+// population as the users list, so it excludes machine-to-machine accounts too.
 func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string) ([]types.RoleResult, error) {
 	return r.tenantRoles(ctx, tenantCode, "")
 }
@@ -57,10 +58,11 @@ func (r *RolesRepository) tenantRoles(ctx context.Context, tenantCode, roleCode 
 		       COALESCE(h.holders, 0) AS assigned_users_count
 		FROM role r
 		LEFT JOIN (
-			SELECT role_code, COUNT(DISTINCT user_id) AS holders
-			FROM user_role
-			WHERE tenant_code = ?
-			GROUP BY role_code
+			SELECT ur.role_code, COUNT(DISTINCT ur.user_id) AS holders
+			FROM user_role ur
+			JOIN users u ON u.user_id = ur.user_id
+			WHERE ur.tenant_code = ? AND `+personalAccount+`
+			GROUP BY ur.role_code
 		) h ON h.role_code = r.code
 		WHERE r.tenant_code = ?`
 	args := []any{tenantCode, tenantCode}

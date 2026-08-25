@@ -226,6 +226,26 @@ func Test_UsersRepository_ListTenantUsers_PaginatesWithoutAffectingCount(t *test
 	})
 }
 
+// systemUserID is the fixture machine-to-machine account: a grant in radiant, but no email or
+// name (test/data/auth/05_users.sql).
+const systemUserID = "c0ffee00-1111-4222-8333-444455556666"
+
+func Test_UsersRepository_ListTenantUsers_ExcludesSystemUsers(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		users, _, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant(""))
+		require.NoError(t, err)
+		assert.Nil(t, userByID(users, systemUserID), "a machine-to-machine account is not administered by a person")
+
+		// The role filter must not reintroduce it: it holds data_manager, like gabe.
+		managers, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, withRoles("", "data_manager"))
+		require.NoError(t, err)
+		assert.Nil(t, userByID(managers, systemUserID))
+		assert.Equal(t, int64(len(managers)), count, "count and page agree on the exclusion")
+	})
+}
+
 func Test_UsersRepository_ListTenantUsers_SortsByName(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
