@@ -211,7 +211,8 @@ var membershipOnlyTenantRoutes = map[string]bool{
 // expectedTenantAnyActions are /:tenant routes gated by RequireAnyAction: the caller needs any
 // one of the listed actions. These are reads shared by several admin sections.
 var expectedTenantAnyActions = map[string][]string{
-	"GET /:tenant/roles": {types.ActionManageRole, types.ActionManageUser},
+	"GET /:tenant/roles":       {types.ActionManageRole, types.ActionManageUser},
+	"GET /:tenant/roles/:code": {types.ActionManageRole, types.ActionManageUser},
 }
 
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in

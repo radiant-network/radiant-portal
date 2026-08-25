@@ -46,6 +46,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/sequencing/1/details",
 			"radiant/organizations",
 			"radiant/roles",
+			"radiant/roles/geneticist",
 			"radiant/users",
 			"radiant/cases/1",
 			"radiant/cases/filters",

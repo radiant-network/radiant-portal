@@ -68,3 +68,68 @@ func Test_ListRoles_CrossTenant_Forbidden(t *testing.T) {
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
+
+func getRole(t *testing.T, userID, tenant, code string) *httptest.ResponseRecorder {
+	t.Helper()
+	var w *httptest.ResponseRecorder
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		rolesRepo := postgres.NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: userID}
+
+		router := gin.Default()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+		// Mirrors production: the detail shares the list's gate.
+		tenantRoutes.GET("/roles/:code", server.RequireAnyAction(auth, authRepo, types.ActionManageRole, types.ActionManageUser), server.GetRoleHandler(rolesRepo))
+
+		req, _ := http.NewRequest("GET", "/"+tenant+"/roles/"+code, nil)
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+	})
+	return w
+}
+
+func Test_GetRole_RoleManager_ReturnsSeededRole(t *testing.T) {
+	w := getRole(t, taraID, "radiant", "geneticist")
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var role types.RoleResult
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &role))
+
+	assert.Equal(t, "geneticist", role.Code)
+	assert.True(t, role.IsDefault)
+	assert.Equal(t, types.RoleScopeOrg, role.Scope)
+	assert.NotEmpty(t, role.Actions)
+}
+
+func Test_GetRole_RoleManager_ReturnsCustomRoleWithMixedScope(t *testing.T) {
+	w := getRole(t, taraID, "radiant", "practitioner")
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var role types.RoleResult
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &role))
+
+	assert.False(t, role.IsDefault)
+	assert.Equal(t, types.RoleScopeMixed, role.Scope)
+}
+
+func Test_GetRole_UnknownRole_NotFound(t *testing.T) {
+	w := getRole(t, taraID, "radiant", "no_such_role")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_GetRole_WithoutEitherManagementActionDenied(t *testing.T) {
+	// mike is a radiant member: tenant access passes, the action gate is what denies.
+	w := getRole(t, mikeID, "radiant", "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_GetRole_CrossTenant_Forbidden(t *testing.T) {
+	// tara manages roles in radiant only → RequireTenantAccess rejects before the handler runs.
+	w := getRole(t, taraID, "tenant_b", "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
