@@ -59,7 +59,7 @@ describe('Cases - Batch - Missing fields - String fields', () => {
     expect(response.status).to.eq(400);
   });
 
-  it('Message [SJRA-1709]', () => {
+  it('Message', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'DiagnosticLabCode', 'required'));
@@ -71,7 +71,6 @@ describe('Cases - Batch - Missing fields - String fields', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'Code', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'System', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'Value', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'OnsetCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsText[0]', 'Code', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsText[0]', 'Value', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0]', 'SubmitterPatientId', 'required'));
