@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -45,6 +46,82 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 		return nil, nil
 	}
 	return &roles[0], nil
+}
+
+const roleNameUniqueIndex = "role_unique_name_per_tenant"
+
+// CreateRole inserts a custom role and its action mappings, then returns the role in the same
+// shape the reads serve it. The insert is one transaction, so a role never lands without the
+// actions that give it meaning.
+//
+// Every requested action must exist and be grantable; otherwise nothing is written and the
+// offending codes come back wrapped in types.ErrRoleActionsNotGrantable. Refusing reserved
+// actions here is what makes can_manage_user impossible to confer through a custom role — and
+// tenant_admin, whose only distinguishing action is that one, un-duplicable as a consequence.
+func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req types.CreateRoleRequest) (*types.RoleResult, error) {
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		refused, err := ungrantableActions(tx, req.Actions)
+		if err != nil {
+			return err
+		}
+		if len(refused) > 0 {
+			return fmt.Errorf("%w: %s", types.ErrRoleActionsNotGrantable, strings.Join(refused, ", "))
+		}
+
+		if err := tx.Exec(`
+			INSERT INTO role (tenant_code, code, name_en, description_en, is_default)
+			VALUES (?, ?, ?, NULLIF(?, ''), false)`,
+			tenantCode, req.Code, req.Name, req.Description).Error; err != nil {
+			switch {
+			case uniqueViolationOn(err, roleNameUniqueIndex):
+				return types.ErrRoleNameExists
+			case isUniqueViolation(err):
+				return types.ErrRoleCodeExists
+			}
+			return fmt.Errorf("error creating role %q in tenant %q: %w", req.Code, tenantCode, err)
+		}
+
+		mappings := make([]map[string]any, 0, len(req.Actions))
+		for _, action := range req.Actions {
+			mappings = append(mappings, map[string]any{
+				"tenant_code": tenantCode,
+				"role_code":   req.Code,
+				"action_code": action,
+			})
+		}
+		if err := tx.Table("role_action").Create(mappings).Error; err != nil {
+			return fmt.Errorf("error mapping actions to role %q in tenant %q: %w", req.Code, tenantCode, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetTenantRole(ctx, tenantCode, req.Code)
+}
+
+// ungrantableActions returns the requested codes a custom role may not map, in the order given —
+// those absent from the catalog and those reserved (grantable = false) are equally refused, since
+// from the caller's side both mean "this action is not on offer".
+func ungrantableActions(tx *gorm.DB, actions []string) ([]string, error) {
+	allowed := []string{}
+	if err := tx.Raw(
+		`SELECT code FROM action WHERE code IN ? AND grantable`, actions).Scan(&allowed).Error; err != nil {
+		return nil, fmt.Errorf("error checking actions %v: %w", actions, err)
+	}
+
+	grantable := make(map[string]bool, len(allowed))
+	for _, code := range allowed {
+		grantable[code] = true
+	}
+	refused := []string{}
+	for _, action := range actions {
+		if !grantable[action] {
+			refused = append(refused, action)
+		}
+	}
+	return refused, nil
 }
 
 // tenantRoles loads the tenant's roles with their actions, the scope those actions derive, and

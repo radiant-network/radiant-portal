@@ -918,6 +918,25 @@ components:
       required:
       - patients
       type: object
+    CreateRoleRequest:
+      description: Payload to create a custom role in a tenant
+      properties:
+        actions:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        code:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+      required:
+      - actions
+      - code
+      - name
+      type: object
     CreateSampleBatchBody:
       description: CreateSampleBatchBody represents the body required to create a
         sample batch
@@ -8109,6 +8128,92 @@ paths:
       security:
       - bearerauth: []
       summary: List the tenant's roles
+      tags:
+      - roles
+    post:
+      description: |-
+        Creates a custom role in the tenant in the path and returns it, in the same shape
+        the reads serve it. Requires the `can_manage_role` action — unlike reading the
+        catalog, `can_manage_user` does not open this.
+
+        `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
+        unique within the tenant. `name` must also be unique within the tenant, compared
+        case-insensitively and including the seeded roles' names, so 409 covers a clash on
+        either. `description` is optional. `actions` must list at least one action, and
+        every one of them must exist and be grantable — a reserved action (such as
+        `can_manage_user`) yields 422, which is what keeps it out of every custom role and
+        makes `tenant_admin` un-duplicable.
+
+        The role's `scope` is not supplied: it is derived from the actions and decides
+        whether granting the role needs organizations. A created role is never
+        `is_default`, so it stays editable and deletable.
+      operationId: createRole
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+        description: Role to create
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResult'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Create a custom role
       tags:
       - roles
   /{tenant}/roles/{code}:

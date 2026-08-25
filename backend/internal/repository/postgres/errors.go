@@ -22,3 +22,8 @@ func pgErrorCodeIs(err error, code string) bool {
 
 func isUniqueViolation(err error) bool     { return pgErrorCodeIs(err, sqlStateUniqueViolation) }
 func isForeignKeyViolation(err error) bool { return pgErrorCodeIs(err, sqlStateForeignKeyViolation) }
+
+func uniqueViolationOn(err error, constraint string) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == sqlStateUniqueViolation && pgErr.ConstraintName == constraint
+}

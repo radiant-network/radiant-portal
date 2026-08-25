@@ -3,8 +3,10 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -172,6 +174,137 @@ func Test_GetRoleHandler_UnknownRoleNotFound(t *testing.T) {
 func Test_GetRoleHandler_RepoError(t *testing.T) {
 	repo := &mockRoleDetailReader{err: errors.New("boom")}
 	w := serveGetRole(repo, "geneticist")
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type mockRoleCreator struct {
+	role      *types.RoleResult
+	err       error
+	gotTenant string
+	gotReq    types.CreateRoleRequest
+	calls     int
+}
+
+func (m *mockRoleCreator) CreateRole(_ context.Context, tenantCode string, req types.CreateRoleRequest) (*types.RoleResult, error) {
+	m.calls++
+	m.gotTenant = tenantCode
+	m.gotReq = req
+	return m.role, m.err
+}
+
+func servePostRole(repo roleCreator, body string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.POST("/:tenant/roles", PostRoleHandler(repo))
+	req, _ := http.NewRequest("POST", "/radiant/roles", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+const createRoleBody = `{"code":"clinical_reviewer","name":"Clinical Reviewer","description":"Full clinical work.","actions":["can_search_case","can_read_pii"]}`
+
+func Test_PostRoleHandler_ReturnsCreatedRole(t *testing.T) {
+	repo := &mockRoleCreator{role: &types.RoleResult{
+		Code:        "clinical_reviewer",
+		Name:        "Clinical Reviewer",
+		Description: "Full clinical work.",
+		Scope:       types.RoleScopeMixed,
+		Actions: []types.RoleActionResult{
+			{Code: "can_search_case", Name: "Search cases", Description: "Search and view cases.", Scope: types.ActionScopeTenant},
+			{Code: "can_read_pii", Name: "Read PHI", Description: "View protected health information.", Scope: types.ActionScopeOrg},
+		},
+	}}
+	w := servePostRole(repo, createRoleBody)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.JSONEq(t, `{
+		"code":"clinical_reviewer",
+		"name":"Clinical Reviewer",
+		"description":"Full clinical work.",
+		"is_default":false,
+		"scope":"mixed",
+		"actions":[
+			{"code":"can_search_case","name":"Search cases","description":"Search and view cases.","scope":"tenant"},
+			{"code":"can_read_pii","name":"Read PHI","description":"View protected health information.","scope":"org"}
+		],
+		"assigned_users_count":0
+	}`, w.Body.String())
+}
+
+func Test_PostRoleHandler_PassesTenantAndPayloadToRepo(t *testing.T) {
+	repo := &mockRoleCreator{role: &types.RoleResult{Code: "clinical_reviewer", Actions: []types.RoleActionResult{}}}
+	servePostRole(repo, createRoleBody)
+
+	assert.Equal(t, "radiant", repo.gotTenant)
+	assert.Equal(t, "clinical_reviewer", repo.gotReq.Code)
+	assert.Equal(t, "Clinical Reviewer", repo.gotReq.Name)
+	assert.Equal(t, "Full clinical work.", repo.gotReq.Description)
+	assert.Equal(t, []string{"can_search_case", "can_read_pii"}, repo.gotReq.Actions)
+}
+
+func Test_PostRoleHandler_MalformedBodyIsRejected(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "an unparsable body never reaches the repository")
+}
+
+func Test_PostRoleHandler_MissingRequiredFieldIsRejected(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"name":"Clinical Reviewer","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PostRoleHandler_InvalidCodeIsRejected(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":"Clinical-Reviewer","name":"Clinical Reviewer","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Clinical-Reviewer")
+	assert.Zero(t, repo.calls, "validation runs before the repository is touched")
+}
+
+func Test_PostRoleHandler_EmptyActionsIsRejected(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":"empty","name":"Empty","actions":[]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PostRoleHandler_DuplicateCodeIsConflict(t *testing.T) {
+	repo := &mockRoleCreator{err: types.ErrRoleCodeExists}
+	w := servePostRole(repo, createRoleBody)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"role code already exists in this tenant"}`, w.Body.String())
+}
+
+func Test_PostRoleHandler_DuplicateNameIsConflict(t *testing.T) {
+	repo := &mockRoleCreator{err: types.ErrRoleNameExists}
+	w := servePostRole(repo, createRoleBody)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"role name already exists in this tenant"}`, w.Body.String())
+}
+
+func Test_PostRoleHandler_UngrantableActionIsUnprocessable(t *testing.T) {
+	repo := &mockRoleCreator{err: fmt.Errorf("%w: can_manage_user", types.ErrRoleActionsNotGrantable)}
+	w := servePostRole(repo, createRoleBody)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.JSONEq(t, `{"status":422,"message":"actions cannot be granted to a custom role: can_manage_user"}`, w.Body.String())
+}
+
+func Test_PostRoleHandler_RepoError(t *testing.T) {
+	repo := &mockRoleCreator{err: errors.New("boom")}
+	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())

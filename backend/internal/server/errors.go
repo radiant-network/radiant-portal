@@ -49,3 +49,7 @@ func HandleForbiddenError(c *gin.Context) {
 func HandleConflictError(c *gin.Context, message string) {
 	c.JSON(http.StatusConflict, types.ApiError{Status: http.StatusConflict, Message: message})
 }
+
+func HandleUnprocessableEntityError(c *gin.Context, message string) {
+	c.JSON(http.StatusUnprocessableEntity, types.ApiError{Status: http.StatusUnprocessableEntity, Message: message})
+}

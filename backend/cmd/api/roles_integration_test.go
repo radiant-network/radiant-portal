@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -130,6 +131,99 @@ func Test_GetRole_WithoutEitherManagementActionDenied(t *testing.T) {
 func Test_GetRole_CrossTenant_Forbidden(t *testing.T) {
 	// tara manages roles in radiant only → RequireTenantAccess rejects before the handler runs.
 	w := getRole(t, taraID, "tenant_b", "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+// postRoleRouter mirrors production's wiring for the create route: tenant membership, then the
+// can_manage_role gate alone — can_manage_user does not open it.
+func postRoleRouter(env *testutils.Env, userID string) (*gin.Engine, *postgres.RolesRepository) {
+	authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+	rolesRepo := postgres.NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+	auth := &testutils.MockAuth{Id: userID}
+
+	router := gin.Default()
+	tenantRoutes := router.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+	tenantRoutes.POST("/roles", server.RequireAction(auth, authRepo, types.ActionManageRole), server.PostRoleHandler(rolesRepo))
+	return router, rolesRepo
+}
+
+func postRole(t *testing.T, userID, tenant, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	var w *httptest.ResponseRecorder
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		router, _ := postRoleRouter(env, userID)
+		req, _ := http.NewRequest("POST", "/"+tenant+"/roles", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+	})
+	return w
+}
+
+func Test_PostRole_RoleManager_CreatesRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const code = "zz_int_reviewer"
+		defer env.Postgres.Exec("DELETE FROM role WHERE tenant_code = 'radiant' AND code = ?", code)
+
+		router, repo := postRoleRouter(env, taraID)
+		body := `{"code":"` + code + `","name":"ZZ Integration Reviewer","description":"Created by the integration test.","actions":["can_search_case","can_read_pii"]}`
+		req, _ := http.NewRequest("POST", "/radiant/roles", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusCreated, w.Code)
+
+		var created types.RoleResult
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &created))
+		assert.Equal(t, code, created.Code)
+		assert.Equal(t, "ZZ Integration Reviewer", created.Name)
+		assert.False(t, created.IsDefault, "a role created through the API stays editable")
+		assert.Equal(t, types.RoleScopeMixed, created.Scope)
+		assert.EqualValues(t, 0, created.AssignedUsersCount)
+		assert.Len(t, created.Actions, 2)
+
+		// The role is really in the catalog, with its actions mapped.
+		stored, err := repo.GetTenantRole(t.Context(), "radiant", code)
+		require.NoError(t, err)
+		require.NotNil(t, stored)
+		assert.Equal(t, &created, stored)
+	})
+}
+
+func Test_PostRole_ClashWithSeededRoleName_Conflict(t *testing.T) {
+	// "Geneticist" is seeded in radiant; the name is unique per tenant, so this is a 409.
+	w := postRole(t, taraID, "radiant", `{"code":"zz_int_clash","name":"Geneticist","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+}
+
+func Test_PostRole_ReservedAction_Unprocessable(t *testing.T) {
+	// can_manage_user is not grantable, which is what makes tenant_admin un-duplicable.
+	w := postRole(t, taraID, "radiant", `{"code":"zz_int_admin","name":"ZZ Almost Admin","actions":["can_manage_user"]}`)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Contains(t, w.Body.String(), "can_manage_user")
+}
+
+func Test_PostRole_InvalidCode_BadRequest(t *testing.T) {
+	w := postRole(t, taraID, "radiant", `{"code":"ZZ-Int-Bad","name":"ZZ Int Bad","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostRole_WithoutManageRoleDenied(t *testing.T) {
+	// mike is a radiant member: tenant access passes, the action gate is what denies.
+	w := postRole(t, mikeID, "radiant", `{"code":"zz_int_denied","name":"ZZ Int Denied","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_PostRole_CrossTenant_Forbidden(t *testing.T) {
+	// tara manages roles in radiant only → RequireTenantAccess rejects before the handler runs.
+	w := postRole(t, taraID, "tenant_b", `{"code":"zz_int_cross","name":"ZZ Int Cross","actions":["can_view_kb"]}`)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
