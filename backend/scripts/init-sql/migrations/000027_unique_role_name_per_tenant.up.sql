@@ -1,4 +1,4 @@
--- Admin API MVP: a role's name must be unique within its tenant, so creating a custom role that
+-- A role's name must be unique within its tenant, so creating a custom role that
 -- clashes with an existing one (including a seeded role's name) is refused with 409 rather than
 -- producing two roles the admin UI renders identically. Compared case-insensitively: "Clinical
 -- Reviewer" and "clinical reviewer" are the same name to a reader, so they must not coexist.
