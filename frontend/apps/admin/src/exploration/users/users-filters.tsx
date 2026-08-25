@@ -7,8 +7,8 @@ import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 
-import { useTenantRoles } from './use-tenant-roles';
-import { BASELINE_ROLE_CODE } from './user-roles';
+import { BASELINE_ROLE_CODE } from '../roles/roles-utils';
+import { useTenantRoles } from '../roles/use-tenant-roles';
 
 type UsersFiltersProps = {
   search: string;

@@ -23,12 +23,18 @@ import { useLoginContext } from '@/components/hooks/use-login';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
 
+import RolePermissionsDialog from '../roles/role-permissions-dialog';
+import { ScopeBadges } from '../roles/role-scope-badges';
+import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE, findRole, needsOrganizations } from '../roles/roles-utils';
+import { useTenantRoles } from '../roles/use-tenant-roles';
+
 import RoleOrganizationsPicker, { NO_ORGANIZATIONS } from './role-organizations-picker';
-import RolePermissionsDialog from './role-permissions-dialog';
-import { ScopeBadges } from './role-scope-badges';
 import { useTenantAdminCount } from './use-tenant-admin-count';
-import { useTenantRoles } from './use-tenant-roles';
-import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE, findRole, getAssignableRoles, needsOrganizations } from './user-roles';
+
+/** Administrator has its own box and the baseline role is implicit, so neither is in the picker. */
+function getAssignableRoles(roles: RoleResult[]) {
+  return roles.filter(role => role.code !== ADMIN_ROLE_CODE && role.code !== BASELINE_ROLE_CODE);
+}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

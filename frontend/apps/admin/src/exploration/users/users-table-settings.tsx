@@ -12,7 +12,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 
-import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE } from './user-roles';
+import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE } from '../roles/roles-utils';
 
 const columnHelper = createColumnHelper<UserResult>();
 
