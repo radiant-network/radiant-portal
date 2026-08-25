@@ -50,6 +50,7 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 		"case_category_code":         c.CaseCategoryCode,
 		"analysis_catalog_id":        c.AnalysisCatalogID,
 		"note":                       c.Note,
+		"diagnosis_hypothesis":       c.DiagnosisHypothesis,
 		"ordering_organization_code": c.OrderingOrganizationCode,
 		"ordering_physician":         c.OrderingPhysician,
 	}

@@ -317,8 +317,8 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	}
 
 	txObservations := db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.TenantQualifiedName(ctx), types.ObsCategoricalTable.Alias))
-	txObservations = txObservations.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(ctx)))
-	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
+	txObservations = txObservations.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON obs.observation_code = ? AND hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(ctx)), types.ObsCodePhenotype)
+	txObservations = txObservations.Where("obs.observation_code = ? AND obs.case_id = ?", types.ObsCodePhenotype, caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
 	txObservations = txObservations.Select("obs.patient_id, obs.fetus_id, COALESCE(hpo.id, obs.code_value) as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
 	if err := txObservations.Find(&phenotypeObsCategoricals).Error; err != nil {

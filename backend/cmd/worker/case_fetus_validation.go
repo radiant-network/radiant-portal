@@ -113,6 +113,7 @@ func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 			continue
 		}
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+		cr.validateExamCode(obs.Code, obs.ExamCode, path, res)
 		cr.ValidateStringField(obs.Value, "value", path+".value", ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, true)
 	}
 }

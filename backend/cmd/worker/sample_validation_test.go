@@ -98,6 +98,10 @@ type MockValueSetRepository struct {
 	GetCodesFunc func(vsType postgres.ValueSetType) ([]string, error)
 }
 
+func (m *MockValueSetRepository) GetExamCodes(_ context.Context, _ string) ([]string, error) {
+	return []string{"eeg", "emg", "other"}, nil
+}
+
 func (m *MockValueSetRepository) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	if m.GetCodesFunc != nil {
 		return m.GetCodesFunc(vsType)

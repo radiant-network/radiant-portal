@@ -1,0 +1,223 @@
+{
+  "case_id": 2,
+  "case_type": "germline",
+  "analysis_catalog_code": "WGA",
+  "analysis_catalog_name": "Whole Genome Analysis",
+  "case_category_code": "prenatal",
+  "case_category_name": "Prenatal",
+  "created_on": "2024-03-04T09:00:00Z",
+  "updated_on": "2024-03-04T09:00:00Z",
+  "prescriber": "Dr. Tremblay",
+  "ordering_organization_code": "CHUSJ",
+  "ordering_organization_name": "CHU Sainte-Justine",
+  "diagnosis_lab_code": "CQGC",
+  "diagnosis_lab_name": "Quebec Clinical Genomic Center",
+  "priority_code": "asap",
+  "status_code": "in_progress",
+  "primary_condition_id": "MONDO:0008056",
+  "primary_condition_name": "Myotonic dystrophy type 1",
+  "note": "Triplet pregnancy, prenatal workup requested at 18 weeks",
+  "diagnosis_hypothesis": "Suspected congenital myotonic dystrophy, maternal transmission",
+  "project_code": "N1",
+  "project_name": "Project N1",
+  "panel_code": "NEUROMUSC",
+  "panel_name": "Neuromuscular disorders",
+  "sequencing_experiments": [
+    {
+      "seq_id": 10,
+      "patient_id": 1,
+      "relationship_to_proband": "fetus",
+      "sample_id": 10,
+      "sample_submitter_id": "SP-FETUS-A",
+      "sample_type_code": "DNA",
+      "affected_status_code": "affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "completed",
+      "updated_on": "2024-03-04T08:00:00Z",
+      "has_variants": true
+    },
+    {
+      "seq_id": 11,
+      "patient_id": 1,
+      "relationship_to_proband": "fetus",
+      "sample_id": 11,
+      "sample_submitter_id": "SP-FETUS-B",
+      "sample_type_code": "DNA",
+      "affected_status_code": "affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "completed",
+      "updated_on": "2024-03-04T08:00:00Z",
+      "has_variants": false
+    },
+    {
+      "seq_id": 12,
+      "patient_id": 1,
+      "relationship_to_proband": "fetus",
+      "sample_id": 12,
+      "sample_submitter_id": "SP-FETUS-C",
+      "sample_type_code": "DNA",
+      "affected_status_code": "affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "in_progress",
+      "updated_on": "2024-03-04T08:00:00Z",
+      "has_variants": false
+    }
+  ],
+  "members": [
+    {
+      "relationship_to_proband": "proband",
+      "affected_status_code": "affected",
+      "patient_id": 1,
+      "first_name": "Léa",
+      "last_name": "Bernier",
+      "date_of_birth": "1992-06-15T00:00:00Z",
+      "life_status_code": "alive",
+      "sex_code": "female",
+      "submitter_patient_id": "MRN-101",
+      "jhn": "BER9206157788",
+      "organization_code": "CHUSJ",
+      "organization_name": "CHU Sainte-Justine",
+      "ethnicities": [
+        {
+          "code": "CA-FR",
+          "name": "French Canadian"
+        }
+      ],
+      "consanguinity": {
+        "code": "consanguinity",
+        "name": "Consanguinity in family"
+      },
+      "observed_phenotypes": [
+        {
+          "id": "HP:0003552",
+          "name": "Muscle stiffness",
+          "onset_code": "young_adult"
+        }
+      ],
+      "notes": [
+        "Diagnosed with myotonic dystrophy at 24, triplet pregnancy followed since week 8"
+      ],
+      "family_history": [
+        {
+          "family_member_code": "mother",
+          "condition": "Myotonic dystrophy"
+        },
+        {
+          "family_member_code": "brother",
+          "condition": "Cataract"
+        }
+      ],
+      "exams": [
+        {
+          "exam_code": "ctgr",
+          "name": "CTG Repeat Testing (Steinert Disease)",
+          "interpretation_code": "abnormal",
+          "value": "Expansion > 1000 repeats"
+        }
+      ],
+      "non_observed_phenotypes": [
+        {
+          "id": "HP:0000508",
+          "name": "Ptosis",
+          "onset_code": "unknown"
+        }
+      ]
+    },
+    {
+      "relationship_to_proband": "fetus",
+      "affected_status_code": "affected",
+      "fetus_id": 1,
+      "life_status_code": "alive",
+      "sex_code": "male",
+      "last_menstrual_period": "2023-11-02T00:00:00Z",
+      "observed_phenotypes": [
+        {
+          "id": "HP:0001561",
+          "name": "Polyhydramnios",
+          "onset_code": "antenatal"
+        }
+      ],
+      "exams": [
+        {
+          "exam_code": "bmus",
+          "name": "Muscle Biopsy",
+          "interpretation_code": "abnormal",
+          "value": "HP:0003749",
+          "value_name": "Muscle hypertrophy",
+          "coding_system": "HPO"
+        },
+        {
+          "exam_code": "eabd",
+          "name": "Abdominal Ultrasound",
+          "interpretation_code": "abnormal",
+          "value": "Reduced fetal movement, polyhydramnios"
+        }
+      ],
+      "notes": [
+        "Findings on the second-trimester ultrasound"
+      ]
+    },
+    {
+      "relationship_to_proband": "fetus",
+      "affected_status_code": "affected",
+      "fetus_id": 2,
+      "life_status_code": "alive",
+      "sex_code": "female",
+      "last_menstrual_period": "2023-11-02T00:00:00Z",
+      "exams": [
+        {
+          "exam_code": "eabd",
+          "name": "Abdominal Ultrasound",
+          "interpretation_code": "normal",
+          "value": "normal"
+        }
+      ]
+    },
+    {
+      "relationship_to_proband": "fetus",
+      "affected_status_code": "affected",
+      "fetus_id": 3,
+      "life_status_code": "alive",
+      "sex_code": "male",
+      "estimated_due_date": "2024-08-08T00:00:00Z",
+      "notes": [
+        "Dating from the first-trimester ultrasound, no menstrual date available"
+      ]
+    },
+    {
+      "relationship_to_proband": "father",
+      "affected_status_code": "non_affected",
+      "patient_id": 2,
+      "first_name": "Nicolas",
+      "last_name": "Fortin",
+      "date_of_birth": "1989-02-20T00:00:00Z",
+      "life_status_code": "alive",
+      "sex_code": "male",
+      "submitter_patient_id": "MRN-102",
+      "jhn": "FOR8902204321",
+      "organization_code": "CHUSJ",
+      "organization_name": "CHU Sainte-Justine",
+      "ethnicities": [
+        {
+          "code": "EU",
+          "name": "European Caucasian"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": 10,
+      "type_code": "alignment_germline_variant_calling",
+      "type_name": "Genome Alignment and Germline Variant Calling",
+      "created_on": "2024-03-04T09:00:00Z",
+      "patients": [
+        "fetus"
+      ]
+    }
+  ],
+  "has_igv_files": false
+}

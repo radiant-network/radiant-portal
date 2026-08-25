@@ -6,7 +6,7 @@
       "category_code": "postnatal",
       "project_code": "N1",
       "analysis_code": "WGA",
-      "status_code": "active",
+      "status_code": "in_progress",
       "priority_code": "routine",
       "ordering_organization_code": "CHUSJ",
       "ordering_physician": "Dr. Dupont",
@@ -14,7 +14,8 @@
       "primary_condition_value": "MONDO:0700092",
       "primary_condition_code_system": "MONDO",
       "note": "Germline trio analysis for epilepsy workup",
-      "resolution_status_code": "unresolved",
+      "diagnosis_hypothesis": "Refractory epilepsy with global developmental delay, suspected channelopathy",
+      "resolution_status_code": "unsolved",
       "patients": [
         {
           "submitter_patient_id": "MRN-001",
@@ -23,28 +24,51 @@
           "affected_status_code": "affected",
           "observations_categorical": [
             {
+              "code": "phenotype",
               "system": "HPO",
-              "code": "HP:0001250",
-              "value": "Seizures",
+              "value": "HP:0001250",
               "onset_code": "infantile",
               "interpretation_code": "positive",
               "note": "Onset at age 3"
             },
             {
+              "code": "phenotype",
               "system": "HPO",
-              "code": "HP:0001249",
-              "value": "Intellectual disability",
+              "value": "HP:0001249",
               "onset_code": "infantile",
               "interpretation_code": "positive"
+            },
+            {
+              "code": "exam",
+              "system": "HPO",
+              "value": "HP:0002353",
+              "exam_code": "eeg",
+              "interpretation_code": "abnormal"
             }
           ],
           "observations_text": [
             {
-              "code": "clinical_summary",
+              "code": "note",
               "value": "Patient presents with refractory epilepsy and global developmental delay."
+            },
+            {
+              "code": "exam",
+              "value": "normal",
+              "exam_code": "irmc",
+              "interpretation_code": "normal"
+            },
+            {
+              "code": "exam",
+              "value": "Ophthalmology consult 2024",
+              "exam_code": "other"
             }
           ],
-          "family_history": []
+          "family_history": [
+            {
+              "condition": "Epilepsy",
+              "family_member_code": "uncle"
+            }
+          ]
         },
         {
           "submitter_patient_id": "MRN-002",
@@ -55,8 +79,8 @@
           "observations_text": [],
           "family_history": [
             {
-              "condition": "HP:0001250",
-              "family_member_code": "maternal_uncle"
+              "condition": "Febrile seizures",
+              "family_member_code": "uncle"
             }
           ]
         },
@@ -90,7 +114,11 @@
       "tasks": [
         {
           "type_code": "alignment_germline_variant_calling",
-          "aliquots": ["ALQ-PROBAND-001", "ALQ-MOTHER-001", "ALQ-FATHER-001"],
+          "aliquots": [
+            "ALQ-PROBAND-001",
+            "ALQ-MOTHER-001",
+            "ALQ-FATHER-001"
+          ],
           "pipeline_name": "dragen-germline",
           "pipeline_version": "4.2.4",
           "genome_build": "GRCh38",
@@ -154,17 +182,33 @@
         },
         {
           "type_code": "radiant_germline_annotation",
-          "aliquots": ["ALQ-PROBAND-001", "ALQ-MOTHER-001", "ALQ-FATHER-001"],
+          "aliquots": [
+            "ALQ-PROBAND-001",
+            "ALQ-MOTHER-001",
+            "ALQ-FATHER-001"
+          ],
           "pipeline_name": "radiant-annotation",
           "pipeline_version": "1.3.0",
           "genome_build": "GRCh38",
           "input_documents": [
-            { "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz" },
-            { "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi" },
-            { "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz" },
-            { "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz.tbi" },
-            { "url": "s3://bucket/variants/trio001_father.snv.vcf.gz" },
-            { "url": "s3://bucket/variants/trio001_father.snv.vcf.gz.tbi" }
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz.tbi"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz.tbi"
+            }
           ],
           "output_documents": [
             {
@@ -189,13 +233,19 @@
         },
         {
           "type_code": "exomiser",
-          "aliquots": ["ALQ-PROBAND-001"],
+          "aliquots": [
+            "ALQ-PROBAND-001"
+          ],
           "pipeline_name": "exomiser",
           "pipeline_version": "14.0.0",
           "genome_build": "GRCh38",
           "input_documents": [
-            { "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz" },
-            { "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi" }
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi"
+            }
           ],
           "output_documents": [
             {
@@ -226,7 +276,7 @@
       "category_code": "prenatal",
       "project_code": "N1",
       "analysis_code": "WGA",
-      "status_code": "active",
+      "status_code": "in_progress",
       "priority_code": "asap",
       "ordering_organization_code": "CHUSJ",
       "ordering_physician": "Dr. Dupont",
@@ -234,7 +284,8 @@
       "primary_condition_value": "MONDO:0700092",
       "primary_condition_code_system": "MONDO",
       "note": "Prenatal trio analysis — mother, father and fetus",
-      "resolution_status_code": "unresolved",
+      "diagnosis_hypothesis": "Ventriculomegaly on the anatomy scan, suspected neurodevelopmental disorder",
+      "resolution_status_code": "unsolved",
       "patients": [
         {
           "submitter_patient_id": "MRN-004",
@@ -264,13 +315,28 @@
           "last_menstrual_period": "2026-02-01",
           "observations_categorical": [
             {
+              "code": "phenotype",
               "system": "HPO",
-              "code": "HP:0002119",
-              "value": "Ventriculomegaly",
+              "value": "HP:0002119",
+              "onset_code": "antenatal",
               "interpretation_code": "positive",
               "note": "Seen on 20-week anatomy scan"
             }
           ],
+          "observations_text": [
+            {
+              "code": "note",
+              "value": "Findings on the second-trimester ultrasound"
+            }
+          ]
+        },
+        {
+          "submitter_fetus_id": "FETUS-002",
+          "sex_code": "female",
+          "life_status_code": "alive",
+          "affected_status_code": "unknown",
+          "estimated_due_date": "2026-11-08",
+          "observations_categorical": [],
           "observations_text": []
         }
       ],
@@ -335,8 +401,12 @@
           "pipeline_version": "1.3.0",
           "genome_build": "GRCh38",
           "input_documents": [
-            { "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz" },
-            { "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz.tbi" }
+            {
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz.tbi"
+            }
           ],
           "output_documents": [
             {

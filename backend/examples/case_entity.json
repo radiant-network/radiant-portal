@@ -13,12 +13,15 @@
   "diagnosis_lab_code": "CQGC",
   "diagnosis_lab_name": "Quebec Clinical Genomic Center",
   "priority_code": "routine",
-  "status_code": "active",
+  "status_code": "in_progress",
   "primary_condition_id": "MONDO:0700092",
   "primary_condition_name": "Neurodevelopmental disorder",
   "note": "Germline trio analysis for epilepsy workup",
+  "diagnosis_hypothesis": "Suspected early-onset epileptic encephalopathy",
   "project_code": "N1",
   "project_name": "Project N1",
+  "panel_code": "EPILEP",
+  "panel_name": "Epilepsy",
   "sequencing_experiments": [
     {
       "seq_id": 1,
@@ -74,9 +77,9 @@
       "life_status_code": "alive",
       "sex_code": "male",
       "submitter_patient_id": "MRN-001",
+      "jhn": "SMI1506154321",
       "organization_code": "CHUSJ",
       "organization_name": "CHU Sainte-Justine",
-      "ethnicity_codes": [],
       "observed_phenotypes": [
         {
           "id": "HP:0001250",
@@ -89,7 +92,51 @@
           "onset_code": "infantile"
         }
       ],
-      "non_observed_phenotypes": []
+      "non_observed_phenotypes": [],
+      "ethnicities": [
+        {
+          "code": "CA-FR",
+          "name": "French Canadian"
+        },
+        {
+          "code": "EU",
+          "name": "European Caucasian"
+        }
+      ],
+      "consanguinity": {
+        "code": "consanguinity",
+        "name": "Consanguinity in family"
+      },
+      "exams": [
+        {
+          "exam_code": "eeg",
+          "name": "Electroencephalogram (EEG)",
+          "interpretation_code": "abnormal",
+          "value": "HP:0002353",
+          "value_name": "EEG abnormality",
+          "coding_system": "HPO"
+        },
+        {
+          "exam_code": "irmc",
+          "name": "Cerebral MRI",
+          "interpretation_code": "normal",
+          "value": "normal"
+        },
+        {
+          "exam_code": "other",
+          "name": "Other",
+          "value": "Ophthalmology consult 2024"
+        }
+      ],
+      "notes": [
+        "Seizure onset at 6 months, refractory to first-line treatment"
+      ],
+      "family_history": [
+        {
+          "family_member_code": "uncle",
+          "condition": "Epilepsy"
+        }
+      ]
     },
     {
       "relationship_to_proband": "mother",
@@ -101,11 +148,20 @@
       "life_status_code": "alive",
       "sex_code": "female",
       "submitter_patient_id": "MRN-002",
+      "jhn": "SMI8503226789",
       "organization_code": "CHUSJ",
       "organization_name": "CHU Sainte-Justine",
-      "ethnicity_codes": [],
       "observed_phenotypes": [],
-      "non_observed_phenotypes": []
+      "non_observed_phenotypes": [],
+      "ethnicities": [
+        {
+          "code": "CA-FR",
+          "name": "French Canadian"
+        }
+      ],
+      "notes": [
+        "No personal history of seizures"
+      ]
     },
     {
       "relationship_to_proband": "father",
@@ -117,9 +173,9 @@
       "life_status_code": "alive",
       "sex_code": "male",
       "submitter_patient_id": "MRN-003",
+      "jhn": "SMI8311081234",
       "organization_code": "CHUSJ",
       "organization_name": "CHU Sainte-Justine",
-      "ethnicity_codes": [],
       "observed_phenotypes": [],
       "non_observed_phenotypes": []
     }
@@ -130,21 +186,32 @@
       "type_code": "alignment_germline_variant_calling",
       "type_name": "Genome Alignment and Germline Variant Calling",
       "created_on": "2024-01-15T09:00:00Z",
-      "patients": ["proband", "mother", "father"]
+      "patients": [
+        "proband",
+        "mother",
+        "father"
+      ]
     },
     {
       "id": 2,
       "type_code": "radiant_germline_annotation",
       "type_name": "RADIANT Germline Annotation",
       "created_on": "2024-01-15T09:00:00Z",
-      "patients": ["proband", "mother", "father"]
+      "patients": [
+        "proband",
+        "mother",
+        "father"
+      ]
     },
     {
       "id": 3,
       "type_code": "exomiser",
       "type_name": "Exomiser",
       "created_on": "2024-01-15T09:00:00Z",
-      "patients": ["proband"]
+      "patients": [
+        "proband"
+      ]
     }
-  ]
+  ],
+  "has_igv_files": false
 }

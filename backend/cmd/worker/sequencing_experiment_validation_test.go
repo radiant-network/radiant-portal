@@ -101,6 +101,10 @@ func (m *mockSeqExpDAO) GetSequencingExperimentDetailById(seqId int) (*types.Seq
 
 type mockValueSetsDAO struct{ mock.Mock }
 
+func (m *mockValueSetsDAO) GetExamCodes(_ context.Context, _ string) ([]string, error) {
+	return []string{"eeg", "emg", "other"}, nil
+}
+
 func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	switch vsType {
 	case postgres.ValueSetExperimentalStrategy:

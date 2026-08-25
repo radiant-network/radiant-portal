@@ -35,6 +35,8 @@ type BatchValidationCache struct {
 
 	// Value Sets (Static Lookups)
 	ValueSets map[postgres.ValueSetType][]string
+	// ExamCodes is keyed by tenant: exam is the only value set scoped by (code, tenant_code).
+	ExamCodes map[string][]string
 
 	// Referenced Entities (Indexed by their natural keys)
 	OrganizationsByCode            map[string]*types.Organization                          // Key: code
@@ -56,6 +58,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 	return &BatchValidationCache{
 		Context:                        context,
 		ValueSets:                      make(map[postgres.ValueSetType][]string),
+		ExamCodes:                      make(map[string][]string),
 		OrganizationsByCode:            make(map[string]*types.Organization),
 		Projects:                       make(map[string]*types.Project),
 		Patients:                       make(map[PatientKey]*types.Patient),
@@ -324,5 +327,19 @@ func (c *BatchValidationCache) GetValueSetCodes(ctx context.Context, valueSetTyp
 	}
 
 	c.ValueSets[valueSetType] = codes
+	return getCopy(codes), nil
+}
+
+func (c *BatchValidationCache) GetExamCodes(ctx context.Context, tenantCode string) ([]string, error) {
+	if codes, ok := c.ExamCodes[tenantCode]; ok {
+		return getCopy(codes), nil
+	}
+
+	codes, err := c.Context.ValueSetsRepo.GetExamCodes(ctx, tenantCode)
+	if err != nil {
+		return nil, fmt.Errorf("batch validation cache GetExamCodes: %w", err)
+	}
+
+	c.ExamCodes[tenantCode] = codes
 	return getCopy(codes), nil
 }

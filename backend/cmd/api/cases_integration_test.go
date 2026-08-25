@@ -260,8 +260,8 @@ func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 				"observed_phenotypes":[{"id":"HP:0001631", "onset_code":"antenatal"}],
 				"notes":["Findings on the second-trimester ultrasound"],
 				"exams":[
-					{"exam_code":"", "interpretation_code":"abnormal", "value":"Bilateral ventriculomegaly"},
-					{"exam_code":"eeg", "name":"Electroencephalogram (EEG)", "interpretation_code":"abnormal", "value":"abnormal"}
+					{"exam_code":"eeg", "name":"Electroencephalogram (EEG)", "interpretation_code":"abnormal", "value":"abnormal"},
+					{"exam_code":"other", "name":"Other", "interpretation_code":"abnormal", "value":"Bilateral ventriculomegaly"}
 				]
 			}
 		],
