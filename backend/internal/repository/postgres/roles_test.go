@@ -265,6 +265,21 @@ func Test_RolesRepository_GetTenantRole_RoleWithoutActionIsTenantScoped(t *testi
 	})
 }
 
+// Exclusive for the same reason as the holder-count test above.
+func Test_RolesRepository_ListTenantRoles_HolderCountExcludesSystemUsers(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		roles, err := repo.ListTenantRoles(t.Context(), types.DefaultTenantCode)
+		require.NoError(t, err)
+
+		// gabe and the machine-to-machine account both hold data_manager; only gabe is counted.
+		dataManager := roleByCodeIn(roles, "data_manager")
+		require.NotNil(t, dataManager)
+		assert.EqualValues(t, 1, dataManager.AssignedUsersCount)
+	})
+}
+
 // No seeded or fixture role maps zero actions, so this builds one in a tenant of its own — the
 // read tests above assert radiant's and tenant_b's exact role sets and run in parallel.
 func Test_RolesRepository_ListTenantRoles_RoleWithoutActionIsTenantScoped(t *testing.T) {
