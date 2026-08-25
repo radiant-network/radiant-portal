@@ -20,7 +20,7 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLoginContext } from '@/components/hooks/use-login';
-import { useTenant } from '@/components/hooks/use-tenant';
+import { TENANT_ACTIONS, useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
 
 import RolePermissionsDialog from '../roles/role-permissions-dialog';
@@ -87,6 +87,19 @@ function toFormValues(user: UserResult): FormValues {
  * Needed to manage alert closing without impact on sheet display
  */
 const isAlertDialogOpen = () => !!document.querySelector('[role="alertdialog"]');
+
+/** Where an administrator who just gave up their own access is sent. */
+const CASES_PATH = '/case';
+
+const ADMIN_ACTIONS: readonly string[] = Object.values(TENANT_ACTIONS);
+
+/**
+ * Whether the role set still grants access to the admin section. Read from the actions rather than
+ * from the role codes: a custom role can carry an administrative action too.
+ */
+function keepsAdminAccess(roleCodes: string[], roles: RoleResult[]) {
+  return roleCodes.some(code => findRole(roles, code)?.actions.some(action => ADMIN_ACTIONS.includes(action.code)));
+}
 
 /** Comparable form of a role set, so an unchanged edit can be detected. */
 function serializeRoles(roles: CreateUserRole[]) {
@@ -324,6 +337,13 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
           roles: rolePayload,
         });
       }
+      // Giving up your own last administrative action locks you out of this page: leave for the
+      // cases list with a full reload, so the whole app reads the new authorization from /auth/me.
+      if (isSelf && tenantRoles && !keepsAdminAccess(values.roles, tenantRoles)) {
+        window.location.assign(CASES_PATH);
+        return;
+      }
+
       toast.success(t(isEdit ? 'admin.users.edit.notifications.success' : 'admin.users.create.notifications.success'));
       onSaved();
       onOpenChange(false);
