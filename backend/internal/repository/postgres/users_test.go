@@ -194,6 +194,67 @@ func Test_UsersRepository_ListTenantUsers_SearchTreatsWildcardsLiterally(t *test
 	})
 }
 
+// seedSearchableUser adds a radiant researcher whose name the search tests match on. researcher
+// is deliberate: it is the one seeded role no test counts exactly, so an extra holder is harmless.
+func seedSearchableUser(t *testing.T, db *gorm.DB, userID, firstName, lastName, email string) {
+	t.Helper()
+	t.Cleanup(func() {
+		db.Exec(`DELETE FROM user_role WHERE user_id = ?`, userID)
+		db.Exec(`DELETE FROM users WHERE user_id = ?`, userID)
+	})
+	require.NoError(t, db.Exec(`
+		INSERT INTO users (user_id, email, first_name, last_name)
+		VALUES (?, ?, ?, ?)`, userID, email, firstName, lastName).Error)
+	require.NoError(t, db.Exec(`
+		INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
+		VALUES (?, 'radiant', NULL, 'researcher', 'seed')`, userID).Error)
+}
+
+// Exclusive rather than added to the shared fixture: an accented last name sorts between its
+// unaccented neighbours in Postgres but after every ASCII name byte-wise, which is what the
+// SortsByName assertion compares.
+func Test_UsersRepository_ListTenantUsers_SearchIgnoresAccentsOnBothSides(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		const (
+			accentedID   = "f5e4d3c2-b1a0-4988-8776-655443322110"
+			unaccentedID = "0112233a-4455-4667-8899-aabbccddeeff"
+		)
+		seedSearchableUser(t, env.Postgres, accentedID, "Frédéric", "Lévesque", "frederic.levesque@accent.test")
+		seedSearchableUser(t, env.Postgres, unaccentedID, "Frederic", "Levesque", "flevesque@accent.test")
+
+		// Every combination of an accented/unaccented term against an accented/unaccented value.
+		for _, search := range []string{"fre", "fré", "lev", "lév", "Frédéric", "Frederic"} {
+			users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant(search))
+			require.NoError(t, err)
+			assert.Equalf(t, int64(2), count, "search %q", search)
+			assert.NotNilf(t, userByID(users, accentedID), "search %q missed the accented member", search)
+			assert.NotNilf(t, userByID(users, unaccentedID), "search %q missed the unaccented member", search)
+		}
+	})
+}
+
+// Exclusive for the same reason as the test above.
+func Test_UsersRepository_ListTenantUsers_SearchIgnoresEveryDiacritic(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+
+		const francoisID = "aabbccdd-eeff-4001-8223-334455667788"
+		seedSearchableUser(t, env.Postgres, francoisID, "François", "Côté", "françois.côté@accent.test")
+
+		// Cedilla, circumflex and acute, matched on the first name, the last name and the email —
+		// and the email folds on the stored side too, being the one field that carries the accents.
+		for _, search := range []string{"francois", "François", "cot", "Côté", "francois.cote@", "françois.côté@"} {
+			users, count, err := repo.ListTenantUsers(t.Context(), types.DefaultTenantCode, wholeTenant(search))
+			require.NoError(t, err)
+			assert.Equalf(t, int64(1), count, "search %q", search)
+			require.Lenf(t, users, 1, "search %q", search)
+			assert.Equalf(t, francoisID, users[0].UserID, "search %q", search)
+		}
+	})
+}
+
 func Test_UsersRepository_ListTenantUsers_SearchWithoutMatchReturnsEmpty(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
