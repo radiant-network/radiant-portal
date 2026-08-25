@@ -147,8 +147,16 @@ func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode string, qu
 		Where("EXISTS ("+grant+")", args...)
 	if query.Search != "" {
 		prefix := likePrefix(query.Search)
+		// Folded on both sides so accents are ignored in the term as well as in the stored value:
+		// "fre" and "fré" both reach Frédéric, and either reaches an unaccented Frederic.
+		clauses := make([]string, 0, 3)
+		args := make([]any, 0, 3)
+		for _, column := range []string{"u.first_name", "u.last_name", "u.email"} {
+			clauses = append(clauses, unaccented(column)+" ILIKE "+unaccented("?"))
+			args = append(args, prefix)
+		}
 		// Parenthesized explicitly so the OR cannot absorb another filter's predicate.
-		tx = tx.Where("(u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.email ILIKE ?)", prefix, prefix, prefix)
+		tx = tx.Where("("+strings.Join(clauses, " OR ")+")", args...)
 	}
 	return tx
 }
@@ -160,6 +168,14 @@ var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 // likePrefix builds a case-insensitive StartsWith pattern for ILIKE.
 func likePrefix(search string) string {
 	return likeEscaper.Replace(search) + "%"
+}
+
+// unaccented wraps a text SQL expression in an accent-folding one: NFD decomposes an accented
+// letter into its base letter plus a combining mark, and the U+0300-U+036F mark range is then
+// dropped, so every diacritic goes — not just the acute accent. It stands in for the unaccent
+// extension, which the app role cannot install on managed Postgres (see migration 000023).
+func unaccented(expr string) string {
+	return `regexp_replace(normalize(` + expr + `, NFD), '[\u0300-\u036f]', '', 'g')`
 }
 
 // tenantGrants returns the users' grants in the tenant, each carrying the scopes its role's actions
