@@ -8111,6 +8111,73 @@ paths:
       summary: List the tenant's roles
       tags:
       - roles
+  /{tenant}/roles/{code}:
+    get:
+      description: |-
+        Returns the role with the code in the path, in the same shape the list serves it:
+        the actions it grants, the `scope` derived from them, and the number of users
+        holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same
+        gate as the list — it backs the role detail panel, the duplicate flow (read the
+        role, then create a new one from its actions), and the "what this grants" preview
+        the user screens show at assignment. `is_default` marks a seeded role, which is
+        locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role
+        of another tenant is reported as not found.
+      operationId: getRole
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Role code
+        in: path
+        name: code
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResult'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get one of the tenant's roles
+      tags:
+      - roles
   /{tenant}/samples/batch:
     post:
       description: Create a new sample batch

@@ -50,3 +50,51 @@ func ListRolesHandler(repo rolesReader) gin.HandlerFunc {
 		c.JSON(http.StatusOK, roles)
 	}
 }
+
+type roleDetailReader interface {
+	GetTenantRole(ctx context.Context, tenantCode, roleCode string) (*types.RoleResult, error)
+}
+
+// GetRoleHandler
+// @Summary Get one of the tenant's roles
+// @Id getRole
+// @Description Returns the role with the code in the path, in the same shape the list serves it:
+// @Description the actions it grants, the `scope` derived from them, and the number of users
+// @Description holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same
+// @Description gate as the list — it backs the role detail panel, the duplicate flow (read the
+// @Description role, then create a new one from its actions), and the "what this grants" preview
+// @Description the user screens show at assignment. `is_default` marks a seeded role, which is
+// @Description locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role
+// @Description of another tenant is reported as not found.
+// @Tags roles
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param code path string true "Role code"
+// @Produce json
+// @Success 200 {object} types.RoleResult
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/roles/{code} [get]
+func GetRoleHandler(repo roleDetailReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		role, err := repo.GetTenantRole(c.Request.Context(), *tenant, c.Param("code"))
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if role == nil {
+			HandleNotFoundError(c, "role")
+			return
+		}
+		c.JSON(http.StatusOK, role)
+	}
+}

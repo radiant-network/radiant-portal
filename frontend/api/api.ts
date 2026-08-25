@@ -13633,6 +13633,48 @@ export class PatientsApi extends BaseAPI {
 export const RolesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
+         * @summary Get one of the tenant\'s roles
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRole: async (tenant: string, code: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getRole', 'tenant', tenant)
+            // verify required parameter 'code' is not null or undefined
+            assertParamExists('getRole', 'code', code)
+            const localVarPath = `/{tenant}/roles/{code}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"code"}}`, encodeURIComponent(String(code)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns every role defined in the tenant in the path — the seeded ones and the tenant\'s own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section\'s own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
          * @summary List the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -13681,6 +13723,20 @@ export const RolesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RolesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
+         * @summary Get one of the tenant\'s roles
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRole(tenant: string, code: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoleResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRole(tenant, code, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RolesApi.getRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns every role defined in the tenant in the path — the seeded ones and the tenant\'s own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section\'s own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
          * @summary List the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -13704,6 +13760,17 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = RolesApiFp(configuration)
     return {
         /**
+         * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
+         * @summary Get one of the tenant\'s roles
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRole(tenant: string, code: string, options?: RawAxiosRequestConfig): AxiosPromise<RoleResult> {
+            return localVarFp.getRole(tenant, code, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns every role defined in the tenant in the path — the seeded ones and the tenant\'s own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section\'s own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
          * @summary List the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -13723,6 +13790,19 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
  * @extends {BaseAPI}
  */
 export class RolesApi extends BaseAPI {
+    /**
+     * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
+     * @summary Get one of the tenant\'s roles
+     * @param {string} tenant Tenant code
+     * @param {string} code Role code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RolesApi
+     */
+    public getRole(tenant: string, code: string, options?: RawAxiosRequestConfig) {
+        return RolesApiFp(this.configuration).getRole(tenant, code, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Returns every role defined in the tenant in the path — the seeded ones and the tenant\'s own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section\'s own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
      * @summary List the tenant\'s roles

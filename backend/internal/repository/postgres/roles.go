@@ -29,8 +29,30 @@ type roleAction struct {
 // custom ones — each with the actions it maps and the number of users holding it. Roles are a
 // small bounded set, so the whole list is returned unpaged.
 func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string) ([]types.RoleResult, error) {
+	return r.tenantRoles(ctx, tenantCode, "")
+}
+
+// GetTenantRole returns one role of the tenant in the same shape the list serves it. A role the
+// tenant does not define is reported as a nil result rather than an error, so the caller answers
+// 404 without inspecting the error — and a role of another tenant reads as absent here, since the
+// role key is (tenant_code, code).
+func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCode string) (*types.RoleResult, error) {
+	roles, err := r.tenantRoles(ctx, tenantCode, roleCode)
+	if err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, nil
+	}
+	return &roles[0], nil
+}
+
+// tenantRoles loads the tenant's roles with their actions, the scope those actions derive, and
+// their holder count. An empty roleCode returns the whole catalog; a non-empty one narrows to that
+// single role, so both reads share one definition of what a role looks like.
+func (r *RolesRepository) tenantRoles(ctx context.Context, tenantCode, roleCode string) ([]types.RoleResult, error) {
 	roles := []types.RoleResult{}
-	err := r.db.WithContext(ctx).Raw(`
+	query := `
 		SELECT r.code, r.name_en AS name, r.description_en AS description, r.is_default,
 		       COALESCE(h.holders, 0) AS assigned_users_count
 		FROM role r
@@ -40,24 +62,58 @@ func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string
 			WHERE tenant_code = ?
 			GROUP BY role_code
 		) h ON h.role_code = r.code
-		WHERE r.tenant_code = ?
-		ORDER BY r.is_default DESC, r.name_en, r.code`,
-		tenantCode, tenantCode).Scan(&roles).Error
-	if err != nil {
-		return nil, fmt.Errorf("error listing roles of tenant %q: %w", tenantCode, err)
+		WHERE r.tenant_code = ?`
+	args := []any{tenantCode, tenantCode}
+	if roleCode != "" {
+		query += ` AND r.code = ?`
+		args = append(args, roleCode)
+	}
+	query += `
+		ORDER BY r.is_default DESC, r.name_en, r.code`
+
+	if err := r.db.WithContext(ctx).Raw(query, args...).Scan(&roles).Error; err != nil {
+		return nil, fmt.Errorf("error loading roles of tenant %q: %w", tenantCode, err)
 	}
 	if len(roles) == 0 {
 		return roles, nil
 	}
 
-	// Actions are loaded by tenantRoleActions below, which is why RoleResult tags them gorm:"-":
+	// Actions are loaded by roleActions below, which is why RoleResult tags them gorm:"-":
 	// left parsable, GORM reads the slice as an association and errors out on every scan.
-	actions, err := r.tenantRoleActions(ctx, tenantCode)
+	actions, err := r.roleActions(ctx, tenantCode, roleCode)
 	if err != nil {
 		return nil, err
 	}
+	applyRoleActions(roles, actions)
+	return roles, nil
+}
 
-	// Group by role, tracking the scopes seen so the role's own scope falls out of the same pass.
+// roleActions loads the actions of the tenant's roles in one statement — of every role when
+// roleCode is empty, so listing stays two statements whatever the number of roles.
+func (r *RolesRepository) roleActions(ctx context.Context, tenantCode, roleCode string) ([]roleAction, error) {
+	var actions []roleAction
+	query := `
+		SELECT ra.role_code, a.code, a.name_en AS name, a.description_en AS description, a.scope
+		FROM role_action ra
+		JOIN action a ON a.code = ra.action_code
+		WHERE ra.tenant_code = ?`
+	args := []any{tenantCode}
+	if roleCode != "" {
+		query += ` AND ra.role_code = ?`
+		args = append(args, roleCode)
+	}
+	query += `
+		ORDER BY a.scope, a.code`
+
+	if err := r.db.WithContext(ctx).Raw(query, args...).Scan(&actions).Error; err != nil {
+		return nil, fmt.Errorf("error loading role actions of tenant %q: %w", tenantCode, err)
+	}
+	return actions, nil
+}
+
+// applyRoleActions attaches each role the actions it maps and the scope they derive, grouping in a
+// single pass — tracking the scopes seen per role is what makes the role's own scope fall out of it.
+func applyRoleActions(roles []types.RoleResult, actions []roleAction) {
 	type roleActions struct {
 		list              []types.RoleActionResult
 		hasTenant, hasOrg bool
@@ -84,21 +140,4 @@ func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string
 		}
 		roles[i].Scope = roleScope(grouped.hasTenant, grouped.hasOrg)
 	}
-	return roles, nil
-}
-
-// tenantRoleActions loads the actions of all the tenant's roles at once, so listing stays two
-// statements whatever the number of roles.
-func (r *RolesRepository) tenantRoleActions(ctx context.Context, tenantCode string) ([]roleAction, error) {
-	var actions []roleAction
-	err := r.db.WithContext(ctx).Raw(`
-		SELECT ra.role_code, a.code, a.name_en AS name, a.description_en AS description, a.scope
-		FROM role_action ra
-		JOIN action a ON a.code = ra.action_code
-		WHERE ra.tenant_code = ?
-		ORDER BY a.scope, a.code`, tenantCode).Scan(&actions).Error
-	if err != nil {
-		return nil, fmt.Errorf("error listing role actions of tenant %q: %w", tenantCode, err)
-	}
-	return actions, nil
 }
