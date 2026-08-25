@@ -61,7 +61,7 @@ func (r *RolesRepository) tenantRoles(ctx context.Context, tenantCode, roleCode 
 			SELECT ur.role_code, COUNT(DISTINCT ur.user_id) AS holders
 			FROM user_role ur
 			JOIN users u ON u.user_id = ur.user_id
-			WHERE ur.tenant_code = ? AND `+personalAccount+`
+			WHERE ur.tenant_code = ? AND ` + personalAccount + `
 			GROUP BY ur.role_code
 		) h ON h.role_code = r.code
 		WHERE r.tenant_code = ?`
