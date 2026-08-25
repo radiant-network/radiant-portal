@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import type { PaginationState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import useSWR from 'swr';
@@ -20,6 +21,7 @@ import { getUsersColumns, usersDefaultSettings } from './users-table-settings';
 
 const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
+const ROLE_PARAM = 'role';
 
 type ListUsersInput = {
   tenant: string;
@@ -44,14 +46,31 @@ export default function UsersSection() {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const { sub } = useLoginContext();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [roles, setRoles] = useState<string[]>([]);
+  // Deep link from the roles table: read once, then the filter belongs to this section.
+  const [roles, setRoles] = useState<string[]>(() => {
+    const role = searchParams.get(ROLE_PARAM);
+    return role ? [role] : [];
+  });
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editedUser, setEditedUser] = useState<UserResult>();
+
+  // The deep-linked role has been read into the filter state: drop it so a reload starts clean.
+  useEffect(() => {
+    if (!searchParams.has(ROLE_PARAM)) return;
+    setSearchParams(
+      params => {
+        params.delete(ROLE_PARAM);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams]);
 
   const debouncedSearch = useDebounce(search.trim(), SEARCH_DEBOUNCE_MS);
 

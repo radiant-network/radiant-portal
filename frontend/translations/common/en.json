@@ -67,6 +67,43 @@
         "name": "Name"
       }
     },
+    "roles": {
+      "add": "Add role",
+      "count_one": "{{count}} Role",
+      "count_other": "{{count}} Roles",
+      "default_note": "Default roles can't be edited or deleted.",
+      "filters": {
+        "custom_only": "Custom roles only",
+        "search_placeholder": "Search by name or description"
+      },
+      "permissions": {
+        "description": "Permission descriptions and scope for this role",
+        "empty": "This role grants no permission.",
+        "locked": "Can't be edited or deleted"
+      },
+      "scope": {
+        "network": "Network",
+        "organization": "Organization"
+      },
+      "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
+      "table": {
+        "actions": "More actions",
+        "assigned_to": "Assigned to",
+        "delete": "Delete role",
+        "duplicate": "Duplicate",
+        "edit": "Edit role",
+        "members_count_one": "{{count}} member",
+        "members_count_other": "{{count}} members",
+        "permissions": "Permissions",
+        "permissions_count_one": "{{count}} permission",
+        "permissions_count_other": "{{count}} permissions",
+        "role": "Role",
+        "scope": "Scope",
+        "view": "View",
+        "view_role": "View role"
+      },
+      "view_permissions": "View permissions"
+    },
     "sections": {
       "group_label": "Network settings",
       "organizations": "Organizations",
@@ -134,18 +171,8 @@
         },
         "organizations": "At these organizations",
         "organizations_placeholder": "Organizations",
-        "permissions": {
-          "description": "Permission descriptions and scope for this role",
-          "empty": "This role grants no permission.",
-          "locked": "Can't be edited or deleted"
-        },
-        "scope": {
-          "network": "Network",
-          "organization": "Organization"
-        },
         "subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
-        "title": "Member roles",
-        "view_permissions": "View permissions"
+        "title": "Member roles"
       },
       "subtitle": "Manage members and role assignments.",
       "table": {

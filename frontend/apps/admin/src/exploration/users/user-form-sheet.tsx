@@ -156,7 +156,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
 
   const viewPermissionsLink = (role: RoleResult) => (
     <AnchorLink component="button" type="button" size="sm" external={false} onClick={() => setPermissionsRole(role)}>
-      {t('admin.users.roles.view_permissions')}
+      {t('admin.roles.view_permissions')}
     </AnchorLink>
   );
 
