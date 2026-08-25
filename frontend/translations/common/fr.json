@@ -94,6 +94,8 @@
         "edit": "Modifier le rôle",
         "members_count_one": "{{count}} membre",
         "members_count_other": "{{count}} membres",
+        "orgs_count_one": "{{count}} organisation",
+        "orgs_count_other": "{{count}} organisations",
         "permissions": "Permissions",
         "permissions_count_one": "{{count}} permission",
         "permissions_count_other": "{{count}} permissions",

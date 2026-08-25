@@ -96,20 +96,28 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
       cell: info => {
         const count = info.getValue();
         const label = t('admin.roles.table.members_count', { count });
-
-        if (count === 0) {
-          return <span className="text-muted-foreground">{label}</span>;
-        }
+        const orgsCount = info.row.original.assigned_orgs_count ?? 0;
 
         return (
-          <AnchorLink
-            component="button"
-            size="sm"
-            external={false}
-            onClick={() => actions.onViewMembers(info.row.original)}
-          >
-            {label}
-          </AnchorLink>
+          <div>
+            {count === 0 ? (
+              <span className="text-muted-foreground">{label}</span>
+            ) : (
+              <AnchorLink
+                component="button"
+                size="sm"
+                external={false}
+                onClick={() => actions.onViewMembers(info.row.original)}
+              >
+                {label}
+              </AnchorLink>
+            )}
+            {orgsCount > 0 && (
+              <span className="block text-sm text-muted-foreground">
+                {t('admin.roles.table.orgs_count', { count: orgsCount })}
+              </span>
+            )}
+          </div>
         );
       },
       header: t('admin.roles.table.assigned_to'),
