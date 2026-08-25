@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -19,7 +20,7 @@ func Test_CreateRoleRequest_Validate_AcceptsValidCodes(t *testing.T) {
 	valid := []string{"a", "member", "clinical_reviewer", "role_2", "r0", strings.Repeat("a", 50)}
 	for _, code := range valid {
 		req := validCreateRoleRequest()
-		req.Code = code
+		req.Code = TrimmedString(code)
 		if err := req.Validate(); err != nil {
 			t.Errorf("Validate(code=%q) = %v; want nil", code, err)
 		}
@@ -32,7 +33,7 @@ func Test_CreateRoleRequest_Validate_RejectsInvalidCodes(t *testing.T) {
 	invalid := []string{"", "Clinical", "CLINICAL", "clinical-reviewer", "9role", "_role", "role x", "role.x", strings.Repeat("a", 51)}
 	for _, code := range invalid {
 		req := validCreateRoleRequest()
-		req.Code = code
+		req.Code = TrimmedString(code)
 		if err := req.Validate(); err == nil {
 			t.Errorf("Validate(code=%q) = nil; want error", code)
 		}
@@ -42,7 +43,7 @@ func Test_CreateRoleRequest_Validate_RejectsInvalidCodes(t *testing.T) {
 func Test_CreateRoleRequest_Validate_RejectsBlankName(t *testing.T) {
 	for _, name := range []string{"", "   ", "\t"} {
 		req := validCreateRoleRequest()
-		req.Name = name
+		req.Name = TrimmedString(name)
 		if err := req.Validate(); err == nil {
 			t.Errorf("Validate(name=%q) = nil; want error", name)
 		}
@@ -79,6 +80,27 @@ func Test_CreateRoleRequest_Validate_RejectsDuplicateAction(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), ActionSearchCase) {
 		t.Errorf("Validate() error = %q; want it to name the duplicated action %q", err, ActionSearchCase)
+	}
+}
+
+func Test_CreateRoleRequest_UnmarshalTrimsStoredFields(t *testing.T) {
+	var req CreateRoleRequest
+	body := `{"code":"  clinical_reviewer  ","name":"  Clinical Reviewer  ","description":"  Full clinical work.  ","actions":["can_view_kb"]}`
+	if err := json.Unmarshal([]byte(body), &req); err != nil {
+		t.Fatalf("Unmarshal() = %v; want nil", err)
+	}
+
+	if req.Code != "clinical_reviewer" {
+		t.Errorf("Code = %q; want %q", req.Code, "clinical_reviewer")
+	}
+	if req.Name != "Clinical Reviewer" {
+		t.Errorf("Name = %q; want %q", req.Name, "Clinical Reviewer")
+	}
+	if req.Description != "Full clinical work." {
+		t.Errorf("Description = %q; want %q", req.Description, "Full clinical work.")
+	}
+	if err := req.Validate(); err != nil {
+		t.Errorf("Validate() = %v; want nil — the padded code is valid once trimmed", err)
 	}
 }
 

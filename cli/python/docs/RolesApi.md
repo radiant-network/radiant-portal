@@ -10,13 +10,13 @@ Method | HTTP request | Description
 
 
 # **create_role**
-> RoleResult create_role(tenant, create_role_request)
+> object create_role(tenant, create_role_request)
 
 Create a custom role
 
-Creates a custom role in the tenant in the path and returns it, in the same shape
-the reads serve it. Requires the `can_manage_role` action — unlike reading the
-catalog, `can_manage_user` does not open this.
+Creates a custom role in the tenant in the path. Requires the `can_manage_role`
+action — unlike reading the catalog, `can_manage_user` does not open this.
+Returns an empty 201.
 
 `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
 unique within the tenant. `name` must also be unique within the tenant, compared
@@ -37,7 +37,6 @@ whether granting the role needs organizations. A created role is never
 ```python
 import radiant_python
 from radiant_python.models.create_role_request import CreateRoleRequest
-from radiant_python.models.role_result import RoleResult
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -85,7 +84,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**RoleResult**](RoleResult.md)
+**object**
 
 ### Authorization
 

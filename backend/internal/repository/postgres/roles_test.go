@@ -177,12 +177,15 @@ func withScratchTenant(t *testing.T, env *testutils.Env, code string, fn func(re
 func Test_RolesRepository_CreateRole_InsertsRoleWithItsActions(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_mixed", func(repo *RolesRepository, tenant string) {
-			created, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code:        "clinical_reviewer",
 				Name:        "Clinical Reviewer",
 				Description: "Full clinical work as one role.",
 				Actions:     []string{types.ActionSearchCase, types.ActionReadPII},
 			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
 			require.NoError(t, err)
 			require.NotNil(t, created)
 
@@ -198,11 +201,6 @@ func Test_RolesRepository_CreateRole_InsertsRoleWithItsActions(t *testing.T) {
 			for _, action := range created.Actions {
 				assert.NotEmpty(t, action.Name, "action %q carries its labels, as on the read path", action.Code)
 			}
-
-			// The same role reads back identically through the detail endpoint's path.
-			fetched, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
-			require.NoError(t, err)
-			assert.Equal(t, created, fetched)
 		})
 	})
 }
@@ -210,11 +208,14 @@ func Test_RolesRepository_CreateRole_InsertsRoleWithItsActions(t *testing.T) {
 func Test_RolesRepository_CreateRole_DerivesTenantScopeFromActions(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_tenant_scope", func(repo *RolesRepository, tenant string) {
-			created, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code:    "browser",
 				Name:    "Browser",
 				Actions: []string{types.ActionSearchCase, types.ActionViewKb},
 			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "browser")
 			require.NoError(t, err)
 			require.NotNil(t, created)
 			assert.Equal(t, types.RoleScopeTenant, created.Scope, "no org-scoped action demands no organization")
@@ -225,11 +226,14 @@ func Test_RolesRepository_CreateRole_DerivesTenantScopeFromActions(t *testing.T)
 func Test_RolesRepository_CreateRole_OmittedDescriptionIsStoredAsNull(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_no_desc", func(repo *RolesRepository, tenant string) {
-			created, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code:    "terse",
 				Name:    "Terse",
 				Actions: []string{types.ActionViewKb},
 			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "terse")
 			require.NoError(t, err)
 			require.NotNil(t, created)
 			assert.Empty(t, created.Description)
@@ -247,11 +251,11 @@ func Test_RolesRepository_CreateRole_DuplicateCodeIsRefused(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_dup_code", func(repo *RolesRepository, tenant string) {
 			req := types.CreateRoleRequest{Code: "twice", Name: "First", Actions: []string{types.ActionViewKb}}
-			_, err := repo.CreateRole(t.Context(), tenant, req)
+			err := repo.CreateRole(t.Context(), tenant, req)
 			require.NoError(t, err)
 
 			req.Name = "Second"
-			_, err = repo.CreateRole(t.Context(), tenant, req)
+			err = repo.CreateRole(t.Context(), tenant, req)
 			assert.ErrorIs(t, err, types.ErrRoleCodeExists)
 		})
 	})
@@ -260,13 +264,13 @@ func Test_RolesRepository_CreateRole_DuplicateCodeIsRefused(t *testing.T) {
 func Test_RolesRepository_CreateRole_DuplicateNameIsRefusedCaseInsensitively(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_dup_name", func(repo *RolesRepository, tenant string) {
-			_, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code: "reviewer_one", Name: "Clinical Reviewer", Actions: []string{types.ActionViewKb},
 			})
 			require.NoError(t, err)
 
 			// Different code, same name in different case: identical to a reader, so refused.
-			_, err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code: "reviewer_two", Name: "clinical reviewer", Actions: []string{types.ActionViewKb},
 			})
 			assert.ErrorIs(t, err, types.ErrRoleNameExists)
@@ -285,7 +289,7 @@ func Test_RolesRepository_CreateRole_ClashWithSeededRoleNameIsRefused(t *testing
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
 
-		_, err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
+		err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
 			Code: "zz_clash_geneticist", Name: "geneticist", Actions: []string{types.ActionViewKb},
 		})
 		assert.ErrorIs(t, err, types.ErrRoleNameExists, "a custom role may not take a seeded role's name")
@@ -300,7 +304,7 @@ func Test_RolesRepository_CreateRole_ReservedActionIsRefused(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_reserved", func(repo *RolesRepository, tenant string) {
 			// can_manage_user is grantable = false, which is what blocks duplicating tenant_admin.
-			_, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code:    "almost_admin",
 				Name:    "Almost Admin",
 				Actions: []string{types.ActionManageOrg, types.ActionManageUser},
@@ -319,7 +323,7 @@ func Test_RolesRepository_CreateRole_ReservedActionIsRefused(t *testing.T) {
 func Test_RolesRepository_CreateRole_UnknownActionIsRefused(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_unknown", func(repo *RolesRepository, tenant string) {
-			_, err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code:    "typo",
 				Name:    "Typo",
 				Actions: []string{types.ActionViewKb, "can_do_everything"},
@@ -341,9 +345,9 @@ func Test_RolesRepository_CreateRole_SameNameInAnotherTenantIsAllowed(t *testing
 			withScratchTenant(t, env, "zz_create_iso_b", func(_ *RolesRepository, tenantB string) {
 				req := types.CreateRoleRequest{Code: "shared", Name: "Shared", Actions: []string{types.ActionViewKb}}
 
-				_, err := repo.CreateRole(t.Context(), tenantA, req)
+				err := repo.CreateRole(t.Context(), tenantA, req)
 				require.NoError(t, err)
-				_, err = repo.CreateRole(t.Context(), tenantB, req)
+				err = repo.CreateRole(t.Context(), tenantB, req)
 				assert.NoError(t, err, "roles are keyed per tenant, so this is a different role")
 			})
 		})

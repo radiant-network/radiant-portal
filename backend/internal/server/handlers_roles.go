@@ -101,15 +101,15 @@ func GetRoleHandler(repo roleDetailReader) gin.HandlerFunc {
 }
 
 type roleCreator interface {
-	CreateRole(ctx context.Context, tenantCode string, req types.CreateRoleRequest) (*types.RoleResult, error)
+	CreateRole(ctx context.Context, tenantCode string, req types.CreateRoleRequest) error
 }
 
 // PostRoleHandler
 // @Summary Create a custom role
 // @Id createRole
-// @Description Creates a custom role in the tenant in the path and returns it, in the same shape
-// @Description the reads serve it. Requires the `can_manage_role` action — unlike reading the
-// @Description catalog, `can_manage_user` does not open this.
+// @Description Creates a custom role in the tenant in the path. Requires the `can_manage_role`
+// @Description action — unlike reading the catalog, `can_manage_user` does not open this.
+// @Description Returns an empty 201.
 // @Description
 // @Description `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
 // @Description unique within the tenant. `name` must also be unique within the tenant, compared
@@ -128,7 +128,7 @@ type roleCreator interface {
 // @Param message body types.CreateRoleRequest true "Role to create"
 // @Accept json
 // @Produce json
-// @Success 201 {object} types.RoleResult
+// @Success 201
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
@@ -154,10 +154,9 @@ func PostRoleHandler(repo roleCreator) gin.HandlerFunc {
 			return
 		}
 
-		role, err := repo.CreateRole(c.Request.Context(), *tenant, req)
-		switch {
+		switch err := repo.CreateRole(c.Request.Context(), *tenant, req); {
 		case err == nil:
-			c.JSON(http.StatusCreated, role)
+			c.Status(http.StatusCreated)
 		case errors.Is(err, types.ErrRoleCodeExists), errors.Is(err, types.ErrRoleNameExists):
 			HandleConflictError(c, err.Error())
 		case errors.Is(err, types.ErrRoleActionsNotGrantable):

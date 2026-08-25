@@ -11,6 +11,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockRolesReader struct {
@@ -180,18 +181,17 @@ func Test_GetRoleHandler_RepoError(t *testing.T) {
 }
 
 type mockRoleCreator struct {
-	role      *types.RoleResult
 	err       error
 	gotTenant string
 	gotReq    types.CreateRoleRequest
 	calls     int
 }
 
-func (m *mockRoleCreator) CreateRole(_ context.Context, tenantCode string, req types.CreateRoleRequest) (*types.RoleResult, error) {
+func (m *mockRoleCreator) CreateRole(_ context.Context, tenantCode string, req types.CreateRoleRequest) error {
 	m.calls++
 	m.gotTenant = tenantCode
 	m.gotReq = req
-	return m.role, m.err
+	return m.err
 }
 
 func servePostRole(repo roleCreator, body string) *httptest.ResponseRecorder {
@@ -206,43 +206,41 @@ func servePostRole(repo roleCreator, body string) *httptest.ResponseRecorder {
 
 const createRoleBody = `{"code":"clinical_reviewer","name":"Clinical Reviewer","description":"Full clinical work.","actions":["can_search_case","can_read_pii"]}`
 
-func Test_PostRoleHandler_ReturnsCreatedRole(t *testing.T) {
-	repo := &mockRoleCreator{role: &types.RoleResult{
-		Code:        "clinical_reviewer",
-		Name:        "Clinical Reviewer",
-		Description: "Full clinical work.",
-		Scope:       types.RoleScopeMixed,
-		Actions: []types.RoleActionResult{
-			{Code: "can_search_case", Name: "Search cases", Description: "Search and view cases.", Scope: types.ActionScopeTenant},
-			{Code: "can_read_pii", Name: "Read PHI", Description: "View protected health information.", Scope: types.ActionScopeOrg},
-		},
-	}}
+func Test_PostRoleHandler_CreatedIsEmpty(t *testing.T) {
+	repo := &mockRoleCreator{}
 	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-	assert.JSONEq(t, `{
-		"code":"clinical_reviewer",
-		"name":"Clinical Reviewer",
-		"description":"Full clinical work.",
-		"is_default":false,
-		"scope":"mixed",
-		"actions":[
-			{"code":"can_search_case","name":"Search cases","description":"Search and view cases.","scope":"tenant"},
-			{"code":"can_read_pii","name":"Read PHI","description":"View protected health information.","scope":"org"}
-		],
-		"assigned_users_count":0
-	}`, w.Body.String())
+	assert.Empty(t, w.Body.String(), "matches the other create endpoints: the caller reads the role back")
 }
 
 func Test_PostRoleHandler_PassesTenantAndPayloadToRepo(t *testing.T) {
-	repo := &mockRoleCreator{role: &types.RoleResult{Code: "clinical_reviewer", Actions: []types.RoleActionResult{}}}
+	repo := &mockRoleCreator{}
 	servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, "radiant", repo.gotTenant)
-	assert.Equal(t, "clinical_reviewer", repo.gotReq.Code)
-	assert.Equal(t, "Clinical Reviewer", repo.gotReq.Name)
-	assert.Equal(t, "Full clinical work.", repo.gotReq.Description)
+	assert.EqualValues(t, "clinical_reviewer", repo.gotReq.Code)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.Name)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.Description)
 	assert.Equal(t, []string{"can_search_case", "can_read_pii"}, repo.gotReq.Actions)
+}
+
+func Test_PostRoleHandler_TrimsCodeNameAndDescription(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":"  clinical_reviewer  ","name":"  Clinical Reviewer  ","description":"  Full clinical work.  ","actions":["can_view_kb"]}`)
+
+	require.Equal(t, http.StatusCreated, w.Code)
+	assert.EqualValues(t, "clinical_reviewer", repo.gotReq.Code)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.Name)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.Description)
+}
+
+func Test_PostRoleHandler_WhitespaceOnlyNameIsRejected(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":"reviewer","name":"   ","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code, "trimming leaves it empty, so required fails")
+	assert.Zero(t, repo.calls)
 }
 
 func Test_PostRoleHandler_MalformedBodyIsRejected(t *testing.T) {

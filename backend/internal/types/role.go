@@ -21,17 +21,17 @@ var (
 // @Description Payload to create a custom role in a tenant
 // @Name CreateRoleRequest
 type CreateRoleRequest struct {
-	Code        string   `json:"code" binding:"required"`
-	Name        string   `json:"name" binding:"required"`
-	Description string   `json:"description,omitempty"`
-	Actions     []string `json:"actions" binding:"required"`
+	Code        TrimmedString `json:"code" binding:"required"`
+	Name        TrimmedString `json:"name" binding:"required"`
+	Description TrimmedString `json:"description,omitempty"`
+	Actions     []string      `json:"actions" binding:"required"`
 }
 
 func (r CreateRoleRequest) Validate() error {
-	if !roleCodePattern.MatchString(r.Code) {
+	if !roleCodePattern.MatchString(r.Code.String()) {
 		return fmt.Errorf("code %q is invalid: must start with a lowercase letter and contain only lowercase letters, digits, or underscores (max 50)", r.Code)
 	}
-	if strings.TrimSpace(r.Name) == "" {
+	if strings.TrimSpace(r.Name.String()) == "" {
 		return fmt.Errorf("name must not be blank")
 	}
 	if len(r.Actions) == 0 {

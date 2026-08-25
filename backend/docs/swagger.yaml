@@ -8132,9 +8132,9 @@ paths:
       - roles
     post:
       description: |-
-        Creates a custom role in the tenant in the path and returns it, in the same shape
-        the reads serve it. Requires the `can_manage_role` action — unlike reading the
-        catalog, `can_manage_user` does not open this.
+        Creates a custom role in the tenant in the path. Requires the `can_manage_role`
+        action — unlike reading the catalog, `can_manage_user` does not open this.
+        Returns an empty 201.
 
         `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
         unique within the tenant. `name` must also be unique within the tenant, compared
@@ -8167,7 +8167,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoleResult'
+                type: object
           description: Created
         "400":
           content:

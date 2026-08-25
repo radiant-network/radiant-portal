@@ -58,8 +58,8 @@ const roleNameUniqueIndex = "role_unique_name_per_tenant"
 // offending codes come back wrapped in types.ErrRoleActionsNotGrantable. Refusing reserved
 // actions here is what makes can_manage_user impossible to confer through a custom role — and
 // tenant_admin, whose only distinguishing action is that one, un-duplicable as a consequence.
-func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req types.CreateRoleRequest) (*types.RoleResult, error) {
-	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req types.CreateRoleRequest) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		refused, err := ungrantableActions(tx, req.Actions)
 		if err != nil {
 			return err
@@ -71,7 +71,7 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 		if err := tx.Exec(`
 			INSERT INTO role (tenant_code, code, name_en, description_en, is_default)
 			VALUES (?, ?, ?, NULLIF(?, ''), false)`,
-			tenantCode, req.Code, req.Name, req.Description).Error; err != nil {
+			tenantCode, req.Code.String(), req.Name.String(), req.Description.String()).Error; err != nil {
 			switch {
 			case uniqueViolationOn(err, roleNameUniqueIndex):
 				return types.ErrRoleNameExists
@@ -85,7 +85,7 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 		for _, action := range req.Actions {
 			mappings = append(mappings, map[string]any{
 				"tenant_code": tenantCode,
-				"role_code":   req.Code,
+				"role_code":   req.Code.String(),
 				"action_code": action,
 			})
 		}
@@ -94,11 +94,6 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return r.GetTenantRole(ctx, tenantCode, req.Code)
 }
 
 // ungrantableActions returns the requested codes a custom role may not map, in the order given —

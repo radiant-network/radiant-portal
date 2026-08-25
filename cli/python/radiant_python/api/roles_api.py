@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
-from typing import List
+from typing import Any, Dict, List
 from typing_extensions import Annotated
 from radiant_python.models.create_role_request import CreateRoleRequest
 from radiant_python.models.role_result import RoleResult
@@ -57,10 +57,10 @@ class RolesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RoleResult:
+    ) -> object:
         """Create a custom role
 
-        Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+        Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -98,7 +98,7 @@ class RolesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "RoleResult",
+            '201': "object",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -134,10 +134,10 @@ class RolesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[RoleResult]:
+    ) -> ApiResponse[object]:
         """Create a custom role
 
-        Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+        Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -175,7 +175,7 @@ class RolesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "RoleResult",
+            '201': "object",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -214,7 +214,7 @@ class RolesApi:
     ) -> RESTResponseType:
         """Create a custom role
 
-        Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+        Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role's `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -252,7 +252,7 @@ class RolesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "RoleResult",
+            '201': "object",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",

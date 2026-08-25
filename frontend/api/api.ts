@@ -13664,7 +13664,7 @@ export class PatientsApi extends BaseAPI {
 export const RolesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
@@ -13798,14 +13798,14 @@ export const RolesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RolesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createRole(tenant: string, createRoleRequest: CreateRoleRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoleResult>> {
+        async createRole(tenant: string, createRoleRequest: CreateRoleRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createRole(tenant, createRoleRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RolesApi.createRole']?.[localVarOperationServerIndex]?.url;
@@ -13849,14 +13849,14 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = RolesApiFp(configuration)
     return {
         /**
-         * Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createRole(tenant: string, createRoleRequest: CreateRoleRequest, options?: RawAxiosRequestConfig): AxiosPromise<RoleResult> {
+        createRole(tenant: string, createRoleRequest: CreateRoleRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
             return localVarFp.createRole(tenant, createRoleRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -13891,7 +13891,7 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
  */
 export class RolesApi extends BaseAPI {
     /**
-     * Creates a custom role in the tenant in the path and returns it, in the same shape the reads serve it. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+     * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name` must also be unique within the tenant, compared case-insensitively and including the seeded roles\' names, so 409 covers a clash on either. `description` is optional. `actions` must list at least one action, and every one of them must exist and be grantable — a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
      * @summary Create a custom role
      * @param {string} tenant Tenant code
      * @param {CreateRoleRequest} createRoleRequest Role to create

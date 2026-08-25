@@ -175,21 +175,18 @@ func Test_PostRole_RoleManager_CreatesRole(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		require.Equal(t, http.StatusCreated, w.Code)
-
-		var created types.RoleResult
-		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &created))
-		assert.Equal(t, code, created.Code)
-		assert.Equal(t, "ZZ Integration Reviewer", created.Name)
-		assert.False(t, created.IsDefault, "a role created through the API stays editable")
-		assert.Equal(t, types.RoleScopeMixed, created.Scope)
-		assert.EqualValues(t, 0, created.AssignedUsersCount)
-		assert.Len(t, created.Actions, 2)
+		assert.Empty(t, w.Body.String(), "the create endpoints answer an empty 201")
 
 		// The role is really in the catalog, with its actions mapped.
 		stored, err := repo.GetTenantRole(t.Context(), "radiant", code)
 		require.NoError(t, err)
 		require.NotNil(t, stored)
-		assert.Equal(t, &created, stored)
+		assert.Equal(t, code, stored.Code)
+		assert.Equal(t, "ZZ Integration Reviewer", stored.Name)
+		assert.False(t, stored.IsDefault, "a role created through the API stays editable")
+		assert.Equal(t, types.RoleScopeMixed, stored.Scope)
+		assert.EqualValues(t, 0, stored.AssignedUsersCount)
+		assert.Len(t, stored.Actions, 2)
 	})
 }
 
