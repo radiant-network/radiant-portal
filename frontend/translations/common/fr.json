@@ -128,7 +128,7 @@
     "title": "Communauté",
     "search": {
       "label": "Rechercher par nom de membre ou affiliation",
-      "placeholder": "ex : Watson, Linda Crnic Institute"
+      "placeholder": "ex. : Watson, Linda Crnic Institute"
     },
     "filters": {
       "toggle": "Filtres",
@@ -609,7 +609,7 @@
         "revel_score": "REVEL",
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
         "search_by_symbol": "Recherche par gène",
-        "search_by_symbol_placeholder": "ex : BRAF, ENSG00000157764",
+        "search_by_symbol_placeholder": "ex. : BRAF, ENSG00000157764",
         "search_by_symbol_tooltip": "Recherche par symbole et Ensembl ID",
         "select_unit": "Sélectionner une unité",
         "sift_pred": "SIFT",
@@ -823,7 +823,7 @@
       "symbol": {
         "button": "Téléverser une liste de gènes",
         "dialog_title": "Téléverser une liste de gènes",
-        "input_placeholder": "ex : ENSG00000157764, TP53",
+        "input_placeholder": "ex. : ENSG00000157764, TP53",
         "popover_identifiers_values": "Symbole du gène, Ensembl ID",
         "submitted_identifier": "Identifiant soumis",
         "symbol": "Symbole",
