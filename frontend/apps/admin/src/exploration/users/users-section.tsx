@@ -48,7 +48,6 @@ export default function UsersSection() {
   const { sub } = useLoginContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  // Deep link from the roles table: read once, then the filter belongs to this section.
   const [roles, setRoles] = useState<string[]>(() => {
     const role = searchParams.get(ROLE_PARAM);
     return role ? [role] : [];

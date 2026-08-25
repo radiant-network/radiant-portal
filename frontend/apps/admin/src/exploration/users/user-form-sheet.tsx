@@ -31,7 +31,6 @@ import { useTenantRoles } from '../roles/use-tenant-roles';
 import RoleOrganizationsPicker, { NO_ORGANIZATIONS } from './role-organizations-picker';
 import { useTenantAdminCount } from './use-tenant-admin-count';
 
-/** Administrator has its own box and the baseline role is implicit, so neither is in the picker. */
 function getAssignableRoles(roles: RoleResult[]) {
   return roles.filter(role => role.code !== ADMIN_ROLE_CODE && role.code !== BASELINE_ROLE_CODE);
 }
@@ -88,9 +87,7 @@ function toFormValues(user: UserResult): FormValues {
  */
 const isAlertDialogOpen = () => !!document.querySelector('[role="alertdialog"]');
 
-/** Where an administrator who just gave up their own access is sent. */
 const CASES_PATH = '/case';
-
 const ADMIN_ACTIONS: readonly string[] = Object.values(TENANT_ACTIONS);
 
 /**
@@ -333,12 +330,10 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
           email: values.email.trim(),
           first_name: values.first_name.trim(),
           last_name: values.last_name.trim(),
-          // `member` is granted tenant-wide by the API and must not be listed
           roles: rolePayload,
         });
       }
-      // Giving up your own last administrative action locks you out of this page: leave for the
-      // cases list with a full reload, so the whole app reads the new authorization from /auth/me.
+      // Redirect if you remove your own admin role
       if (isSelf && tenantRoles && !keepsAdminAccess(values.roles, tenantRoles)) {
         window.location.assign(CASES_PATH);
         return;

@@ -24,11 +24,8 @@ import { ADMIN_ROLE_CODE } from './roles-utils';
 const columnHelper = createColumnHelper<RoleResult>();
 
 type RolesColumnsActions = {
-  /** Read-only view of the actions a role grants. */
   onViewPermissions: (role: RoleResult) => void;
-  /** Jumps to the members list, filtered on the role. */
   onViewMembers: (role: RoleResult) => void;
-  /** Custom roles only: a default role is locked. */
   onEdit: (role: RoleResult) => void;
 };
 
@@ -55,7 +52,6 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
               {role.is_default && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    {/* Focusable so the tooltip is reachable from the keyboard, not only on hover */}
                     <span tabIndex={0} className="inline-flex">
                       <LockIcon className="size-3.5 shrink-0 text-muted-foreground" />
                     </span>
@@ -64,7 +60,6 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
                 </Tooltip>
               )}
             </span>
-            {/* The cell forces nowrap on its own div child, so the description wraps from a span. */}
             <span className="block whitespace-normal text-sm text-muted-foreground">{role.description}</span>
           </div>
         );
@@ -73,7 +68,6 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
       size: 520,
       minSize: 320,
     }),
-    // Sortable, so the scope is an accessor rather than a display column: sorting needs a value.
     columnHelper.accessor(row => row.scope, {
       id: 'scope',
       cell: info => <ScopeBadges scope={info.getValue()} />,
@@ -103,7 +97,6 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
         const count = info.getValue();
         const label = t('admin.roles.table.members_count', { count });
 
-        // Nobody to show: the count stays plain text rather than a link to an empty list.
         if (count === 0) {
           return <span className="text-muted-foreground">{label}</span>;
         }
@@ -129,7 +122,6 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
       cell: info => {
         const role = info.row.original;
 
-        // Administrator is reserved: neither editable nor duplicable, so it gets no menu at all.
         if (role.code === ADMIN_ROLE_CODE) {
           return (
             <div className="flex justify-center">

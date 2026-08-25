@@ -49,11 +49,6 @@ export default function RolesSection() {
     [t],
   );
 
-  /**
-   * The baseline role is not listed: every member holds it, and the card description says so with a
-   * link to its permissions. Search and the custom-only filter are client-side — the API returns
-   * the whole catalog unpaged.
-   */
   const filteredRoles = useMemo(() => {
     const term = normalize(search.trim());
     return (tenantRoles ?? []).filter(
@@ -71,7 +66,6 @@ export default function RolesSection() {
           <CardTitle size="xl">
             {isLoading ? <Skeleton className="h-5 w-40" /> : t('admin.roles.count', { count: filteredRoles.length })}
           </CardTitle>
-          {/* Capped like the mockup: the description wraps instead of running up to the button */}
           <CardDescription className="max-w-3xl">
             <Trans
               i18nKey="admin.roles.subtitle"
