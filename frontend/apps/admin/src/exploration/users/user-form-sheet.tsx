@@ -320,11 +320,8 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
 
     try {
       if (user) {
-        await usersApi.updateUser(tenant, user.user_id, {
-          first_name: user.first_name ?? '',
-          last_name: user.last_name ?? '',
-          roles: rolePayload,
-        });
+        // Identity is fixed at creation and read-only above, so an edit carries roles alone.
+        await usersApi.updateUser(tenant, user.user_id, { roles: rolePayload });
       } else {
         await usersApi.createUser(tenant, {
           email: values.email.trim(),
