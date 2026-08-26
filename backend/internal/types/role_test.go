@@ -8,10 +8,10 @@ import (
 
 func validCreateRoleRequest() CreateRoleRequest {
 	return CreateRoleRequest{
-		Code:        "clinical_reviewer",
-		Name:        "Clinical Reviewer",
-		Description: "Full clinical work as one role.",
-		Actions:     []string{ActionSearchCase, ActionReadPII},
+		Code:          "clinical_reviewer",
+		NameEn:        "Clinical Reviewer",
+		DescriptionEn: "Full clinical work as one role.",
+		Actions:       []string{ActionSearchCase, ActionReadPII},
 	}
 }
 
@@ -43,7 +43,7 @@ func Test_CreateRoleRequest_Validate_RejectsInvalidCodes(t *testing.T) {
 func Test_CreateRoleRequest_Validate_RejectsBlankName(t *testing.T) {
 	for _, name := range []string{"", "   ", "\t"} {
 		req := validCreateRoleRequest()
-		req.Name = TrimmedString(name)
+		req.NameEn = TrimmedString(name)
 		if err := req.Validate(); err == nil {
 			t.Errorf("Validate(name=%q) = nil; want error", name)
 		}
@@ -85,7 +85,9 @@ func Test_CreateRoleRequest_Validate_RejectsDuplicateAction(t *testing.T) {
 
 func Test_CreateRoleRequest_UnmarshalTrimsStoredFields(t *testing.T) {
 	var req CreateRoleRequest
-	body := `{"code":"  clinical_reviewer  ","name":"  Clinical Reviewer  ","description":"  Full clinical work.  ","actions":["can_view_kb"]}`
+	body := `{"code":"  clinical_reviewer  ","name_en":"  Clinical Reviewer  ","name_fr":"  Réviseur clinique  ",
+	          "description_en":"  Full clinical work.  ","description_fr":"  Travail clinique complet.  ",
+	          "actions":["can_view_kb"]}`
 	if err := json.Unmarshal([]byte(body), &req); err != nil {
 		t.Fatalf("Unmarshal() = %v; want nil", err)
 	}
@@ -93,20 +95,72 @@ func Test_CreateRoleRequest_UnmarshalTrimsStoredFields(t *testing.T) {
 	if req.Code != "clinical_reviewer" {
 		t.Errorf("Code = %q; want %q", req.Code, "clinical_reviewer")
 	}
-	if req.Name != "Clinical Reviewer" {
-		t.Errorf("Name = %q; want %q", req.Name, "Clinical Reviewer")
+	if req.NameEn != "Clinical Reviewer" {
+		t.Errorf("NameEn = %q; want %q", req.NameEn, "Clinical Reviewer")
 	}
-	if req.Description != "Full clinical work." {
-		t.Errorf("Description = %q; want %q", req.Description, "Full clinical work.")
+	if req.NameFr != "Réviseur clinique" {
+		t.Errorf("NameFr = %q; want %q", req.NameFr, "Réviseur clinique")
+	}
+	if req.DescriptionEn != "Full clinical work." {
+		t.Errorf("DescriptionEn = %q; want %q", req.DescriptionEn, "Full clinical work.")
+	}
+	if req.DescriptionFr != "Travail clinique complet." {
+		t.Errorf("DescriptionFr = %q; want %q", req.DescriptionFr, "Travail clinique complet.")
 	}
 	if err := req.Validate(); err != nil {
 		t.Errorf("Validate() = %v; want nil — the padded code is valid once trimmed", err)
 	}
 }
 
+func Test_CreateRoleRequest_FrenchLabels_UseTheSuppliedValues(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.NameFr = "Réviseur clinique"
+	req.DescriptionFr = "Travail clinique complet."
+
+	if got := req.FrenchName(); got != "Réviseur clinique" {
+		t.Errorf("FrenchName() = %q; want %q", got, "Réviseur clinique")
+	}
+	if got := req.FrenchDescription(); got != "Travail clinique complet." {
+		t.Errorf("FrenchDescription() = %q; want %q", got, "Travail clinique complet.")
+	}
+}
+
+func Test_CreateRoleRequest_FrenchLabels_FallBackToEnglishWhenOmitted(t *testing.T) {
+	req := validCreateRoleRequest()
+
+	if got := req.FrenchName(); got != "Clinical Reviewer" {
+		t.Errorf("FrenchName() = %q; want the English name %q", got, "Clinical Reviewer")
+	}
+	if got := req.FrenchDescription(); got != "Full clinical work as one role." {
+		t.Errorf("FrenchDescription() = %q; want the English description", got)
+	}
+}
+
+func Test_CreateRoleRequest_FrenchLabels_BlankFallsBackToEnglish(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.NameFr = "   "
+	req.DescriptionFr = "   "
+
+	if got := req.FrenchName(); got != "Clinical Reviewer" {
+		t.Errorf("FrenchName() = %q; want the English name — whitespace is not a translation", got)
+	}
+	if got := req.FrenchDescription(); got != "Full clinical work as one role." {
+		t.Errorf("FrenchDescription() = %q; want the English description", got)
+	}
+}
+
+func Test_CreateRoleRequest_FrenchDescription_EmptyWhenNeitherSupplied(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.DescriptionEn = ""
+
+	if got := req.FrenchDescription(); got != "" {
+		t.Errorf("FrenchDescription() = %q; want empty so the column stays NULL", got)
+	}
+}
+
 func Test_CreateRoleRequest_Validate_AllowsEmptyDescription(t *testing.T) {
 	req := validCreateRoleRequest()
-	req.Description = ""
+	req.DescriptionEn = ""
 	if err := req.Validate(); err != nil {
 		t.Errorf("Validate(description=\"\") = %v; want nil — the description is optional", err)
 	}

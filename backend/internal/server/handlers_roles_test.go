@@ -208,7 +208,7 @@ func servePostRole(repo roleCreator, body string) *httptest.ResponseRecorder {
 	return w
 }
 
-const createRoleBody = `{"code":"clinical_reviewer","name":"Clinical Reviewer","description":"Full clinical work.","actions":["can_search_case","can_read_pii"]}`
+const createRoleBody = `{"code":"clinical_reviewer","name_en":"Clinical Reviewer","name_fr":"Réviseur clinique","description_en":"Full clinical work.","description_fr":"Travail clinique complet.","actions":["can_search_case","can_read_pii"]}`
 
 func Test_PostRoleHandler_CreatedIsEmpty(t *testing.T) {
 	repo := &mockRoleCreator{}
@@ -224,24 +224,36 @@ func Test_PostRoleHandler_PassesTenantAndPayloadToRepo(t *testing.T) {
 
 	assert.Equal(t, "radiant", repo.gotTenant)
 	assert.EqualValues(t, "clinical_reviewer", repo.gotReq.Code)
-	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.Name)
-	assert.EqualValues(t, "Full clinical work.", repo.gotReq.Description)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.NameEn)
+	assert.EqualValues(t, "Réviseur clinique", repo.gotReq.NameFr)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.DescriptionEn)
+	assert.EqualValues(t, "Travail clinique complet.", repo.gotReq.DescriptionFr)
 	assert.Equal(t, []string{"can_search_case", "can_read_pii"}, repo.gotReq.Actions)
+}
+
+func Test_PostRoleHandler_FrenchLabelsAreOptional(t *testing.T) {
+	repo := &mockRoleCreator{}
+	w := servePostRole(repo, `{"code":"reviewer","name_en":"Reviewer","actions":["can_view_kb"]}`)
+
+	require.Equal(t, http.StatusCreated, w.Code)
+	assert.Empty(t, repo.gotReq.NameFr, "omitted, so the repository falls back to the English name")
+	assert.EqualValues(t, "Reviewer", repo.gotReq.FrenchName())
 }
 
 func Test_PostRoleHandler_TrimsCodeNameAndDescription(t *testing.T) {
 	repo := &mockRoleCreator{}
-	w := servePostRole(repo, `{"code":"  clinical_reviewer  ","name":"  Clinical Reviewer  ","description":"  Full clinical work.  ","actions":["can_view_kb"]}`)
+	w := servePostRole(repo, `{"code":"  clinical_reviewer  ","name_en":"  Clinical Reviewer  ","name_fr":"  Réviseur clinique  ","description_en":"  Full clinical work.  ","actions":["can_view_kb"]}`)
 
 	require.Equal(t, http.StatusCreated, w.Code)
 	assert.EqualValues(t, "clinical_reviewer", repo.gotReq.Code)
-	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.Name)
-	assert.EqualValues(t, "Full clinical work.", repo.gotReq.Description)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.NameEn)
+	assert.EqualValues(t, "Réviseur clinique", repo.gotReq.NameFr)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.DescriptionEn)
 }
 
 func Test_PostRoleHandler_WhitespaceOnlyNameIsRejected(t *testing.T) {
 	repo := &mockRoleCreator{}
-	w := servePostRole(repo, `{"code":"reviewer","name":"   ","actions":["can_view_kb"]}`)
+	w := servePostRole(repo, `{"code":"reviewer","name_en":"   ","actions":["can_view_kb"]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code, "trimming leaves it empty, so required fails")
 	assert.Zero(t, repo.calls)
@@ -257,7 +269,7 @@ func Test_PostRoleHandler_MalformedBodyIsRejected(t *testing.T) {
 
 func Test_PostRoleHandler_MissingRequiredFieldIsRejected(t *testing.T) {
 	repo := &mockRoleCreator{}
-	w := servePostRole(repo, `{"name":"Clinical Reviewer","actions":["can_view_kb"]}`)
+	w := servePostRole(repo, `{"name_en":"Clinical Reviewer","actions":["can_view_kb"]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls)
@@ -265,7 +277,7 @@ func Test_PostRoleHandler_MissingRequiredFieldIsRejected(t *testing.T) {
 
 func Test_PostRoleHandler_InvalidCodeIsRejected(t *testing.T) {
 	repo := &mockRoleCreator{}
-	w := servePostRole(repo, `{"code":"Clinical-Reviewer","name":"Clinical Reviewer","actions":["can_view_kb"]}`)
+	w := servePostRole(repo, `{"code":"Clinical-Reviewer","name_en":"Clinical Reviewer","actions":["can_view_kb"]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Contains(t, w.Body.String(), "Clinical-Reviewer")
@@ -274,7 +286,7 @@ func Test_PostRoleHandler_InvalidCodeIsRejected(t *testing.T) {
 
 func Test_PostRoleHandler_EmptyActionsIsRejected(t *testing.T) {
 	repo := &mockRoleCreator{}
-	w := servePostRole(repo, `{"code":"empty","name":"Empty","actions":[]}`)
+	w := servePostRole(repo, `{"code":"empty","name_en":"Empty","actions":[]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls)

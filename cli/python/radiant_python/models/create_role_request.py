@@ -28,9 +28,11 @@ class CreateRoleRequest(BaseModel):
     """ # noqa: E501
     actions: List[StrictStr]
     code: StrictStr
-    description: Optional[StrictStr] = None
-    name: StrictStr
-    __properties: ClassVar[List[str]] = ["actions", "code", "description", "name"]
+    description_en: Optional[StrictStr] = None
+    description_fr: Optional[StrictStr] = None
+    name_en: StrictStr
+    name_fr: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["actions", "code", "description_en", "description_fr", "name_en", "name_fr"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,8 +87,10 @@ class CreateRoleRequest(BaseModel):
         _obj = cls.model_validate({
             "actions": obj.get("actions"),
             "code": obj.get("code"),
-            "description": obj.get("description"),
-            "name": obj.get("name")
+            "description_en": obj.get("description_en"),
+            "description_fr": obj.get("description_fr"),
+            "name_en": obj.get("name_en"),
+            "name_fr": obj.get("name_fr")
         })
         return _obj
 

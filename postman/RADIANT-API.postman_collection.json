@@ -426,7 +426,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"code\": \"clinical_reviewer\",\n    \"name\": \"Clinical Reviewer\",\n    \"description\": \"Full clinical work as one role.\",\n    \"actions\": [\n        \"can_search_case\",\n        \"can_view_kb\",\n        \"can_read_pii\",\n        \"can_interpret_variant\",\n        \"can_comment_variant\",\n        \"can_flag_variant\",\n        \"can_download_file\"\n    ]\n}",
+              "raw": "{\n    \"code\": \"clinical_reviewer\",\n    \"name_en\": \"Clinical Reviewer\",\n    \"name_fr\": \"Réviseur clinique\",\n    \"description_en\": \"Full clinical work as one role.\",\n    \"description_fr\": \"Travail clinique complet en un seul rôle.\",\n    \"actions\": [\n        \"can_search_case\",\n        \"can_view_kb\",\n        \"can_read_pii\",\n        \"can_interpret_variant\",\n        \"can_comment_variant\",\n        \"can_flag_variant\",\n        \"can_download_file\"\n    ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

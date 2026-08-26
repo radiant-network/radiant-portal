@@ -2,8 +2,8 @@
 -- can never render identically to an existing one. One index per localized name:
 -- the name a reader sees depends on their locale, so an EN-only index would let a role named
 -- "Généticien" coexist with the seeded geneticist ("Geneticist" / "Généticien"). Per-column rather
--- than one combined constraint, because a custom role carries the same admin-entered string in
--- both columns.
+-- than one combined constraint, because a role may hold the same string in both columns — a caller
+-- that supplies no French name gets the English one there.
 DO $$
 DECLARE
     duplicates text;

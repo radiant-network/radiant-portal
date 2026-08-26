@@ -76,8 +76,8 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 			INSERT INTO role (tenant_code, code, name_en, description_en, name_fr, description_fr, is_default)
 			VALUES (?, ?, ?, NULLIF(?, ''), ?, NULLIF(?, ''), false)`,
 			tenantCode, req.Code.String(),
-			req.Name.String(), req.Description.String(),
-			req.Name.String(), req.Description.String()).Error; err != nil {
+			req.NameEn.String(), req.DescriptionEn.String(),
+			req.FrenchName(), req.FrenchDescription()).Error; err != nil {
 			switch {
 			case uniqueViolationOn(err, roleNameEnUniqueIndex), uniqueViolationOn(err, roleNameFrUniqueIndex):
 				return types.ErrRoleNameExists

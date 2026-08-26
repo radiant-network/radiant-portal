@@ -21,18 +21,34 @@ var (
 // @Description Payload to create a custom role in a tenant
 // @Name CreateRoleRequest
 type CreateRoleRequest struct {
-	Code        TrimmedString `json:"code" binding:"required"`
-	Name        TrimmedString `json:"name" binding:"required"`
-	Description TrimmedString `json:"description,omitempty"`
-	Actions     []string      `json:"actions" binding:"required"`
+	Code          TrimmedString `json:"code" binding:"required"`
+	NameEn        TrimmedString `json:"name_en" binding:"required"`
+	NameFr        TrimmedString `json:"name_fr,omitempty"`
+	DescriptionEn TrimmedString `json:"description_en,omitempty"`
+	DescriptionFr TrimmedString `json:"description_fr,omitempty"`
+	Actions       []string      `json:"actions" binding:"required"`
+}
+
+func (r CreateRoleRequest) FrenchName() string {
+	if name := strings.TrimSpace(r.NameFr.String()); name != "" {
+		return name
+	}
+	return strings.TrimSpace(r.NameEn.String())
+}
+
+func (r CreateRoleRequest) FrenchDescription() string {
+	if description := strings.TrimSpace(r.DescriptionFr.String()); description != "" {
+		return description
+	}
+	return strings.TrimSpace(r.DescriptionEn.String())
 }
 
 func (r CreateRoleRequest) Validate() error {
 	if !roleCodePattern.MatchString(r.Code.String()) {
 		return fmt.Errorf("code %q is invalid: must start with a lowercase letter and contain only lowercase letters, digits, or underscores (max 50)", r.Code)
 	}
-	if strings.TrimSpace(r.Name.String()) == "" {
-		return fmt.Errorf("name must not be blank")
+	if strings.TrimSpace(r.NameEn.String()) == "" {
+		return fmt.Errorf("name_en must not be blank")
 	}
 	if len(r.Actions) == 0 {
 		return fmt.Errorf("actions must not be empty")

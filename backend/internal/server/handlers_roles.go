@@ -112,11 +112,12 @@ type roleCreator interface {
 // @Description Returns an empty 201.
 // @Description
 // @Description `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
-// @Description unique within the tenant. `name` must also be unique within the tenant, compared
-// @Description case-insensitively and including the seeded roles' names, so 409 covers a clash on
-// @Description either. `description` is optional. `actions` must list at least one action, and
-// @Description every one of them must exist and be grantable — a reserved action (such as
-// @Description `can_manage_user`) yields 422, which is what keeps it out of every custom role and
+// @Description unique within the tenant. `name_en` is required; `name_fr` is optional and falls
+// @Description back to `name_en` when omitted, so the role never renders blank to a French reader.
+// @Description Each name must be unique within the tenant in its own language.
+// @Description `description_en` / `description_fr` are optional and follow the same fallback.
+// @Description `actions` must list at least one action, and every one of them must exist and be grantable
+// @Description a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and
 // @Description makes `tenant_admin` un-duplicable.
 // @Description
 // @Description The role's `scope` is not supplied: it is derived from the actions and decides

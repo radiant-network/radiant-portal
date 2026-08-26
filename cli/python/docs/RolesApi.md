@@ -19,9 +19,13 @@ action — unlike reading the catalog, `can_manage_user` does not open this.
 Returns an empty 201.
 
 `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
-unique within the tenant. `name` must also be unique within the tenant, compared
-case-insensitively and including the seeded roles' names, so 409 covers a clash on
-either. `description` is optional. `actions` must list at least one action, and
+unique within the tenant. `name_en` is required; `name_fr` is optional and falls
+back to `name_en` when omitted, so the role never renders blank to a French reader.
+Each name must be unique within the tenant in its own language, compared
+case-insensitively and including the seeded roles' names — so 409 covers a clash on
+the code or on either name, including an English name that matches a seeded role's
+French one. `description_en` / `description_fr` are optional and follow the same
+fallback. `actions` must list at least one action, and
 every one of them must exist and be grantable — a reserved action (such as
 `can_manage_user`) yields 422, which is what keeps it out of every custom role and
 makes `tenant_admin` un-duplicable.

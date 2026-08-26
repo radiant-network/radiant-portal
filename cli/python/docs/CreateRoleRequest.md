@@ -8,8 +8,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **actions** | **List[str]** |  | 
 **code** | **str** |  | 
-**description** | **str** |  | [optional] 
-**name** | **str** |  | 
+**description_en** | **str** |  | [optional] 
+**description_fr** | **str** |  | [optional] 
+**name_en** | **str** |  | 
+**name_fr** | **str** |  | [optional] 
 
 ## Example
 
