@@ -277,7 +277,6 @@ func Test_PutUserHandler_ForwardsRequestAndAnswers200(t *testing.T) {
 	svc := &mockUserUpdater{}
 
 	w := servePutUser(svc, `{
-		"first_name":"Grace","last_name":"Chen",
 		"roles":[{"role_code":"geneticist","org_codes":["CHOP","CHUSJ"]}]
 	}`)
 
@@ -287,38 +286,33 @@ func Test_PutUserHandler_ForwardsRequestAndAnswers200(t *testing.T) {
 	assert.Equal(t, "b3f1-keycloak-sub", svc.gotUserID)
 	assert.Equal(t, "acting-admin-sub", svc.gotActor, "granted_by is the acting admin")
 	assert.Equal(t, types.UpdateUserRequest{
-		FirstName: "Grace",
-		LastName:  "Chen",
-		Roles:     []types.CreateUserRole{{RoleCode: "geneticist", OrgCodes: []string{"CHOP", "CHUSJ"}}},
+		Roles: []types.CreateUserRole{{RoleCode: "geneticist", OrgCodes: []string{"CHOP", "CHUSJ"}}},
 	}, svc.got)
 }
 
 func Test_PutUserHandler_EmptyRoleSetIsForwarded(t *testing.T) {
 	svc := &mockUserUpdater{}
 
-	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+	w := servePutUser(svc, `{"roles":[]}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Empty(t, svc.got.Roles, "an empty set is a valid edit — it revokes everything but member")
 }
 
-func Test_PutUserHandler_MissingNameIsRejected(t *testing.T) {
-	for _, body := range []string{
-		`{"last_name":"Chen"}`,
-		`{"first_name":"Grace"}`,
-		`{"first_name":"Grace","last_name":"  "}`,
-	} {
-		svc := &mockUserUpdater{}
-		w := servePutUser(svc, body)
-		assert.Equal(t, http.StatusBadRequest, w.Code, "body %s", body)
-		assert.Zero(t, svc.calls, "nothing is written when the payload is rejected")
-	}
+func Test_PutUserHandler_IdentityFieldsAreIgnored(t *testing.T) {
+	svc := &mockUserUpdater{}
+
+	// Identity is fixed at creation: a payload carrying it edits nothing but the roles.
+	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen","email":"grace.chen@chop.edu"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, types.UpdateUserRequest{}, svc.got)
 }
 
 func Test_PutUserHandler_DuplicateRoleIsRejected(t *testing.T) {
 	svc := &mockUserUpdater{}
 
-	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen","roles":[
+	w := servePutUser(svc, `{"roles":[
 		{"role_code":"geneticist","org_codes":["CHOP"]},
 		{"role_code":"geneticist","org_codes":["CHUSJ"]}
 	]}`)
@@ -329,7 +323,7 @@ func Test_PutUserHandler_DuplicateRoleIsRejected(t *testing.T) {
 }
 
 func Test_PutUserHandler_MalformedBodyIsRejected(t *testing.T) {
-	w := servePutUser(&mockUserUpdater{}, `{"first_name":`)
+	w := servePutUser(&mockUserUpdater{}, `{"roles":`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
@@ -337,7 +331,7 @@ func Test_PutUserHandler_MalformedBodyIsRejected(t *testing.T) {
 func Test_PutUserHandler_UnknownUserIsNotFound(t *testing.T) {
 	svc := &mockUserUpdater{err: types.ErrUserNotInTenant}
 
-	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+	w := servePutUser(svc, `{"roles":[]}`)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.JSONEq(t, `{"status":404,"message":"user not found"}`, w.Body.String())
@@ -346,7 +340,7 @@ func Test_PutUserHandler_UnknownUserIsNotFound(t *testing.T) {
 func Test_PutUserHandler_LastAdminIsConflict(t *testing.T) {
 	svc := &mockUserUpdater{err: types.ErrLastTenantAdmin}
 
-	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+	w := servePutUser(svc, `{"roles":[]}`)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.JSONEq(t, `{"status":409,"message":"this is the last user who can manage the users of this tenant"}`, w.Body.String())
@@ -358,7 +352,7 @@ func Test_PutUserHandler_ScopeViolationIsBadRequest(t *testing.T) {
 		types.ErrUnknownRole, types.ErrUnknownOrganizations,
 	} {
 		svc := &mockUserUpdater{err: fmt.Errorf("role %q %w", "geneticist", sentinel)}
-		w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+		w := servePutUser(svc, `{"roles":[]}`)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code, "sentinel %v", sentinel)
 		assert.Contains(t, w.Body.String(), sentinel.Error(), "the reason reaches the caller")
@@ -368,7 +362,7 @@ func Test_PutUserHandler_ScopeViolationIsBadRequest(t *testing.T) {
 func Test_PutUserHandler_UpdateErrorIsRedacted(t *testing.T) {
 	svc := &mockUserUpdater{err: errors.New("keycloak: connection refused")}
 
-	w := servePutUser(svc, `{"first_name":"Grace","last_name":"Chen"}`)
+	w := servePutUser(svc, `{"roles":[]}`)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())

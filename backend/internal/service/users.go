@@ -17,10 +17,10 @@ import (
 type TenantUserStore interface {
 	EmailHasTenantGrant(ctx context.Context, tenantCode, email string) (bool, error)
 	RoleScopes(ctx context.Context, tenantCode string, roleCodes []string) (map[string]string, error)
-	TenantUser(ctx context.Context, tenantCode, userID string) (*types.TenantUser, error)
+	TenantUserGrants(ctx context.Context, tenantCode, userID string) ([]types.Grant, error)
 	RolesWithAction(ctx context.Context, tenantCode, actionCode string) ([]string, error)
 	HasOtherUserWithAnyRole(ctx context.Context, tenantCode, userID string, roleCodes []string) (bool, error)
-	UpdateTenantUser(ctx context.Context, tenantCode, userID, firstName, lastName, grantedBy string, add, remove []types.Grant) error
+	UpdateTenantUserRoles(ctx context.Context, tenantCode, userID, grantedBy string, add, remove []types.Grant) error
 	RemoveTenantUser(ctx context.Context, tenantCode, userID string) error
 }
 
@@ -79,13 +79,14 @@ func (a *UserAdmin) CreateTenantUser(ctx context.Context, tenant string, req typ
 	return nil
 }
 
-// UpdateTenantUser applies the edited user: their identity attributes, and the role set they
-// should end up with. The payload carries the whole desired set, so a role it omits is revoked —
-// except member, which resolveGrants keeps tenant-wide either way.
+// UpdateTenantUser applies the role set the user should end up with in the tenant. The payload
+// carries the whole desired set, so a role it omits is revoked — except member, which
+// resolveGrants keeps tenant-wide either way. Identity is fixed at creation: the name and the
+// email the account signs in with are never edited here.
 //
 // actor is the acting administrator's user_id, recorded as granted_by on the rows this adds.
 func (a *UserAdmin) UpdateTenantUser(ctx context.Context, tenant, userID string, req types.UpdateUserRequest, actor string) error {
-	current, err := a.users.TenantUser(ctx, tenant, userID)
+	current, err := a.users.TenantUserGrants(ctx, tenant, userID)
 	if err != nil {
 		return err
 	}
@@ -93,21 +94,12 @@ func (a *UserAdmin) UpdateTenantUser(ctx context.Context, tenant, userID string,
 	if err != nil {
 		return err
 	}
-	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, current, desired); err != nil {
+	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, userID, current, desired); err != nil {
 		return err
 	}
-	add, remove := diffGrants(current.Grants, desired)
 
-	// Keycloak goes first because the portal serves names from Postgres: a failure here leaves
-	// nothing visibly changed and a retry converges, whereas the reverse order would commit the
-	// whole edit and still answer with an error. The rename is skipped when the name is unchanged,
-	// so editing roles alone never depends on the identity provider being reachable.
-	if req.FirstName != current.FirstName || req.LastName != current.LastName {
-		if err := a.deps.Keycloak.UpdateUserName(ctx, userID, req.FirstName, req.LastName); err != nil {
-			return fmt.Errorf("keycloak: update user %q: %w", userID, err)
-		}
-	}
-	if err := a.users.UpdateTenantUser(ctx, tenant, userID, req.FirstName, req.LastName, actor, add, remove); err != nil {
+	add, remove := diffGrants(current, desired)
+	if err := a.users.UpdateTenantUserRoles(ctx, tenant, userID, actor, add, remove); err != nil {
 		return err
 	}
 
@@ -130,12 +122,12 @@ func (a *UserAdmin) RemoveTenantUser(ctx context.Context, tenant, userID, actor 
 	if userID == actor {
 		return types.ErrCannotRemoveSelf
 	}
-	current, err := a.users.TenantUser(ctx, tenant, userID)
+	current, err := a.users.TenantUserGrants(ctx, tenant, userID)
 	if err != nil {
 		return err
 	}
 	// The user ends up holding nothing, so the invariant is checked against an empty role set.
-	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, current, nil); err != nil {
+	if err := a.assertTenantKeepsAnAdmin(ctx, tenant, userID, current, nil); err != nil {
 		return err
 	}
 
@@ -151,22 +143,22 @@ func (a *UserAdmin) RemoveTenantUser(ctx context.Context, tenant, userID, actor 
 		return err
 	}
 
-	logRevocations(ctx, actor, userID, current.Grants)
+	logRevocations(ctx, actor, userID, current)
 	return nil
 }
 
 // assertTenantKeepsAnAdmin refuses a change that would strip the tenant of its last user able to
 // manage users. The action is only ever obtained from a role, and granting a role takes that same
 // action, so a tenant that loses its last holder cannot be recovered through the API at all.
-func (a *UserAdmin) assertTenantKeepsAnAdmin(ctx context.Context, tenant string, current *types.TenantUser, desired []types.Grant) error {
+func (a *UserAdmin) assertTenantKeepsAnAdmin(ctx context.Context, tenant, userID string, current, desired []types.Grant) error {
 	adminRoles, err := a.users.RolesWithAction(ctx, tenant, types.ActionManageUser)
 	if err != nil {
 		return err
 	}
-	if !holdsAnyRole(current.Grants, adminRoles) || holdsAnyRole(desired, adminRoles) {
+	if !holdsAnyRole(current, adminRoles) || holdsAnyRole(desired, adminRoles) {
 		return nil
 	}
-	other, err := a.users.HasOtherUserWithAnyRole(ctx, tenant, current.UserID, adminRoles)
+	other, err := a.users.HasOtherUserWithAnyRole(ctx, tenant, userID, adminRoles)
 	if err != nil {
 		return err
 	}

@@ -1,13 +1,11 @@
 # UpdateUserRequest
 
-Payload to update a user's identity and role set within a tenant.
+Payload to update the roles granted to a user within a tenant.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**first_name** | **str** |  | 
-**last_name** | **str** |  | 
 **roles** | [**List[CreateUserRole]**](CreateUserRole.md) |  | [optional] 
 
 ## Example

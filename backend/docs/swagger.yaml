@@ -2960,20 +2960,13 @@ components:
       - name_en
       type: object
     UpdateUserRequest:
-      description: Payload to update a user's identity and role set within a tenant.
+      description: Payload to update the roles granted to a user within a tenant.
       properties:
-        first_name:
-          type: string
-        last_name:
-          type: string
         roles:
           items:
             $ref: '#/components/schemas/CreateUserRole'
           type: array
           uniqueItems: false
-      required:
-      - first_name
-      - last_name
       type: object
     UserPreference:
       properties:
@@ -8948,14 +8941,14 @@ paths:
       - users
     put:
       description: |-
-        Updates the user's name and replaces the roles granted to them in the tenant in the
-        path with the ones in the payload — a role left out is revoked. Requires the
-        `can_manage_user` action. The email is the identity the account signs in with and
-        cannot be changed here. The `member` role is kept tenant-wide whether or not it is
-        listed, and the last user able to manage users cannot lose that ability (409).
-        Whether a role needs organizations is derived from its actions: a role holding only
-        tenant-scoped actions must come with no `org_codes`, one holding any org-scoped
-        action needs at least one (`*` meaning every organization).
+        Replaces the roles granted to the user in the tenant in the path with the ones in
+        the payload — a role left out is revoked. Requires the `can_manage_user` action.
+        The user's identity is fixed at creation: their name and the email the account
+        signs in with cannot be changed here. The `member` role is kept tenant-wide whether
+        or not it is listed, and the last user able to manage users cannot lose that
+        ability (409). Whether a role needs organizations is derived from its actions: a
+        role holding only tenant-scoped actions must come with no `org_codes`, one holding
+        any org-scoped action needs at least one (`*` meaning every organization).
       operationId: updateUser
       parameters:
       - description: Tenant code
@@ -8975,7 +8968,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateUserRequest'
-        description: Desired state of the user
+        description: Roles the user should end up with
         required: true
       responses:
         "200":
@@ -9028,7 +9021,7 @@ paths:
                 type: string
       security:
       - bearerauth: []
-      summary: Update a user of the tenant
+      summary: Update the roles of a user of the tenant
       tags:
       - users
   /{tenant}/variants/germline/{locus_id}/cases/count:

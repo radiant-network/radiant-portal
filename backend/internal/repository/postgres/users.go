@@ -82,7 +82,7 @@ func (r *UsersRepository) EmailHasTenantGrant(ctx context.Context, tenantCode, e
 			WHERE lower(u.email) = lower(?) AND ur.tenant_code = ?
 		)`, email, tenantCode).Scan(&exists).Error
 	if err != nil {
-		return false, fmt.Errorf("error checking email %q in tenant %q: %w", email, tenantCode, err)
+		return false, fmt.Errorf("error checking an email in tenant %q: %w", tenantCode, err)
 	}
 	return exists, nil
 }
@@ -247,11 +247,11 @@ func roleScope(hasTenant, hasOrg bool) string {
 	}
 }
 
-// TenantUser returns the user's stored state within the tenant: their identity attributes and
-// every grant they hold there. Holding no grant is what "not a user of this tenant" means, so
-// that case is reported as types.ErrUserNotInTenant rather than as an empty grant list.
-func (r *UsersRepository) TenantUser(ctx context.Context, tenantCode, userID string) (*types.TenantUser, error) {
-	var grants []struct {
+// TenantUserGrants returns every grant the user holds in the tenant, at the (role, organization)
+// grain the edit diff works on. Holding no grant is what "not a user of this tenant" means, so
+// that case is reported as types.ErrUserNotInTenant rather than as an empty list.
+func (r *UsersRepository) TenantUserGrants(ctx context.Context, tenantCode, userID string) ([]types.Grant, error) {
+	var rows []struct {
 		RoleCode string
 		OrgCode  *string
 	}
@@ -259,40 +259,23 @@ func (r *UsersRepository) TenantUser(ctx context.Context, tenantCode, userID str
 		SELECT ur.role_code, ur.org_code
 		FROM user_role ur
 		WHERE ur.tenant_code = ? AND ur.user_id = ?
-		ORDER BY ur.role_code, ur.org_code`, tenantCode, userID).Scan(&grants).Error
+		ORDER BY ur.role_code, ur.org_code`, tenantCode, userID).Scan(&rows).Error
 	if err != nil {
 		return nil, fmt.Errorf("error loading grants of user %q in tenant %q: %w", userID, tenantCode, err)
 	}
-	if len(grants) == 0 {
+	if len(rows) == 0 {
 		return nil, types.ErrUserNotInTenant
 	}
 
-	var identity struct {
-		Email     string
-		FirstName string
-		LastName  string
-	}
-	if err := r.db.WithContext(ctx).Raw(`
-		SELECT u.email, u.first_name, u.last_name FROM users u WHERE u.user_id = ?`, userID).
-		Scan(&identity).Error; err != nil {
-		return nil, fmt.Errorf("error loading user %q: %w", userID, err)
-	}
-
-	user := types.TenantUser{
-		UserID:    userID,
-		Email:     identity.Email,
-		FirstName: identity.FirstName,
-		LastName:  identity.LastName,
-		Grants:    make([]types.Grant, 0, len(grants)),
-	}
-	for _, grant := range grants {
+	grants := make([]types.Grant, 0, len(rows))
+	for _, row := range rows {
 		org := ""
-		if grant.OrgCode != nil {
-			org = *grant.OrgCode
+		if row.OrgCode != nil {
+			org = *row.OrgCode
 		}
-		user.Grants = append(user.Grants, types.Grant{TenantCode: tenantCode, OrgCode: org, RoleCode: grant.RoleCode})
+		grants = append(grants, types.Grant{TenantCode: tenantCode, OrgCode: org, RoleCode: row.RoleCode})
 	}
-	return &user, nil
+	return grants, nil
 }
 
 // RolesWithAction returns the tenant's roles holding the action, which is how a caller reaches an
@@ -328,23 +311,21 @@ func (r *UsersRepository) HasOtherUserWithAnyRole(ctx context.Context, tenantCod
 	return exists, nil
 }
 
-// UpdateTenantUser applies an edited user in one transaction: the identity attributes, then the
-// grants to revoke and the grants to add. Only the difference is written, so the grants the edit
-// left alone keep the granted_at / granted_by of their original assignment.
-func (r *UsersRepository) UpdateTenantUser(ctx context.Context, tenantCode, userID, firstName, lastName, grantedBy string, add, remove []types.Grant) error {
+// UpdateTenantUserRoles applies an edited role set in one transaction: the grants to revoke, then
+// the grants to add. Only the difference is written, so the grants the edit left alone keep the
+// granted_at / granted_by of their original assignment.
+func (r *UsersRepository) UpdateTenantUserRoles(ctx context.Context, tenantCode, userID, grantedBy string, add, remove []types.Grant) error {
+	if len(add) == 0 && len(remove) == 0 {
+		return nil
+	}
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec(`
-			UPDATE users SET first_name = ?, last_name = ? WHERE user_id = ?`,
-			firstName, lastName, userID).Error; err != nil {
-			return err
-		}
 		if err := revokeGrants(tx, tenantCode, userID, remove); err != nil {
 			return err
 		}
 		return addGrants(tx, tenantCode, userID, grantedBy, add)
 	})
 	if err != nil {
-		return fmt.Errorf("error updating user %q in tenant %q: %w", userID, tenantCode, err)
+		return fmt.Errorf("error updating the roles of user %q in tenant %q: %w", userID, tenantCode, err)
 	}
 	return nil
 }

@@ -1002,7 +1002,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         user_id: Annotated[StrictStr, Field(description="User id (the identity provider's subject id)")],
-        update_user_request: Annotated[UpdateUserRequest, Field(description="Desired state of the user")],
+        update_user_request: Annotated[UpdateUserRequest, Field(description="Roles the user should end up with")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1016,15 +1016,15 @@ class UsersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
-        """Update a user of the tenant
+        """Update the roles of a user of the tenant
 
-        Updates the user's name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+        Replaces the roles granted to the user in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The user's identity is fixed at creation: their name and the email the account signs in with cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param user_id: User id (the identity provider's subject id) (required)
         :type user_id: str
-        :param update_user_request: Desired state of the user (required)
+        :param update_user_request: Roles the user should end up with (required)
         :type update_user_request: UpdateUserRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1083,7 +1083,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         user_id: Annotated[StrictStr, Field(description="User id (the identity provider's subject id)")],
-        update_user_request: Annotated[UpdateUserRequest, Field(description="Desired state of the user")],
+        update_user_request: Annotated[UpdateUserRequest, Field(description="Roles the user should end up with")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1097,15 +1097,15 @@ class UsersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
-        """Update a user of the tenant
+        """Update the roles of a user of the tenant
 
-        Updates the user's name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+        Replaces the roles granted to the user in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The user's identity is fixed at creation: their name and the email the account signs in with cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param user_id: User id (the identity provider's subject id) (required)
         :type user_id: str
-        :param update_user_request: Desired state of the user (required)
+        :param update_user_request: Roles the user should end up with (required)
         :type update_user_request: UpdateUserRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1164,7 +1164,7 @@ class UsersApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         user_id: Annotated[StrictStr, Field(description="User id (the identity provider's subject id)")],
-        update_user_request: Annotated[UpdateUserRequest, Field(description="Desired state of the user")],
+        update_user_request: Annotated[UpdateUserRequest, Field(description="Roles the user should end up with")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1178,15 +1178,15 @@ class UsersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Update a user of the tenant
+        """Update the roles of a user of the tenant
 
-        Updates the user's name and replaces the roles granted to them in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The email is the identity the account signs in with and cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
+        Replaces the roles granted to the user in the tenant in the path with the ones in the payload — a role left out is revoked. Requires the `can_manage_user` action. The user's identity is fixed at creation: their name and the email the account signs in with cannot be changed here. The `member` role is kept tenant-wide whether or not it is listed, and the last user able to manage users cannot lose that ability (409). Whether a role needs organizations is derived from its actions: a role holding only tenant-scoped actions must come with no `org_codes`, one holding any org-scoped action needs at least one (`*` meaning every organization).
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param user_id: User id (the identity provider's subject id) (required)
         :type user_id: str
-        :param update_user_request: Desired state of the user (required)
+        :param update_user_request: Roles the user should end up with (required)
         :type update_user_request: UpdateUserRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

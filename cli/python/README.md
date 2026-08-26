@@ -180,7 +180,7 @@ Class | Method | HTTP request | Description
 *UsersApi* | [**create_user**](docs/UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
 *UsersApi* | [**delete_user**](docs/UsersApi.md#delete_user) | **DELETE** /{tenant}/users/{user_id} | Remove a user from the tenant
 *UsersApi* | [**list_users**](docs/UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
-*UsersApi* | [**update_user**](docs/UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update a user of the tenant
+*UsersApi* | [**update_user**](docs/UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update the roles of a user of the tenant
 *ValueSetsApi* | [**list_value_set**](docs/ValueSetsApi.md#list_value_set) | **GET** /value_sets/{type} | List a value set
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /{tenant}/variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
 *VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /{tenant}/variants/germline/cases/filters | Get cases filters for germline variant entity

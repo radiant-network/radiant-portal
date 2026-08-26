@@ -27,8 +27,6 @@ type fakeKeycloak struct {
 	groupsByName    map[string]string // name -> id
 	groupAdds       [][2]string       // {userID, groupID}
 
-	lastUpdatedID         string // id addressed by the last user update
-	lastUpdateBody        map[string]any
 	lastPasswordTemporary bool       // "temporary" field of the last reset-password credential
 	lastTokenForm         url.Values // form of the last token request
 }
@@ -109,8 +107,6 @@ func (f *fakeKeycloak) server() *httptest.Server {
 			f.groupAdds = append(f.groupAdds, [2]string{userID, strings.TrimPrefix(sub, "groups/")})
 		default:
 			f.updated++
-			f.lastUpdatedID = userID
-			_ = json.NewDecoder(r.Body).Decode(&f.lastUpdateBody)
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
@@ -302,29 +298,4 @@ func Test_KeycloakAdminClient_UpsertUser_CreateFailureIsReported(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "create user")
-}
-
-func Test_KeycloakAdminClient_UpdateUserName_SendsOnlyTheNameAttributes(t *testing.T) {
-	fake := newFakeKeycloak("radiant")
-	srv := fake.server()
-	defer srv.Close()
-
-	err := fake.client(srv.URL).UpdateUserName(context.Background(), "the-sub", "Grace", "Chen")
-
-	require.NoError(t, err)
-	assert.Equal(t, "the-sub", fake.lastUpdatedID, "the sub addresses the account directly")
-	assert.Equal(t, map[string]any{"firstName": "Grace", "lastName": "Chen"}, fake.lastUpdateBody,
-		"a fuller representation would reset enabled and the required actions")
-}
-
-func Test_KeycloakAdminClient_UpdateUserName_TokenFailureIsReported(t *testing.T) {
-	fake := newFakeKeycloak("radiant")
-	fake.tokenStatus = http.StatusUnauthorized
-	srv := fake.server()
-	defer srv.Close()
-
-	err := fake.client(srv.URL).UpdateUserName(context.Background(), "the-sub", "Grace", "Chen")
-
-	require.Error(t, err)
-	assert.Equal(t, 0, fake.updated)
 }
