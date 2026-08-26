@@ -243,7 +243,70 @@ func Test_RolesRepository_CreateRole_OmittedDescriptionIsStoredAsNull(t *testing
 				`SELECT description_en IS NULL FROM role WHERE tenant_code = ? AND code = ?`,
 				tenant, "terse").Scan(&isNull).Error)
 			assert.True(t, isNull, "an omitted description stays NULL, as on the seeded roles")
+
+			var frIsNull bool
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT description_fr IS NULL FROM role WHERE tenant_code = ? AND code = ?`,
+				tenant, "terse").Scan(&frIsNull).Error)
+			assert.True(t, frIsNull, "the mirrored French description is NULL too, not an empty string")
 		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_MirrorsTheNameIntoBothLocales(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_locales", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:        "clinical_reviewer",
+				Name:        "Clinical Reviewer",
+				Description: "Full clinical work as one role.",
+				Actions:     []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			var stored struct {
+				NameEn        string
+				NameFr        string
+				DescriptionEn string
+				DescriptionFr string
+			}
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT name_en, name_fr, description_en, description_fr
+				 FROM role WHERE tenant_code = ? AND code = ?`,
+				tenant, "clinical_reviewer").Scan(&stored).Error)
+
+			assert.Equal(t, "Clinical Reviewer", stored.NameEn)
+			assert.Equal(t, "Clinical Reviewer", stored.NameFr)
+			assert.Equal(t, "Full clinical work as one role.", stored.DescriptionEn)
+			assert.Equal(t, "Full clinical work as one role.", stored.DescriptionFr)
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_ClashWithSeededFrenchNameIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		// Precondition: the seeded role carries that French name and an unrelated English one.
+		var seeded struct {
+			NameEn string
+			NameFr string
+		}
+		require.NoError(t, env.Postgres.Raw(
+			`SELECT name_en, name_fr FROM role WHERE tenant_code = ? AND code = 'geneticist'`,
+			types.DefaultTenantCode).Scan(&seeded).Error)
+		require.Equal(t, "Geneticist", seeded.NameEn)
+		require.Equal(t, "Généticien", seeded.NameFr)
+
+		err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
+			Code: "zz_clash_fr", Name: "Généticien", Actions: []string{types.ActionViewKb},
+		})
+		assert.ErrorIs(t, err, types.ErrRoleNameExists,
+			"a custom role may not take a seeded role's French name either")
+
+		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "zz_clash_fr")
+		require.NoError(t, err)
+		assert.Nil(t, role)
 	})
 }
 

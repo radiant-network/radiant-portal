@@ -1,24 +1,27 @@
--- A role's name must be unique within its tenant, so creating a custom role that
--- clashes with an existing one (including a seeded role's name) is refused with 409 rather than
--- producing two roles the admin UI renders identically. Compared case-insensitively: "Clinical
--- Reviewer" and "clinical reviewer" are the same name to a reader, so they must not coexist.
---
--- Enforced by the index rather than by a read-then-insert check so two concurrent creates cannot
--- both land; the repository maps this constraint's violation to 409.
-
--- Fail loudly and legibly if a tenant already holds two roles with the same name: the index below
--- cannot be built over such rows, and Postgres's own error names neither the tenant nor the name.
--- Rename one role of each pair listed, then let the migration run again.
+-- A role's name must be unique within its tenant, compared case-insensitively, so a custom role
+-- can never render identically to an existing one. One index per localized name:
+-- the name a reader sees depends on their locale, so an EN-only index would let a role named
+-- "Généticien" coexist with the seeded geneticist ("Geneticist" / "Généticien"). Per-column rather
+-- than one combined constraint, because a custom role carries the same admin-entered string in
+-- both columns.
 DO $$
 DECLARE
     duplicates text;
 BEGIN
-    SELECT string_agg(format('%s/%s', tenant_code, name), ', ')
+    SELECT string_agg(label, ', ')
     INTO duplicates
     FROM (
-        SELECT tenant_code, lower(name_en) AS name
+        SELECT format('%s/%s (name_en)', tenant_code, lower(name_en)) AS label
         FROM public.role
         GROUP BY tenant_code, lower(name_en)
+        HAVING count(*) > 1
+
+        UNION ALL
+
+        SELECT format('%s/%s (name_fr)', tenant_code, lower(name_fr)) AS label
+        FROM public.role
+        WHERE name_fr IS NOT NULL
+        GROUP BY tenant_code, lower(name_fr)
         HAVING count(*) > 1
     ) d;
 
@@ -31,3 +34,6 @@ END $$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS role_unique_name_per_tenant
     ON public.role (tenant_code, lower(name_en));
+
+CREATE UNIQUE INDEX IF NOT EXISTS role_unique_name_fr_per_tenant
+    ON public.role (tenant_code, lower(name_fr));

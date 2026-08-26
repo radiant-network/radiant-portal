@@ -50,7 +50,10 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 	return &roles[0], nil
 }
 
-const roleNameUniqueIndex = "role_unique_name_per_tenant"
+const (
+	roleNameEnUniqueIndex = "role_unique_name_per_tenant"
+	roleNameFrUniqueIndex = "role_unique_name_fr_per_tenant"
+)
 
 // CreateRole inserts a custom role and its action mappings in one transaction, so a role never
 // lands without the actions that give it meaning.
@@ -70,11 +73,13 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 		}
 
 		if err := tx.Exec(`
-			INSERT INTO role (tenant_code, code, name_en, description_en, is_default)
-			VALUES (?, ?, ?, NULLIF(?, ''), false)`,
-			tenantCode, req.Code.String(), req.Name.String(), req.Description.String()).Error; err != nil {
+			INSERT INTO role (tenant_code, code, name_en, description_en, name_fr, description_fr, is_default)
+			VALUES (?, ?, ?, NULLIF(?, ''), ?, NULLIF(?, ''), false)`,
+			tenantCode, req.Code.String(),
+			req.Name.String(), req.Description.String(),
+			req.Name.String(), req.Description.String()).Error; err != nil {
 			switch {
-			case uniqueViolationOn(err, roleNameUniqueIndex):
+			case uniqueViolationOn(err, roleNameEnUniqueIndex), uniqueViolationOn(err, roleNameFrUniqueIndex):
 				return types.ErrRoleNameExists
 			case isUniqueViolation(err):
 				return types.ErrRoleCodeExists
