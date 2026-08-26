@@ -67,6 +67,7 @@ type sampleReader interface {
 
 type valueSetsReader interface {
 	GetCodes(ctx context.Context, vsType postgres.ValueSetType) ([]string, error)
+	GetExamCodes(ctx context.Context, tenantCode string) ([]string, error)
 }
 
 type BatchValidationContext struct {

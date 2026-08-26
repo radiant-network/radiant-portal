@@ -95,6 +95,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		AnalysisCode:               update.AnalysisCode,
 		ResolutionStatusCode:       update.ResolutionStatusCode,
 		Note:                       update.Note,
+		DiagnosisHypothesis:        update.DiagnosisHypothesis,
 		OrderingPhysician:          update.OrderingPhysician,
 		OrderingOrganizationCode:   update.OrderingOrganizationCode,
 		Patients:                   update.Patients,
@@ -296,6 +297,7 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		AnalysisCatalogID:        *rec.Record.AnalysisCatalogID,
 		ResolutionStatusCode:     u.ResolutionStatusCode,
 		Note:                     u.Note,
+		DiagnosisHypothesis:      rec.Record.diagnosisHypothesis(),
 		OrderingOrganizationCode: &u.OrderingOrganizationCode,
 		OrderingPhysician:        u.OrderingPhysician,
 	}); err != nil {

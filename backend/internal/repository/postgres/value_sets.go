@@ -120,3 +120,19 @@ func (r *ValueSetsRepository) GetCodes(ctx context.Context, vsType ValueSetType)
 
 	return codes, nil
 }
+
+// exam is the only value set keyed by (code, tenant_code): the generic GetCodes would return other
+// tenants' codes, which pass validation and then violate the composite FK.
+func (r *ValueSetsRepository) GetExamCodes(ctx context.Context, tenantCode string) ([]string, error) {
+	var codes []string
+	err := r.db.WithContext(ctx).
+		Table(types.ExamTable.Name).
+		Select("code").
+		Where("tenant_code = ?", tenantCode).
+		Order("code asc").
+		Find(&codes).Error
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving exam codes for tenant %q: %w", tenantCode, err)
+	}
+	return codes, nil
+}

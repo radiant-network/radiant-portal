@@ -37,39 +37,57 @@ class TestCaseEntity(unittest.TestCase):
             return CaseEntity(
                 analysis_catalog_code = '',
                 analysis_catalog_name = '',
-                sequencing_experiments = [
-                    radiant_python.models.case_sequencing_experiment.CaseSequencingExperiment(
-                        affected_status_code = '', 
-                        experimental_strategy_code = '', 
-                        has_variants = True, 
-                        histology_code = '', 
-                        patient_id = 56, 
-                        relationship_to_proband = '', 
-                        sample_id = 56, 
-                        sample_submitter_id = '', 
-                        sample_type_code = '', 
-                        seq_id = 56, 
-                        status_code = '', 
-                        updated_on = '', )
-                    ],
+                case_category_code = '',
+                case_category_name = '',
                 case_id = 56,
                 case_type = '',
                 created_on = '',
+                diagnosis_hypothesis = '',
                 diagnosis_lab_code = '',
                 diagnosis_lab_name = '',
+                has_igv_files = True,
                 members = [
                     radiant_python.models.case_patient_clinical_information.CasePatientClinicalInformation(
                         affected_status_code = '', 
+                        consanguinity = radiant_python.models.value_set_item.ValueSetItem(
+                            code = '', 
+                            name = '', ), 
                         date_of_birth = '', 
-                        ethnicity_codes = [
-                            ''
+                        estimated_due_date = '', 
+                        ethnicities = [
+                            radiant_python.models.value_set_item.ValueSetItem(
+                                code = '', 
+                                name = '', )
                             ], 
+                        exams = [
+                            radiant_python.models.case_exam.CaseExam(
+                                coding_system = '', 
+                                exam_code = '', 
+                                interpretation_code = '', 
+                                name = '', 
+                                value = '', 
+                                value_name = '', )
+                            ], 
+                        family_history = [
+                            radiant_python.models.case_family_history.CaseFamilyHistory(
+                                condition = '', 
+                                family_member_code = '', )
+                            ], 
+                        fetus_id = 56, 
+                        first_name = '', 
+                        jhn = '', 
+                        last_menstrual_period = '', 
+                        last_name = '', 
+                        life_status_code = '', 
                         non_observed_phenotypes = [
                             radiant_python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
                                 term = '', )
+                            ], 
+                        notes = [
+                            ''
                             ], 
                         observed_phenotypes = [
                             radiant_python.models.term.Term(
@@ -88,27 +106,14 @@ class TestCaseEntity(unittest.TestCase):
                 note = '',
                 ordering_organization_code = '',
                 ordering_organization_name = '',
+                panel_code = '',
+                panel_name = '',
                 prescriber = '',
                 primary_condition_id = '',
                 primary_condition_name = '',
                 priority_code = '',
                 project_code = '',
                 project_name = '',
-                status_code = '',
-                tasks = [
-                    radiant_python.models.case_task.CaseTask(
-                        created_on = '', 
-                        id = 56, 
-                        patients = [
-                            ''
-                            ], 
-                        type_code = '', 
-                        type_name = '', )
-                    ],
-                updated_on = ''
-            )
-        else:
-            return CaseEntity(
                 sequencing_experiments = [
                     radiant_python.models.case_sequencing_experiment.CaseSequencingExperiment(
                         affected_status_code = '', 
@@ -124,21 +129,68 @@ class TestCaseEntity(unittest.TestCase):
                         status_code = '', 
                         updated_on = '', )
                     ],
+                status_code = '',
+                tasks = [
+                    radiant_python.models.case_task.CaseTask(
+                        created_on = '', 
+                        id = 56, 
+                        patients = [
+                            ''
+                            ], 
+                        type_code = '', 
+                        type_name = '', )
+                    ],
+                updated_on = ''
+            )
+        else:
+            return CaseEntity(
+                case_category_code = '',
+                case_category_name = '',
                 case_id = 56,
                 created_on = '',
+                has_igv_files = True,
                 members = [
                     radiant_python.models.case_patient_clinical_information.CasePatientClinicalInformation(
                         affected_status_code = '', 
+                        consanguinity = radiant_python.models.value_set_item.ValueSetItem(
+                            code = '', 
+                            name = '', ), 
                         date_of_birth = '', 
-                        ethnicity_codes = [
-                            ''
+                        estimated_due_date = '', 
+                        ethnicities = [
+                            radiant_python.models.value_set_item.ValueSetItem(
+                                code = '', 
+                                name = '', )
                             ], 
+                        exams = [
+                            radiant_python.models.case_exam.CaseExam(
+                                coding_system = '', 
+                                exam_code = '', 
+                                interpretation_code = '', 
+                                name = '', 
+                                value = '', 
+                                value_name = '', )
+                            ], 
+                        family_history = [
+                            radiant_python.models.case_family_history.CaseFamilyHistory(
+                                condition = '', 
+                                family_member_code = '', )
+                            ], 
+                        fetus_id = 56, 
+                        first_name = '', 
+                        jhn = '', 
+                        last_menstrual_period = '', 
+                        last_name = '', 
+                        life_status_code = '', 
                         non_observed_phenotypes = [
                             radiant_python.models.term.Term(
                                 id = '', 
                                 name = '', 
                                 onset_code = '', 
                                 term = '', )
+                            ], 
+                        notes = [
+                            ''
                             ], 
                         observed_phenotypes = [
                             radiant_python.models.term.Term(
@@ -153,6 +205,21 @@ class TestCaseEntity(unittest.TestCase):
                         relationship_to_proband = '', 
                         sex_code = '', 
                         submitter_patient_id = '', )
+                    ],
+                sequencing_experiments = [
+                    radiant_python.models.case_sequencing_experiment.CaseSequencingExperiment(
+                        affected_status_code = '', 
+                        experimental_strategy_code = '', 
+                        has_variants = True, 
+                        histology_code = '', 
+                        patient_id = 56, 
+                        relationship_to_proband = '', 
+                        sample_id = 56, 
+                        sample_submitter_id = '', 
+                        sample_type_code = '', 
+                        seq_id = 56, 
+                        status_code = '', 
+                        updated_on = '', )
                     ],
                 status_code = '',
                 tasks = [

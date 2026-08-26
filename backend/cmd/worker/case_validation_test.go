@@ -22,6 +22,7 @@ import (
 // -----------------------------------------------------------------------------
 
 type CaseValidationMockRepo struct {
+	CodesMockRepo
 	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*types.Case, error)
 }
 
@@ -241,7 +242,15 @@ func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType postgres.Va
 // -----------------------------------------------------------------------------
 
 type CodesMockRepo struct {
-	GetCodesFunc func(setType postgres.ValueSetType) ([]string, error)
+	GetCodesFunc     func(setType postgres.ValueSetType) ([]string, error)
+	GetExamCodesFunc func(tenantCode string) ([]string, error)
+}
+
+func (m *CodesMockRepo) GetExamCodes(_ context.Context, tenantCode string) ([]string, error) {
+	if m.GetExamCodesFunc != nil {
+		return m.GetExamCodesFunc(tenantCode)
+	}
+	return []string{"eeg", "emg", "other"}, nil
 }
 
 func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetType) ([]string, error) {
@@ -2313,7 +2322,7 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
-							FamilyMemberCode: createString(FreeTextMaxLength + 1),
+							FamilyMemberCode: createString(TextMaxLength + 1),
 							Condition:        "diabetes",
 						},
 					},
@@ -2342,7 +2351,7 @@ func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
-							FamilyMemberCode: createString(FreeTextMaxLength+1) + "123",
+							FamilyMemberCode: createString(TextMaxLength+1) + "123",
 							Condition:        "diabetes",
 						},
 					},
@@ -2495,10 +2504,10 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 					FamilyHistory: []*types.FamilyHistoryBatch{
 						{
 							FamilyMemberCode: "mother123",
-							Condition:        "diabetes@invalid",
+							Condition:        "diabetes",
 						},
 						{
-							FamilyMemberCode: createString(FreeTextMaxLength + 1),
+							FamilyMemberCode: createString(TextMaxLength + 1),
 							Condition:        createString(FreeTextMaxLength + 1),
 						},
 					},
@@ -2508,7 +2517,7 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	}
 
 	record.validateFamilyHistory(0)
-	// One fewer than before: the condition's characters are no longer validated, only its length.
+	// "mother123" fails the family-member-code regex; the second entry is over both bounds.
 	assert.Len(t, record.Errors, 3)
 }
 
@@ -3691,8 +3700,8 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 }
 
 // Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText locks in that TextRegExpCompiled
-// (used for pipeline_version, aliquots, type_code, genome_build, pipeline_name) stays strict: widening
-// FreeTextRegExpCompiled for clinical free text must not loosen validation of these technical fields.
+// (used for pipeline_version, aliquots, type_code, genome_build, pipeline_name) stays strict: dropping
+// the character constraint on clinical free text must not loosen these technical fields.
 func Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText(t *testing.T) {
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
 	record.validateTaskTextField("pipeline-v1.2 (été)", "pipeline_version", 0, TextRegExpCompiled, true)
@@ -4287,8 +4296,8 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 }
 
 // Test_validateDocumentTextField_HashRegex_RejectsAccentedText locks in that TextRegExpCompiled
-// (used for document hash/name) stays strict: widening FreeTextRegExpCompiled for clinical free
-// text must not loosen validation of these technical fields.
+// (used for document hash/name) stays strict: dropping the character constraint on clinical free
+// text must not loosen these technical fields.
 func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
@@ -4760,6 +4769,7 @@ func obsCategoricalRecord(obs *types.ObservationCategoricalBatch) CaseValidation
 			},
 		},
 		ObservationCodes:    []string{"phenotype", "ancestry", "consanguinity", "exam"},
+		ExamCodes:           []string{"eeg", "emg", "other"},
 		OnsetCodes:          []string{"infantile", "unknown"},
 		InterpretationCodes: []string{"positive", "negative", "abnormal", "normal"},
 		AncestryCodes:       []string{"CA-FR", "EU", "OTH"},
@@ -4883,4 +4893,50 @@ func Test_validateObservationsCategorical_ExamCode_InterpretationStillRequired(t
 	assert.NoError(t, err)
 	assert.False(t, hasErrorForField(record.Errors, "onset_code"), "onset_code should not be required when exam_code is set")
 	assert.True(t, hasErrorForField(record.Errors, "interpretation_code"), "interpretation_code is still required for exam-tagged rows")
+}
+
+func examCodeRecord() CaseValidationRecord {
+	return CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		ExamCodes:            []string{"eeg", "emg", "other"},
+	}
+}
+
+func Test_validateExamCode_RequiredWhenObservationIsAnExam(t *testing.T) {
+	record := examCodeRecord()
+	record.validateExamCode(types.ObsCodeExam, "", "create_case[0].patients[0].observations_text[0]", "res")
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "exam code")
+	assert.Equal(t, "create_case[0].patients[0].observations_text[0].exam_code", record.Errors[0].Path)
+}
+
+func Test_validateExamCode_RejectsCodeOutsideTheCatalog(t *testing.T) {
+	record := examCodeRecord()
+	record.validateExamCode(types.ObsCodeExam, "irmc", "create_case[0].patients[0].observations_text[0]", "res")
+
+	assert.Len(t, record.Errors, 1)
+	assert.Contains(t, record.Errors[0].Message, `"irmc" is not a valid exam code`)
+}
+
+func Test_validateExamCode_AcceptsCodeFromTheCatalog(t *testing.T) {
+	record := examCodeRecord()
+	record.validateExamCode(types.ObsCodeExam, "eeg", "create_case[0].patients[0].observations_text[0]", "res")
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateExamCode_OptionalOnANonExamObservation(t *testing.T) {
+	record := examCodeRecord()
+	record.validateExamCode(types.ObsCodePhenotype, "", "create_case[0].patients[0].observations_categorical[0]", "res")
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateExamCode_RejectsUnknownCodeOnANonExamObservation(t *testing.T) {
+	record := examCodeRecord()
+	record.validateExamCode(types.ObsCodePhenotype, "irmc", "create_case[0].patients[0].observations_categorical[0]", "res")
+
+	assert.Len(t, record.Errors, 1)
 }

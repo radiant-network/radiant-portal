@@ -220,3 +220,47 @@ func Test_ProcessBatch_UpdateCase_MissingCase_NoPersistence(t *testing.T) {
 		assert.Zero(t, count)
 	})
 }
+
+// A PUT must be able to move the diagnostic hypothesis, both from the dedicated field and — until
+// the ingester switches over — from the legacy 'condition' observation, which feeds the column
+// instead of landing in obs_string.
+func Test_ProcessBatch_UpdateCase_UpdatesDiagnosisHypothesis(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+		const submitterCaseId = "CASE-UPDATE-HYPOTHESIS"
+
+		seedBaseCase(t, ctx, client, db, submitterCaseId)
+
+		var seeded types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, submitterCaseId).First(&seeded)
+		assert.NotZero(t, seeded.ID)
+
+		updates := updateCaseForBase(submitterCaseId)
+		updates[0].DiagnosisHypothesis = "Suspected mitochondrial disorder"
+		updateBytes, _ := json.Marshal(updates)
+
+		id := insertPayloadAndProcessBatch(db, string(updateBytes), types.BatchStatusPending, types.UpdateCaseBatchType, false, "user123", "2025-12-06")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var afterField types.Case
+		db.Table("cases").Where("id = ?", seeded.ID).First(&afterField)
+		assert.Equal(t, "Suspected mitochondrial disorder", afterField.DiagnosisHypothesis)
+
+		legacy := updateCaseForBase(submitterCaseId)
+		legacy[0].Patients[0].ObservationsText = []*types.ObservationTextBatch{
+			{Code: types.ObsCodeCondition, Value: "Suspected Rett syndrome"},
+		}
+		legacyBytes, _ := json.Marshal(legacy)
+
+		legacyId := insertPayloadAndProcessBatch(db, string(legacyBytes), types.BatchStatusPending, types.UpdateCaseBatchType, false, "user123", "2025-12-06")
+		assertBatchProcessing(t, db, legacyId, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var afterLegacy types.Case
+		db.Table("cases").Where("id = ?", seeded.ID).First(&afterLegacy)
+		assert.Equal(t, "Suspected Rett syndrome", afterLegacy.DiagnosisHypothesis)
+
+		var obsStr []*types.ObsString
+		db.Table("obs_string").Where("case_id = ? AND observation_code = ?", seeded.ID, types.ObsCodeCondition).Find(&obsStr)
+		assert.Empty(t, obsStr, "a 'condition' observation is diverted to cases.diagnosis_hypothesis")
+	})
+}

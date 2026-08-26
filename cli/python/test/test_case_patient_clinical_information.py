@@ -36,16 +36,45 @@ class TestCasePatientClinicalInformation(unittest.TestCase):
         if include_optional:
             return CasePatientClinicalInformation(
                 affected_status_code = '',
+                consanguinity = radiant_python.models.value_set_item.ValueSetItem(
+                    code = '', 
+                    name = '', ),
                 date_of_birth = '',
-                ethnicity_codes = [
-                    ''
+                estimated_due_date = '',
+                ethnicities = [
+                    radiant_python.models.value_set_item.ValueSetItem(
+                        code = '', 
+                        name = '', )
                     ],
+                exams = [
+                    radiant_python.models.case_exam.CaseExam(
+                        coding_system = '', 
+                        exam_code = '', 
+                        interpretation_code = '', 
+                        name = '', 
+                        value = '', 
+                        value_name = '', )
+                    ],
+                family_history = [
+                    radiant_python.models.case_family_history.CaseFamilyHistory(
+                        condition = '', 
+                        family_member_code = '', )
+                    ],
+                fetus_id = 56,
+                first_name = '',
+                jhn = '',
+                last_menstrual_period = '',
+                last_name = '',
+                life_status_code = '',
                 non_observed_phenotypes = [
                     radiant_python.models.term.Term(
                         id = '', 
                         name = '', 
                         onset_code = '', 
                         term = '', )
+                    ],
+                notes = [
+                    ''
                     ],
                 observed_phenotypes = [
                     radiant_python.models.term.Term(
@@ -64,7 +93,7 @@ class TestCasePatientClinicalInformation(unittest.TestCase):
         else:
             return CasePatientClinicalInformation(
                 affected_status_code = '',
-                patient_id = 56,
+                life_status_code = '',
                 relationship_to_proband = '',
                 sex_code = '',
         )

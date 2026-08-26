@@ -177,6 +177,7 @@ type CaseValidationRecord struct {
 	// Codes
 	StatusCodes                       []string
 	ObservationCodes                  []string
+	ExamCodes                         []string
 	OnsetCodes                        []string
 	InterpretationCodes               []string
 	AncestryCodes                     []string
@@ -260,6 +261,15 @@ func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error 
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
 	r.ObservationCodes = observationCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchExamCodes(ctx context.Context) error {
+	examCodes, err := r.Cache.GetExamCodes(ctx, r.TenantCode)
+	if err != nil {
+		return fmt.Errorf("error retrieving exam codes: %v", err)
+	}
+	r.ExamCodes = examCodes
 	return nil
 }
 
@@ -373,6 +383,9 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 	}
 	if err := r.fetchObservationCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve observation codes: %w", err)
+	}
+	if err := r.fetchExamCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve exam codes: %w", err)
 	}
 	if err := r.fetchOnsetCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve onset codes: %w", err)
@@ -699,6 +712,10 @@ func (cr *CaseValidationRecord) addNullObservationError(res, path string) {
 	cr.AddErrors(fmt.Sprintf("Invalid observation for %s. Reason: entry is null.", res), ObservationInvalidField, path)
 }
 
+func (cr *CaseValidationRecord) validateExamCode(obsCode, examCode, path, res string) {
+	cr.ValidateCode(res, path+".exam_code", "exam_code", ObservationInvalidField, examCode, cr.ExamCodes, []string{}, obsCode == types.ObsCodeExam)
+}
+
 func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.ObservationCategoricalBatch, obsPath, res string) {
 	if obs == nil {
 		cr.addNullObservationError(res, obsPath)
@@ -710,6 +727,7 @@ func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.Ob
 	cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 	cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
 	cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, interpretationRequired)
+	cr.validateExamCode(obs.Code, obs.ExamCode, obsPath, res)
 
 	cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 	if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
@@ -747,6 +765,7 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error
 
 		path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
 		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+		cr.validateExamCode(obs.Code, obs.ExamCode, path, res)
 		cr.validateObsTextValue(patientIndex, obsIndex)
 	}
 	return nil

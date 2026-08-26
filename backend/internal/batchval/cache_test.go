@@ -35,11 +35,16 @@ func (m *mockSampleRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]i
 }
 
 type mockValueSetsRepo struct {
-	GetCodesFunc func(vsType postgres.ValueSetType) ([]string, error)
+	GetCodesFunc     func(vsType postgres.ValueSetType) ([]string, error)
+	GetExamCodesFunc func(tenantCode string) ([]string, error)
 }
 
 func (m *mockValueSetsRepo) GetCodes(_ context.Context, vsType postgres.ValueSetType) ([]string, error) {
 	return m.GetCodesFunc(vsType)
+}
+
+func (m *mockValueSetsRepo) GetExamCodes(_ context.Context, tenantCode string) ([]string, error) {
+	return m.GetExamCodesFunc(tenantCode)
 }
 
 type mockProjectRepo struct {
@@ -503,4 +508,31 @@ func TestBatchValidationCache_Errors(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, result)
 	assert.Equal(t, expectedErr, err)
+}
+
+func TestBatchValidationCache_GetExamCodes_IsScopedByTenant(t *testing.T) {
+	mockRepo := &mockValueSetsRepo{}
+	ctx := &BatchValidationContext{ValueSetsRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetExamCodesFunc = func(tenantCode string) ([]string, error) {
+		return []string{tenantCode + "-exam"}, nil
+	}
+
+	qlin, err := cache.GetExamCodes(t.Context(), "qlin")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"qlin-exam"}, qlin)
+
+	radiant, err := cache.GetExamCodes(t.Context(), "radiant")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"radiant-exam"}, radiant)
+
+	// Cache hit: a second read of a known tenant must not reach the repository.
+	mockRepo.GetExamCodesFunc = func(string) ([]string, error) {
+		t.Fatal("Repo should not be called on cache hit")
+		return nil, nil
+	}
+	again, err := cache.GetExamCodes(t.Context(), "qlin")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"qlin-exam"}, again)
 }

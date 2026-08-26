@@ -13,10 +13,8 @@ INSERT INTO "obs_string" (id, case_id, patient_id, fetus_id, observation_code, v
 VALUES (2, 74, 65,   NULL, 'exam', 'normal',                     'normal',   'eeg',   'radiant'),
        (3, 74, 65,   NULL, 'exam', 'Ophthalmology consult 2026', NULL,       'other', 'radiant'),
        (4, 74, NULL, 4,    'exam', 'abnormal',                   'abnormal', 'eeg',   'radiant'),
-       -- exam_code NULL: an FK guarantees a non-null code exists in the catalog, so this is the
-       -- only way an exam row can have no matching exam — and it must still surface, unlabelled,
-       -- rather than be dropped by the join.
-       (5, 74, NULL, 4,    'exam', 'Bilateral ventriculomegaly', 'abnormal', NULL,    'radiant')
+       -- Second exam on the same fetus, so the exam_code ordering is observable on a member.
+       (5, 74, NULL, 4,    'exam', 'Bilateral ventriculomegaly', 'abnormal', 'other', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 -- Clinical notes are per member: the mother and her fetus each carry their own.

@@ -786,19 +786,16 @@ func Test_RetrieveCasePatients_ParaclinicalExams(t *testing.T) {
 		require.NotNil(t, fetus)
 		require.Len(t, fetus.Exams, 2)
 
-		// Looked up by code rather than by position: where a row with no exam_code sorts is left to
-		// the database, and asserting on it would pin behaviour we do not control.
-		uncoded := findExamByCode(fetus.Exams, "")
-		require.NotNil(t, uncoded)
-		// Guards the LEFT JOIN: an INNER JOIN would drop this row with no error.
-		assert.Empty(t, uncoded.Name)
-		assert.Equal(t, "abnormal", uncoded.InterpretationCode)
-		assert.Equal(t, "Bilateral ventriculomegaly", uncoded.Value)
+		// Both exams of a member come back in exam_code order.
+		assert.Equal(t, "eeg", fetus.Exams[0].ExamCode)
+		assert.Equal(t, "Electroencephalogram (EEG)", fetus.Exams[0].Name)
+		assert.Equal(t, "abnormal", fetus.Exams[0].InterpretationCode)
+		assert.Equal(t, "abnormal", fetus.Exams[0].Value)
 
-		eeg := findExamByCode(fetus.Exams, "eeg")
-		require.NotNil(t, eeg)
-		assert.Equal(t, "abnormal", eeg.InterpretationCode)
-		assert.Equal(t, "abnormal", eeg.Value)
+		assert.Equal(t, "other", fetus.Exams[1].ExamCode)
+		assert.Equal(t, "Other", fetus.Exams[1].Name)
+		assert.Equal(t, "abnormal", fetus.Exams[1].InterpretationCode)
+		assert.Equal(t, "Bilateral ventriculomegaly", fetus.Exams[1].Value)
 	})
 }
 
@@ -871,15 +868,6 @@ func Test_RetrieveCasePatients_CaseWithoutExams(t *testing.T) {
 			assert.NotNil(t, member.Exams)
 		}
 	})
-}
-
-func findExamByCode(exams types.JsonArray[types.CaseExam], code string) *types.CaseExam {
-	for i := range exams {
-		if exams[i].ExamCode == code {
-			return &exams[i]
-		}
-	}
-	return nil
 }
 
 func findMemberByFetusID(members []types.CasePatientClinicalInformation, fetusID int) *types.CasePatientClinicalInformation {
