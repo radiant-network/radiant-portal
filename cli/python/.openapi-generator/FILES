@@ -39,6 +39,7 @@ docs/CreateCaseBatchBody.md
 docs/CreateOccurrenceNoteInput.md
 docs/CreateOrganizationRequest.md
 docs/CreatePatientBatchBody.md
+docs/CreateRoleRequest.md
 docs/CreateSampleBatchBody.md
 docs/CreateSequencingExperimentBatchBody.md
 docs/CreateUserRequest.md
@@ -215,6 +216,7 @@ radiant_python/models/create_case_batch_body.py
 radiant_python/models/create_occurrence_note_input.py
 radiant_python/models/create_organization_request.py
 radiant_python/models/create_patient_batch_body.py
+radiant_python/models/create_role_request.py
 radiant_python/models/create_sample_batch_body.py
 radiant_python/models/create_sequencing_experiment_batch_body.py
 radiant_python/models/create_user_request.py

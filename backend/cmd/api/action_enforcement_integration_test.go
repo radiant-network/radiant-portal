@@ -218,6 +218,7 @@ var expectedTenantAnyActions = map[string][]string{
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in
 // setupRouter. Reads are can_search_case; writes/files/ingest are the org-scoped actions.
 var expectedTenantActions = map[string]string{
+	"POST /:tenant/roles":                                                            types.ActionManageRole,
 	"GET /:tenant/users":                                                             types.ActionManageUser,
 	"POST /:tenant/users":                                                            types.ActionManageUser,
 	"PUT /:tenant/users/:user_id":                                                    types.ActionManageUser,

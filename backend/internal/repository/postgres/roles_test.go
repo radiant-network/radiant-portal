@@ -161,6 +161,309 @@ func Test_RolesRepository_ListTenantRoles_CountsHoldersAcrossOrganizations(t *te
 	})
 }
 
+// withScratchTenant runs fn against a tenant of its own, so creating roles never disturbs the
+// read tests that assert radiant's and tenant_b's exact role sets in parallel. Dropping the role
+// cascades role_action.
+func withScratchTenant(t *testing.T, env *testutils.Env, code string, fn func(repo *RolesRepository, tenant string)) {
+	t.Helper()
+	defer func() {
+		env.Postgres.Exec("DELETE FROM role WHERE tenant_code = ?", code)
+		env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
+	}()
+	require.NoError(t, env.Postgres.Exec("INSERT INTO tenant (code, name) VALUES (?, ?)", code, code).Error)
+	fn(NewRolesRepository(database.PostgresDB{DB: env.Postgres}), code)
+}
+
+func Test_RolesRepository_CreateRole_InsertsRoleWithItsActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_mixed", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:          "clinical_reviewer",
+				NameEn:        "Clinical Reviewer",
+				DescriptionEn: "Full clinical work as one role.",
+				Actions:       []string{types.ActionSearchCase, types.ActionReadPII},
+			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
+			require.NoError(t, err)
+			require.NotNil(t, created)
+
+			assert.Equal(t, "clinical_reviewer", created.Code)
+			assert.Equal(t, "Clinical Reviewer", created.Name)
+			assert.Equal(t, "Full clinical work as one role.", created.Description)
+			assert.False(t, created.IsDefault, "a role created through the API is never locked")
+			assert.Equal(t, types.RoleScopeMixed, created.Scope, "one tenant- and one org-scoped action")
+			assert.EqualValues(t, 0, created.AssignedUsersCount)
+			assert.ElementsMatch(t,
+				[]string{types.ActionSearchCase, types.ActionReadPII},
+				actionCodes(created))
+			for _, action := range created.Actions {
+				assert.NotEmpty(t, action.Name, "action %q carries its labels, as on the read path", action.Code)
+			}
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_DerivesTenantScopeFromActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_tenant_scope", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:    "browser",
+				NameEn:  "Browser",
+				Actions: []string{types.ActionSearchCase, types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "browser")
+			require.NoError(t, err)
+			require.NotNil(t, created)
+			assert.Equal(t, types.RoleScopeTenant, created.Scope, "no org-scoped action demands no organization")
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_OmittedDescriptionIsStoredAsNull(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_no_desc", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:    "terse",
+				NameEn:  "Terse",
+				Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			created, err := repo.GetTenantRole(t.Context(), tenant, "terse")
+			require.NoError(t, err)
+			require.NotNil(t, created)
+			assert.Empty(t, created.Description)
+
+			var isNull bool
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT description_en IS NULL FROM role WHERE tenant_code = ? AND code = ?`,
+				tenant, "terse").Scan(&isNull).Error)
+			assert.True(t, isNull, "an omitted description stays NULL, as on the seeded roles")
+
+			var frIsNull bool
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT description_fr IS NULL FROM role WHERE tenant_code = ? AND code = ?`,
+				tenant, "terse").Scan(&frIsNull).Error)
+			assert.True(t, frIsNull, "the mirrored French description is NULL too, not an empty string")
+		})
+	})
+}
+
+type storedRoleLabels struct {
+	NameEn        string
+	NameFr        string
+	DescriptionEn string
+	DescriptionFr string
+}
+
+func readRoleLabels(t *testing.T, env *testutils.Env, tenant, code string) storedRoleLabels {
+	t.Helper()
+	var stored storedRoleLabels
+	require.NoError(t, env.Postgres.Raw(
+		`SELECT name_en, name_fr, description_en, description_fr
+		 FROM role WHERE tenant_code = ? AND code = ?`, tenant, code).Scan(&stored).Error)
+	return stored
+}
+
+func Test_RolesRepository_CreateRole_StoresTheSuppliedFrenchLabels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_locales_fr", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:          "clinical_reviewer",
+				NameEn:        "Clinical Reviewer",
+				NameFr:        "Réviseur clinique",
+				DescriptionEn: "Full clinical work as one role.",
+				DescriptionFr: "Travail clinique complet en un seul rôle.",
+				Actions:       []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			stored := readRoleLabels(t, env, tenant, "clinical_reviewer")
+			assert.Equal(t, "Clinical Reviewer", stored.NameEn)
+			assert.Equal(t, "Réviseur clinique", stored.NameFr)
+			assert.Equal(t, "Full clinical work as one role.", stored.DescriptionEn)
+			assert.Equal(t, "Travail clinique complet en un seul rôle.", stored.DescriptionFr)
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_FallsBackToEnglishLabels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_locales", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:          "clinical_reviewer",
+				NameEn:        "Clinical Reviewer",
+				DescriptionEn: "Full clinical work as one role.",
+				Actions:       []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			stored := readRoleLabels(t, env, tenant, "clinical_reviewer")
+			assert.Equal(t, "Clinical Reviewer", stored.NameEn)
+			assert.Equal(t, "Clinical Reviewer", stored.NameFr)
+			assert.Equal(t, "Full clinical work as one role.", stored.DescriptionEn)
+			assert.Equal(t, "Full clinical work as one role.", stored.DescriptionFr)
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_DuplicateSuppliedFrenchNameIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_dup_fr", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "reviewer_one", NameEn: "Reviewer One", NameFr: "Réviseur",
+				Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			// Distinct English names, same French one refused on the name_fr index.
+			err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "reviewer_two", NameEn: "Reviewer Two", NameFr: "réviseur",
+				Actions: []string{types.ActionViewKb},
+			})
+			assert.ErrorIs(t, err, types.ErrRoleNameExists)
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_ClashWithSeededFrenchNameIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		// Precondition: the seeded role carries that French name and an unrelated English one.
+		var seeded struct {
+			NameEn string
+			NameFr string
+		}
+		require.NoError(t, env.Postgres.Raw(
+			`SELECT name_en, name_fr FROM role WHERE tenant_code = ? AND code = 'geneticist'`,
+			types.DefaultTenantCode).Scan(&seeded).Error)
+		require.Equal(t, "Geneticist", seeded.NameEn)
+		require.Equal(t, "Généticien", seeded.NameFr)
+
+		err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
+			Code: "zz_clash_fr", NameEn: "Généticien", Actions: []string{types.ActionViewKb},
+		})
+		assert.ErrorIs(t, err, types.ErrRoleNameExists,
+			"a custom role may not take a seeded role's French name either")
+
+		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "zz_clash_fr")
+		require.NoError(t, err)
+		assert.Nil(t, role)
+	})
+}
+
+func Test_RolesRepository_CreateRole_DuplicateCodeIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_dup_code", func(repo *RolesRepository, tenant string) {
+			req := types.CreateRoleRequest{Code: "twice", NameEn: "First", Actions: []string{types.ActionViewKb}}
+			err := repo.CreateRole(t.Context(), tenant, req)
+			require.NoError(t, err)
+
+			req.NameEn = "Second"
+			err = repo.CreateRole(t.Context(), tenant, req)
+			assert.ErrorIs(t, err, types.ErrRoleCodeExists)
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_DuplicateNameIsRefusedCaseInsensitively(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_dup_name", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "reviewer_one", NameEn: "Clinical Reviewer", Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			// Different code, same name in different case: identical to a reader, so refused.
+			err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "reviewer_two", NameEn: "clinical reviewer", Actions: []string{types.ActionViewKb},
+			})
+			assert.ErrorIs(t, err, types.ErrRoleNameExists)
+
+			var count int64
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT count(*) FROM role WHERE tenant_code = ?`, tenant).Scan(&count).Error)
+			assert.EqualValues(t, 1, count, "the refused create must leave nothing behind")
+		})
+	})
+}
+
+// A refused create writes nothing, so this can run against radiant without disturbing the read
+// tests that assert its exact role set.
+func Test_RolesRepository_CreateRole_ClashWithSeededRoleNameIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
+			Code: "zz_clash_geneticist", NameEn: "geneticist", Actions: []string{types.ActionViewKb},
+		})
+		assert.ErrorIs(t, err, types.ErrRoleNameExists, "a custom role may not take a seeded role's name")
+
+		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "zz_clash_geneticist")
+		require.NoError(t, err)
+		assert.Nil(t, role)
+	})
+}
+
+func Test_RolesRepository_CreateRole_ReservedActionIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_reserved", func(repo *RolesRepository, tenant string) {
+			// can_manage_user is grantable = false, which is what blocks duplicating tenant_admin.
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:    "almost_admin",
+				NameEn:  "Almost Admin",
+				Actions: []string{types.ActionManageOrg, types.ActionManageUser},
+			})
+			require.ErrorIs(t, err, types.ErrRoleActionsNotGrantable)
+			assert.Contains(t, err.Error(), types.ActionManageUser, "the refused action is named")
+			assert.NotContains(t, err.Error(), types.ActionManageOrg, "a grantable action is not")
+
+			role, err := repo.GetTenantRole(t.Context(), tenant, "almost_admin")
+			require.NoError(t, err)
+			assert.Nil(t, role, "nothing is written when an action is refused")
+		})
+	})
+}
+
+func Test_RolesRepository_CreateRole_UnknownActionIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_unknown", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code:    "typo",
+				NameEn:  "Typo",
+				Actions: []string{types.ActionViewKb, "can_do_everything"},
+			})
+			require.ErrorIs(t, err, types.ErrRoleActionsNotGrantable)
+			assert.Contains(t, err.Error(), "can_do_everything")
+
+			role, err := repo.GetTenantRole(t.Context(), tenant, "typo")
+			require.NoError(t, err)
+			assert.Nil(t, role)
+		})
+	})
+}
+
+// The name index is per tenant, so the same role name in two tenants is not a clash.
+func Test_RolesRepository_CreateRole_SameNameInAnotherTenantIsAllowed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_iso_a", func(repo *RolesRepository, tenantA string) {
+			withScratchTenant(t, env, "zz_create_iso_b", func(_ *RolesRepository, tenantB string) {
+				req := types.CreateRoleRequest{Code: "shared", NameEn: "Shared", Actions: []string{types.ActionViewKb}}
+
+				err := repo.CreateRole(t.Context(), tenantA, req)
+				require.NoError(t, err)
+				err = repo.CreateRole(t.Context(), tenantB, req)
+				assert.NoError(t, err, "roles are keyed per tenant, so this is a different role")
+			})
+		})
+	})
+}
+
 func Test_RolesRepository_GetTenantRole_ReturnsRoleWithItsActions(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})

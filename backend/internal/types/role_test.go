@@ -1,0 +1,167 @@
+package types
+
+import (
+	"encoding/json"
+	"strings"
+	"testing"
+)
+
+func validCreateRoleRequest() CreateRoleRequest {
+	return CreateRoleRequest{
+		Code:          "clinical_reviewer",
+		NameEn:        "Clinical Reviewer",
+		DescriptionEn: "Full clinical work as one role.",
+		Actions:       []string{ActionSearchCase, ActionReadPII},
+	}
+}
+
+func Test_CreateRoleRequest_Validate_AcceptsValidCodes(t *testing.T) {
+	// Lowercase, must start with a letter, digits and underscores allowed, up to 50 characters.
+	valid := []string{"a", "member", "clinical_reviewer", "role_2", "r0", strings.Repeat("a", 50)}
+	for _, code := range valid {
+		req := validCreateRoleRequest()
+		req.Code = TrimmedString(code)
+		if err := req.Validate(); err != nil {
+			t.Errorf("Validate(code=%q) = %v; want nil", code, err)
+		}
+	}
+}
+
+func Test_CreateRoleRequest_Validate_RejectsInvalidCodes(t *testing.T) {
+	// Uppercase and dashes are accepted for org codes but not here: a role code is shared
+	// vocabulary with the seeded roles, which are all lowercase.
+	invalid := []string{"", "Clinical", "CLINICAL", "clinical-reviewer", "9role", "_role", "role x", "role.x", strings.Repeat("a", 51)}
+	for _, code := range invalid {
+		req := validCreateRoleRequest()
+		req.Code = TrimmedString(code)
+		if err := req.Validate(); err == nil {
+			t.Errorf("Validate(code=%q) = nil; want error", code)
+		}
+	}
+}
+
+func Test_CreateRoleRequest_Validate_RejectsBlankName(t *testing.T) {
+	for _, name := range []string{"", "   ", "\t"} {
+		req := validCreateRoleRequest()
+		req.NameEn = TrimmedString(name)
+		if err := req.Validate(); err == nil {
+			t.Errorf("Validate(name=%q) = nil; want error", name)
+		}
+	}
+}
+
+func Test_CreateRoleRequest_Validate_RejectsEmptyActions(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.Actions = []string{}
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions=[]) = nil; want error — a role binding no action grants nothing")
+	}
+
+	req.Actions = nil
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions=nil) = nil; want error")
+	}
+}
+
+func Test_CreateRoleRequest_Validate_RejectsBlankAction(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.Actions = []string{ActionSearchCase, "  "}
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions with a blank entry) = nil; want error")
+	}
+}
+
+func Test_CreateRoleRequest_Validate_RejectsDuplicateAction(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.Actions = []string{ActionSearchCase, ActionReadPII, ActionSearchCase}
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("Validate(actions with a duplicate) = nil; want error")
+	}
+	if !strings.Contains(err.Error(), ActionSearchCase) {
+		t.Errorf("Validate() error = %q; want it to name the duplicated action %q", err, ActionSearchCase)
+	}
+}
+
+func Test_CreateRoleRequest_UnmarshalTrimsStoredFields(t *testing.T) {
+	var req CreateRoleRequest
+	body := `{"code":"  clinical_reviewer  ","name_en":"  Clinical Reviewer  ","name_fr":"  Réviseur clinique  ",
+	          "description_en":"  Full clinical work.  ","description_fr":"  Travail clinique complet.  ",
+	          "actions":["can_view_kb"]}`
+	if err := json.Unmarshal([]byte(body), &req); err != nil {
+		t.Fatalf("Unmarshal() = %v; want nil", err)
+	}
+
+	if req.Code != "clinical_reviewer" {
+		t.Errorf("Code = %q; want %q", req.Code, "clinical_reviewer")
+	}
+	if req.NameEn != "Clinical Reviewer" {
+		t.Errorf("NameEn = %q; want %q", req.NameEn, "Clinical Reviewer")
+	}
+	if req.NameFr != "Réviseur clinique" {
+		t.Errorf("NameFr = %q; want %q", req.NameFr, "Réviseur clinique")
+	}
+	if req.DescriptionEn != "Full clinical work." {
+		t.Errorf("DescriptionEn = %q; want %q", req.DescriptionEn, "Full clinical work.")
+	}
+	if req.DescriptionFr != "Travail clinique complet." {
+		t.Errorf("DescriptionFr = %q; want %q", req.DescriptionFr, "Travail clinique complet.")
+	}
+	if err := req.Validate(); err != nil {
+		t.Errorf("Validate() = %v; want nil — the padded code is valid once trimmed", err)
+	}
+}
+
+func Test_CreateRoleRequest_FrenchLabels_UseTheSuppliedValues(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.NameFr = "Réviseur clinique"
+	req.DescriptionFr = "Travail clinique complet."
+
+	if got := req.FrenchName(); got != "Réviseur clinique" {
+		t.Errorf("FrenchName() = %q; want %q", got, "Réviseur clinique")
+	}
+	if got := req.FrenchDescription(); got != "Travail clinique complet." {
+		t.Errorf("FrenchDescription() = %q; want %q", got, "Travail clinique complet.")
+	}
+}
+
+func Test_CreateRoleRequest_FrenchLabels_FallBackToEnglishWhenOmitted(t *testing.T) {
+	req := validCreateRoleRequest()
+
+	if got := req.FrenchName(); got != "Clinical Reviewer" {
+		t.Errorf("FrenchName() = %q; want the English name %q", got, "Clinical Reviewer")
+	}
+	if got := req.FrenchDescription(); got != "Full clinical work as one role." {
+		t.Errorf("FrenchDescription() = %q; want the English description", got)
+	}
+}
+
+func Test_CreateRoleRequest_FrenchLabels_BlankFallsBackToEnglish(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.NameFr = "   "
+	req.DescriptionFr = "   "
+
+	if got := req.FrenchName(); got != "Clinical Reviewer" {
+		t.Errorf("FrenchName() = %q; want the English name — whitespace is not a translation", got)
+	}
+	if got := req.FrenchDescription(); got != "Full clinical work as one role." {
+		t.Errorf("FrenchDescription() = %q; want the English description", got)
+	}
+}
+
+func Test_CreateRoleRequest_FrenchDescription_EmptyWhenNeitherSupplied(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.DescriptionEn = ""
+
+	if got := req.FrenchDescription(); got != "" {
+		t.Errorf("FrenchDescription() = %q; want empty so the column stays NULL", got)
+	}
+}
+
+func Test_CreateRoleRequest_Validate_AllowsEmptyDescription(t *testing.T) {
+	req := validCreateRoleRequest()
+	req.DescriptionEn = ""
+	if err := req.Validate(); err != nil {
+		t.Errorf("Validate(description=\"\") = %v; want nil — the description is optional", err)
+	}
+}
