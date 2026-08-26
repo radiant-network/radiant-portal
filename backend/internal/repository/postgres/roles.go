@@ -26,11 +26,12 @@ type roleAction struct {
 	Scope       string
 }
 
-// ListTenantRoles returns every role defined in the tenant — the seeded ones and the tenant's own
+// ListTenantRoles returns the tenant's assignable roles — the seeded ones and the tenant's own
 // custom ones — each with the actions it maps, the number of users holding it and the number of
-// organizations it is assigned at. Roles are a small bounded set, so the whole list is returned
-// unpaged. Both counts cover the same population as the users list, so they exclude
-// machine-to-machine accounts too.
+// organizations it is assigned at. The member role is left out: every user holds it implicitly, so
+// it is neither assignable nor revocable and has nothing to offer a catalog or a role picker.
+// Roles are a small bounded set, so the whole list is returned unpaged. Both counts cover the same
+// population as the users list, so they exclude machine-to-machine accounts too.
 func (r *RolesRepository) ListTenantRoles(ctx context.Context, tenantCode string) ([]types.RoleResult, error) {
 	return r.tenantRoles(ctx, tenantCode, "")
 }
@@ -195,8 +196,9 @@ func ungrantableActions(tx *gorm.DB, actions []string) ([]string, error) {
 }
 
 // tenantRoles loads the tenant's roles with their actions, the scope those actions derive, and
-// their holder and organization counts. An empty roleCode returns the whole catalog; a non-empty
-// one narrows to that single role, so both reads share one definition of what a role looks like.
+// their holder and organization counts. An empty roleCode returns the whole catalog minus the
+// implicit member role; a non-empty one narrows to that single role, so both reads share one
+// definition of what a role looks like.
 //
 // The organization count is the number of the tenant's organizations where at least one user holds
 // the role, so the join expands a '*' grant to every organization of the tenant, exactly like
@@ -225,6 +227,9 @@ func (r *RolesRepository) tenantRoles(ctx context.Context, tenantCode, roleCode 
 	if roleCode != "" {
 		query += ` AND r.code = ?`
 		args = append(args, roleCode)
+	} else {
+		query += ` AND r.code <> ?`
+		args = append(args, types.RoleMember)
 	}
 	query += `
 		ORDER BY r.is_default DESC, r.name_en, r.code`
