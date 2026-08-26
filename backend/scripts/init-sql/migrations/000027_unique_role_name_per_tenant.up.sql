@@ -32,7 +32,7 @@ BEGIN
     END IF;
 END $$;
 
-CREATE UNIQUE INDEX IF NOT EXISTS role_unique_name_per_tenant
+CREATE UNIQUE INDEX IF NOT EXISTS role_unique_name_en_per_tenant
     ON public.role (tenant_code, lower(name_en));
 
 CREATE UNIQUE INDEX IF NOT EXISTS role_unique_name_fr_per_tenant

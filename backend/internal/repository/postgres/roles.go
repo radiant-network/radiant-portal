@@ -51,7 +51,7 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 }
 
 const (
-	roleNameEnUniqueIndex = "role_unique_name_per_tenant"
+	roleNameEnUniqueIndex = "role_unique_name_en_per_tenant"
 	roleNameFrUniqueIndex = "role_unique_name_fr_per_tenant"
 )
 
