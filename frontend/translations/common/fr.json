@@ -67,6 +67,45 @@
         "name": "Nom"
       }
     },
+    "roles": {
+      "add": "Ajouter un rôle",
+      "count_one": "{{count}} rôle",
+      "count_other": "{{count}} rôles",
+      "default_note": "Les rôles par défaut ne peuvent être ni modifiés ni supprimés.",
+      "filters": {
+        "custom_only": "Rôles personnalisés seulement",
+        "search_placeholder": "Rechercher par nom ou description"
+      },
+      "permissions": {
+        "description": "Description des permissions et portée de ce rôle",
+        "empty": "Ce rôle n'accorde aucune permission.",
+        "locked": "Non modifiable ni supprimable"
+      },
+      "scope": {
+        "network": "Réseau",
+        "organization": "Organisation"
+      },
+      "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
+      "table": {
+        "actions": "Autres actions",
+        "assigned_to": "Attribué à",
+        "delete": "Supprimer le rôle",
+        "duplicate": "Dupliquer",
+        "edit": "Modifier le rôle",
+        "members_count_one": "{{count}} membre",
+        "members_count_other": "{{count}} membres",
+        "orgs_count_one": "{{count}} organisation",
+        "orgs_count_other": "{{count}} organisations",
+        "permissions": "Permissions",
+        "permissions_count_one": "{{count}} permission",
+        "permissions_count_other": "{{count}} permissions",
+        "role": "Rôle",
+        "scope": "Portée",
+        "view": "Voir",
+        "view_role": "Voir le rôle"
+      },
+      "view_permissions": "Voir les permissions"
+    },
     "sections": {
       "group_label": "Paramètres du réseau",
       "organizations": "Organisations",
@@ -134,18 +173,8 @@
         },
         "organizations": "Dans ces organisations",
         "organizations_placeholder": "Organisations",
-        "permissions": {
-          "description": "Description des permissions et portée de ce rôle",
-          "empty": "Ce rôle n'accorde aucune permission.",
-          "locked": "Non modifiable ni supprimable"
-        },
-        "scope": {
-          "network": "Réseau",
-          "organization": "Organisation"
-        },
         "subtitle": "Attribuez des rôles pour activer des actions supplémentaires — les rôles ajoutent des permissions, ils n'en retirent jamais.",
-        "title": "Rôles du membre",
-        "view_permissions": "Voir les permissions"
+        "title": "Rôles du membre"
       },
       "subtitle": "Gérez les membres et les attributions des rôles.",
       "table": {

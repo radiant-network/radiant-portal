@@ -41,15 +41,15 @@ function RolePermissionsDialog({ role, onOpenChange }: RolePermissionsDialogProp
                     <LockIcon className="size-4 text-muted-foreground" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>{t('admin.users.roles.permissions.locked')}</TooltipContent>
+                <TooltipContent>{t('admin.roles.permissions.locked')}</TooltipContent>
               </Tooltip>
             )}
           </DialogTitle>
-          <DialogDescription>{t('admin.users.roles.permissions.description')}</DialogDescription>
+          <DialogDescription>{t('admin.roles.permissions.description')}</DialogDescription>
         </DialogHeader>
         <DialogBody className="space-y-4 overflow-y-auto">
           {actions.length === 0 && (
-            <p className="text-sm text-muted-foreground">{t('admin.users.roles.permissions.empty')}</p>
+            <p className="text-sm text-muted-foreground">{t('admin.roles.permissions.empty')}</p>
           )}
           {actions.map(action => (
             <div key={action.code} className="space-y-1">
