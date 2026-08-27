@@ -51,9 +51,22 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 }
 
 const (
+	roleCodePrimaryKey    = "role_pkey"
 	roleNameEnUniqueIndex = "role_unique_name_en_per_tenant"
 	roleNameFrUniqueIndex = "role_unique_name_fr_per_tenant"
 )
+
+func roleConflictField(err error) (string, bool) {
+	switch {
+	case uniqueViolationOn(err, roleCodePrimaryKey):
+		return types.RoleFieldCode, true
+	case uniqueViolationOn(err, roleNameEnUniqueIndex):
+		return types.RoleFieldNameEn, true
+	case uniqueViolationOn(err, roleNameFrUniqueIndex):
+		return types.RoleFieldNameFr, true
+	}
+	return "", false
+}
 
 // CreateRole inserts a custom role and its action mappings in one transaction, so a role never
 // lands without the actions that give it meaning.
@@ -78,11 +91,8 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 			tenantCode, req.Code.String(),
 			req.NameEn.String(), req.DescriptionEn.String(),
 			req.FrenchName(), req.FrenchDescription()).Error; err != nil {
-			switch {
-			case uniqueViolationOn(err, roleNameEnUniqueIndex), uniqueViolationOn(err, roleNameFrUniqueIndex):
-				return types.ErrRoleNameExists
-			case isUniqueViolation(err):
-				return types.ErrRoleCodeExists
+			if field, ok := roleConflictField(err); ok {
+				return &types.RoleConflictError{Field: field}
 			}
 			return fmt.Errorf("error creating role %q in tenant %q: %w", req.Code, tenantCode, err)
 		}

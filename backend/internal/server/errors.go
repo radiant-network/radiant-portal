@@ -50,6 +50,14 @@ func HandleConflictError(c *gin.Context, message string) {
 	c.JSON(http.StatusConflict, types.ApiError{Status: http.StatusConflict, Message: message})
 }
 
+func HandleFieldConflictError(c *gin.Context, message, field string) {
+	c.JSON(http.StatusConflict, types.ApiError{
+		Status:  http.StatusConflict,
+		Message: message,
+		Detail:  gin.H{"field": field},
+	})
+}
+
 func HandleUnprocessableEntityError(c *gin.Context, message string) {
 	c.JSON(http.StatusUnprocessableEntity, types.ApiError{Status: http.StatusUnprocessableEntity, Message: message})
 }

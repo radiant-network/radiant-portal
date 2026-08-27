@@ -10,11 +10,22 @@ import (
 // roleCodePattern is lowercase-only, starts with a letter, and allows digits and underscores up to the column's 50 characters.
 var roleCodePattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,49}$`)
 
-var (
-	ErrRoleCodeExists          = errors.New("role code already exists in this tenant")
-	ErrRoleNameExists          = errors.New("role name already exists in this tenant")
-	ErrRoleActionsNotGrantable = errors.New("actions cannot be granted to a custom role")
+var ErrRoleActionsNotGrantable = errors.New("actions cannot be granted to a custom role")
+
+// Fields a create-role conflict is reported on, named after the request's own JSON fields.
+const (
+	RoleFieldCode   = "code"
+	RoleFieldNameEn = "name_en"
+	RoleFieldNameFr = "name_fr"
 )
+
+type RoleConflictError struct {
+	Field string
+}
+
+func (e *RoleConflictError) Error() string {
+	return fmt.Sprintf("a role with the same %s already exists in this tenant", e.Field)
+}
 
 // CreateRoleRequest is the payload creating a custom role. The role's scope is not part of it —
 // it is derived from the actions and resolved at assignment (ADR §5.4).
