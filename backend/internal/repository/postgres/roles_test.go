@@ -356,9 +356,9 @@ func Test_RolesRepository_CreateRole_ClashWithSeededFrenchNameIsRefused(t *testi
 		err := repo.CreateRole(t.Context(), types.DefaultTenantCode, types.CreateRoleRequest{
 			Code: "zz_clash_fr", NameEn: "Généticien", Actions: []string{types.ActionViewKb},
 		})
-		assert.Equal(t, types.RoleFieldNameEn, conflictField(t, err),
-			"a custom role may not take a seeded role's French name either — and with no name_fr "+
-				"supplied, the value that collided came from name_en, so that is the field reported")
+		// The fallback copied name_en into name_fr, and it is the name_fr index that refuses it.
+		assert.Equal(t, types.RoleFieldNameFr, conflictField(t, err),
+			"a custom role may not take a seeded role's French name either")
 
 		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "zz_clash_fr")
 		require.NoError(t, err)
@@ -392,8 +392,8 @@ func Test_RolesRepository_CreateRole_DuplicateNameIsRefusedCaseInsensitively(t *
 			err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
 				Code: "reviewer_two", NameEn: "clinical reviewer", Actions: []string{types.ActionViewKb},
 			})
-			// The fallback copied name_en into name_fr, so both indexes collide; whichever
-			// Postgres reports, the field is name_en — the only name the request carried.
+			// The fallback copied name_en into name_fr, so both indexes collide and Postgres
+			// reports the first one it checks — name_en, created before name_fr in 000027.
 			assert.Equal(t, types.RoleFieldNameEn, conflictField(t, err))
 
 			var count int64

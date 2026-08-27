@@ -56,16 +56,13 @@ const (
 	roleNameFrUniqueIndex = "role_unique_name_fr_per_tenant"
 )
 
-func roleConflictField(err error, req types.CreateRoleRequest) (string, bool) {
+func roleConflictField(err error) (string, bool) {
 	switch {
 	case uniqueViolationOn(err, roleCodePrimaryKey):
 		return types.RoleFieldCode, true
 	case uniqueViolationOn(err, roleNameEnUniqueIndex):
 		return types.RoleFieldNameEn, true
 	case uniqueViolationOn(err, roleNameFrUniqueIndex):
-		if strings.TrimSpace(req.NameFr.String()) == "" {
-			return types.RoleFieldNameEn, true
-		}
 		return types.RoleFieldNameFr, true
 	}
 	return "", false
@@ -94,7 +91,7 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 			tenantCode, req.Code.String(),
 			req.NameEn.String(), req.DescriptionEn.String(),
 			req.FrenchName(), req.FrenchDescription()).Error; err != nil {
-			if field, ok := roleConflictField(err, req); ok {
+			if field, ok := roleConflictField(err); ok {
 				return &types.RoleConflictError{Field: field}
 			}
 			return fmt.Errorf("error creating role %q in tenant %q: %w", req.Code, tenantCode, err)
