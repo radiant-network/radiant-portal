@@ -124,6 +124,7 @@ docs/UpdateCaseBatch.md
 docs/UpdateCaseBatchBody.md
 docs/UpdateOccurrenceNoteInput.md
 docs/UpdateOrganizationRequest.md
+docs/UpdateRoleRequest.md
 docs/UpdateUserRequest.md
 docs/UserPreference.md
 docs/UserPreferencesApi.md
@@ -285,6 +286,7 @@ radiant_python/models/update_case_batch.py
 radiant_python/models/update_case_batch_body.py
 radiant_python/models/update_occurrence_note_input.py
 radiant_python/models/update_organization_request.py
+radiant_python/models/update_role_request.py
 radiant_python/models/update_user_request.py
 radiant_python/models/user_preference.py
 radiant_python/models/user_result.py

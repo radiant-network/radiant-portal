@@ -674,3 +674,308 @@ func Test_RolesRepository_GetTenantRole_CountsOrganizationsAndExpandsWildcardGra
 		assert.EqualValues(t, 6, role.AssignedOrgsCount, "alice at CHOP, dan at CHUSJ, wendy and carol at '*'")
 	})
 }
+
+func seedCustomRole(t *testing.T, repo *RolesRepository, tenant string, req types.CreateRoleRequest) {
+	t.Helper()
+	require.NoError(t, repo.CreateRole(t.Context(), tenant, req))
+}
+
+func Test_RolesRepository_UpdateRole_ReplacesLabelsAndActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_labels", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:          "clinical_reviewer",
+				NameEn:        "Clinical Reviewer",
+				DescriptionEn: "Full clinical work as one role.",
+				Actions:       []string{types.ActionSearchCase, types.ActionReadPII},
+			})
+
+			err := repo.UpdateRole(t.Context(), tenant, "clinical_reviewer", types.UpdateRoleRequest{
+				NameEn:        "Senior Clinical Reviewer",
+				NameFr:        "Réviseur clinique principal",
+				DescriptionEn: "Now with the knowledge base.",
+				DescriptionFr: "Avec la base de connaissances.",
+				Actions:       []string{types.ActionViewKb, types.ActionCommentVariant},
+			})
+			require.NoError(t, err)
+
+			updated, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
+			require.NoError(t, err)
+			require.NotNil(t, updated)
+			assert.Equal(t, "clinical_reviewer", updated.Code, "the code is immutable")
+			assert.Equal(t, "Senior Clinical Reviewer", updated.Name)
+			assert.Equal(t, "Now with the knowledge base.", updated.Description)
+			assert.False(t, updated.IsDefault, "an edited custom role stays custom")
+			assert.ElementsMatch(t,
+				[]string{types.ActionViewKb, types.ActionCommentVariant},
+				actionCodes(updated),
+				"the payload is the role's whole action set, so the previous two are gone")
+
+			stored := readRoleLabels(t, env, tenant, "clinical_reviewer")
+			assert.Equal(t, "Réviseur clinique principal", stored.NameFr)
+			assert.Equal(t, "Avec la base de connaissances.", stored.DescriptionFr)
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_RederivesScopeFromTheNewActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_scope", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "shifting",
+				NameEn:  "Shifting",
+				Actions: []string{types.ActionSearchCase, types.ActionViewKb},
+			})
+			before, err := repo.GetTenantRole(t.Context(), tenant, "shifting")
+			require.NoError(t, err)
+			require.Equal(t, types.RoleScopeTenant, before.Scope)
+
+			require.NoError(t, repo.UpdateRole(t.Context(), tenant, "shifting", types.UpdateRoleRequest{
+				NameEn:  "Shifting",
+				Actions: []string{types.ActionSearchCase, types.ActionReadPII},
+			}))
+
+			after, err := repo.GetTenantRole(t.Context(), tenant, "shifting")
+			require.NoError(t, err)
+			assert.Equal(t, types.RoleScopeMixed, after.Scope,
+				"scope is never stored, so adding an org-scoped action moves the role to mixed")
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_ClearedDescriptionBecomesNull(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_no_desc", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:          "terse",
+				NameEn:        "Terse",
+				DescriptionEn: "A description that is about to go away.",
+				Actions:       []string{types.ActionViewKb},
+			})
+
+			require.NoError(t, repo.UpdateRole(t.Context(), tenant, "terse", types.UpdateRoleRequest{
+				NameEn:  "Terse",
+				Actions: []string{types.ActionViewKb},
+			}))
+
+			var isNull bool
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT description_en IS NULL AND description_fr IS NULL FROM role WHERE tenant_code = ? AND code = ?`,
+				tenant, "terse").Scan(&isNull).Error)
+			assert.True(t, isNull, "an omitted description clears the column rather than leaving the old text")
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_FallsBackToEnglishLabels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_locales", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "clinical_reviewer",
+				NameEn:  "Clinical Reviewer",
+				NameFr:  "Réviseur clinique",
+				Actions: []string{types.ActionViewKb},
+			})
+
+			require.NoError(t, repo.UpdateRole(t.Context(), tenant, "clinical_reviewer", types.UpdateRoleRequest{
+				NameEn:        "Senior Reviewer",
+				DescriptionEn: "Full clinical work.",
+				Actions:       []string{types.ActionViewKb},
+			}))
+
+			stored := readRoleLabels(t, env, tenant, "clinical_reviewer")
+			assert.Equal(t, "Senior Reviewer", stored.NameEn)
+			assert.Equal(t, "Senior Reviewer", stored.NameFr,
+				"dropping the French name re-mirrors the English one, never leaves the stale translation")
+			assert.Equal(t, "Full clinical work.", stored.DescriptionFr)
+		})
+	})
+}
+
+// The unique name index is per tenant, so an edit that keeps the role's own name must not read as
+// a clash with itself.
+func Test_RolesRepository_UpdateRole_KeepingItsOwnNameSucceeds(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_same_name", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "clinical_reviewer",
+				NameEn:  "Clinical Reviewer",
+				NameFr:  "Réviseur clinique",
+				Actions: []string{types.ActionViewKb},
+			})
+
+			err := repo.UpdateRole(t.Context(), tenant, "clinical_reviewer", types.UpdateRoleRequest{
+				NameEn:        "Clinical Reviewer",
+				NameFr:        "Réviseur clinique",
+				DescriptionEn: "Only the description changed.",
+				Actions:       []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			updated, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
+			require.NoError(t, err)
+			assert.Equal(t, "Only the description changed.", updated.Description)
+		})
+	})
+}
+
+// The role keeps its holders across an edit: only the actions those holders get change, which is
+// what makes the UI's "changes access for N users" warning the whole story.
+func Test_RolesRepository_UpdateRole_PreservesTheGrantsOfItsHolders(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_grants", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "held",
+				NameEn:  "Held",
+				Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, env.Postgres.Exec(
+				`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				 VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', ?, NULL, 'held')`, tenant).Error)
+
+			require.NoError(t, repo.UpdateRole(t.Context(), tenant, "held", types.UpdateRoleRequest{
+				NameEn:  "Held",
+				Actions: []string{types.ActionSearchCase},
+			}))
+
+			updated, err := repo.GetTenantRole(t.Context(), tenant, "held")
+			require.NoError(t, err)
+			assert.EqualValues(t, 1, updated.AssignedUsersCount, "the holder keeps the role, only its actions moved")
+			assert.Equal(t, []string{types.ActionSearchCase}, actionCodes(updated))
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_UnknownRoleIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_missing", func(repo *RolesRepository, tenant string) {
+			err := repo.UpdateRole(t.Context(), tenant, "no_such_role", types.UpdateRoleRequest{
+				NameEn:  "No Such Role",
+				Actions: []string{types.ActionViewKb},
+			})
+			assert.ErrorIs(t, err, types.ErrRoleNotFound)
+		})
+	})
+}
+
+// A role of another tenant reads as absent here, exactly as it does on the read path: the role key
+// is (tenant_code, code), so an edit can never cross a tenant boundary.
+func Test_RolesRepository_UpdateRole_RoleOfAnotherTenantIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_cross", func(repo *RolesRepository, tenant string) {
+			err := repo.UpdateRole(t.Context(), tenant, "researcher", types.UpdateRoleRequest{
+				NameEn:  "Hijacked",
+				Actions: []string{types.ActionViewKb},
+			})
+			require.ErrorIs(t, err, types.ErrRoleNotFound, "radiant's researcher is invisible from another tenant")
+
+			stored := readRoleLabels(t, env, types.DefaultTenantCode, "researcher")
+			assert.Equal(t, "Researcher", stored.NameEn, "radiant's own role is untouched")
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_DefaultRoleIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		// geneticist is seeded by migration 000012 with is_default = true, so it is locked.
+		err := repo.UpdateRole(t.Context(), types.DefaultTenantCode, "geneticist", types.UpdateRoleRequest{
+			NameEn:  "Geneticist Redefined",
+			Actions: []string{types.ActionViewKb},
+		})
+		require.ErrorIs(t, err, types.ErrRoleIsDefault)
+
+		stored := readRoleLabels(t, env, types.DefaultTenantCode, "geneticist")
+		assert.Equal(t, "Geneticist", stored.NameEn, "the refusal happens before anything is written")
+
+		role, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "geneticist")
+		require.NoError(t, err)
+		assert.NotEmpty(t, role.Actions, "its action mappings survive too")
+	})
+}
+
+func Test_RolesRepository_UpdateRole_UngrantableActionIsRefusedAndChangesNothing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_reserved", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "almost_admin",
+				NameEn:  "Almost Admin",
+				Actions: []string{types.ActionViewKb},
+			})
+
+			// Editing is not a way in for can_manage_user: refusing it here is what keeps
+			// tenant_admin un-duplicable after creation too.
+			err := repo.UpdateRole(t.Context(), tenant, "almost_admin", types.UpdateRoleRequest{
+				NameEn:  "Actually Admin",
+				Actions: []string{types.ActionViewKb, types.ActionManageUser},
+			})
+			require.ErrorIs(t, err, types.ErrRoleActionsNotGrantable)
+			assert.Contains(t, err.Error(), types.ActionManageUser)
+
+			unchanged, err := repo.GetTenantRole(t.Context(), tenant, "almost_admin")
+			require.NoError(t, err)
+			assert.Equal(t, "Almost Admin", unchanged.Name, "the transaction rolled back the whole edit")
+			assert.Equal(t, []string{types.ActionViewKb}, actionCodes(unchanged))
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_UnknownActionIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_unknown_action", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "reviewer",
+				NameEn:  "Reviewer",
+				Actions: []string{types.ActionViewKb},
+			})
+
+			err := repo.UpdateRole(t.Context(), tenant, "reviewer", types.UpdateRoleRequest{
+				NameEn:  "Reviewer",
+				Actions: []string{"can_do_anything"},
+			})
+			require.ErrorIs(t, err, types.ErrRoleActionsNotGrantable)
+			assert.Contains(t, err.Error(), "can_do_anything")
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_DuplicateEnglishNameIsConflict(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_clash_en", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code: "taken", NameEn: "Taken Name", Actions: []string{types.ActionViewKb},
+			})
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code: "mover", NameEn: "Mover", Actions: []string{types.ActionViewKb},
+			})
+
+			// Case-insensitive: the index is on lower(name_en).
+			err := repo.UpdateRole(t.Context(), tenant, "mover", types.UpdateRoleRequest{
+				NameEn:  "taken name",
+				Actions: []string{types.ActionViewKb},
+			})
+			assert.Equal(t, types.RoleFieldNameEn, conflictField(t, err))
+		})
+	})
+}
+
+func Test_RolesRepository_UpdateRole_DuplicateFrenchNameIsConflict(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_update_clash_fr", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code: "taken", NameEn: "Taken", NameFr: "Nom pris", Actions: []string{types.ActionViewKb},
+			})
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code: "mover", NameEn: "Mover", NameFr: "Déménageur", Actions: []string{types.ActionViewKb},
+			})
+
+			err := repo.UpdateRole(t.Context(), tenant, "mover", types.UpdateRoleRequest{
+				NameEn:  "Mover",
+				NameFr:  "Nom pris",
+				Actions: []string{types.ActionViewKb},
+			})
+			assert.Equal(t, types.RoleFieldNameFr, conflictField(t, err))
+		})
+	})
+}

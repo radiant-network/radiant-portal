@@ -239,6 +239,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	rolesGroup.GET("", requireAnyAction(types.ActionManageRole, types.ActionManageUser), server.ListRolesHandler(repoRoles))
 	rolesGroup.GET("/:code", requireAnyAction(types.ActionManageRole, types.ActionManageUser), server.GetRoleHandler(repoRoles))
 	rolesGroup.POST("", requireAction(types.ActionManageRole), server.PostRoleHandler(repoRoles))
+	rolesGroup.PUT("/:code", requireAction(types.ActionManageRole), server.PutRoleHandler(repoRoles))
 
 	// Tenant users administration, gated by can_manage_user. Distinct from the global /users group
 	// below, which serves the caller's own saved filters, sets and preferences.

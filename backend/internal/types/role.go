@@ -10,7 +10,11 @@ import (
 // roleCodePattern is lowercase-only, starts with a letter, and allows digits and underscores up to the column's 50 characters.
 var roleCodePattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,49}$`)
 
-var ErrRoleActionsNotGrantable = errors.New("actions cannot be granted to a custom role")
+var (
+	ErrRoleActionsNotGrantable = errors.New("actions cannot be granted to a custom role")
+	ErrRoleNotFound            = errors.New("role not found")
+	ErrRoleIsDefault           = errors.New("cannot edit a default role")
+)
 
 // Fields a create-role conflict is reported on, named after the request's own JSON fields.
 const (
@@ -41,31 +45,60 @@ type CreateRoleRequest struct {
 }
 
 func (r CreateRoleRequest) FrenchName() string {
-	if name := strings.TrimSpace(r.NameFr.String()); name != "" {
-		return name
-	}
-	return strings.TrimSpace(r.NameEn.String())
+	return frenchLabel(r.NameFr, r.NameEn)
 }
 
 func (r CreateRoleRequest) FrenchDescription() string {
-	if description := strings.TrimSpace(r.DescriptionFr.String()); description != "" {
-		return description
-	}
-	return strings.TrimSpace(r.DescriptionEn.String())
+	return frenchLabel(r.DescriptionFr, r.DescriptionEn)
 }
 
 func (r CreateRoleRequest) Validate() error {
 	if !roleCodePattern.MatchString(r.Code.String()) {
 		return fmt.Errorf("code %q is invalid: must start with a lowercase letter and contain only lowercase letters, digits, or underscores (max 50)", r.Code)
 	}
-	if strings.TrimSpace(r.NameEn.String()) == "" {
+	return validateRoleNameAndActions(r.NameEn, r.Actions)
+}
+
+// UpdateRoleRequest is the payload editing a custom role.
+// Every editable field is replaced, so an omitted description clears it and the actions listed become the role's entire action set.
+// @Description Payload to edit a custom role of a tenant
+// @Name UpdateRoleRequest
+type UpdateRoleRequest struct {
+	NameEn        TrimmedString `json:"name_en" binding:"required"`
+	NameFr        TrimmedString `json:"name_fr,omitempty"`
+	DescriptionEn TrimmedString `json:"description_en,omitempty"`
+	DescriptionFr TrimmedString `json:"description_fr,omitempty"`
+	Actions       []string      `json:"actions" binding:"required"`
+}
+
+func (r UpdateRoleRequest) FrenchName() string {
+	return frenchLabel(r.NameFr, r.NameEn)
+}
+
+func (r UpdateRoleRequest) FrenchDescription() string {
+	return frenchLabel(r.DescriptionFr, r.DescriptionEn)
+}
+
+func (r UpdateRoleRequest) Validate() error {
+	return validateRoleNameAndActions(r.NameEn, r.Actions)
+}
+
+func frenchLabel(french, english TrimmedString) string {
+	if label := strings.TrimSpace(french.String()); label != "" {
+		return label
+	}
+	return strings.TrimSpace(english.String())
+}
+
+func validateRoleNameAndActions(nameEn TrimmedString, actions []string) error {
+	if strings.TrimSpace(nameEn.String()) == "" {
 		return fmt.Errorf("name_en must not be blank")
 	}
-	if len(r.Actions) == 0 {
+	if len(actions) == 0 {
 		return fmt.Errorf("actions must not be empty")
 	}
 	seen := map[string]bool{}
-	for _, action := range r.Actions {
+	for _, action := range actions {
 		if strings.TrimSpace(action) == "" {
 			return fmt.Errorf("action must not be blank")
 		}

@@ -165,3 +165,139 @@ func Test_CreateRoleRequest_Validate_AllowsEmptyDescription(t *testing.T) {
 		t.Errorf("Validate(description=\"\") = %v; want nil — the description is optional", err)
 	}
 }
+
+func validUpdateRoleRequest() UpdateRoleRequest {
+	return UpdateRoleRequest{
+		NameEn:        "Clinical Reviewer",
+		DescriptionEn: "Full clinical work as one role.",
+		Actions:       []string{ActionSearchCase, ActionReadPII},
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_AcceptsAValidPayload(t *testing.T) {
+	if err := validUpdateRoleRequest().Validate(); err != nil {
+		t.Errorf("Validate() = %v; want nil", err)
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_RejectsBlankName(t *testing.T) {
+	for _, name := range []string{"", "   ", "\t"} {
+		req := validUpdateRoleRequest()
+		req.NameEn = TrimmedString(name)
+		if err := req.Validate(); err == nil {
+			t.Errorf("Validate(name=%q) = nil; want error", name)
+		}
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_RejectsEmptyActions(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.Actions = []string{}
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions=[]) = nil; want error — an edit may not strip a role down to nothing")
+	}
+
+	req.Actions = nil
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions=nil) = nil; want error")
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_RejectsBlankAction(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.Actions = []string{ActionSearchCase, "  "}
+	if err := req.Validate(); err == nil {
+		t.Error("Validate(actions with a blank entry) = nil; want error")
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_RejectsDuplicateAction(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.Actions = []string{ActionSearchCase, ActionReadPII, ActionSearchCase}
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("Validate(actions with a duplicate) = nil; want error")
+	}
+	if !strings.Contains(err.Error(), ActionSearchCase) {
+		t.Errorf("Validate() error = %q; want it to name the duplicated action %q", err, ActionSearchCase)
+	}
+}
+
+func Test_UpdateRoleRequest_Validate_AllowsEmptyDescription(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.DescriptionEn = ""
+	if err := req.Validate(); err != nil {
+		t.Errorf("Validate(description=\"\") = %v; want nil — clearing the description is a legal edit", err)
+	}
+}
+
+// The code lives in the path, so an edit payload carrying one is simply ignored rather than
+// validated — nothing here can reject a role whose stored code predates the current pattern.
+func Test_UpdateRoleRequest_UnmarshalIgnoresCode(t *testing.T) {
+	var req UpdateRoleRequest
+	body := `{"code":"NOT-A-VALID-CODE","name_en":"Clinical Reviewer","actions":["can_view_kb"]}`
+	if err := json.Unmarshal([]byte(body), &req); err != nil {
+		t.Fatalf("Unmarshal() = %v; want nil", err)
+	}
+	if err := req.Validate(); err != nil {
+		t.Errorf("Validate() = %v; want nil — the code is not part of the edit payload", err)
+	}
+}
+
+func Test_UpdateRoleRequest_UnmarshalTrimsStoredFields(t *testing.T) {
+	var req UpdateRoleRequest
+	body := `{"name_en":"  Clinical Reviewer  ","name_fr":"  Réviseur clinique  ",
+	          "description_en":"  Full clinical work.  ","description_fr":"  Travail clinique complet.  ",
+	          "actions":["can_view_kb"]}`
+	if err := json.Unmarshal([]byte(body), &req); err != nil {
+		t.Fatalf("Unmarshal() = %v; want nil", err)
+	}
+
+	if req.NameEn != "Clinical Reviewer" {
+		t.Errorf("NameEn = %q; want %q", req.NameEn, "Clinical Reviewer")
+	}
+	if req.NameFr != "Réviseur clinique" {
+		t.Errorf("NameFr = %q; want %q", req.NameFr, "Réviseur clinique")
+	}
+	if req.DescriptionEn != "Full clinical work." {
+		t.Errorf("DescriptionEn = %q; want %q", req.DescriptionEn, "Full clinical work.")
+	}
+	if req.DescriptionFr != "Travail clinique complet." {
+		t.Errorf("DescriptionFr = %q; want %q", req.DescriptionFr, "Travail clinique complet.")
+	}
+}
+
+func Test_UpdateRoleRequest_FrenchLabels_UseTheSuppliedValues(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.NameFr = "Réviseur clinique"
+	req.DescriptionFr = "Travail clinique complet."
+
+	if got := req.FrenchName(); got != "Réviseur clinique" {
+		t.Errorf("FrenchName() = %q; want %q", got, "Réviseur clinique")
+	}
+	if got := req.FrenchDescription(); got != "Travail clinique complet." {
+		t.Errorf("FrenchDescription() = %q; want %q", got, "Travail clinique complet.")
+	}
+}
+
+func Test_UpdateRoleRequest_FrenchLabels_BlankFallsBackToEnglish(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.NameFr = "   "
+	req.DescriptionFr = "   "
+
+	if got := req.FrenchName(); got != "Clinical Reviewer" {
+		t.Errorf("FrenchName() = %q; want the English name — whitespace is not a translation", got)
+	}
+	if got := req.FrenchDescription(); got != "Full clinical work as one role." {
+		t.Errorf("FrenchDescription() = %q; want the English description", got)
+	}
+}
+
+func Test_UpdateRoleRequest_FrenchDescription_EmptyWhenNeitherSupplied(t *testing.T) {
+	req := validUpdateRoleRequest()
+	req.DescriptionEn = ""
+
+	if got := req.FrenchDescription(); got != "" {
+		t.Errorf("FrenchDescription() = %q; want empty so the column is cleared to NULL", got)
+	}
+}

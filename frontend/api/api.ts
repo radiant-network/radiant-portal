@@ -5973,6 +5973,43 @@ export interface UpdateOrganizationRequest {
     'name': string;
 }
 /**
+ * Payload to edit a custom role of a tenant
+ * @export
+ * @interface UpdateRoleRequest
+ */
+export interface UpdateRoleRequest {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UpdateRoleRequest
+     */
+    'actions': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoleRequest
+     */
+    'description_en'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoleRequest
+     */
+    'description_fr'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoleRequest
+     */
+    'name_en': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoleRequest
+     */
+    'name_fr'?: string;
+}
+/**
  * Payload to update a user\'s identity and role set within a tenant.
  * @export
  * @interface UpdateUserRequest
@@ -13682,7 +13719,7 @@ export class PatientsApi extends BaseAPI {
 export const RolesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name_en` is required; `name_fr` is optional and falls back to `name_en` when omitted, so the role never renders blank to a French reader. Each name must be unique within the tenant in its own language. `description_en` / `description_fr` are optional and follow the same fallback. `actions` must list at least one action, and every one of them must exist and be grantable a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique per tenant; `name_en` is required and each name stays unique per tenant too (409). `name_fr`/`description_fr` fall back to their English counterparts. `actions` must list at least one, and every one must exist and be grantable — a reserved action such as `can_manage_user` yields 422. `scope` is derived from the actions; a created role is never `is_default`.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
@@ -13805,6 +13842,54 @@ export const RolesApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Replaces the labels and actions of the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 200.  Full replacement, not a patch: an omitted optional field is cleared, and the `actions` listed become the role\'s whole set, so one left out is revoked from every holder. `name_fr`/`description_fr` fall back to their English counterparts; each name stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the actions. Every action must be grantable (422); a seeded role is locked (403).
+         * @summary Edit a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {UpdateRoleRequest} updateRoleRequest Desired state of the role
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRole: async (tenant: string, code: string, updateRoleRequest: UpdateRoleRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('updateRole', 'tenant', tenant)
+            // verify required parameter 'code' is not null or undefined
+            assertParamExists('updateRole', 'code', code)
+            // verify required parameter 'updateRoleRequest' is not null or undefined
+            assertParamExists('updateRole', 'updateRoleRequest', updateRoleRequest)
+            const localVarPath = `/{tenant}/roles/{code}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"code"}}`, encodeURIComponent(String(code)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateRoleRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -13816,7 +13901,7 @@ export const RolesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RolesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name_en` is required; `name_fr` is optional and falls back to `name_en` when omitted, so the role never renders blank to a French reader. Each name must be unique within the tenant in its own language. `description_en` / `description_fr` are optional and follow the same fallback. `actions` must list at least one action, and every one of them must exist and be grantable a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique per tenant; `name_en` is required and each name stays unique per tenant too (409). `name_fr`/`description_fr` fall back to their English counterparts. `actions` must list at least one, and every one must exist and be grantable — a reserved action such as `can_manage_user` yields 422. `scope` is derived from the actions; a created role is never `is_default`.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
@@ -13856,6 +13941,21 @@ export const RolesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['RolesApi.listRoles']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Replaces the labels and actions of the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 200.  Full replacement, not a patch: an omitted optional field is cleared, and the `actions` listed become the role\'s whole set, so one left out is revoked from every holder. `name_fr`/`description_fr` fall back to their English counterparts; each name stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the actions. Every action must be grantable (422); a seeded role is locked (403).
+         * @summary Edit a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {UpdateRoleRequest} updateRoleRequest Desired state of the role
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRole(tenant: string, code: string, updateRoleRequest: UpdateRoleRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRole(tenant, code, updateRoleRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RolesApi.updateRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -13867,7 +13967,7 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = RolesApiFp(configuration)
     return {
         /**
-         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name_en` is required; `name_fr` is optional and falls back to `name_en` when omitted, so the role never renders blank to a French reader. Each name must be unique within the tenant in its own language. `description_en` / `description_fr` are optional and follow the same fallback. `actions` must list at least one action, and every one of them must exist and be grantable a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+         * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique per tenant; `name_en` is required and each name stays unique per tenant too (409). `name_fr`/`description_fr` fall back to their English counterparts. `actions` must list at least one, and every one must exist and be grantable — a reserved action such as `can_manage_user` yields 422. `scope` is derived from the actions; a created role is never `is_default`.
          * @summary Create a custom role
          * @param {string} tenant Tenant code
          * @param {CreateRoleRequest} createRoleRequest Role to create
@@ -13898,6 +13998,18 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
         listRoles(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoleResult>> {
             return localVarFp.listRoles(tenant, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Replaces the labels and actions of the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 200.  Full replacement, not a patch: an omitted optional field is cleared, and the `actions` listed become the role\'s whole set, so one left out is revoked from every holder. `name_fr`/`description_fr` fall back to their English counterparts; each name stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the actions. Every action must be grantable (422); a seeded role is locked (403).
+         * @summary Edit a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {UpdateRoleRequest} updateRoleRequest Desired state of the role
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRole(tenant: string, code: string, updateRoleRequest: UpdateRoleRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.updateRole(tenant, code, updateRoleRequest, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -13909,7 +14021,7 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
  */
 export class RolesApi extends BaseAPI {
     /**
-     * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action — unlike reading the catalog, `can_manage_user` does not open this. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique within the tenant. `name_en` is required; `name_fr` is optional and falls back to `name_en` when omitted, so the role never renders blank to a French reader. Each name must be unique within the tenant in its own language. `description_en` / `description_fr` are optional and follow the same fallback. `actions` must list at least one action, and every one of them must exist and be grantable a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and makes `tenant_admin` un-duplicable.  The role\'s `scope` is not supplied: it is derived from the actions and decides whether granting the role needs organizations. A created role is never `is_default`, so it stays editable and deletable.
+     * Creates a custom role in the tenant in the path. Requires the `can_manage_role` action. Returns an empty 201.  `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be unique per tenant; `name_en` is required and each name stays unique per tenant too (409). `name_fr`/`description_fr` fall back to their English counterparts. `actions` must list at least one, and every one must exist and be grantable — a reserved action such as `can_manage_user` yields 422. `scope` is derived from the actions; a created role is never `is_default`.
      * @summary Create a custom role
      * @param {string} tenant Tenant code
      * @param {CreateRoleRequest} createRoleRequest Role to create
@@ -13944,6 +14056,20 @@ export class RolesApi extends BaseAPI {
      */
     public listRoles(tenant: string, options?: RawAxiosRequestConfig) {
         return RolesApiFp(this.configuration).listRoles(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Replaces the labels and actions of the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 200.  Full replacement, not a patch: an omitted optional field is cleared, and the `actions` listed become the role\'s whole set, so one left out is revoked from every holder. `name_fr`/`description_fr` fall back to their English counterparts; each name stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the actions. Every action must be grantable (422); a seeded role is locked (403).
+     * @summary Edit a custom role
+     * @param {string} tenant Tenant code
+     * @param {string} code Role code
+     * @param {UpdateRoleRequest} updateRoleRequest Desired state of the role
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RolesApi
+     */
+    public updateRole(tenant: string, code: string, updateRoleRequest: UpdateRoleRequest, options?: RawAxiosRequestConfig) {
+        return RolesApiFp(this.configuration).updateRole(tenant, code, updateRoleRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
