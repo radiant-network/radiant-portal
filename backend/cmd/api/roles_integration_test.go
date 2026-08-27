@@ -195,6 +195,30 @@ func Test_PostRole_ClashWithSeededRoleName_Conflict(t *testing.T) {
 	w := postRole(t, taraID, "radiant", `{"code":"zz_int_clash","name_en":"Geneticist","actions":["can_view_kb"]}`)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t,
+		`{"status":409,"message":"role name_en already exists in this tenant","detail":{"field":"name_en"}}`,
+		w.Body.String(), "the 409 names the field so the form flags name_en alone")
+}
+
+func Test_PostRole_ClashWithSeededRoleCode_Conflict(t *testing.T) {
+	// The seeded geneticist's code, under a name nothing else carries: only the code collides.
+	w := postRole(t, taraID, "radiant", `{"code":"geneticist","name_en":"ZZ Int Free Name","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t,
+		`{"status":409,"message":"role code already exists in this tenant","detail":{"field":"code"}}`,
+		w.Body.String())
+}
+
+func Test_PostRole_ClashWithSeededFrenchName_Conflict(t *testing.T) {
+	// "Généticien" is the seeded geneticist's French name, supplied here as name_fr.
+	w := postRole(t, taraID, "radiant",
+		`{"code":"zz_int_clash_fr","name_en":"ZZ Int Clash Fr","name_fr":"Généticien","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t,
+		`{"status":409,"message":"role name_fr already exists in this tenant","detail":{"field":"name_fr"}}`,
+		w.Body.String())
 }
 
 func Test_PostRole_ReservedAction_Unprocessable(t *testing.T) {

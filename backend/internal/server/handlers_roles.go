@@ -155,11 +155,12 @@ func PostRoleHandler(repo roleCreator) gin.HandlerFunc {
 			return
 		}
 
+		var conflict *types.RoleConflictError
 		switch err := repo.CreateRole(c.Request.Context(), *tenant, req); {
 		case err == nil:
 			c.Status(http.StatusCreated)
-		case errors.Is(err, types.ErrRoleCodeExists), errors.Is(err, types.ErrRoleNameExists):
-			HandleConflictError(c, err.Error())
+		case errors.As(err, &conflict):
+			HandleFieldConflictError(c, conflict.Error(), conflict.Field)
 		case errors.Is(err, types.ErrRoleActionsNotGrantable):
 			HandleUnprocessableEntityError(c, err.Error())
 		default:
