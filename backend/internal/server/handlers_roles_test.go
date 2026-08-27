@@ -297,7 +297,7 @@ func Test_PostRoleHandler_DuplicateCodeIsConflict(t *testing.T) {
 	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"role code already exists in this tenant","detail":{"field":"code"}}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same code already exists in this tenant","detail":{"field":"code"}}`, w.Body.String())
 }
 
 func Test_PostRoleHandler_DuplicateEnglishNameIsConflict(t *testing.T) {
@@ -305,7 +305,7 @@ func Test_PostRoleHandler_DuplicateEnglishNameIsConflict(t *testing.T) {
 	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"role name_en already exists in this tenant","detail":{"field":"name_en"}}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same name_en already exists in this tenant","detail":{"field":"name_en"}}`, w.Body.String())
 }
 
 func Test_PostRoleHandler_DuplicateFrenchNameIsConflict(t *testing.T) {
@@ -313,7 +313,7 @@ func Test_PostRoleHandler_DuplicateFrenchNameIsConflict(t *testing.T) {
 	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"role name_fr already exists in this tenant","detail":{"field":"name_fr"}}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same name_fr already exists in this tenant","detail":{"field":"name_fr"}}`, w.Body.String())
 }
 
 // A conflict wrapped on its way up still answers 409 with the field, so a repository that adds
@@ -323,7 +323,7 @@ func Test_PostRoleHandler_WrappedConflictIsStillConflict(t *testing.T) {
 	w := servePostRole(repo, createRoleBody)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"role code already exists in this tenant","detail":{"field":"code"}}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same code already exists in this tenant","detail":{"field":"code"}}`, w.Body.String())
 }
 
 func Test_PostRoleHandler_UngrantableActionIsUnprocessable(t *testing.T) {

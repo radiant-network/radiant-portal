@@ -24,7 +24,7 @@ type RoleConflictError struct {
 }
 
 func (e *RoleConflictError) Error() string {
-	return fmt.Sprintf("role %s already exists in this tenant", e.Field)
+	return fmt.Sprintf("a role with the same %s already exists in this tenant", e.Field)
 }
 
 // CreateRoleRequest is the payload creating a custom role. The role's scope is not part of it —

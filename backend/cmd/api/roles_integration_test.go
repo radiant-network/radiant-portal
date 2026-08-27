@@ -196,7 +196,7 @@ func Test_PostRole_ClashWithSeededRoleName_Conflict(t *testing.T) {
 
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.JSONEq(t,
-		`{"status":409,"message":"role name_en already exists in this tenant","detail":{"field":"name_en"}}`,
+		`{"status":409,"message":"a role with the same name_en already exists in this tenant","detail":{"field":"name_en"}}`,
 		w.Body.String(), "the 409 names the field so the form flags name_en alone")
 }
 
@@ -206,7 +206,7 @@ func Test_PostRole_ClashWithSeededRoleCode_Conflict(t *testing.T) {
 
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.JSONEq(t,
-		`{"status":409,"message":"role code already exists in this tenant","detail":{"field":"code"}}`,
+		`{"status":409,"message":"a role with the same code already exists in this tenant","detail":{"field":"code"}}`,
 		w.Body.String())
 }
 
@@ -217,7 +217,7 @@ func Test_PostRole_ClashWithSeededFrenchName_Conflict(t *testing.T) {
 
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.JSONEq(t,
-		`{"status":409,"message":"role name_fr already exists in this tenant","detail":{"field":"name_fr"}}`,
+		`{"status":409,"message":"a role with the same name_fr already exists in this tenant","detail":{"field":"name_fr"}}`,
 		w.Body.String())
 }
 
