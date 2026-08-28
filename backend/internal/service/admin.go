@@ -9,12 +9,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// KeycloakProvisioner maintains a user in the identity provider: UpsertUser creates or converges
-// the account and returns its stable subject id (the `sub` claim), UpdateUserName renames an
-// account already keyed by that id.
+// KeycloakProvisioner upserts a user in the identity provider and returns its
+// stable subject id (the `sub` claim).
 type KeycloakProvisioner interface {
 	UpsertUser(ctx context.Context, username, email, firstName, lastName, password string) (sub string, err error)
-	UpdateUserName(ctx context.Context, userID, firstName, lastName string) error
 }
 
 // RangerProvisioner manages users and their tenant-role membership in Ranger.
@@ -83,7 +81,7 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, gran
 		var err error
 		sub, err = deps.Keycloak.UpsertUser(ctx, in.Username, in.Email, in.FirstName, in.LastName, in.Password)
 		if err != nil {
-			return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
+			return "", fmt.Errorf("keycloak: upsert user: %w", err)
 		}
 	} else if _, err := uuid.Parse(sub); err != nil {
 		// Validated up front so a malformed sub can't reach the StarRocks DDL guard after the

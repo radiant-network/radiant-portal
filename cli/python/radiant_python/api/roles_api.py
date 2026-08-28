@@ -943,7 +943,7 @@ class RolesApi:
     ) -> List[RoleResult]:
         """List the tenant's roles
 
-        Returns every role defined in the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
+        Returns the assignable roles of the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. The `member` role is not listed: every user of the tenant holds it implicitly, so it is neither assignable nor revocable. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -1013,7 +1013,7 @@ class RolesApi:
     ) -> ApiResponse[List[RoleResult]]:
         """List the tenant's roles
 
-        Returns every role defined in the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
+        Returns the assignable roles of the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. The `member` role is not listed: every user of the tenant holds it implicitly, so it is neither assignable nor revocable. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -1083,7 +1083,7 @@ class RolesApi:
     ) -> RESTResponseType:
         """List the tenant's roles
 
-        Returns every role defined in the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
+        Returns the assignable roles of the tenant in the path — the seeded ones and the tenant's own custom ones — each with the actions it grants and the number of users holding it. The `member` role is not listed: every user of the tenant holds it implicitly, so it is neither assignable nor revocable. Requires the `can_manage_role` or the `can_manage_user` action: the catalog is both the roles section's own list and the role picker the add and edit user screens are built from. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. `scope` is derived from the actions: `tenant` when they are all tenant-scoped, `org` when they are all org-scoped, `mixed` when both — it is what decides whether granting the role needs organizations. The list is small and bounded, so it is returned unpaged.
 
         :param tenant: Tenant code (required)
         :type tenant: str

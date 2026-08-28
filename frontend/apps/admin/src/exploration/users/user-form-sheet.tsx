@@ -38,7 +38,7 @@ function getAssignableRoles(roles: RoleResult[]) {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function buildFormSchema(roles: RoleResult[], isEdit: boolean) {
-  // TODO post demo, remove first and last name in back payload and validation front for user update
+  // Create and edit share one set of form values, so the identity keys must exist in both shapes.
   const identity = isEdit
     ? { first_name: z.string(), last_name: z.string(), email: z.string() }
     : {
@@ -68,15 +68,14 @@ type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 const EMPTY_FORM: FormValues = { first_name: '', last_name: '', email: '', roles: [], organizations: {} };
 
 /**
- * Manage member role, never edited here, so it is left out of the form
+ * To prefill Edit when it opens, and — once turned into a payload — as the reference
+ * an unchanged submit is compared against.
  */
 function toFormValues(user: UserResult): FormValues {
   const grantedRoles = user.roles.filter(role => role.role_code !== BASELINE_ROLE_CODE);
 
   return {
-    first_name: user.first_name ?? '',
-    last_name: user.last_name ?? '',
-    email: user.email ?? '',
+    ...EMPTY_FORM,
     roles: grantedRoles.map(role => role.role_code),
     organizations: Object.fromEntries(grantedRoles.map(role => [role.role_code, role.org_codes ?? []])),
   };
@@ -320,11 +319,8 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
 
     try {
       if (user) {
-        await usersApi.updateUser(tenant, user.user_id, {
-          first_name: user.first_name ?? '',
-          last_name: user.last_name ?? '',
-          roles: rolePayload,
-        });
+        // Identity is fixed at creation and read-only above, so an edit carries roles alone.
+        await usersApi.updateUser(tenant, user.user_id, { roles: rolePayload });
       } else {
         await usersApi.createUser(tenant, {
           email: values.email.trim(),

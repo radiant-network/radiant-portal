@@ -7,7 +7,7 @@ Method | HTTP request | Description
 [**create_user**](UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
 [**delete_user**](UsersApi.md#delete_user) | **DELETE** /{tenant}/users/{user_id} | Remove a user from the tenant
 [**list_users**](UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
-[**update_user**](UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update a user of the tenant
+[**update_user**](UsersApi.md#update_user) | **PUT** /{tenant}/users/{user_id} | Update the roles of a user of the tenant
 
 
 # **create_user**
@@ -286,16 +286,16 @@ Name | Type | Description  | Notes
 # **update_user**
 > object update_user(tenant, user_id, update_user_request)
 
-Update a user of the tenant
+Update the roles of a user of the tenant
 
-Updates the user's name and replaces the roles granted to them in the tenant in the
-path with the ones in the payload — a role left out is revoked. Requires the
-`can_manage_user` action. The email is the identity the account signs in with and
-cannot be changed here. The `member` role is kept tenant-wide whether or not it is
-listed, and the last user able to manage users cannot lose that ability (409).
-Whether a role needs organizations is derived from its actions: a role holding only
-tenant-scoped actions must come with no `org_codes`, one holding any org-scoped
-action needs at least one (`*` meaning every organization).
+Replaces the roles granted to the user in the tenant in the path with the ones in
+the payload — a role left out is revoked. Requires the `can_manage_user` action.
+The user's identity is fixed at creation: their name and the email the account
+signs in with cannot be changed here. The `member` role is kept tenant-wide whether
+or not it is listed, and the last user able to manage users cannot lose that
+ability (409). Whether a role needs organizations is derived from its actions: a
+role holding only tenant-scoped actions must come with no `org_codes`, one holding
+any org-scoped action needs at least one (`*` meaning every organization).
 
 ### Example
 
@@ -329,10 +329,10 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.UsersApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     user_id = 'user_id_example' # str | User id (the identity provider's subject id)
-    update_user_request = radiant_python.UpdateUserRequest() # UpdateUserRequest | Desired state of the user
+    update_user_request = radiant_python.UpdateUserRequest() # UpdateUserRequest | Roles the user should end up with
 
     try:
-        # Update a user of the tenant
+        # Update the roles of a user of the tenant
         api_response = api_instance.update_user(tenant, user_id, update_user_request)
         print("The response of UsersApi->update_user:\n")
         pprint(api_response)
@@ -349,7 +349,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **user_id** | **str**| User id (the identity provider&#39;s subject id) | 
- **update_user_request** | [**UpdateUserRequest**](UpdateUserRequest.md)| Desired state of the user | 
+ **update_user_request** | [**UpdateUserRequest**](UpdateUserRequest.md)| Roles the user should end up with | 
 
 ### Return type
 

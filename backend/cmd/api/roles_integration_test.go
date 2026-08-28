@@ -49,8 +49,8 @@ func Test_ListRoles_RoleManager_ReturnsTenantCatalog(t *testing.T) {
 	for _, role := range roles {
 		byCode[role.Code] = role
 	}
-	assert.True(t, byCode["member"].IsDefault)
-	assert.Equal(t, types.RoleScopeTenant, byCode["member"].Scope)
+	assert.NotContains(t, byCode, types.RoleMember, "the implicit member role is not part of the catalog")
+	assert.True(t, byCode["geneticist"].IsDefault)
 	assert.False(t, byCode["practitioner"].IsDefault)
 	assert.Equal(t, types.RoleScopeMixed, byCode["practitioner"].Scope)
 	assert.NotEmpty(t, byCode["geneticist"].Actions)

@@ -19,7 +19,7 @@ type userCreator interface {
 	CreateTenantUser(ctx context.Context, tenantCode string, req types.CreateUserRequest, actor string) error
 }
 
-// userUpdater applies an edited user within the tenant. Implemented by service.UserAdmin.
+// userUpdater applies an edited role set within the tenant. Implemented by service.UserAdmin.
 type userUpdater interface {
 	UpdateTenantUser(ctx context.Context, tenantCode, userID string, req types.UpdateUserRequest, actor string) error
 }
@@ -139,21 +139,21 @@ func PostUserHandler(svc userCreator, auth utils.Auth) gin.HandlerFunc {
 }
 
 // PutUserHandler
-// @Summary Update a user of the tenant
+// @Summary Update the roles of a user of the tenant
 // @Id updateUser
-// @Description Updates the user's name and replaces the roles granted to them in the tenant in the
-// @Description path with the ones in the payload — a role left out is revoked. Requires the
-// @Description `can_manage_user` action. The email is the identity the account signs in with and
-// @Description cannot be changed here. The `member` role is kept tenant-wide whether or not it is
-// @Description listed, and the last user able to manage users cannot lose that ability (409).
-// @Description Whether a role needs organizations is derived from its actions: a role holding only
-// @Description tenant-scoped actions must come with no `org_codes`, one holding any org-scoped
-// @Description action needs at least one (`*` meaning every organization).
+// @Description Replaces the roles granted to the user in the tenant in the path with the ones in
+// @Description the payload — a role left out is revoked. Requires the `can_manage_user` action.
+// @Description The user's identity is fixed at creation: their name and the email the account
+// @Description signs in with cannot be changed here. The `member` role is kept tenant-wide whether
+// @Description or not it is listed, and the last user able to manage users cannot lose that
+// @Description ability (409). Whether a role needs organizations is derived from its actions: a
+// @Description role holding only tenant-scoped actions must come with no `org_codes`, one holding
+// @Description any org-scoped action needs at least one (`*` meaning every organization).
 // @Tags users
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
 // @Param user_id path string true "User id (the identity provider's subject id)"
-// @Param message body types.UpdateUserRequest true "Desired state of the user"
+// @Param message body types.UpdateUserRequest true "Roles the user should end up with"
 // @Accept json
 // @Produce json
 // @Success 200

@@ -16,9 +16,11 @@ type rolesReader interface {
 // ListRolesHandler
 // @Summary List the tenant's roles
 // @Id listRoles
-// @Description Returns every role defined in the tenant in the path — the seeded ones and the
+// @Description Returns the assignable roles of the tenant in the path — the seeded ones and the
 // @Description tenant's own custom ones — each with the actions it grants and the number of users
-// @Description holding it. Requires the `can_manage_role` or the `can_manage_user` action: the
+// @Description holding it. The `member` role is not listed: every user of the tenant holds it
+// @Description implicitly, so it is neither assignable nor revocable.
+// @Description Requires the `can_manage_role` or the `can_manage_user` action: the
 // @Description catalog is both the roles section's own list and the role picker the add and edit
 // @Description user screens are built from. `is_default` marks a seeded
 // @Description role, which is locked and can be neither edited nor deleted. `scope` is derived

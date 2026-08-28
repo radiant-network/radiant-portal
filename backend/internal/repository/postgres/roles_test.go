@@ -46,8 +46,10 @@ func Test_RolesRepository_ListTenantRoles_ReturnsSeededAndCustomRoles(t *testing
 			codes[i] = role.Code
 		}
 		assert.ElementsMatch(t,
-			[]string{"tenant_admin", "member", "geneticist", "data_manager", "researcher", "practitioner"},
+			[]string{"tenant_admin", "geneticist", "data_manager", "researcher", "practitioner"},
 			codes)
+		assert.NotContains(t, codes, types.RoleMember,
+			"member is implicit — every user holds it, so it is not part of the assignable catalog")
 	})
 }
 

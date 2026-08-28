@@ -520,38 +520,35 @@ func radiantGrant(orgCode, roleCode string) types.Grant {
 	return types.Grant{TenantCode: types.DefaultTenantCode, OrgCode: orgCode, RoleCode: roleCode}
 }
 
-func Test_UsersRepository_TenantUser_ReturnsIdentityAndGrants(t *testing.T) {
+func Test_UsersRepository_TenantUserGrants_ReturnsEveryGrantInTheTenant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
-		user, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, aliceID)
+		grants, err := repo.TenantUserGrants(t.Context(), types.DefaultTenantCode, aliceID)
 		require.NoError(t, err)
 
-		assert.Equal(t, "alice@test.authz", user.Email)
-		assert.Equal(t, "Alice", user.FirstName)
-		assert.Equal(t, "Adams", user.LastName)
 		assert.Equal(t, []types.Grant{
 			radiantGrant("CHOP", "geneticist"),
 			radiantGrant("", "researcher"),
-		}, user.Grants, "a tenant-wide grant reads as an empty org code")
+		}, grants, "a tenant-wide grant reads as an empty org code")
 	})
 }
 
-func Test_UsersRepository_TenantUser_UnknownUserIsNotInTenant(t *testing.T) {
+func Test_UsersRepository_TenantUserGrants_UnknownUserIsNotInTenant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
-		_, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, "00000000-0000-4000-8000-000000000000")
+		_, err := repo.TenantUserGrants(t.Context(), types.DefaultTenantCode, "00000000-0000-4000-8000-000000000000")
 		assert.ErrorIs(t, err, types.ErrUserNotInTenant)
 	})
 }
 
-func Test_UsersRepository_TenantUser_IsScopedToTheTenant(t *testing.T) {
+func Test_UsersRepository_TenantUserGrants_IsScopedToTheTenant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		// alice holds roles in radiant only, so she is not a user of tenant_b.
-		_, err := repo.TenantUser(t.Context(), "tenant_b", aliceID)
+		_, err := repo.TenantUserGrants(t.Context(), "tenant_b", aliceID)
 		assert.ErrorIs(t, err, types.ErrUserNotInTenant)
 	})
 }
@@ -619,28 +616,26 @@ func storedGrants(t *testing.T, db *gorm.DB, userID string) []storedGrant {
 	return grants
 }
 
-func Test_UsersRepository_UpdateTenantUser_AppliesIdentityAndGrantDiff(t *testing.T) {
+func Test_UsersRepository_UpdateTenantUserRoles_AppliesTheGrantDiff(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "d1a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
 		seedTenantUser(t, env.Postgres, userID, radiantGrant("", "member"), radiantGrant("CHOP", "geneticist"))
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
-		require.NoError(t, repo.UpdateTenantUser(t.Context(), types.DefaultTenantCode, userID, "Edited", "Name", taraID,
+		require.NoError(t, repo.UpdateTenantUserRoles(t.Context(), types.DefaultTenantCode, userID, taraID,
 			[]types.Grant{radiantGrant("CHUSJ", "geneticist")},
 			[]types.Grant{radiantGrant("CHOP", "geneticist")}))
 
-		user, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, userID)
+		grants, err := repo.TenantUserGrants(t.Context(), types.DefaultTenantCode, userID)
 		require.NoError(t, err)
-		assert.Equal(t, "Edited", user.FirstName)
-		assert.Equal(t, "Name", user.LastName)
 		assert.Equal(t, []types.Grant{
 			radiantGrant("CHUSJ", "geneticist"),
 			radiantGrant("", "member"),
-		}, user.Grants)
+		}, grants)
 	})
 }
 
-func Test_UsersRepository_UpdateTenantUser_PreservesTheAuditOfUntouchedGrants(t *testing.T) {
+func Test_UsersRepository_UpdateTenantUserRoles_PreservesTheAuditOfUntouchedGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "d2a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
 		seedTenantUser(t, env.Postgres, userID, radiantGrant("", "member"))
@@ -648,7 +643,7 @@ func Test_UsersRepository_UpdateTenantUser_PreservesTheAuditOfUntouchedGrants(t 
 		before := storedGrants(t, env.Postgres, userID)
 		require.Len(t, before, 1)
 
-		require.NoError(t, repo.UpdateTenantUser(t.Context(), types.DefaultTenantCode, userID, "Edit", "Target", taraID,
+		require.NoError(t, repo.UpdateTenantUserRoles(t.Context(), types.DefaultTenantCode, userID, taraID,
 			[]types.Grant{radiantGrant("", "researcher")}, nil))
 
 		after := storedGrants(t, env.Postgres, userID)
@@ -661,23 +656,23 @@ func Test_UsersRepository_UpdateTenantUser_PreservesTheAuditOfUntouchedGrants(t 
 	})
 }
 
-func Test_UsersRepository_UpdateTenantUser_RevokesATenantWideGrant(t *testing.T) {
+func Test_UsersRepository_UpdateTenantUserRoles_RevokesATenantWideGrant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "d3a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
 		seedTenantUser(t, env.Postgres, userID, radiantGrant("", "member"), radiantGrant("", "researcher"))
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		// The revoked row stores a NULL org_code, which no equality test would match.
-		require.NoError(t, repo.UpdateTenantUser(t.Context(), types.DefaultTenantCode, userID, "Edit", "Target", taraID,
+		require.NoError(t, repo.UpdateTenantUserRoles(t.Context(), types.DefaultTenantCode, userID, taraID,
 			nil, []types.Grant{radiantGrant("", "researcher")}))
 
-		user, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, userID)
+		grants, err := repo.TenantUserGrants(t.Context(), types.DefaultTenantCode, userID)
 		require.NoError(t, err)
-		assert.Equal(t, []types.Grant{radiantGrant("", "member")}, user.Grants)
+		assert.Equal(t, []types.Grant{radiantGrant("", "member")}, grants)
 	})
 }
 
-func Test_UsersRepository_UpdateTenantUser_LeavesOtherTenantsAlone(t *testing.T) {
+func Test_UsersRepository_UpdateTenantUserRoles_LeavesOtherTenantsAlone(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "d4a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
 		seedTenantUser(t, env.Postgres, userID,
@@ -686,27 +681,25 @@ func Test_UsersRepository_UpdateTenantUser_LeavesOtherTenantsAlone(t *testing.T)
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
 
 		// The same role code exists in tenant_b, so a revoke that forgot the tenant would hit it.
-		require.NoError(t, repo.UpdateTenantUser(t.Context(), types.DefaultTenantCode, userID, "Edit", "Target", taraID,
+		require.NoError(t, repo.UpdateTenantUserRoles(t.Context(), types.DefaultTenantCode, userID, taraID,
 			nil, []types.Grant{{TenantCode: types.DefaultTenantCode, OrgCode: "*", RoleCode: "geneticist"}}))
 
-		elsewhere, err := repo.TenantUser(t.Context(), "tenant_b", userID)
+		elsewhere, err := repo.TenantUserGrants(t.Context(), "tenant_b", userID)
 		require.NoError(t, err)
-		assert.Equal(t, []types.Grant{{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"}}, elsewhere.Grants)
+		assert.Equal(t, []types.Grant{{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"}}, elsewhere)
 	})
 }
 
-func Test_UsersRepository_UpdateTenantUser_NoDiffOnlyUpdatesIdentity(t *testing.T) {
+func Test_UsersRepository_UpdateTenantUserRoles_EmptyDiffLeavesTheGrantsAlone(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		const userID = "d5a2a3a4-b5b6-4c70-8d90-e1e2e3e4e5e6"
 		seedTenantUser(t, env.Postgres, userID, radiantGrant("", "member"))
 		repo := NewUsersRepository(database.PostgresDB{DB: env.Postgres})
+		before := storedGrants(t, env.Postgres, userID)
 
-		require.NoError(t, repo.UpdateTenantUser(t.Context(), types.DefaultTenantCode, userID, "Renamed", "Only", taraID, nil, nil))
+		require.NoError(t, repo.UpdateTenantUserRoles(t.Context(), types.DefaultTenantCode, userID, taraID, nil, nil))
 
-		user, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, userID)
-		require.NoError(t, err)
-		assert.Equal(t, "Renamed", user.FirstName)
-		assert.Equal(t, []types.Grant{radiantGrant("", "member")}, user.Grants)
+		assert.Equal(t, before, storedGrants(t, env.Postgres, userID), "an edit that changes no role touches no row")
 	})
 }
 
@@ -719,7 +712,7 @@ func Test_UsersRepository_RemoveTenantUser_RevokesEveryGrantIncludingMember(t *t
 
 		require.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
 
-		_, err := repo.TenantUser(t.Context(), types.DefaultTenantCode, userID)
+		_, err := repo.TenantUserGrants(t.Context(), types.DefaultTenantCode, userID)
 		assert.ErrorIs(t, err, types.ErrUserNotInTenant, "member is revoked too — the user is out of the tenant")
 	})
 }
@@ -748,9 +741,9 @@ func Test_UsersRepository_RemoveTenantUser_LeavesOtherTenantsAlone(t *testing.T)
 
 		require.NoError(t, repo.RemoveTenantUser(t.Context(), types.DefaultTenantCode, userID))
 
-		elsewhere, err := repo.TenantUser(t.Context(), "tenant_b", userID)
+		elsewhere, err := repo.TenantUserGrants(t.Context(), "tenant_b", userID)
 		require.NoError(t, err)
-		assert.Equal(t, []types.Grant{{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"}}, elsewhere.Grants)
+		assert.Equal(t, []types.Grant{{TenantCode: "tenant_b", OrgCode: "*", RoleCode: "geneticist"}}, elsewhere)
 	})
 }
 
