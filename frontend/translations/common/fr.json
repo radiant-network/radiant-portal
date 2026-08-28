@@ -71,7 +71,67 @@
       "add": "Ajouter un rôle",
       "count_one": "{{count}} rôle",
       "count_other": "{{count}} rôles",
+      "create": {
+        "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer le rôle."
+          },
+          "success": "Rôle créé."
+        },
+        "submit": "Créer le rôle",
+        "title": "Ajouter un rôle"
+      },
       "default_note": "Les rôles par défaut ne peuvent être ni modifiés ni supprimés.",
+      "delete": {
+        "action": "Supprimer le rôle",
+        "body": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b> dans <b>{{orgs}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "body_empty": "<name>{{name}}</name> n'est attribué à aucun membre. Il sera définitivement supprimé.",
+        "body_no_orgs": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le rôle."
+          },
+          "success": "Rôle supprimé."
+        },
+        "submit": "Supprimer le rôle",
+        "title": "Supprimer ce rôle ?"
+      },
+      "duplicate": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de dupliquer le rôle."
+          },
+          "success": "Rôle dupliqué."
+        }
+      },
+      "duplicate_suffix": "(copie)",
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le rôle."
+          },
+          "success": "Rôle mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le rôle"
+      },
+      "edit_impact": {
+        "body": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b> dans <b>{{orgs}}</b>.",
+        "body_no_orgs": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b>.",
+        "submit": "Enregistrer",
+        "title": "Modifier ce rôle ?"
+      },
+      "fields": {
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres minuscules, chiffres et traits de soulignement.",
+        "description": "Description",
+        "description_placeholder": "À quoi sert ce rôle ? (facultatif)",
+        "name": "Nom",
+        "name_placeholder": "Nom du rôle",
+        "permissions": "Permissions",
+        "permissions_hint": "Sélectionnez-en au moins une. Les permissions Réseau et Organisation peuvent être combinées."
+      },
       "filters": {
         "custom_only": "Rôles personnalisés seulement",
         "search_placeholder": "Rechercher par nom ou description"
@@ -89,9 +149,9 @@
       "table": {
         "actions": "Autres actions",
         "assigned_to": "Attribué à",
-        "delete": "Supprimer le rôle",
+        "delete": "Supprimer",
         "duplicate": "Dupliquer",
-        "edit": "Modifier le rôle",
+        "edit": "Modifier",
         "members_count_one": "{{count}} membre",
         "members_count_other": "{{count}} membres",
         "orgs_count_one": "{{count}} organisation",
@@ -279,8 +339,12 @@
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
         "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
+        "at_least_one_permission": "Sélectionnez au moins une permission.",
         "invalid_email": "Saisissez une adresse courriel valide",
+        "invalid_role_code": "Doit commencer par une lettre minuscule et ne contenir que des lettres minuscules, des chiffres et des traits de soulignement.",
         "organization_code_exists": "Une organisation avec ce code existe déjà.",
+        "role_code_exists": "Un rôle avec ce code existe déjà.",
+        "role_name_exists": "Un rôle avec ce nom existe déjà.",
         "user_email_exists": "Cette personne est déjà membre de ce réseau."
       }
     },
