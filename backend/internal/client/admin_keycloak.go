@@ -112,7 +112,7 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 			return "", err
 		}
 		if id == "" {
-			return "", fmt.Errorf("user %q not found after create", email)
+			return "", fmt.Errorf("user not found after create")
 		}
 	} else {
 		if err := c.updateUser(ctx, token, id, user); err != nil {
@@ -134,18 +134,6 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 		}
 	}
 	return id, nil
-}
-
-// UpdateUserName renames the user in the identity provider. Keycloak's user id is the `sub` every
-// other system keys on, so the account is addressed directly with no lookup. Only the two name
-// attributes are sent: a full representation would also carry `enabled` and the credentials'
-// required actions, and would reset them as a side effect of a rename.
-func (c *KeycloakAdminClient) UpdateUserName(ctx context.Context, userID, firstName, lastName string) error {
-	token, err := c.adminToken(ctx)
-	if err != nil {
-		return err
-	}
-	return c.updateUser(ctx, token, userID, map[string]string{"firstName": firstName, "lastName": lastName})
 }
 
 // adminToken fetches an access token for the service account via the OAuth2
@@ -184,6 +172,10 @@ func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
 	return parsed.AccessToken, nil
 }
 
+// Errors in this file never name the user by email. The email is the account's login identity, and
+// these errors are wrapped up to HandleError, which logs them server-side — so an email in one is a
+// PII leak into the logs. Once Keycloak has minted it the sub identifies the account safely; before
+// that, a failure is correlated by the request id HandleError already reports.
 // findUserIDByEmail returns the id of the user with an exact email match, or "" if none.
 func (c *KeycloakAdminClient) findUserIDByEmail(ctx context.Context, token, email string) (string, error) {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users?email=%s&exact=true",
@@ -193,17 +185,17 @@ func (c *KeycloakAdminClient) findUserIDByEmail(ctx context.Context, token, emai
 		return "", err
 	}
 	if status != http.StatusOK {
-		return "", fmt.Errorf("find user %q failed: HTTP %d: %s", email, status, string(body))
+		return "", fmt.Errorf("find user by email failed: HTTP %d: %s", status, string(body))
 	}
 	var users []keycloakUser
 	if err := json.Unmarshal(body, &users); err != nil {
-		return "", fmt.Errorf("parse user search for %q: %w", email, err)
+		return "", fmt.Errorf("parse user search response: %w", err)
 	}
 	if len(users) == 0 {
 		return "", nil
 	}
 	if len(users) > 1 {
-		return "", fmt.Errorf("find user %q: expected at most 1 exact match, got %d", email, len(users))
+		return "", fmt.Errorf("find user by email: expected at most 1 exact match, got %d", len(users))
 	}
 	return users[0].ID, nil
 }
@@ -215,14 +207,12 @@ func (c *KeycloakAdminClient) createUser(ctx context.Context, token string, user
 		return err
 	}
 	if status != http.StatusCreated && status != http.StatusConflict {
-		return fmt.Errorf("create user %q failed: HTTP %d: %s", user.Username, status, string(body))
+		return fmt.Errorf("create user failed: HTTP %d: %s", status, string(body))
 	}
 	return nil
 }
 
-// updateUser sends a partial user representation: Keycloak leaves out any attribute the payload
-// omits, so a caller can send just the fields it means to change.
-func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user any) error {
+func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user keycloakUser) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s", c.cfg.BaseURL, c.cfg.Realm, id)
 	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, user)
 	if err != nil {

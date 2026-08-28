@@ -15,7 +15,7 @@ type mockTenantUserStore struct {
 	scopes map[string]string
 	err    error
 
-	current    *types.TenantUser
+	current    []types.Grant
 	currentErr error
 	adminRoles []string
 	otherAdmin bool
@@ -24,8 +24,6 @@ type mockTenantUserStore struct {
 	gotRoles []string
 
 	updated     bool
-	gotFirst    string
-	gotLast     string
 	gotActor    string
 	gotAdd      []types.Grant
 	gotRemove   []types.Grant
@@ -36,7 +34,7 @@ type mockTenantUserStore struct {
 	gotRemoveErr error
 }
 
-func (m *mockTenantUserStore) TenantUser(_ context.Context, _, _ string) (*types.TenantUser, error) {
+func (m *mockTenantUserStore) TenantUserGrants(_ context.Context, _, _ string) ([]types.Grant, error) {
 	return m.current, m.currentErr
 }
 
@@ -49,12 +47,12 @@ func (m *mockTenantUserStore) HasOtherUserWithAnyRole(_ context.Context, _, user
 	return m.otherAdmin, m.err
 }
 
-func (m *mockTenantUserStore) UpdateTenantUser(_ context.Context, _, _, firstName, lastName, grantedBy string, add, remove []types.Grant) error {
+func (m *mockTenantUserStore) UpdateTenantUserRoles(_ context.Context, _, _, grantedBy string, add, remove []types.Grant) error {
 	if m.err != nil {
 		return m.err
 	}
 	m.updated = true
-	m.gotFirst, m.gotLast, m.gotActor = firstName, lastName, grantedBy
+	m.gotActor = grantedBy
 	m.gotAdd, m.gotRemove = add, remove
 	return nil
 }
@@ -283,38 +281,34 @@ func Test_UserAdmin_CreateTenantUser_PropagatesProvisioningError(t *testing.T) {
 	assert.Contains(t, err.Error(), "keycloak")
 }
 
-// editedUser is the stored state the edit tests reconcile against: a member of radiant who is also
-// a geneticist at CHOP.
-func editedUser() *types.TenantUser {
-	return &types.TenantUser{
-		UserID: "b3f1-keycloak-sub", Email: "grace.chen@chop.edu", FirstName: "Grace", LastName: "Chen",
-		Grants: []types.Grant{
-			{TenantCode: "radiant", RoleCode: types.RoleMember},
-			{TenantCode: "radiant", OrgCode: "CHOP", RoleCode: "geneticist"},
-		},
+// editedUser is the stored role set the edit tests reconcile against: a member of radiant who is
+// also a geneticist at CHOP.
+func editedUser() []types.Grant {
+	return []types.Grant{
+		{TenantCode: "radiant", RoleCode: types.RoleMember},
+		{TenantCode: "radiant", OrgCode: "CHOP", RoleCode: "geneticist"},
 	}
 }
 
 func newUpdate(roles ...types.CreateUserRole) types.UpdateUserRequest {
-	return types.UpdateUserRequest{FirstName: "Grace", LastName: "Chen", Roles: roles}
+	return types.UpdateUserRequest{Roles: roles}
 }
 
 // updateUser runs UserAdmin's edit path against stubbed stores.
-func updateUser(t *testing.T, users *mockTenantUserStore, orgs *mockOrgChecker, req types.UpdateUserRequest) (*mockKeycloak, error) {
+func updateUser(t *testing.T, users *mockTenantUserStore, orgs *mockOrgChecker, req types.UpdateUserRequest) error {
 	t.Helper()
-	keycloak := &mockKeycloak{sub: "b3f1-keycloak-sub"}
 	admin := NewUserAdmin(users, orgs, AdminDeps{
-		Keycloak:  keycloak,
+		Keycloak:  &mockKeycloak{sub: "b3f1-keycloak-sub"},
 		Ranger:    &mockRanger{},
 		Starrocks: &mockStarrocks{},
 		Auth:      &mockAuthStore{},
 	})
-	return keycloak, admin.UpdateTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub", req, "acting-admin-sub")
+	return admin.UpdateTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub", req, "acting-admin-sub")
 }
 
 func Test_UserAdmin_UpdateTenantUser_WritesOnlyTheDifference(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	_, err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHUSJ"}},
+	err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHUSJ"}},
 		newUpdate(types.CreateUserRole{RoleCode: "geneticist", OrgCodes: []string{"CHUSJ"}}))
 
 	require.NoError(t, err)
@@ -325,7 +319,7 @@ func Test_UserAdmin_UpdateTenantUser_WritesOnlyTheDifference(t *testing.T) {
 
 func Test_UserAdmin_UpdateTenantUser_KeepsMemberWhenOmitted(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	_, err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
+	err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
 
 	require.NoError(t, err)
 	assert.Empty(t, users.gotAdd)
@@ -335,7 +329,7 @@ func Test_UserAdmin_UpdateTenantUser_KeepsMemberWhenOmitted(t *testing.T) {
 
 func Test_UserAdmin_UpdateTenantUser_UnchangedRoleSetWritesNothing(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	_, err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHOP"}},
+	err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHOP"}},
 		newUpdate(types.CreateUserRole{RoleCode: "geneticist", OrgCodes: []string{"CHOP"}}))
 
 	require.NoError(t, err)
@@ -345,48 +339,16 @@ func Test_UserAdmin_UpdateTenantUser_UnchangedRoleSetWritesNothing(t *testing.T)
 
 func Test_UserAdmin_UpdateTenantUser_RepeatedOrgYieldsOneGrant(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	_, err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHUSJ"}},
+	err := updateUser(t, users, &mockOrgChecker{existing: []string{"CHUSJ"}},
 		newUpdate(types.CreateUserRole{RoleCode: "geneticist", OrgCodes: []string{"CHUSJ", "CHUSJ"}}))
 
 	require.NoError(t, err)
 	assert.Len(t, users.gotAdd, 1)
 }
 
-func Test_UserAdmin_UpdateTenantUser_RenamesInKeycloak(t *testing.T) {
-	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	keycloak, err := updateUser(t, users, &mockOrgChecker{},
-		types.UpdateUserRequest{FirstName: "Grace", LastName: "Chen-Lee"})
-
-	require.NoError(t, err)
-	assert.Equal(t, [3]string{"b3f1-keycloak-sub", "Grace", "Chen-Lee"}, keycloak.gotRename)
-	assert.Equal(t, "Chen-Lee", users.gotLast)
-}
-
-func Test_UserAdmin_UpdateTenantUser_UnchangedNameSkipsKeycloak(t *testing.T) {
-	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	keycloak, err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
-
-	require.NoError(t, err)
-	assert.Zero(t, keycloak.gotRename, "editing roles alone must not depend on the identity provider")
-}
-
-func Test_UserAdmin_UpdateTenantUser_KeycloakFailureLeavesGrantsUntouched(t *testing.T) {
-	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	keycloak := &mockKeycloak{renameErr: errors.New("keycloak unreachable")}
-	admin := NewUserAdmin(users, &mockOrgChecker{}, AdminDeps{
-		Keycloak: keycloak, Ranger: &mockRanger{}, Starrocks: &mockStarrocks{}, Auth: &mockAuthStore{},
-	})
-
-	err := admin.UpdateTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub",
-		types.UpdateUserRequest{FirstName: "Grace", LastName: "Chen-Lee"}, "acting-admin-sub")
-
-	require.Error(t, err)
-	assert.False(t, users.updated, "nothing is committed, so the admin's retry converges")
-}
-
 func Test_UserAdmin_UpdateTenantUser_UnknownUserIsReported(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), currentErr: types.ErrUserNotInTenant}
-	_, err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
+	err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
 
 	assert.ErrorIs(t, err, types.ErrUserNotInTenant)
 	assert.False(t, users.updated)
@@ -394,20 +356,17 @@ func Test_UserAdmin_UpdateTenantUser_UnknownUserIsReported(t *testing.T) {
 
 func Test_UserAdmin_UpdateTenantUser_UnknownRoleIsRejected(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser()}
-	_, err := updateUser(t, users, &mockOrgChecker{}, newUpdate(types.CreateUserRole{RoleCode: "no_such_role"}))
+	err := updateUser(t, users, &mockOrgChecker{}, newUpdate(types.CreateUserRole{RoleCode: "no_such_role"}))
 
 	assert.ErrorIs(t, err, types.ErrUnknownRole)
 	assert.False(t, users.updated)
 }
 
 // adminUser holds the role carrying can_manage_user, so the invariant applies to them.
-func adminUser() *types.TenantUser {
-	return &types.TenantUser{
-		UserID: "tara-sub", FirstName: "Tara", LastName: "Admin",
-		Grants: []types.Grant{
-			{TenantCode: "radiant", RoleCode: types.RoleMember},
-			{TenantCode: "radiant", RoleCode: "tenant_admin"},
-		},
+func adminUser() []types.Grant {
+	return []types.Grant{
+		{TenantCode: "radiant", RoleCode: types.RoleMember},
+		{TenantCode: "radiant", RoleCode: "tenant_admin"},
 	}
 }
 
@@ -423,7 +382,7 @@ func editAdmin(t *testing.T, users *mockTenantUserStore, roles ...types.CreateUs
 		Keycloak: &mockKeycloak{}, Ranger: &mockRanger{}, Starrocks: &mockStarrocks{}, Auth: &mockAuthStore{},
 	})
 	return admin.UpdateTenantUser(t.Context(), "radiant", "tara-sub",
-		types.UpdateUserRequest{FirstName: "Tara", LastName: "Admin", Roles: roles}, "tara-sub")
+		types.UpdateUserRequest{Roles: roles}, "tara-sub")
 }
 
 func Test_UserAdmin_UpdateTenantUser_LastAdminCannotLoseTheRole(t *testing.T) {
@@ -459,7 +418,7 @@ func Test_UserAdmin_UpdateTenantUser_LastAdminKeepingTheRoleIsAllowed(t *testing
 func Test_UserAdmin_UpdateTenantUser_NonAdminIsUnaffectedByTheInvariant(t *testing.T) {
 	users := &mockTenantUserStore{scopes: defaultScopes(), current: editedUser(), adminRoles: []string{"tenant_admin"}}
 
-	_, err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
+	err := updateUser(t, users, &mockOrgChecker{}, newUpdate())
 
 	require.NoError(t, err)
 	assert.Empty(t, users.gotExcluded)
@@ -502,7 +461,7 @@ func Test_UserAdmin_RemoveTenantUser_LeavesTheKeycloakIdentityAlone(t *testing.T
 
 	require.NoError(t, admin.RemoveTenantUser(t.Context(), "radiant", "b3f1-keycloak-sub", "acting-admin-sub"))
 
-	assert.Zero(t, keycloak.gotRename, "revoking tenant access is not an account deletion")
+	assert.Empty(t, keycloak.gotUsername, "revoking tenant access is not an account deletion")
 }
 
 func Test_UserAdmin_RemoveTenantUser_RemovingYourselfIsRejected(t *testing.T) {
@@ -526,8 +485,7 @@ func Test_UserAdmin_RemoveTenantUser_UnknownUserIsReported(t *testing.T) {
 }
 
 func Test_UserAdmin_RemoveTenantUser_LastAdminCannotBeRemoved(t *testing.T) {
-	current := editedUser()
-	current.Grants = append(current.Grants, types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
+	current := append(editedUser(), types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
 	users := &mockTenantUserStore{current: current, adminRoles: []string{"tenant_admin"}, otherAdmin: false}
 
 	ranger, err := removeUser(t, users, "b3f1-keycloak-sub")
@@ -538,8 +496,7 @@ func Test_UserAdmin_RemoveTenantUser_LastAdminCannotBeRemoved(t *testing.T) {
 }
 
 func Test_UserAdmin_RemoveTenantUser_AdminCanBeRemovedWhenAnotherHoldsTheRole(t *testing.T) {
-	current := editedUser()
-	current.Grants = append(current.Grants, types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
+	current := append(editedUser(), types.Grant{TenantCode: "radiant", RoleCode: "tenant_admin"})
 	users := &mockTenantUserStore{current: current, adminRoles: []string{"tenant_admin"}, otherAdmin: true}
 
 	_, err := removeUser(t, users, "b3f1-keycloak-sub")

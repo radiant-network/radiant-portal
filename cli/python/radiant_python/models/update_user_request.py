@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.create_user_role import CreateUserRole
 from typing import Optional, Set
@@ -25,12 +25,10 @@ from typing_extensions import Self
 
 class UpdateUserRequest(BaseModel):
     """
-    Payload to update a user's identity and role set within a tenant.
+    Payload to update the roles granted to a user within a tenant.
     """ # noqa: E501
-    first_name: StrictStr
-    last_name: StrictStr
     roles: Optional[List[CreateUserRole]] = None
-    __properties: ClassVar[List[str]] = ["first_name", "last_name", "roles"]
+    __properties: ClassVar[List[str]] = ["roles"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,8 +88,6 @@ class UpdateUserRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "first_name": obj.get("first_name"),
-            "last_name": obj.get("last_name"),
             "roles": [CreateUserRole.from_dict(_item) for _item in obj["roles"]] if obj.get("roles") is not None else None
         })
         return _obj

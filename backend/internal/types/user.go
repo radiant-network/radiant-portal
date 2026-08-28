@@ -102,35 +102,20 @@ type CreateUserRole struct {
 	OrgCodes []string `json:"org_codes"`
 } // @name CreateUserRole
 
-// UpdateUserRequest is the Edit-user payload. It carries the full desired state of the user in
-// the tenant: the identity attributes an administrator may change, and the complete set of roles
-// they should end up with. Email is absent because it is the Keycloak login identity and stays
-// read-only; the user is addressed by user_id in the path.
+// UpdateUserRequest is the Edit-user payload: the complete set of roles the user should end up
+// with in the tenant. Identity is absent on purpose — email, first name and last name are fixed
+// at creation — so the payload carries nothing but access, and the user is addressed by user_id
+// in the path.
 //
 // Roles replaces the user's grants rather than adding to them, so omitting a role removes it —
 // except member, which the server keeps tenant-wide whether or not it is listed.
-// @Description Payload to update a user's identity and role set within a tenant.
+// @Description Payload to update the roles granted to a user within a tenant.
 type UpdateUserRequest struct {
-	FirstName string           `json:"first_name" binding:"required"`
-	LastName  string           `json:"last_name" binding:"required"`
-	Roles     []CreateUserRole `json:"roles"`
+	Roles []CreateUserRole `json:"roles"`
 } // @name UpdateUserRequest
 
 func (r UpdateUserRequest) Validate() error {
-	if strings.TrimSpace(r.FirstName) == "" || strings.TrimSpace(r.LastName) == "" {
-		return fmt.Errorf("first_name and last_name must not be blank")
-	}
 	return validateRoles(r.Roles)
-}
-
-// TenantUser is a user's stored state within one tenant: their identity attributes and every role
-// grant they hold there, at the (role, organization) grain the edit diff works on.
-type TenantUser struct {
-	UserID    string
-	Email     string
-	FirstName string
-	LastName  string
-	Grants    []Grant
 }
 
 func (r CreateUserRequest) Validate() error {

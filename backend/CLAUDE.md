@@ -178,7 +178,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `API_PORT` | API listen port | 8090 |
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
-| `KEYCLOAK_ADMIN_CLIENT_ID/SECRET` | Service-account client (needs realm-management roles) the Keycloak **admin** client authenticates with via client_credentials. Required by any process that provisions or edits users — `cmd/createuser`, `cmd/create-tenant`, and `POST` / `PUT /{tenant}/users` in the API (the edit renames the account when the name changes). Read lazily, so a deployment that never provisions is unaffected. | — |
+| `KEYCLOAK_ADMIN_CLIENT_ID/SECRET` | Service-account client (needs realm-management roles) the Keycloak **admin** client authenticates with via client_credentials. Required by any process that provisions users — `cmd/createuser`, `cmd/create-tenant`, and `POST /{tenant}/users` in the API. Read lazily, so a deployment that never provisions is unaffected. | — |
 | `KEYCLOAK_DEFAULT_GROUP` | Keycloak group every newly provisioned user joins (all paths go through `service.ProvisionUser`). Empty = no group assignment; a configured group that does not exist is an error, not a silent skip. | — (none) |
 | `RANGER_URL/ADMIN_USER/ADMIN_PASSWORD` | Ranger admin API used to create the user and add them to the tenant's `<code>_user` role during provisioning, and to drop that membership again on `DELETE /{tenant}/users/{user_id}`. Same lazy-read note as the Keycloak admin credentials. | — |
 | `STARROCKS_JWT_JWKS_URL/REQUIRED_ISSUER/REQUIRED_AUDIENCE` | `authentication_jwt` parameters baked into each StarRocks user created during provisioning. | — |

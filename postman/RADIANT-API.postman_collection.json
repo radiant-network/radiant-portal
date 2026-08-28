@@ -595,7 +595,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Grace\",\n  \"last_name\": \"Chen\",\n  \"roles\": [\n    {\n      \"role_code\": \"geneticist\",\n      \"org_codes\": [\n        \"CHOP\",\n        \"CHUSJ\"\n      ]\n    }\n  ]\n}",
+              "raw": "{\n  \"roles\": [\n    {\n      \"role_code\": \"geneticist\",\n      \"org_codes\": [\n        \"CHOP\",\n        \"CHUSJ\"\n      ]\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
