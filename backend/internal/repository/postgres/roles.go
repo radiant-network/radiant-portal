@@ -114,17 +114,8 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 // for can_manage_user, which is exactly what refusing it at creation prevents.
 func (r *RolesRepository) UpdateRole(ctx context.Context, tenantCode, roleCode string, req types.UpdateRoleRequest) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		isDefault := []bool{}
-		if err := tx.Raw(
-			`SELECT is_default FROM role WHERE tenant_code = ? AND code = ? FOR UPDATE`,
-			tenantCode, roleCode).Scan(&isDefault).Error; err != nil {
-			return fmt.Errorf("error loading role %q of tenant %q: %w", roleCode, tenantCode, err)
-		}
-		if len(isDefault) == 0 {
-			return types.ErrRoleNotFound
-		}
-		if isDefault[0] {
-			return types.ErrRoleIsDefault
+		if err := lockCustomRole(tx, tenantCode, roleCode); err != nil {
+			return err
 		}
 
 		refused, err := ungrantableActions(tx, req.Actions)
@@ -158,6 +149,44 @@ func (r *RolesRepository) UpdateRole(ctx context.Context, tenantCode, roleCode s
 		}
 		return nil
 	})
+}
+
+// DeleteRole removes a custom role from the tenant. Its action mappings and every grant of it go
+// with it through the two ON DELETE CASCADE foreign keys, which is the whole point: deleting is the
+// explicit cascade the administrator confirmed after seeing how many users hold the role. Holders
+// keep their other roles and simply lose the actions this one gave them.
+//
+// Only custom roles are deletable — a seeded role comes back as types.ErrRoleIsDefault and a role
+// the tenant does not define as types.ErrRoleNotFound, both before anything is written.
+func (r *RolesRepository) DeleteRole(ctx context.Context, tenantCode, roleCode string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := lockCustomRole(tx, tenantCode, roleCode); err != nil {
+			return err
+		}
+
+		if err := tx.Exec(
+			`DELETE FROM role WHERE tenant_code = ? AND code = ?`,
+			tenantCode, roleCode).Error; err != nil {
+			return fmt.Errorf("error deleting role %q in tenant %q: %w", roleCode, tenantCode, err)
+		}
+		return nil
+	})
+}
+
+func lockCustomRole(tx *gorm.DB, tenantCode, roleCode string) error {
+	isDefault := []bool{}
+	if err := tx.Raw(
+		`SELECT is_default FROM role WHERE tenant_code = ? AND code = ? FOR UPDATE`,
+		tenantCode, roleCode).Scan(&isDefault).Error; err != nil {
+		return fmt.Errorf("error loading role %q of tenant %q: %w", roleCode, tenantCode, err)
+	}
+	if len(isDefault) == 0 {
+		return types.ErrRoleNotFound
+	}
+	if isDefault[0] {
+		return types.ErrRoleIsDefault
+	}
+	return nil
 }
 
 func roleActionMappings(tenantCode, roleCode string, actions []string) []map[string]any {

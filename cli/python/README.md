@@ -160,6 +160,7 @@ Class | Method | HTTP request | Description
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
 *RolesApi* | [**create_role**](docs/RolesApi.md#create_role) | **POST** /{tenant}/roles | Create a custom role
+*RolesApi* | [**delete_role**](docs/RolesApi.md#delete_role) | **DELETE** /{tenant}/roles/{code} | Delete a custom role
 *RolesApi* | [**get_role**](docs/RolesApi.md#get_role) | **GET** /{tenant}/roles/{code} | Get one of the tenant&#39;s roles
 *RolesApi* | [**list_roles**](docs/RolesApi.md#list_roles) | **GET** /{tenant}/roles | List the tenant&#39;s roles
 *RolesApi* | [**update_role**](docs/RolesApi.md#update_role) | **PUT** /{tenant}/roles/{code} | Edit a custom role

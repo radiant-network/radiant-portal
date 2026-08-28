@@ -484,6 +484,36 @@
             "description": "Edits the custom role created by \"Create role\". The code is immutable, so it is in the path and not in the body. The edit is a full replacement: the actions listed become the role's whole action set (this one drops can_download_file), and an omitted description is cleared. A seeded role such as `geneticist` answers 403 — it is locked."
           },
           "response": []
+        },
+        {
+          "name": "Delete role",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/roles/clinical_reviewer",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "roles",
+                "clinical_reviewer"
+              ]
+            },
+            "description": "Deletes the custom role created by \"Create role\" and answers an empty 204. The delete cascades and cannot be undone: the role is removed from every user holding it, who lose the actions it granted and keep their other roles. Run \"Get role\" first — its assigned_users_count / assigned_orgs_count are the impact to confirm before calling this. A seeded role such as `geneticist` answers 403 (locked) and an unknown code answers 404."
+          },
+          "response": []
         }
       ]
     },

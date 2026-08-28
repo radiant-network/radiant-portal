@@ -504,3 +504,81 @@ func Test_PutRoleHandler_RepoError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+type mockRoleDeleter struct {
+	err       error
+	gotTenant string
+	gotCode   string
+	calls     int
+}
+
+func (m *mockRoleDeleter) DeleteRole(_ context.Context, tenantCode, roleCode string) error {
+	m.calls++
+	m.gotTenant = tenantCode
+	m.gotCode = roleCode
+	return m.err
+}
+
+func serveDeleteRole(repo roleDeleter, code string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.DELETE("/:tenant/roles/:code", DeleteRoleHandler(repo))
+	req, _ := http.NewRequest("DELETE", "/radiant/roles/"+code, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_DeleteRoleHandler_NoContentIsEmpty(t *testing.T) {
+	repo := &mockRoleDeleter{}
+	w := serveDeleteRole(repo, "clinical_reviewer")
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+	assert.Empty(t, w.Body.String(), "matches the other delete endpoints: nothing is left to return")
+}
+
+func Test_DeleteRoleHandler_PassesTenantAndCodeFromPath(t *testing.T) {
+	repo := &mockRoleDeleter{}
+	serveDeleteRole(repo, "clinical_reviewer")
+
+	assert.Equal(t, "radiant", repo.gotTenant)
+	assert.Equal(t, "clinical_reviewer", repo.gotCode)
+}
+
+func Test_DeleteRoleHandler_UnknownRoleIsNotFound(t *testing.T) {
+	repo := &mockRoleDeleter{err: types.ErrRoleNotFound}
+	w := serveDeleteRole(repo, "no_such_role")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"role not found"}`, w.Body.String())
+}
+
+func Test_DeleteRoleHandler_DefaultRoleIsForbiddenWithAReason(t *testing.T) {
+	repo := &mockRoleDeleter{err: types.ErrRoleIsDefault}
+	w := serveDeleteRole(repo, "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.JSONEq(t, `{"status":403,"message":"cannot delete a default role"}`, w.Body.String(),
+		"the reason distinguishes a locked role from a missing action")
+}
+
+func Test_DeleteRoleHandler_WrappedDefaultRoleErrorIsStillForbidden(t *testing.T) {
+	repo := &mockRoleDeleter{err: fmt.Errorf("deleting role %q: %w", "geneticist", types.ErrRoleIsDefault)}
+	w := serveDeleteRole(repo, "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_DeleteRoleHandler_WrappedNotFoundIsStillNotFound(t *testing.T) {
+	repo := &mockRoleDeleter{err: fmt.Errorf("deleting role: %w", types.ErrRoleNotFound)}
+	w := serveDeleteRole(repo, "no_such_role")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteRoleHandler_RepoError(t *testing.T) {
+	repo := &mockRoleDeleter{err: errors.New("boom")}
+	w := serveDeleteRole(repo, "clinical_reviewer")
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

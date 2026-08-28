@@ -8232,6 +8232,66 @@ paths:
       tags:
       - roles
   /{tenant}/roles/{code}:
+    delete:
+      description: |-
+        Deletes the custom role with the code in the path. Requires the `can_manage_role`
+        action. Returns an empty 204.
+
+        The delete cascades and is not reversible: the role is removed from every user holding it.
+        A seeded role is locked (403); a role the tenant does not define — another tenant's
+        included — is not found (404).
+      operationId: deleteRole
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Role code
+        in: path
+        name: code
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Delete a custom role
+      tags:
+      - roles
     get:
       description: |-
         Returns the role with the code in the path, in the same shape the list serves it:

@@ -13751,6 +13751,48 @@ export const RolesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Deletes the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 204.  The delete cascades and is not reversible: the role is removed from every user holding it. A seeded role is locked (403); a role the tenant does not define — another tenant\'s included — is not found (404).
+         * @summary Delete a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRole: async (tenant: string, code: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('deleteRole', 'tenant', tenant)
+            // verify required parameter 'code' is not null or undefined
+            assertParamExists('deleteRole', 'code', code)
+            const localVarPath = `/{tenant}/roles/{code}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"code"}}`, encodeURIComponent(String(code)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
          * @summary Get one of the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -13903,6 +13945,20 @@ export const RolesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Deletes the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 204.  The delete cascades and is not reversible: the role is removed from every user holding it. A seeded role is locked (403); a role the tenant does not define — another tenant\'s included — is not found (404).
+         * @summary Delete a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteRole(tenant: string, code: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRole(tenant, code, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RolesApi.deleteRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
          * @summary Get one of the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -13966,6 +14022,17 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.createRole(tenant, createRoleRequest, options).then((request) => request(axios, basePath));
         },
         /**
+         * Deletes the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 204.  The delete cascades and is not reversible: the role is removed from every user holding it. A seeded role is locked (403); a role the tenant does not define — another tenant\'s included — is not found (404).
+         * @summary Delete a custom role
+         * @param {string} tenant Tenant code
+         * @param {string} code Role code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRole(tenant: string, code: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteRole(tenant, code, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns the role with the code in the path, in the same shape the list serves it: the actions it grants, the `scope` derived from them, and the number of users holding it. Requires the `can_manage_role` or the `can_manage_user` action, the same gate as the list — it backs the role detail panel, the duplicate flow (read the role, then create a new one from its actions), and the \"what this grants\" preview the user screens show at assignment. `is_default` marks a seeded role, which is locked and can be neither edited nor deleted. Roles are keyed per tenant, so a role of another tenant is reported as not found.
          * @summary Get one of the tenant\'s roles
          * @param {string} tenant Tenant code
@@ -14019,6 +14086,19 @@ export class RolesApi extends BaseAPI {
      */
     public createRole(tenant: string, createRoleRequest: CreateRoleRequest, options?: RawAxiosRequestConfig) {
         return RolesApiFp(this.configuration).createRole(tenant, createRoleRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Deletes the custom role with the code in the path. Requires the `can_manage_role` action. Returns an empty 204.  The delete cascades and is not reversible: the role is removed from every user holding it. A seeded role is locked (403); a role the tenant does not define — another tenant\'s included — is not found (404).
+     * @summary Delete a custom role
+     * @param {string} tenant Tenant code
+     * @param {string} code Role code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RolesApi
+     */
+    public deleteRole(tenant: string, code: string, options?: RawAxiosRequestConfig) {
+        return RolesApiFp(this.configuration).deleteRole(tenant, code, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
