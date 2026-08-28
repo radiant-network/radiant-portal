@@ -392,3 +392,117 @@ func Test_PutRole_CrossTenant_Forbidden(t *testing.T) {
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
+
+// deleteRoleRouter mirrors production's wiring for the delete route: tenant membership, then the
+// can_manage_role gate alone — can_manage_user does not open it.
+func deleteRoleRouter(env *testutils.Env, userID string) (*gin.Engine, *postgres.RolesRepository) {
+	authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+	rolesRepo := postgres.NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+	auth := &testutils.MockAuth{Id: userID}
+
+	router := gin.Default()
+	tenantRoutes := router.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+	tenantRoutes.DELETE("/roles/:code", server.RequireAction(auth, authRepo, types.ActionManageRole), server.DeleteRoleHandler(rolesRepo))
+	return router, rolesRepo
+}
+
+func serveDeleteRoleRequest(router *gin.Engine, tenant, code string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("DELETE", "/"+tenant+"/roles/"+code, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func deleteRole(t *testing.T, userID, tenant, code string) *httptest.ResponseRecorder {
+	t.Helper()
+	var w *httptest.ResponseRecorder
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		router, _ := deleteRoleRouter(env, userID)
+		w = serveDeleteRoleRequest(router, tenant, code)
+	})
+	return w
+}
+
+func Test_DeleteRole_RoleManager_DeletesRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const code = "zz_int_deletable"
+		defer env.Postgres.Exec("DELETE FROM role WHERE tenant_code = 'radiant' AND code = ?", code)
+
+		router, repo := deleteRoleRouter(env, taraID)
+		require.NoError(t, repo.CreateRole(t.Context(), "radiant", types.CreateRoleRequest{
+			Code:          code,
+			NameEn:        "ZZ Integration Deletable",
+			DescriptionEn: "Created by the integration test.",
+			Actions:       []string{types.ActionSearchCase},
+		}))
+
+		w := serveDeleteRoleRequest(router, "radiant", code)
+
+		require.Equal(t, http.StatusNoContent, w.Code)
+		assert.Empty(t, w.Body.String(), "the delete endpoint answers an empty 204")
+
+		gone, err := repo.GetTenantRole(t.Context(), "radiant", code)
+		require.NoError(t, err)
+		assert.Nil(t, gone, "the role is really out of the catalog")
+	})
+}
+
+func Test_DeleteRole_RoleManager_RemovesTheRoleFromItsHolders(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const code = "zz_int_held"
+		defer env.Postgres.Exec("DELETE FROM role WHERE tenant_code = 'radiant' AND code = ?", code)
+
+		router, repo := deleteRoleRouter(env, taraID)
+		require.NoError(t, repo.CreateRole(t.Context(), "radiant", types.CreateRoleRequest{
+			Code: code, NameEn: "ZZ Integration Held", Actions: []string{types.ActionViewKb},
+		}))
+		require.NoError(t, env.Postgres.Exec(
+			`INSERT INTO user_role (user_id, tenant_code, org_code, role_code) VALUES (?, 'radiant', NULL, ?)`,
+			mikeID, code).Error)
+
+		held, err := repo.GetTenantRole(t.Context(), "radiant", code)
+		require.NoError(t, err)
+		require.EqualValues(t, 1, held.AssignedUsersCount, "the impact the UI surfaces before confirming")
+
+		w := serveDeleteRoleRequest(router, "radiant", code)
+		require.Equal(t, http.StatusNoContent, w.Code)
+
+		var grants int64
+		require.NoError(t, env.Postgres.Raw(
+			`SELECT COUNT(*) FROM user_role WHERE tenant_code = 'radiant' AND role_code = ?`, code).
+			Scan(&grants).Error)
+		assert.EqualValues(t, 0, grants, "mike keeps his other roles and simply loses this one")
+	})
+}
+
+func Test_DeleteRole_DefaultRole_Forbidden(t *testing.T) {
+	w := deleteRole(t, taraID, "radiant", "geneticist")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.JSONEq(t,
+		`{"status":403,"message":"cannot delete a default role"}`,
+		w.Body.String(), "the reason distinguishes a locked role from a missing action")
+}
+
+func Test_DeleteRole_UnknownRole_NotFound(t *testing.T) {
+	w := deleteRole(t, taraID, "radiant", "no_such_role")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteRole_WithoutManageRoleDenied(t *testing.T) {
+	// mike is a radiant member: tenant access passes, the action gate is what denies.
+	w := deleteRole(t, mikeID, "radiant", "practitioner")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.JSONEq(t, `{"status":403,"message":"Forbidden"}`, w.Body.String(),
+		"the action gate stays generic — it never says which action is missing")
+}
+
+func Test_DeleteRole_CrossTenant_Forbidden(t *testing.T) {
+	// tara manages roles in radiant only → RequireTenantAccess rejects before the handler runs.
+	w := deleteRole(t, taraID, "tenant_b", "researcher")
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}

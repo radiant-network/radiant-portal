@@ -116,6 +116,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// DELETE requests
 		for _, route := range []string{
 			"radiant/occurrences/flags/1/1/1/10000",
+			"radiant/roles/researcher",
 			"radiant/users/b3f1-keycloak-sub",
 		} {
 			req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)

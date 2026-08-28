@@ -979,3 +979,137 @@ func Test_RolesRepository_UpdateRole_DuplicateFrenchNameIsConflict(t *testing.T)
 		})
 	})
 }
+
+func Test_RolesRepository_DeleteRole_RemovesTheRoleAndItsActions(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_delete_role", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:          "clinical_reviewer",
+				NameEn:        "Clinical Reviewer",
+				DescriptionEn: "Full clinical work as one role.",
+				Actions:       []string{types.ActionSearchCase, types.ActionReadPII},
+			})
+
+			require.NoError(t, repo.DeleteRole(t.Context(), tenant, "clinical_reviewer"))
+
+			deleted, err := repo.GetTenantRole(t.Context(), tenant, "clinical_reviewer")
+			require.NoError(t, err)
+			assert.Nil(t, deleted, "the role is gone from the catalog")
+
+			var mappings int64
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT COUNT(*) FROM role_action WHERE tenant_code = ? AND role_code = ?`,
+				tenant, "clinical_reviewer").Scan(&mappings).Error)
+			assert.EqualValues(t, 0, mappings, "role_action cascades, so no mapping outlives the role")
+		})
+	})
+}
+
+func Test_RolesRepository_DeleteRole_RevokesTheGrantsOfItsHolders(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_delete_grants", func(repo *RolesRepository, tenant string) {
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code:    "held",
+				NameEn:  "Held",
+				Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, env.Postgres.Exec(
+				`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				 VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', ?, NULL, 'held')`, tenant).Error)
+
+			require.NoError(t, repo.DeleteRole(t.Context(), tenant, "held"))
+
+			var grants int64
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT COUNT(*) FROM user_role WHERE tenant_code = ? AND role_code = ?`,
+				tenant, "held").Scan(&grants).Error)
+			assert.EqualValues(t, 0, grants, "user_role cascades: the holder simply no longer has the role")
+
+			var stillAUser int64
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT COUNT(*) FROM users WHERE user_id = '25286548-fbef-4e93-b3c4-c659e6169396'`).
+				Scan(&stillAUser).Error)
+			assert.EqualValues(t, 1, stillAUser, "deleting a role never deletes the users holding it")
+		})
+	})
+}
+
+func Test_RolesRepository_DeleteRole_UnknownRoleIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_delete_missing", func(repo *RolesRepository, tenant string) {
+			err := repo.DeleteRole(t.Context(), tenant, "no_such_role")
+			assert.ErrorIs(t, err, types.ErrRoleNotFound)
+		})
+	})
+}
+
+func Test_RolesRepository_DeleteRole_RoleOfAnotherTenantIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_delete_cross", func(repo *RolesRepository, tenant string) {
+			err := repo.DeleteRole(t.Context(), tenant, "researcher")
+			require.ErrorIs(t, err, types.ErrRoleNotFound, "radiant's researcher is invisible from another tenant")
+
+			survivor, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "researcher")
+			require.NoError(t, err)
+			assert.NotNil(t, survivor, "radiant's own role is untouched")
+		})
+	})
+}
+
+func Test_RolesRepository_DeleteRole_DefaultRoleIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.DeleteRole(t.Context(), types.DefaultTenantCode, "geneticist")
+		require.ErrorIs(t, err, types.ErrRoleIsDefault)
+
+		survivor, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, "geneticist")
+		require.NoError(t, err)
+		require.NotNil(t, survivor, "the refusal happens before anything is written")
+		assert.NotEmpty(t, survivor.Actions, "its action mappings survive too")
+	})
+}
+
+// member is what guarantees every user holds at least one role, so it has to be locked like the
+// rest of the seeded catalog — it is the one delete that could break the minimum-role invariant.
+func Test_RolesRepository_DeleteRole_MemberRoleIsRefused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.DeleteRole(t.Context(), types.DefaultTenantCode, types.RoleMember)
+		require.ErrorIs(t, err, types.ErrRoleIsDefault)
+
+		survivor, err := repo.GetTenantRole(t.Context(), types.DefaultTenantCode, types.RoleMember)
+		require.NoError(t, err)
+		assert.NotNil(t, survivor, "member stays in the catalog, so every user keeps a role to fall back on")
+	})
+}
+
+// The minimum-role invariant end to end: because member is a default role it survives any
+// custom-role delete, so cascading the grants away can never leave a holder with no role at all.
+func Test_RolesRepository_DeleteRole_HoldersKeepTheirMemberRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_delete_minimum", func(repo *RolesRepository, tenant string) {
+			require.NoError(t, NewTenantRepository(database.PostgresDB{DB: env.Postgres}).
+				SeedDefaultRoles(t.Context(), tenant))
+			seedCustomRole(t, repo, tenant, types.CreateRoleRequest{
+				Code: "extra", NameEn: "Extra", Actions: []string{types.ActionViewKb},
+			})
+
+			const holder = "25286548-fbef-4e93-b3c4-c659e6169396"
+			require.NoError(t, env.Postgres.Exec(
+				`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				 VALUES (?, ?, NULL, ?), (?, ?, NULL, 'extra')`,
+				holder, tenant, types.RoleMember, holder, tenant).Error)
+
+			require.NoError(t, repo.DeleteRole(t.Context(), tenant, "extra"))
+
+			var remaining []string
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT role_code FROM user_role WHERE user_id = ? AND tenant_code = ?`, holder, tenant).
+				Scan(&remaining).Error)
+			assert.Equal(t, []string{types.RoleMember}, remaining,
+				"the cascade takes the deleted role's grant only, never the baseline one")
+		})
+	})
+}

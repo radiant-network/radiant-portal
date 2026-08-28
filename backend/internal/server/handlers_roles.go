@@ -228,3 +228,49 @@ func PutRoleHandler(repo roleUpdater) gin.HandlerFunc {
 		}
 	}
 }
+
+type roleDeleter interface {
+	DeleteRole(ctx context.Context, tenantCode, roleCode string) error
+}
+
+// DeleteRoleHandler
+// @Summary Delete a custom role
+// @Id deleteRole
+// @Description Deletes the custom role with the code in the path. Requires the `can_manage_role`
+// @Description action. Returns an empty 204.
+// @Description
+// @Description The delete cascades and is not reversible: the role is removed from every user holding it.
+// @Description A seeded role is locked (403); a role the tenant does not define — another tenant's
+// @Description included — is not found (404).
+// @Tags roles
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param code path string true "Role code"
+// @Produce json
+// @Success 204
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/roles/{code} [delete]
+func DeleteRoleHandler(repo roleDeleter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		switch err := repo.DeleteRole(c.Request.Context(), *tenant, c.Param("code")); {
+		case err == nil:
+			c.Status(http.StatusNoContent)
+		case errors.Is(err, types.ErrRoleNotFound):
+			HandleNotFoundError(c, "role")
+		case errors.Is(err, types.ErrRoleIsDefault):
+			HandleForbiddenError(c, "cannot delete a default role")
+		default:
+			HandleError(c, err)
+		}
+	}
+}

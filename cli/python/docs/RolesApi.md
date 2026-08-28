@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_role**](RolesApi.md#create_role) | **POST** /{tenant}/roles | Create a custom role
+[**delete_role**](RolesApi.md#delete_role) | **DELETE** /{tenant}/roles/{code} | Delete a custom role
 [**get_role**](RolesApi.md#get_role) | **GET** /{tenant}/roles/{code} | Get one of the tenant&#39;s roles
 [**list_roles**](RolesApi.md#list_roles) | **GET** /{tenant}/roles | List the tenant&#39;s roles
 [**update_role**](RolesApi.md#update_role) | **PUT** /{tenant}/roles/{code} | Edit a custom role
@@ -100,6 +101,92 @@ Name | Type | Description  | Notes
 **403** | Forbidden |  -  |
 **409** | Conflict |  -  |
 **422** | Unprocessable Entity |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **delete_role**
+> delete_role(tenant, code)
+
+Delete a custom role
+
+Deletes the custom role with the code in the path. Requires the `can_manage_role`
+action. Returns an empty 204.
+
+The delete cascades and is not reversible: the role is removed from every user holding it.
+A seeded role is locked (403); a role the tenant does not define — another tenant's
+included — is not found (404).
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.RolesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    code = 'code_example' # str | Role code
+
+    try:
+        # Delete a custom role
+        api_instance.delete_role(tenant, code)
+    except Exception as e:
+        print("Exception when calling RolesApi->delete_role: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **code** | **str**| Role code | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**204** | No Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
