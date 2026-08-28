@@ -445,6 +445,45 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Edit role",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_en\": \"Senior Clinical Reviewer\",\n    \"name_fr\": \"Réviseur clinique principal\",\n    \"description_en\": \"Full clinical work as one role.\",\n    \"description_fr\": \"Travail clinique complet en un seul rôle.\",\n    \"actions\": [\n        \"can_search_case\",\n        \"can_view_kb\",\n        \"can_read_pii\",\n        \"can_interpret_variant\",\n        \"can_comment_variant\",\n        \"can_flag_variant\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/roles/clinical_reviewer",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "roles",
+                "clinical_reviewer"
+              ]
+            },
+            "description": "Edits the custom role created by \"Create role\". The code is immutable, so it is in the path and not in the body. The edit is a full replacement: the actions listed become the role's whole action set (this one drops can_download_file), and an omitted description is cleared. A seeded role such as `geneticist` answers 403 — it is locked."
+          },
+          "response": []
         }
       ]
     },

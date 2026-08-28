@@ -162,6 +162,7 @@ Class | Method | HTTP request | Description
 *RolesApi* | [**create_role**](docs/RolesApi.md#create_role) | **POST** /{tenant}/roles | Create a custom role
 *RolesApi* | [**get_role**](docs/RolesApi.md#get_role) | **GET** /{tenant}/roles/{code} | Get one of the tenant&#39;s roles
 *RolesApi* | [**list_roles**](docs/RolesApi.md#list_roles) | **GET** /{tenant}/roles | List the tenant&#39;s roles
+*RolesApi* | [**update_role**](docs/RolesApi.md#update_role) | **PUT** /{tenant}/roles/{code} | Edit a custom role
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
 *SamplesApi* | [**put_sample_batch**](docs/SamplesApi.md#put_sample_batch) | **PUT** /{tenant}/samples/batch | Update existing samples (batch)
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
@@ -301,6 +302,7 @@ Class | Method | HTTP request | Description
  - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)
  - [UpdateOrganizationRequest](docs/UpdateOrganizationRequest.md)
+ - [UpdateRoleRequest](docs/UpdateRoleRequest.md)
  - [UpdateUserRequest](docs/UpdateUserRequest.md)
  - [UserPreference](docs/UserPreference.md)
  - [UserResult](docs/UserResult.md)

@@ -42,8 +42,12 @@ func HandleUnauthorizedError(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, types.ApiError{Status: http.StatusUnauthorized, Message: "Unauthorized"})
 }
 
-func HandleForbiddenError(c *gin.Context) {
-	c.JSON(http.StatusForbidden, types.ApiError{Status: http.StatusForbidden, Message: "Forbidden"})
+func HandleForbiddenError(c *gin.Context, message ...string) {
+	reason := "Forbidden"
+	if len(message) > 0 && message[0] != "" {
+		reason = message[0]
+	}
+	c.JSON(http.StatusForbidden, types.ApiError{Status: http.StatusForbidden, Message: reason})
 }
 
 func HandleConflictError(c *gin.Context, message string) {

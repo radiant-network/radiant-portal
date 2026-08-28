@@ -108,21 +108,14 @@ type roleCreator interface {
 // @Summary Create a custom role
 // @Id createRole
 // @Description Creates a custom role in the tenant in the path. Requires the `can_manage_role`
-// @Description action — unlike reading the catalog, `can_manage_user` does not open this.
-// @Description Returns an empty 201.
+// @Description action. Returns an empty 201.
 // @Description
 // @Description `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
-// @Description unique within the tenant. `name_en` is required; `name_fr` is optional and falls
-// @Description back to `name_en` when omitted, so the role never renders blank to a French reader.
-// @Description Each name must be unique within the tenant in its own language.
-// @Description `description_en` / `description_fr` are optional and follow the same fallback.
-// @Description `actions` must list at least one action, and every one of them must exist and be grantable
-// @Description a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and
-// @Description makes `tenant_admin` un-duplicable.
-// @Description
-// @Description The role's `scope` is not supplied: it is derived from the actions and decides
-// @Description whether granting the role needs organizations. A created role is never
-// @Description `is_default`, so it stays editable and deletable.
+// @Description unique per tenant; `name_en` is required and each name stays unique per tenant too
+// @Description (409). `name_fr`/`description_fr` fall back to their English counterparts.
+// @Description `actions` must list at least one, and every one must exist and be grantable — a
+// @Description reserved action such as `can_manage_user` yields 422. `scope` is derived from the
+// @Description actions; a created role is never `is_default`.
 // @Tags roles
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -159,6 +152,73 @@ func PostRoleHandler(repo roleCreator) gin.HandlerFunc {
 		switch err := repo.CreateRole(c.Request.Context(), *tenant, req); {
 		case err == nil:
 			c.Status(http.StatusCreated)
+		case errors.As(err, &conflict):
+			HandleFieldConflictError(c, conflict.Error(), conflict.Field)
+		case errors.Is(err, types.ErrRoleActionsNotGrantable):
+			HandleUnprocessableEntityError(c, err.Error())
+		default:
+			HandleError(c, err)
+		}
+	}
+}
+
+type roleUpdater interface {
+	UpdateRole(ctx context.Context, tenantCode, roleCode string, req types.UpdateRoleRequest) error
+}
+
+// PutRoleHandler
+// @Summary Edit a custom role
+// @Id updateRole
+// @Description Replaces the labels and actions of the custom role with the code in the path.
+// @Description Requires the `can_manage_role` action. Returns an empty 200.
+// @Description
+// @Description Full replacement, not a patch: an omitted optional field is cleared, and the
+// @Description `actions` listed become the role's whole set, so one left out is revoked from every
+// @Description holder. `name_fr`/`description_fr` fall back to their English counterparts; each name
+// @Description stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the
+// @Description actions. Every action must be grantable (422); a seeded role is locked (403).
+// @Tags roles
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param code path string true "Role code"
+// @Param message body types.UpdateRoleRequest true "Desired state of the role"
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 409 {object} types.ApiError
+// @Failure 422 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/roles/{code} [put]
+func PutRoleHandler(repo roleUpdater) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req types.UpdateRoleRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := req.Validate(); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		var conflict *types.RoleConflictError
+		switch err := repo.UpdateRole(c.Request.Context(), *tenant, c.Param("code"), req); {
+		case err == nil:
+			c.Status(http.StatusOK)
+		case errors.Is(err, types.ErrRoleNotFound):
+			HandleNotFoundError(c, "role")
+		case errors.Is(err, types.ErrRoleIsDefault):
+			HandleForbiddenError(c, err.Error())
 		case errors.As(err, &conflict):
 			HandleFieldConflictError(c, conflict.Error(), conflict.Field)
 		case errors.Is(err, types.ErrRoleActionsNotGrantable):

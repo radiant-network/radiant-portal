@@ -97,19 +97,78 @@ func (r *RolesRepository) CreateRole(ctx context.Context, tenantCode string, req
 			return fmt.Errorf("error creating role %q in tenant %q: %w", req.Code, tenantCode, err)
 		}
 
-		mappings := make([]map[string]any, 0, len(req.Actions))
-		for _, action := range req.Actions {
-			mappings = append(mappings, map[string]any{
-				"tenant_code": tenantCode,
-				"role_code":   req.Code.String(),
-				"action_code": action,
-			})
-		}
-		if err := tx.Table("role_action").Create(mappings).Error; err != nil {
+		if err := tx.Table("role_action").Create(roleActionMappings(tenantCode, req.Code.String(), req.Actions)).Error; err != nil {
 			return fmt.Errorf("error mapping actions to role %q in tenant %q: %w", req.Code, tenantCode, err)
 		}
 		return nil
 	})
+}
+
+// UpdateRole replaces a custom role's labels and its whole action set in one transaction, so a
+// role is never briefly readable with the new name and the old actions.
+//
+// Only custom roles are editable: a seeded role comes back as types.ErrRoleIsDefault and a role
+// the tenant does not define as types.ErrRoleNotFound, both before anything is written. The
+// grantable check is the same one creation applies — otherwise editing a role would be a way in
+// for can_manage_user, which is exactly what refusing it at creation prevents.
+func (r *RolesRepository) UpdateRole(ctx context.Context, tenantCode, roleCode string, req types.UpdateRoleRequest) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		isDefault := []bool{}
+		if err := tx.Raw(
+			`SELECT is_default FROM role WHERE tenant_code = ? AND code = ? FOR UPDATE`,
+			tenantCode, roleCode).Scan(&isDefault).Error; err != nil {
+			return fmt.Errorf("error loading role %q of tenant %q: %w", roleCode, tenantCode, err)
+		}
+		if len(isDefault) == 0 {
+			return types.ErrRoleNotFound
+		}
+		if isDefault[0] {
+			return types.ErrRoleIsDefault
+		}
+
+		refused, err := ungrantableActions(tx, req.Actions)
+		if err != nil {
+			return err
+		}
+		if len(refused) > 0 {
+			return fmt.Errorf("%w: %s", types.ErrRoleActionsNotGrantable, strings.Join(refused, ", "))
+		}
+
+		if err := tx.Exec(`
+			UPDATE role
+			SET name_en = ?, description_en = NULLIF(?, ''), name_fr = ?, description_fr = NULLIF(?, '')
+			WHERE tenant_code = ? AND code = ?`,
+			req.NameEn.String(), req.DescriptionEn.String(),
+			req.FrenchName(), req.FrenchDescription(),
+			tenantCode, roleCode).Error; err != nil {
+			if field, ok := roleConflictField(err); ok {
+				return &types.RoleConflictError{Field: field}
+			}
+			return fmt.Errorf("error updating role %q in tenant %q: %w", roleCode, tenantCode, err)
+		}
+
+		if err := tx.Exec(
+			`DELETE FROM role_action WHERE tenant_code = ? AND role_code = ?`,
+			tenantCode, roleCode).Error; err != nil {
+			return fmt.Errorf("error clearing actions of role %q in tenant %q: %w", roleCode, tenantCode, err)
+		}
+		if err := tx.Table("role_action").Create(roleActionMappings(tenantCode, roleCode, req.Actions)).Error; err != nil {
+			return fmt.Errorf("error mapping actions to role %q in tenant %q: %w", roleCode, tenantCode, err)
+		}
+		return nil
+	})
+}
+
+func roleActionMappings(tenantCode, roleCode string, actions []string) []map[string]any {
+	mappings := make([]map[string]any, 0, len(actions))
+	for _, action := range actions {
+		mappings = append(mappings, map[string]any{
+			"tenant_code": tenantCode,
+			"role_code":   roleCode,
+			"action_code": action,
+		})
+	}
+	return mappings
 }
 
 // ungrantableActions returns the requested codes a custom role may not map, in the order given —

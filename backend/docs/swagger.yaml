@@ -2939,6 +2939,26 @@ components:
       required:
       - name
       type: object
+    UpdateRoleRequest:
+      description: Payload to edit a custom role of a tenant
+      properties:
+        actions:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        description_en:
+          type: string
+        description_fr:
+          type: string
+        name_en:
+          type: string
+        name_fr:
+          type: string
+      required:
+      - actions
+      - name_en
+      type: object
     UpdateUserRequest:
       description: Payload to update a user's identity and role set within a tenant.
       properties:
@@ -8139,21 +8159,14 @@ paths:
     post:
       description: |-
         Creates a custom role in the tenant in the path. Requires the `can_manage_role`
-        action — unlike reading the catalog, `can_manage_user` does not open this.
-        Returns an empty 201.
+        action. Returns an empty 201.
 
         `code` is immutable after creation, must match `[a-z][a-z0-9_]*` (max 50) and be
-        unique within the tenant. `name_en` is required; `name_fr` is optional and falls
-        back to `name_en` when omitted, so the role never renders blank to a French reader.
-        Each name must be unique within the tenant in its own language.
-        `description_en` / `description_fr` are optional and follow the same fallback.
-        `actions` must list at least one action, and every one of them must exist and be grantable
-        a reserved action (such as `can_manage_user`) yields 422, which is what keeps it out of every custom role and
-        makes `tenant_admin` un-duplicable.
-
-        The role's `scope` is not supplied: it is derived from the actions and decides
-        whether granting the role needs organizations. A created role is never
-        `is_default`, so it stays editable and deletable.
+        unique per tenant; `name_en` is required and each name stays unique per tenant too
+        (409). `name_fr`/`description_fr` fall back to their English counterparts.
+        `actions` must list at least one, and every one must exist and be grantable — a
+        reserved action such as `can_manage_user` yields 422. `scope` is derived from the
+        actions; a created role is never `is_default`.
       operationId: createRole
       parameters:
       - description: Tenant code
@@ -8288,6 +8301,97 @@ paths:
       security:
       - bearerauth: []
       summary: Get one of the tenant's roles
+      tags:
+      - roles
+    put:
+      description: |-
+        Replaces the labels and actions of the custom role with the code in the path.
+        Requires the `can_manage_role` action. Returns an empty 200.
+
+        Full replacement, not a patch: an omitted optional field is cleared, and the
+        `actions` listed become the role's whole set, so one left out is revoked from every
+        holder. `name_fr`/`description_fr` fall back to their English counterparts; each name
+        stays unique per tenant (409). `code` is immutable; `scope` is re-derived from the
+        actions. Every action must be grantable (422); a seeded role is locked (403).
+      operationId: updateRole
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Role code
+        in: path
+        name: code
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+        description: Desired state of the role
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Edit a custom role
       tags:
       - roles
   /{tenant}/samples/batch:

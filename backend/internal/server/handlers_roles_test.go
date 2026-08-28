@@ -341,3 +341,166 @@ func Test_PostRoleHandler_RepoError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+type mockRoleUpdater struct {
+	err       error
+	gotTenant string
+	gotCode   string
+	gotReq    types.UpdateRoleRequest
+	calls     int
+}
+
+func (m *mockRoleUpdater) UpdateRole(_ context.Context, tenantCode, roleCode string, req types.UpdateRoleRequest) error {
+	m.calls++
+	m.gotTenant = tenantCode
+	m.gotCode = roleCode
+	m.gotReq = req
+	return m.err
+}
+
+func servePutRole(repo roleUpdater, code, body string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.PUT("/:tenant/roles/:code", PutRoleHandler(repo))
+	req, _ := http.NewRequest("PUT", "/radiant/roles/"+code, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+const updateRoleBody = `{"name_en":"Clinical Reviewer","name_fr":"Réviseur clinique","description_en":"Full clinical work.","description_fr":"Travail clinique complet.","actions":["can_search_case","can_read_pii"]}`
+
+func Test_PutRoleHandler_OkIsEmpty(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String(), "matches the other write endpoints: the caller reads the role back")
+}
+
+func Test_PutRoleHandler_PassesTenantCodeAndPayloadToRepo(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, "radiant", repo.gotTenant)
+	assert.Equal(t, "clinical_reviewer", repo.gotCode)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.NameEn)
+	assert.EqualValues(t, "Réviseur clinique", repo.gotReq.NameFr)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.DescriptionEn)
+	assert.EqualValues(t, "Travail clinique complet.", repo.gotReq.DescriptionFr)
+	assert.Equal(t, []string{"can_search_case", "can_read_pii"}, repo.gotReq.Actions)
+}
+
+func Test_PutRoleHandler_FrenchLabelsAreOptional(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"name_en":"Reviewer","actions":["can_view_kb"]}`)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, repo.gotReq.NameFr, "omitted, so the repository falls back to the English name")
+	assert.EqualValues(t, "Reviewer", repo.gotReq.FrenchName())
+}
+
+func Test_PutRoleHandler_TrimsNameAndDescription(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"name_en":"  Clinical Reviewer  ","name_fr":"  Réviseur clinique  ","description_en":"  Full clinical work.  ","actions":["can_view_kb"]}`)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.EqualValues(t, "Clinical Reviewer", repo.gotReq.NameEn)
+	assert.EqualValues(t, "Réviseur clinique", repo.gotReq.NameFr)
+	assert.EqualValues(t, "Full clinical work.", repo.gotReq.DescriptionEn)
+}
+
+func Test_PutRoleHandler_WhitespaceOnlyNameIsRejected(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"name_en":"   ","actions":["can_view_kb"]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code, "trimming leaves it empty, so required fails")
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PutRoleHandler_MalformedBodyIsRejected(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"name_en":`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "an unparsable body never reaches the repository")
+}
+
+func Test_PutRoleHandler_MissingRequiredFieldIsRejected(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"description_en":"No name here."}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PutRoleHandler_EmptyActionsIsRejected(t *testing.T) {
+	repo := &mockRoleUpdater{}
+	w := servePutRole(repo, "reviewer", `{"name_en":"Reviewer","actions":[]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code, "an edit may not strip a role down to no actions")
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PutRoleHandler_UnknownRoleIsNotFound(t *testing.T) {
+	repo := &mockRoleUpdater{err: types.ErrRoleNotFound}
+	w := servePutRole(repo, "no_such_role", updateRoleBody)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"role not found"}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_DefaultRoleIsForbiddenWithAReason(t *testing.T) {
+	repo := &mockRoleUpdater{err: types.ErrRoleIsDefault}
+	w := servePutRole(repo, "geneticist", updateRoleBody)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.JSONEq(t, `{"status":403,"message":"cannot edit a default role"}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_DuplicateEnglishNameIsConflict(t *testing.T) {
+	repo := &mockRoleUpdater{err: &types.RoleConflictError{Field: types.RoleFieldNameEn}}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same name_en already exists in this tenant","detail":{"field":"name_en"}}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_DuplicateFrenchNameIsConflict(t *testing.T) {
+	repo := &mockRoleUpdater{err: &types.RoleConflictError{Field: types.RoleFieldNameFr}}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same name_fr already exists in this tenant","detail":{"field":"name_fr"}}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_WrappedDefaultRoleErrorIsStillForbidden(t *testing.T) {
+	repo := &mockRoleUpdater{err: fmt.Errorf("updating role %q: %w", "geneticist", types.ErrRoleIsDefault)}
+	w := servePutRole(repo, "geneticist", updateRoleBody)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_PutRoleHandler_WrappedConflictIsStillConflict(t *testing.T) {
+	repo := &mockRoleUpdater{err: fmt.Errorf("updating role: %w", &types.RoleConflictError{Field: types.RoleFieldNameEn})}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.JSONEq(t, `{"status":409,"message":"a role with the same name_en already exists in this tenant","detail":{"field":"name_en"}}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_UngrantableActionIsUnprocessable(t *testing.T) {
+	repo := &mockRoleUpdater{err: fmt.Errorf("%w: can_manage_user", types.ErrRoleActionsNotGrantable)}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.JSONEq(t, `{"status":422,"message":"actions cannot be granted to a custom role: can_manage_user"}`, w.Body.String())
+}
+
+func Test_PutRoleHandler_RepoError(t *testing.T) {
+	repo := &mockRoleUpdater{err: errors.New("boom")}
+	w := servePutRole(repo, "clinical_reviewer", updateRoleBody)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

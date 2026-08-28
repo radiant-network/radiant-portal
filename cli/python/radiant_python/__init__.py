@@ -159,6 +159,7 @@ from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
 from radiant_python.models.update_organization_request import UpdateOrganizationRequest
+from radiant_python.models.update_role_request import UpdateRoleRequest
 from radiant_python.models.update_user_request import UpdateUserRequest
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_result import UserResult
