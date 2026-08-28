@@ -179,11 +179,13 @@ export default function RolesSection() {
       actionProps: {
         variant: 'destructive',
         children: t('admin.roles.delete.submit'),
-        onClick: () => {
-          // TODO(SJRA-1450): call the delete endpoint here; the rest of the path is in place.
-          toast.success(t('admin.roles.delete.notifications.success'));
-          mutate();
-          closeSheets();
+        onClick: async () => {
+          try {
+            await rolesApi.deleteRole(tenant, role.code);
+            onSaved('admin.roles.delete.notifications.success');
+          } catch {
+            toast.error(t('admin.roles.delete.notifications.errors.default'));
+          }
         },
       },
     });
