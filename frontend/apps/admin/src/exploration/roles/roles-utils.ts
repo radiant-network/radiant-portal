@@ -1,7 +1,7 @@
 import { type RoleResult, RoleResultScopeEnum } from '@/api/api';
 
 export const ADMIN_ROLE_CODE = 'tenant_admin';
-export const BASELINE_ROLE_CODE = 'member';
+export const MEMBER_ROLE_CODE = 'member';
 export const MAX_ROLE_CODE_LENGTH = 50;
 export const ROLE_CODE_PATTERN = /^[a-z][a-z0-9_]*$/;
 

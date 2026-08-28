@@ -21,7 +21,7 @@ import RoleFormSheet, { type RoleFormValues } from './role-form-sheet';
 import RolePermissionsDialog from './role-permissions-dialog';
 import RolesFilters from './roles-filters';
 import { getRolesColumns, rolesDefaultSettings } from './roles-table-settings';
-import { BASELINE_ROLE_CODE, findRole } from './roles-utils';
+import { useMemberRole } from './use-member-role';
 import { useTenantRoles } from './use-tenant-roles';
 
 /** TODO name translation exists in back but not in front mock up */
@@ -52,6 +52,7 @@ export default function RolesSection() {
   const [duplicatedRole, setDuplicatedRole] = useState<RoleResult>();
 
   const { data: tenantRoles, isLoading, mutate } = useTenantRoles(tenant);
+  const { data: memberRole } = useMemberRole(tenant);
 
   const closeSheets = () => {
     setIsCreateOpen(false);
@@ -233,7 +234,6 @@ export default function RolesSection() {
     const term = normalize(search.trim());
     return (tenantRoles ?? []).filter(
       role =>
-        role.code !== BASELINE_ROLE_CODE &&
         (!term || normalize(role.name).includes(term) || normalize(role.description ?? '').includes(term)) &&
         (!customOnly || !role.is_default),
     );
@@ -256,7 +256,7 @@ export default function RolesSection() {
                     type="button"
                     size="sm"
                     external={false}
-                    onClick={() => setPermissionsRole(findRole(tenantRoles ?? [], BASELINE_ROLE_CODE))}
+                    onClick={() => setPermissionsRole(memberRole)}
                   />
                 ),
               }}

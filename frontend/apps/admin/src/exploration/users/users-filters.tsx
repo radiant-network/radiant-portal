@@ -7,7 +7,6 @@ import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 
-import { BASELINE_ROLE_CODE } from '../roles/roles-utils';
 import { useTenantRoles } from '../roles/use-tenant-roles';
 
 type UsersFiltersProps = {
@@ -23,9 +22,7 @@ function UsersFilters({ search, onSearchChange, roles, onRolesChange }: UsersFil
   const { data: tenantRoles } = useTenantRoles(tenant);
 
   const roleOptions: IFilterButtonItem[] = sortOptions(
-    (tenantRoles ?? [])
-      .filter(role => role.code !== BASELINE_ROLE_CODE)
-      .map(({ code, name }) => ({ key: code, label: name })),
+    (tenantRoles ?? []).map(({ code, name }) => ({ key: code, label: name })),
   );
 
   const hasActiveFilters = search.length > 0 || roles.length > 0;

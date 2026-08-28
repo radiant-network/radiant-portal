@@ -12,7 +12,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 
-import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE } from '../roles/roles-utils';
+import { ADMIN_ROLE_CODE, MEMBER_ROLE_CODE } from '../roles/roles-utils';
 
 const columnHelper = createColumnHelper<UserResult>();
 
@@ -25,7 +25,7 @@ function formatOrganizations(orgCodes: string[], t: TFunction<string, undefined>
 }
 
 function RolesCell({ roles, t }: { roles: UserRoleResult[]; t: TFunction<string, undefined> }) {
-  const grantedRoles = roles.filter(role => role.role_code !== BASELINE_ROLE_CODE).sort(adminFirst);
+  const grantedRoles = roles.filter(role => role.role_code !== MEMBER_ROLE_CODE).sort(adminFirst);
 
   if (grantedRoles.length === 0) {
     return <span className="text-muted-foreground">{t('admin.users.table.baseline_role')}</span>;

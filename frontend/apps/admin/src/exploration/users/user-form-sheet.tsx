@@ -25,14 +25,15 @@ import { usersApi } from '@/utils/api';
 
 import RolePermissionsDialog from '../roles/role-permissions-dialog';
 import { ScopeBadges } from '../roles/role-scope-badges';
-import { ADMIN_ROLE_CODE, BASELINE_ROLE_CODE, findRole, needsOrganizations } from '../roles/roles-utils';
+import { ADMIN_ROLE_CODE, findRole, MEMBER_ROLE_CODE, needsOrganizations } from '../roles/roles-utils';
+import { useMemberRole } from '../roles/use-member-role';
 import { useTenantRoles } from '../roles/use-tenant-roles';
 
 import RoleOrganizationsPicker, { NO_ORGANIZATIONS } from './role-organizations-picker';
 import { useTenantAdminCount } from './use-tenant-admin-count';
 
 function getAssignableRoles(roles: RoleResult[]) {
-  return roles.filter(role => role.code !== ADMIN_ROLE_CODE && role.code !== BASELINE_ROLE_CODE);
+  return roles.filter(role => role.code !== ADMIN_ROLE_CODE);
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,7 +73,7 @@ const EMPTY_FORM: FormValues = { first_name: '', last_name: '', email: '', roles
  * an unchanged submit is compared against.
  */
 function toFormValues(user: UserResult): FormValues {
-  const grantedRoles = user.roles.filter(role => role.role_code !== BASELINE_ROLE_CODE);
+  const grantedRoles = user.roles.filter(role => role.role_code !== MEMBER_ROLE_CODE);
 
   return {
     ...EMPTY_FORM,
@@ -124,6 +125,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
   const [permissionsRole, setPermissionsRole] = useState<RoleResult>();
 
   const { data: tenantRoles, isLoading: isLoadingRoles } = useTenantRoles(tenant);
+  const { data: memberRole } = useMemberRole(tenant);
   const { data: adminCount } = useTenantAdminCount(tenant, open && isEdit);
 
   const isLastAdmin = adminCount === 1 && !!user?.roles.some(role => role.role_code === ADMIN_ROLE_CODE);
@@ -299,7 +301,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
 
   const toRolePayload = (values: FormValues): CreateUserRole[] =>
     values.roles
-      .filter(code => code !== BASELINE_ROLE_CODE)
+      .filter(code => code !== MEMBER_ROLE_CODE)
       .map(role_code => {
         const orgCodes = values.organizations[role_code] ?? [];
         return orgCodes.length > 0 ? { role_code, org_codes: orgCodes } : { role_code };
@@ -454,7 +456,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
                             type="button"
                             size="sm"
                             external={false}
-                            onClick={() => setPermissionsRole(findRole(tenantRoles ?? [], BASELINE_ROLE_CODE))}
+                            onClick={() => setPermissionsRole(memberRole)}
                           />
                         ),
                       }}
