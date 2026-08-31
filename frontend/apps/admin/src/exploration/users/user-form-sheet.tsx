@@ -299,11 +299,17 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
     </HoverCard>
   );
 
+  /**
+   * TODO maybe additional back fix needed
+   * Edit a mixed role to tenant role, if users have this role remove their orgs.
+   * Front fix to remove the 'orgs' role from the user so the update no trigger error.
+   */
   const toRolePayload = (values: FormValues): CreateUserRole[] =>
     values.roles
       .filter(code => code !== MEMBER_ROLE_CODE)
       .map(role_code => {
-        const orgCodes = values.organizations[role_code] ?? [];
+        const role = findRole(tenantRoles ?? [], role_code);
+        const orgCodes = role && !needsOrganizations(role) ? [] : (values.organizations[role_code] ?? []);
         return orgCodes.length > 0 ? { role_code, org_codes: orgCodes } : { role_code };
       });
 
