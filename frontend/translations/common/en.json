@@ -147,7 +147,7 @@
       },
       "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
       "table": {
-        "actions": "More actions",
+        "actions": "Role actions",
         "assigned_to": "Assigned to",
         "delete": "Delete",
         "duplicate": "Duplicate",
@@ -180,9 +180,9 @@
         "details_title": "Member details",
         "notifications": {
           "errors": {
-            "default": "Unable to add member."
+            "default": "Unable to create member."
           },
-          "success": "Member added."
+          "success": "Member created."
         },
         "submit": "Create member",
         "title": "Add member"
@@ -211,7 +211,7 @@
       "errors": {
         "last_admin_update": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
         "last_admin_update_title": "This network needs an Administrator",
-        "self_delete": "You can't delete your own acount."
+        "self_delete": "You can't delete your own account."
       },
       "fields": {
         "email": "Email",
@@ -338,14 +338,14 @@
         "required": "This field is required",
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
-        "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
+        "invalid_code": "Letters, numbers, underscores and dashes; start with a letter.",
         "at_least_one_permission": "Select at least one permission.",
         "invalid_email": "Enter a valid email.",
         "invalid_role_code": "Must start with a lowercase letter and contain only lowercase letters, numbers and underscores",
         "organization_code_exists": "An organization with this code already exists.",
         "role_code_exists": "A role with this code already exists.",
         "role_name_exists": "A role with this name already exists.",
-        "user_email_exists": "This person is already a member of this network."
+        "user_email_exists": "A member with this email already exists."
       }
     },
     "editor": {
