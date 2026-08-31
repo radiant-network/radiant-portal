@@ -8,13 +8,9 @@ async function fetchRoles(tenant: string) {
   return response.data;
 }
 
-/**
- * The tenant's role catalog — seeded roles and the tenant's own — each with the actions it grants.
- */
 export function useTenantRoles(tenant: string) {
   return useSWR<RoleResult[], ApiError>(`admin-roles-${tenant}`, () => fetchRoles(tenant), {
     revalidateOnFocus: false,
-    revalidateIfStale: false,
     shouldRetryOnError: false,
   });
 }

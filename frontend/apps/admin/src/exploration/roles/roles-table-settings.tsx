@@ -27,6 +27,8 @@ type RolesColumnsActions = {
   onViewPermissions: (role: RoleResult) => void;
   onViewMembers: (role: RoleResult) => void;
   onEdit: (role: RoleResult) => void;
+  onDuplicate: (role: RoleResult) => void;
+  onDelete: (role: RoleResult) => void;
 };
 
 export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesColumnsActions) {
@@ -161,20 +163,20 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
                     {t('admin.roles.table.view')}
                   </DropdownMenuItem>
                 ) : (
-                  // TODO(SJRA-1450): opens the Edit role sheet, which lands with its API endpoint
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => actions.onEdit(role)}>
                     <PencilIcon />
                     {t('admin.roles.table.edit')}
                   </DropdownMenuItem>
                 )}
-                {/* TODO(SJRA-1450): duplicating creates a custom role, so it needs the create endpoint */}
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => actions.onDuplicate(role)}>
                   <CopyIcon />
                   {t('admin.roles.table.duplicate')}
                 </DropdownMenuItem>
                 {!role.is_default && (
-                  // TODO(SJRA-1450): lands with the delete endpoint and its impact confirmation
-                  <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                  <DropdownMenuItem
+                    onClick={() => actions.onDelete(role)}
+                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                  >
                     <Trash2Icon />
                     {t('admin.roles.table.delete')}
                   </DropdownMenuItem>

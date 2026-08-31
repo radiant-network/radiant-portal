@@ -71,7 +71,67 @@
       "add": "Add role",
       "count_one": "{{count}} Role",
       "count_other": "{{count}} Roles",
+      "create": {
+        "description": "A role is a named bundle of permissions. Assign it to members to grant those actions—roles only add access, never remove it.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to create role."
+          },
+          "success": "Role created."
+        },
+        "submit": "Create role",
+        "title": "Add role"
+      },
       "default_note": "Default roles can't be edited or deleted.",
+      "delete": {
+        "action": "Delete role",
+        "body": "<name>{{name}}</name> This role is assigned to <b>{{members}}</b> across <b>{{orgs}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+        "body_empty": "<name>{{name}}</name> is unassigned. It will be permanently deleted.",
+        "body_no_orgs": "<name>{{name}}</name> This role is assigned to <b>{{members}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to delete role."
+          },
+          "success": "Role deleted."
+        },
+        "submit": "Delete role",
+        "title": "Delete this role?"
+      },
+      "duplicate": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to duplicate role."
+          },
+          "success": "Role duplicated."
+        }
+      },
+      "duplicate_suffix": "(copy)",
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to update role."
+          },
+          "success": "Role updated."
+        },
+        "submit": "Save",
+        "title": "Edit role"
+      },
+      "edit_impact": {
+        "body": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b> across <b>{{orgs}}</b>.",
+        "body_no_orgs": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b>.",
+        "submit": "Save",
+        "title": "Edit this role?"
+      },
+      "fields": {
+        "code": "Code",
+        "code_hint": "Can't be changed after creation. Lowercase letters, numbers, and underscores.",
+        "description": "Description",
+        "description_placeholder": "What is this role for? (optional)",
+        "name": "Name",
+        "name_placeholder": "Role name",
+        "permissions": "Permissions",
+        "permissions_hint": "Select at least one. Network and Organization permissions can be mixed."
+      },
       "filters": {
         "custom_only": "Custom roles only",
         "search_placeholder": "Search by name or description"
@@ -87,11 +147,11 @@
       },
       "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
       "table": {
-        "actions": "More actions",
+        "actions": "Role actions",
         "assigned_to": "Assigned to",
-        "delete": "Delete role",
+        "delete": "Delete",
         "duplicate": "Duplicate",
-        "edit": "Edit role",
+        "edit": "Edit",
         "members_count_one": "{{count}} member",
         "members_count_other": "{{count}} members",
         "orgs_count_one": "{{count}} organization",
@@ -120,9 +180,9 @@
         "details_title": "Member details",
         "notifications": {
           "errors": {
-            "default": "Unable to add member."
+            "default": "Unable to create member."
           },
-          "success": "Member added."
+          "success": "Member created."
         },
         "submit": "Create member",
         "title": "Add member"
@@ -151,7 +211,7 @@
       "errors": {
         "last_admin_update": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
         "last_admin_update_title": "This network needs an Administrator",
-        "self_delete": "You can't delete your own acount."
+        "self_delete": "You can't delete your own account."
       },
       "fields": {
         "email": "Email",
@@ -278,10 +338,14 @@
         "required": "This field is required",
         "min_2": "Min 2 characters",
         "max_50": "Max 50 characters",
-        "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
-        "invalid_email": "Enter a valid email address",
+        "invalid_code": "Letters, numbers, underscores and dashes; start with a letter.",
+        "at_least_one_permission": "Select at least one permission.",
+        "invalid_email": "Enter a valid email.",
+        "invalid_role_code": "Must start with a lowercase letter and contain only lowercase letters, numbers and underscores",
         "organization_code_exists": "An organization with this code already exists.",
-        "user_email_exists": "This person is already a member of this network."
+        "role_code_exists": "A role with this code already exists.",
+        "role_name_exists": "A role with this name already exists.",
+        "user_email_exists": "A member with this email already exists."
       }
     },
     "editor": {

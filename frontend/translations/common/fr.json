@@ -51,7 +51,7 @@
       "fields": {
         "category": "Catégorie",
         "category_hint": "Ne peut pas être modifiée après la création.",
-        "category_placeholder": "Sélectionner une catégorie",
+        "category_placeholder": "Sélectionnez une catégorie",
         "code": "Code",
         "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
         "name": "Nom"
@@ -71,13 +71,73 @@
       "add": "Ajouter un rôle",
       "count_one": "{{count}} rôle",
       "count_other": "{{count}} rôles",
-      "default_note": "Les rôles par défaut ne peuvent être ni modifiés ni supprimés.",
+      "create": {
+        "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer le rôle."
+          },
+          "success": "Rôle créé."
+        },
+        "submit": "Créer le rôle",
+        "title": "Ajouter un rôle"
+      },
+      "default_note": "Les rôles par défaut ne peuvent être modifiés ni supprimés.",
+      "delete": {
+        "action": "Supprimer le rôle",
+        "body": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b> dans <b>{{orgs}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "body_empty": "<name>{{name}}</name> n'est attribué à aucun membre. Il sera définitivement supprimé.",
+        "body_no_orgs": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le rôle."
+          },
+          "success": "Rôle supprimé."
+        },
+        "submit": "Supprimer le rôle",
+        "title": "Supprimer ce rôle ?"
+      },
+      "duplicate": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de dupliquer le rôle."
+          },
+          "success": "Rôle dupliqué."
+        }
+      },
+      "duplicate_suffix": "(copie)",
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le rôle."
+          },
+          "success": "Rôle mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le rôle"
+      },
+      "edit_impact": {
+        "body": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b> dans <b>{{orgs}}</b>.",
+        "body_no_orgs": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b>.",
+        "submit": "Enregistrer",
+        "title": "Modifier ce rôle ?"
+      },
+      "fields": {
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres minuscules, chiffres et traits de soulignement.",
+        "description": "Description",
+        "description_placeholder": "À quoi sert ce rôle ? (facultatif)",
+        "name": "Nom",
+        "name_placeholder": "Nom du rôle",
+        "permissions": "Permissions",
+        "permissions_hint": "Sélectionnez-en au moins une. Les permissions Réseau et Organisation peuvent être combinées."
+      },
       "filters": {
         "custom_only": "Rôles personnalisés seulement",
         "search_placeholder": "Rechercher par nom ou description"
       },
       "permissions": {
-        "description": "Description des permissions et portée de ce rôle",
+        "description": "Descriptions des permissions et portée de ce rôle",
         "empty": "Ce rôle n'accorde aucune permission.",
         "locked": "Non modifiable ni supprimable"
       },
@@ -87,11 +147,11 @@
       },
       "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
       "table": {
-        "actions": "Autres actions",
+        "actions": "Actions du rôle",
         "assigned_to": "Attribué à",
-        "delete": "Supprimer le rôle",
+        "delete": "Supprimer",
         "duplicate": "Dupliquer",
-        "edit": "Modifier le rôle",
+        "edit": "Modifier",
         "members_count_one": "{{count}} membre",
         "members_count_other": "{{count}} membres",
         "orgs_count_one": "{{count}} organisation",
@@ -120,16 +180,16 @@
         "details_title": "Détails du membre",
         "notifications": {
           "errors": {
-            "default": "Impossible d'ajouter le membre."
+            "default": "Impossible de créer le membre."
           },
-          "success": "Membre ajouté."
+          "success": "Membre créé."
         },
         "submit": "Créer le membre",
         "title": "Ajouter un membre"
       },
       "delete": {
         "action": "Supprimer le membre",
-        "body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations..",
+        "body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations.",
         "notifications": {
           "errors": {
             "default": "Impossible de supprimer le membre."
@@ -150,7 +210,7 @@
       },
       "errors": {
         "last_admin_update": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de le retirer ici.",
-        "last_admin_update_title": "Ce réseau doit conserver un Administrateur",
+        "last_admin_update_title": "Ce réseau doit conserver un administrateur",
         "self_delete": "Vous ne pouvez pas supprimer votre propre compte."
       },
       "fields": {
@@ -165,18 +225,18 @@
       "roles": {
         "admin_access": "Administrateur",
         "admin_hint": "Accès administratif complet à ce réseau (<permissions>voir les permissions</permissions>)",
-        "all_organizations": "Toutes les organisations, actuelles et futures",
-        "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
+        "all_organizations": "Toutes les organisations actuelles et futures",
+        "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir le détail</permissions>).",
         "errors": {
           "organizations_required": "Sélectionnez au moins une organisation.",
           "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur."
         },
         "organizations": "Dans ces organisations",
         "organizations_placeholder": "Organisations",
-        "subtitle": "Attribuez des rôles pour activer des actions supplémentaires — les rôles ajoutent des permissions, ils n'en retirent jamais.",
+        "subtitle": "Attribuez des rôles pour permettre des actions supplémentaires — les rôles ajoutent des permissions, sans jamais en retirer.",
         "title": "Rôles du membre"
       },
-      "subtitle": "Gérez les membres et les attributions des rôles.",
+      "subtitle": "Gérez les membres et les attributions de rôles.",
       "table": {
         "all_organizations": "Toutes les orgs",
         "baseline_role": "Membre",
@@ -278,10 +338,14 @@
         "required": "Ce champ est requis",
         "min_2": "2 caractères minimum",
         "max_50": "50 caractères maximum",
-        "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
-        "invalid_email": "Saisissez une adresse courriel valide",
+        "invalid_code": "Lettres, chiffres, traits de soulignement et tirets; commencez par une lettre.",
+        "at_least_one_permission": "Sélectionnez au moins une permission.",
+        "invalid_email": "Saisissez une adresse courriel valide.",
+        "invalid_role_code": "Doit commencer par une lettre minuscule et ne contenir que des lettres minuscules, des chiffres et des traits de soulignement.",
         "organization_code_exists": "Une organisation avec ce code existe déjà.",
-        "user_email_exists": "Cette personne est déjà membre de ce réseau."
+        "role_code_exists": "Un rôle avec ce code existe déjà.",
+        "role_name_exists": "Un rôle avec ce nom existe déjà.",
+        "user_email_exists": "Un membre avec ce courriel existe déjà."
       }
     },
     "editor": {
