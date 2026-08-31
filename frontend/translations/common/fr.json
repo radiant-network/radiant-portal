@@ -340,7 +340,7 @@
         "max_50": "50 caractères maximum",
         "invalid_code": "Doit commencer par une lettre et ne contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
         "at_least_one_permission": "Sélectionnez au moins une permission.",
-        "invalid_email": "Saisissez une adresse courriel valide",
+        "invalid_email": "Saisissez une adresse courriel valide.",
         "invalid_role_code": "Doit commencer par une lettre minuscule et ne contenir que des lettres minuscules, des chiffres et des traits de soulignement.",
         "organization_code_exists": "Une organisation avec ce code existe déjà.",
         "role_code_exists": "Un rôle avec ce code existe déjà.",
