@@ -340,7 +340,7 @@
         "max_50": "Max 50 characters",
         "invalid_code": "Must start with a letter and contain only letters, numbers, underscores and dashes",
         "at_least_one_permission": "Select at least one permission.",
-        "invalid_email": "Enter a valid email address",
+        "invalid_email": "Enter a valid email.",
         "invalid_role_code": "Must start with a lowercase letter and contain only lowercase letters, numbers and underscores",
         "organization_code_exists": "An organization with this code already exists.",
         "role_code_exists": "A role with this code already exists.",
