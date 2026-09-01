@@ -68,6 +68,10 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
             value: SomaticVariantInterface.SNV_TN,
             tooltip: t(`case_entity.variants.filters.snv_tn_tooltip`),
           },
+          {
+            value: SomaticVariantInterface.SNV_TO,
+            tooltip: t(`case_entity.variants.filters.snv_to_tooltip`),
+          },
         ]}
         selectedSeqId={seqId}
         handleChange={handlechange}

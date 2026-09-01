@@ -2003,7 +2003,8 @@
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
-        "snv_to": "SNV (TO)"
+        "snv_to": "SNV (TO)",
+        "snv_to_tooltip": "SNV (tumeur seule)"
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
