@@ -219,7 +219,6 @@ var expectedTenantAnyActions = map[string][]string{
 // resource's own organization — RequireActionAt with a resolver that walks the resource back
 // to its case and takes that case's diagnosis_lab_code.
 var orgResolvedTenantRoutes = map[string]bool{
-	"GET /:tenant/igv/:case_id": true,
 	"POST /:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id": true,
 	"POST /:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id":  true,
 	"POST /:tenant/notes":       true,
