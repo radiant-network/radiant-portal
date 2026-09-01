@@ -31,7 +31,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
   const { tenant } = useTenant();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
-  const appId = config.somatic_snv_to_occurrence.app_id;
+  const appId = config.somatic_snv_tn_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
 
@@ -71,7 +71,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
           enableColumnOrdering
           enableFullscreen
           extras={[
-            <SliderSomaticOccurrenceSheet key="somatic-snv-to-occurrence-sheet" patientSelected={patientSelected} />,
+            <SliderSomaticOccurrenceSheet key="somatic-snv-tn-occurrence-sheet" patientSelected={patientSelected} />,
           ]}
         />
       </QueryBuilder>

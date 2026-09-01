@@ -456,8 +456,8 @@ export const radiantConfig = {
       },
     },
   },
-  somatic_snv_to_occurrence: {
-    app_id: ApplicationId.somatic_snv_to_occurrence,
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
     saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {
       variant: {
@@ -765,8 +765,8 @@ export const radiantConfig = {
       logout: true,
     },
   },
-  somatic_snv_tn_occurrence: {
-    app_id: ApplicationId.somatic_snv_tn_occurrence,
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
     aggregations: {},
     saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
   },
