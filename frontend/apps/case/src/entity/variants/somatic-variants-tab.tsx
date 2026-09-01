@@ -12,13 +12,28 @@ import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
-import { getDefaultSeqId, useVariantSearchParamsEffect } from './hooks/use-variant-search-params';
+import {
+  getDefaultSeqId,
+  useVariantSearchParamsEffect,
+  VARIANT_SECTION_PARAM,
+} from './hooks/use-variant-search-params';
 import SNVTumorNormalTab from './somatic-occurrence/snv-tumor-normal-tab';
 
 export enum SomaticVariantInterface {
   SNV_TN = 'SNV_TN',
   SNV_TO = 'SNV_TO',
   CNV_TO = 'CNV_TO',
+}
+
+/** Value each sub-tab takes in the `variant_section` URL param. */
+const VARIANT_SECTIONS: Record<SomaticVariantInterface, string> = {
+  [SomaticVariantInterface.SNV_TN]: 'snv-tn',
+  [SomaticVariantInterface.SNV_TO]: 'snv-to',
+  [SomaticVariantInterface.CNV_TO]: 'cnv-to',
+};
+
+function getInterfaceFromVariantSection(section: string | null) {
+  return (Object.keys(VARIANT_SECTIONS) as SomaticVariantInterface[]).find(key => VARIANT_SECTIONS[key] === section);
 }
 
 type VariantTabProps = {
@@ -30,7 +45,9 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const caseId = useCaseIdFromParam();
-  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface | undefined>(undefined);
+  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface | undefined>(
+    getInterfaceFromVariantSection(searchParams.get(VARIANT_SECTION_PARAM)),
+  );
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
@@ -103,7 +120,14 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     }
   }, [availableInterfaces, activeInterface, isTasksLoading]);
 
-  useVariantSearchParamsEffect({ seqId, setSeqId, caseEntity, tasks, isLoading: isTasksLoading });
+  useVariantSearchParamsEffect({
+    seqId,
+    setSeqId,
+    caseEntity,
+    tasks,
+    isLoading: isTasksLoading,
+    variantSection: activeInterface && VARIANT_SECTIONS[activeInterface],
+  });
 
   return (
     <div className="bg-background flex flex-col">
