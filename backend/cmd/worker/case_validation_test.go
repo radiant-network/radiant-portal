@@ -259,7 +259,7 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 	}
 
 	switch setType {
-	case postgres.ValueSetStatus:
+	case postgres.ValueSetCaseStatus:
 		return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 
 	case postgres.ValueSetOnset:

@@ -31,18 +31,32 @@ func (Sex) TableName() string {
 	return SexTable.Name
 }
 
-var StatusTable = Table{
-	Name:           "status",
-	FederationName: "radiant_jdbc.public.status",
-	Alias:          "status",
+var CaseStatusTable = Table{
+	Name:           "case_status",
+	FederationName: "radiant_jdbc.public.case_status",
+	Alias:          "case_status",
 }
 
-type Status struct {
+type CaseStatus struct {
 	ValueSet
-} // @name Status
+} // @name CaseStatus
 
-func (Status) TableName() string {
-	return StatusTable.Name
+func (CaseStatus) TableName() string {
+	return CaseStatusTable.Name
+}
+
+var SequencingExperimentStatusTable = Table{
+	Name:           "sequencing_experiment_status",
+	FederationName: "radiant_jdbc.public.sequencing_experiment_status",
+	Alias:          "seq_exp_status",
+}
+
+type SequencingExperimentStatus struct {
+	ValueSet
+} // @name SequencingExperimentStatus
+
+func (SequencingExperimentStatus) TableName() string {
+	return SequencingExperimentStatusTable.Name
 }
 
 var PriorityTable = Table{

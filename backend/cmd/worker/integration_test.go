@@ -1586,29 +1586,29 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 		cache := batchval.NewBatchValidationCache(&bv)
 		expected := []string{"completed", "draft", "incomplete", "in_progress", "revoke", "submitted", "unknown"}
 
-		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetCaseStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 
 		// Insert a value into the value set
 		if err := env.Postgres.Exec(`
-			INSERT INTO status (code, name_en) VALUES ('foo', 'bar');
+			INSERT INTO case_status (code, name_en) VALUES ('foo', 'bar');
 		`).Error; err != nil {
 			t.Fatal("failed to insert status code:", err)
 		}
 
-		codes, err := repo.GetCodes(t.Context(), postgres.ValueSetStatus)
+		codes, err := repo.GetCodes(t.Context(), postgres.ValueSetCaseStatus)
 		assert.NoError(t, err)
 		assert.Contains(t, codes, "foo") // Make sure the new code is in the DB
 
 		// We should not get the new value, since we use the cache
-		vc, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+		vc, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetCaseStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 
 		// Cleanup
 		if err := env.Postgres.Exec(`
-			DELETE FROM status WHERE code = 'foo';
+			DELETE FROM case_status WHERE code = 'foo';
 		`).Error; err != nil {
 			t.Fatal("failed to delete status code:", err)
 		}

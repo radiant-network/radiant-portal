@@ -111,7 +111,7 @@ func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType postgres.ValueSetT
 		return []string{"wgs", "wxs", "rna_seq"}, nil
 	case postgres.ValueSetSequencingReadTechnology:
 		return []string{"short_read", "long_read"}, nil
-	case postgres.ValueSetStatus:
+	case postgres.ValueSetSequencingExperimentStatus:
 		return []string{"draft", "in_progress", "completed"}, nil
 	case postgres.ValueSetPlatform:
 		return []string{"illumina", "pacbio", "nanopore"}, nil

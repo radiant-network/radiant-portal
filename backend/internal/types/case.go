@@ -17,7 +17,7 @@ type Case struct {
 	PriorityCode             string       `gorm:"default:routine"`
 	Priority                 Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
 	StatusCode               string
-	Status                   Status           `gorm:"foreignKey:Code;references:StatusCode"`
+	Status                   CaseStatus       `gorm:"foreignKey:Code;references:StatusCode"`
 	ResolutionStatusCode     string           `gorm:"default:unsolved"`
 	ResolutionStatus         ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
 	PrimaryCondition         string

@@ -102,7 +102,7 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo(ctx contex
 	}
 	r.SequencingReadTechnologyCodes = sequencingReadTechnologyCodes
 
-	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSequencingExperimentStatus)
 	if err != nil {
 		return fmt.Errorf("error fetching status codes: %w", err)
 	}

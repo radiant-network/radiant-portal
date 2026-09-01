@@ -9,7 +9,7 @@ type SequencingExperiment struct {
 	SampleID                     int
 	Sample                       Sample `gorm:"foreignKey:ID;references:SampleID"`
 	StatusCode                   string
-	Status                       Status `gorm:"foreignKey:Code;references:StatusCode"`
+	Status                       SequencingExperimentStatus `gorm:"foreignKey:Code;references:StatusCode"`
 	Aliquot                      string
 	SequencingLabCode            string
 	TenantCode                   string

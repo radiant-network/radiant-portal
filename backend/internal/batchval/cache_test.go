@@ -174,20 +174,20 @@ func TestBatchValidationCache_GetValueSetCodes(t *testing.T) {
 
 	// Test cache miss
 	mockRepo.GetCodesFunc = func(vsType postgres.ValueSetType) ([]string, error) {
-		assert.Equal(t, postgres.ValueSetStatus, vsType)
+		assert.Equal(t, postgres.ValueSetCaseStatus, vsType)
 		return codes, nil
 	}
-	result, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+	result, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetCaseStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
-	assert.Equal(t, codes, cache.ValueSets[postgres.ValueSetStatus])
+	assert.Equal(t, codes, cache.ValueSets[postgres.ValueSetCaseStatus])
 
 	// Test cache hit
 	mockRepo.GetCodesFunc = func(vsType postgres.ValueSetType) ([]string, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+	result, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetCaseStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
 }

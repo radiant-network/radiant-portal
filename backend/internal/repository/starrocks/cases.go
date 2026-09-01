@@ -112,7 +112,7 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 
 func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, error) {
 	db := r.db.WithContext(ctx)
-	status, err := utils.GetFilter(db, types.StatusTable, "name_en", nil)
+	status, err := utils.GetFilter(db, types.CaseStatusTable, "name_en", nil)
 	if err != nil {
 		return nil, err
 	}

@@ -247,7 +247,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 }
 
 func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
-	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetCaseStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving status codes: %v", err)
 	}
