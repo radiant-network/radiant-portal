@@ -1,7 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { type CaseEntity, type CaseSequencingExperiment, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
+import {
+  type CaseEntity,
+  type CaseSequencingExperiment,
+  CaseTasksWithOccurrencesDataTypeEnum,
+  type TaskOccurrenceType,
+} from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
@@ -25,18 +30,51 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const caseId = useCaseIdFromParam();
-  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface>(SomaticVariantInterface.SNV_TN);
+  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface | undefined>(undefined);
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
   const seqExpVariants = caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants) ?? [];
 
-  const { tasks, isLoading: isTasksLoading } = useOccurrenceTasks(
+  const { tasks: tumorOnlyTasks, isLoading: isTumorOnlyTasksLoading } = useOccurrenceTasks(
     caseId,
     seqId,
-    CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv,
+    CaseTasksWithOccurrencesDataTypeEnum.SomaticSnvTo,
   );
+  const { tasks: tumorNormalTasks, isLoading: isTumorNormalTasksLoading } = useOccurrenceTasks(
+    caseId,
+    seqId,
+    CaseTasksWithOccurrencesDataTypeEnum.SomaticSnvTn,
+  );
+  const isTasksLoading = isTumorOnlyTasksLoading || isTumorNormalTasksLoading;
   const selectedTaskId = useTaskIdFromSearchParam();
+
+  // A sub-tab is offered only when the sequencing experiment has tasks producing its occurrences.
+  const availableInterfaces = useMemo(() => {
+    const interfaces: SomaticVariantInterface[] = [];
+    if (tumorOnlyTasks.length > 0) {
+      interfaces.push(SomaticVariantInterface.SNV_TO);
+    }
+    if (tumorNormalTasks.length > 0) {
+      interfaces.push(SomaticVariantInterface.SNV_TN);
+    }
+    return interfaces;
+  }, [tumorOnlyTasks, tumorNormalTasks]);
+
+  const options = useMemo(
+    () =>
+      availableInterfaces.map(value => ({
+        value,
+        tooltip: t(`case_entity.variants.filters.${value.toLowerCase()}_tooltip`),
+      })),
+    [availableInterfaces, t],
+  );
+
+  const tasksByInterface: Partial<Record<SomaticVariantInterface, TaskOccurrenceType[]>> = {
+    [SomaticVariantInterface.SNV_TO]: tumorOnlyTasks,
+    [SomaticVariantInterface.SNV_TN]: tumorNormalTasks,
+  };
+  const tasks = (activeInterface && tasksByInterface[activeInterface]) || [];
 
   const handlechange = useCallback(
     (value: number) => {
@@ -54,28 +92,28 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [searchParams, setSearchParams],
   );
 
+  // Select the leftmost available sub-tab, on load and whenever the active one has no task on this
+  // sequencing experiment — a tumor-only case has no TN task, for instance.
+  useEffect(() => {
+    if (isTasksLoading || availableInterfaces.length === 0) {
+      return;
+    }
+    if (activeInterface === undefined || !availableInterfaces.includes(activeInterface)) {
+      setActiveInterface(availableInterfaces[0]);
+    }
+  }, [availableInterfaces, activeInterface, isTasksLoading]);
+
   useVariantSearchParamsEffect({ seqId, setSeqId, caseEntity, tasks, isLoading: isTasksLoading });
 
-  // @TODO: to be changed when all tabs are implemented
-  // options={Object.keys(SomaticVariantInterface)}
   return (
     <div className="bg-background flex flex-col">
       <SequencingExperimentVariantFilters
         isLoading={isLoading}
         sequencingExperiments={seqExpVariants}
-        options={[
-          {
-            value: SomaticVariantInterface.SNV_TN,
-            tooltip: t(`case_entity.variants.filters.snv_tn_tooltip`),
-          },
-          {
-            value: SomaticVariantInterface.SNV_TO,
-            tooltip: t(`case_entity.variants.filters.snv_to_tooltip`),
-          },
-        ]}
+        options={options}
         selectedSeqId={seqId}
         handleChange={handlechange}
-        activeInterface={activeInterface}
+        activeInterface={activeInterface ?? ''}
         onActiveInterfaceChange={value => {
           setActiveInterface(value as SomaticVariantInterface);
         }}
