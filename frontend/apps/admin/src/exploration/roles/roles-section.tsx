@@ -296,7 +296,14 @@ export default function RolesSection() {
         <LockIcon className="size-3.5" />
         {t('admin.roles.default_note')}
       </p>
-      <RolePermissionsDialog role={permissionsRole} onOpenChange={() => setPermissionsRole(undefined)} />
+      <RolePermissionsDialog
+        role={permissionsRole}
+        onOpenChange={() => setPermissionsRole(undefined)}
+        onEdit={role => {
+          setPermissionsRole(undefined);
+          setEditedRole(role);
+        }}
+      />
       {isCreateOpen && (
         <RoleFormSheet
           open={isCreateOpen}

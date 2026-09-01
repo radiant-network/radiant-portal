@@ -20,10 +20,11 @@ import { ScopeBadge } from './role-scope-badges';
 type RolePermissionsDialogProps = {
   role?: RoleResult;
   onOpenChange: (open: boolean) => void;
+  onEdit?: (role: RoleResult) => void;
 };
 
-/** Read-only view of what a role grants, composed from the actions the role carries. */
-function RolePermissionsDialog({ role, onOpenChange }: RolePermissionsDialogProps) {
+/** What a role grants, composed from the actions it carries. Read-only unless `onEdit` is given. */
+function RolePermissionsDialog({ role, onOpenChange, onEdit }: RolePermissionsDialogProps) {
   const { t } = useI18n();
 
   const actions = role?.actions ?? [];
@@ -65,6 +66,9 @@ function RolePermissionsDialog({ role, onOpenChange }: RolePermissionsDialogProp
           <DialogClose asChild>
             <Button variant="outline">{t('common.close')}</Button>
           </DialogClose>
+          {role && !role.is_default && onEdit && (
+            <Button onClick={() => onEdit(role)}>{t('admin.roles.table.edit')}</Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
