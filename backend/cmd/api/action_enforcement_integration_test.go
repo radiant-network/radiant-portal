@@ -237,7 +237,7 @@ var expectedTenantActions = map[string]string{
 	"GET /:tenant/genes/autocomplete":                                                types.ActionSearchCase,
 	"POST /:tenant/genes/search":                                                     types.ActionSearchCase,
 	"GET /:tenant/hpo/autocomplete":                                                  types.ActionSearchCase,
-	"GET /:tenant/igv/:case_id":                                                      types.ActionDownloadFile,
+	"GET /:tenant/igv/:case_id":                                                      types.ActionSearchCase,
 	"GET /:tenant/interpretations/pubmed/:citation_id":                               types.ActionSearchCase,
 	"GET /:tenant/interpretations/germline":                                          types.ActionSearchCase,
 	"GET /:tenant/interpretations/somatic":                                           types.ActionSearchCase,
