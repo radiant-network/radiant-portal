@@ -187,26 +187,68 @@ type actionChecker interface {
 	HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error)
 }
 
-// WildcardOnlyOrg matches only '*' grants in HasAction (GrantRole stores empty orgs as NULL),
-// so it is correct while every grant is '*'. STEP 2 will resolve the real org per resource.
-const WildcardOnlyOrg = ""
+// TenantWideOrg is the org code passed for tenant-scoped actions: HasAction ignores the org
+// for those, so they need no resource lookup. Against an org-scoped action it would match
+// only '*' grants — which is why every org-scoped route must carry a real OrgResolver.
+const TenantWideOrg = ""
 
-func resolveOrgCode(_ *gin.Context) (string, error) {
-	return WildcardOnlyOrg, nil
+// OrgContextKey is the gin context key under which the action middlewares store the orgs
+// they resolved, so a handler can reuse them instead of repeating the lookup.
+const OrgContextKey = "authorized_orgs"
+
+// OrgResolver resolves the organizations the request's target resource belongs to — the
+// diagnosis labs of the cases it hangs off (see the resolvers in org_resolvers.go). The
+// caller is admitted when they hold the action at any one of them.
+//
+// Resolving to no org denies. A resource that cannot be attributed to a case — it does not
+// exist, belongs to another tenant, or the id is malformed — is never implicitly allowed,
+// and the denial is the same generic 403 as a missing grant so the check does not become an
+// existence oracle. A handler that runs has already been authorized, so it is free to 404 on
+// its own lookup.
+type OrgResolver func(c *gin.Context) ([]string, error)
+
+// tenantWideOrg is the resolver for tenant-scoped actions, where the org is not consulted.
+func tenantWideOrg(_ *gin.Context) ([]string, error) {
+	return []string{TenantWideOrg}, nil
 }
 
-// RequireAction gates a route on an action. It reads the caller from the token and the tenant
-// from context (RequireTenantAccess must run first). On denial the missing action is logged,
-// not returned, so the 403 body stays generic.
+// GetAuthorizedOrgs returns the orgs the action middleware resolved for this request.
+func GetAuthorizedOrgs(c *gin.Context) ([]string, bool) {
+	value, exists := c.Get(OrgContextKey)
+	if !exists {
+		return nil, false
+	}
+	orgs, ok := value.([]string)
+	return orgs, ok
+}
+
+// RequireAction gates a route on a tenant-scoped action, where the org is not consulted.
+// An org-scoped action belongs on RequireActionAt, so the grant is checked against the
+// resource's own organization — the one exception being the batch routes, whose org lives
+// per record in the payload and is checked inline during validation.
 func RequireAction(auth utils.Auth, repo actionChecker, action string) gin.HandlerFunc {
-	return RequireAnyAction(auth, repo, action)
+	return requireActions(auth, repo, tenantWideOrg, action)
 }
 
-// RequireAnyAction gates a route on holding at least one of the actions. It serves the reads
-// several admin sections share: the role catalog, for one, is read both by role management
-// (can_manage_role) and by the role picker in the user screens (can_manage_user), and neither
-// action implies the other.
+// RequireAnyAction gates a route on holding at least one of several tenant-scoped actions.
+// It serves the reads several admin sections share: the role catalog, for one, is read both
+// by role management (can_manage_role) and by the role picker in the user screens
+// (can_manage_user), and neither action implies the other.
 func RequireAnyAction(auth utils.Auth, repo actionChecker, actions ...string) gin.HandlerFunc {
+	return requireActions(auth, repo, tenantWideOrg, actions...)
+}
+
+// RequireActionAt gates a route on an org-scoped action, checked against the organizations
+// the resolver attributes the target resource to.
+func RequireActionAt(auth utils.Auth, repo actionChecker, action string, resolve OrgResolver) gin.HandlerFunc {
+	return requireActions(auth, repo, resolve, action)
+}
+
+// requireActions is the shared gate. It reads the caller from the token and the tenant from
+// context (RequireTenantAccess must run first), resolves the resource's orgs, and admits the
+// caller holding any of the actions at any of those orgs. On denial the missing action is
+// logged, not returned, so the 403 body stays generic.
+func requireActions(auth utils.Auth, repo actionChecker, resolve OrgResolver, actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
@@ -222,23 +264,26 @@ func RequireAnyAction(auth utils.Auth, repo actionChecker, actions ...string) gi
 			return
 		}
 
-		orgCode, err := resolveOrgCode(c)
+		orgs, err := resolve(c)
 		if err != nil {
 			HandleError(c, err)
 			c.Abort()
 			return
 		}
+		c.Set(OrgContextKey, orgs)
 
 		for _, action := range actions {
-			allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, orgCode, action)
-			if err != nil {
-				HandleError(c, err)
-				c.Abort()
-				return
-			}
-			if allowed {
-				c.Next()
-				return
+			for _, org := range orgs {
+				allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, org, action)
+				if err != nil {
+					HandleError(c, err)
+					c.Abort()
+					return
+				}
+				if allowed {
+					c.Next()
+					return
+				}
 			}
 		}
 
@@ -246,6 +291,7 @@ func RequireAnyAction(auth utils.Auth, repo actionChecker, actions ...string) gi
 			slog.String("user_id", *userID),
 			slog.Any("actions", actions),
 			slog.String("tenant", *tenant),
+			slog.Any("orgs", orgs),
 		)
 		HandleForbiddenError(c)
 		c.Abort()

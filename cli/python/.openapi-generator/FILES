@@ -30,8 +30,11 @@ docs/CaseTask.md
 docs/CaseTaskBatch.md
 docs/CasesApi.md
 docs/CasesSearchResponse.md
+docs/ClientAuthConfig.md
+docs/ClientConfig.md
 docs/ClinvarRCV.md
 docs/ClinvarVariantConditions.md
+docs/ConfigApi.md
 docs/Count.md
 docs/CountBodyWithSqon.md
 docs/CreateBatchResponse.md
@@ -156,6 +159,7 @@ radiant_python/api/actions_api.py
 radiant_python/api/auth_api.py
 radiant_python/api/batches_api.py
 radiant_python/api/cases_api.py
+radiant_python/api/config_api.py
 radiant_python/api/documents_api.py
 radiant_python/api/genes_api.py
 radiant_python/api/hpo_api.py
@@ -207,6 +211,8 @@ radiant_python/models/case_sequencing_experiment_batch.py
 radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py
+radiant_python/models/client_auth_config.py
+radiant_python/models/client_config.py
 radiant_python/models/clinvar_rcv.py
 radiant_python/models/clinvar_variant_conditions.py
 radiant_python/models/cnv_gene_overlap.py
@@ -310,3 +316,6 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_client_auth_config.py
+test/test_client_config.py
+test/test_config_api.py

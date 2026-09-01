@@ -106,6 +106,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
+*ConfigApi* | [**get_client_config**](docs/ConfigApi.md#get_client_config) | **GET** /config | Get public client configuration
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /{tenant}/documents/autocomplete | Get AutocompleteResult list of matching prefix
 *DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
 *DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /{tenant}/documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
@@ -115,14 +116,10 @@ Class | Method | HTTP request | Description
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 *IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /{tenant}/igv/{case_id} | Get IGV
 *InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
-*InterpretationsApi* | [**get_interpretation_germline_deprecated**](docs/InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
 *InterpretationsApi* | [**get_interpretation_somatic**](docs/InterpretationsApi.md#get_interpretation_somatic) | **GET** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
-*InterpretationsApi* | [**get_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#get_interpretation_somatic_deprecated) | **GET** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
 *InterpretationsApi* | [**get_pubmed_citation**](docs/InterpretationsApi.md#get_pubmed_citation) | **GET** /{tenant}/interpretations/pubmed/{citation_id} | Get pubmed citation by ID
 *InterpretationsApi* | [**post_interpretation_germline**](docs/InterpretationsApi.md#post_interpretation_germline) | **POST** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
-*InterpretationsApi* | [**post_interpretation_germline_deprecated**](docs/InterpretationsApi.md#post_interpretation_germline_deprecated) | **POST** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
 *InterpretationsApi* | [**post_interpretation_somatic**](docs/InterpretationsApi.md#post_interpretation_somatic) | **POST** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
-*InterpretationsApi* | [**post_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#post_interpretation_somatic_deprecated) | **POST** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
 *InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /{tenant}/interpretations/germline | Search interpretation germline
 *InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /{tenant}/interpretations/somatic | Search interpretation somatic
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /{tenant}/mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
@@ -225,6 +222,8 @@ Class | Method | HTTP request | Description
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
+ - [ClientAuthConfig](docs/ClientAuthConfig.md)
+ - [ClientConfig](docs/ClientConfig.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
  - [ClinvarVariantConditions](docs/ClinvarVariantConditions.md)
  - [Count](docs/Count.md)

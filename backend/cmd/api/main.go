@@ -132,12 +132,22 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 		tenantRoutes.Use(server.BindStarrocksUserPool(auth, database.NewStarrocksUserPool))
 	}
 
+	// Tenant-scoped actions ignore the org, so requireAction needs no resource lookup.
+	// Org-scoped actions go through requireActionAt with the resolver that attributes the
+	// target resource to a case, and through it to that case's diagnosis lab.
 	requireAction := func(action string) gin.HandlerFunc {
 		return server.RequireAction(auth, repoAuth, action)
 	}
 	requireAnyAction := func(actions ...string) gin.HandlerFunc {
 		return server.RequireAnyAction(auth, repoAuth, actions...)
 	}
+	requireActionAt := func(action string, resolve server.OrgResolver) gin.HandlerFunc {
+		return server.RequireActionAt(auth, repoAuth, action, resolve)
+	}
+	orgFromCase := server.OrgFromCaseParam(repoAuth)
+	orgFromCaseBody := server.OrgFromCaseBody(repoAuth)
+	orgFromNote := server.OrgFromNoteParam(repoAuth)
+	orgFromDocument := server.OrgFromDocumentParam(repoAuth)
 
 	casesGroup := tenantRoutes.Group("/cases")
 	casesGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchCasesHandler(repoCases))
@@ -163,27 +173,21 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsGroup.GET("/germline", requireAction(types.ActionSearchCase), server.SearchInterpretationGermline(repoInterpretations))
 	interpretationsGroup.GET("/somatic", requireAction(types.ActionSearchCase), server.SearchInterpretationSomatic(repoInterpretations))
 
-	interpretationsGermlineGroupDeprecated := interpretationsGroup.Group("/germline/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsGermlineGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermlineDeprecated(repoInterpretations))
-	interpretationsGermlineGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermlineDeprecated(repoInterpretations))
 	interpretationsGermlineGroup := interpretationsGroup.Group("/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsGermlineGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermline(repoInterpretations, repoTerms))
-	interpretationsGermlineGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationGermline(repoInterpretations))
+	interpretationsGermlineGroup.POST("", requireActionAt(types.ActionInterpretVariant, orgFromCase), server.PostInterpretationGermline(repoInterpretations))
 
-	interpretationsSomaticGroupDeprecated := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroupDeprecated.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomaticDeprecated(repoInterpretations))
-	interpretationsSomaticGroupDeprecated.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomaticDeprecated(repoInterpretations))
 	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
 	interpretationsSomaticGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomatic(repoInterpretations, repoTerms))
-	interpretationsSomaticGroup.POST("", requireAction(types.ActionInterpretVariant), server.PostInterpretationSomatic(repoInterpretations))
+	interpretationsSomaticGroup.POST("", requireActionAt(types.ActionInterpretVariant, orgFromCase), server.PostInterpretationSomatic(repoInterpretations))
 
 	mondoGroup := tenantRoutes.Group("/mondo")
 	mondoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetMondoTermAutoComplete(repoTerms))
 
 	notesGroup := tenantRoutes.Group("/notes")
-	notesGroup.POST("", requireAction(types.ActionCommentVariant), server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
-	notesGroup.PUT("/:id", requireAction(types.ActionCommentVariant), server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
-	notesGroup.DELETE("/:id", requireAction(types.ActionCommentVariant), server.DeleteOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.POST("", requireActionAt(types.ActionCommentVariant, orgFromCaseBody), server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.PUT("/:id", requireActionAt(types.ActionCommentVariant, orgFromNote), server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.DELETE("/:id", requireActionAt(types.ActionCommentVariant, orgFromNote), server.DeleteOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", requireAction(types.ActionSearchCase), server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id/count", requireAction(types.ActionSearchCase), server.GetOccurrenceNoteCountHandler(repoOccurrenceNotes))
 
@@ -192,8 +196,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
 
 	occurrenceFlagsGroup := occurrencesGroup.Group("/flags")
-	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", requireAction(types.ActionFlagVariant), server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
-	occurrenceFlagsGroup.DELETE("/:case_id/:seq_id/:task_id/:occurrence_id", requireAction(types.ActionFlagVariant), server.DeleteOccurrenceFlagHandler(repoOccurrenceFlags))
+	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", requireActionAt(types.ActionFlagVariant, orgFromCase), server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
+	occurrenceFlagsGroup.DELETE("/:case_id/:seq_id/:task_id/:occurrence_id", requireActionAt(types.ActionFlagVariant, orgFromCase), server.DeleteOccurrenceFlagHandler(repoOccurrenceFlags))
 
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
@@ -280,7 +284,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.DocumentsFiltersHandler(repoDocuments))
-	documentsGroup.GET("/:document_id/download_url", requireAction(types.ActionDownloadFile), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
+	documentsGroup.GET("/:document_id/download_url", requireActionAt(types.ActionDownloadFile, orgFromDocument), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
 	batchesGroup := tenantRoutes.Group("/batches")
 	batchesGroup.GET("/:batch_id", requireAction(types.ActionIngestData), server.GetBatchHandler(repoBatches))

@@ -56,6 +56,67 @@ func (r *AuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgC
 	return allowed, nil
 }
 
+// The org a request is authorized against is the diagnosis lab of the case the target
+// resource hangs off (cases.diagnosis_lab_code, NOT NULL). Each lookup below answers
+// "which labs does this resource belong to?" for one route family; the middleware then
+// checks the action at those orgs. They return an empty slice — never an error — when
+// the resource does not exist or belongs to another tenant, so an unattributable
+// resource is denied rather than implicitly allowed.
+
+// OrgsForCase returns the diagnosis lab of a case in the tenant.
+func (r *AuthRepository) OrgsForCase(ctx context.Context, tenantCode string, caseID int) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT diagnosis_lab_code
+		FROM cases
+		WHERE id = ? AND tenant_code = ?`, caseID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for case %d: %w", caseID, err)
+	}
+	return orgs, nil
+}
+
+// OrgsForNote returns the diagnosis lab of the case an occurrence note was written on.
+func (r *AuthRepository) OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT c.diagnosis_lab_code
+		FROM occurrence_note n
+		JOIN cases c ON c.id = n.case_id AND c.tenant_code = n.tenant_code
+		WHERE n.id = ? AND n.tenant_code = ?`, noteID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for note %q: %w", noteID, err)
+	}
+	return orgs, nil
+}
+
+// OrgsForDocument returns the diagnosis labs of the cases a document is attached to. A
+// document reaches its case through the task that produced it, and nothing in the schema
+// forbids two tasks from two cases sharing one document, so this can legitimately return
+// more than one lab — the caller needs the action at any one of them.
+//
+// The case join mirrors joins.TaskContextWithCaseHasSeqExp, the read path documents/search
+// uses, so a document is authorized against exactly the cases it is listed under:
+// task_context.case_id when the task names one, otherwise every case carrying the task's
+// sequencing experiment (task_context.case_id is nullable and often NULL).
+func (r *AuthRepository) OrgsForDocument(ctx context.Context, tenantCode string, documentID int) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT DISTINCT c.diagnosis_lab_code
+		FROM document d
+		JOIN task_has_document thd ON thd.document_id = d.id
+		JOIN task_context tc       ON tc.task_id = thd.task_id
+		JOIN case_has_sequencing_experiment chse
+		     ON chse.sequencing_experiment_id = tc.sequencing_experiment_id
+		    AND (tc.case_id IS NULL OR chse.case_id = tc.case_id)
+		JOIN cases c               ON c.id = chse.case_id AND c.tenant_code = d.tenant_code
+		WHERE d.id = ? AND d.tenant_code = ?`, documentID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for document %d: %w", documentID, err)
+	}
+	return orgs, nil
+}
+
 // TenantExists reports whether a tenant with the given code exists. It backs the
 // tenant-routing middleware: an unknown tenant in the URL path becomes a 404 instead of
 // reaching a write and surfacing as a foreign-key violation (a 500) downstream.

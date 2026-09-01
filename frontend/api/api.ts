@@ -9230,57 +9230,6 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
-         * Get interpretation germline
-         * @summary Get interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getInterpretationGermlineDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('getInterpretationGermlineDeprecated', 'tenant', tenant)
-            // verify required parameter 'sequencingId' is not null or undefined
-            assertParamExists('getInterpretationGermlineDeprecated', 'sequencingId', sequencingId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getInterpretationGermlineDeprecated', 'locusId', locusId)
-            // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('getInterpretationGermlineDeprecated', 'transcriptId', transcriptId)
-            const localVarPath = `/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
-                .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
-                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
          * @param {string} tenant Tenant code
@@ -9305,57 +9254,6 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             const localVarPath = `/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
-                .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
-                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get interpretation somatic
-         * @summary Get interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getInterpretationSomaticDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('getInterpretationSomaticDeprecated', 'tenant', tenant)
-            // verify required parameter 'sequencingId' is not null or undefined
-            assertParamExists('getInterpretationSomaticDeprecated', 'sequencingId', sequencingId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getInterpretationSomaticDeprecated', 'locusId', locusId)
-            // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('getInterpretationSomaticDeprecated', 'transcriptId', transcriptId)
-            const localVarPath = `/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -9488,63 +9386,6 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
-         * Create or Update interpretation germline
-         * @summary Create or Update interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationGermline} interpretationGermline Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        postInterpretationGermlineDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('postInterpretationGermlineDeprecated', 'tenant', tenant)
-            // verify required parameter 'sequencingId' is not null or undefined
-            assertParamExists('postInterpretationGermlineDeprecated', 'sequencingId', sequencingId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('postInterpretationGermlineDeprecated', 'locusId', locusId)
-            // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('postInterpretationGermlineDeprecated', 'transcriptId', transcriptId)
-            // verify required parameter 'interpretationGermline' is not null or undefined
-            assertParamExists('postInterpretationGermlineDeprecated', 'interpretationGermline', interpretationGermline)
-            const localVarPath = `/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
-                .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
-                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(interpretationGermline, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
          * @param {string} tenant Tenant code
@@ -9572,63 +9413,6 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             const localVarPath = `/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
-                .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
-                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(interpretationSomatic, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Create or Update interpretation somatic
-         * @summary Create or Update interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationSomatic} interpretationSomatic Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        postInterpretationSomaticDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('postInterpretationSomaticDeprecated', 'tenant', tenant)
-            // verify required parameter 'sequencingId' is not null or undefined
-            assertParamExists('postInterpretationSomaticDeprecated', 'sequencingId', sequencingId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('postInterpretationSomaticDeprecated', 'locusId', locusId)
-            // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('postInterpretationSomaticDeprecated', 'transcriptId', transcriptId)
-            // verify required parameter 'interpretationSomatic' is not null or undefined
-            assertParamExists('postInterpretationSomaticDeprecated', 'interpretationSomatic', interpretationSomatic)
-            const localVarPath = `/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -9765,23 +9549,6 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get interpretation germline
-         * @summary Get interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationGermlineDeprecated']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
          * @param {string} tenant Tenant code
@@ -9796,23 +9563,6 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Get interpretation somatic
-         * @summary Get interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationSomaticDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -9848,24 +9598,6 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Create or Update interpretation germline
-         * @summary Create or Update interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationGermline} interpretationGermline Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationGermlineDeprecated']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
          * @param {string} tenant Tenant code
@@ -9881,24 +9613,6 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Create or Update interpretation somatic
-         * @summary Create or Update interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationSomatic} interpretationSomatic Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomaticDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -9952,20 +9666,6 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
             return localVarFp.getInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get interpretation germline
-         * @summary Get interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
          * @param {string} tenant Tenant code
@@ -9978,20 +9678,6 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          */
         getInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
             return localVarFp.getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get interpretation somatic
-         * @summary Get interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get pubmed citation by ID
@@ -10020,21 +9706,6 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
             return localVarFp.postInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
         },
         /**
-         * Create or Update interpretation germline
-         * @summary Create or Update interpretation germline
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationGermline} interpretationGermline Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
          * @param {string} tenant Tenant code
@@ -10048,21 +9719,6 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          */
         postInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
             return localVarFp.postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Create or Update interpretation somatic
-         * @summary Create or Update interpretation somatic
-         * @param {string} tenant Tenant code
-         * @param {string} sequencingId Sequencing ID
-         * @param {string} locusId Locus ID
-         * @param {string} transcriptId Transcript ID
-         * @param {InterpretationSomatic} interpretationSomatic Interpretation Body
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
         },
         /**
          * Search interpretation germline
@@ -10111,22 +9767,6 @@ export class InterpretationsApi extends BaseAPI {
     }
 
     /**
-     * Get interpretation germline
-     * @summary Get interpretation germline
-     * @param {string} tenant Tenant code
-     * @param {string} sequencingId Sequencing ID
-     * @param {string} locusId Locus ID
-     * @param {string} transcriptId Transcript ID
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof InterpretationsApi
-     */
-    public getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Get interpretation somatic
      * @summary Get interpretation somatic
      * @param {string} tenant Tenant code
@@ -10140,22 +9780,6 @@ export class InterpretationsApi extends BaseAPI {
      */
     public getInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get interpretation somatic
-     * @summary Get interpretation somatic
-     * @param {string} tenant Tenant code
-     * @param {string} sequencingId Sequencing ID
-     * @param {string} locusId Locus ID
-     * @param {string} transcriptId Transcript ID
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof InterpretationsApi
-     */
-    public getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -10189,23 +9813,6 @@ export class InterpretationsApi extends BaseAPI {
     }
 
     /**
-     * Create or Update interpretation germline
-     * @summary Create or Update interpretation germline
-     * @param {string} tenant Tenant code
-     * @param {string} sequencingId Sequencing ID
-     * @param {string} locusId Locus ID
-     * @param {string} transcriptId Transcript ID
-     * @param {InterpretationGermline} interpretationGermline Interpretation Body
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof InterpretationsApi
-     */
-    public postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Create or Update interpretation somatic
      * @summary Create or Update interpretation somatic
      * @param {string} tenant Tenant code
@@ -10220,23 +9827,6 @@ export class InterpretationsApi extends BaseAPI {
      */
     public postInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
         return InterpretationsApiFp(this.configuration).postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Create or Update interpretation somatic
-     * @summary Create or Update interpretation somatic
-     * @param {string} tenant Tenant code
-     * @param {string} sequencingId Sequencing ID
-     * @param {string} locusId Locus ID
-     * @param {string} transcriptId Transcript ID
-     * @param {InterpretationSomatic} interpretationSomatic Interpretation Body
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof InterpretationsApi
-     */
-    public postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

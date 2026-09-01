@@ -21,6 +21,7 @@ from radiant_python.api.actions_api import ActionsApi
 from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
 from radiant_python.api.cases_api import CasesApi
+from radiant_python.api.config_api import ConfigApi
 from radiant_python.api.documents_api import DocumentsApi
 from radiant_python.api.genes_api import GenesApi
 from radiant_python.api.hpo_api import HpoApi
@@ -81,6 +82,8 @@ from radiant_python.models.case_sequencing_experiment_batch import CaseSequencin
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
+from radiant_python.models.client_auth_config import ClientAuthConfig
+from radiant_python.models.client_config import ClientConfig
 from radiant_python.models.clinvar_rcv import ClinvarRCV
 from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
 from radiant_python.models.count import Count

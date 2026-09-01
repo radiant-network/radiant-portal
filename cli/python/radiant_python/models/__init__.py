@@ -40,6 +40,8 @@ from radiant_python.models.case_sequencing_experiment_batch import CaseSequencin
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
+from radiant_python.models.client_auth_config import ClientAuthConfig
+from radiant_python.models.client_config import ClientConfig
 from radiant_python.models.clinvar_rcv import ClinvarRCV
 from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
 from radiant_python.models.count import Count

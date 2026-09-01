@@ -215,38 +215,103 @@ var expectedTenantAnyActions = map[string][]string{
 	"GET /:tenant/roles/:code": {types.ActionManageRole, types.ActionManageUser},
 }
 
+// orgResolvedTenantRoutes are the routes whose org-scoped action is checked against the
+// resource's own organization — RequireActionAt with a resolver that walks the resource back
+// to its case and takes that case's diagnosis_lab_code.
+var orgResolvedTenantRoutes = map[string]bool{
+	"GET /:tenant/igv/:case_id": true,
+	"POST /:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id": true,
+	"POST /:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id":  true,
+	"POST /:tenant/notes":       true,
+	"PUT /:tenant/notes/:id":    true,
+	"DELETE /:tenant/notes/:id": true,
+	"POST /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id":   true,
+	"DELETE /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id": true,
+	"GET /:tenant/documents/:document_id/download_url":                           true,
+}
+
+// sentinelOrgActionRoutes hold an org-scoped action but are still gated with the tenant-wide
+// sentinel: the batch routes carry their org per record in the payload, so the check belongs
+// inline in validation rather than in a route middleware. Every other org-scoped route must
+// resolve a real org — Test_OrgScopedRoutesResolveTheirOrg enforces that.
+var sentinelOrgActionRoutes = map[string]bool{
+	"GET /:tenant/batches/:batch_id": true,
+	"POST /:tenant/patients/batch":   true,
+	"PUT /:tenant/patients/batch":    true,
+	"POST /:tenant/samples/batch":    true,
+	"PUT /:tenant/samples/batch":     true,
+	"POST /:tenant/sequencing/batch": true,
+	"PUT /:tenant/sequencing/batch":  true,
+	"POST /:tenant/cases/batch":      true,
+	"PATCH /:tenant/cases/batch":     true,
+	"PUT /:tenant/cases/batch":       true,
+}
+
+// Test_OrgScopedRoutesResolveTheirOrg is the guard behind "no org-scoped route falls back to
+// the tenant-wide sentinel". It reads each mapped action's scope from the action catalog, so
+// a route mapped to an org-scoped action must be declared as org-resolved (or as one of the
+// batch routes that check per record) — adding one without a resolver fails here.
+func Test_OrgScopedRoutesResolveTheirOrg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		actions, err := repo.ListActions(t.Context())
+		assert.NoError(t, err)
+
+		scopes := map[string]string{}
+		for _, action := range actions {
+			scopes[action.Code] = action.Scope
+		}
+
+		for route, action := range expectedTenantActions {
+			scope, known := scopes[action]
+			assert.Truef(t, known, "route %q maps to unknown action %q", route, action)
+			if scope != types.ActionScopeOrg {
+				assert.Falsef(t, orgResolvedTenantRoutes[route], "route %q maps to the tenant-scoped action %q, so it pays for an org lookup it ignores — use requireAction", route, action)
+				continue
+			}
+			assert.Truef(t, orgResolvedTenantRoutes[route] || sentinelOrgActionRoutes[route],
+				"route %q is gated on the org-scoped action %q but resolves no org — gate it with requireActionAt and a resolver, then declare it in orgResolvedTenantRoutes", route, action)
+		}
+
+		for route := range orgResolvedTenantRoutes {
+			_, mapped := expectedTenantActions[route]
+			assert.Truef(t, mapped, "org-resolved route %q is no longer mapped — remove it from orgResolvedTenantRoutes", route)
+		}
+		for route := range sentinelOrgActionRoutes {
+			_, mapped := expectedTenantActions[route]
+			assert.Truef(t, mapped, "sentinel route %q is no longer mapped — remove it from sentinelOrgActionRoutes", route)
+		}
+	})
+}
+
 // expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in
 // setupRouter. Reads are can_search_case; writes/files/ingest are the org-scoped actions.
 var expectedTenantActions = map[string]string{
-	"POST /:tenant/roles":                                                            types.ActionManageRole,
-	"PUT /:tenant/roles/:code":                                                       types.ActionManageRole,
-	"DELETE /:tenant/roles/:code":                                                    types.ActionManageRole,
-	"GET /:tenant/users":                                                             types.ActionManageUser,
-	"POST /:tenant/users":                                                            types.ActionManageUser,
-	"PUT /:tenant/users/:user_id":                                                    types.ActionManageUser,
-	"DELETE /:tenant/users/:user_id":                                                 types.ActionManageUser,
-	"POST /:tenant/organizations":                                                    types.ActionManageOrg,
-	"PUT /:tenant/organizations/:code":                                               types.ActionManageOrg,
-	"POST /:tenant/cases/search":                                                     types.ActionSearchCase,
-	"GET /:tenant/cases/autocomplete":                                                types.ActionSearchCase,
-	"GET /:tenant/cases/filters":                                                     types.ActionSearchCase,
-	"GET /:tenant/cases/:case_id":                                                    types.ActionSearchCase,
-	"POST /:tenant/cases/:case_id/documents/search":                                  types.ActionSearchCase,
-	"GET /:tenant/cases/:case_id/documents/filters":                                  types.ActionSearchCase,
-	"GET /:tenant/cases/:case_id/:seq_id/tasks_with_occurrences":                     types.ActionSearchCase,
-	"GET /:tenant/genes/autocomplete":                                                types.ActionSearchCase,
-	"POST /:tenant/genes/search":                                                     types.ActionSearchCase,
-	"GET /:tenant/hpo/autocomplete":                                                  types.ActionSearchCase,
-	"GET /:tenant/igv/:case_id":                                                      types.ActionSearchCase,
-	"GET /:tenant/interpretations/pubmed/:citation_id":                               types.ActionSearchCase,
-	"GET /:tenant/interpretations/germline":                                          types.ActionSearchCase,
-	"GET /:tenant/interpretations/somatic":                                           types.ActionSearchCase,
-	"GET /:tenant/interpretations/germline/:sequencing_id/:locus_id/:transcript_id":  types.ActionSearchCase,
-	"POST /:tenant/interpretations/germline/:sequencing_id/:locus_id/:transcript_id": types.ActionInterpretVariant,
+	"POST /:tenant/roles":                                        types.ActionManageRole,
+	"PUT /:tenant/roles/:code":                                   types.ActionManageRole,
+	"DELETE /:tenant/roles/:code":                                types.ActionManageRole,
+	"GET /:tenant/users":                                         types.ActionManageUser,
+	"POST /:tenant/users":                                        types.ActionManageUser,
+	"PUT /:tenant/users/:user_id":                                types.ActionManageUser,
+	"DELETE /:tenant/users/:user_id":                             types.ActionManageUser,
+	"POST /:tenant/organizations":                                types.ActionManageOrg,
+	"PUT /:tenant/organizations/:code":                           types.ActionManageOrg,
+	"POST /:tenant/cases/search":                                 types.ActionSearchCase,
+	"GET /:tenant/cases/autocomplete":                            types.ActionSearchCase,
+	"GET /:tenant/cases/filters":                                 types.ActionSearchCase,
+	"GET /:tenant/cases/:case_id":                                types.ActionSearchCase,
+	"POST /:tenant/cases/:case_id/documents/search":              types.ActionSearchCase,
+	"GET /:tenant/cases/:case_id/documents/filters":              types.ActionSearchCase,
+	"GET /:tenant/cases/:case_id/:seq_id/tasks_with_occurrences": types.ActionSearchCase,
+	"GET /:tenant/genes/autocomplete":                            types.ActionSearchCase,
+	"POST /:tenant/genes/search":                                 types.ActionSearchCase,
+	"GET /:tenant/hpo/autocomplete":                              types.ActionSearchCase,
+	"GET /:tenant/igv/:case_id":                                  types.ActionSearchCase,
+	"GET /:tenant/interpretations/pubmed/:citation_id":           types.ActionSearchCase,
+	"GET /:tenant/interpretations/germline":                      types.ActionSearchCase,
+	"GET /:tenant/interpretations/somatic":                       types.ActionSearchCase,
 	"GET /:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id":  types.ActionSearchCase,
 	"POST /:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id": types.ActionInterpretVariant,
-	"GET /:tenant/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id":               types.ActionSearchCase,
-	"POST /:tenant/interpretations/somatic/:sequencing_id/:locus_id/:transcript_id":              types.ActionInterpretVariant,
 	"GET /:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id":   types.ActionSearchCase,
 	"POST /:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id":  types.ActionInterpretVariant,
 	"GET /:tenant/mondo/autocomplete":                                                       types.ActionSearchCase,
