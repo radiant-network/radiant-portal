@@ -10,6 +10,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -262,18 +263,36 @@ func Test_ValidateOrganization(t *testing.T) {
 	assert.Nil(t, rec.Errors)
 }
 
-func Test_ValidateDateOfBirth(t *testing.T) {
-	// Nil date of birth: no errors
-	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", DateOfBirth: nil}
-	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
-	rec.validateDateOfBirth()
-
-	expected := types.BatchMessage{
-		Code:    "PATIENT-004",
-		Message: "Invalid field date_of_birth for create_patient (CHUSJ / id1). Reason: missing value, date of birth is required.",
-		Path:    "create_patient[0].date_of_birth",
+func Test_ValidateExistingPatient_NilDateOfBirth(t *testing.T) {
+	// Absent on both sides: not a difference, patient is skipped as already existing
+	patient := types.PatientBatch{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id1",
+		SexCode:                 "M",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             nil,
 	}
-	assert.Equal(t, expected, rec.Errors[0])
+	existing := &types.Patient{
+		SubmitterPatientId: "id1",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        nil,
+	}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateExistingPatient(existing)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Infos, 1)
+	assert.Equal(t, PatientAlreadyExistCode, rec.Infos[0].Code)
+	assert.Nil(t, rec.Warnings)
+
+	// Existing has one, incoming does not: flagged as a difference
+	dobExisting := time.Date(1990, 5, 6, 0, 0, 0, 0, time.UTC)
+	existing.DateOfBirth = &dobExisting
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreatePatientBatchType}, Patient: patient}
+	rec.validateExistingPatient(existing)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Warnings, 1)
+	assert.Equal(t, PatientExistingPatientDifferentFieldCode, rec.Warnings[0].Code)
 }
 
 func Test_ValidateExistingPatient_Nil(t *testing.T) {
@@ -301,7 +320,7 @@ func Test_ValidateExistingPatient_SameValues(t *testing.T) {
 		SubmitterPatientId: "id2",
 		SexCode:            "M",
 		LifeStatusCode:     "alive",
-		DateOfBirth:        time.Time(dob),
+		DateOfBirth:        utils.TimePtr(time.Time(dob)),
 		LastName:           "Doe",
 		FirstName:          "John",
 		Jhn:                "JHN-123",
@@ -332,7 +351,7 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 		SubmitterPatientId: "id3",
 		SexCode:            "M",
 		LifeStatusCode:     "alive",
-		DateOfBirth:        dobExisting,
+		DateOfBirth:        &dobExisting,
 		LastName:           "Jones",
 		FirstName:          "Bob",
 		Jhn:                "JHN-123",

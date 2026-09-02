@@ -239,11 +239,6 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 				Path:    "create_patient[1].patient_organization_code",
 			},
 			{
-				Code:    "PATIENT-004",
-				Message: "Invalid field date_of_birth for create_patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
-				Path:    "create_patient[3].date_of_birth",
-			},
-			{
 				Code:    "PATIENT-005",
 				Message: "Organization type (sequencing_center) defined for patient (CQGC / ABC123456) is not in this list : healthcare_provider, research_institute.",
 				Path:    "create_patient[3].patient_organization_code",

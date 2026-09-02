@@ -11,7 +11,7 @@ type PatientBatch struct {
 	FirstName               TrimmedString `json:"first_name,omitempty" toml:"first_name,omitempty"`
 	LastName                TrimmedString `json:"last_name,omitempty" toml:"last_name,omitempty"`
 	SexCode                 string        `json:"sex_code" toml:"sex_code" binding:"required,oneof=male female unknown"`
-	DateOfBirth             *DateISO8601  `json:"date_of_birth" toml:"date_of_birth" binding:"required" swaggertype:"string" format:"date" example:"2020-01-31"`
+	DateOfBirth             *DateISO8601  `json:"date_of_birth,omitempty" toml:"date_of_birth,omitempty" swaggertype:"string" format:"date" example:"2020-01-31"`
 	Jhn                     TrimmedString `json:"jhn,omitempty" toml:"jhn,omitempty"`
 }
 

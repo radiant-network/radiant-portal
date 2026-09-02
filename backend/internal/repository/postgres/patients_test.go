@@ -6,6 +6,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -76,7 +77,7 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 			FirstName:              "Updated",
 			LastName:               "Person",
 			Jhn:                    "JHN-UPDATED",
-			DateOfBirth:            time.Time(dob),
+			DateOfBirth:            utils.TimePtr(time.Time(dob)),
 		}
 		err = repo.UpdatePatient(t.Context(), updated)
 		require.NoError(t, err)
@@ -90,7 +91,8 @@ func Test_UpdatePatient_ExistingRow(t *testing.T) {
 		assert.Equal(t, "Updated", patient.FirstName)
 		assert.Equal(t, "Person", patient.LastName)
 		assert.Equal(t, "JHN-UPDATED", patient.Jhn)
-		assert.True(t, time.Time(dob).Equal(patient.DateOfBirth))
+		require.NotNil(t, patient.DateOfBirth)
+		assert.True(t, time.Time(dob).Equal(*patient.DateOfBirth))
 	})
 }
 
