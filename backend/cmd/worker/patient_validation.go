@@ -107,14 +107,6 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 	}
 }
 
-func (r *PatientValidationRecord) validateDateOfBirth() {
-	if r.Patient.DateOfBirth == nil {
-		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := batchval.FormatInvalidField(r.GetResourceType(), "date_of_birth", "missing value, date of birth is required", resIds)
-		r.AddErrors(message, PatientInvalidValueCode, r.getFormattedPath("date_of_birth"))
-	}
-}
-
 func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
 	if existingPatient == nil {
 		return
@@ -123,11 +115,15 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	r.Skipped = true
 	anyDifference := validateIsDifferentExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
 	anyDifference = validateIsDifferentExistingPatientField(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode) || anyDifference
-	if r.Patient.DateOfBirth != nil {
-		anyDifference = validateIsDifferentExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time(*r.Patient.DateOfBirth)) || anyDifference
-	} else {
-		anyDifference = validateIsDifferentExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time{}) || anyDifference
+	existingDateOfBirth := time.Time{}
+	if existingPatient.DateOfBirth != nil {
+		existingDateOfBirth = *existingPatient.DateOfBirth
 	}
+	recordDateOfBirth := time.Time{}
+	if r.Patient.DateOfBirth != nil {
+		recordDateOfBirth = time.Time(*r.Patient.DateOfBirth)
+	}
+	anyDifference = validateIsDifferentExistingPatientField(r, "date_of_birth", existingDateOfBirth, recordDateOfBirth) || anyDifference
 	anyDifference = validateIsDifferentExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String()) || anyDifference
 	anyDifference = validateIsDifferentExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String()) || anyDifference
 	anyDifference = validateIsDifferentExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String()) || anyDifference
@@ -255,9 +251,7 @@ func insertPatientRecords(ctx context.Context, records []*PatientValidationRecor
 				Jhn:                    record.Patient.Jhn.String(),
 				SexCode:                record.Patient.SexCode,
 				LifeStatusCode:         record.Patient.LifeStatusCode,
-			}
-			if record.Patient.DateOfBirth != nil {
-				patient.DateOfBirth = time.Time(*record.Patient.DateOfBirth)
+				DateOfBirth:            (*time.Time)(record.Patient.DateOfBirth),
 			}
 			err := repo.CreatePatient(ctx, &patient)
 			if err != nil {
@@ -300,7 +294,6 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
-	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {
 		return nil, fmt.Errorf("error validating life status code: %v", err)
@@ -405,9 +398,7 @@ func updatePatientRecords(ctx context.Context, records []*PatientValidationRecor
 				Jhn:                    record.Patient.Jhn.String(),
 				SexCode:                record.Patient.SexCode,
 				LifeStatusCode:         record.Patient.LifeStatusCode,
-			}
-			if record.Patient.DateOfBirth != nil {
-				patient.DateOfBirth = time.Time(*record.Patient.DateOfBirth)
+				DateOfBirth:            (*time.Time)(record.Patient.DateOfBirth),
 			}
 			err := repo.UpdatePatient(ctx, &patient)
 			if err != nil {
@@ -450,7 +441,6 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
-	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {
 		return nil, fmt.Errorf("error validating life status code: %v", err)

@@ -50,6 +50,33 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
+func TestPostPatientBatchHandler_NoDateOfBirth(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    types.BatchStatusPending,
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
+	body := `{"patients": [{"submitter_patient_id": "p1", "submitter_patient_id_type": "MR", "patient_organization_code": "org1", "life_status_code": "alive", "sex_code": "unknown", "jhn": "AAAA990101022"}]}`
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+}
+
 func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}

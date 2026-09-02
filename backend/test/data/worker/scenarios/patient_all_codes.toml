@@ -40,7 +40,7 @@ date_of_birth = "2025-01-30"  # Different from existing record
 jhn = "LEF7001303889"
 
 # Should trigger PATIENT-005 Organisation type is not in this list : healthcare_provider, research_institute
-# Missing date_of_birth should trigger PATIENT-004
+# Missing date_of_birth is allowed, no error expected for it
 [[patients]]
 submitter_patient_id = "ABC123456"
 submitter_patient_id_type = "mrn"

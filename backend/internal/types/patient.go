@@ -11,11 +11,11 @@ type Patient struct {
 	Organization           Organization `gorm:"foreignKey:OrganizationCode,TenantCode;references:Code,TenantCode"`
 	SexCode                string
 	LifeStatusCode         string
-	FirstName              string    `json:"first_name,omitempty"`
-	LastName               string    `json:"last_name,omitempty"`
-	Jhn                    string    `json:"jhn,omitempty"`
-	Sex                    Sex       `gorm:"foreignKey:Code;references:SexCode"`
-	DateOfBirth            time.Time `gorm:"type:DATE"`
+	FirstName              string     `json:"first_name,omitempty"`
+	LastName               string     `json:"last_name,omitempty"`
+	Jhn                    string     `json:"jhn,omitempty"`
+	Sex                    Sex        `gorm:"foreignKey:Code;references:SexCode"`
+	DateOfBirth            *time.Time `gorm:"type:DATE"`
 }
 
 var PatientTable = Table{

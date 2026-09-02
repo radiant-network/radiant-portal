@@ -2135,7 +2135,6 @@ components:
         submitter_patient_id_type:
           type: string
       required:
-      - date_of_birth
       - life_status_code
       - patient_organization_code
       - sex_code
