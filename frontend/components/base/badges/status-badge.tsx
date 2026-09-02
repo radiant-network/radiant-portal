@@ -25,8 +25,7 @@ export type Status =
   | 'unresolved'
   | 'inconclusive'
   | 'reopened'
-  | 'revoked'
-  | 'unknown';
+  | 'revoked';
 
 type StatusBadgeProps = {
   status: Status;
@@ -44,7 +43,6 @@ const colors: Record<string, BadgeProps['variant']> = {
   inconclusive: 'lime',
   reopened: 'violet',
   revoked: 'neutral',
-  unknown: 'outline',
 };
 
 const icons: Record<string, LucideIcon> = {
@@ -58,7 +56,6 @@ const icons: Record<string, LucideIcon> = {
   inconclusive: FileQuestion,
   reopened: RotateCcw,
   revoked: CircleX,
-  unknown: FileQuestion,
 };
 
 function StatusBadge({ status, className }: StatusBadgeProps) {

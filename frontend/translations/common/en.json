@@ -1099,7 +1099,6 @@
       "resolved": "Resolved",
       "revoked": "Cancelled",
       "submitted": "Pending",
-      "unknown": "Unknown",
       "unresolved": "Unresolved"
     },
     "case": {
