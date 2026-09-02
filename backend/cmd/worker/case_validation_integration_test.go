@@ -852,7 +852,7 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field status_code for create_case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
+				Message: "Invalid field status_code for create_case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].",
 				Path:    "create_case[1].status_code",
 			},
 			{

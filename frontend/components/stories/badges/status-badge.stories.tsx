@@ -50,7 +50,7 @@ const meta = {
   title: 'Components/Badges/Status Badge',
   component: StatusBadge,
   args: {
-    status: 'draft',
+    status: 'submitted',
   },
   decorators: [
     Story => (
@@ -72,7 +72,18 @@ export const Default: Story = {
   render: _args => (
     <StorySection title="Default">
       <div className="flex gap-2">
-        {['draft', 'submitted', 'revoke', 'in_progress', 'completed', 'incomplete', 'unknown'].map((status, index) => (
+        {[
+          'submitted',
+          'processing',
+          'in_progress',
+          'in_review',
+          'completed',
+          'resolved',
+          'unresolved',
+          'inconclusive',
+          'reopened',
+          'revoked',
+        ].map((status, index) => (
           <StatusBadge key={index} status={status as Status} />
         ))}
       </div>

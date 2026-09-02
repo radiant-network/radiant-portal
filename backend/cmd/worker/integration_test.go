@@ -1517,7 +1517,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 		warnings := []types.BatchMessage{
 			{
 				Code:    "SEQ-004",
-				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> draft).",
+				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> submitted).",
 				Path:    "create_sequencing_experiment[2].status_code",
 			},
 			{
@@ -1584,7 +1584,7 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 			ValueSetsRepo: repo,
 		}
 		cache := batchval.NewBatchValidationCache(&bv)
-		expected := []string{"completed", "draft", "incomplete", "in_progress", "revoke", "submitted", "unknown"}
+		expected := []string{"completed", "inconclusive", "in_progress", "in_review", "processing", "reopened", "resolved", "revoked", "submitted", "unresolved"}
 
 		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 		assert.NoError(t, err)

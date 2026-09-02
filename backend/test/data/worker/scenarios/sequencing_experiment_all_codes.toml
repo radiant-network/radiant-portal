@@ -44,7 +44,7 @@ sequencing_lab_code = "CQGC"
 capture_kit = "SureSelect Custom DNA Target"
 run_alias = "A00516_0170"
 run_name = "1618"
-status_code = "draft"  # Different status_code to trigger SEQ-004
+status_code = "submitted"  # Different status_code to trigger SEQ-004
 
 [[sequencing_experiments]]
 aliquot = "ABCD1"
@@ -58,7 +58,7 @@ capture_kit = "SureSelect Custom DNA Target"
 run_alias = "A00516_0169"
 run_date = "2021-08-17T00:00:00Z"
 run_name = "1617"
-status_code = "draft"
+status_code = "submitted"
 
 # Should trigger SEQ-006 duplicate sequencing experiment
 [[sequencing_experiments]]

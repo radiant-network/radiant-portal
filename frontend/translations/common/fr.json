@@ -1091,13 +1091,17 @@
       "germline_family": "Lignée Germinale Familiale"
     },
     "status": {
-      "completed": "Completé",
-      "draft": "Brouillon",
+      "completed": "Complété",
       "in_progress": "En cours",
-      "incomplete": "Incomplet",
-      "revoke": "Refusé",
-      "submitted": "Soumis",
-      "unknown": "Inconnu"
+      "in_review": "En révision",
+      "inconclusive": "Non concluant",
+      "processing": "En traitement",
+      "reopened": "Rouvert",
+      "resolved": "Résolu",
+      "revoked": "Annulé",
+      "submitted": "En attente",
+      "unknown": "Inconnu",
+      "unresolved": "Non résolu"
     },
     "case": {
       "title": "{{total}} Cas",

@@ -60,9 +60,9 @@ func (m *MockRepository) SearchById(ctx context.Context, prefix string, limit in
 func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilters, error) {
 	var result = types.CaseFilters{
 		Status: []types.FiltersValue{
-			{Key: "draft", Label: "Draft"},
+			{Key: "in_review", Label: "In Review"},
 			{Key: "in_progress", Label: "In Progress"},
-			{Key: "revoke", Label: "Revoke"},
+			{Key: "revoked", Label: "Cancelled"},
 		},
 		Priority: []types.FiltersValue{
 			{Key: "routine", Label: "Routine"},
@@ -240,9 +240,9 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "status_code":[
-			{"key":"draft", "label":"Draft"},
+			{"key":"in_review", "label":"In Review"},
 			{"key":"in_progress", "label":"In Progress"},
-			{"key":"revoke", "label":"Revoke"}
+			{"key":"revoked", "label":"Cancelled"}
 		], "resolution_status_code":[
 			{"key":"inconclusive", "label":"Inconclusive"},
 			{"key":"solved", "label":"Solved"},

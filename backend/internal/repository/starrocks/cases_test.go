@@ -78,7 +78,7 @@ func Test_SearchCasesNoResult(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CasePriorityCodeField.GetAlias(),
-				Value:     []interface{}{"urgent"},
+				Value:     []any{"urgent"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -95,14 +95,14 @@ func Test_SearchCases(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseStatusCodeField.GetAlias(),
-				Value:     []interface{}{"incomplete"},
+				Value:     []any{"submitted"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), *count)
-		assert.Len(t, *cases, 2)
+		assert.Equal(t, int64(4), *count)
+		assert.Len(t, *cases, 4)
 	})
 }
 
@@ -112,7 +112,7 @@ func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.SubmitterPatientIdField.GetAlias(),
-				Value:     []interface{}{"MRN-283775"},
+				Value:     []any{"MRN-283775"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -131,7 +131,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.SubmitterPatientIdField.GetAlias(),
-				Value:     []interface{}{"MRN-283773"},
+				Value:     []any{"MRN-283773"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -150,7 +150,7 @@ func Test_SearchCases_OnProbandID(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PatientIdField.GetAlias(),
-				Value:     []interface{}{"3"},
+				Value:     []any{"3"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -169,7 +169,7 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PatientIdField.GetAlias(),
-				Value:     []interface{}{"1"},
+				Value:     []any{"1"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -188,7 +188,7 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseSequencingExperimentIdField.GetAlias(),
-				Value:     []interface{}{"1"},
+				Value:     []any{"1"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -206,7 +206,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
-				Value:     []interface{}{"unsolved"},
+				Value:     []any{"unsolved"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -217,7 +217,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 		searchCriteria = []types.SearchCriterion{
 			{
 				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
-				Value:     []interface{}{"solved"},
+				Value:     []any{"solved"},
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -233,7 +233,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CasePrimaryConditionIdField.GetAlias(),
-				Value:     []interface{}{"MONDO:0700092"},
+				Value:     []any{"MONDO:0700092"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -244,7 +244,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 		searchCriteria = []types.SearchCriterion{
 			{
 				FieldName: types.CasePrimaryConditionIdField.GetAlias(),
-				Value:     []interface{}{"MONDO:0700099"},
+				Value:     []any{"MONDO:0700099"},
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -260,7 +260,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.PanelCodeField.GetAlias(),
-				Value:     []interface{}{"EPILEP"},
+				Value:     []any{"EPILEP"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -276,7 +276,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.ProbandLifeStatusCodeField.GetAlias(),
-				Value:     []interface{}{"alive"},
+				Value:     []any{"alive"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -287,7 +287,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 		searchCriteria = []types.SearchCriterion{
 			{
 				FieldName: types.ProbandLifeStatusCodeField.GetAlias(),
-				Value:     []interface{}{"deceased"},
+				Value:     []any{"deceased"},
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -303,7 +303,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseCategoryCodeField.GetAlias(),
-				Value:     []interface{}{"postnatal"},
+				Value:     []any{"postnatal"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -314,7 +314,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 		searchCriteria = []types.SearchCriterion{
 			{
 				FieldName: types.CaseCategoryCodeField.GetAlias(),
-				Value:     []interface{}{"prenatal"},
+				Value:     []any{"prenatal"},
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -330,7 +330,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"germline"},
+				Value:     []any{"germline"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -341,7 +341,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		searchCriteria = []types.SearchCriterion{
 			{
 				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"somatic"},
+				Value:     []any{"somatic"},
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -357,7 +357,7 @@ func Test_SearchCases_OnSubmitterCaseId(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
-				Value:     []interface{}{"1:8"},
+				Value:     []any{"1:8"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -377,7 +377,7 @@ func Test_SearchCases_OnSubmitterCaseId_NoResult(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
-				Value:     []interface{}{"does-not-exist"},
+				Value:     []any{"does-not-exist"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -394,7 +394,7 @@ func Test_SearchCases_PrenatalSoloCase_CountsMotherAndFetusAsTwoMembers(t *testi
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseSubmitterCaseIdField.GetAlias(),
-				Value:     []interface{}{"1:72"},
+				Value:     []any{"1:72"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -445,7 +445,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		filters, err := repo.GetCasesFilters(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, len((*filters).Status), 7)
+		assert.Equal(t, len((*filters).Status), 10)
 		assert.Equal(t, len((*filters).Priority), 4)
 		assert.Equal(t, len((*filters).AnalysisCatalog), 4)
 		assert.Equal(t, len((*filters).Project), 2)
