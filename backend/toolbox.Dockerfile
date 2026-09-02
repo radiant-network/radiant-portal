@@ -17,6 +17,6 @@ COPY --from=builder /app/bin/createuser/createuser /usr/local/bin/createuser
 COPY --from=builder /app/bin/refresh-tenants/refresh-tenants /usr/local/bin/refresh-tenants
 
 # No fixed ENTRYPOINT: this image bundles three independent commands, invoked by name,
-# e.g. `docker run --env-file .env toolbox create-tenant -code demo -name "Demo Hospital"`.
+# e.g. `docker run --env-file .env radiant-toolbox create-tenant -code demo -name "Demo Hospital"`.
 USER nobody
 CMD ["sh"]
