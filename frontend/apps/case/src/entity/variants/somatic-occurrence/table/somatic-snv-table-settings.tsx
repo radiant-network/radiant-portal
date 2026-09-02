@@ -10,10 +10,10 @@ import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import SomaticFrequencyCell from '@/components/base/data-table/cells/somatic-frequency-cell';
 import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/somatic-germline-frequency-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import TumorNormalFrequencyCell from '@/components/base/data-table/cells/tumor-normal-frequency-cell';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -207,11 +207,27 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
       size: 124,
       minSize: 40,
     }),
+    // Freq. TO
+    columnHelper.accessor(row => row, {
+      id: 'somatic_pf_to_wgs',
+      cell: info => (
+        <SomaticFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.somatic_pc_to_wgs}
+          pf={info.row.original.somatic_pf_to_wgs}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.freq_to_tooltip')}>{t('variant.headers.freq_to')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
     // Freq. TN
     columnHelper.accessor(row => row, {
       id: 'somatic_pf_tn_wgs',
       cell: info => (
-        <TumorNormalFrequencyCell
+        <SomaticFrequencyCell
           locusId={info.row.original.locus_id}
           pc={info.row.original.somatic_pc_tn_wgs}
           pf={info.row.original.somatic_pf_tn_wgs}
@@ -239,7 +255,22 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
       size: 124,
       minSize: 40,
     }),
-    // @TODO: SQ. (Somatic Quality) is missing in somatic api
+    // SQ
+    columnHelper.accessor(row => row.sq, {
+      id: 'sq',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.sq_tooltip')}>{t('variant.headers.sq')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+    }),
+    // AQ
+    columnHelper.accessor(row => row.aq, {
+      id: 'aq',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.aq_tooltip')}>{t('variant.headers.aq')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+    }),
     // @TODO: Zyg. is missing in somatic api
     // Ratio AD
     columnHelper.accessor(row => row.ad_ratio, {
@@ -334,6 +365,11 @@ const defaultSomaticSNVSettings = createColumnSettings([
     label: 'variant.headers.gnomad_v3_af',
   },
   {
+    id: 'somatic_pf_to_wgs',
+    visible: true,
+    label: 'variant.headers.freq_to',
+  },
+  {
     id: 'somatic_pf_tn_wgs',
     visible: true,
     label: 'variant.headers.freq_tn',
@@ -343,6 +379,18 @@ const defaultSomaticSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.freq_g',
     additionalFields: ['germline_pf_wgs'],
+  },
+  {
+    id: 'sq',
+    visible: true,
+    label: 'variant.headers.sq',
+    additionalFields: ['sq'],
+  },
+  {
+    id: 'aq',
+    visible: true,
+    label: 'variant.headers.aq',
+    additionalFields: ['aq'],
   },
   {
     id: 'ad_ratio',

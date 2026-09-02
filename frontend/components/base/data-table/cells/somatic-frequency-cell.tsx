@@ -4,13 +4,13 @@ import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { toExponentialNotation } from '@/components/lib/number-format';
 
-type NumberCellProps = {
+type SomaticFrequencyCellProps = {
   pc?: number;
   pf?: number;
   locusId?: string;
 };
 
-function TumorNormalFrequencyCell({ pc, pf, locusId }: NumberCellProps) {
+function SomaticFrequencyCell({ pc, pf, locusId }: SomaticFrequencyCellProps) {
   if (pc === undefined || locusId === undefined || pf === undefined) {
     return <EmptyCell />;
   }
@@ -27,4 +27,4 @@ function TumorNormalFrequencyCell({ pc, pf, locusId }: NumberCellProps) {
   );
 }
 
-export default TumorNormalFrequencyCell;
+export default SomaticFrequencyCell;
