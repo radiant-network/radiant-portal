@@ -1737,6 +1737,7 @@
         "frequencies": {
           "title": "Frequencies",
           "affected": "Affected",
+          "to": "Tumor-only",
           "tn": "Tumor-normal",
           "gnomad": "gnomAD"
         },
@@ -1785,6 +1786,8 @@
           "quality_depth": "Quality Depth",
           "allele_depth_alt": "Allele Depth ALT",
           "total_depth_alt_ref": "Total Depth ALT + REF",
+          "sq": "Somatic Quality",
+          "aq": "Systematic Noise (AQ)",
           "genotype_quality": "Genotype Quality",
           "filter": "Filter",
           "pass": "Pass",

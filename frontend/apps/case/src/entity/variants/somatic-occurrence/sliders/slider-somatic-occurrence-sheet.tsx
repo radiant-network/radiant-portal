@@ -278,6 +278,8 @@ export function SomaticOccurrenceSheetContent({
           filter={expandResult.data.filter}
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
+          sq={expandResult.data.sq}
+          aq={expandResult.data.aq}
           locus={expandResult.data.locus}
           has_igv_files={caseEntity.data?.has_igv_files}
           somatic={true}
@@ -323,6 +325,9 @@ export function SomaticOccurrenceSheetContent({
         exon_total={expandResult.data.exon_total}
         rsnumber={expandResult.data.rsnumber}
         hotspot={occurrence.hotspot}
+        somatic_pc_to_wgs={expandResult.data.somatic_pc_to_wgs}
+        somatic_pn_to_wgs={expandResult.data.somatic_pn_to_wgs}
+        somatic_pf_to_wgs={expandResult.data.somatic_pf_to_wgs}
         somatic_pc_tn_wgs={expandResult.data.somatic_pc_tn_wgs}
         somatic_pn_tn_wgs={expandResult.data.somatic_pn_tn_wgs}
         somatic_pf_tn_wgs={expandResult.data.somatic_pf_tn_wgs}
