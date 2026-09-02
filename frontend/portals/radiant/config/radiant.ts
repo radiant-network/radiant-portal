@@ -141,6 +141,18 @@ const somaticSNVAggregations = {
         type: FilterTypes.DIVIDER,
       },
       {
+        key: 'somatic_pf_to_wgs',
+        translation_key: 'somatic_pf_to_wgs',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
         key: 'somatic_pf_tn_wgs',
         translation_key: 'somatic_pf_tn_wgs',
         type: FilterTypes.NUMERICAL,
@@ -278,6 +290,30 @@ const somaticSNVAggregations = {
       {
         key: 'ad_ratio',
         translation_key: 'ad_ratio',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'sq',
+        translation_key: 'sq',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'aq',
+        translation_key: 'aq',
         type: FilterTypes.NUMERICAL,
         defaults: {
           min: 0,
