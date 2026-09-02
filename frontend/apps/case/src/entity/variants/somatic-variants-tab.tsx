@@ -17,13 +17,8 @@ import {
   useVariantSearchParamsEffect,
   VARIANT_SECTION_PARAM,
 } from './hooks/use-variant-search-params';
-import SNVTumorNormalTab from './somatic-occurrence/snv-tumor-normal-tab';
-
-export enum SomaticVariantInterface {
-  SNV_TN = 'SNV_TN',
-  SNV_TO = 'SNV_TO',
-  CNV_TO = 'CNV_TO',
-}
+import SomaticSNVTab from './somatic-occurrence/somatic-snv-tab';
+import { SomaticVariantInterface } from './constants';
 
 /** Value each sub-tab takes in the `variant_section` URL param. */
 const VARIANT_SECTIONS: Record<SomaticVariantInterface, string> = {
@@ -145,8 +140,13 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         selectedTaskId={selectedTaskId}
         onTaskChange={handleTaskChange}
       />
-      {activeInterface == SomaticVariantInterface.SNV_TN && (
-        <SNVTumorNormalTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
+      {(activeInterface === SomaticVariantInterface.SNV_TO || activeInterface === SomaticVariantInterface.SNV_TN) && (
+        <SomaticSNVTab
+          cohort={activeInterface}
+          seqId={seqId}
+          patientSelected={patientSelected}
+          caseEntity={caseEntity}
+        />
       )}
     </div>
   );

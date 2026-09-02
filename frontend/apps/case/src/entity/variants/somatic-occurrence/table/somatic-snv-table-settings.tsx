@@ -35,7 +35,7 @@ type SomaticSNVOccurrenceTableSettingsProps = {
   t: TFunction<string, undefined>;
 };
 
-function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSNVOccurrenceTableSettingsProps) {
+function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -358,4 +358,4 @@ const defaultSomaticSNVSettings = createColumnSettings([
   },
 ]);
 
-export { defaultSomaticSNVSettings, getSomaticSNVTumorNormalColumns };
+export { defaultSomaticSNVSettings, getSomaticSNVColumns };
