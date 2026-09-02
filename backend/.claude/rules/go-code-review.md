@@ -88,7 +88,7 @@ References: [Code Review Comments §Interfaces](https://go.dev/wiki/CodeReviewCo
 - **Comment sentences:** start with the name of the thing and end with a period
   (`// AuthRepository provides ...`).
 - **Package comments:** sit directly above the `package` clause, no blank line. For `package main`,
-  forms like `// Command createuser ...` are the convention (see `cmd/createuser/main.go`).
+  forms like `// Command create-user ...` are the convention (see `cmd/create-user/main.go`).
 
 ## Errors
 
@@ -132,7 +132,7 @@ References: [Code Review Comments §Interfaces](https://go.dev/wiki/CodeReviewCo
 - **Imports:** don't rename except to break a collision (rename the most local/project-specific one).
   Group as stdlib, then third-party (blank line between); `goimports` does this.
 - **Blank import** (`import _ "pkg"`): only in `package main` or tests, for side effects
-  (e.g. the `godotenv/autoload` import in `cmd/createuser`).
+  (e.g. the `godotenv/autoload` import in `cmd/create-user`).
 - **Dot import** (`import . "pkg"`): avoid; only in a test file that can't live in the tested package
   due to a cycle.
 

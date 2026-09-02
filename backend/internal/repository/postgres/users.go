@@ -126,7 +126,7 @@ func (r *UsersRepository) RoleScopes(ctx context.Context, tenantCode string, rol
 
 // personalAccount keeps only the users an administrator manages, excluding the machine-to-machine
 // accounts provisioned from a Keycloak client's service account: those carry no email and no name.
-// Every human path (POST /{tenant}/users, createuser -email) requires an email, so its absence is
+// Every human path (POST /{tenant}/users, create-user -email) requires an email, so its absence is
 // what distinguishes them — the registry has no dedicated flag. It assumes the users alias `u`.
 const personalAccount = "COALESCE(u.email, '') <> ''"
 

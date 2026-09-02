@@ -89,7 +89,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoRoles := postgres.NewRolesRepository(postgresDB)
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
-	// cmd/createuser does. The clients are lazy, so the Keycloak/Ranger settings only have to be
+	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
 	// present in a deployment that actually exposes user administration.
 	userAdmin := service.NewUserAdmin(repoUsers, repoOrganizationsWrite, provisioning.NewAdminDeps(postgresDB, starrocksDB))
 

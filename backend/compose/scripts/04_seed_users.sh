@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # 04_seed_users.sh — provision the demo regular users (alice/bob/wendy) end-to-end
-# across Keycloak + Postgres + Ranger + StarRocks by driving the `cmd/createuser`
+# across Keycloak + Postgres + Ranger + StarRocks by driving the `cmd/create-user`
 # Go tool once per user. Each user is keyed on its Keycloak `sub` (see the
 # "Identity bridge" section of README.md).
 #
@@ -19,7 +19,7 @@
 # All three share USER_PASSWORD (default radiant123!), the password the rest of
 # the demo (README, starrocks-connect.sh) authenticates the JWT users with.
 #
-# cmd/createuser reads all its connection settings from the environment. Unlike
+# cmd/create-user reads all its connection settings from the environment. Unlike
 # docker-compose.yml (which uses the in-container hostnames `starrocks`/`postgres`
 # and the StarRocks TLS cert), this script runs on the host and reaches the stack
 # on its published ports — so it sets the host equivalents below. Every var is
@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-# Run from backend/ so `go run ./cmd/createuser` resolves.
+# Run from backend/ so `go run ./cmd/create-user` resolves.
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 export USER_PASSWORD="${USER_PASSWORD:-radiant123!}"
@@ -67,11 +67,11 @@ export RANGER_URL=http://localhost:6080
 export RANGER_ADMIN_USER=admin
 export RANGER_ADMIN_PASSWORD=rangerR0cks!
 
-go run ./cmd/createuser -email alice@demo.org -first Alice -last Demo \
+go run ./cmd/create-user -email alice@demo.org -first Alice -last Demo \
   -grant tenant_a:ORG_A1:geneticist
 
-go run ./cmd/createuser -email bob@demo.org -first Bob -last Demo \
+go run ./cmd/create-user -email bob@demo.org -first Bob -last Demo \
   -grant tenant_b:ORG_B1:geneticist
 
-go run ./cmd/createuser -email wendy@demo.org -first Wendy -last Demo \
+go run ./cmd/create-user -email wendy@demo.org -first Wendy -last Demo \
   -grant tenant_a:*:geneticist

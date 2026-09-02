@@ -6,7 +6,7 @@
    (StarRocks rejects `--` line comments when piped, so we use C-style comments.)
 
    The regular JWT users (alice/bob/wendy) are NO LONGER created here. They are
-   provisioned by the Go tool `cmd/createuser`, which creates each StarRocks user
+   provisioned by the Go tool `cmd/create-user`, which creates each StarRocks user
    named by its Keycloak `sub` with authentication_jwt and "principal_field":
    "sub" (was preferred_username). This file now only creates the native-auth
    service admin, which is scaffolding, not a regular user.

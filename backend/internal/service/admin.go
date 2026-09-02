@@ -74,7 +74,7 @@ func RangerTenantRole(tenantCode string) string {
 // used as-is for the remaining three systems.
 //
 // grantedBy records audit attribution for the role grants (who performed the provisioning) — the
-// createuser CLI passes "createuser"; the POST /{tenant}/users handler passes the acting admin.
+// create-user CLI passes "create-user"; the POST /{tenant}/users handler passes the acting admin.
 func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, grantedBy string) (string, error) {
 	sub := in.Sub
 	if sub == "" {

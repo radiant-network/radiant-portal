@@ -531,7 +531,7 @@
     {
       "clientId": "radiant-admin-cli",
       "name": "Radiant admin CLI service account",
-      "description": "Service account used by cmd/createuser to manage users via the Admin API",
+      "description": "Service account used by cmd/create-user to manage users via the Admin API",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "radiant-admin-secret",

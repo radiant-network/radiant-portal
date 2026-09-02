@@ -64,7 +64,7 @@ ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
 --
 -- The regular users (alice/bob/wendy) and their grants are NO LONGER seeded
 -- here. They are provisioned end-to-end — Keycloak + Postgres + Ranger +
--- StarRocks — by the Go tool `cmd/createuser` (run it after this script), which
+-- StarRocks — by the Go tool `cmd/create-user` (run it after this script), which
 -- keys them on the Keycloak `sub` (now stored in users.user_id and used as the
 -- StarRocks username / principal_field).
 INSERT INTO public.users (user_id, email, first_name, last_name) VALUES
