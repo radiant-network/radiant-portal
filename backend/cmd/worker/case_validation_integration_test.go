@@ -551,7 +551,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "create_case[0].tasks[0].type_code",
 			},
 		}
@@ -1000,7 +1000,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "create_case[0].tasks[0].type_code",
 			},
 			{
@@ -1125,7 +1125,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
+				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
 				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
