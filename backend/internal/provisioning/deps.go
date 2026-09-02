@@ -1,6 +1,6 @@
 // Package provisioning wires the per-system provisioners service.ProvisionUser orchestrates.
 //
-// It exists as its own package so both cmd/createuser and cmd/api build the same set of
+// It exists as its own package so both cmd/create-user and cmd/api build the same set of
 // dependencies from the same environment variables — a user added through the API is provisioned
 // identically to one added by the CLI. The wiring cannot live in internal/service, which declares
 // the provisioner interfaces and deliberately imports nothing but internal/types.

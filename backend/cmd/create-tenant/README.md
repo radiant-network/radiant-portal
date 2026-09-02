@@ -65,7 +65,7 @@ How the views are built:
 - Nests `<code>_user` under `user_role` so the tenant's members are masking subjects.
 
 Role *membership* is not managed here — it's owned by the user-provisioning flow
-(`cmd/createuser`). `create-tenant` only creates the empty role, the policies, and the
+(`cmd/create-user`). `create-tenant` only creates the empty role, the policies, and the
 role nesting.
 
 ## Configuration

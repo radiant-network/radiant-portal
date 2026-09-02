@@ -35,7 +35,7 @@ auth and work with any client.
 The scripts now seed only the **scaffolding** (tenants, orgs, patients, role &
 action definitions, Ranger role hierarchy + policies, StarRocks views and the
 service admin). The **regular users** alice/bob/wendy are created end-to-end by
-`04_seed_users.sh`, which drives the Go tool `cmd/createuser` once per user to
+`04_seed_users.sh`, which drives the Go tool `cmd/create-user` once per user to
 provision each across Keycloak + Postgres + Ranger + StarRocks keyed on the
 Keycloak `sub` (see "Identity bridge" below).
 
@@ -67,7 +67,7 @@ All steps are idempotent; re-running converges to the same state. To provision a
 single ad-hoc user instead of the demo set, call the tool directly (from `backend/`):
 
 ```bash
-go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
+go run ./cmd/create-user -email carol@demo.org -first Carol -last Demo \
     -grant tenant_a:ORG_A1:geneticist
 ```
 
@@ -77,7 +77,7 @@ StarRocks are provisioned. Useful against a deployed environment, where the
 identity is not yours to create:
 
 ```bash
-go run ./cmd/createuser -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
+go run ./cmd/create-user -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
     -grant tenant_a:ORG_A1:geneticist
 ```
 
@@ -118,7 +118,7 @@ radiant_jdbc (Postgres federation)
   users authenticate with `"principal_field": "sub"`, so the StarRocks username,
   `users.user_id`, and the Ranger user name are all the same `sub` — never the
   email (StarRocks usernames can't contain `@`). The mask/filter extract the
-  login from `current_user()` (`'<sub>'@'%'`). `cmd/createuser` writes the sub to
+  login from `current_user()` (`'<sub>'@'%'`). `cmd/create-user` writes the sub to
   all three systems at provisioning time.
 - **`can_read_pii` column:** doubles as a user-facing flag — `1` = this row is
   visible to me, `0` = masked. (For admins it reads `0` while they still see

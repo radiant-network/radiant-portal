@@ -1,7 +1,7 @@
-// Command createuser provisions a regular (non-admin) user end-to-end across
+// Command create-user provisions a regular (non-admin) user end-to-end across
 // Keycloak, Postgres, Ranger, and StarRocks, keyed on the Keycloak `sub`.
 //
-//	go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
+//	go run ./cmd/create-user -email carol@demo.org -first Carol -last Demo \
 //	    -grant tenant_a:ORG_A1:geneticist -grant tenant_b:*:geneticist
 //
 // On create, the email is sent as the Keycloak username verbatim — the CLI never
@@ -13,7 +13,7 @@
 // pass its `sub` instead of an email to provision Postgres, Ranger and StarRocks
 // only — Keycloak is left untouched and no password is needed:
 //
-//	go run ./cmd/createuser -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
+//	go run ./cmd/create-user -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
 //	    -grant radiant:*:geneticist
 //
 // -email / -first / -last remain accepted alongside -sub as Postgres attributes;
@@ -38,7 +38,7 @@ import (
 )
 
 // grantedBy is the audit attribution recorded on role grants made by this CLI.
-const grantedBy = "createuser"
+const grantedBy = "create-user"
 
 // grantList collects repeated -grant tenant:org:role flags.
 type grantList []types.Grant
@@ -67,7 +67,7 @@ func main() {
 	flag.Parse()
 
 	if *email == "" && *sub == "" {
-		log.Fatal("createuser: one of -email (create in Keycloak) or -sub (already in Keycloak) is required")
+		log.Fatal("create-user: one of -email (create in Keycloak) or -sub (already in Keycloak) is required")
 	}
 
 	// No Keycloak account is created in -sub mode, so there is no password to set —
@@ -76,13 +76,13 @@ func main() {
 	if *sub == "" {
 		var err error
 		if password, err = resolvePassword(*prompt); err != nil {
-			log.Fatalf("createuser: %v", err)
+			log.Fatalf("create-user: %v", err)
 		}
 	}
 
 	deps, err := buildDeps()
 	if err != nil {
-		log.Fatalf("createuser: %v", err)
+		log.Fatalf("create-user: %v", err)
 	}
 
 	// New users are created with the email as their Keycloak username; existing
@@ -100,7 +100,7 @@ func main() {
 	ctx := context.Background()
 	provisioned, err := service.ProvisionUser(ctx, deps, in, grantedBy)
 	if err != nil {
-		log.Fatalf("createuser: provision %q: %v", target, err)
+		log.Fatalf("create-user: provision %q: %v", target, err)
 	}
 	log.Printf("provisioned %s (sub=%s) with %d grant(s)", target, provisioned, len(in.Grants))
 }

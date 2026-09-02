@@ -46,10 +46,10 @@ RANGER_USER = os.environ.get("RANGER_ADMIN_USER", "admin")
 RANGER_PASS = os.environ.get("RANGER_ADMIN_PASSWORD", "rangerR0cks!")
 SERVICE = "starrocks"
 
-# Regular users are added to these tenant roles by the Go tool `cmd/createuser`
+# Regular users are added to these tenant roles by the Go tool `cmd/create-user`
 # (keyed on the Keycloak sub), NOT here. This script only needs the role NAMES to
 # exist and the admin wired up. Tenant roles are created empty + create-if-missing
-# so a re-run never wipes the members cmd/createuser added.
+# so a re-run never wipes the members cmd/create-user added.
 TENANT_ROLES = ["tenant_a_user", "tenant_b_user"]
 ADMINS = ["svc_admin_api"]
 
@@ -102,7 +102,7 @@ def upsert_role(name, users=None, sub_roles=None):
 
 
 # --- tenant roles: create empty only if missing -----------------------------
-# cmd/createuser owns tenant-role membership (it adds each user's sub). So here we
+# cmd/create-user owns tenant-role membership (it adds each user's sub). So here we
 # only create the role when it's absent; if it already exists we leave its member
 # list untouched, otherwise a re-run of this script would wipe those members.
 def ensure_role_if_missing(name):
@@ -179,7 +179,7 @@ def main():
         ensure_user(login)
 
     print("\nRanger roles:")
-    # Tenant roles: create empty if missing; cmd/createuser fills them per user.
+    # Tenant roles: create empty if missing; cmd/create-user fills them per user.
     for role in TENANT_ROLES:
         ensure_role_if_missing(role)
     upsert_role("admin_role", users=ADMINS)

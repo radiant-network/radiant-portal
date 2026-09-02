@@ -34,7 +34,7 @@ password grant needs it. What follows from that:
 - **Keycloak counts every connection as a login attempt.** A client with a stale saved password
   reconnecting in a loop can trip brute-force lockout. Tune that in Keycloak's realm policy.
 - **ROPC cannot satisfy MFA.** A realm requiring OTP for these users rejects every login
-  (`invalid_grant`) — the same constraint that pushed `cmd/createuser`'s admin client onto
+  (`invalid_grant`) — the same constraint that pushed `cmd/create-user`'s admin client onto
   `client_credentials`.
 - Prefer a **public** Keycloak client (no secret deployed) with direct access grants enabled.
   Do not reuse the portal's confidential client.
