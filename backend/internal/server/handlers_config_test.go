@@ -13,7 +13,6 @@ import (
 func Test_ClientConfigFromEnv_Defaults(t *testing.T) {
 	t.Setenv(keycloakHostEnv, "http://keycloak:8081")
 	t.Setenv(keycloakRealmEnv, "radiant")
-	t.Setenv(keycloakPublicURLEnv, "")
 	t.Setenv(keycloakCliClientIDEnv, "")
 
 	cfg := ClientConfigFromEnv()
@@ -26,9 +25,8 @@ func Test_ClientConfigFromEnv_Defaults(t *testing.T) {
 	}}, cfg)
 }
 
-func Test_ClientConfigFromEnv_PublicURLOverridesHost(t *testing.T) {
-	t.Setenv(keycloakHostEnv, "http://keycloak.svc:8080")
-	t.Setenv(keycloakPublicURLEnv, "https://auth.example.org")
+func Test_ClientConfigFromEnv_CustomClientID(t *testing.T) {
+	t.Setenv(keycloakHostEnv, "https://auth.example.org")
 	t.Setenv(keycloakRealmEnv, "qlin")
 	t.Setenv(keycloakCliClientIDEnv, "custom-cli")
 
@@ -41,7 +39,6 @@ func Test_ClientConfigFromEnv_PublicURLOverridesHost(t *testing.T) {
 
 func Test_ClientConfigFromEnv_MissingEnvGivesEmptyValues(t *testing.T) {
 	t.Setenv(keycloakHostEnv, "")
-	t.Setenv(keycloakPublicURLEnv, "")
 	t.Setenv(keycloakRealmEnv, "")
 
 	cfg := ClientConfigFromEnv()

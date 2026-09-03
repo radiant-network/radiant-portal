@@ -10,20 +10,18 @@ import (
 
 const (
 	keycloakHostEnv        = "KEYCLOAK_HOST"
-	keycloakPublicURLEnv   = "KEYCLOAK_PUBLIC_URL"
 	keycloakRealmEnv       = "KEYCLOAK_REALM"
 	keycloakCliClientIDEnv = "KEYCLOAK_CLI_CLIENT_ID"
 	defaultCliClientID     = "radiant-client-cli"
 )
 
-// ClientConfigFromEnv reads the client configuration once at startup. KEYCLOAK_PUBLIC_URL
-// exists for deployments where KEYCLOAK_HOST is an in-cluster address the end user's
-// machine cannot reach.
+// ClientConfigFromEnv reads the client configuration once at startup. KEYCLOAK_HOST must be
+// reachable from the end user's machine, which holds for every current deployment.
 func ClientConfigFromEnv() types.ClientConfig {
 	return types.ClientConfig{
 		Auth: types.ClientAuthConfig{
 			Method:      types.ClientAuthMethodDevice,
-			KeycloakURL: utils.GetEnvOrDefault(keycloakPublicURLEnv, utils.GetEnvOrDefault(keycloakHostEnv, "")),
+			KeycloakURL: utils.GetEnvOrDefault(keycloakHostEnv, ""),
 			Realm:       utils.GetEnvOrDefault(keycloakRealmEnv, ""),
 			ClientID:    utils.GetEnvOrDefault(keycloakCliClientIDEnv, defaultCliClientID),
 		},
