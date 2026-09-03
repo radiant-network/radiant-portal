@@ -273,6 +273,8 @@ export function SomaticOccurrenceSheetContent({
         <SliderOccurrenceDetailsCard
           caseId={caseId}
           seqId={occurrence.seq_id}
+          start={expandResult.data.start}
+          chromosome={expandResult.data.chromosome}
           quality_depth={expandResult.data.qd}
           relationshipToProband={patient?.relationship_to_proband}
           filter={expandResult.data.filter}
