@@ -144,7 +144,7 @@ All build logic lives in `backend/Makefile`; the workflow only calls make target
   	go test ./cmd/$(CLI_NAME)/... ./internal/cli/... ./internal/client/... -count=1
   ```
   `--version` prints `v1.4.0 (commit abc1234, built 2026-09-02T...)` on a tag build, `dev (commit none, built ...)` with no git. Fix `clean` to remove `bin/ dist/`.
-- `backend/toolbox.Dockerfile`: build + copy `radiant-client` (fourth binary), pass `--build-arg VERSION` through to ldflags so the image binary reports the tag too.
+- `backend/toolbox.Dockerfile`: untouched. The toolbox image bundles server-side admin CLIs driven by env vars; `radiant-client` is an end-user tool shipped as release binaries only (decided during review).
 - `.github/workflows/test-and-release-cli.yml` (repo root), two jobs:
   ```yaml
   name: Test and Release radiant-client

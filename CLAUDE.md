@@ -126,5 +126,6 @@ See `frontend/CLAUDE.md` for full details.
 ### GitHub Workflows
 
 - `backend.yml` — Backend CI (test + build)
+- `test-and-release-cli.yml` — On `v*.*.*` tags: `radiant-client` tests, then `make -C backend build-cli-all` and the binaries attached to the GitHub release
 - `build_and_push.yml` — Docker image build and registry push (multi-portal)
 - `storybook.yml` — Storybook build and GitHub Pages deployment
