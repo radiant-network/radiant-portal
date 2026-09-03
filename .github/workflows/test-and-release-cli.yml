@@ -1,0 +1,39 @@
+name: Test and release radiant-client
+
+# Same v* tags as the docker images (build_and_push.yml). All build logic lives in
+# backend/Makefile; this workflow only calls it and attaches dist/* to the GitHub release.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: make -C backend test-cli
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # git describe needs the tags
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: make -C backend build-cli-all
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: backend/dist/*
+          generate_release_notes: true
