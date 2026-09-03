@@ -42,12 +42,16 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           </TooltipTrigger>
           <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
         </Tooltip>,
-        <Tooltip key="status">
-          <TooltipTrigger>
-            <StatusBadge className="px-3 py-2" status={(data?.status_code as Status) || 'unknown'} />
-          </TooltipTrigger>
-          <TooltipContent>{t(`case_entity.header.status_tooltip`)}</TooltipContent>
-        </Tooltip>,
+        ...(data?.status_code
+          ? [
+              <Tooltip key="status">
+                <TooltipTrigger>
+                  <StatusBadge className="px-3 py-2" status={data.status_code as Status} />
+                </TooltipTrigger>
+                <TooltipContent>{t(`case_entity.header.status_tooltip`)}</TooltipContent>
+              </Tooltip>,
+            ]
+          : []),
       ]}
     />
   );

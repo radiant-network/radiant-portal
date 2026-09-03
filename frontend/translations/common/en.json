@@ -1090,13 +1090,16 @@
       "germline_family": "Family germline"
     },
     "status": {
-      "completed": "Completed",
-      "draft": "Draft",
+      "completed": "Closed",
       "in_progress": "In Progress",
-      "incomplete": "Incomplete",
-      "revoke": "Revoke",
-      "submitted": "Submitted",
-      "unknown": "Unknown"
+      "in_review": "In Review",
+      "inconclusive": "Inconclusive",
+      "processing": "Processing",
+      "reopened": "Reopened",
+      "resolved": "Resolved",
+      "revoked": "Cancelled",
+      "submitted": "Pending",
+      "unresolved": "Unresolved"
     },
     "case": {
       "title": "{{total}} Cases",

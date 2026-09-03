@@ -33,7 +33,7 @@ capture_kit = ""
 run_alias = ""
 run_date = "2023-01-01T00:00:00Z"
 run_name = ""
-status_code = "draft"
+status_code = "submitted"
 
 [[cases]]
 submitter_case_id = "CASE-12345"

@@ -95,14 +95,14 @@ func Test_SearchCases(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CaseStatusCodeField.GetAlias(),
-				Value:     []interface{}{"incomplete"},
+				Value:     []interface{}{"submitted"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), *count)
-		assert.Len(t, *cases, 2)
+		assert.Equal(t, int64(4), *count)
+		assert.Len(t, *cases, 4)
 	})
 }
 
@@ -445,7 +445,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		filters, err := repo.GetCasesFilters(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, len((*filters).Status), 7)
+		assert.Equal(t, len((*filters).Status), 10)
 		assert.Equal(t, len((*filters).Priority), 4)
 		assert.Equal(t, len((*filters).AnalysisCatalog), 4)
 		assert.Equal(t, len((*filters).Project), 2)

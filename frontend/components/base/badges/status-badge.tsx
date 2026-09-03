@@ -1,9 +1,31 @@
-import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwIcon } from 'lucide-react';
+import {
+  Check,
+  CircleCheck,
+  CircleDashed,
+  CircleX,
+  Eye,
+  FileQuestion,
+  Hourglass,
+  LoaderCircle,
+  type LucideIcon,
+  RefreshCcwIcon,
+  RotateCcw,
+} from 'lucide-react';
 
 import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-export type Status = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';
+export type Status =
+  | 'submitted'
+  | 'processing'
+  | 'in_progress'
+  | 'in_review'
+  | 'completed'
+  | 'resolved'
+  | 'unresolved'
+  | 'inconclusive'
+  | 'reopened'
+  | 'revoked';
 
 type StatusBadgeProps = {
   status: Status;
@@ -11,37 +33,41 @@ type StatusBadgeProps = {
 };
 
 const colors: Record<string, BadgeProps['variant']> = {
-  unknown: 'outline',
-  draft: 'neutral',
-  submitted: 'yellow',
-  active: 'blue',
+  submitted: 'outline',
+  processing: 'yellow',
   in_progress: 'blue',
-  revoke: 'red',
+  in_review: 'cyan',
   completed: 'green',
-  incomplete: 'orange',
+  resolved: 'green',
+  unresolved: 'lime',
+  inconclusive: 'lime',
+  reopened: 'violet',
+  revoked: 'neutral',
 };
 
-const icons = {
-  unknown: FileQuestion,
-  draft: Pen,
+const icons: Record<string, LucideIcon> = {
   submitted: Hourglass,
-  active: RefreshCcwIcon,
+  processing: LoaderCircle,
   in_progress: RefreshCcwIcon,
-  revoke: CircleX,
+  in_review: Eye,
   completed: Check,
-  incomplete: CircleDashed,
+  resolved: CircleCheck,
+  unresolved: CircleDashed,
+  inconclusive: FileQuestion,
+  reopened: RotateCcw,
+  revoked: CircleX,
 };
 
 function StatusBadge({ status, className }: StatusBadgeProps) {
   const { t } = useI18n();
 
-  const color = colors[status];
-  const Icon = icons[status];
+  const color = colors[status] ?? 'neutral';
+  const Icon = icons[status] ?? FileQuestion;
 
   return (
-    <Badge variant={color ?? 'neutral'} className={className}>
+    <Badge variant={color} className={className}>
       <Icon />
-      {t(`case_exploration.status.${status}`)}
+      {t(`case_exploration.status.${status}`, status)}
     </Badge>
   );
 }
