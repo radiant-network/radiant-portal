@@ -1,0 +1,10 @@
+import{a as l,j as r,Y as t,Z as c,_ as d}from"./iframe-CsmmCDil.js";import{B as m}from"./badge-CuqrEnJU.js";import{u}from"./i18n-CivhJ0zv.js";import{R as p}from"./rotate-ccw-ClNdDRbm.js";import{F as n,C as v,R as g,H as _}from"./refresh-ccw-D6euhKiu.js";import{C as f}from"./check-Bvaswsz_.js";const y=[["path",{d:"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",key:"1nclc0"}],["circle",{cx:"12",cy:"12",r:"3",key:"1v7zrd"}]],C=l("eye",y),k={submitted:"outline",processing:"yellow",in_progress:"blue",in_review:"cyan",completed:"green",resolved:"green",unresolved:"lime",inconclusive:"lime",reopened:"violet",revoked:"neutral"},w={submitted:_,processing:d,in_progress:g,in_review:C,completed:f,resolved:c,unresolved:v,inconclusive:n,reopened:p,revoked:t};function h({status:e,className:o}){const{t:s}=u(),i=k[e]??"neutral",a=w[e]??n;return r.jsxs(m,{variant:i,className:o,children:[r.jsx(a,{}),s(`case_exploration.status.${e}`,e)]})}h.__docgenInfo={description:"",methods:[],displayName:"StatusBadge",props:{status:{required:!0,tsType:{name:"union",raw:`| 'submitted'
+| 'processing'
+| 'in_progress'
+| 'in_review'
+| 'completed'
+| 'resolved'
+| 'unresolved'
+| 'inconclusive'
+| 'reopened'
+| 'revoked'`,elements:[{name:"literal",value:"'submitted'"},{name:"literal",value:"'processing'"},{name:"literal",value:"'in_progress'"},{name:"literal",value:"'in_review'"},{name:"literal",value:"'completed'"},{name:"literal",value:"'resolved'"},{name:"literal",value:"'unresolved'"},{name:"literal",value:"'inconclusive'"},{name:"literal",value:"'reopened'"},{name:"literal",value:"'revoked'"}]},description:""},className:{required:!1,tsType:{name:"string"},description:""}}};export{h as S};
