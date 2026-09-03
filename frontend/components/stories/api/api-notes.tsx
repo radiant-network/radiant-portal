@@ -1,6 +1,6 @@
 import { HttpResponse } from 'msw';
 
-export const notesListApi = `api/notes/:case_id/:seq_id/:task_id/:occurrence_id`;
+export const notesListApi = `api/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id`;
 
 export function getHTTPMockNotesList() {
   return HttpResponse.json([

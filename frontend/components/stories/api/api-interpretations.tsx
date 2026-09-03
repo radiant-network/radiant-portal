@@ -1,6 +1,6 @@
 import { HttpResponse } from 'msw';
 
-export const interpretationsGermlineApi = `api/interpretations/v2/germline/:case_id/:seq_id/:locus_id/:transcript_id`;
+export const interpretationsGermlineApi = `api/:tenant/interpretations/v2/germline/:case_id/:seq_id/:locus_id/:transcript_id`;
 
 export async function httpInterpretationGermlineOccurrenceResponse() {
   return HttpResponse.json({
