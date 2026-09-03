@@ -1125,7 +1125,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
+				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv, zip].",
 				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{

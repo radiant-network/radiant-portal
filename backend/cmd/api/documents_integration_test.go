@@ -216,7 +216,8 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
 			{"key":"ssnv", "label":"Somatic SNV"}, 
 			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
-			{"key":"ssv", "label":"Somatic SV"}
+			{"key":"ssv", "label":"Somatic SV"},
+			{"key":"zip", "label":"Zip Archive"}
 		], 
 		"format_code":[
 			{"key":"bed", "label":"BED File"}, 
