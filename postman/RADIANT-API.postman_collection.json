@@ -7,6 +7,31 @@
   },
   "item": [
     {
+      "name": "Config",
+      "item": [
+        {
+          "name": "Get client config",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/config",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "config"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Auth",
       "item": [
         {

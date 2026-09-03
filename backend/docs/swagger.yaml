@@ -776,6 +776,36 @@ components:
       - count
       - list
       type: object
+    ClientAuthConfig:
+      description: Public Keycloak settings for the OAuth2 device authorization grant.
+      properties:
+        client_id:
+          example: radiant-client-cli
+          type: string
+        keycloak_url:
+          example: https://auth.example.org
+          type: string
+        method:
+          example: device
+          type: string
+        realm:
+          example: radiant
+          type: string
+      required:
+      - client_id
+      - keycloak_url
+      - method
+      - realm
+      type: object
+    ClientConfig:
+      description: Public configuration a command-line client needs before any authenticated
+        call.
+      properties:
+        auth:
+          $ref: '#/components/schemas/ClientAuthConfig'
+      required:
+      - auth
+      type: object
     ClinvarRCV:
       description: ClinvarRCV represents a Reference ClinVar record - data aggregated
         by variant-condition pair
@@ -9913,6 +9943,21 @@ paths:
       summary: Get the caller's effective authorization
       tags:
       - auth
+  /config:
+    get:
+      description: Settings a command-line client needs to authenticate (Keycloak
+        device flow). Public, no token required.
+      operationId: getClientConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientConfig'
+          description: OK
+      summary: Get public client configuration
+      tags:
+      - config
   /status:
     get:
       description: Returns the current status of the API

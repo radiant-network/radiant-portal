@@ -85,6 +85,7 @@ make migrate       # Create new migration file
 
 Route groups:
 - `GET /status` — health check (public, no auth)
+- `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
 
@@ -178,6 +179,8 @@ Copy `.env.template` → `.env`. Key variables:
 | `API_PORT` | API listen port | 8090 |
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
+| `KEYCLOAK_CLI_CLIENT_ID` | Public Keycloak client (device authorization grant, no secret) advertised by `GET /config` to CLI tools | radiant-client-cli |
+| `KEYCLOAK_PUBLIC_URL` | Keycloak base URL advertised by `GET /config` when `KEYCLOAK_HOST` is an in-cluster address unreachable from a user's machine. Unset = `KEYCLOAK_HOST` | — |
 | `KEYCLOAK_ADMIN_CLIENT_ID/SECRET` | Service-account client (needs realm-management roles) the Keycloak **admin** client authenticates with via client_credentials. Required by any process that provisions users — `cmd/create-user`, `cmd/create-tenant`, and `POST /{tenant}/users` in the API. Read lazily, so a deployment that never provisions is unaffected. | — |
 | `KEYCLOAK_DEFAULT_GROUP` | Keycloak group every newly provisioned user joins (all paths go through `service.ProvisionUser`). Empty = no group assignment; a configured group that does not exist is an error, not a silent skip. | — (none) |
 | `RANGER_URL/ADMIN_USER/ADMIN_PASSWORD` | Ranger admin API used to create the user and add them to the tenant's `<code>_user` role during provisioning, and to drop that membership again on `DELETE /{tenant}/users/{user_id}`. Same lazy-read note as the Keycloak admin credentials. | — |

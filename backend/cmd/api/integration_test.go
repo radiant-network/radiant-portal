@@ -37,6 +37,10 @@ func Test_SecureRoutes(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 200, resp.StatusCode)
 
+		resp, err = http.Get(fmt.Sprintf("http://localhost:%d/config", randomPort))
+		assert.NoError(t, err)
+		assert.Equal(t, 200, resp.StatusCode)
+
 		// Validate all the other routes are private
 
 		// GET requests. Tenant-scoped routes now live under /{tenant}/; a missing token is

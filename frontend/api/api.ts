@@ -1492,6 +1492,50 @@ export interface CasesSearchResponse {
     'list': Array<CaseResult>;
 }
 /**
+ * Public Keycloak settings for the OAuth2 device authorization grant.
+ * @export
+ * @interface ClientAuthConfig
+ */
+export interface ClientAuthConfig {
+    /**
+     * 
+     * @type {string}
+     * @memberof ClientAuthConfig
+     */
+    'client_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClientAuthConfig
+     */
+    'keycloak_url': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClientAuthConfig
+     */
+    'method': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClientAuthConfig
+     */
+    'realm': string;
+}
+/**
+ * Public configuration a command-line client needs before any authenticated call.
+ * @export
+ * @interface ClientConfig
+ */
+export interface ClientConfig {
+    /**
+     * 
+     * @type {ClientAuthConfig}
+     * @memberof ClientConfig
+     */
+    'auth': ClientAuthConfig;
+}
+/**
  * ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
  * @export
  * @interface ClinvarRCV
@@ -8196,6 +8240,107 @@ export const CaseTasksWithOccurrencesDataTypeEnum = {
     SomaticCnv: 'somatic_cnv'
 } as const;
 export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
+
+
+/**
+ * ConfigApi - axios parameter creator
+ * @export
+ */
+export const ConfigApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Settings a command-line client needs to authenticate (Keycloak device flow). Public, no token required.
+         * @summary Get public client configuration
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getClientConfig: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/config`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ConfigApi - functional programming interface
+ * @export
+ */
+export const ConfigApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ConfigApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Settings a command-line client needs to authenticate (Keycloak device flow). Public, no token required.
+         * @summary Get public client configuration
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getClientConfig(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClientConfig>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getClientConfig(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ConfigApi.getClientConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ConfigApi - factory interface
+ * @export
+ */
+export const ConfigApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ConfigApiFp(configuration)
+    return {
+        /**
+         * Settings a command-line client needs to authenticate (Keycloak device flow). Public, no token required.
+         * @summary Get public client configuration
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getClientConfig(options?: RawAxiosRequestConfig): AxiosPromise<ClientConfig> {
+            return localVarFp.getClientConfig(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ConfigApi - object-oriented interface
+ * @export
+ * @class ConfigApi
+ * @extends {BaseAPI}
+ */
+export class ConfigApi extends BaseAPI {
+    /**
+     * Settings a command-line client needs to authenticate (Keycloak device flow). Public, no token required.
+     * @summary Get public client configuration
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConfigApi
+     */
+    public getClientConfig(options?: RawAxiosRequestConfig) {
+        return ConfigApiFp(this.configuration).getClientConfig(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
 
 
 /**
