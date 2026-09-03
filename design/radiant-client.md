@@ -31,12 +31,12 @@ Files (backend = `services/radiant-portal/backend`):
    }
    ```
    Manifest columns are the CLI's own knowledge (required `tenant`, `document_id`; optional `name`, `size`), not served by the API.
-2. `internal/server/handlers_config.go`: `ClientConfigFromEnv() types.ClientConfig` reading `KEYCLOAK_PUBLIC_URL` (fallback `KEYCLOAK_HOST`, same base-URL format gin-keycloak uses in `internal/authorization/keycloak.go`), `KEYCLOAK_REALM`, `KEYCLOAK_CLI_CLIENT_ID` (default `radiant-client-cli`); `GetClientConfigHandler(cfg types.ClientConfig) gin.HandlerFunc` with swaggo block (`@Tags config`, `@Router /config [get]`, no `@Security`), mirroring `StatusHandler` in `internal/server/handlers.go:16-32`. Use `utils.GetEnvOrDefault` (`internal/utils/env.go`).
+2. `internal/server/handlers_config.go`: `ClientConfigFromEnv() types.ClientConfig` reading `KEYCLOAK_HOST` (same base-URL format gin-keycloak uses in `internal/authorization/keycloak.go`; a separate public-URL variable was dropped in review, every deployment exposes the public URL there), `KEYCLOAK_REALM`, `KEYCLOAK_CLI_CLIENT_ID` (default `radiant-client-cli`); `GetClientConfigHandler(cfg types.ClientConfig) gin.HandlerFunc` with swaggo block (`@Tags config`, `@Router /config [get]`, no `@Security`), mirroring `StatusHandler` in `internal/server/handlers.go:16-32`. Use `utils.GetEnvOrDefault` (`internal/utils/env.go`).
    Tests `handlers_config_test.go`: `Test_ClientConfigFromEnv_Defaults`, `Test_ClientConfigFromEnv_PublicURLOverridesHost`, `Test_GetClientConfigHandler_Success` (`assert.JSONEq`).
 3. `cmd/api/main.go`: register `r.GET("/config", ...)` next to `/status` (line ~105), outside `privateRoutes`. Route audit test only scans `/:tenant` routes, no registry change. Add `/config` to the no-auth check in `cmd/api/integration_test.go` beside the `/status` case (200 without token).
 4. `GET /:tenant/documents/:id/download_url` stays as is (`{url, expires_at}`). Team feedback: size comes from `Content-Length` and the name from the manifest or the URL, so no enrichment, and `hash` is not needed. `/config` is the only backend change.
 5. `make doc` then root `make generate-client-typescript` (commit regenerated `docs/swagger.*` + `frontend/api`). Postman: add `Config > Get client config` to `postman/RADIANT-API.postman_collection.json`.
-6. `backend/CLAUDE.md`: add `/config` to public routes, `KEYCLOAK_CLI_CLIENT_ID` / `KEYCLOAK_PUBLIC_URL` to config table, `cmd/radiant-client` + `internal/cli` to layout. Also fix the stale `GET /metrics` claim while there (verified absent).
+6. `backend/CLAUDE.md`: add `/config` to public routes, `KEYCLOAK_CLI_CLIENT_ID` to config table, `cmd/radiant-client` + `internal/cli` to layout. Also fix the stale `GET /metrics` claim while there (verified absent).
 
 ## Part B: CLI
 
@@ -224,7 +224,7 @@ QA realm is `qlin` (not `radiant`), managed 100% by the terraform keycloak provi
    }
    ```
    Optional realm-level tuning if defaults bite: `keycloak_realm.qlin` `oauth2_device_code_lifespan` (default 600s) / `oauth2_device_polling_interval` (default 5s).
-2. `kubernetes-manifests/apps/radiant-api/deployment.yaml` `env:` block (`:98-182`): add `KEYCLOAK_CLI_CLIENT_ID: radiant-client-cli` (explicit, even though it is the code default). `KEYCLOAK_HOST` is already the public `https://auth.dev.qlin.aws.sante.quebec`, so no `KEYCLOAK_PUBLIC_URL` in QA. `S3_PRESIGNED_URL_EXPIRE` unset there (60m default), fine.
+2. `kubernetes-manifests/apps/radiant-api/deployment.yaml` `env:` block (`:98-182`): add `KEYCLOAK_CLI_CLIENT_ID: radiant-client-cli` (explicit, even though it is the code default). `KEYCLOAK_HOST` is already the public `https://auth.dev.qlin.aws.sante.quebec`. `S3_PRESIGNED_URL_EXPIRE` unset there (60m default), fine.
 3. Flux reconciles both within minutes after merge to `main`; no manual apply. Commit style there: `feat: SJRA-xxxx <desc>`.
 4. Check IAM: `terraform/radiant_api/policies/radiant-api.json` grants `s3:GetObject` only on nextflow buckets; presign of a document in another bucket would sign but 403 at download. Verify document URLs point to covered buckets.
 5. QA end-to-end: `radiant-client configure -u https://api.dev.qlin.aws.sante.quebec`, browser on `https://auth.dev.qlin.aws.sante.quebec/realms/qlin/device`, user needs `can_download_file` on the QA tenant. VPN required (internal ALB).
