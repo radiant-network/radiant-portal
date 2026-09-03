@@ -4,7 +4,9 @@ package style
 
 import (
 	"io"
+	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/term"
@@ -50,9 +52,28 @@ func (p Palette) Red(s string) string       { return p.wrap(red, s) }
 func (p Palette) Green(s string) string     { return p.wrap(green, s) }
 func (p Palette) Yellow(s string) string    { return p.wrap(yellow, s) }
 func (p Palette) Cyan(s string) string      { return p.wrap(cyan, s) }
-func (p Palette) URL(s string) string       { return p.wrap(cyan+underline, s) }
+func (p Palette) URL(s string) string       { return p.wrap(cyan+underline, p.Link(s, s)) }
 func (p Palette) Code(s string) string      { return p.wrap(bold+yellow, s) }
 func (p Palette) Highlight(s string) string { return p.wrap(bold+cyan, s) }
+
+// Link makes text clickable with an OSC 8 hyperlink (Ctrl/Cmd-click in modern terminals).
+// Terminals without OSC 8 support show the plain text. Disabled together with colors.
+func (p Palette) Link(text, target string) string {
+	if !p.Enabled || text == "" || target == "" {
+		return text
+	}
+	return "\x1b]8;;" + target + "\x1b\\" + text + "\x1b]8;;\x1b\\"
+}
+
+// Path renders a local directory or file as a clickable file:// link opening the OS file manager.
+func (p Palette) Path(path string) string {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return p.Bold(path)
+	}
+	u := url.URL{Scheme: "file", Path: "/" + strings.TrimPrefix(filepath.ToSlash(abs), "/")}
+	return p.Bold(p.Link(path, u.String()))
+}
 
 // UsageTemplate colors the section headings of a cobra usage template. Command names are
 // colored through the `cmdname` template function (see TemplateFuncs).

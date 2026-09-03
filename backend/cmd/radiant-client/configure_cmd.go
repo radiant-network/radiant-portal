@@ -58,7 +58,7 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 				return err
 			}
 			p := style.For(cmd.OutOrStdout())
-			prompt.Printf(cmd.OutOrStdout(), "Configuration saved to %s\nAuthentication: %s flow on %s (realm %s, client %s)\n", p.Bold(path), cfg.Auth.Method, p.URL(cfg.Auth.KeycloakURL), cfg.Auth.Realm, cfg.Auth.ClientID)
+			prompt.Printf(cmd.OutOrStdout(), "Configuration saved to %s\nAuthentication: %s flow on %s (realm %s, client %s)\n", p.Path(path), cfg.Auth.Method, p.URL(cfg.Auth.KeycloakURL), cfg.Auth.Realm, cfg.Auth.ClientID)
 			return nil
 		},
 	}

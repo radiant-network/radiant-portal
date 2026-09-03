@@ -144,7 +144,7 @@ func Test_Download_HappyPathWithYes(t *testing.T) {
 	assert.Contains(t, out, "Manifest: 2 documents")
 	assert.Contains(t, out, "Size to download: 13 B (2 files, 1 without size in the manifest)")
 	assert.Contains(t, out, "not found:  missing.bin")
-	assert.Contains(t, out, "Total downloaded files: 1 (resumed 0, skipped 0, failed 0) located here: "+outDir)
+	assert.Contains(t, out, "Total downloaded files: 1 (resumed 0, skipped 0, failed 0)\nlocated here: "+outDir)
 	got, err := os.ReadFile(filepath.Join(outDir, "420010.cnv.vcf.gz"))
 	require.NoError(t, err)
 	assert.Equal(t, payload, got)

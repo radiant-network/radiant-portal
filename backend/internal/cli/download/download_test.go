@@ -70,6 +70,38 @@ func Test_Run_NameFromURLWhenMissing(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func Test_Run_SameDerivedNameSecondIgnored(t *testing.T) {
+	srv := fileServer(t, nil)
+	dir := t.TempDir()
+	items := []Item{
+		{ID: "900", Presign: presign(srv.URL+"/run1/420010.cram", nil)},
+		{ID: "904", Presign: presign(srv.URL+"/run2/420010.cram", nil)},
+	}
+	opts := testOpts(dir)
+	opts.Threads = 1 // deterministic order: 900 claims first
+	res := Run(context.Background(), items, opts)
+	assert.Equal(t, Result{Downloaded: 1, Ignored: []Ignored{{Name: "420010.cram", ID: "904", KeptID: "900"}}}, res)
+	got, err := os.ReadFile(filepath.Join(dir, "420010.cram"))
+	require.NoError(t, err)
+	assert.Equal(t, payload, got)
+}
+
+func Test_Run_SameExplicitNameSecondIgnoredWithoutPresign(t *testing.T) {
+	srv := fileServer(t, nil)
+	dir := t.TempDir()
+	var second atomic.Int32
+	items := []Item{
+		{ID: "1", Name: "same.bin", Presign: presign(srv.URL+"/a", nil)},
+		{ID: "2", Name: "same.bin", Presign: presign(srv.URL+"/b", &second)},
+	}
+	opts := testOpts(dir)
+	opts.Threads = 1
+	res := Run(context.Background(), items, opts)
+	assert.Equal(t, 1, res.Downloaded)
+	assert.Equal(t, []Ignored{{Name: "same.bin", ID: "2", KeptID: "1"}}, res.Ignored)
+	assert.Equal(t, int32(0), second.Load(), "ignored item must not presign")
+}
+
 func Test_Run_NameIsBaseNameOnly(t *testing.T) {
 	srv := fileServer(t, nil)
 	dir := t.TempDir()

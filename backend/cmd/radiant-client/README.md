@@ -51,6 +51,15 @@ qlin	4835	SP0001234.vcf.gz	412 MB
 `size` (`123`, `1.5 GB`, `512 MiB`) feeds the total shown before the confirmation and the disk
 space check; rows without it are counted but not included in that total.
 
+Only an unusable file stops the run (empty, a required column missing, no valid row). Anything
+odd is printed as a `warning:` under the manifest summary and the row is skipped: unknown column,
+row without `document_id`, invalid id, missing tenant, duplicate id (first one wins). An invalid
+`size` keeps the row with an unknown size.
+
+Two different documents resolving to the same file name (explicit `name`, or the same object name
+under different storage prefixes) cannot both be written: the second one is reported as `ignored:`
+with both document ids and nothing is written for it. Give them distinct `name` values.
+
 ### Colors
 
 Progress bars and ANSI colors are only used when the output is an interactive terminal. Piped or

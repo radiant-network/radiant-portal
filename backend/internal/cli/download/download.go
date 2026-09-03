@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/cli/api"
@@ -24,6 +25,7 @@ import (
 )
 
 type Item struct {
+	ID   string // document identifier, only used in messages
 	Name string // empty = derived from the presigned URL path
 	Size int64  // 0 = unknown, taken from Content-Length
 	// Presign is called right before the GET, and again on every retry, so a URL never outlives
@@ -49,7 +51,22 @@ type Result struct {
 	// kept, whatever Resume says, so the next --resume run continues them.
 	Interrupted         int
 	NotFound, Forbidden []string
-	Errors              []error
+	// Ignored lists items whose target file was already claimed by another item of the same run
+	// (two documents resolving to the same file name). Nothing is written for them.
+	Ignored []Ignored
+	Errors  []error
+}
+
+type Ignored struct {
+	Name   string
+	ID     string // the ignored document
+	KeptID string // the document that owns the file
+}
+
+type ignoredError struct{ Ignored }
+
+func (e ignoredError) Error() string {
+	return fmt.Sprintf("same file name as document %s, ignored", e.KeptID)
 }
 
 type outcome int
@@ -73,6 +90,7 @@ type downloader struct {
 	palette style.Palette
 	overall *mpb.Bar
 	bars    *mpb.Progress
+	claims  sync.Map // target path -> Item.ID of the first item that resolved to it
 }
 
 // barStyle renders `[████████░░░░░░]`, the filled part in the given color.
@@ -128,6 +146,7 @@ func Run(ctx context.Context, items []Item, opts Options) Result {
 
 	var res Result
 	for i, err := range errs {
+		var ignored ignoredError
 		switch {
 		case err == nil:
 			switch outcomes[i] {
@@ -140,6 +159,8 @@ func Run(ctx context.Context, items []Item, opts Options) Result {
 			}
 		case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
 			res.Interrupted++
+		case errors.As(err, &ignored):
+			res.Ignored = append(res.Ignored, ignored.Ignored)
 		case errors.Is(err, api.ErrNotFound):
 			res.NotFound = append(res.NotFound, names[i])
 		case errors.Is(err, api.ErrForbidden):
@@ -164,6 +185,11 @@ func (d *downloader) one(ctx context.Context, it Item) (outcome, string, error) 
 	prepare := func() (bool, error) {
 		target = filepath.Join(d.opts.OutDir, name)
 		part = target + ".part"
+		if owner, taken := d.claims.LoadOrStore(target, it.ID); taken {
+			ig := Ignored{Name: name, ID: it.ID, KeptID: owner.(string)}
+			d.log(name, 0, "ignored, same file name as document "+ig.KeptID)
+			return false, ignoredError{ig}
+		}
 		if !d.opts.Resume {
 			return false, nil
 		}

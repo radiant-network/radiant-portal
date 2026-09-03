@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/radiant-network/radiant-api/internal/cli/config"
+	"github.com/radiant-network/radiant-api/internal/cli/prompt"
 	"github.com/radiant-network/radiant-api/internal/cli/style"
 	"github.com/spf13/cobra"
 )
@@ -50,12 +51,20 @@ func main() {
 		cobra.AddTemplateFuncs(p.TemplateFuncs())
 		root.SetUsageTemplate(p.UsageTemplate(root.UsageTemplate()))
 	}
-	if err := root.Execute(); err != nil {
-		var ec exitCodeError
-		if errors.As(err, &ec) {
-			os.Exit(ec.code) // already reported by the command
-		}
-		fmt.Fprintln(os.Stderr, style.For(os.Stderr).Red("Error:"), err)
-		os.Exit(1)
+	// Every run is framed by a blank line before and after, so its output stands apart from the
+	// surrounding shell prompts.
+	prompt.Println(os.Stdout)
+	err := root.Execute()
+	if err == nil {
+		prompt.Println(os.Stdout)
+		return
 	}
+	var ec exitCodeError
+	if errors.As(err, &ec) {
+		prompt.Println(os.Stdout) // already reported by the command
+		os.Exit(ec.code)
+	}
+	prompt.Println(os.Stderr, style.For(os.Stderr).Red("Error:"), err)
+	prompt.Println(os.Stderr)
+	os.Exit(1)
 }

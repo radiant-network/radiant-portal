@@ -80,12 +80,18 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	if err != nil {
 		return fmt.Errorf("open manifest: %w", err)
 	}
-	entries, err := manifest.Parse(mf)
+	entries, warnings, err := manifest.Parse(mf)
 	_ = mf.Close()
 	if err != nil {
+		for _, w := range warnings {
+			prompt.Printf(out, "%s %s\n", p.Yellow("warning:"), w)
+		}
 		return fmt.Errorf("manifest %s: %w", f.manifestPath, err)
 	}
 	prompt.Printf(out, "Manifest: %s documents\n", p.Bold(fmt.Sprint(len(entries))))
+	for _, w := range warnings {
+		prompt.Printf(out, "%s %s\n", p.Yellow("warning:"), w)
+	}
 
 	kc := keycloak.New(keycloak.Config{BaseURL: cfg.Auth.KeycloakURL, Realm: cfg.Auth.Realm, ClientID: cfg.Auth.ClientID})
 	token, err := auth.EnsureToken(ctx, cfg, kc, out, time.Now())
@@ -124,7 +130,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	client.Token = func(context.Context) (string, error) { return token, nil }
 	items := make([]download.Item, len(entries))
 	for i, e := range entries {
-		items[i] = download.Item{Name: e.Name, Size: e.Size, Presign: func(ctx context.Context) (string, error) {
+		items[i] = download.Item{ID: fmt.Sprint(e.DocumentID), Name: e.Name, Size: e.Size, Presign: func(ctx context.Context) (string, error) {
 			ps, err := client.DownloadURL(ctx, e.Tenant, e.DocumentID)
 			if err != nil {
 				return "", err
@@ -218,6 +224,9 @@ func report(out io.Writer, p style.Palette, res download.Result, outDir string, 
 	for _, n := range res.Forbidden {
 		prompt.Printf(out, "%s  %s\n", p.Yellow("forbidden:"), n)
 	}
+	for _, ig := range res.Ignored {
+		prompt.Printf(out, "%s    %s (document %s has the same file name as document %s, only the latter was downloaded)\n", p.Yellow("ignored:"), ig.Name, ig.ID, ig.KeptID)
+	}
 	for _, e := range res.Errors {
 		prompt.Printf(out, "%s     %v\n", p.Red("failed:"), e)
 	}
@@ -228,7 +237,7 @@ func report(out io.Writer, p style.Palette, res download.Result, outDir string, 
 	} else {
 		downloaded = p.Green(downloaded)
 	}
-	prompt.Printf(out, "\nTotal downloaded files: %s (resumed %d, skipped %d, failed %s) located here: %s\n", downloaded, res.Resumed, res.Skipped, failed, p.Bold(outDir))
+	prompt.Printf(out, "\nTotal downloaded files: %s (resumed %d, skipped %d, failed %s)\nlocated here: %s\n", downloaded, res.Resumed, res.Skipped, failed, p.Path(outDir))
 
 	if res.Interrupted > 0 {
 		prompt.Printf(out, "%s %d file(s) not downloaded. Run again with --resume to continue.\n", p.Yellow("Interrupted:"), res.Interrupted)
