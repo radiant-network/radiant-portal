@@ -404,7 +404,7 @@ func Test_SearchCases_PrenatalSoloCase_CountsMotherAndFetusAsTwoMembers(t *testi
 		require.Equal(t, int64(1), *count)
 		require.Len(t, *cases, 1)
 		// Case 72 is a solo prenatal case: one family row for the mother (proband) and one for
-		// her fetus — two distinct members, so it must get the "_family" suffix like interface{} other
+		// her fetus — two distinct members, so it must get the "_family" suffix like any other
 		// case with more than one member, not be misclassified as a singleton.
 		assert.Equal(t, "germline_family", (*cases)[0].CaseType)
 	})
