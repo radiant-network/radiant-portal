@@ -18,7 +18,15 @@ cmd/
   mysql-proxy/   - Loopback sidecar: Go/GORM clients log in to StarRocks as a JWT user
   mysql-gateway/ - Human-facing endpoint: any MySQL client logs in with a Keycloak
                    username + password (TLS required); it does the token exchange
+  radiant-client/ - End-user CLI (cobra): `configure` + `download -m manifest.tsv`, Keycloak
+                   device flow, presigned URL downloads. Released as standalone binaries
+                   (test-and-release-cli.yml), not part of any docker image
 internal/
+  cli/         - radiant-client packages (config, keycloak device flow, api client, manifest,
+                 pool, download, diskspace, prompt, units). MUST NOT import internal/types,
+                 internal/utils or internal/client: they pull gorm/gin/aws into the binary.
+                 The /config JSON shape is duplicated in cli/config and pinned by
+                 Test_ClientConfig_MatchesCLIContract
   authorization/ - Keycloak authorization (RBAC middleware)
   mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
                  cmd/mysql-gateway; the Authenticator seam is the only difference
@@ -65,6 +73,9 @@ Shared JOIN SQL lives once in `internal/utils/joins` as methods on a `Joiner`; a
 make install       # go mod tidy
 make build         # Build API binary → bin/api/
 make build-worker  # Build worker binary → bin/worker/
+make build-cli     # Build radiant-client → bin/radiant-client/ (version from git describe)
+make build-cli-all # Cross-compile radiant-client for linux/darwin/windows → dist/
+make test-cli      # radiant-client tests only (cmd/radiant-client + internal/cli)
 make run           # Run API server (port 8090)
 make run-worker    # Run worker
 make watch         # Live reload (air)

@@ -77,6 +77,10 @@ jobs:
         run: go build -v ./...
         working-directory: ./backend
 
+      - name: Build radiant-client for all release platforms
+        run: make build-cli-all
+        working-directory: ./backend
+
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@v1.13.0
 
