@@ -19,8 +19,9 @@ POLICIES (service `starrocks`)
   access     mtm_access_admin      admin_role  -> SELECT on tenant_*   (wildcard)
   access     mtm_access_tenant_a   tenant_a_user -> SELECT on tenant_a
   access     mtm_access_tenant_b   tenant_b_user -> SELECT on tenant_b
-  access     mtm_access_auth_grant user_role   -> SELECT on auth.pii_grant
+  access     mtm_access_auth_grant user_role   -> SELECT on the auth database
   rowfilter  mtm_rowfilter_auth_grant           any user sees only their own rows
+  rowfilter  mtm_rowfilter_auth_lab_patient     same, for the lab-path view
   mask       mtm_mask_pii_redact   CUSTOM '***' mask on submitter_patient_id/first_name/last_name/jhn
   mask       mtm_mask_dob          CUSTOM year-only mask on date_of_birth
                                    - user_role : PII only where the user_id has
@@ -149,6 +150,25 @@ def access_policy(name, databases, tables, roles):
     }
 
 
+def auth_rowfilter_policy(name, table):
+    return {
+        "policyType": 2, "name": name, "isEnabled": True,
+        "isAuditEnabled": False, "service": SERVICE,
+        "resources": {
+            "catalog": {"values": ["default_catalog"]},
+            "database": {"values": ["auth"]},
+            "table": {"values": [table]},
+        },
+        # Only user_role is row-filtered to its own rows. No match (root, admin_role)
+        # => Ranger applies no filter => they see all rows. So admins/root need no
+        # explicit item, same as the mask policy.
+        "rowFilterPolicyItems": [
+            {"roles": ["user_role"], "accesses": [{"type": "select", "isAllowed": True}],
+             "rowFilterInfo": {"filterExpr": f"user_id = {LOGIN}"}},
+        ],
+    }
+
+
 def mask_policy(name, columns, value_expr):
     # `columns` may list several columns that share the SAME mask — Ranger
     # substitutes {col} per-column, so one policy covers them all.
@@ -196,25 +216,14 @@ def main():
         access_policy("mtm_access_admin", ["tenant_*"], ["*"], ["admin_role"]),
         access_policy("mtm_access_tenant_a", ["tenant_a"], ["*"], ["tenant_a_user"]),
         access_policy("mtm_access_tenant_b", ["tenant_b"], ["*"], ["tenant_b_user"]),
-        # admin_role too: the patient view's can_read_pii column reads pii_grant,
-        # so admins selecting it would otherwise hit access-denied.
-        access_policy("mtm_access_auth_grant", ["auth"], ["pii_grant"], ["user_role", "admin_role"]),
-        {
-            "policyType": 2, "name": "mtm_rowfilter_auth_grant", "isEnabled": True,
-            "isAuditEnabled": False, "service": SERVICE,
-            "resources": {
-                "catalog": {"values": ["default_catalog"]},
-                "database": {"values": ["auth"]},
-                "table": {"values": ["pii_grant"]},
-            },
-            # Only user_role is row-filtered to its own rows. No match (root,
-            # admin_role) => Ranger applies no filter => they see all rows. So
-            # admins/root need no explicit item, same as the mask policy.
-            "rowFilterPolicyItems": [
-                {"roles": ["user_role"], "accesses": [{"type": "select", "isAllowed": True}],
-                 "rowFilterInfo": {"filterExpr": f"user_id = {LOGIN}"}},
-            ],
-        },
+        # The whole auth database, not a table list: the patient view's can_read_pii column
+        # reads every auth view, and one left out of the policy fails the whole patient read
+        # with access-denied. admin_role too, or admins selecting it would hit the same.
+        access_policy("mtm_access_auth_grant", ["auth"], ["*"], ["user_role", "admin_role"]),
+        # Each auth view filtered to the caller's own rows. pii_lab_patient is filtered
+        # explicitly rather than assuming the filter propagates through pii_grant, its source.
+        auth_rowfilter_policy("mtm_rowfilter_auth_grant", "pii_grant"),
+        auth_rowfilter_policy("mtm_rowfilter_auth_lab_patient", "pii_lab_patient"),
         mask_policy("mtm_mask_pii_redact", ["submitter_patient_id", "first_name", "last_name", "jhn"], MASK_REDACT),
         mask_policy("mtm_mask_dob", ["date_of_birth"], MASK_DOB),
     ]

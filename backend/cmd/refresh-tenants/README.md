@@ -17,8 +17,8 @@ go run ./cmd/refresh-tenants -code demo # one tenant
    the per-tenant views to be recreated. (See [`create-tenant`](../create-tenant) for how
    the views are built — this command re-runs that same view DDL.) Recreating is safe: each
    view is `DROP` + `CREATE`, and a missing tenant database is created on the fly.
-2. **Global Ranger PII-masking policies.** The masking-subject marker role, SELECT +
-   row-filter on `auth.pii_grant`, and the `patient` column masks — plus re-nesting each
+2. **Global Ranger PII-masking policies.** The masking-subject marker role, SELECT on the
+   `auth` database + a row-filter per `auth` view, and the `patient` column masks — plus re-nesting each
    tenant role under the marker so its members are masking subjects. These are static
    (independent of tenant count) and idempotently upserted.
 

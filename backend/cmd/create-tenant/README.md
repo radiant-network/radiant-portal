@@ -31,8 +31,9 @@ Three ordered phases (order matters — each builds on the previous):
   `000012`, parameterized by tenant code. Tenants can edit their roles afterward.
 
 ### 2. StarRocks — the per-tenant view layer
-- Ensures the shared `auth.pii_grant` view (the PII-masking source, global — not
-  tenant-specific).
+- Ensures the shared `auth.pii_grant` and `auth.pii_lab_patient` views (the PII-masking
+  source, global — not tenant-specific). The second derives from the first and carries the
+  patients a grant at a case's diagnosis lab reaches; a patient is unmasked by either path.
 - Creates the tenant database **`<code>_tenant`** (e.g. `demo` → `demo_tenant`).
 - Creates one view per federated clinical table over the `radiant_jdbc` federation,
   filtered to the tenant: `… FROM radiant_jdbc.public.<table> WHERE tenant_code = '<code>'`.
@@ -60,8 +61,9 @@ How the views are built:
 - Ensures the access policy `sr_access_<code>` granting `<code>_user` `SELECT` on
   `<code>_tenant.*`.
 - Bootstraps the global PII-masking policies (idempotent, tenant-independent): the
-  `user_role` masking-subject marker, `SELECT` + row-filter on `auth.pii_grant`, and the
-  `patient` column masks (`sr_mask_pii_redact`, `sr_mask_dob`) over `*_tenant`.
+  `user_role` masking-subject marker, `SELECT` on the `auth` database + a row-filter per
+  `auth` view, and the `patient` column masks (`sr_mask_pii_redact`, `sr_mask_dob`) over
+  `*_tenant`.
 - Nests `<code>_user` under `user_role` so the tenant's members are masking subjects.
 
 Role *membership* is not managed here — it's owned by the user-provisioning flow

@@ -45,7 +45,7 @@ cd backend/compose/scripts
 # 1. Seed Postgres scaffolding: 2 tenants, orgs, patients, roles/actions + svc_admin_api.
 PGPASSWORD=radiant psql -h localhost -U radiant -d radiant -p 5432 -f 01_seed_postgres.sql
 
-# 2. StarRocks: auth.pii_grant view + per-tenant patient views.
+# 2. StarRocks: auth.pii_grant + auth.pii_lab_patient views + per-tenant patient views.
 mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
 
 # 2b. StarRocks service admin (native svc_admin_api, adminpass1).
@@ -108,8 +108,13 @@ radiant_jdbc (Postgres federation)
         │     where user_role (keyed on user_id) grants can_read_pii;
         │     the '*' org wildcard is pre-expanded to concrete orgs.
         │
+        ├─ auth.pii_lab_patient (view over pii_grant) ── (user_id, tenant, patient_id)
+        │     the patients a grant at a case's diagnosis_lab_code reaches, as
+        │     proband and as family member: the reveal follows the work.
+        │
         └─ tenant_a.patient / tenant_b.patient (views, filtered by tenant)
-              expose a per-row  can_read_pii  column computed from auth.pii_grant
+              expose a per-row  can_read_pii  column: a grant at the patient's own
+              org (pii_grant) OR at its case's lab (pii_lab_patient)
                  │
                  └─ Ranger mask:  CASE WHEN can_read_pii THEN {col} ELSE '***' END
 ```
@@ -168,8 +173,9 @@ Example — expected masking on `tenant_a.patient` (`1001/1002`=ORG_A1, `1003`=O
 |---|---|---|
 | `mtm_access_admin` | access | `admin_role` → SELECT on `tenant_*` |
 | `mtm_access_tenant_a` / `_b` | access | tenant role → SELECT on its DB |
-| `mtm_access_auth_grant` | access | `user_role`+`admin_role` → SELECT on `auth.pii_grant` |
-| `mtm_rowfilter_auth_grant` | row-filter | `user_role` → own rows only |
+| `mtm_access_auth_grant` | access | `user_role`+`admin_role` → SELECT on the `auth` database |
+| `mtm_rowfilter_auth_grant` | row-filter | `user_role` → own rows of `auth.pii_grant` only |
+| `mtm_rowfilter_auth_lab_patient` | row-filter | `user_role` → own rows of `auth.pii_lab_patient` only |
 | `mtm_mask_pii_redact` | mask | `user_role` → `***` on `submitter_patient_id`/`first_name`/`last_name`/`jhn` unless `can_read_pii` |
 | `mtm_mask_dob` | mask | `user_role` → year-only on `date_of_birth` unless `can_read_pii` |
 

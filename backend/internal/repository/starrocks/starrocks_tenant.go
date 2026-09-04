@@ -55,11 +55,13 @@ func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, ten
 	return nil
 }
 
-// BuildAuthStatements builds the global auth database + pii_grant view DDL.
+// BuildAuthStatements builds the global auth database + the PII-grant view DDL. Order
+// matters: pii_lab_patient reads pii_grant, and the patient view reads both.
 func BuildAuthStatements() []string {
 	return []string{
 		"CREATE DATABASE IF NOT EXISTS auth",
 		readView("auth_pii_grant.sql"),
+		readView("auth_pii_lab_patient.sql"),
 	}
 }
 

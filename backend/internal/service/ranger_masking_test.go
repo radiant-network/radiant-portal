@@ -11,18 +11,19 @@ import (
 
 // maskingRecorder captures the masking bootstrap calls with their arguments.
 type maskingRecorder struct {
-	roles       []string
-	accessNames []string
-	rowFilters  map[string]string   // policy name -> filterExpr
-	masks       map[string][]string // policy name -> columns
-	maskExprs   map[string]string   // policy name -> mask expr
-	nested      []string            // "parent/child" from AddRoleToRole
-	failAtMask  string
-	failRole    string // EnsureRole returns an error for this role name
+	roles        []string
+	accessNames  []string
+	accessTables map[string][]string // policy name -> tables
+	rowFilters   map[string]string   // policy name -> filterExpr
+	masks        map[string][]string // policy name -> columns
+	maskExprs    map[string]string   // policy name -> mask expr
+	nested       []string            // "parent/child" from AddRoleToRole
+	failAtMask   string
+	failRole     string // EnsureRole returns an error for this role name
 }
 
 func newMaskingRecorder() *maskingRecorder {
-	return &maskingRecorder{rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}}
+	return &maskingRecorder{accessTables: map[string][]string{}, rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}}
 }
 
 func (m *maskingRecorder) EnsureRole(ctx context.Context, name string) error {
@@ -34,6 +35,7 @@ func (m *maskingRecorder) EnsureRole(ctx context.Context, name string) error {
 }
 func (m *maskingRecorder) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
 	m.accessNames = append(m.accessNames, name)
+	m.accessTables[name] = tables
 	return nil
 }
 func (m *maskingRecorder) EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error {
@@ -59,8 +61,12 @@ func Test_BootstrapMaskingPolicies_CreatesMarkerRoleAuthGrantRowFilterAndMasks(t
 	require.NoError(t, BootstrapMaskingPolicies(context.Background(), m))
 
 	assert.Equal(t, []string{RangerMaskingRole}, m.roles, "the masking-subject marker role is ensured")
-	assert.Equal(t, []string{authAccessPolicy, sharedAccessPolicy}, m.accessNames, "SELECT on auth.pii_grant + the shared base DB is granted")
+	assert.Equal(t, []string{authAccessPolicy, sharedAccessPolicy}, m.accessNames, "SELECT on the auth views + the shared base DB is granted")
+	assert.Equal(t, []string{authAllTables}, m.accessTables[authAccessPolicy],
+		"the whole auth database is granted, so a new auth view can't fail every patient read by being left out of the policy")
 	assert.Equal(t, "user_id = "+currentUserLogin, m.rowFilters[authRowFilterPolicy], "row-filter keys pii_grant on the caller's sub")
+	assert.Equal(t, "user_id = "+currentUserLogin, m.rowFilters[authLabPatientRowFilterPol],
+		"pii_lab_patient is filtered explicitly, not by assuming the filter propagates through pii_grant")
 	assert.Equal(t, []string{"submitter_patient_id", "first_name", "last_name", "jhn"}, m.masks[maskRedactPolicy])
 	assert.Equal(t, []string{"date_of_birth"}, m.masks[maskDobPolicy])
 	assert.Contains(t, m.maskExprs[maskRedactPolicy], "can_read_pii", "mask branches on the can_read_pii flag")
