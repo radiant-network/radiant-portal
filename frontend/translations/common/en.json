@@ -713,6 +713,7 @@
         "ad_alt": "ALT Allele Depth",
         "ad_ratio": "Allelic Ratio ALT",
         "ad_total": "Total Depth ALT + REF",
+        "aq": "Systematic Noise (AQ)",
         "biotype": "Gene Type",
         "cadd_phred": "CADD (Phred)",
         "cadd_phred_tooltip": "Combined Annotation Dependent Depletion PHRED",
@@ -797,6 +798,9 @@
         "sm_tooltip": "Linear copy ratio of the segment mean",
         "somatic_pf_tn_wgs": "Freq. TN All Patients",
         "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network who had a tumor-normal analysis (WGS)",
+        "somatic_pf_to_wgs": "Freq. TO All Patients",
+        "somatic_pf_to_wgs_tooltip": "Frequency across all patients of the network who had a tumor-only analysis (WGS)",
+        "sq": "Somatic Quality",
         "start": "Position",
         "study_code": "Study Code",
         "study_id": "Study ID",
@@ -1413,6 +1417,8 @@
       "aa_change_tooltip": "Amino acid change",
       "ad_ratio": "AD Ratio",
       "ad_ratio_tooltip": "Allele depth ratio ALT/(ALT+REF)",
+      "aq": "AQ",
+      "aq_tooltip": "Systematic noise score (AQ)",
       "bc": "BC",
       "bc_tooltip": "Number of bins in the region",
       "calls": "GT",
@@ -1434,6 +1440,8 @@
       "filter": "Filter",
       "freq_tn": "Freq. TN",
       "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_to": "Freq. TO",
+      "freq_to_tooltip": "Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
       "freq_g": "Freq. G",
       "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gene_length": "Length",
@@ -1476,6 +1484,8 @@
       "picked_consequences_tooltip": "Most deleterious consequence annotated using VEP",
       "quality": "Qual.",
       "quality_tooltip": "CNV Quality",
+      "sq": "SQ",
+      "sq_tooltip": "Somatic Quality",
       "start": "Start",
       "symbol": "Gene",
       "symbols": "Genes",
@@ -1727,6 +1737,7 @@
         "frequencies": {
           "title": "Frequencies",
           "affected": "Affected",
+          "to": "Tumor-only",
           "tn": "Tumor-normal",
           "gnomad": "gnomAD"
         },
@@ -1775,6 +1786,8 @@
           "quality_depth": "Quality Depth",
           "allele_depth_alt": "Allele Depth ALT",
           "total_depth_alt_ref": "Total Depth ALT + REF",
+          "sq": "Somatic Quality",
+          "aq": "Systematic Noise (AQ)",
           "genotype_quality": "Genotype Quality",
           "filter": "Filter",
           "pass": "Pass",
@@ -1999,7 +2012,8 @@
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
-        "snv_to": "SNV (TO)"
+        "snv_to": "SNV (TO)",
+        "snv_to_tooltip": "SNV (tumor-only)"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

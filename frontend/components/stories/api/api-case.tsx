@@ -1,9 +1,9 @@
 import { HttpResponse } from 'msw';
 
-export const caseFiltersApi = `api/cases/filters`;
-export const caseSearchApi = `api/cases/search`;
-export const caseAutocompleteApi = `api/cases/autocomplete`;
-export const caseEntityApi = 'api/cases/:id';
+export const caseFiltersApi = `api/:tenant/cases/filters`;
+export const caseSearchApi = `api/:tenant/cases/search`;
+export const caseAutocompleteApi = `api/:tenant/cases/autocomplete`;
+export const caseEntityApi = 'api/:tenant/cases/:id';
 
 export async function httpCaseSearchApiResponse() {
   return HttpResponse.json({

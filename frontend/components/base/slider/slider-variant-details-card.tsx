@@ -67,6 +67,9 @@ const SliderVariantDetailsCard = ({
   germline_pc_wgs_not_affected,
   germline_pn_wgs_not_affected,
   germline_pf_wgs_not_affected,
+  somatic_pc_to_wgs,
+  somatic_pn_to_wgs,
+  somatic_pf_to_wgs,
   somatic_pc_tn_wgs,
   somatic_pn_tn_wgs,
   somatic_pf_tn_wgs,
@@ -153,6 +156,9 @@ const SliderVariantDetailsCard = ({
           germline_pc_wgs_not_affected={germline_pc_wgs_not_affected}
           germline_pn_wgs_not_affected={germline_pn_wgs_not_affected}
           germline_pf_wgs_not_affected={germline_pf_wgs_not_affected}
+          somatic_pc_to_wgs={somatic_pc_to_wgs}
+          somatic_pn_to_wgs={somatic_pn_to_wgs}
+          somatic_pf_to_wgs={somatic_pf_to_wgs}
           somatic_pc_tn_wgs={somatic_pc_tn_wgs}
           somatic_pn_tn_wgs={somatic_pn_tn_wgs}
           somatic_pf_tn_wgs={somatic_pf_tn_wgs}
@@ -273,6 +279,9 @@ type PredictionCardProps = SliderVariantType & {
   germline_pc_wgs_not_affected?: number;
   germline_pn_wgs_not_affected?: number;
   germline_pf_wgs_not_affected?: number;
+  somatic_pc_to_wgs?: number;
+  somatic_pn_to_wgs?: number;
+  somatic_pf_to_wgs?: number;
   somatic_pc_tn_wgs?: number;
   somatic_pn_tn_wgs?: number;
   somatic_pf_tn_wgs?: number;
@@ -310,6 +319,9 @@ export const PredictionCard = ({
   germline_pc_wgs_not_affected,
   germline_pn_wgs_not_affected,
   germline_pf_wgs_not_affected,
+  somatic_pc_to_wgs,
+  somatic_pn_to_wgs,
+  somatic_pf_to_wgs,
   somatic_pc_tn_wgs,
   somatic_pn_tn_wgs,
   somatic_pf_tn_wgs,
@@ -344,6 +356,30 @@ export const PredictionCard = ({
   // Frequencies differ from somatic to germline
   const frequencies = [];
   if (type == 'somatic') {
+    // Tumor-only
+    frequencies.push(
+      <DescriptionRow
+        key="to"
+        label={
+          <span className="inline-flex gap-1 items-center">
+            {t('preview_sheet.variant_details.sections.frequencies.to')}
+          </span>
+        }
+      >
+        {somatic_pc_to_wgs && somatic_pn_to_wgs && somatic_pf_to_wgs?.toExponential(2) ? (
+          <AnchorLink
+            size="sm"
+            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`}
+            target="_blank"
+            mono
+          >
+            {somatic_pc_to_wgs} / {somatic_pn_to_wgs} ({somatic_pf_to_wgs?.toExponential(2)})
+          </AnchorLink>
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
     // Tumor-Normal
     frequencies.push(
       <DescriptionRow

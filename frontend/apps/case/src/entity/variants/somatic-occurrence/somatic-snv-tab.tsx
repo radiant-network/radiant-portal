@@ -11,32 +11,39 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import { type SomaticSNVCohort, SomaticVariantInterface } from '../constants';
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
 
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
-import {
-  defaultSomaticSNVSettings,
-  getSomaticSNVTumorNormalColumns,
-} from './table/somatic-snv-tumor-normal-table-settings';
+import { defaultSomaticSNVSettings, getSomaticSNVColumns } from './table/somatic-snv-table-settings';
 
 type SomaticOccurrencesProps = {
+  /**
+   * Cohort whose occurrences to list. Both cohorts share these endpoints — the task selected in the
+   * URL is what scopes the results to tumor-only or tumor-normal calls — but each keeps its own app
+   * config, hence its own facets, column settings and query builder state.
+   */
+  cohort: SomaticSNVCohort;
   seqId: number;
   patientSelected?: CaseSequencingExperiment;
   caseEntity?: CaseEntity;
 };
 
-function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurrencesProps) {
+function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOccurrencesProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
-  const appId = config.somatic_snv_to_occurrence.app_id;
+  const appId =
+    cohort === SomaticVariantInterface.SNV_TO
+      ? config.somatic_snv_to_occurrence.app_id
+      : config.somatic_snv_tn_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
 
   const columns = useMemo(
-    () => getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId: patient?.patient_id }),
+    () => getSomaticSNVColumns({ t, caseEntity, patientId: patient?.patient_id }),
     [t, caseEntity, patient?.patient_id],
   );
 
@@ -46,7 +53,13 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
 
   return (
     <>
+      {/*
+       * Keyed on the app so switching cohorts remounts the whole query builder. Both cohorts render
+       * this same component, so React would otherwise keep the instance alive and the query builder
+       * state — held in a reducer initialised once from the user preference — would leak across.
+       */}
       <QueryBuilder
+        key={appId}
         appId={appId}
         fetcher={{
           list: async (params: IListInput) => {
@@ -70,13 +83,11 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
           defaultColumnSettings={defaultSomaticSNVSettings}
           enableColumnOrdering
           enableFullscreen
-          extras={[
-            <SliderSomaticOccurrenceSheet key="somatic-snv-to-occurrence-sheet" patientSelected={patientSelected} />,
-          ]}
+          extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}
         />
       </QueryBuilder>
       <VariantsOnboardingWizard />
     </>
   );
 }
-export default SNVTumorNormalTab;
+export default SomaticSNVTab;

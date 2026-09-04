@@ -4,6 +4,9 @@ import { useSearchParams } from 'react-router';
 import type { CaseEntity, TaskOccurrenceType } from '@/api/api';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 
+/** URL param holding the active variants sub-tab, e.g. `variant_section=snv-to`. */
+export const VARIANT_SECTION_PARAM = 'variant_section';
+
 /**
  * Utils function to setup default seqId value on load
  */
@@ -27,10 +30,11 @@ type UseVariantSearchParamsEffectProps = {
   caseEntity?: CaseEntity;
   tasks: TaskOccurrenceType[];
   isLoading: boolean;
+  variantSection?: string;
 };
 
 /**
- * Loads & syncs the URL params (`seq_id`, `task_id`) used to fetch the variants tab.
+ * Loads & syncs the URL params (`seq_id`, `task_id`, `variant_section`) used to fetch the variants tab.
  * */
 export function useVariantSearchParamsEffect({
   seqId,
@@ -38,6 +42,7 @@ export function useVariantSearchParamsEffect({
   caseEntity,
   tasks,
   isLoading,
+  variantSection,
 }: UseVariantSearchParamsEffectProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -52,7 +57,7 @@ export function useVariantSearchParamsEffect({
     }
   }, [caseEntity]);
 
-  // Write seq_id + task_id together to avoid two effects racing on the URL.
+  // Write seq_id + task_id + variant_section together to avoid several effects racing on the URL.
   useEffect(() => {
     if (searchParams.get('tab') !== CaseEntityTabs.Variants) {
       return;
@@ -60,6 +65,10 @@ export function useVariantSearchParamsEffect({
 
     const next = new URLSearchParams(searchParams);
     next.set('seq_id', `${seqId}`);
+
+    if (variantSection !== undefined) {
+      next.set(VARIANT_SECTION_PARAM, variantSection);
+    }
 
     // Only reconcile task_id once the task list has finished loading.
     if (!isLoading) {
@@ -76,5 +85,5 @@ export function useVariantSearchParamsEffect({
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
-  }, [seqId, tasks, isLoading, searchParams.get('tab')]);
+  }, [seqId, tasks, isLoading, variantSection, searchParams.get('tab')]);
 }

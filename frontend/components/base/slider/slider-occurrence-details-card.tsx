@@ -34,6 +34,8 @@ type SliderOccurrenceDetailsCardProps = {
   mother_calls?: number[];
   ad_alt?: number;
   ad_total?: number;
+  sq?: number;
+  aq?: number;
   has_igv_files?: boolean;
   somatic?: boolean;
 };
@@ -79,6 +81,8 @@ const SliderOccurrenceDetailsCard = ({
   mother_calls,
   ad_alt,
   ad_total,
+  sq,
+  aq,
   has_igv_files = false,
   somatic = false,
 }: SliderOccurrenceDetailsCardProps) => {
@@ -189,7 +193,7 @@ const SliderOccurrenceDetailsCard = ({
 
   const metricsSection = (
     <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
-      <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
+      <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter, sq, aq]}>
         <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
           {quality_depth ? <span className="font-mono">{thousandNumberFormat(quality_depth)}</span> : <EmptyField />}
         </DescriptionRow>
@@ -199,6 +203,16 @@ const SliderOccurrenceDetailsCard = ({
         <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
           {ad_total ? <span className="font-mono">{thousandNumberFormat(ad_total)}</span> : <EmptyField />}
         </DescriptionRow>
+        {somatic && (
+          <>
+            <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.sq')}>
+              {sq ? <span className="font-mono">{thousandNumberFormat(sq)}</span> : <EmptyField />}
+            </DescriptionRow>
+            <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.aq')}>
+              {aq ? <span className="font-mono">{thousandNumberFormat(aq)}</span> : <EmptyField />}
+            </DescriptionRow>
+          </>
+        )}
         {genotype_quality && (
           <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
             {getGenotypeQuality(genotype_quality)}
