@@ -118,9 +118,11 @@
       },
       "edit_impact": {
         "body": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b> dans <b>{{orgs}}</b>.",
+        "body_first_org_scope": "Vous ajoutez la première permission à portée organisationnelle au rôle <b>{{name}}</b>. Pour l'accorder, vous devrez <b>attribuer une ou plusieurs organisations à chacun des {{members}} de ce rôle </b>. Leur accès actuel reste inchangé.",
         "body_no_orgs": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b>.",
         "submit": "Enregistrer",
-        "title": "Modifier ce rôle ?"
+        "title": "Modifier ce rôle ?",
+        "title_first_org_scope": "Étape supplémentaire requise"
       },
       "fields": {
         "code": "Code",

@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router';
 import { LockIcon, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
-import type { RoleResult } from '@/api/api';
+import { RoleActionResultScopeEnum, type RoleResult, RoleResultScopeEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -21,6 +21,7 @@ import RoleFormSheet, { type RoleFormValues } from './role-form-sheet';
 import RolePermissionsDialog from './role-permissions-dialog';
 import RolesFilters from './roles-filters';
 import { getRolesColumns, rolesDefaultSettings } from './roles-table-settings';
+import { useGrantableActions } from './use-grantable-actions';
 import { useMemberRole } from './use-member-role';
 import { useTenantRoles } from './use-tenant-roles';
 
@@ -53,6 +54,17 @@ export default function RolesSection() {
 
   const { data: tenantRoles, isLoading, mutate } = useTenantRoles(tenant);
   const { data: memberRole } = useMemberRole(tenant);
+  const { data: grantableActions } = useGrantableActions();
+
+  const orgActionCodes = useMemo(
+    () =>
+      new Set(
+        (grantableActions ?? [])
+          .filter(action => action.scope === RoleActionResultScopeEnum.Org)
+          .map(action => action.code),
+      ),
+    [grantableActions],
+  );
 
   const closeSheets = () => {
     setIsCreateOpen(false);
@@ -123,27 +135,26 @@ export default function RolesSection() {
     role: RoleResult,
     values: RoleFormValues,
     helpers: { setDuplicateError: (field: 'name' | 'code') => void },
-  ) =>
+  ) => {
+    // An org-scoped permission grants nothing until each holder is given organizations.
+    const addsFirstOrgScope =
+      role.scope === RoleResultScopeEnum.Tenant && values.permissions.some(code => orgActionCodes.has(code));
+
+    let bodyKey = 'admin.roles.edit_impact.body_no_orgs';
+    if (addsFirstOrgScope) bodyKey = 'admin.roles.edit_impact.body_first_org_scope';
+    else if ((role.assigned_orgs_count ?? 0) > 0) bodyKey = 'admin.roles.edit_impact.body';
+
     alertDialog.open({
       type: 'warning',
-      title: t('admin.roles.edit_impact.title'),
-      description: (
-        <Trans
-          i18nKey={
-            (role.assigned_orgs_count ?? 0) > 0
-              ? 'admin.roles.edit_impact.body'
-              : 'admin.roles.edit_impact.body_no_orgs'
-          }
-          values={impactValues(role)}
-          components={{ b: <strong /> }}
-        />
-      ),
+      title: t(addsFirstOrgScope ? 'admin.roles.edit_impact.title_first_org_scope' : 'admin.roles.edit_impact.title'),
+      description: <Trans i18nKey={bodyKey} values={impactValues(role)} components={{ b: <strong /> }} />,
       cancelProps: { children: t('common.cancel') },
       actionProps: {
         children: t('admin.roles.edit_impact.submit'),
         onClick: () => updateRole(role, values, helpers),
       },
     });
+  };
 
   const openDeleteConfirm = (role: RoleResult) => {
     const membersCount = role.assigned_users_count ?? 0;
