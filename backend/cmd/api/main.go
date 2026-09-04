@@ -103,6 +103,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	// Initialize public routes explicitly
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
+	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
 
 	// Private routes, alphabetically ordered
 	// Use privateRoutes instead of `r` for all private routes to automatically apply the auth middleware
