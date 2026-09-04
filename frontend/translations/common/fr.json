@@ -800,7 +800,7 @@
         "somatic_pf_tn_wgs": "Fréq. TN tous les patients",
         "somatic_pf_tn_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur-normal (WGS)",
         "somatic_pf_to_wgs": "Fréq. TO tous les patients",
-        "somatic_pf_to_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur-only (WGS)",
+        "somatic_pf_to_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur seule (WGS)",
         "sq": "Qualité somatique",
         "start": "Position",
         "study_code": "Code d'étude",
@@ -1441,7 +1441,7 @@
       "freq_tn": "Fréq. TN",
       "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant et la fréquence sur l'ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
       "freq_to": "Fréq. TO",
-      "freq_to_tooltip": "Nombre de génomes tumeur-seule comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_to_tooltip": "Nombre de génomes tumeur seule comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
       "freq_g": "Fréq. G",
       "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
@@ -1741,8 +1741,8 @@
         "frequencies": {
           "title": "Fréquences",
           "affected": "Affectés",
-          "to": "Tumor-only",
-          "tn": "Tumor-normal",
+          "to": "Tumeur seule",
+          "tn": "Tumeur-normal",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
@@ -2015,7 +2015,7 @@
         "sequencing_id": "ID Séq.",
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
-        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_tn_tooltip": "SNV (tumeur-normal)",
         "snv_to": "SNV (TO)",
         "snv_to_tooltip": "SNV (tumeur seule)"
       },
