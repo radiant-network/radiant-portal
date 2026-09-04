@@ -216,8 +216,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
 			{"key":"ssnv", "label":"Somatic SNV"}, 
 			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
-			{"key":"ssv", "label":"Somatic SV"},
-			{"key":"zip", "label":"Zip Archive"}
+			{"key":"ssv", "label":"Somatic SV"}
 		], 
 		"format_code":[
 			{"key":"bed", "label":"BED File"}, 
@@ -232,7 +231,8 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"tgz", "label":"TGZ Archive File"}, 
 			{"key":"tsv", "label":"TSV File"}, 
 			{"key":"txt", "label":"Text File"},
-			{"key":"vcf", "label":"VCF File"}
+			{"key":"vcf", "label":"VCF File"},
+			{"key":"zip", "label":"ZIP Archive File"}
 		], 
 		"diagnosis_lab_code":[
 			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 

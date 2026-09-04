@@ -1125,7 +1125,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv, zip].",
+				Message: "Invalid field data_type_code for create_case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
 				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1135,7 +1135,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field format_code for create_case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf].",
+				Message: "Invalid field format_code for create_case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf, zip].",
 				Path:    "create_case[0].tasks[0].output_documents[0]",
 			},
 			{
