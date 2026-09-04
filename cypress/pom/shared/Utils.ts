@@ -239,6 +239,7 @@ export function getSettingsCheckbox(value: string | RegExp) {
 export const getStatusColor = (status: string) => {
   const concatenatedStatus = status.replace(/\s+/g, '');
   const mapping: Record<string, string> = {
+    Closed: 'green',
     Completed: 'green',
     Draft: 'neutral',
     InProgress: 'blue',
@@ -259,6 +260,7 @@ export const getStatusColor = (status: string) => {
 export const getStatusIcon = (status: string) => {
   const concatenatedStatus = status.replace(/\s+/g, '');
   const mapping: Record<string, string> = {
+    Closed: 'check',
     Completed: 'check',
     Draft: 'pen',
     InProgress: 'refresh-ccw',

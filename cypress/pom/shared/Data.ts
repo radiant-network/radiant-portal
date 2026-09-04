@@ -33,7 +33,7 @@ export const data = {
       sample_type: 'dna',
       histology: 'normal',
       exp_strat: 'wgs',
-      seq_status: 'Completed',
+      seq_status: 'Closed',
       last_update: '2021-10-12',
     },
     task: {
@@ -196,7 +196,7 @@ export const data = {
       sample_type: 'dna',
       histology: 'tumoral',
       exp_strat: 'wgs',
-      seq_status: 'Completed',
+      seq_status: 'Closed',
     },
     task: {
       task_id: '1018',
