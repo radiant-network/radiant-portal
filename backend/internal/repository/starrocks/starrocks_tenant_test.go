@@ -42,11 +42,24 @@ func Test_ViewTemplates_RegistersOnlyTmplFilesKeyedByTable(t *testing.T) {
 
 // --- BuildAuthStatements -----------------------------------------------------
 
-func Test_BuildAuthStatements_CreatesAuthDbThenReplacesPiiGrant(t *testing.T) {
+func Test_BuildAuthStatements_CreatesAuthDbThenReplacesBothGrantViews(t *testing.T) {
 	stmts := BuildAuthStatements()
-	require.Len(t, stmts, 2)
+	require.Len(t, stmts, 3)
 	assert.Contains(t, stmts[0], "CREATE DATABASE IF NOT EXISTS auth")
 	assert.Contains(t, stmts[1], "CREATE OR REPLACE VIEW auth.pii_grant")
+	assert.Contains(t, stmts[2], "CREATE OR REPLACE VIEW auth.pii_lab_patient",
+		"pii_lab_patient reads pii_grant, so it must be created after it")
+}
+
+func Test_BuildAuthStatements_LabPatientViewReachesProbandAndFamilyMember(t *testing.T) {
+	labPatient := BuildAuthStatements()[2]
+
+	assert.Contains(t, labPatient, "c.diagnosis_lab_code = g.org_code", "the reveal follows the case's lab")
+	assert.Contains(t, labPatient, "c.proband_id AS patient_id")
+	assert.Contains(t, labPatient, "f.family_member_id AS patient_id",
+		"a lab grantee must see the family members of its case, not just the proband")
+	assert.Contains(t, labPatient, "FROM auth.pii_grant g",
+		"deriving from pii_grant is what expands '*' grants to every org of the tenant")
 }
 
 // --- BuildViewStatements: database -------------------------------------------
@@ -76,6 +89,12 @@ func Test_BuildViewStatements_PatientUsesTemplateWithMaskingAndTenantFilter(t *t
 	assert.Contains(t, joined, "SELECT `id`, `organization_code`,")
 	assert.Contains(t, joined, "AS can_read_pii", "patient view exposes the masking flag")
 	assert.Contains(t, joined, "g.tenant_code = 'demo'", "mask subquery scoped to the tenant")
+	// Both correlated references are qualified: unqualified, they would silently rebind to the
+	// subquery's own table if an auth view ever grew a column of the same name.
+	assert.Contains(t, joined, "g.org_code = patient.organization_code", "first path: a grant at the patient's own org")
+	assert.Contains(t, joined, "FROM auth.pii_lab_patient l", "second path: a grant at the case's diagnosis lab")
+	assert.Contains(t, joined, "l.patient_id = patient.id")
+	assert.Contains(t, joined, "l.tenant_code = 'demo'", "the lab path is scoped to the tenant too")
 	assert.Contains(t, joined, "FROM radiant_jdbc.public.patient")
 	assert.Contains(t, joined, "WHERE tenant_code = 'demo'")
 }

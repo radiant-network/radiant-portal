@@ -21,6 +21,9 @@
                         (the StarRocks/IdP identity = the Keycloak sub). Since
                         user_role now carries user_id directly, no bridge to the
                         users table is needed.
+     * auth.pii_lab_patient  the second path to a reveal: the patients a grant at
+                        a case's diagnosis lab reaches, as proband and as family
+                        member. Derived from pii_grant, so '*' is expanded there.
      * tenant_a/tenant_b.patient   one logical view per tenant over the JDBC
                         catalog, filtered to its tenant. Exposes every patient
                         column verbatim plus the can_read_pii flag.
@@ -47,6 +50,23 @@ JOIN radiant_jdbc.public.organization o
   ON o.tenant_code = ur.tenant_code
 WHERE ra.action_code = 'can_read_pii' AND ur.org_code = '*';
 
+/* --- auth.pii_lab_patient ------------------------------------------------ */
+DROP VIEW IF EXISTS auth.pii_lab_patient;
+CREATE VIEW auth.pii_lab_patient AS
+/* Both branches: ingestion writes a family row per patient (proband included), but only
+   cases.proband_id is NOT NULL, so the proband is taken from the column that cannot miss. */
+SELECT g.user_id, g.tenant_code, c.proband_id AS patient_id       /* the case's proband */
+FROM auth.pii_grant g
+JOIN radiant_jdbc.public.cases c
+  ON c.tenant_code = g.tenant_code AND c.diagnosis_lab_code = g.org_code
+UNION
+SELECT g.user_id, g.tenant_code, f.family_member_id AS patient_id /* and its family members */
+FROM auth.pii_grant g
+JOIN radiant_jdbc.public.cases c
+  ON c.tenant_code = g.tenant_code AND c.diagnosis_lab_code = g.org_code
+JOIN radiant_jdbc.public.family f
+  ON f.case_id = c.id;
+
 /* --- Per-tenant patient views -------------------------------------------- */
 CREATE DATABASE IF NOT EXISTS tenant_a;
 DROP VIEW IF EXISTS tenant_a.patient;
@@ -62,14 +82,20 @@ SELECT id,
        jhn,
        tenant_code,
        organization_code,
-       /* convenience flag: does the current user_id hold can_read_pii for this
-          row's org? Same condition as the mask, so 1 = PII visible (this row is
-          unmasked for me), 0 = masked. NB: reflects the can_read_pii *action*;
-          admins see clear via admin_role bypass and will read 0 here. */
-       EXISTS (SELECT 1 FROM auth.pii_grant g
-               WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
-                 AND g.tenant_code = 'tenant_a'
-                 AND g.org_code = organization_code) AS can_read_pii
+       /* convenience flag: may the current user_id read this row's PII? Same
+          condition as the mask, so 1 = PII visible (this row is unmasked for me),
+          0 = masked. Two paths: a grant at the patient's own organization, or one
+          at the diagnosis lab of a case the patient is in. NB: reflects the
+          can_read_pii *action*; admins see clear via admin_role bypass and will
+          read 0 here. */
+       (EXISTS (SELECT 1 FROM auth.pii_grant g
+                WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                  AND g.tenant_code = 'tenant_a'
+                  AND g.org_code = patient.organization_code)
+        OR EXISTS (SELECT 1 FROM auth.pii_lab_patient l
+                   WHERE l.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                     AND l.tenant_code = 'tenant_a'
+                     AND l.patient_id = patient.id)) AS can_read_pii
 FROM radiant_jdbc.public.patient
 WHERE tenant_code = 'tenant_a';
 
@@ -87,10 +113,14 @@ SELECT id,
        jhn,
        tenant_code,
        organization_code,
-       EXISTS (SELECT 1 FROM auth.pii_grant g
-               WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
-                 AND g.tenant_code = 'tenant_b'
-                 AND g.org_code = organization_code) AS can_read_pii
+       (EXISTS (SELECT 1 FROM auth.pii_grant g
+                WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                  AND g.tenant_code = 'tenant_b'
+                  AND g.org_code = patient.organization_code)
+        OR EXISTS (SELECT 1 FROM auth.pii_lab_patient l
+                   WHERE l.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                     AND l.tenant_code = 'tenant_b'
+                     AND l.patient_id = patient.id)) AS can_read_pii
 FROM radiant_jdbc.public.patient
 WHERE tenant_code = 'tenant_b';
 

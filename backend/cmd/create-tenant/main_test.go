@@ -80,6 +80,8 @@ func Test_printCreatePlan_AuthBlockPrecedesViews(t *testing.T) {
 	require.NoError(t, printCreatePlan(t.Context(), &buf, "demo", "Demo", src))
 
 	out := buf.String()
-	assert.Less(t, strings.Index(out, "auth.pii_grant"), strings.Index(out, "`demo_tenant`.`patient`"),
-		"auth.pii_grant must be created before the patient view that references it")
+	assert.Less(t, strings.Index(out, "auth.pii_grant"), strings.Index(out, "auth.pii_lab_patient"),
+		"auth.pii_grant must be created before the view that derives from it")
+	assert.Less(t, strings.Index(out, "auth.pii_lab_patient"), strings.Index(out, "`demo_tenant`.`patient`"),
+		"both auth views must be created before the patient view that references them")
 }

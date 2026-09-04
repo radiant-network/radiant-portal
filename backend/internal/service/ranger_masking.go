@@ -13,12 +13,22 @@ import (
 // raw values. This mirrors the role model in compose/scripts/03_ranger_policies.py.
 const RangerMaskingRole = "user_role"
 
-// The auth.pii_grant view (source of truth for "who can read PII where") is the target
-// of the self-access grant + row-filter; the mask expressions read the can_read_pii flag
-// the patient views compute from it.
+// The auth database holds the views answering "who can read PII where": pii_grant, keyed on
+// the patient's own organization, and pii_lab_patient, which derives from it the patients a
+// grant at a case's diagnosis lab reaches. The patient views read BOTH (a reveal by either
+// path), and their can_read_pii subqueries run with invoker privileges, so masking subjects
+// need SELECT on both — hence the grant covers the whole database rather than a table list:
+// a future auth view the patient template starts reading would otherwise fail every patient
+// read with access-denied until someone remembered to extend the policy.
+//
+// Each view is row-filtered to the caller's own rows, so neither can be used to enumerate
+// other people's grants. pii_lab_patient is filtered explicitly rather than relying on the
+// filter propagating through pii_grant, its only source.
 const (
-	authGrantDatabase = "auth"
-	authGrantTable    = "pii_grant"
+	authGrantDatabase   = "auth"
+	authAllTables       = "*"
+	authGrantTable      = "pii_grant"
+	authLabPatientTable = "pii_lab_patient"
 
 	// patientTable is the per-tenant view masks apply to; tenantDatabaseGlob matches every
 	// <code>_tenant database (see types.TenantDatabase) so one mask policy covers all tenants.
@@ -28,11 +38,12 @@ const (
 
 // Global masking policy names (static, independent of tenant count).
 const (
-	authAccessPolicy    = "sr_access_auth"
-	sharedAccessPolicy  = "sr_access_shared"
-	authRowFilterPolicy = "sr_rowfilter_auth"
-	maskRedactPolicy    = "sr_mask_pii_redact"
-	maskDobPolicy       = "sr_mask_dob"
+	authAccessPolicy           = "sr_access_auth"
+	sharedAccessPolicy         = "sr_access_shared"
+	authRowFilterPolicy        = "sr_rowfilter_auth"
+	authLabPatientRowFilterPol = "sr_rowfilter_auth_lab_patient"
+	maskRedactPolicy           = "sr_mask_pii_redact"
+	maskDobPolicy              = "sr_mask_dob"
 )
 
 // current_user() returns '<user_id>'@'%'; drop the leading quote and take up to the next
@@ -70,14 +81,18 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 	}
 	roles := []string{RangerMaskingRole}
 
-	// Masking subjects must be able to read auth.pii_grant — the patient view's
-	// can_read_pii subquery runs with invoker privileges — so grant SELECT, then
-	// row-filter it to the caller's own rows (else they could enumerate everyone's grants).
-	if err := ranger.EnsureAccessPolicy(ctx, authAccessPolicy, []string{authGrantDatabase}, []string{authGrantTable}, roles); err != nil {
+	// Grant SELECT on the auth database, then row-filter each view in it to the caller's own
+	// rows (else they could enumerate everyone's grants — see the const block above).
+	if err := ranger.EnsureAccessPolicy(ctx, authAccessPolicy, []string{authGrantDatabase}, []string{authAllTables}, roles); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", authAccessPolicy, err)
 	}
-	if err := ranger.EnsureRowFilterPolicy(ctx, authRowFilterPolicy, authGrantDatabase, authGrantTable, authRowFilterExpr, roles); err != nil {
-		return fmt.Errorf("ranger: ensure row-filter policy %q: %w", authRowFilterPolicy, err)
+	for _, filtered := range []struct{ policy, table string }{
+		{authRowFilterPolicy, authGrantTable},
+		{authLabPatientRowFilterPol, authLabPatientTable},
+	} {
+		if err := ranger.EnsureRowFilterPolicy(ctx, filtered.policy, authGrantDatabase, filtered.table, authRowFilterExpr, roles); err != nil {
+			return fmt.Errorf("ranger: ensure row-filter policy %q: %w", filtered.policy, err)
+		}
 	}
 
 	// Cross-tenant reference/annotation data (snv__consequence, genes, HPO/MONDO, external

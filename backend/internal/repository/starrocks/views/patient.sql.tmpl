@@ -1,8 +1,12 @@
 CREATE OR REPLACE VIEW `{{.DB}}`.`patient` AS
 SELECT {{.Columns}},
-       EXISTS (SELECT 1 FROM auth.pii_grant g
-               WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
-                 AND g.tenant_code = '{{.TenantCode}}'
-                 AND g.org_code = organization_code) AS can_read_pii
+       (EXISTS (SELECT 1 FROM auth.pii_grant g
+                WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                  AND g.tenant_code = '{{.TenantCode}}'
+                  AND g.org_code = patient.organization_code)
+        OR EXISTS (SELECT 1 FROM auth.pii_lab_patient l
+                   WHERE l.user_id = substring_index(substr(current_user(), 2), char(39), 1)
+                     AND l.tenant_code = '{{.TenantCode}}'
+                     AND l.patient_id = patient.id)) AS can_read_pii
 FROM radiant_jdbc.public.patient
 WHERE tenant_code = '{{.TenantCode}}'
