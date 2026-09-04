@@ -71,7 +71,7 @@ func Test_CreateTenant_RunsAllStepsInPostgresStarrocksRangerOrder(t *testing.T) 
 		"EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews", // Phase B — StarRocks
 		// Phase C — Ranger: global masking bootstrap (marker role + auth grant/row-filter +
 		// shared-DB grant + 2 masks)...
-		"EnsureRole", "EnsureAccessPolicy", "EnsureRowFilterPolicy", "EnsureAccessPolicy", "EnsureMaskPolicy", "EnsureMaskPolicy",
+		"EnsureRole", "EnsureAccessPolicy", "EnsureRowFilterPolicy", "EnsureRowFilterPolicy", "EnsureAccessPolicy", "EnsureMaskPolicy", "EnsureMaskPolicy",
 		// ...then this tenant's role + access policy + nesting under the marker.
 		"EnsureRole", "EnsureAccessPolicy", "AddRoleToRole",
 	}, d.calls)
