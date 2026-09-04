@@ -381,6 +381,17 @@ const tableSomaticSNVColumns = [
     tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
+    id: 'freq_to',
+    name: 'Freq. TO',
+    apiField: 'somatic_pf_to_wgs',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 12,
+    tooltip: 'Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
+  },
+  {
     id: 'freq_tn',
     name: 'Freq. TN',
     apiField: 'somatic_pf_tn_wgs',
@@ -388,7 +399,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 13,
     tooltip: 'Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -399,8 +410,30 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
+  },
+  {
+    id: 'sq',
+    name: 'SQ',
+    apiField: 'sq',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 15,
+    tooltip: 'Somatic Quality',
+  },
+  {
+    id: 'aq',
+    name: 'AQ',
+    apiField: 'aq',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 16,
+    tooltip: 'Systematic noise score (AQ)',
   },
   {
     id: 'ad_ratio',
@@ -410,7 +443,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 17,
     tooltip: 'Allele depth ratio ALT/(ALT+REF)',
   },
   {
@@ -421,7 +454,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 18,
     tooltip: null,
   },
 ];
@@ -793,14 +826,15 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
     /**
      * Validates the sent requests to api on page change functionality.
      * @param dataCase The case object.
+     * @param cohort On a somatic case, the sub-tab to open. Omit for germline, which has no cohort.
      */
-    shouldRequestOnPageChange(dataCase: any) {
+    shouldRequestOnPageChange(dataCase: any, cohort?: 'TN' | 'TO') {
       cy.intercept('POST', '**/list', req => {
         expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest1');
-      cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV');
+      cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV', { cohort });
       cy.wait('@listRequest1');
       cy.waitWhileLoad(60 * 1000);
 
@@ -1009,10 +1043,11 @@ const germlineConfig: SNVTableConfig = {
 const somaticConfig: SNVTableConfig = {
   tableColumns: tableSomaticSNVColumns,
   selectors: { tab: '[data-cy="variants-tab"]' },
-  newTabLinkColumns: ['variant', 'freq_tn', 'freq_g'],
+  newTabLinkColumns: ['variant', 'freq_to', 'freq_tn', 'freq_g'],
   contentHandlers: somaticContentHandlers,
   linkResolver: (columnID, dataVariant) => {
     switch (columnID) {
+      case 'freq_to':
       case 'freq_tn':
         return `/variants/entity/${dataVariant.locus_id}?tab=patients&cases=OtherCases`;
       case 'freq_g':
