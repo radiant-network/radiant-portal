@@ -67,6 +67,8 @@ jobs:
             "cypress/e2e/CaseEntity/Variants/Germline/SNV/**/*.cy.ts,cypress/api/Sequencing/**/*.cy.ts,cypress/api/Samples/**/*.cy.ts,cypress/api/Documents/**/*.cy.ts"
           )
 
+          PROXY_BASE=$(aws ssm get-parameter --region ca-central-1 --name /ferlease/cypress-proxy-url --query Parameter.Value --output text)
+
           NIGHTLY_SHARD_CMD='
           set -e
           S3_PREFIX="s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$SHARD_ID"
@@ -87,7 +89,7 @@ jobs:
             npx marge /tmp/mochawesome.json --reportDir /tmp/html-report --inline --charts
             aws s3 cp /tmp/html-report/mochawesome.html "$S3_PREFIX/report.html" --content-type text/html
             aws s3 cp /tmp/mochawesome.json "$S3_PREFIX/mochawesome.json"
-            REPORT_URL=$(aws s3 presign "$S3_PREFIX/report.html" --expires-in 86400)
+            REPORT_URL="$S3_PREFIX/report.html"
             FAIL_COUNT=$(node -e "let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{process.stdout.write(String(JSON.parse(d).stats.failures||0))}catch(e){process.stdout.write(\"0\")}})" < /tmp/mochawesome.json 2>/dev/null || echo 0)
           fi
           if compgen -G "cypress/results/*.xml" > /dev/null 2>&1; then
@@ -99,7 +101,7 @@ jobs:
           if [ "$fail_count" -gt 0 ]; then
             zip -r /tmp/screenshots.zip cypress/screenshots/
             aws s3 cp /tmp/screenshots.zip "$S3_PREFIX/screenshots.zip"
-            SURL=$(aws s3 presign "$S3_PREFIX/screenshots.zip" --expires-in 86400)
+            SURL="$S3_PREFIX/screenshots.zip"
           fi
           printf "{\"exit_code\":%s,\"report_url\":\"%s\",\"screenshots_url\":\"%s\",\"failure_count\":%s}" "$CYPRESS_EXIT" "$REPORT_URL" "$SURL" "$FAIL_COUNT" > /tmp/result.json
           aws s3 cp /tmp/result.json "$S3_PREFIX/result.json"
@@ -169,7 +171,7 @@ jobs:
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
-            COMBINED_ZURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip" --expires-in 86400)
+            COMBINED_ZURL="${PROXY_BASE}/?key=$RELEASE/combined_screenshots.zip"
           fi
           COMBINED_XURL=""
           XML_PARTS=()
@@ -180,7 +182,7 @@ jobs:
             node -e "const fs=require(\"fs\");const files=process.argv.slice(1).filter(f=>fs.existsSync(f));const suites=files.flatMap(f=>{const c=fs.readFileSync(f,\"utf8\");const w=[...c.matchAll(/<testsuite(?!s)[\\s\\S]*?<\\/testsuite>/g)].map(m=>m[0]);const s=[...c.matchAll(/<testsuite(?!s)[^>]*\\/>/g)].map(m=>m[0].replace(/\\/>/,\"><\\/testsuite>\"));return [...w,...s];});if(suites.length)fs.writeFileSync(\"/tmp/combined-results.xml\",\"<testsuites>\\n\"+suites.join(\"\\n\")+\"\\n</testsuites>\");" "${XML_PARTS[@]}"
             if [ -f /tmp/combined-results.xml ]; then
               aws s3 cp /tmp/combined-results.xml "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-results.xml" --content-disposition "attachment; filename=combined-results.xml"
-              COMBINED_XURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-results.xml" --expires-in 86400)
+              COMBINED_XURL="${PROXY_BASE}/?key=$RELEASE/combined-results.xml"
             fi
           fi
           COMBINED_RURL=""
@@ -195,7 +197,7 @@ jobs:
               npx marge /tmp/combined-mochawesome.json --reportDir /tmp/combined-html --reportFilename mochawesome --inline --charts 2>/dev/null || true
               if [ -f /tmp/combined-html/mochawesome.html ]; then
                 aws s3 cp /tmp/combined-html/mochawesome.html "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-report.html" --content-type text/html
-                COMBINED_RURL=$(aws s3 presign "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-report.html" --expires-in 86400)
+                COMBINED_RURL="${PROXY_BASE}/?key=$RELEASE/combined-report.html"
               fi
             fi
           fi
@@ -217,11 +219,13 @@ jobs:
             --arg arns "${TASK_ARNS[*]}" \
             --arg count "${#TASK_ARNS[@]}" \
             --arg cmd "$AGGREGATOR_CMD" \
+            --arg proxy_base "$PROXY_BASE" \
             '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
               {name:"RELEASE",value:$release},
               {name:"SLACK_WEBHOOK",value:$slack},
               {name:"SHARD_TASK_ARNS",value:$arns},
-              {name:"SHARD_COUNT",value:$count}
+              {name:"SHARD_COUNT",value:$count},
+              {name:"PROXY_BASE",value:$proxy_base}
             ]}]}')
 
           aws ecs run-task \
