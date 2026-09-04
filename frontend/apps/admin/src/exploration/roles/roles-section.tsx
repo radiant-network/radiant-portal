@@ -140,14 +140,22 @@ export default function RolesSection() {
     const addsFirstOrgScope =
       role.scope === RoleResultScopeEnum.Tenant && values.permissions.some(code => orgActionCodes.has(code));
 
-    let bodyKey = 'admin.roles.edit_impact.body_no_orgs';
-    if (addsFirstOrgScope) bodyKey = 'admin.roles.edit_impact.body_first_org_scope';
-    else if ((role.assigned_orgs_count ?? 0) > 0) bodyKey = 'admin.roles.edit_impact.body';
+    const bodyKey =
+      (role.assigned_orgs_count ?? 0) > 0 ? 'admin.roles.edit_impact.body' : 'admin.roles.edit_impact.body_no_orgs';
 
     alertDialog.open({
       type: 'warning',
       title: t(addsFirstOrgScope ? 'admin.roles.edit_impact.title_first_org_scope' : 'admin.roles.edit_impact.title'),
-      description: <Trans i18nKey={bodyKey} values={impactValues(role)} components={{ b: <strong /> }} />,
+      description: addsFirstOrgScope ? (
+        <Trans
+          i18nKey="admin.roles.edit_impact.body_first_org_scope"
+          count={role.assigned_users_count ?? 0}
+          values={{ name: role.name }}
+          components={{ b: <strong /> }}
+        />
+      ) : (
+        <Trans i18nKey={bodyKey} values={impactValues(role)} components={{ b: <strong /> }} />
+      ),
       cancelProps: { children: t('common.cancel') },
       actionProps: {
         children: t('admin.roles.edit_impact.submit'),
