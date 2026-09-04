@@ -21,6 +21,8 @@ func Test_Run_AllJobsExecuted(t *testing.T) {
 }
 
 func Test_Run_RespectsWorkerCount(t *testing.T) {
+	// Each job blocks until another job is running alongside it (or a timeout on a starved
+	// runner), so two workers must overlap while a third never appears.
 	var running, peak atomic.Int32
 	errs := Run(context.Background(), 2, make([]int, 8), func(context.Context, int) error {
 		n := running.Add(1)
@@ -30,7 +32,10 @@ func Test_Run_RespectsWorkerCount(t *testing.T) {
 				break
 			}
 		}
-		time.Sleep(5 * time.Millisecond)
+		deadline := time.Now().Add(200 * time.Millisecond)
+		for running.Load() < 2 && time.Now().Before(deadline) {
+			time.Sleep(time.Millisecond)
+		}
 		running.Add(-1)
 		return nil
 	})
