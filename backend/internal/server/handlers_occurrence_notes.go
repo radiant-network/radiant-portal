@@ -51,7 +51,9 @@ func sanitizeNoteContent(content string, userID string) string {
 func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body types.CreateOccurrenceNoteInput
-		if err := c.ShouldBindJSON(&body); err != nil {
+		// Body-cached binding: the action gate already read case_id off this body to
+		// resolve the org, so the raw payload is served from the context, not the socket.
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
 			HandleValidationError(c, err)
 			return
 		}

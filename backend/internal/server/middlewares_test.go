@@ -279,19 +279,19 @@ func Test_RequireAction_NoTenantInContext_Returns500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-func Test_RequireAction_PassesResolvedOrgToChecker(t *testing.T) {
+func Test_RequireAction_PassesTenantWideOrgToChecker(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	doActionRequest(actionTestRouter(repo, auth, types.ActionFlagVariant))
+	doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase))
 
-	assert.Equal(t, WildcardOnlyOrg, repo.gotOrgCode)
-	assert.Equal(t, types.ActionFlagVariant, repo.gotAction)
+	assert.Equal(t, TenantWideOrg, repo.gotOrgCode)
+	assert.Equal(t, types.ActionSearchCase, repo.gotAction)
 }
 
-func Test_resolveOrgCode_ReturnsWildcardOnly(t *testing.T) {
+func Test_tenantWideOrg_ResolvesToTheSentinelOnly(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
-	org, err := resolveOrgCode(c)
+	orgs, err := tenantWideOrg(c)
 
 	assert.NoError(t, err)
-	assert.Equal(t, WildcardOnlyOrg, org)
+	assert.Equal(t, []string{TenantWideOrg}, orgs)
 }

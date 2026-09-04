@@ -55,14 +55,14 @@ func Test_ListOrganizations_CrossTenant_Forbidden(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
-func postOrganization(t *testing.T, userID, body string) *httptest.ResponseRecorder {
+func postOrganization(t *testing.T, userID, code, body string) *httptest.ResponseRecorder {
 	t.Helper()
 	var w *httptest.ResponseRecorder
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		orgRepo := postgres.NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
 		auth := &testutils.MockAuth{Id: userID}
-		defer env.Postgres.Exec("DELETE FROM organization WHERE code LIKE 'int_org_%' AND tenant_code = 'radiant'")
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = ? AND tenant_code = 'radiant'", code)
 
 		router := gin.Default()
 		tenantRoutes := router.Group("/:tenant")
@@ -78,7 +78,7 @@ func postOrganization(t *testing.T, userID, body string) *httptest.ResponseRecor
 }
 
 func Test_CreateOrganization_TenantAdmin_Created(t *testing.T) {
-	w := postOrganization(t, taraID, `{"code":"int_org_a","name":"Integration Org","category_code":"healthcare_provider"}`)
+	w := postOrganization(t, taraID, "int_org_a", `{"code":"int_org_a","name":"Integration Org","category_code":"healthcare_provider"}`)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.Empty(t, w.Body.String())
@@ -86,7 +86,7 @@ func Test_CreateOrganization_TenantAdmin_Created(t *testing.T) {
 
 func Test_CreateOrganization_WithoutManageOrgs_Forbidden(t *testing.T) {
 	// mike holds member (no can_manage_org) → the action gate 403s before the handler.
-	w := postOrganization(t, mikeID, `{"code":"int_org_b","name":"Integration Org","category_code":"healthcare_provider"}`)
+	w := postOrganization(t, mikeID, "int_org_b", `{"code":"int_org_b","name":"Integration Org","category_code":"healthcare_provider"}`)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }

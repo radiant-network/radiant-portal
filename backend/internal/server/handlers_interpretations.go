@@ -87,42 +87,6 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 	return status
 }
 
-// GetInterpretationGermlineDeprecated
-// @Deprecated
-// @Summary Get interpretation germline
-// @Id GetInterpretationGermlineDeprecated
-// @Description Get interpretation germline
-// @Tags interpretations
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Param sequencing_id path string true "Sequencing ID"
-// @Param locus_id path string true "Locus ID"
-// @Param transcript_id path string true "Transcript ID"
-// @Produce json
-// @Success 200 {object} types.InterpretationGermline
-// @Success 206 {object} types.InterpretationGermline
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
-func GetInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstGermline(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if interpretation == nil {
-			HandleNotFoundError(c, "interpretation")
-			return
-		}
-		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
-	}
-}
-
 // GetInterpretationGermline
 // @Summary Get interpretation germline
 // @Id GetInterpretationGermline
@@ -166,54 +130,6 @@ func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameRead
 		}
 
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
-	}
-}
-
-// PostInterpretationGermlineDeprecated
-// @Deprecated
-// @Summary Create or Update interpretation germline
-// @Id PostInterpretationGermlineDeprecated
-// @Description Create or Update interpretation germline
-// @Tags interpretations
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Param sequencing_id path string true "Sequencing ID"
-// @Param locus_id path string true "Locus ID"
-// @Param transcript_id path string true "Transcript ID"
-// @Param message	body		types.InterpretationGermline	true	"Interpretation Body"
-// @Accept json
-// @Produce json
-// @Success 200 {object} types.InterpretationGermline
-// @Failure 400 {object} types.ApiError
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
-func PostInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		interpretation := &types.InterpretationGermline{}
-		err := c.BindJSON(interpretation)
-
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		err = repo.CreateOrUpdateGermline(c.Request.Context(), interpretation)
-
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-
-		c.JSON(http.StatusOK, interpretation)
 	}
 }
 
@@ -265,42 +181,6 @@ func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 	}
 }
 
-// GetInterpretationSomaticDeprecated
-// @Deprecated
-// @Summary Get interpretation somatic
-// @Id GetInterpretationSomaticDeprecated
-// @Description Get interpretation somatic
-// @Tags interpretations
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Param sequencing_id path string true "Sequencing ID"
-// @Param locus_id path string true "Locus ID"
-// @Param transcript_id path string true "Transcript ID"
-// @Produce json
-// @Success 200 {object} types.InterpretationSomatic
-// @Success 206 {object} types.InterpretationSomatic
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
-func GetInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstSomatic(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if interpretation == nil {
-			HandleNotFoundError(c, "interpretation")
-			return
-		}
-		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
-	}
-}
-
 // GetInterpretationSomatic
 // @Summary Get interpretation somatic
 // @Id GetInterpretationSomatic
@@ -344,53 +224,6 @@ func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReade
 		}
 
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
-	}
-}
-
-// PostInterpretationSomaticDeprecated
-// @Deprecated
-// @Summary Create or Update interpretation somatic
-// @Id PostInterpretationSomaticDeprecated
-// @Description Create or Update interpretation somatic
-// @Tags interpretations
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Param sequencing_id path string true "Sequencing ID"
-// @Param locus_id path string true "Locus ID"
-// @Param transcript_id path string true "Transcript ID"
-// @Param message	body		types.InterpretationSomatic	true	"Interpretation Body"
-// @Accept json
-// @Produce json
-// @Success 200 {object} types.InterpretationSomatic
-// @Failure 400 {object} types.ApiError
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
-func PostInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		interpretation := &types.InterpretationSomatic{}
-		err := c.BindJSON(interpretation)
-
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		err = repo.CreateOrUpdateSomatic(c.Request.Context(), interpretation)
-
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-
-		c.JSON(http.StatusOK, interpretation)
 	}
 }
 

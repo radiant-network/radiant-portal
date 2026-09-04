@@ -5,6 +5,7 @@ from radiant_python.api.actions_api import ActionsApi
 from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
 from radiant_python.api.cases_api import CasesApi
+from radiant_python.api.config_api import ConfigApi
 from radiant_python.api.documents_api import DocumentsApi
 from radiant_python.api.genes_api import GenesApi
 from radiant_python.api.hpo_api import HpoApi
