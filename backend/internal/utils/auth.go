@@ -11,12 +11,9 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
-const DataManagerRole = "data_manager"
-
 type Auth interface {
 	RetrieveUserIdFromToken(c *gin.Context) (*string, error)
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
-	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
 	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
 	RetrieveFullNameFromToken(c *gin.Context) (*string, error)
 }
@@ -51,14 +48,6 @@ func (auth KeycloakAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
 		return nil, err
 	}
 	return &token.Azp, nil
-}
-
-func (auth KeycloakAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	token, err := getOrParseToken(c)
-	if err != nil {
-		return nil, err
-	}
-	return &token.ResourceAccess, nil
 }
 
 func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
