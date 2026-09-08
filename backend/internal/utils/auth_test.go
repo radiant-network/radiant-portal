@@ -52,7 +52,7 @@ func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUserIdFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant")
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -107,7 +107,7 @@ func Test_RetrieveAzpFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveAzpFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant")
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -136,54 +136,6 @@ func Test_RetrieveAzpFromToken_NoTokenInContext(t *testing.T) {
 	assert.Nil(t, azp)
 }
 
-func Test_RetrieveResourceAccessFromToken_ValidKeycloakToken(t *testing.T) {
-	resourceAccess := map[string]ginkeycloak.ServiceRole{"service": {}}
-	c := gin.Context{}
-	c.Set("token", ginkeycloak.KeyCloakToken{ResourceAccess: resourceAccess})
-
-	auth := KeycloakAuth{}
-	access, err := auth.RetrieveResourceAccessFromToken(&c)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, access)
-	assert.Equal(t, resourceAccess, *access)
-}
-
-func Test_RetrieveResourceAccessFromToken_InvalidKeycloakToken(t *testing.T) {
-	c := gin.Context{}
-	c.Set("token", "invalidToken")
-
-	auth := KeycloakAuth{}
-	access, err := auth.RetrieveResourceAccessFromToken(&c)
-
-	assert.Error(t, err)
-	assert.Nil(t, access)
-}
-
-func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
-	c := gin.Context{}
-
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
-	assert.NoError(t, err)
-
-	c.Request = &http.Request{
-		Header: http.Header{
-			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
-		},
-	}
-
-	auth := KeycloakAuth{}
-	resAcc, err := auth.RetrieveResourceAccessFromToken(&c)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, resAcc)
-	assert.Equal(t, map[string]ginkeycloak.ServiceRole{
-		"CBTN":    {Roles: []string{"geneticist"}},
-		"UDN":     {Roles: []string{"requester"}},
-		"radiant": {Roles: []string{DataManagerRole}},
-	}, *resAcc)
-}
-
 func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
 	c := gin.Context{}
 	c.Set("token", ginkeycloak.KeyCloakToken{PreferredUsername: "testuser"})
@@ -199,7 +151,7 @@ func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant")
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -242,7 +194,7 @@ func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
 func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant")
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -289,7 +241,7 @@ func Test_RetrieveFullNameFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveFullNameFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant")
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{

@@ -2,7 +2,6 @@ package testutils
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 const (
@@ -10,16 +9,14 @@ const (
 	DefaultMockUsername = "mock-username"
 	DefaultMockFullName = "Mock User"
 	DefaultMockAzp      = "mock-azp"
-	DefaultMockRole     = "mock-role"
 )
 
 type MockAuth struct {
-	Id             string
-	Username       string
-	Name           string
-	Azp            string
-	ResourceAccess map[string]ginkeycloak.ServiceRole
-	Error          error
+	Id       string
+	Username string
+	Name     string
+	Azp      string
+	Error    error
 }
 
 func (m *MockAuth) RetrieveUserIdFromToken(c *gin.Context) (*string, error) {
@@ -42,21 +39,6 @@ func (m *MockAuth) RetrieveAzpFromToken(c *gin.Context) (*string, error) {
 		return &result, nil
 	}
 	return &m.Azp, nil
-}
-
-func (m *MockAuth) RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	if m.ResourceAccess == nil {
-		result := map[string]ginkeycloak.ServiceRole{
-			DefaultMockAzp: {
-				Roles: []string{DefaultMockRole},
-			},
-		}
-		return &result, nil
-	}
-	return &m.ResourceAccess, nil
 }
 
 func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
