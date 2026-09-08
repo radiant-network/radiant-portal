@@ -18,6 +18,7 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
         "priority_code": null,
         "category_code": "postnatal",
         "analysis_code": "Cypress",
+        "resolution_status_code": null,
         "note": null,
         "ordering_physician": null,
         "ordering_organization_code": "Cypress",
