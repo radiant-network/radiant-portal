@@ -384,6 +384,6 @@ func Test_Run_LogLinePerFile(t *testing.T) {
 	opts.Log = &log
 	Run(context.Background(), []Item{{Name: "a.bin", Presign: presign(srv.URL+"/a", nil)}}, opts)
 	assert.Contains(t, log.String(), "a.bin")
-	assert.Contains(t, log.String(), "10.0 KB")
+	assert.Contains(t, log.String(), "10 kB")
 	assert.Contains(t, log.String(), "ok")
 }

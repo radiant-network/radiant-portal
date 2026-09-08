@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/radiant-network/radiant-api/internal/cli/units"
+	"github.com/dustin/go-humanize"
 )
 
 const (
@@ -114,10 +114,9 @@ func Parse(r io.Reader) (entries []Entry, warnings []string, err error) {
 			continue
 		}
 		seen[id] = line
-		size, err := units.ParseSize(get(ColumnSize))
-		if err != nil {
-			warn("%v for document %d, size treated as unknown", err, id)
-			size = 0
+		size, ok := parseSize(get(ColumnSize))
+		if !ok {
+			warn("invalid size %q for document %d, size treated as unknown", get(ColumnSize), id)
 		}
 		entries = append(entries, Entry{Tenant: tenant, DocumentID: id, Name: get(ColumnName), Size: size})
 	}
@@ -125,6 +124,18 @@ func Parse(r io.Reader) (entries []Entry, warnings []string, err error) {
 		return nil, warnings, errors.New("manifest has no valid document row")
 	}
 	return entries, warnings, nil
+}
+
+// parseSize accepts "123", "1.5 GB", "512 MiB". Empty means unknown (0, ok).
+func parseSize(raw string) (int64, bool) {
+	if raw == "" {
+		return 0, true
+	}
+	n, err := humanize.ParseBytes(raw)
+	if err != nil {
+		return 0, false
+	}
+	return int64(n), true
 }
 
 func blank(rec []string) bool {

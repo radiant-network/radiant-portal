@@ -23,7 +23,7 @@ cmd/
                    (test-and-release-cli.yml), not part of any docker image
 internal/
   cli/         - radiant-client packages (config, keycloak device flow, api client, manifest,
-                 pool, download, diskspace, prompt, units). MUST NOT import internal/types,
+                 pool, download, diskspace, prompt, style). MUST NOT import internal/types,
                  internal/utils or internal/client: they pull gorm/gin/aws into the binary.
                  The /config JSON shape is duplicated in cli/config and pinned by
                  Test_ClientConfig_MatchesCLIContract

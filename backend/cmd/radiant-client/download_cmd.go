@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/radiant-network/radiant-api/internal/cli/api"
 	"github.com/radiant-network/radiant-api/internal/cli/auth"
 	"github.com/radiant-network/radiant-api/internal/cli/config"
@@ -20,7 +21,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/cli/manifest"
 	"github.com/radiant-network/radiant-api/internal/cli/prompt"
 	"github.com/radiant-network/radiant-api/internal/cli/style"
-	"github.com/radiant-network/radiant-api/internal/cli/units"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -108,13 +108,13 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 		return err
 	}
 	if total > available {
-		return fmt.Errorf("not enough disk space: %s needed, %s available in %s", units.FormatBytes(total), units.FormatBytes(available), outDir)
+		return fmt.Errorf("not enough disk space: %s needed, %s available in %s", humanize.Bytes(uint64(total)), humanize.Bytes(uint64(available)), outDir)
 	}
 	sizeNote := ""
 	if unknown > 0 {
 		sizeNote = p.Yellow(fmt.Sprintf(", %d without size in the manifest", unknown))
 	}
-	prompt.Printf(out, "\nSize to download: %s (%d files%s)   available: %s\n", p.Highlight(units.FormatBytes(total)), toDownload, sizeNote, p.Bold(units.FormatBytes(available)))
+	prompt.Printf(out, "\nSize to download: %s (%d files%s)   available: %s\n", p.Highlight(humanize.Bytes(uint64(total))), toDownload, sizeNote, p.Bold(humanize.Bytes(uint64(available))))
 	if !f.yes {
 		ok, err := prompt.Confirm(cmd.InOrStdin(), out, "Continue?")
 		if err != nil {
