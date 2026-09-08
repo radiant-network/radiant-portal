@@ -1,23 +1,14 @@
-import { Check, CircleDashed, FileQuestion, Hourglass, OctagonX, Pen, RefreshCcw } from 'lucide-react';
-
 import type { FiltersValue } from '@/api/api';
+import { statusFallbackIcon, statusIcons } from '@/components/base/badges/status-badge';
 import type { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 /**
  * Item Status
  */
 const itemStatusTranslationKeyPrefix = 'case_exploration.status';
+
 function getItemStatusIcon(statusKey: string) {
-  const iconMap: { [key: string]: any } = {
-    draft: Pen,
-    submitted: Hourglass,
-    in_progress: RefreshCcw,
-    completed: Check,
-    incomplete: CircleDashed,
-    revoke: OctagonX,
-    unknown: FileQuestion,
-  };
-  return iconMap[statusKey.toLowerCase()] || FileQuestion;
+  return statusIcons[statusKey.toLowerCase()] || statusFallbackIcon;
 }
 
 export default function getItemStatus(options: FiltersValue[], t: any): IFilterButtonItem[] {

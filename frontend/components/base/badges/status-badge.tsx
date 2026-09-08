@@ -45,7 +45,9 @@ const colors: Record<string, BadgeProps['variant']> = {
   revoked: 'neutral',
 };
 
-const icons: Record<string, LucideIcon> = {
+export const statusFallbackIcon = FileQuestion;
+
+export const statusIcons: Record<string, LucideIcon> = {
   submitted: Hourglass,
   processing: LoaderCircle,
   in_progress: RefreshCcwIcon,
@@ -62,7 +64,7 @@ function StatusBadge({ status, className }: StatusBadgeProps) {
   const { t } = useI18n();
 
   const color = colors[status] ?? 'neutral';
-  const Icon = icons[status] ?? FileQuestion;
+  const Icon = statusIcons[status] ?? statusFallbackIcon;
 
   return (
     <Badge variant={color} className={className}>
