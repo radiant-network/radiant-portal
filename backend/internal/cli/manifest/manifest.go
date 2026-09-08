@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 
@@ -132,7 +133,7 @@ func parseSize(raw string) (int64, bool) {
 		return 0, true
 	}
 	n, err := humanize.ParseBytes(raw)
-	if err != nil {
+	if err != nil || n > math.MaxInt64 {
 		return 0, false
 	}
 	return int64(n), true

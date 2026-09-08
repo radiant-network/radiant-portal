@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/radiant-network/radiant-api/internal/cli/api"
 	"github.com/radiant-network/radiant-api/internal/cli/auth"
 	"github.com/radiant-network/radiant-api/internal/cli/config"
@@ -108,13 +107,13 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 		return err
 	}
 	if total > available {
-		return fmt.Errorf("not enough disk space: %s needed, %s available in %s", humanize.Bytes(uint64(total)), humanize.Bytes(uint64(available)), outDir)
+		return fmt.Errorf("not enough disk space: %s needed, %s available in %s", prompt.Bytes(total), prompt.Bytes(available), outDir)
 	}
 	sizeNote := ""
 	if unknown > 0 {
 		sizeNote = p.Yellow(fmt.Sprintf(", %d without size in the manifest", unknown))
 	}
-	prompt.Printf(out, "\nSize to download: %s (%d files%s)   available: %s\n", p.Highlight(humanize.Bytes(uint64(total))), toDownload, sizeNote, p.Bold(humanize.Bytes(uint64(available))))
+	prompt.Printf(out, "\nSize to download: %s (%d files%s)   available: %s\n", p.Highlight(prompt.Bytes(total)), toDownload, sizeNote, p.Bold(prompt.Bytes(available)))
 	if !f.yes {
 		ok, err := prompt.Confirm(cmd.InOrStdin(), out, "Continue?")
 		if err != nil {

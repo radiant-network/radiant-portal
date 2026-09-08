@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/dustin/go-humanize"
 )
 
 // Printf writes console output. A failed write to the terminal is not an error worth handling.
@@ -56,4 +58,12 @@ func readLine(in io.Reader) (string, error) {
 		return "", fmt.Errorf("read input: %w", err)
 	}
 	return line, nil
+}
+
+// Bytes renders a size for the console ("1.5 GB"). Negative values render as 0 B.
+func Bytes(n int64) string {
+	if n < 0 {
+		n = 0
+	}
+	return humanize.Bytes(uint64(n)) //nolint:gosec // G115: clamped to >= 0 above
 }

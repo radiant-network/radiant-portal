@@ -15,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/radiant-network/radiant-api/internal/cli/api"
 	"github.com/radiant-network/radiant-api/internal/cli/pool"
 	"github.com/radiant-network/radiant-api/internal/cli/prompt"
@@ -359,7 +358,7 @@ func (d *downloader) log(name string, size int64, status string) {
 		return
 	}
 	if size > 0 {
-		prompt.Printf(d.opts.Log, "%-40s %10s  %s\n", name, humanize.Bytes(uint64(size)), status)
+		prompt.Printf(d.opts.Log, "%-40s %10s  %s\n", name, prompt.Bytes(size), status)
 		return
 	}
 	prompt.Printf(d.opts.Log, "%-40s %10s  %s\n", name, "", status)
