@@ -30,7 +30,6 @@ const CRITERIAS = {
   diagnosis_lab_code: { key: 'diagnosis_lab_code', visible: false },
   ordering_organization_code: { key: 'ordering_organization_code', visible: false },
   panel_code: { key: 'panel_code', visible: false },
-  resolution_status_code: { key: 'resolution_status_code', visible: false },
   life_status_code: { key: 'proband_life_status_code', visible: false },
   case_category_code: { key: 'case_category_code', visible: false },
 };
@@ -44,7 +43,6 @@ export const FILTER_DEFAULTS = {
   diagnosis_lab_code: [],
   ordering_organization_code: [],
   panel_code: [],
-  resolution_status_code: [],
   life_status_code: [],
   case_category_code: [],
 };
@@ -118,7 +116,6 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           };
         case 'life_status_code':
         case 'case_category_code':
-        case 'resolution_status_code':
           return {
             ...baseOption,
             isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,

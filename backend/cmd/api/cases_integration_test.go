@@ -142,10 +142,6 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"key":"revoked", "label":"Cancelled"},
 			{"key":"submitted", "label":"Pending"},
 			{"key":"unresolved", "label":"Unresolved"}],
-		"resolution_status_code":[
-			{"key":"inconclusive", "label":"Inconclusive"},
-			{"key":"solved", "label":"Solved"},
-			{"key":"unsolved", "label":"Unsolved"}],
 		"life_status_code":[
 			{"key":"alive", "label":"Alive"},
 			{"key":"deceased", "label":"Deceased"},

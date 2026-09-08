@@ -36,9 +36,8 @@ class CaseFilters(BaseModel):
     panel_code: List[FiltersValue]
     priority_code: List[FiltersValue]
     project_code: List[FiltersValue]
-    resolution_status_code: List[FiltersValue]
     status_code: List[FiltersValue]
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "case_category_code", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "resolution_status_code", "status_code"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "case_category_code", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "status_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -142,13 +141,6 @@ class CaseFilters(BaseModel):
                 if _item_project_code:
                     _items.append(_item_project_code.to_dict())
             _dict['project_code'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in resolution_status_code (list)
-        _items = []
-        if self.resolution_status_code:
-            for _item_resolution_status_code in self.resolution_status_code:
-                if _item_resolution_status_code:
-                    _items.append(_item_resolution_status_code.to_dict())
-            _dict['resolution_status_code'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in status_code (list)
         _items = []
         if self.status_code:
@@ -177,7 +169,6 @@ class CaseFilters(BaseModel):
             "panel_code": [FiltersValue.from_dict(_item) for _item in obj["panel_code"]] if obj.get("panel_code") is not None else None,
             "priority_code": [FiltersValue.from_dict(_item) for _item in obj["priority_code"]] if obj.get("priority_code") is not None else None,
             "project_code": [FiltersValue.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
-            "resolution_status_code": [FiltersValue.from_dict(_item) for _item in obj["resolution_status_code"]] if obj.get("resolution_status_code") is not None else None,
             "status_code": [FiltersValue.from_dict(_item) for _item in obj["status_code"]] if obj.get("status_code") is not None else None
         })
         return _obj

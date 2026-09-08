@@ -632,23 +632,6 @@ export async function httpCaseFiltersApiResponse() {
         count: 0,
       },
     ],
-    resolution_status_code: [
-      {
-        key: 'inconclusive',
-        label: 'Inconclusive',
-        count: 0,
-      },
-      {
-        key: 'solved',
-        label: 'Solved',
-        count: 0,
-      },
-      {
-        key: 'unsolved',
-        label: 'Unsolved',
-        count: 0,
-      },
-    ],
     panel_code: [],
     life_status_code: [
       {

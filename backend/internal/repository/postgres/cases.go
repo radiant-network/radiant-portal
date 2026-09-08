@@ -36,10 +36,10 @@ func (r *CasesRepository) UpdateCaseDiagnosisLabCode(ctx context.Context, caseID
 // proband_id, project_id, submitter_case_id and tenant_code untouched — those are the
 // natural key + immutable identity, not updatable fields.
 //
-// priority_code and resolution_status_code are FK-backed and DB-defaulted columns; unlike
-// the plain text fields, writing an empty string for them (an omitted optional field) would
-// violate the FK rather than fall back to the default the way a fresh INSERT would. So an
-// empty value leaves the existing column untouched instead of clearing it.
+// priority_code is a FK-backed, DB-defaulted column; unlike the plain text fields, writing an
+// empty string for it (an omitted optional field) would violate the FK rather than fall back to
+// the default the way a fresh INSERT would. So an empty value leaves the existing column
+// untouched instead of clearing it.
 func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) error {
 	updates := map[string]any{
 		"case_type_code":             c.CaseTypeCode,
@@ -56,9 +56,6 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 	}
 	if c.PriorityCode != "" {
 		updates["priority_code"] = c.PriorityCode
-	}
-	if c.ResolutionStatusCode != "" {
-		updates["resolution_status_code"] = c.ResolutionStatusCode
 	}
 
 	tx := r.db.WithContext(ctx).Table(types.CaseTable.Name).Where("id = ?", caseID).Updates(updates)

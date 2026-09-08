@@ -44,13 +44,12 @@ class CaseBatch(BaseModel):
     primary_condition_value: Optional[StrictStr] = None
     priority_code: Optional[StrictStr] = None
     project_code: StrictStr
-    resolution_status_code: Optional[StrictStr] = None
     sequencing_experiments: List[CaseSequencingExperimentBatch]
     status_code: StrictStr
     submitter_case_id: Optional[StrictStr] = None
     tasks: List[CaseTaskBatch]
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnosis_hypothesis", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
+    __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnosis_hypothesis", "diagnostic_lab_code", "fetuses", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
 
     @field_validator('category_code')
     def category_code_validate_enum(cls, value):
@@ -158,7 +157,6 @@ class CaseBatch(BaseModel):
             "primary_condition_value": obj.get("primary_condition_value"),
             "priority_code": obj.get("priority_code"),
             "project_code": obj.get("project_code"),
-            "resolution_status_code": obj.get("resolution_status_code"),
             "sequencing_experiments": [CaseSequencingExperimentBatch.from_dict(_item) for _item in obj["sequencing_experiments"]] if obj.get("sequencing_experiments") is not None else None,
             "status_code": obj.get("status_code"),
             "submitter_case_id": obj.get("submitter_case_id"),

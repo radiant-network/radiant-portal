@@ -284,20 +284,6 @@ func (CaseCategory) TableName() string {
 	return CaseCategoryTable.Name
 }
 
-var ResolutionStatusTable = Table{
-	Name:           "resolution_status",
-	FederationName: "radiant_jdbc.public.resolution_status",
-	Alias:          "resolution_status",
-}
-
-type ResolutionStatus struct {
-	ValueSet
-} // @name ResolutionStatus
-
-func (ResolutionStatus) TableName() string {
-	return ResolutionStatusTable.Name
-}
-
 var CaseTypeTable = Table{
 	Name:           "case_type",
 	FederationName: "radiant_jdbc.public.case_type",

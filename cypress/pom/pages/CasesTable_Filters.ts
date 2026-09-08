@@ -52,12 +52,6 @@ export const filters = [
     isVisibleByDefault: false,
   },
   {
-    key: 'resolution_status_code',
-    label: 'Resolution',
-    field: 'resolution_status_code',
-    isVisibleByDefault: false,
-  },
-  {
     key: 'life_status_code',
     label: 'Vital Status',
     field: 'proband_life_status_code',

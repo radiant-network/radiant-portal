@@ -106,6 +106,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
+*ConfigApi* | [**get_client_config**](docs/ConfigApi.md#get_client_config) | **GET** /config | Get public client configuration
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /{tenant}/documents/autocomplete | Get AutocompleteResult list of matching prefix
 *DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
 *DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /{tenant}/documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
@@ -225,6 +226,8 @@ Class | Method | HTTP request | Description
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
+ - [ClientAuthConfig](docs/ClientAuthConfig.md)
+ - [ClientConfig](docs/ClientConfig.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
  - [ClinvarVariantConditions](docs/ClinvarVariantConditions.md)
  - [Count](docs/Count.md)

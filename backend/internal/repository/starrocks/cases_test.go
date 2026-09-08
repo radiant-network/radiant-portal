@@ -68,7 +68,6 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.Equal(t, "EPILEP", (*cases)[1].PanelCode)
 		assert.Equal(t, "Epilepsy", (*cases)[1].PanelName)
 		assert.Equal(t, "postnatal", (*cases)[1].CaseCategoryCode)
-		assert.Equal(t, "unsolved", (*cases)[1].ResolutionStatusCode)
 	})
 }
 
@@ -197,33 +196,6 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 		assert.Equal(t, int64(1), *count)
 		assert.Len(t, *cases, 1)
 		assert.Equal(t, 1, (*cases)[0].CaseID)
-	})
-}
-
-func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
-				Value:     []interface{}{"unsolved"},
-			},
-		}
-		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(26), *count)
-
-		searchCriteria = []types.SearchCriterion{
-			{
-				FieldName: types.CaseResolutionStatusCodeField.GetAlias(),
-				Value:     []interface{}{"solved"},
-			},
-		}
-		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(0), *count)
 	})
 }
 
@@ -451,7 +423,6 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, len((*filters).Project), 2)
 		assert.Equal(t, len((*filters).DiagnosisLab), 2)
 		assert.Equal(t, len((*filters).OrderingOrganization), 4)
-		assert.Equal(t, 3, len((*filters).ResolutionStatus))
 		assert.Equal(t, 3, len((*filters).LifeStatus))
 		assert.Equal(t, 2, len((*filters).CaseCategory))
 		assert.Equal(t, 2, len((*filters).Panel))

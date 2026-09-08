@@ -420,12 +420,6 @@ export interface CaseBatch {
     'project_code': string;
     /**
      * 
-     * @type {string}
-     * @memberof CaseBatch
-     */
-    'resolution_status_code'?: string;
-    /**
-     * 
      * @type {Array<CaseSequencingExperimentBatch>}
      * @memberof CaseBatch
      */
@@ -880,12 +874,6 @@ export interface CaseFilters {
      * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'resolution_status_code': Array<FiltersValue>;
-    /**
-     * 
-     * @type {Array<FiltersValue>}
-     * @memberof CaseFilters
-     */
     'status_code': Array<FiltersValue>;
 }
 /**
@@ -1257,12 +1245,6 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'project_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseResult
-     */
-    'resolution_status_code'?: string;
     /**
      * 
      * @type {string}
@@ -5926,12 +5908,6 @@ export interface UpdateCaseBatch {
      * @memberof UpdateCaseBatch
      */
     'project_code': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateCaseBatch
-     */
-    'resolution_status_code'?: string;
     /**
      * 
      * @type {Array<CaseSequencingExperimentBatch>}

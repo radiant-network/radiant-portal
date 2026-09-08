@@ -18,7 +18,6 @@ describe('Cases - Batch - Missing fields - Optional dive fields', () => {
           "priority_code": "Cypress",
           "category_code": "postnatal",
           "analysis_code": "Cypress",
-          "resolution_status_code": "Cypress",
           "note": "Cypress",
           "ordering_physician": "Cypress",
           "ordering_organization_code": "Cypress",

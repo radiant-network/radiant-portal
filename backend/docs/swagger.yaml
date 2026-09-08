@@ -193,8 +193,6 @@ components:
           type: string
         project_code:
           type: string
-        resolution_status_code:
-          type: string
         sequencing_experiments:
           items:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
@@ -453,11 +451,6 @@ components:
             $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
-        resolution_status_code:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
         status_code:
           items:
             $ref: '#/components/schemas/FiltersValue'
@@ -473,7 +466,6 @@ components:
       - panel_code
       - priority_code
       - project_code
-      - resolution_status_code
       - status_code
       type: object
     CasePatientBatch:
@@ -643,8 +635,6 @@ components:
         project_code:
           type: string
         project_name:
-          type: string
-        resolution_status_code:
           type: string
         status_code:
           type: string
@@ -2908,8 +2898,6 @@ components:
         priority_code:
           type: string
         project_code:
-          type: string
-        resolution_status_code:
           type: string
         sequencing_experiments:
           items:

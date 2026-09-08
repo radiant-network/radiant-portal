@@ -137,11 +137,6 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		return nil, err
 	}
 
-	resolution, err := utils.GetFilter(db, types.ResolutionStatusTable, "name_en", nil)
-	if err != nil {
-		return nil, err
-	}
-
 	caseType, err := utils.GetFilter(db, types.CaseTypeTable, "name_en", nil)
 	if err != nil {
 		return nil, err
@@ -177,7 +172,6 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		DiagnosisLab:         diagnosisLab,
 		OrderingOrganization: orderingOrg,
 		CaseCategory:         caseCategory,
-		ResolutionStatus:     resolution,
 		CaseType:             caseType,
 		LifeStatus:           lifeStatus,
 		Panel:                panel,
