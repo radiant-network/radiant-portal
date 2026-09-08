@@ -279,14 +279,14 @@ func (d *downloader) one(ctx context.Context, it Item) (outcome, string, error) 
 func (d *downloader) fetch(ctx context.Context, rawURL, part string, offset *int64, size int64, bar *mpb.Bar) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("build download request: %w", err)
 	}
 	if *offset > 0 {
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", *offset))
 	}
 	resp, err := d.opts.HTTP.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("download request: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 

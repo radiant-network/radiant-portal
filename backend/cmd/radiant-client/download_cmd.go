@@ -184,7 +184,7 @@ func (e exitCodeError) Error() string { return e.msg }
 func prepareOutDir(dir string) (string, error) {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("resolve output directory: %w", err)
 	}
 	if err := os.MkdirAll(abs, 0o750); err != nil {
 		return "", fmt.Errorf("create output directory: %w", err)

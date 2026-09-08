@@ -99,12 +99,12 @@ func (c *Client) PollDeviceToken(ctx context.Context, da *DeviceAuth) (*Tokens, 
 	}
 	for {
 		if err := ctx.Err(); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("waiting for browser login: %w", err)
 		}
 		c.sleep(time.Duration(interval) * time.Second)
 		tokens, oerr, err := c.token(ctx, form)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("device login: %w", err)
 		}
 		if oerr == nil {
 			return tokens, nil
@@ -134,7 +134,7 @@ func (c *Client) Refresh(ctx context.Context, refreshToken string) (*Tokens, err
 	}
 	tokens, oerr, err := c.token(ctx, form)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("refresh session: %w", err)
 	}
 	if oerr != nil {
 		return nil, fmt.Errorf("%w: %s: %s", ErrInvalidGrant, oerr.Code, oerr.Description)
@@ -168,7 +168,7 @@ func (c *Client) token(ctx context.Context, form url.Values) (*Tokens, *oauthErr
 func (c *Client) post(ctx context.Context, endpoint string, form url.Values) ([]byte, int, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("build request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := c.http.Do(req)
@@ -178,7 +178,7 @@ func (c *Client) post(ctx context.Context, endpoint string, form url.Values) ([]
 	defer func() { _ = resp.Body.Close() }()
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("read response: %w", err)
 	}
 	return body, resp.StatusCode, nil
 }

@@ -42,7 +42,7 @@ func New(baseURL string) *Client {
 func (c *Client) GetConfig(ctx context.Context) (*config.ClientConfig, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/config", nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build /config request: %w", err)
 	}
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
@@ -63,11 +63,11 @@ func (c *Client) DownloadURL(ctx context.Context, tenant string, documentID int)
 	path := fmt.Sprintf("%s/%s/documents/%d/download_url", c.BaseURL, url.PathEscape(tenant), documentID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build download_url request: %w", err)
 	}
 	token, err := c.Token(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get access token: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := c.HTTP.Do(req)
