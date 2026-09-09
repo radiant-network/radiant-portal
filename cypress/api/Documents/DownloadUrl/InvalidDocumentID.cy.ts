@@ -13,13 +13,13 @@ describe('Documents - Download URL - Invalid document ID', () => {
   });
 
   it('Request status', () => {
-    expect(response.status).to.eq(404);
+    expect(response.status).to.eq(403);
   });
 
   it('Return content', () => {
     expect(response.body).to.have.all.keys('status', 'message');
     expect(response.body).to.include({
-      message: apiMessages.DocumentIdNotFound,
+      message: apiMessages.Forbidden,
     });
   });
 });
