@@ -58,8 +58,8 @@ class SequencingExperimentBatch(BaseModel):
     @field_validator('status_code')
     def status_code_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['unknown', 'draft', 'revoke', 'completed', 'incomplete', 'submitted', 'in_progress']):
-            raise ValueError("must be one of enum values ('unknown', 'draft', 'revoke', 'completed', 'incomplete', 'submitted', 'in_progress')")
+        if value not in set(['submitted', 'processing', 'in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked']):
+            raise ValueError("must be one of enum values ('submitted', 'processing', 'in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked')")
         return value
 
     model_config = ConfigDict(

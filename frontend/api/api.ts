@@ -4813,13 +4813,16 @@ export const SequencingExperimentBatchSequencingReadTechnologyCodeEnum = {
 
 export type SequencingExperimentBatchSequencingReadTechnologyCodeEnum = typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum[keyof typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum];
 export const SequencingExperimentBatchStatusCodeEnum = {
-    Unknown: 'unknown',
-    Draft: 'draft',
-    Revoke: 'revoke',
-    Completed: 'completed',
-    Incomplete: 'incomplete',
     Submitted: 'submitted',
-    InProgress: 'in_progress'
+    Processing: 'processing',
+    InProgress: 'in_progress',
+    InReview: 'in_review',
+    Completed: 'completed',
+    Resolved: 'resolved',
+    Unresolved: 'unresolved',
+    Inconclusive: 'inconclusive',
+    Reopened: 'reopened',
+    Revoked: 'revoked'
 } as const;
 
 export type SequencingExperimentBatchStatusCodeEnum = typeof SequencingExperimentBatchStatusCodeEnum[keyof typeof SequencingExperimentBatchStatusCodeEnum];

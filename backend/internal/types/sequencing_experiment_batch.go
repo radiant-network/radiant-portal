@@ -15,7 +15,7 @@ type SequencingExperimentBatch struct {
 	RunAlias                     TrimmedString `json:"run_alias,omitempty" toml:"run_alias,omitempty"`
 	RunDate                      *DateRFC3339  `json:"run_date,omitempty" toml:"run_date,omitempty" format:"date-time" example:"2023-10-01T00:00:00Z"`
 	RunName                      TrimmedString `json:"run_name,omitempty" toml:"run_name,omitempty"`
-	StatusCode                   string        `json:"status_code" toml:"status_code" binding:"required,oneof=unknown draft revoke completed incomplete submitted in_progress"`
+	StatusCode                   string        `json:"status_code" toml:"status_code" binding:"required,oneof=submitted processing in_progress in_review completed resolved unresolved inconclusive reopened revoked"`
 }
 
 // CreateSequencingExperimentBatchBody represents the body required to create a sequencing experiment batch

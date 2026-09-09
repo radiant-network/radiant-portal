@@ -2371,13 +2371,16 @@ components:
           type: string
         status_code:
           enum:
-          - unknown
-          - draft
-          - revoke
-          - completed
-          - incomplete
           - submitted
+          - processing
           - in_progress
+          - in_review
+          - completed
+          - resolved
+          - unresolved
+          - inconclusive
+          - reopened
+          - revoked
           type: string
         submitter_sample_id:
           type: string
