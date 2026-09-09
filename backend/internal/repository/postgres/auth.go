@@ -90,6 +90,42 @@ func (r *AuthRepository) OrgsForNote(ctx context.Context, tenantCode, noteID str
 	return orgs, nil
 }
 
+// OrgsForSubmitterCases returns the diagnosis lab of each (project code, submitter case id)
+// pair given, keyed by that pair. It serves the case-batch gate, whose records name their case
+// by submitter key rather than by id. A pair absent from the result does not exist in the
+// tenant, which the caller must treat as unauthorized rather than skip.
+func (r *AuthRepository) OrgsForSubmitterCases(ctx context.Context, tenantCode string, pairs [][2]string) (map[[2]string]string, error) {
+	if len(pairs) == 0 {
+		return map[[2]string]string{}, nil
+	}
+	tuples := make([]string, 0, len(pairs))
+	args := []any{tenantCode}
+	for _, pair := range pairs {
+		tuples = append(tuples, "(?, ?)")
+		args = append(args, pair[0], pair[1])
+	}
+
+	var rows []struct {
+		ProjectCode      string
+		SubmitterCaseID  string
+		DiagnosisLabCode string
+	}
+	query := fmt.Sprintf(`
+		SELECT p.code AS project_code, c.submitter_case_id, c.diagnosis_lab_code
+		FROM cases c
+		JOIN project p ON p.id = c.project_id AND p.tenant_code = c.tenant_code
+		WHERE c.tenant_code = ? AND (p.code, c.submitter_case_id) IN (%s)`, strings.Join(tuples, ", "))
+	if err := r.db.WithContext(ctx).Raw(query, args...).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error resolving orgs for %d submitter cases: %w", len(pairs), err)
+	}
+
+	orgs := make(map[[2]string]string, len(rows))
+	for _, row := range rows {
+		orgs[[2]string{row.ProjectCode, row.SubmitterCaseID}] = row.DiagnosisLabCode
+	}
+	return orgs, nil
+}
+
 // OrgsForDocument returns the diagnosis labs of the cases a document is attached to. A
 // document reaches its case through the task that produced it, and nothing in the schema
 // forbids two tasks from two cases sharing one document, so this can legitimately return

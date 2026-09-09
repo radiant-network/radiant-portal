@@ -37,7 +37,9 @@ func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			body       types.CreateCaseBatchBody
 			queryParam types.CreateBatchQueryParam
 		)
-		if err := c.ShouldBindJSON(&body); err != nil {
+		// Body-cached binding: the action gate already read each record's lab off this body
+		// to resolve the orgs, so the payload is served from the context, not the socket.
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
 			HandleValidationError(c, err)
 			return
 		}
@@ -102,7 +104,9 @@ func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			body       types.PatchCaseBatchBody
 			queryParam types.CreateBatchQueryParam
 		)
-		if err := c.ShouldBindJSON(&body); err != nil {
+		// Body-cached binding: the action gate already read each record's lab off this body
+		// to resolve the orgs, so the payload is served from the context, not the socket.
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
 			HandleValidationError(c, err)
 			return
 		}
@@ -168,7 +172,9 @@ func PutCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			body       types.UpdateCaseBatchBody
 			queryParam types.CreateBatchQueryParam
 		)
-		if err := c.ShouldBindJSON(&body); err != nil {
+		// Body-cached binding: the action gate already read each record's lab off this body
+		// to resolve the orgs, so the payload is served from the context, not the socket.
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
 			HandleValidationError(c, err)
 			return
 		}

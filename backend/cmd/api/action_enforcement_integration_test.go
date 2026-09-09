@@ -227,12 +227,18 @@ var orgResolvedTenantRoutes = map[string]bool{
 	"POST /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id":   true,
 	"DELETE /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id": true,
 	"GET /:tenant/documents/:document_id/download_url":                           true,
+	// Case batches resolve one lab per record and require the action at every one of them.
+	"POST /:tenant/cases/batch":  true,
+	"PATCH /:tenant/cases/batch": true,
+	"PUT /:tenant/cases/batch":   true,
 }
 
-// sentinelOrgActionRoutes hold an org-scoped action but are still gated with the tenant-wide
-// sentinel: the batch routes carry their org per record in the payload, so the check belongs
-// inline in validation rather than in a route middleware. Every other org-scoped route must
-// resolve a real org — Test_OrgScopedRoutesResolveTheirOrg enforces that.
+// sentinelOrgActionRoutes hold an org-scoped action but are gated with the tenant-wide
+// sentinel, because nothing in the request names an organization to check against. The
+// patient, sample and sequencing batches carry no diagnosis lab — their records are not
+// attached to a case yet — and a batch row names no org either, so holding can_ingest_data
+// anywhere in the tenant is what admits these. Every other org-scoped route must resolve a
+// real org: Test_OrgScopedRoutesResolveTheirOrg enforces that.
 var sentinelOrgActionRoutes = map[string]bool{
 	"GET /:tenant/batches/:batch_id": true,
 	"POST /:tenant/patients/batch":   true,
@@ -241,9 +247,6 @@ var sentinelOrgActionRoutes = map[string]bool{
 	"PUT /:tenant/samples/batch":     true,
 	"POST /:tenant/sequencing/batch": true,
 	"PUT /:tenant/sequencing/batch":  true,
-	"POST /:tenant/cases/batch":      true,
-	"PATCH /:tenant/cases/batch":     true,
-	"PUT /:tenant/cases/batch":       true,
 }
 
 // Test_OrgScopedRoutesResolveTheirOrg is the guard behind "no org-scoped route falls back to
