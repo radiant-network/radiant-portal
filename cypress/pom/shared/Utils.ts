@@ -239,14 +239,16 @@ export function getSettingsCheckbox(value: string | RegExp) {
 export const getStatusColor = (status: string) => {
   const concatenatedStatus = status.replace(/\s+/g, '');
   const mapping: Record<string, string> = {
+    Cancelled: 'neutral',
     Closed: 'green',
-    Completed: 'green',
-    Draft: 'neutral',
+    Inconclusive: 'lime',
     InProgress: 'blue',
-    Incomplete: 'orange',
-    Revoke: 'red',
-    Submitted: 'yellow',
-    Unknown: 'blank',
+    InReview: 'cyan',
+    Pending: 'outline',
+    Processing: 'yellow',
+    Reopened: 'violet',
+    Resolved: 'green',
+    Unresolved: 'lime',
   };
 
   return mapping[concatenatedStatus];
@@ -260,14 +262,16 @@ export const getStatusColor = (status: string) => {
 export const getStatusIcon = (status: string) => {
   const concatenatedStatus = status.replace(/\s+/g, '');
   const mapping: Record<string, string> = {
+    Cancelled: 'circle-x',
     Closed: 'check',
-    Completed: 'check',
-    Draft: 'pen',
+    Inconclusive: 'file-question',
     InProgress: 'refresh-ccw',
-    Incomplete: 'circle-dashed',
-    Revoke: 'circle-x',
-    Submitted: 'hourglass',
-    Unknown: 'file-question',
+    InReview: 'eye',
+    Pending: 'hourglass',
+    Processing: 'loader-circle',
+    Reopened: 'rotate-ccw',
+    Resolved: 'circle-check',
+    Unresolved: 'circle-dashed',
   };
 
   return mapping[concatenatedStatus];
