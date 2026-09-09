@@ -529,6 +529,9 @@ const germlineContentHandlers: Record<string, ContentHandler> = {
 
 const somaticContentHandlers: Record<string, ContentHandler> = {
   ...sharedContentHandlers,
+  hotspot: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowClass(dataVariant.hotspot ? CommonSelectors.hotspotOnIcon : CommonSelectors.hotspotOffIcon, position);
+  },
   omim: ({ position, dataVariant }) => {
     dataVariant.omim.codes.forEach((code: string) => {
       cy.validateTableFirstRowContent(code, position);

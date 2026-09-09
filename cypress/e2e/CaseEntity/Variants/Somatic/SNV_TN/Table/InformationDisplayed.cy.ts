@@ -54,6 +54,11 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information disp
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('omim', data.variantSomatic);
   });
 
+  it('Hotspot', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('hotspot', data.variantSomatic);
+  });
+
   it('ClinVar', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('clinvar', data.variantSomatic);
@@ -64,6 +69,11 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information disp
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gnomad', data.variantSomatic);
   });
 
+  it('Freq. TO', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_to', data.variantSomatic);
+  });
+
   it('Freq. TN', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_tn', data.variantSomatic);
@@ -72,5 +82,20 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information disp
   it('Freq. G', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_g', data.variantSomatic);
+  });
+
+  it('SQ', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('sq', data.variantSomatic);
+  });
+
+  it('AQ', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('aq', data.variantSomatic);
+  });
+
+  it('AD Ratio', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('ad_ratio', data.variantSomatic);
   });
 });
