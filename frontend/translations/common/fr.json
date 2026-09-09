@@ -1125,7 +1125,6 @@
         "panel_code": "Panel",
         "priority_code": "Priorité",
         "project_code": "Projet",
-        "resolution_status_code": "Résolution",
         "status_code": "Statut"
       },
       "headers": {
@@ -1156,8 +1155,7 @@
         "life_status": "Statut vital",
         "category_code": "Pré/Postnatal",
         "panel": "Panel",
-        "jhn": "RAMQ",
-        "resolution_status_code": "Résolution"
+        "jhn": "RAMQ"
       }
     },
     "sequencing": {

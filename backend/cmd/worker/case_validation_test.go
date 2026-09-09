@@ -265,9 +265,6 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 	case postgres.ValueSetOnset:
 		return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
 
-	case postgres.ValueSetResolutionStatus:
-		return []string{"solved", "unsolved", "inconclusive"}, nil
-
 	case postgres.ValueSetObservation:
 		return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
 
@@ -303,12 +300,6 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 	default:
 		return nil, nil
 	}
-}
-
-type ResolutionStatusMockRepo struct{}
-
-func (m *ResolutionStatusMockRepo) GetResolutionStatusCodes() ([]string, error) {
-	return []string{"solved", "unsolved", "inconclusive"}, nil
 }
 
 type SamplesMockRepo struct {
@@ -1573,37 +1564,14 @@ func Test_validateStatusCode_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
 		Case: types.CaseBatch{
-			StatusCode:           "in_progress",
-			ResolutionStatusCode: "unsolved",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "wgs",
+			StatusCode:   "in_progress",
+			PriorityCode: "routine",
+			CategoryCode: "clinical",
+			AnalysisCode: "wgs",
 		},
-		StatusCodes:           []string{"in_progress", "revoke", "completed"},
-		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
-		PriorityCodes:         []string{"routine"},
-		CategoryCodes:         []string{"clinical"},
-	}
-
-	cr.validateCodes()
-
-	assert.Empty(t, cr.Errors)
-}
-
-func Test_validateResolutionStatusCode_Valid(t *testing.T) {
-	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
-		Case: types.CaseBatch{
-			StatusCode:           "in_progress",
-			ResolutionStatusCode: "unsolved",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "wgs",
-		},
-		StatusCodes:           []string{"in_progress", "revoke", "completed"},
-		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
-		PriorityCodes:         []string{"routine"},
-		CategoryCodes:         []string{"clinical"},
+		StatusCodes:   []string{"in_progress", "revoke", "completed"},
+		PriorityCodes: []string{"routine"},
+		CategoryCodes: []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1615,16 +1583,14 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr := &CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
 		Case: types.CaseBatch{
-			StatusCode:           "unknown_status",
-			ResolutionStatusCode: "unsolved",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "wgs",
+			StatusCode:   "unknown_status",
+			PriorityCode: "routine",
+			CategoryCode: "clinical",
+			AnalysisCode: "wgs",
 		},
-		StatusCodes:           []string{"in_progress", "revoke", "completed"},
-		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
-		PriorityCodes:         []string{"routine"},
-		CategoryCodes:         []string{"clinical"},
+		StatusCodes:   []string{"in_progress", "revoke", "completed"},
+		PriorityCodes: []string{"routine"},
+		CategoryCodes: []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1634,31 +1600,6 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "\"unknown_status\" is not a valid status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0].status_code", cr.Errors[0].Path)
-}
-
-func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
-	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
-		Case: types.CaseBatch{
-			StatusCode:           "in_progress",
-			ResolutionStatusCode: "nan",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "wgs",
-		},
-		StatusCodes:           []string{"in_progress", "revoke", "completed"},
-		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
-		PriorityCodes:         []string{"routine"},
-		CategoryCodes:         []string{"clinical"},
-	}
-
-	cr.validateCodes()
-
-	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field resolution_status_code for create_case 0")
-	assert.Contains(t, cr.Errors[0].Message, "\"nan\" is not a valid resolution status code")
-	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].resolution_status_code", cr.Errors[0].Path)
 }
 
 // -----------------------------------------------------------------------------
@@ -1685,7 +1626,6 @@ func Test_validateCase_Valid(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed", "unknown"},
-		ResolutionStatusCodes:      []string{"solved", "unsolved", "unknown"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
@@ -1696,7 +1636,6 @@ func Test_validateCase_Valid(t *testing.T) {
 			OrderingOrganizationCode:   "LAB-2",
 			PrimaryConditionCodeSystem: "HPO",
 			PrimaryConditionValue:      "HP:0001234",
-			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smîth",
 			PriorityCode:               "routine",
@@ -1730,17 +1669,15 @@ func Test_validateCase_MissingProject(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:      "CASE-1",
-			StatusCode:           "completed",
-			ResolutionStatusCode: "solved",
-			ProjectCode:          "UNKNOWN-PROJ",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "WGA",
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			ProjectCode:     "UNKNOWN-PROJ",
+			PriorityCode:    "routine",
+			CategoryCode:    "clinical",
+			AnalysisCode:    "WGA",
 		},
 	}
 
@@ -1775,17 +1712,15 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:      "CASE-1",
-			StatusCode:           "completed",
-			ResolutionStatusCode: "solved",
-			DiagnosticLabCode:    "UNKNOWN-LAB",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "WGA",
+			SubmitterCaseId:   "CASE-1",
+			StatusCode:        "completed",
+			DiagnosticLabCode: "UNKNOWN-LAB",
+			PriorityCode:      "routine",
+			CategoryCode:      "clinical",
+			AnalysisCode:      "WGA",
 		},
 	}
 
@@ -1818,16 +1753,14 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:      "CASE-1",
-			StatusCode:           "completed",
-			ResolutionStatusCode: "solved",
-			AnalysisCode:         "UNKNOWN-ANALYSIS",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			AnalysisCode:    "UNKNOWN-ANALYSIS",
+			PriorityCode:    "routine",
+			CategoryCode:    "clinical",
 		},
 	}
 
@@ -1861,13 +1794,11 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 		OrderingOrganizationExists: false,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:          "CASE-1",
 			StatusCode:               "completed",
-			ResolutionStatusCode:     "solved",
 			OrderingOrganizationCode: "UNKNOWN-ORG",
 			PriorityCode:             "routine",
 			CategoryCode:             "clinical",
@@ -1905,16 +1836,14 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed", "pending"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:      "CASE-1",
-			StatusCode:           "invalid_status",
-			ResolutionStatusCode: "solved",
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "WGA",
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "invalid_status",
+			PriorityCode:    "routine",
+			CategoryCode:    "clinical",
+			AnalysisCode:    "WGA",
 		},
 	}
 
@@ -1947,17 +1876,15 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "CASE-1",
 		StatusCodes:                []string{"completed"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:      "CASE-1",
-			StatusCode:           "completed",
-			ResolutionStatusCode: "solved",
-			Note:                 strings.Repeat("a", 1001),
-			PriorityCode:         "routine",
-			CategoryCode:         "clinical",
-			AnalysisCode:         "WGA",
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			Note:            strings.Repeat("a", 1001),
+			PriorityCode:    "routine",
+			CategoryCode:    "clinical",
+			AnalysisCode:    "WGA",
 		},
 	}
 
@@ -2081,7 +2008,6 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 		OrderingOrganizationExists: true,
 		SubmitterCaseID:            "",
 		StatusCodes:                []string{"completed", "unknown"},
-		ResolutionStatusCodes:      []string{"solved"},
 		PriorityCodes:              []string{"routine", "urgent"},
 		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
@@ -2092,7 +2018,6 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 			OrderingOrganizationCode:   "LAB-2",
 			PrimaryConditionCodeSystem: "HPO",
 			PrimaryConditionValue:      "HP:0001234",
-			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smith",
 			PriorityCode:               "routine",
@@ -2150,7 +2075,6 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			SubmitterCaseId:            "CASE-1",
 			Type:                       "germline",
 			StatusCode:                 "completed",
-			ResolutionStatusCode:       "solved",
 			OrderingOrganizationCode:   "LAB-1",
 			DiagnosticLabCode:          "LAB-2",
 			PrimaryConditionCodeSystem: "MONDO",
@@ -2217,7 +2141,6 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		SubmitterCaseId:            "CASE-1",
 		Type:                       "germline",
 		StatusCode:                 "in_progress",
-		ResolutionStatusCode:       "solved",
 		OrderingOrganizationCode:   "LAB-1",
 		DiagnosticLabCode:          "LAB-2",
 		PrimaryConditionCodeSystem: "MONDO",

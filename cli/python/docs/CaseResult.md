@@ -32,7 +32,6 @@ Name | Type | Description | Notes
 **proband_life_status_code** | **str** |  | [optional] 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
-**resolution_status_code** | **str** |  | [optional] 
 **status_code** | **str** |  | 
 **submitter_proband_id** | **str** |  | [optional] 
 **updated_on** | **str** |  | 

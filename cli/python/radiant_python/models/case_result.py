@@ -52,11 +52,10 @@ class CaseResult(BaseModel):
     proband_life_status_code: Optional[StrictStr] = None
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
-    resolution_status_code: Optional[StrictStr] = None
     status_code: StrictStr
     submitter_proband_id: Optional[StrictStr] = None
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "project_code", "project_name", "resolution_status_code", "status_code", "submitter_proband_id", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "project_code", "project_name", "status_code", "submitter_proband_id", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -135,7 +134,6 @@ class CaseResult(BaseModel):
             "proband_life_status_code": obj.get("proband_life_status_code"),
             "project_code": obj.get("project_code"),
             "project_name": obj.get("project_name"),
-            "resolution_status_code": obj.get("resolution_status_code"),
             "status_code": obj.get("status_code"),
             "submitter_proband_id": obj.get("submitter_proband_id"),
             "updated_on": obj.get("updated_on")

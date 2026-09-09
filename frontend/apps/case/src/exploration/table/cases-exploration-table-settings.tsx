@@ -106,14 +106,6 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
-    // Resolution
-    columnHelper.accessor(row => row.resolution_status_code, {
-      id: 'resolution_status_code',
-      cell: info => info.getValue(),
-      header: t('case_exploration.case.headers.resolution_status_code'),
-      size: 124,
-      minSize: 40,
-    }),
     // Type
     columnHelper.accessor(row => row.case_type, {
       id: 'case_type',
@@ -311,12 +303,6 @@ const defaultSettings = createColumnSettings([
     id: 'status_code',
     visible: true,
     label: 'case_exploration.case.headers.status_code',
-  },
-  {
-    id: 'resolution_status_code',
-    visible: false,
-    label: 'case_exploration.case.headers.resolution_status_code',
-    additionalFields: ['resolution_status_code'],
   },
   {
     id: 'case_type',

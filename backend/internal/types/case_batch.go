@@ -35,7 +35,6 @@ type CaseBatch struct {
 	PriorityCode               string                           `json:"priority_code,omitempty" toml:"priority_code"`
 	CategoryCode               string                           `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
 	AnalysisCode               string                           `json:"analysis_code" toml:"analysis_code" binding:"required"`
-	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string                           `json:"note,omitempty" toml:"note"`
 	DiagnosisHypothesis        string                           `json:"diagnosis_hypothesis,omitempty" toml:"diagnosis_hypothesis"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
@@ -155,7 +154,6 @@ type UpdateCaseBatch struct {
 	PriorityCode               string              `json:"priority_code,omitempty" toml:"priority_code"`
 	CategoryCode               string              `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
 	AnalysisCode               string              `json:"analysis_code" toml:"analysis_code" binding:"required"`
-	ResolutionStatusCode       string              `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string              `json:"note,omitempty" toml:"note"`
 	DiagnosisHypothesis        string              `json:"diagnosis_hypothesis,omitempty" toml:"diagnosis_hypothesis"`
 	OrderingOrganizationCode   string              `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`

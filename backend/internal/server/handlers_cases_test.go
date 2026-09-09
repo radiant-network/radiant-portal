@@ -94,11 +94,6 @@ func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilter
 			{Key: "deceased", Label: "Deceased"},
 			{Key: "unknown", Label: "Unknown"},
 		},
-		ResolutionStatus: []types.FiltersValue{
-			{Key: "inconclusive", Label: "Inconclusive"},
-			{Key: "solved", Label: "Solved"},
-			{Key: "unsolved", Label: "Unsolved"},
-		},
 		CaseCategory: []types.FiltersValue{
 			{Key: "prenatal", Label: "Prenatal"},
 			{Key: "postnatal", Label: "Postnatal"},
@@ -243,10 +238,6 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"key":"in_review", "label":"In Review"},
 			{"key":"in_progress", "label":"In Progress"},
 			{"key":"revoked", "label":"Cancelled"}
-		], "resolution_status_code":[
-			{"key":"inconclusive", "label":"Inconclusive"},
-			{"key":"solved", "label":"Solved"},
-			{"key":"unsolved", "label":"Unsolved"}
 		], "life_status_code":[
 			{"key":"alive", "label":"Alive"},
 			{"key":"deceased", "label":"Deceased"},

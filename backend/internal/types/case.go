@@ -17,9 +17,7 @@ type Case struct {
 	PriorityCode             string       `gorm:"default:routine"`
 	Priority                 Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
 	StatusCode               string
-	Status                   Status           `gorm:"foreignKey:Code;references:StatusCode"`
-	ResolutionStatusCode     string           `gorm:"default:unsolved"`
-	ResolutionStatus         ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
+	Status                   Status `gorm:"foreignKey:Code;references:StatusCode"`
 	PrimaryCondition         string
 	ConditionCodeSystem      string
 	DiagnosisHypothesis      string
@@ -64,7 +62,6 @@ type CaseResult struct {
 	HasVariants              bool      `json:"has_variants" validate:"required"`
 	PanelCode                string    `json:"panel_code,omitempty"`
 	PanelName                string    `json:"panel_name,omitempty"`
-	ResolutionStatusCode     string    `json:"resolution_status_code,omitempty"`
 	CaseCategoryCode         string    `json:"case_category_code,omitempty"`
 	ProbandJhn               string    `json:"proband_jhn,omitempty"`
 	ProbandLifeStatusCode    string    `json:"proband_life_status_code,omitempty"`
@@ -226,7 +223,6 @@ var CasesFields = []Field{
 	PanelCodeField,
 	PanelNameField,
 	CaseCategoryCodeField,
-	CaseResolutionStatusCodeField,
 	ProbandJhnField,
 	ProbandLifeStatusCodeField,
 	ProbandFirstNameField,
@@ -402,15 +398,6 @@ var CaseCategoryCodeField = Field{
 	Table:         CaseTable,
 }
 
-var CaseResolutionStatusCodeField = Field{
-	Name:          "resolution_status_code",
-	Alias:         "resolution_status_code",
-	CanBeSelected: true,
-	CanBeSorted:   true,
-	CanBeFiltered: true,
-	Table:         CaseTable,
-}
-
 type CaseFilters struct {
 	Status               []FiltersValue `json:"status_code" validate:"required"`
 	Priority             []FiltersValue `json:"priority_code" validate:"required"`
@@ -418,7 +405,6 @@ type CaseFilters struct {
 	Project              []FiltersValue `json:"project_code" validate:"required"`
 	DiagnosisLab         []FiltersValue `json:"diagnosis_lab_code" validate:"required"`
 	OrderingOrganization []FiltersValue `json:"ordering_organization_code" validate:"required"`
-	ResolutionStatus     []FiltersValue `json:"resolution_status_code" validate:"required"`
 	Panel                []FiltersValue `json:"panel_code" validate:"required"`
 	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
 	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`

@@ -14,7 +14,6 @@ Name | Type | Description | Notes
 **panel_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **priority_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **project_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
-**resolution_status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 
 ## Example

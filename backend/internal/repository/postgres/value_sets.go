@@ -32,7 +32,6 @@ const (
 	ValueSetPanelType                 ValueSetType = "panel_type"
 	ValueSetPlatform                  ValueSetType = "platform"
 	ValueSetPriority                  ValueSetType = "priority"
-	ValueSetResolutionStatus          ValueSetType = "resolution_status"
 	ValueSetSampleType                ValueSetType = "sample_type"
 	ValueSetSequencingReadTechnology  ValueSetType = "sequencing_read_technology"
 	ValueSetSex                       ValueSetType = "sex"
@@ -67,7 +66,6 @@ func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
 		ValueSetPanelType:                 types.PanelTypeTable.Name,
 		ValueSetPlatform:                  types.PlatformTable.Name,
 		ValueSetPriority:                  types.PriorityTable.Name,
-		ValueSetResolutionStatus:          types.ResolutionStatusTable.Name,
 		ValueSetSampleType:                types.SampleTypeTable.Name,
 		ValueSetSequencingReadTechnology:  types.SequencingReadTechnologyTable.Name,
 		ValueSetSex:                       types.SexTable.Name,

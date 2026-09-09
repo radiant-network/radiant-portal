@@ -857,11 +857,6 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field resolution_status_code for create_case 1. Reason: \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
-				Path:    "create_case[1].resolution_status_code",
-			},
-			{
-				Code:    "CASE-002",
 				Message: "Invalid field priority_code for create_case 1. Reason: \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
 				Path:    "create_case[1].priority_code",
 			},

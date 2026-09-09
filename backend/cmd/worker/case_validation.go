@@ -183,7 +183,6 @@ type CaseValidationRecord struct {
 	AncestryCodes                     []string
 	ConsanguinityCodes                []string
 	TaskTypeCodes                     []string
-	ResolutionStatusCodes             []string
 	PriorityCodes                     []string
 	CategoryCodes                     []string
 	PatientAffectedStatusCodes        []string
@@ -309,15 +308,6 @@ func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) erro
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchResolutionStatusCodes(ctx context.Context) error {
-	rsCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetResolutionStatus)
-	if err != nil {
-		return fmt.Errorf("error retrieving resolution status codes: %v", err)
-	}
-	r.ResolutionStatusCodes = rsCodes
-	return nil
-}
-
 func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
 	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetPriority)
 	if err != nil {
@@ -401,9 +391,6 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 	}
 	if err := r.fetchTaskTypeCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve task type codes: %w", err)
-	}
-	if err := r.fetchResolutionStatusCodes(ctx); err != nil {
-		return fmt.Errorf("failed to retrieve resolution status codes: %w", err)
 	}
 	if err := r.fetchPriorityCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve priority codes: %w", err)
@@ -989,7 +976,6 @@ func (cr *CaseValidationRecord) validateCodes() {
 	resIds := []string{fmt.Sprintf("%d", cr.Index)}
 	path := cr.formatFieldPath("", nil, "", nil)
 	cr.ValidateCode(cr.GetResourceType(), path+".status_code", "status_code", CaseInvalidField, cr.Case.StatusCode, cr.StatusCodes, resIds, true)
-	cr.ValidateCode(cr.GetResourceType(), path+".resolution_status_code", "resolution_status_code", CaseInvalidField, cr.Case.ResolutionStatusCode, cr.ResolutionStatusCodes, resIds, false)
 	cr.ValidateCode(cr.GetResourceType(), path+".priority_code", "priority_code", CaseInvalidField, cr.Case.PriorityCode, cr.PriorityCodes, resIds, false)
 	cr.ValidateCode(cr.GetResourceType(), path+".category_code", "category_code", CaseInvalidField, cr.Case.CategoryCode, cr.CategoryCodes, resIds, false)
 }
@@ -1051,9 +1037,6 @@ func (cr *CaseValidationRecord) validateCaseCommonFields(path string) {
 	}
 	if cr.Case.PrimaryConditionValue != "" {
 		cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)
-	}
-	if cr.Case.ResolutionStatusCode != "" {
-		cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)
 	}
 	if cr.Case.Note != "" {
 		cr.validateCaseField(cr.Case.Note, "note", path, nil, FreeTextMaxLength, false)
@@ -1519,7 +1502,6 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 		CaseCategoryCode:         cr.Case.CategoryCode,
 		PriorityCode:             cr.Case.PriorityCode,
 		StatusCode:               cr.Case.StatusCode,
-		ResolutionStatusCode:     cr.Case.ResolutionStatusCode,
 		PrimaryCondition:         cr.Case.PrimaryConditionValue,
 		ConditionCodeSystem:      cr.Case.PrimaryConditionCodeSystem,
 		OrderingPhysician:        cr.Case.OrderingPhysician,

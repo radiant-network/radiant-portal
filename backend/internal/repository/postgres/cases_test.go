@@ -29,7 +29,6 @@ func Test_CreateCases(t *testing.T) {
 			CaseTypeCode:             "germline",
 			CaseCategoryCode:         "postnatal",
 			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
 			TenantCode:               types.DefaultTenantCode,
@@ -68,7 +67,6 @@ func Test_UpdateCase_OK(t *testing.T) {
 			CaseTypeCode:             "germline",
 			CaseCategoryCode:         "postnatal",
 			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Original",
 			OrderingOrganizationCode: &orgCode,
 			TenantCode:               types.DefaultTenantCode,
@@ -87,7 +85,6 @@ func Test_UpdateCase_OK(t *testing.T) {
 			PriorityCode:             "urgent",
 			CaseCategoryCode:         "prenatal",
 			AnalysisCatalogID:        1,
-			ResolutionStatusCode:     "solved",
 			Note:                     "updated note",
 			OrderingOrganizationCode: &newOrgCode,
 			OrderingPhysician:        "Dr. Updated",
@@ -105,7 +102,6 @@ func Test_UpdateCase_OK(t *testing.T) {
 		assert.Equal(t, "OMIM:0000002", result.PrimaryCondition)
 		assert.Equal(t, "urgent", result.PriorityCode)
 		assert.Equal(t, "prenatal", result.CaseCategoryCode)
-		assert.Equal(t, "solved", result.ResolutionStatusCode)
 		assert.Equal(t, "updated note", result.Note)
 		assert.Equal(t, "CHUSJ", *result.OrderingOrganizationCode)
 		assert.Equal(t, "Dr. Updated", result.OrderingPhysician)
@@ -155,7 +151,6 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 			CaseTypeCode:             "germline",
 			CaseCategoryCode:         "postnatal",
 			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
 			TenantCode:               types.DefaultTenantCode,
@@ -191,7 +186,6 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 			CaseTypeCode:             "germline",
 			CaseCategoryCode:         "postnatal",
 			ConditionCodeSystem:      "MONDO",
-			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
 			TenantCode:               types.DefaultTenantCode,

@@ -1124,7 +1124,6 @@
         "panel_code": "Panel",
         "priority_code": "Priority",
         "project_code": "Project",
-        "resolution_status_code": "Resolution",
         "status_code": "Status"
       },
       "headers": {
@@ -1155,8 +1154,7 @@
         "life_status": "Vital Status",
         "category_code": "Pre/Postnatal",
         "panel": "Panel",
-        "jhn": "JHN",
-        "resolution_status_code": "Resolution"
+        "jhn": "JHN"
       }
     },
     "sequencing": {

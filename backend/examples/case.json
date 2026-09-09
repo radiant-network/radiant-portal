@@ -15,7 +15,6 @@
       "primary_condition_code_system": "MONDO",
       "note": "Germline trio analysis for epilepsy workup",
       "diagnosis_hypothesis": "Refractory epilepsy with global developmental delay, suspected channelopathy",
-      "resolution_status_code": "unsolved",
       "patients": [
         {
           "submitter_patient_id": "MRN-001",
@@ -285,7 +284,6 @@
       "primary_condition_code_system": "MONDO",
       "note": "Prenatal trio analysis — mother, father and fetus",
       "diagnosis_hypothesis": "Ventriculomegaly on the anatomy scan, suspected neurodevelopmental disorder",
-      "resolution_status_code": "unsolved",
       "patients": [
         {
           "submitter_patient_id": "MRN-004",

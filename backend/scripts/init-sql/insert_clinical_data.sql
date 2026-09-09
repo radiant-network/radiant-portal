@@ -1230,31 +1230,31 @@ VALUES (1, 27, 'output'),
        (76, 271, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;
 
-INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
+INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, ordering_physician, ordering_organization_code, submitter_case_id)
 VALUES
-    (1, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:1'),
-    (2, 4, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 'CHUSJ', '1:2'),
-    (3, 8, 1, 1, 'incomplete', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Christopher Watson', 'CHOP', '1:3'),
-    (4, 10, 1, 1, 'incomplete', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 'CHOP', '1:4'),
-    (5, 15, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Antoine Paré', 'CHOP', '1:5'),
-    (6, 16, 1, 1, 'draft', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jonathan Frye', 'CHOP', '1:6'),
-    (7, 20, 1, 1, 'revoke', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Dawn Taylor', 'CHOP', '1:7'),
-    (8, 22, 1, 1, 'submitted', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Lauren Maxwell', 'CHOP', '1:8'),
-    (9, 23, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Elliot Duchesne', 'CHOP', '1:9'),
-    (10, 27, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Alex Williams', 'CHOP', '2:10'),
-    (11, 30, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arthur Séguin', 'CHUSJ', '2:11'),
-    (12, 34, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Raphaelle Veilleux', 'CHUSJ', '2:12'),
-    (13, 37, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Louis Stevens', 'CHUSJ', '2:13'),
-    (14, 39, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sarah Gervais', 'CHUSJ', '2:14'),
-    (15, 42, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Xavier Peterson', 'CHUSJ', '2:15'),
-    (16, 44, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jeanne Laroche', 'CHUSJ', '2:16'),
-    (17, 47, 2, 2, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Arnaud Morissette', 'CHUSJ', '2:17'),
-    (18, 50, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Sophia Charron', 'CHUSJ', '2:18'),
-    (19, 55, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Fadi Hamdan', 'CHUSJ', '2:19'),
-    (20, 58, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 'CHUSJ', '2:20'),
-    (21, 60, 2, 2, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 'CHUSJ', '2:21'),
-    (22, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12 13:08:00', '2021-09-12 13:08:00', 'routine', 'somatic', 'postnatal', 'MONDO', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:22'),
-    (70, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 'CHOP', '1:70')
+    (1, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Felix Laflamme', 'CHUSJ', '1:1'),
+    (2, 4, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Melissa Lopez', 'CHUSJ', '1:2'),
+    (3, 8, 1, 1, 'submitted', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Christopher Watson', 'CHOP', '1:3'),
+    (4, 10, 1, 1, 'submitted', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Victoria Breton', 'CHOP', '1:4'),
+    (5, 15, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Antoine Paré', 'CHOP', '1:5'),
+    (6, 16, 1, 1, 'submitted', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Jonathan Frye', 'CHOP', '1:6'),
+    (7, 20, 1, 1, 'revoked', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Dawn Taylor', 'CHOP', '1:7'),
+    (8, 22, 1, 1, 'submitted', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Lauren Maxwell', 'CHOP', '1:8'),
+    (9, 23, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Elliot Duchesne', 'CHOP', '1:9'),
+    (10, 27, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Alex Williams', 'CHOP', '2:10'),
+    (11, 30, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Arthur Séguin', 'CHUSJ', '2:11'),
+    (12, 34, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Raphaelle Veilleux', 'CHUSJ', '2:12'),
+    (13, 37, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Louis Stevens', 'CHUSJ', '2:13'),
+    (14, 39, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Sarah Gervais', 'CHUSJ', '2:14'),
+    (15, 42, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Xavier Peterson', 'CHUSJ', '2:15'),
+    (16, 44, 2, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Jeanne Laroche', 'CHUSJ', '2:16'),
+    (17, 47, 2, 2, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Arnaud Morissette', 'CHUSJ', '2:17'),
+    (18, 50, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Sophia Charron', 'CHUSJ', '2:18'),
+    (19, 55, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'Fadi Hamdan', 'CHUSJ', '2:19'),
+    (20, 58, 2, 2, 'completed', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'Melissa Lopez', 'CHUSJ', '2:20'),
+    (21, 60, 2, 2, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'Victoria Breton', 'CHUSJ', '2:21'),
+    (22, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12 13:08:00', '2021-09-12 13:08:00', 'routine', 'somatic', 'postnatal', 'MONDO', 'Felix Laflamme', 'CHUSJ', '1:22'),
+    (70, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'Isabella Murphy', 'CHOP', '1:70')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "family" (id, case_id, family_member_id, relationship_to_proband_code, affected_status_code, tenant_code)
@@ -1812,13 +1812,13 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (6, 6, 'completed', 'S13229', 'CQGC', 'radiant', 1622, 'A00516_0174', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
-       (7, 7, 'incomplete', 'S13230', 'CQGC', 'radiant', 1623, 'A00516_0175', '2021-08-17', 'SureSelect Custom DNA Target',
+       (7, 7, 'submitted', 'S13230', 'CQGC', 'radiant', 1623, 'A00516_0175', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (8, 8, 'completed', 'S13231', 'CQGC', 'radiant', 1624, 'A00516_0176', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (9, 9, 'completed', 'S13232', 'CQGC', 'radiant', 1625, 'A00516_0177', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
-       (10, 10, 'incomplete', 'S13233', 'CQGC', 'radiant', 1626, 'A00516_0178', '2021-08-17',
+       (10, 10, 'submitted', 'S13233', 'CQGC', 'radiant', 1626, 'A00516_0178', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
        (11, 11, 'completed', 'S13234', 'CQGC', 'radiant', 1627, 'A00516_0179', '2021-08-17',
@@ -1835,7 +1835,7 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
        (15, 15, 'completed', 'S13238', 'CQGC', 'radiant', 1631, 'A00516_0183', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
-       (16, 16, 'draft', 'S14029', 'CQGC', 'radiant', 1632, 'A00516_0184', '2021-08-17', 'SureSelect Custom DNA Target',
+       (16, 16, 'submitted', 'S14029', 'CQGC', 'radiant', 1632, 'A00516_0184', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (17, 17, 'completed', 'S14030', 'CQGC', 'radiant', 1633, 'A00516_0185', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
@@ -1843,7 +1843,7 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
        (18, 18, 'completed', 'S14031', 'CQGC', 'radiant', 1634, 'A00516_0186', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
-       (19, 19, 'revoke', 'S14048', 'CQGC', 'radiant', 1635, 'A00516_0187', '2021-08-17', 'SureSelect Custom DNA Target',
+       (19, 19, 'revoked', 'S14048', 'CQGC', 'radiant', 1635, 'A00516_0187', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (20, 20, 'completed', 'S14049', 'CQGC', 'radiant', 1636, 'A00516_0188', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
@@ -1872,10 +1872,10 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
         'illumina'),
        (29, 29, 'in_progress', 'S14137', 'CQGC', 'radiant', 1645, 'A00516_0197', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
-       (30, 30, 'incomplete', 'S14138', 'CQGC', 'radiant', 1646, 'A00516_0198', '2021-08-17',
+       (30, 30, 'submitted', 'S14138', 'CQGC', 'radiant', 1646, 'A00516_0198', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
-       (31, 31, 'incomplete', 'S14139', 'CQGC', 'radiant', 1647, 'A00516_0199', '2021-08-17',
+       (31, 31, 'submitted', 'S14139', 'CQGC', 'radiant', 1647, 'A00516_0199', '2021-08-17',
         'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
        (32, 32, 'completed', 'S14691', 'CQGC', 'radiant', 1648, 'A00516_0200', '2021-08-17',
@@ -1962,10 +1962,10 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
        (61, 61, 'submitted', 'S14859', 'CQGC', 'radiant', 1677, 'A00516_0229', '2021-08-31',
         'SureSelect Custom DNA Target', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
-       (62, 123, 'incomplete', 'TCR002361_SRX1091647-T', 'CQGC', 'radiant', 1677, 'TCR002361_SRX1091647-Tumor', '2021-08-31',
+       (62, 123, 'submitted', 'TCR002361_SRX1091647-T', 'CQGC', 'radiant', 1677, 'TCR002361_SRX1091647-Tumor', '2021-08-31',
         'SureSelect Custom DNA Target', '2021-10-12 13:08:00', '2021-10-12 13:08:00', 'wgs', 'short_read',
         'illumina'),
-       (63, 124, 'incomplete', 'TCR002361_SRX1091646-N', 'CQGC', 'radiant', 1677, 'TCR002361_SRX1091646-Normal', '2021-08-31',
+       (63, 124, 'submitted', 'TCR002361_SRX1091646-N', 'CQGC', 'radiant', 1677, 'TCR002361_SRX1091646-Normal', '2021-08-31',
         'SureSelect Custom DNA Target', '2021-10-12 13:08:00', '2021-10-12 13:08:00', 'wgs', 'short_read',
         'illumina'),
        (70, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2021-08-17', 'SureSelect Custom DNA Target',
@@ -2179,11 +2179,11 @@ VALUES (1, 'F-71-1', 62, 'CHUSJ', 'alive',    'male',    '2026-02-01', NULL,    
        (5, 'F-74-1', 66, 'CHUSJ', 'alive',    'female',  NULL,         '2026-12-05', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_code, submitter_case_id)
-VALUES (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — solo pregnancy', '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:71'),
-       (72, 63, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — twin pregnancy', '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:72'),
-       (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — trio (mother + father + fetus)', '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:73'),
-       (74, 66, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — fetus alone, no parent sequenced', '2026-04-04T13:08:00-04:00', '2026-04-04T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'unsolved', 'Felix Laflamme', 'CHUSJ', '1:74')
+INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, ordering_physician, ordering_organization_code, submitter_case_id)
+VALUES (71, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — solo pregnancy', '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'Felix Laflamme', 'CHUSJ', '1:71'),
+       (72, 63, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — twin pregnancy', '2026-04-02T13:08:00-04:00', '2026-04-02T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'Felix Laflamme', 'CHUSJ', '1:72'),
+       (73, 64, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — trio (mother + father + fetus)', '2026-04-03T13:08:00-04:00', '2026-04-03T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'Felix Laflamme', 'CHUSJ', '1:73'),
+       (74, 66, 1, 1, 'in_progress', 'CQGC', 'radiant', 'MONDO:0700092', 'Prenatal case — fetus alone, no parent sequenced', '2026-04-04T13:08:00-04:00', '2026-04-04T13:08:00-04:00', 'asap', 'germline', 'prenatal', 'mondo', 'Felix Laflamme', 'CHUSJ', '1:74')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "family" (id, case_id, family_member_id, fetus_id, relationship_to_proband_code, affected_status_code, tenant_code)

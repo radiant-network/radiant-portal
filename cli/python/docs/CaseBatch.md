@@ -18,7 +18,6 @@ Name | Type | Description | Notes
 **primary_condition_value** | **str** |  | [optional] 
 **priority_code** | **str** |  | [optional] 
 **project_code** | **str** |  | 
-**resolution_status_code** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | 
 **status_code** | **str** |  | 
 **submitter_case_id** | **str** |  | [optional] 
