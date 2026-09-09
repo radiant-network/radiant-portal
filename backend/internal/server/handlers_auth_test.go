@@ -23,7 +23,9 @@ type mockAuthRepository struct {
 	hasAction       bool
 	actionsHeld     map[string]bool // when set, answers per action instead of hasAction
 	actionErr       error
+	orgsHeld        map[string]bool // when set, answers per org instead of hasAction
 	gotOrgCode      string
+	gotOrgCodes     []string
 	gotAction       string
 	gotActions      []string
 }
@@ -40,8 +42,12 @@ func (m *mockAuthRepository) HasTenantAccess(ctx context.Context, email, tenantC
 
 func (m *mockAuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error) {
 	m.gotOrgCode = orgCode
+	m.gotOrgCodes = append(m.gotOrgCodes, orgCode)
 	m.gotAction = actionCode
 	m.gotActions = append(m.gotActions, actionCode)
+	if m.orgsHeld != nil {
+		return m.orgsHeld[orgCode], m.actionErr
+	}
 	if m.actionsHeld != nil {
 		return m.actionsHeld[actionCode], m.actionErr
 	}

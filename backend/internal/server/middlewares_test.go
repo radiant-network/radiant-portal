@@ -295,3 +295,131 @@ func Test_tenantWideOrg_ResolvesToTheSentinelOnly(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []string{TenantWideOrg}, orgs)
 }
+
+// --- RequireActionAtEvery ----------------------------------------------------------------
+
+const (
+	labA = "CQGC"
+	labB = "CHUSJ"
+)
+
+// everyActionTestRouter wires RequireActionAtEvery over a fixed set of orgs, standing in for
+// the case-batch resolver. The handler echoes what the gate stored in context.
+func everyActionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, action string, orgs []string, resolveErr error) *gin.Engine {
+	resolve := func(c *gin.Context) ([]string, error) { return orgs, resolveErr }
+
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
+	tenantGroup.GET("/cases/filters", RequireActionAtEvery(auth, repo, action, resolve), func(c *gin.Context) {
+		authorized, _ := GetAuthorizedOrgs(c)
+		c.JSON(http.StatusOK, gin.H{"orgs": authorized})
+	})
+	return router
+}
+
+func Test_RequireActionAtEvery_HoldsActionAtEveryOrg_Allows(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, orgsHeld: map[string]bool{labA: true, labB: true}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, []string{labA, labB}, nil))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, []string{labA, labB}, repo.gotOrgCodes, "every resolved org is checked")
+	assert.Contains(t, w.Body.String(), labB, "the resolved orgs are left in context for the handler")
+}
+
+func Test_RequireActionAtEvery_LacksActionAtOneOrg_Returns403(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, orgsHeld: map[string]bool{labA: true, labB: false}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, []string{labA, labB}, nil))
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.NotContains(t, w.Body.String(), types.ActionIngestData, "the body must not name the missing action")
+}
+
+// The all-of quantifier is the whole point of this gate: the same inputs that admit a caller
+// under RequireActionAt (any-of) must refuse them here.
+func Test_RequireActionAtEvery_DiffersFromRequireActionAt_OnTheSameOrgs(t *testing.T) {
+	orgs := []string{labA, labB}
+	held := map[string]bool{labA: true, labB: false}
+	resolve := func(c *gin.Context) ([]string, error) { return orgs, nil }
+
+	route := func(gate func(*mockAuthRepository, *testutils.MockAuth) gin.HandlerFunc) int {
+		repo := &mockAuthRepository{hasTenantAccess: true, orgsHeld: held}
+		auth := &testutils.MockAuth{Id: mockUserID}
+		router := gin.New()
+		tenantGroup := router.Group("/:tenant")
+		tenantGroup.Use(RequireTenantAccess(auth, repo))
+		tenantGroup.GET("/cases/filters", gate(repo, auth), func(c *gin.Context) { c.Status(http.StatusOK) })
+		return doActionRequest(router).Code
+	}
+
+	anyOf := route(func(repo *mockAuthRepository, auth *testutils.MockAuth) gin.HandlerFunc {
+		return RequireActionAt(auth, repo, types.ActionIngestData, resolve)
+	})
+	everyOf := route(func(repo *mockAuthRepository, auth *testutils.MockAuth) gin.HandlerFunc {
+		return RequireActionAtEvery(auth, repo, types.ActionIngestData, resolve)
+	})
+
+	assert.Equal(t, http.StatusOK, anyOf, "any-of admits a caller holding the action at one of the orgs")
+	assert.Equal(t, http.StatusForbidden, everyOf, "all-of refuses the same caller")
+}
+
+func Test_RequireActionAtEvery_StopsAtTheFirstDenial(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, orgsHeld: map[string]bool{labA: false, labB: true}}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, []string{labA, labB}, nil))
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, []string{labA}, repo.gotOrgCodes, "a denial ends the loop; the rest are not queried")
+}
+
+func Test_RequireActionAtEvery_NoOrgResolved_Returns403(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, nil, nil))
+
+	assert.Equal(t, http.StatusForbidden, w.Code, "an unattributable request is denied, never vacuously allowed")
+	assert.Empty(t, repo.gotOrgCodes, "with nothing to check against, the action is not queried at all")
+}
+
+func Test_RequireActionAtEvery_ResolverError_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, nil, fmt.Errorf("boom")))
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_RequireActionAtEvery_RepoError_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("boom")}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(everyActionTestRouter(repo, auth, types.ActionIngestData, []string{labA}, nil))
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_RequireActionAtEvery_TokenError_Returns401(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	// RequireTenantAccess is bypassed so the gate itself is what meets the token error.
+	router := gin.New()
+	router.GET("/:tenant/cases/filters",
+		func(c *gin.Context) { c.Set(TenantContextKey, "radiant") },
+		RequireActionAtEvery(&testutils.MockAuth{Error: fmt.Errorf("no token")}, repo, types.ActionIngestData,
+			func(c *gin.Context) ([]string, error) { return []string{labA}, nil }),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	assert.Equal(t, http.StatusUnauthorized, doActionRequest(router).Code)
+}
+
+func Test_RequireActionAtEvery_NoTenantInContext_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	router := gin.New()
+	router.GET("/:tenant/cases/filters",
+		RequireActionAtEvery(auth, repo, types.ActionIngestData,
+			func(c *gin.Context) ([]string, error) { return []string{labA}, nil }),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	assert.Equal(t, http.StatusInternalServerError, doActionRequest(router).Code)
+}

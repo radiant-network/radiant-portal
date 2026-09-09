@@ -201,3 +201,123 @@ func Test_OrgResolution_UnknownDocumentDenied(t *testing.T) {
 	p := probeByName("document param")
 	assertOrgResolved(t, wendyID, withRequest(p, "/radiant/probe/"+unknownDocument, ""), http.StatusForbidden)
 }
+
+// --- case batches: the action is required at EVERY lab the payload names ------------------
+
+// Case 1 is submitter case "1:1" of project N1, and its diagnosis lab is CQGC. A PATCH record
+// may omit diagnostic_lab_code (POST and PUT require it), and such a record is authorized
+// against the lab of the case its project_code + submitter_case_id point at — so
+// casePatchWithoutLab below resolves to CQGC.
+const (
+	caseBatchAtCQGC         = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1","diagnostic_lab_code":"CQGC"}]}`
+	caseBatchAtCQGCAndCHUSJ = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1","diagnostic_lab_code":"CQGC"},` +
+		`{"project_code":"N1","submitter_case_id":"1:2","diagnostic_lab_code":"CHUSJ"}]}`
+	casePatchWithoutLab  = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1"}]}`
+	casePatchUnknownCase = `{"cases":[{"project_code":"N1","submitter_case_id":"no-such-case"}]}`
+	casePatchUnknownProj = `{"cases":[{"project_code":"NOPE","submitter_case_id":"1:1"}]}`
+	caseBatchEmpty       = `{"cases":[]}`
+)
+
+// serveCaseBatchProbe mirrors the production wiring of the case-batch routes: the all-of gate
+// with the case-batch resolver.
+func serveCaseBatchProbe(repo *postgres.AuthRepository, userID, body string) *httptest.ResponseRecorder {
+	auth := &testutils.MockAuth{Id: userID}
+
+	router := gin.New()
+	tenantRoutes := router.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
+	tenantRoutes.POST("/cases/batch",
+		server.RequireActionAtEvery(auth, repo, types.ActionIngestData, server.OrgsFromCaseBatchBody(repo)),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	req, _ := http.NewRequest("POST", "/radiant/cases/batch", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func assertCaseBatch(t *testing.T, userID, body string, expected int) {
+	t.Helper()
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		assert.Equal(t, expected, serveCaseBatchProbe(repo, userID, body).Code)
+	})
+}
+
+// seedIngestorAt is seedGeneticistAt's data_manager twin: can_ingest_data at one org only.
+func seedIngestorAt(t *testing.T, db *gorm.DB, orgCode string) string {
+	t.Helper()
+	userID := uuid.NewString()
+	t.Cleanup(func() {
+		db.Exec(`DELETE FROM user_role WHERE user_id = ?`, userID)
+		db.Exec(`DELETE FROM users WHERE user_id = ?`, userID)
+	})
+	require.NoError(t, db.Exec(`
+		INSERT INTO users (user_id, email, first_name, last_name)
+		VALUES (?, ?, 'Ida', 'Ingest')`, userID, userID+"@test.authz").Error)
+	require.NoError(t, db.Exec(`
+		INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
+		VALUES (?, 'radiant', ?, 'data_manager', 'seed')`, userID, orgCode).Error)
+	return userID
+}
+
+// Test_CaseBatch_IngestorAtOneLab covers what an ingestor granted at CQGC alone may submit.
+// The three cases share one seeded grantee: seeding needs WritePostgres, whose teardown runs
+// the shared destructive cleanUp against every test running in parallel, so it is worth
+// paying once.
+func Test_CaseBatch_IngestorAtOneLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		userID := seedIngestorAt(t, env.Postgres, "CQGC")
+
+		t.Run("every record at its own lab is admitted", func(t *testing.T) {
+			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchAtCQGC).Code)
+		})
+
+		t.Run("one record at another lab refuses the whole batch", func(t *testing.T) {
+			assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchAtCQGCAndCHUSJ).Code,
+				"the gate requires the action at EVERY lab the payload names, not any one of them")
+		})
+
+		t.Run("a record with no lab is checked against its target case's lab", func(t *testing.T) {
+			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, casePatchWithoutLab).Code,
+				"N1/1:1 is case 1, whose lab is CQGC")
+		})
+	})
+}
+
+// Test_CaseBatch_IngestorAtAnotherLab_Denied is the negative twin: every fixture case is at
+// CQGC, so an ingestor granted at CHOP may submit none of them. gabe would not do — his
+// can_ingest_data is at '*' — hence a seeded single-org grantee.
+func Test_CaseBatch_IngestorAtAnotherLab_Denied(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		userID := seedIngestorAt(t, env.Postgres, "CHOP")
+
+		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchAtCQGC).Code)
+		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, casePatchWithoutLab).Code,
+			"omitting diagnostic_lab_code falls back to the target case's lab (CQGC), it does not skip the check")
+	})
+}
+
+func Test_CaseBatch_WildcardIngestorAllowed(t *testing.T) {
+	assertCaseBatch(t, gabeID, caseBatchAtCQGCAndCHUSJ, http.StatusOK)
+}
+
+func Test_CaseBatch_WithoutIngestActionDenied(t *testing.T) {
+	assertCaseBatch(t, wendyID, caseBatchAtCQGC, http.StatusForbidden)
+}
+
+func Test_CaseBatch_UnresolvableRecordsDenied(t *testing.T) {
+	for name, body := range map[string]string{
+		"unknown submitter case": casePatchUnknownCase,
+		"unknown project":        casePatchUnknownProj,
+		"no cases":               caseBatchEmpty,
+		"malformed body":         "not json",
+	} {
+		t.Run(name, func(t *testing.T) {
+			assertCaseBatch(t, gabeID, body, http.StatusForbidden)
+		})
+	}
+}

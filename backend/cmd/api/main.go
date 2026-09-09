@@ -300,9 +300,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	sequencingGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
 	sequencingGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutSequencingExperimentBatchHandler(repoBatches, auth))
 
-	casesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostCaseBatchHandler(repoBatches, auth))
-	casesGroup.PATCH("/batch", requireAction(types.ActionIngestData), server.PatchCaseBatchHandler(repoBatches, auth))
-	casesGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutCaseBatchHandler(repoBatches, auth))
+	// Case batches carry one lab per record, so the caller must hold can_ingest_data at EVERY
+	// lab the payload names — one record outside their remit refuses the batch whole. The other
+	// batch types name no lab (see sentinelOrgActionRoutes) and stay on the tenant-wide check.
+	requireIngestEverywhere := server.RequireActionAtEvery(auth, repoAuth, types.ActionIngestData, server.OrgsFromCaseBatchBody(repoAuth))
+	casesGroup.POST("/batch", requireIngestEverywhere, server.PostCaseBatchHandler(repoBatches, auth))
+	casesGroup.PATCH("/batch", requireIngestEverywhere, server.PatchCaseBatchHandler(repoBatches, auth))
+	casesGroup.PUT("/batch", requireIngestEverywhere, server.PutCaseBatchHandler(repoBatches, auth))
 
 	return r
 }

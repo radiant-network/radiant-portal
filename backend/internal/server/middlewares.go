@@ -239,9 +239,68 @@ func RequireAnyAction(auth utils.Auth, repo actionChecker, actions ...string) gi
 }
 
 // RequireActionAt gates a route on an org-scoped action, checked against the organizations
-// the resolver attributes the target resource to.
+// the resolver attributes the target resource to. Holding the action at any one of them
+// admits the caller: the resolvers return several orgs only when one resource legitimately
+// belongs to several cases.
 func RequireActionAt(auth utils.Auth, repo actionChecker, action string, resolve OrgResolver) gin.HandlerFunc {
 	return requireActions(auth, repo, resolve, action)
+}
+
+// RequireActionAtEvery is RequireActionAt's all-of twin, for a request that acts on many
+// resources at once: the caller must hold the action at EVERY org the resolver returns, so a
+// batch carrying one record outside their remit is refused whole. Resolving no org denies, as
+// it does everywhere else.
+func RequireActionAtEvery(auth utils.Auth, repo actionChecker, action string, resolve OrgResolver) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			c.Abort()
+			return
+		}
+
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+
+		orgs, err := resolve(c)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+		c.Set(OrgContextKey, orgs)
+
+		denied := len(orgs) == 0
+		for _, org := range orgs {
+			allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, org, action)
+			if err != nil {
+				HandleError(c, err)
+				c.Abort()
+				return
+			}
+			if !allowed {
+				denied = true
+				break
+			}
+		}
+		if !denied {
+			c.Next()
+			return
+		}
+
+		slog.WarnContext(c.Request.Context(), "forbidden: caller lacks required action at every org",
+			slog.String("user_id", *userID),
+			slog.String("action", action),
+			slog.String("tenant", *tenant),
+			slog.Any("orgs", orgs),
+		)
+		HandleForbiddenError(c)
+		c.Abort()
+	}
 }
 
 // requireActions is the shared gate. It reads the caller from the token and the tenant from
