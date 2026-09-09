@@ -70,17 +70,17 @@ func (c *Client) StartDeviceAuth(ctx context.Context) (*DeviceAuth, error) {
 	form := url.Values{"client_id": {c.cfg.ClientID}, "scope": {"openid"}}
 	body, status, err := c.post(ctx, c.endpoint("auth/device"), form)
 	if err != nil {
-		return nil, fmt.Errorf("device authorization request: %w", err)
+		return nil, fmt.Errorf("request: %w", err)
 	}
 	if status != http.StatusOK {
-		return nil, fmt.Errorf("device authorization request failed: HTTP %d: %s", status, strings.TrimSpace(string(body)))
+		return nil, fmt.Errorf("HTTP %d: %s", status, strings.TrimSpace(string(body)))
 	}
 	var da DeviceAuth
 	if err := json.Unmarshal(body, &da); err != nil {
-		return nil, fmt.Errorf("parse device authorization response: %w", err)
+		return nil, fmt.Errorf("parse response: %w", err)
 	}
 	if da.DeviceCode == "" {
-		return nil, errors.New("device authorization response had no device_code")
+		return nil, errors.New("response had no device_code")
 	}
 	return &da, nil
 }
@@ -99,12 +99,12 @@ func (c *Client) PollDeviceToken(ctx context.Context, da *DeviceAuth) (*Tokens, 
 	}
 	for {
 		if err := ctx.Err(); err != nil {
-			return nil, fmt.Errorf("waiting for browser login: %w", err)
+			return nil, fmt.Errorf("wait: %w", err)
 		}
 		c.sleep(time.Duration(interval) * time.Second)
 		tokens, oerr, err := c.token(ctx, form)
 		if err != nil {
-			return nil, fmt.Errorf("device login: %w", err)
+			return nil, fmt.Errorf("poll token: %w", err)
 		}
 		if oerr == nil {
 			return tokens, nil
@@ -118,7 +118,7 @@ func (c *Client) PollDeviceToken(ctx context.Context, da *DeviceAuth) (*Tokens, 
 		case "access_denied":
 			return nil, ErrAccessDenied
 		default:
-			return nil, fmt.Errorf("device token request failed: %s: %s", oerr.Code, oerr.Description)
+			return nil, fmt.Errorf("%s: %s", oerr.Code, oerr.Description)
 		}
 		if c.now().After(deadline) {
 			return nil, ErrDeviceCodeExpired
@@ -146,15 +146,15 @@ func (c *Client) Refresh(ctx context.Context, refreshToken string) (*Tokens, err
 func (c *Client) token(ctx context.Context, form url.Values) (*Tokens, *oauthError, error) {
 	body, status, err := c.post(ctx, c.endpoint("token"), form)
 	if err != nil {
-		return nil, nil, fmt.Errorf("token request: %w", err)
+		return nil, nil, fmt.Errorf("request: %w", err)
 	}
 	if status == http.StatusOK {
 		var tokens Tokens
 		if err := json.Unmarshal(body, &tokens); err != nil {
-			return nil, nil, fmt.Errorf("parse token response: %w", err)
+			return nil, nil, fmt.Errorf("parse response: %w", err)
 		}
 		if tokens.AccessToken == "" {
-			return nil, nil, errors.New("token response had no access_token")
+			return nil, nil, errors.New("response had no access_token")
 		}
 		return &tokens, nil, nil
 	}
@@ -162,7 +162,7 @@ func (c *Client) token(ctx context.Context, form url.Values) (*Tokens, *oauthErr
 	if json.Unmarshal(body, &oerr) == nil && oerr.Code != "" {
 		return nil, &oerr, nil
 	}
-	return nil, nil, fmt.Errorf("token request failed: HTTP %d: %s", status, strings.TrimSpace(string(body)))
+	return nil, nil, fmt.Errorf("HTTP %d: %s", status, strings.TrimSpace(string(body)))
 }
 
 func (c *Client) post(ctx context.Context, endpoint string, form url.Values) ([]byte, int, error) {

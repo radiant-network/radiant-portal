@@ -39,14 +39,14 @@ func EnsureToken(ctx context.Context, cfg *config.Config, kc tokenSource, out io
 	}
 	da, err := kc.StartDeviceAuth(ctx)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("start device login: %w", err)
 	}
 	prompt.Printf(out, "\n%s Open this link in a browser and sign in:\n%s\n", p.Bold("Authentication required."), p.URL(da.VerificationURIComplete))
 	prompt.Printf(out, "If the page asks for a code, enter %s  %s\n", p.Code(da.UserCode), p.Dim(fmt.Sprintf("(expires in %d min)", da.ExpiresIn/60)))
 	prompt.Println(out, p.Dim("Waiting for the browser confirmation..."))
 	tokens, err := kc.PollDeviceToken(ctx, da)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("browser login: %w", err)
 	}
 	store(cfg, tokens)
 	if claims, err := keycloak.Claims(tokens.AccessToken); err == nil {

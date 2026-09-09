@@ -21,7 +21,7 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			path, err := resolve()
 			if err != nil {
-				return err
+				return fmt.Errorf("resolve config path: %w", err)
 			}
 			if reset {
 				if err := config.Save(path, &config.Config{}); err != nil {
@@ -37,7 +37,7 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 			if apiURL == "" {
 				apiURL, err = prompt.Line(cmd.InOrStdin(), cmd.OutOrStdout(), "Radiant API URL", cfg.APIURL)
 				if err != nil {
-					return err
+					return fmt.Errorf("read API URL: %w", err)
 				}
 			}
 			apiURL = strings.TrimRight(strings.TrimSpace(apiURL), "/")
@@ -46,7 +46,7 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 			}
 			cc, err := api.New(apiURL).GetConfig(cmd.Context())
 			if err != nil {
-				return err
+				return fmt.Errorf("fetch server config: %w", err)
 			}
 			cfg.APIURL = apiURL
 			cfg.Auth = cc.Auth

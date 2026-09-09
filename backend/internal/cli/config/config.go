@@ -46,7 +46,7 @@ func DefaultPath() (string, error) {
 	}
 	dir, err := os.UserConfigDir()
 	if err != nil {
-		return "", fmt.Errorf("resolve user config dir: %w", err)
+		return "", fmt.Errorf("user config dir: %w", err)
 	}
 	return filepath.Join(dir, "radiant-client", "config.json"), nil
 }

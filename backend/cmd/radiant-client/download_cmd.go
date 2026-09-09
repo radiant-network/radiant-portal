@@ -60,7 +60,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	p := style.For(out)
 	path, err := resolve()
 	if err != nil {
-		return err
+		return fmt.Errorf("resolve config path: %w", err)
 	}
 	cfg, err := config.Load(path)
 	if err != nil {
@@ -72,7 +72,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 
 	outDir, err := prepareOutDir(f.outDir)
 	if err != nil {
-		return err
+		return fmt.Errorf("prepare output directory: %w", err)
 	}
 
 	mf, err := os.Open(f.manifestPath)
@@ -95,7 +95,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	kc := keycloak.New(keycloak.Config{BaseURL: cfg.Auth.KeycloakURL, Realm: cfg.Auth.Realm, ClientID: cfg.Auth.ClientID})
 	token, err := auth.EnsureToken(ctx, cfg, kc, out, time.Now())
 	if err != nil {
-		return err
+		return fmt.Errorf("authenticate: %w", err)
 	}
 	if err := config.Save(path, cfg); err != nil {
 		return fmt.Errorf("save tokens: %w", err)
@@ -117,7 +117,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	if !f.yes {
 		ok, err := prompt.Confirm(cmd.InOrStdin(), out, "Continue?")
 		if err != nil {
-			return err
+			return fmt.Errorf("confirm: %w", err)
 		}
 		if !ok {
 			return errors.New("aborted by user")
@@ -132,7 +132,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 		items[i] = download.Item{ID: fmt.Sprint(e.DocumentID), Name: e.Name, Size: e.Size, Presign: func(ctx context.Context) (string, error) {
 			ps, err := client.DownloadURL(ctx, e.Tenant, e.DocumentID)
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("presign: %w", err)
 			}
 			return ps.URL, nil
 		}}
@@ -184,14 +184,14 @@ func (e exitCodeError) Error() string { return e.msg }
 func prepareOutDir(dir string) (string, error) {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
-		return "", fmt.Errorf("resolve output directory: %w", err)
+		return "", fmt.Errorf("resolve %s: %w", dir, err)
 	}
 	if err := os.MkdirAll(abs, 0o750); err != nil {
-		return "", fmt.Errorf("create output directory: %w", err)
+		return "", fmt.Errorf("create %s: %w", abs, err)
 	}
 	probe, err := os.CreateTemp(abs, ".radiant-client-*")
 	if err != nil {
-		return "", fmt.Errorf("output directory %s is not writable: %w", abs, err)
+		return "", fmt.Errorf("%s is not writable: %w", abs, err)
 	}
 	_ = probe.Close()
 	_ = os.Remove(probe.Name())
