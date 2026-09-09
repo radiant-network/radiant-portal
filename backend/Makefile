@@ -23,6 +23,39 @@ build-worker:
 run-worker:
 	@go run ./cmd/worker
 
+# radiant-client CLI. Version comes from the git tag (or <sha>-dirty, or dev) and is baked
+# in with ldflags, never hardcoded.
+CLI_NAME=radiant-client
+VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+DATE?=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+CLI_LDFLAGS=-s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DATE)
+CLI_PLATFORMS=linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
+
+build-cli:
+	@echo "Building $(CLI_NAME) $(VERSION)..."
+	@CGO_ENABLED=0 go build -trimpath -ldflags="$(CLI_LDFLAGS)" -o bin/$(CLI_NAME)/ ./cmd/$(CLI_NAME)/
+
+# Cross-compile every platform into dist/ as tar.gz (zip on windows) plus a sha256 manifest.
+build-cli-all:
+	@rm -rf dist && mkdir -p dist
+	@for p in $(CLI_PLATFORMS); do \
+		os=$${p%/*}; arch=$${p#*/}; ext=$$([ $$os = windows ] && echo .exe); \
+		echo "Building $(CLI_NAME) $(VERSION) for $$os/$$arch..."; \
+		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -trimpath -ldflags="$(CLI_LDFLAGS)" -o dist/$$os-$$arch/$(CLI_NAME)$$ext ./cmd/$(CLI_NAME)/ || exit 1; \
+		if [ $$os = windows ]; then \
+			(cd dist/$$os-$$arch && zip -q ../$(CLI_NAME)-$$os-$$arch.zip $(CLI_NAME)$$ext); \
+		else \
+			tar -czf dist/$(CLI_NAME)-$$os-$$arch.tar.gz -C dist/$$os-$$arch $(CLI_NAME); \
+		fi; \
+		rm -rf dist/$$os-$$arch; \
+	done
+	@cd dist && sha256sum *.tar.gz *.zip > checksums.txt
+	@ls -1 dist
+
+test-cli:
+	@go test ./cmd/$(CLI_NAME)/... ./internal/cli/... -count=1
+
 # Create DB container
 docker-run:
 	@if docker compose -f compose/docker-compose.yml up --build 2>/dev/null; then \
@@ -77,10 +110,10 @@ lint:
 		exit 1; \
 	fi
 
-# Clean the binary
+# Clean the binaries
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -rf main bin dist
 
 # Live Reload
 watch:

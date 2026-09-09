@@ -38,6 +38,7 @@ go.sum
 
 # binary
 bin/
+dist/
 
 # config
 .env
