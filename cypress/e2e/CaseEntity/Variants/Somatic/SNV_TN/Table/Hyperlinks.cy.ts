@@ -36,6 +36,13 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowResultsCount(resultCount, false /*beEqual*/);
   });
 
+  it('Freq. TO', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.actions.clickTableCellLink(data.variantSomatic, 'freq_to');
+    VariantEntity_Patients.validations.shouldHaveTitle(data.variantSomatic);
+    VariantEntity_Patients.validations.shouldHaveActiveTab();
+  });
+
   it('Freq. TN', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.actions.clickTableCellLink(data.variantSomatic, 'freq_tn');
