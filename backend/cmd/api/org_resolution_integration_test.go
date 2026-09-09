@@ -321,3 +321,52 @@ func Test_CaseBatch_UnresolvableRecordsDenied(t *testing.T) {
 		})
 	}
 }
+
+// --- non-case batches: the action is checked across the tenant ---------------------------
+
+// serveInTenantBatchProbe mirrors the wiring of the batch routes that name no organization:
+// the patient, sample and sequencing batches, and a batch read.
+func serveInTenantBatchProbe(repo *postgres.AuthRepository, userID string) *httptest.ResponseRecorder {
+	auth := &testutils.MockAuth{Id: userID}
+
+	router := gin.New()
+	tenantRoutes := router.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
+	tenantRoutes.POST("/patients/batch",
+		server.RequireActionInTenant(auth, repo, types.ActionIngestData),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	req, _ := http.NewRequest("POST", "/radiant/patients/batch", strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+// Test_PatientBatch_IngestorAtOneOrg_Allowed is the regression test for the QA report: a
+// data_manager granted at a single org was refused, because RequireAction's empty org matches
+// only '*' grants. No batch type other than cases names a lab, so the org must not be consulted.
+func Test_PatientBatch_IngestorAtOneOrg_Allowed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		userID := seedIngestorAt(t, env.Postgres, "CHOP")
+
+		assert.Equal(t, http.StatusOK, serveInTenantBatchProbe(repo, userID).Code,
+			"can_ingest_data at any one org admits the caller")
+	})
+}
+
+func Test_PatientBatch_WildcardIngestorAllowed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		assert.Equal(t, http.StatusOK, serveInTenantBatchProbe(repo, gabeID).Code)
+	})
+}
+
+func Test_PatientBatch_WithoutIngestActionDenied(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		assert.Equal(t, http.StatusForbidden, serveInTenantBatchProbe(repo, wendyID).Code,
+			"ignoring the org must not turn into ignoring the action")
+	})
+}

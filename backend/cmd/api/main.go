@@ -144,6 +144,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	requireActionAt := func(action string, resolve server.OrgResolver) gin.HandlerFunc {
 		return server.RequireActionAt(auth, repoAuth, action, resolve)
 	}
+	// For an org-scoped action on a request that names no organization: check it anywhere in
+	// the tenant. requireAction would pass an empty org, which matches only '*' grants.
+	requireActionInTenant := func(action string) gin.HandlerFunc {
+		return server.RequireActionInTenant(auth, repoAuth, action)
+	}
 	orgFromCase := server.OrgFromCaseParam(repoAuth)
 	orgFromCaseBody := server.OrgFromCaseBody(repoAuth)
 	orgFromNote := server.OrgFromNoteParam(repoAuth)
@@ -287,22 +292,22 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.GET("/:document_id/download_url", requireActionAt(types.ActionDownloadFile, orgFromDocument), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
 	batchesGroup := tenantRoutes.Group("/batches")
-	batchesGroup.GET("/:batch_id", requireAction(types.ActionIngestData), server.GetBatchHandler(repoBatches))
+	batchesGroup.GET("/:batch_id", requireActionInTenant(types.ActionIngestData), server.GetBatchHandler(repoBatches))
 
 	patientsGroup := tenantRoutes.Group("/patients")
-	patientsGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
-	patientsGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
+	patientsGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
+	patientsGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
 
 	samplesGroup := tenantRoutes.Group("/samples")
-	samplesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
-	samplesGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutSampleBatchHandler(repoBatches, auth))
+	samplesGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
+	samplesGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutSampleBatchHandler(repoBatches, auth))
 
-	sequencingGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
-	sequencingGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutSequencingExperimentBatchHandler(repoBatches, auth))
+	sequencingGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+	sequencingGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutSequencingExperimentBatchHandler(repoBatches, auth))
 
 	// Case batches carry one lab per record, so the caller must hold can_ingest_data at EVERY
 	// lab the payload names — one record outside their remit refuses the batch whole. The other
-	// batch types name no lab (see sentinelOrgActionRoutes) and stay on the tenant-wide check.
+	// batch types name no lab, so they are checked across the tenant instead (see above).
 	requireIngestEverywhere := server.RequireActionAtEvery(auth, repoAuth, types.ActionIngestData, server.OrgsFromCaseBatchBody(repoAuth))
 	casesGroup.POST("/batch", requireIngestEverywhere, server.PostCaseBatchHandler(repoBatches, auth))
 	casesGroup.PATCH("/batch", requireIngestEverywhere, server.PatchCaseBatchHandler(repoBatches, auth))

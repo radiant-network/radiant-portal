@@ -16,23 +16,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Probe users from the seeded auth fixtures (test/data/auth/06_user_role.sql):
+// Enforcement tests for RequireAction against the real AuthRepository, plus the two guards that
+// keep every /:tenant route consciously gated.
 //
-//	wendy → geneticist @ '*'   → interpret/comment/flag (org actions, '*' matches the sentinel)
-//	mike  → member @ '*'       → search_case + download_file
+// Probe users, from the seeded fixtures (test/data/auth/06_user_role.sql + migration 000012):
+//
+//	wendy → geneticist @ '*'   → read_pii, interpret, comment, flag, download_file
+//	mike  → member @ '*'       → search_case, view_kb
 //	gabe  → data_manager @ '*' → ingest_data
+//	alice → geneticist @ CHOP + researcher tenant-wide → search_case, view_kb
 //
-// alice (geneticist @ CHOP specific + researcher tenant-wide) belongs to the radiant tenant and
-// holds can_search_case, but no org action under the wildcard sentinel — the negative for org
-// actions: tenant access passes, the action gate is what denies.
+// alice is the negative for org-scoped actions: she holds them, but at CHOP, and RequireAction
+// matches an org-scoped action only against a '*' grant. Per-resource org resolution — what
+// production routes actually use — is tested in org_resolution_integration_test.go.
 const (
 	wendyID = "79a8855e-3782-4dc8-be2a-8afdb34d6359"
 	mikeID  = "9f1d2c3b-4a5e-4f60-8c71-2d3e4f5a6b7c"
 	gabeID  = "0a1b2c3d-4e5f-4061-8273-849506a7b8c9"
 )
 
-// assertActionEnforced mirrors the production wiring (RequireTenantAccess then RequireAction,
-// enforcement on) against the real AuthRepository, and asserts the status for the given user.
+// assertActionEnforced runs RequireTenantAccess then RequireAction against the real repository
+// and asserts the status for the given user.
 func assertActionEnforced(t *testing.T, userID, action string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
@@ -67,7 +71,7 @@ func Test_ActionEnforcement_InterpretVariant_WildcardGranteeAllowed(t *testing.T
 }
 
 func Test_ActionEnforcement_InterpretVariant_SpecificOrgGranteeDenied(t *testing.T) {
-	// alice's geneticist grant is at CHOP only; the wildcard sentinel does not match it.
+	// alice's geneticist grant is at CHOP only, which an empty org does not match.
 	assertActionEnforced(t, aliceID, types.ActionInterpretVariant, http.StatusForbidden)
 }
 
@@ -135,40 +139,9 @@ func Test_ActionEnforcement_AnyAction_HoldsNone_Denied(t *testing.T) {
 	assertAnyActionEnforced(t, mikeID, []string{types.ActionManageRole, types.ActionManageUser}, http.StatusForbidden)
 }
 
-// Batch routes are gated by RequireAction (can_ingest_data).
-func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
-		auth := &testutils.MockAuth{Id: userID}
-
-		router := gin.New()
-		tenantRoutes := router.Group("/:tenant")
-		tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
-		tenantRoutes.POST("/cases/batch", server.RequireAction(auth, repo, types.ActionIngestData), func(c *gin.Context) {
-			c.Status(http.StatusOK)
-		})
-
-		req, _ := http.NewRequest("POST", "/radiant/cases/batch", nil)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		assert.Equal(t, expectedStatus, w.Code)
-	})
-}
-
-func Test_ActionEnforcement_Batch_GranteeAllowed(t *testing.T) {
-	// gabe holds the can_ingest_data grant.
-	assertBatchEnforced(t, gabeID, http.StatusOK)
-}
-
-func Test_ActionEnforcement_Batch_WithoutActionDenied(t *testing.T) {
-	// alice has no can_ingest_data grant → the action gate 403s.
-	assertBatchEnforced(t, aliceID, http.StatusForbidden)
-}
-
-// Test_TenantRoutesAreMappedToActions guards against a privileged route shipping ungated: every
-// route registered under /:tenant must appear in expectedTenantActions. A new route fails this
-// test until it is consciously mapped to an action (or added here).
+// Test_TenantRoutesAreMappedToActions fails if a /:tenant route appears in none of the four
+// route sets below, so a new route cannot ship ungated. It also checks the reverse, so a set
+// cannot name a route that no longer exists.
 func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
@@ -202,22 +175,19 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 	})
 }
 
-// membershipOnlyTenantRoutes are /:tenant routes intentionally gated by tenant membership alone
-// (RequireTenantAccess) with no per-action RequireAction — referential reads any member may see.
+// Gated by tenant membership alone: referential reads any member may see.
 var membershipOnlyTenantRoutes = map[string]bool{
 	"GET /:tenant/organizations": true,
 }
 
-// expectedTenantAnyActions are /:tenant routes gated by RequireAnyAction: the caller needs any
-// one of the listed actions. These are reads shared by several admin sections.
+// RequireAnyAction: any one of the listed actions admits. Reads shared by several admin sections.
 var expectedTenantAnyActions = map[string][]string{
 	"GET /:tenant/roles":       {types.ActionManageRole, types.ActionManageUser},
 	"GET /:tenant/roles/:code": {types.ActionManageRole, types.ActionManageUser},
 }
 
-// orgResolvedTenantRoutes are the routes whose org-scoped action is checked against the
-// resource's own organization — RequireActionAt with a resolver that walks the resource back
-// to its case and takes that case's diagnosis_lab_code.
+// Checked against the resource's own organization: a resolver walks the resource back to its
+// case and takes that case's diagnosis_lab_code.
 var orgResolvedTenantRoutes = map[string]bool{
 	"POST /:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id": true,
 	"POST /:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id":  true,
@@ -227,19 +197,19 @@ var orgResolvedTenantRoutes = map[string]bool{
 	"POST /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id":   true,
 	"DELETE /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id": true,
 	"GET /:tenant/documents/:document_id/download_url":                           true,
-	// Case batches resolve one lab per record and require the action at every one of them.
+	// One lab per record, and the action is required at every one of them.
 	"POST /:tenant/cases/batch":  true,
 	"PATCH /:tenant/cases/batch": true,
 	"PUT /:tenant/cases/batch":   true,
 }
 
-// sentinelOrgActionRoutes hold an org-scoped action but are gated with the tenant-wide
-// sentinel, because nothing in the request names an organization to check against. The
-// patient, sample and sequencing batches carry no diagnosis lab — their records are not
-// attached to a case yet — and a batch row names no org either, so holding can_ingest_data
-// anywhere in the tenant is what admits these. Every other org-scoped route must resolve a
-// real org: Test_OrgScopedRoutesResolveTheirOrg enforces that.
-var sentinelOrgActionRoutes = map[string]bool{
+// Org-scoped action, but nothing in the request names an organization: these batch records are
+// not attached to a case yet, and a batch row carries no org. RequireActionInTenant admits the
+// action held anywhere in the tenant.
+//
+// RequireAction would be wrong here — it matches an org-scoped action only against '*' grants,
+// refusing every specific-org grantee.
+var inTenantOrgActionRoutes = map[string]bool{
 	"GET /:tenant/batches/:batch_id": true,
 	"POST /:tenant/patients/batch":   true,
 	"PUT /:tenant/patients/batch":    true,
@@ -249,10 +219,9 @@ var sentinelOrgActionRoutes = map[string]bool{
 	"PUT /:tenant/sequencing/batch":  true,
 }
 
-// Test_OrgScopedRoutesResolveTheirOrg is the guard behind "no org-scoped route falls back to
-// the tenant-wide sentinel". It reads each mapped action's scope from the action catalog, so
-// a route mapped to an org-scoped action must be declared as org-resolved (or as one of the
-// batch routes that check per record) — adding one without a resolver fails here.
+// Test_OrgScopedRoutesResolveTheirOrg reads each action's scope from the catalog and fails if a
+// route on an org-scoped action is in neither orgResolvedTenantRoutes nor
+// inTenantOrgActionRoutes — that is, if it was left on RequireAction.
 func Test_OrgScopedRoutesResolveTheirOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
@@ -271,23 +240,22 @@ func Test_OrgScopedRoutesResolveTheirOrg(t *testing.T) {
 				assert.Falsef(t, orgResolvedTenantRoutes[route], "route %q maps to the tenant-scoped action %q, so it pays for an org lookup it ignores — use requireAction", route, action)
 				continue
 			}
-			assert.Truef(t, orgResolvedTenantRoutes[route] || sentinelOrgActionRoutes[route],
-				"route %q is gated on the org-scoped action %q but resolves no org — gate it with requireActionAt and a resolver, then declare it in orgResolvedTenantRoutes", route, action)
+			assert.Truef(t, orgResolvedTenantRoutes[route] || inTenantOrgActionRoutes[route],
+				"route %q is gated on the org-scoped action %q but resolves no org — gate it with requireActionAt and a resolver, then declare it in orgResolvedTenantRoutes, or gate it with requireActionInTenant and declare it in inTenantOrgActionRoutes if the request names no org", route, action)
 		}
 
 		for route := range orgResolvedTenantRoutes {
 			_, mapped := expectedTenantActions[route]
 			assert.Truef(t, mapped, "org-resolved route %q is no longer mapped — remove it from orgResolvedTenantRoutes", route)
 		}
-		for route := range sentinelOrgActionRoutes {
+		for route := range inTenantOrgActionRoutes {
 			_, mapped := expectedTenantActions[route]
-			assert.Truef(t, mapped, "sentinel route %q is no longer mapped — remove it from sentinelOrgActionRoutes", route)
+			assert.Truef(t, mapped, "in-tenant route %q is no longer mapped — remove it from inTenantOrgActionRoutes", route)
 		}
 	})
 }
 
-// expectedTenantActions is the audited route → action map (SJRA-1446), mirroring the wiring in
-// setupRouter. Reads are can_search_case; writes/files/ingest are the org-scoped actions.
+// Every gated /:tenant route and the action it requires, mirroring setupRouter.
 var expectedTenantActions = map[string]string{
 	"POST /:tenant/roles":                                        types.ActionManageRole,
 	"PUT /:tenant/roles/:code":                                   types.ActionManageRole,

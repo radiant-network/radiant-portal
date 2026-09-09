@@ -54,6 +54,15 @@ func (m *mockAuthRepository) HasAction(ctx context.Context, userID, tenantCode, 
 	return m.hasAction, m.actionErr
 }
 
+func (m *mockAuthRepository) HasActionInTenant(ctx context.Context, userID, tenantCode, actionCode string) (bool, error) {
+	m.gotAction = actionCode
+	m.gotActions = append(m.gotActions, actionCode)
+	if m.actionsHeld != nil {
+		return m.actionsHeld[actionCode], m.actionErr
+	}
+	return m.hasAction, m.actionErr
+}
+
 func (m *mockAuthRepository) GetMemberships(ctx context.Context, email string) ([]types.TenantMembership, error) {
 	return m.memberships, m.err
 }
