@@ -153,6 +153,29 @@ func (r *AuthRepository) OrgsForDocument(ctx context.Context, tenantCode string,
 	return orgs, nil
 }
 
+// HasActionInTenant reports whether the user holds an action anywhere in the tenant, ignoring
+// the org an org-scoped grant is scoped to. It serves the requests that name no organization to
+// check against — the patient, sample and sequencing batches, whose records are not attached to
+// a case yet, and a batch read.
+//
+// This is NOT what HasAction with an empty orgCode does: that matches only '*' grants, since
+// GrantRole stores a tenant-wide grant's org as NULL. Passing an empty org for an org-scoped
+// action therefore refuses every specific-org grantee.
+func (r *AuthRepository) HasActionInTenant(ctx context.Context, userID, tenantCode, actionCode string) (bool, error) {
+	var allowed bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM user_role ur
+			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+			WHERE ur.user_id = ? AND ur.tenant_code = ? AND ra.action_code = ?
+		)`, userID, tenantCode, actionCode).Scan(&allowed).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking action %q in tenant for %q: %w", actionCode, userID, err)
+	}
+	return allowed, nil
+}
+
 // TenantExists reports whether a tenant with the given code exists. It backs the
 // tenant-routing middleware: an unknown tenant in the URL path becomes a 404 instead of
 // reaching a write and surfacing as a foreign-key violation (a 500) downstream.

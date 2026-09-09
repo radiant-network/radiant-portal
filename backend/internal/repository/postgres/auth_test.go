@@ -82,20 +82,22 @@ func Test_AuthRepository_HasAction_OrgScoped_Wildcard(t *testing.T) {
 	})
 }
 
-// server.RequireAction passes "" (its WildcardOnlyOrg sentinel) for org-scoped actions until
-// per-resource org resolution lands. The empty org must match only '*' grants, never a
-// specific-org grant — the invariant that makes that sentinel correct under today's grants.
+// An empty orgCode matches only '*' grants, never a specific-org grant: GrantRole stores a
+// tenant-wide grant's org_code as NULL, so nothing equals ”. This is why an org-scoped action
+// must never be gated by server.RequireAction (which passes its empty TenantWideOrg) — doing so
+// refuses every specific-org grantee, as it did for the batch routes in QA. Such a route either
+// resolves its resource's org or uses HasActionInTenant, below.
 // "" is used as a literal here because importing the server package would cycle.
 func Test_AuthRepository_HasAction_OrgScoped_EmptyOrgMatchesOnlyWildcard(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
-		// wendy's grant is wildcard ('*') → the empty sentinel matches.
+		// wendy's grant is wildcard ('*') → an empty org matches.
 		wildcardGrantee, err := repo.HasAction(t.Context(), wendyID, types.DefaultTenantCode, "", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, wildcardGrantee, "empty org matches a '*' grant")
 
-		// dan's grant is specific (CHUSJ) → the empty sentinel must not match.
+		// dan's grant is specific (CHUSJ) → an empty org must not match.
 		specificGrantee, err := repo.HasAction(t.Context(), danID, types.DefaultTenantCode, "", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, specificGrantee, "empty org must not match a specific-org grant")
@@ -520,5 +522,33 @@ func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
 			"SELECT count(*) FROM public.user_role WHERE user_id = ? AND role_code = ? AND org_code IS NULL",
 			userID, role).Scan(&nullOrgCount).Error)
 		assert.Equal(t, int64(1), nullOrgCount, "empty orgCode is stored as NULL, not the empty string")
+	})
+}
+
+// Test_AuthRepository_HasActionInTenant_IgnoresOrgScope pins the rule the batch types that name
+// no organization need: holding an org-scoped action ANYWHERE in the tenant is enough. The
+// contrast with HasAction's empty-org behaviour (see EmptyOrgMatchesOnlyWildcard above) is the
+// whole point, so both are asserted here.
+func Test_AuthRepository_HasActionInTenant_IgnoresOrgScope(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		userID := "6f1e2d3c-4b5a-4098-8765-43210fedcba9"
+		t.Cleanup(func() {
+			env.Postgres.Exec(`DELETE FROM user_role WHERE user_id = ?`, userID)
+			env.Postgres.Exec(`DELETE FROM users WHERE user_id = ?`, userID)
+		})
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO users (user_id, email) VALUES (?, ?)`, userID, userID+"@test.authz").Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
+			VALUES (?, 'radiant', 'CHOP', 'data_manager', 'seed')`, userID).Error)
+
+		atEmptyOrg, err := repo.HasAction(t.Context(), userID, types.DefaultTenantCode, "", types.ActionIngestData)
+		require.NoError(t, err)
+		assert.False(t, atEmptyOrg, "an empty org matches only '*' grants — this is the QA bug")
+
+		inTenant, err := repo.HasActionInTenant(t.Context(), userID, types.DefaultTenantCode, types.ActionIngestData)
+		require.NoError(t, err)
+		assert.True(t, inTenant, "a grant at any org admits the caller when the org is not consulted")
 	})
 }

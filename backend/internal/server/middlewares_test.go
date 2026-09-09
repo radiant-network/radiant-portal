@@ -288,7 +288,7 @@ func Test_RequireAction_PassesTenantWideOrgToChecker(t *testing.T) {
 	assert.Equal(t, types.ActionSearchCase, repo.gotAction)
 }
 
-func Test_tenantWideOrg_ResolvesToTheSentinelOnly(t *testing.T) {
+func Test_tenantWideOrg_ResolvesToTheEmptyOrgOnly(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	orgs, err := tenantWideOrg(c)
 
@@ -419,6 +419,64 @@ func Test_RequireActionAtEvery_NoTenantInContext_Returns500(t *testing.T) {
 	router.GET("/:tenant/cases/filters",
 		RequireActionAtEvery(auth, repo, types.ActionIngestData,
 			func(c *gin.Context) ([]string, error) { return []string{labA}, nil }),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	assert.Equal(t, http.StatusInternalServerError, doActionRequest(router).Code)
+}
+
+// --- RequireActionInTenant ---------------------------------------------------------------
+
+func inTenantActionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, action string) *gin.Engine {
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
+	tenantGroup.GET("/cases/filters", RequireActionInTenant(auth, repo, action), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+	return router
+}
+
+func Test_RequireActionInTenant_HoldsAction_Allows(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(inTenantActionTestRouter(repo, auth, types.ActionIngestData))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, repo.gotOrgCodes, "the org is never consulted, so HasAction is not the query used")
+}
+
+func Test_RequireActionInTenant_LacksAction_Returns403(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: false}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(inTenantActionTestRouter(repo, auth, types.ActionIngestData))
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.NotContains(t, w.Body.String(), types.ActionIngestData, "the body must not name the missing action")
+}
+
+func Test_RequireActionInTenant_RepoError_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("boom")}
+	auth := &testutils.MockAuth{Id: mockUserID}
+
+	assert.Equal(t, http.StatusInternalServerError, doActionRequest(inTenantActionTestRouter(repo, auth, types.ActionIngestData)).Code)
+}
+
+func Test_RequireActionInTenant_TokenError_Returns401(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	router := gin.New()
+	router.GET("/:tenant/cases/filters",
+		func(c *gin.Context) { c.Set(TenantContextKey, "radiant") },
+		RequireActionInTenant(&testutils.MockAuth{Error: fmt.Errorf("no token")}, repo, types.ActionIngestData),
+		func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	assert.Equal(t, http.StatusUnauthorized, doActionRequest(router).Code)
+}
+
+func Test_RequireActionInTenant_NoTenantInContext_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	router := gin.New()
+	router.GET("/:tenant/cases/filters", RequireActionInTenant(auth, repo, types.ActionIngestData),
 		func(c *gin.Context) { c.Status(http.StatusOK) })
 
 	assert.Equal(t, http.StatusInternalServerError, doActionRequest(router).Code)

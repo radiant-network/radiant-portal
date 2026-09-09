@@ -187,9 +187,14 @@ type actionChecker interface {
 	HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error)
 }
 
-// TenantWideOrg is the org code passed for tenant-scoped actions: HasAction ignores the org
-// for those, so they need no resource lookup. Against an org-scoped action it would match
-// only '*' grants — which is why every org-scoped route must carry a real OrgResolver.
+// TenantWideOrg is the org code passed for tenant-scoped actions, where HasAction ignores the
+// org entirely so no resource lookup is needed.
+//
+// It is NOT a way to say "any org": against an org-scoped action HasAction matches only '*'
+// grants with it, because a tenant-wide grant's org_code is NULL. An org-scoped route must
+// therefore either resolve its resource's org (RequireActionAt / RequireActionAtEvery) or, when
+// the request names no organization at all, check the action across the tenant
+// (RequireActionInTenant).
 const TenantWideOrg = ""
 
 // OrgContextKey is the gin context key under which the action middlewares store the orgs
@@ -297,6 +302,54 @@ func RequireActionAtEvery(auth utils.Auth, repo actionChecker, action string, re
 			slog.String("action", action),
 			slog.String("tenant", *tenant),
 			slog.Any("orgs", orgs),
+		)
+		HandleForbiddenError(c)
+		c.Abort()
+	}
+}
+
+// tenantActionChecker answers whether a caller holds an action anywhere in a tenant, whatever
+// org an org-scoped grant is scoped to.
+type tenantActionChecker interface {
+	HasActionInTenant(ctx context.Context, userID, tenantCode, actionCode string) (bool, error)
+}
+
+// RequireActionInTenant gates a route on holding an action anywhere in the tenant, ignoring the
+// org of an org-scoped grant. It serves the requests that name no organization to check
+// against: the patient, sample and sequencing batches, whose records are not attached to a case
+// yet, and reading a batch. Passing TenantWideOrg to RequireAction would instead admit only '*'
+// grantees and refuse everyone holding the action at a specific org.
+func RequireActionInTenant(auth utils.Auth, repo tenantActionChecker, action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			c.Abort()
+			return
+		}
+
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+
+		allowed, err := repo.HasActionInTenant(c.Request.Context(), *userID, *tenant, action)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+		if allowed {
+			c.Next()
+			return
+		}
+
+		slog.WarnContext(c.Request.Context(), "forbidden: caller lacks required action in tenant",
+			slog.String("user_id", *userID),
+			slog.String("action", action),
+			slog.String("tenant", *tenant),
 		)
 		HandleForbiddenError(c)
 		c.Abort()
