@@ -4,10 +4,10 @@ import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_QueryBuilder } from 'pom/pages/CaseEntity_Variants_QueryBuilder';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
-describe('Case Entity - Variants - Somatic - SNV - Query builder - Two pills', () => {
+describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Two pills', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV');
+    cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', { cohort: 'TN' });
     CaseEntity_Variants_SavedFilters.somatic.actions.selectFilterInDropdown('Cypress_QB_2Pills');
   };
 

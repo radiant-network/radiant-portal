@@ -7,6 +7,11 @@ import EmptyField from '../information/empty-field';
 
 import DetailSection, { DetailItem } from './detail-section';
 
+/**
+ * Dead code: nothing imports this component. The somatic frequency rows actually rendered by the
+ * occurrence sheet and by the interpretation side panel live in `PredictionCard`, in
+ * `components/base/slider/slider-variant-details-card.tsx`.
+ */
 export type SomaticFrequencySectionProps = {
   somatic_pc_tn_wgs?: number;
   somatic_pn_tn_wgs?: number;

@@ -14,6 +14,13 @@ import { sb } from 'storybook/test';
 import { setDefaultOptions } from 'date-fns';
 import { enUS, frCA } from 'date-fns/locale';
 import { axiosClient } from '../../utils/axios';
+import { TenantContext } from '../hooks/use-tenant';
+import { BetaFeatureProvider } from '../hooks/beta-feature-provider';
+
+// Every API path is tenant-scoped (`/{tenant}/...`). Without a provider the context falls back to an
+// empty tenant, the client emits `/api//...` and no MSW handler matches, leaving stories stuck
+// loading. Stories needing their own tenants nest their provider inside this one.
+const STORYBOOK_TENANT = 'radiant';
 
 // mock
 sb.mock(import('../../utils/helper.ts'), { spy: true });
@@ -108,7 +115,11 @@ const preview: Preview = {
         <ThemeProvider>
           <TooltipProvider>
             <AlertDialogProvider>
-              <Story />
+              <TenantContext.Provider value={{ tenant: STORYBOOK_TENANT, tenants: [], setTenant: async () => {} }}>
+                <BetaFeatureProvider>
+                  <Story />
+                </BetaFeatureProvider>
+              </TenantContext.Provider>
             </AlertDialogProvider>
           </TooltipProvider>
         </ThemeProvider>

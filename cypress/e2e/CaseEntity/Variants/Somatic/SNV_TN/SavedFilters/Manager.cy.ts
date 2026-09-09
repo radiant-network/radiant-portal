@@ -4,10 +4,10 @@ import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 import { ManagerFilterModal } from 'pom/pages/ManagerFilterModal';
 
-describe('Case Entity - Variants - Somatic - SNV - Saved filters - Manager', () => {
+describe('Case Entity - Variants - Somatic - SNV (TN) - Saved filters - Manager', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV');
+    cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', { cohort: 'TN' });
     CaseEntity_Variants_SavedFilters.somatic.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
     CaseEntity_Variants_SavedFilters.somatic.actions.clickNewFilterButton(); // Clean Query Builder
   };

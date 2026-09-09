@@ -283,6 +283,9 @@ function SomaticInterpretationDialog({
                   />
                   <PredictionCard
                     type="somatic"
+                    somatic_pc_to_wgs={occurrenceExpand?.data?.somatic_pc_to_wgs}
+                    somatic_pn_to_wgs={occurrenceExpand?.data?.somatic_pn_to_wgs}
+                    somatic_pf_to_wgs={occurrenceExpand?.data?.somatic_pf_to_wgs}
                     somatic_pc_tn_wgs={occurrenceExpand?.data?.somatic_pc_tn_wgs}
                     somatic_pn_tn_wgs={occurrenceExpand?.data?.somatic_pn_tn_wgs}
                     somatic_pf_tn_wgs={occurrenceExpand?.data?.somatic_pf_tn_wgs}

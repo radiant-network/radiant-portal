@@ -1,6 +1,331 @@
 import { SavedFilterType } from '../../../api';
 import { RangeOperators } from '../../../components/base/query-builder/type';
-import { ApplicationId, FilterTypes, type PortalConfig } from '../../../components/cores/applications-config';
+import {
+  type AggregationConfig,
+  ApplicationId,
+  FilterTypes,
+  type PortalConfig,
+} from '../../../components/cores/applications-config';
+
+/**
+ * Facets shared by both somatic SNV cohorts. The analysis defines a single somatic facet set:
+ * the facet database carries no TN/TO discriminator, and saved filters are shared between the
+ * two sub-tabs, so both must expose the same fields.
+ */
+const somaticSNVAggregations = {
+  variant: {
+    items: [
+      { key: 'variant_class', translation_key: 'variant_class', type: FilterTypes.MULTIPLE, withDictionary: true },
+      { key: 'consequence', translation_key: 'consequence', type: FilterTypes.MULTIPLE, withDictionary: true },
+      { key: 'chromosome', translation_key: 'chromosome', type: FilterTypes.MULTIPLE, withDictionary: true },
+      {
+        key: 'start',
+        translation_key: 'start',
+        type: FilterTypes.NUMERICAL,
+        defaults: { min: 0, max: 100, defaultOperator: RangeOperators.Between },
+      },
+    ],
+  },
+  gene: {
+    items: [
+      { key: 'search_by_symbol', translation_key: 'search_by_symbol', type: FilterTypes.SEARCH_BY },
+      { key: 'upload_list_symbol', translation_key: 'upload_list_symbol', type: FilterTypes.UPLOAD_LIST },
+      { key: 'biotype', translation_key: 'biotype', type: FilterTypes.MULTIPLE, withDictionary: true },
+      {
+        key: 'gnomad_pli',
+        translation_key: 'gnomad_pli',
+        type: FilterTypes.NUMERICAL,
+        defaults: { min: 0, max: 100, defaultOperator: RangeOperators.GreaterThan },
+      },
+      {
+        key: 'gnomad_loeuf',
+        translation_key: 'gnomad_loeuf',
+        type: FilterTypes.NUMERICAL,
+        defaults: { min: 0, max: 100, defaultOperator: RangeOperators.LessThan },
+      },
+      {
+        key: 'omim_inheritance',
+        translation_key: 'omim_inheritance',
+        type: FilterTypes.MULTIPLE,
+        withDictionary: true,
+      },
+      { key: 'gene_divider', translation_key: 'gene_divider', type: FilterTypes.DIVIDER },
+      { key: 'hpo_gene_panel', translation_key: 'hpo_gene_panel', type: FilterTypes.MULTIPLE },
+      { key: 'orphanet_gene_panel', translation_key: 'orphanet_gene_panel', type: FilterTypes.MULTIPLE },
+      { key: 'omim_gene_panel', translation_key: 'omim_gene_panel', type: FilterTypes.MULTIPLE },
+      { key: 'ddd_gene_panel', translation_key: 'ddd_gene_panel', type: FilterTypes.MULTIPLE },
+      { key: 'cosmic_gene_panel', translation_key: 'cosmic_gene_panel', type: FilterTypes.MULTIPLE },
+      { key: 'symbol', translation_key: 'symbol', type: FilterTypes.MULTIPLE, facetHidden: true },
+    ],
+  },
+  pathogenicity: {
+    items: [
+      { key: 'clinvar', translation_key: 'clinvar', type: FilterTypes.MULTIPLE, withDictionary: true },
+      { key: 'vep_impact', translation_key: 'vep_impact', type: FilterTypes.MULTIPLE, withDictionary: true },
+      {
+        key: 'pathogenicity_predictions_divider',
+        translation_key: 'pathogenicity_predictions_divider',
+        type: FilterTypes.DIVIDER,
+      },
+      {
+        key: 'cadd_score',
+        translation_key: 'cadd_score',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'cadd_phred',
+        translation_key: 'cadd_phred',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'dann_score',
+        translation_key: 'dann_score',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      { key: 'fathmm_pred', translation_key: 'fathmm_pred', type: FilterTypes.MULTIPLE },
+      { key: 'lrt_pred', translation_key: 'lrt_pred', type: FilterTypes.MULTIPLE, withDictionary: true },
+      { key: 'polyphen2_hvar_pred', translation_key: 'polyphen2_hvar_pred', type: FilterTypes.MULTIPLE },
+      {
+        key: 'revel_score',
+        translation_key: 'revel_score',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'spliceai_ds',
+        translation_key: 'spliceai_ds',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      { key: 'sift_pred', translation_key: 'sift_pred', type: FilterTypes.MULTIPLE },
+    ],
+  },
+  frequency: {
+    items: [
+      {
+        key: 'frequency_divider_my_organization',
+        translation_key: 'frequency_divider_my_organization',
+        type: FilterTypes.DIVIDER,
+      },
+      {
+        key: 'somatic_pf_to_wgs',
+        translation_key: 'somatic_pf_to_wgs',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'somatic_pf_tn_wgs',
+        translation_key: 'somatic_pf_tn_wgs',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'germline_pf_wgs',
+        translation_key: 'germline_pf_wgs',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'germline_pf_wgs_affected',
+        translation_key: 'germline_pf_wgs_affected',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'germline_pf_wgs_not_affected',
+        translation_key: 'germline_pf_wgs_not_affected',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'frequency_divider_pulic_cohorts',
+        translation_key: 'frequency_divider_pulic_cohorts',
+        type: FilterTypes.DIVIDER,
+      },
+      {
+        key: 'gnomad_v3_af',
+        translation_key: 'gnomad_v3_af',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'topmed_af',
+        translation_key: 'topmed_af',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'thousand_genome_af',
+        translation_key: 'thousand_genome_af',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+    ],
+  },
+  occurrence: {
+    items: [
+      {
+        key: 'occurrence_metrics_divider',
+        translation_key: 'occurrence_metrics_divider',
+        type: FilterTypes.DIVIDER,
+      },
+      { key: 'filter', translation_key: 'filter', type: FilterTypes.MULTIPLE },
+      {
+        key: 'info_qd',
+        translation_key: 'info_qd',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'ad_alt',
+        translation_key: 'ad_alt',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'ad_total',
+        translation_key: 'ad_total',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'ad_ratio',
+        translation_key: 'ad_ratio',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'sq',
+        translation_key: 'sq',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+      {
+        key: 'aq',
+        translation_key: 'aq',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 100,
+          defaultOperator: RangeOperators.GreaterThan,
+          defaultMin: 0,
+          defaultMax: 100,
+        },
+      },
+    ],
+  },
+} satisfies AggregationConfig;
 
 export const radiantConfig = {
   admin: {
@@ -456,287 +781,10 @@ export const radiantConfig = {
       },
     },
   },
-  somatic_snv_to_occurrence: {
-    app_id: ApplicationId.somatic_snv_to_occurrence,
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
     saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
-    aggregations: {
-      variant: {
-        items: [
-          { key: 'variant_class', translation_key: 'variant_class', type: FilterTypes.MULTIPLE, withDictionary: true },
-          { key: 'consequence', translation_key: 'consequence', type: FilterTypes.MULTIPLE, withDictionary: true },
-          { key: 'chromosome', translation_key: 'chromosome', type: FilterTypes.MULTIPLE, withDictionary: true },
-          {
-            key: 'start',
-            translation_key: 'start',
-            type: FilterTypes.NUMERICAL,
-            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.Between },
-          },
-        ],
-      },
-      gene: {
-        items: [
-          { key: 'search_by_symbol', translation_key: 'search_by_symbol', type: FilterTypes.SEARCH_BY },
-          { key: 'upload_list_symbol', translation_key: 'upload_list_symbol', type: FilterTypes.UPLOAD_LIST },
-          { key: 'biotype', translation_key: 'biotype', type: FilterTypes.MULTIPLE, withDictionary: true },
-          {
-            key: 'gnomad_pli',
-            translation_key: 'gnomad_pli',
-            type: FilterTypes.NUMERICAL,
-            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.GreaterThan },
-          },
-          {
-            key: 'gnomad_loeuf',
-            translation_key: 'gnomad_loeuf',
-            type: FilterTypes.NUMERICAL,
-            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.LessThan },
-          },
-          {
-            key: 'omim_inheritance',
-            translation_key: 'omim_inheritance',
-            type: FilterTypes.MULTIPLE,
-            withDictionary: true,
-          },
-          { key: 'gene_divider', translation_key: 'gene_divider', type: FilterTypes.DIVIDER },
-          { key: 'hpo_gene_panel', translation_key: 'hpo_gene_panel', type: FilterTypes.MULTIPLE },
-          { key: 'orphanet_gene_panel', translation_key: 'orphanet_gene_panel', type: FilterTypes.MULTIPLE },
-          { key: 'omim_gene_panel', translation_key: 'omim_gene_panel', type: FilterTypes.MULTIPLE },
-          { key: 'ddd_gene_panel', translation_key: 'ddd_gene_panel', type: FilterTypes.MULTIPLE },
-          { key: 'cosmic_gene_panel', translation_key: 'cosmic_gene_panel', type: FilterTypes.MULTIPLE },
-          { key: 'symbol', translation_key: 'symbol', type: FilterTypes.MULTIPLE, facetHidden: true },
-        ],
-      },
-      pathogenicity: {
-        items: [
-          { key: 'clinvar', translation_key: 'clinvar', type: FilterTypes.MULTIPLE, withDictionary: true },
-          { key: 'vep_impact', translation_key: 'vep_impact', type: FilterTypes.MULTIPLE, withDictionary: true },
-          {
-            key: 'pathogenicity_predictions_divider',
-            translation_key: 'pathogenicity_predictions_divider',
-            type: FilterTypes.DIVIDER,
-          },
-          {
-            key: 'cadd_score',
-            translation_key: 'cadd_score',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'cadd_phred',
-            translation_key: 'cadd_phred',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'dann_score',
-            translation_key: 'dann_score',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          { key: 'fathmm_pred', translation_key: 'fathmm_pred', type: FilterTypes.MULTIPLE },
-          { key: 'lrt_pred', translation_key: 'lrt_pred', type: FilterTypes.MULTIPLE, withDictionary: true },
-          { key: 'polyphen2_hvar_pred', translation_key: 'polyphen2_hvar_pred', type: FilterTypes.MULTIPLE },
-          {
-            key: 'revel_score',
-            translation_key: 'revel_score',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'spliceai_ds',
-            translation_key: 'spliceai_ds',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          { key: 'sift_pred', translation_key: 'sift_pred', type: FilterTypes.MULTIPLE },
-        ],
-      },
-      frequency: {
-        items: [
-          {
-            key: 'frequency_divider_my_organization',
-            translation_key: 'frequency_divider_my_organization',
-            type: FilterTypes.DIVIDER,
-          },
-          {
-            key: 'somatic_pf_tn_wgs',
-            translation_key: 'somatic_pf_tn_wgs',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'germline_pf_wgs',
-            translation_key: 'germline_pf_wgs',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'germline_pf_wgs_affected',
-            translation_key: 'germline_pf_wgs_affected',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'germline_pf_wgs_not_affected',
-            translation_key: 'germline_pf_wgs_not_affected',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'frequency_divider_pulic_cohorts',
-            translation_key: 'frequency_divider_pulic_cohorts',
-            type: FilterTypes.DIVIDER,
-          },
-          {
-            key: 'gnomad_v3_af',
-            translation_key: 'gnomad_v3_af',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'topmed_af',
-            translation_key: 'topmed_af',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'thousand_genome_af',
-            translation_key: 'thousand_genome_af',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-        ],
-      },
-      occurrence: {
-        items: [
-          {
-            key: 'occurrence_metrics_divider',
-            translation_key: 'occurrence_metrics_divider',
-            type: FilterTypes.DIVIDER,
-          },
-          { key: 'filter', translation_key: 'filter', type: FilterTypes.MULTIPLE },
-          {
-            key: 'info_qd',
-            translation_key: 'info_qd',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'ad_alt',
-            translation_key: 'ad_alt',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'ad_total',
-            translation_key: 'ad_total',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'ad_ratio',
-            translation_key: 'ad_ratio',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.GreaterThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-        ],
-      },
-    },
+    aggregations: somaticSNVAggregations,
   },
   study: {
     app_id: ApplicationId.study,
@@ -765,10 +813,10 @@ export const radiantConfig = {
       logout: true,
     },
   },
-  somatic_snv_tn_occurrence: {
-    app_id: ApplicationId.somatic_snv_tn_occurrence,
-    aggregations: {},
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
     saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+    aggregations: somaticSNVAggregations,
   },
   somatic_cnv_to_occurrence: {
     app_id: ApplicationId.somatic_cnv_to_occurrence,

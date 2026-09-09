@@ -2,11 +2,11 @@ import { HttpResponse } from 'msw';
 
 import { generateBooleanData, generateMultiSelectData, generateSortedAdvancedData } from '../table/table-mock';
 
-export const occurrenceListApi = `api/occurrences/germline/:type/:case_id/:seq_id/list`;
-export const occurrenceAggregateApi = `api/occurrences/germline/:type/:case_id/:seq_id/aggregate`;
-export const occurrenceAggregateStatisticApi = `api/occurrences/germline/:type/:case_id/:seq_id/statistics`;
-export const occurrenceGermlineExpandApi = `api/occurrences/germline/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
-export const occurrenceSomaticExpandApi = `api/occurrences/somatic/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
+export const occurrenceListApi = `api/:tenant/occurrences/germline/:type/:case_id/:seq_id/:task_id/list`;
+export const occurrenceAggregateApi = `api/:tenant/occurrences/germline/:type/:case_id/:seq_id/:task_id/aggregate`;
+export const occurrenceAggregateStatisticApi = `api/:tenant/occurrences/germline/:type/:case_id/:seq_id/:task_id/statistics`;
+export const occurrenceGermlineExpandApi = `api/:tenant/occurrences/germline/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
+export const occurrenceSomaticExpandApi = `api/:tenant/occurrences/somatic/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
 
 export type OccurenceHandler = {
   case_id: string;
@@ -256,12 +256,17 @@ export async function httpSomaticOccurrenceExpandResponse() {
     dna_change: 'c.74T>A',
     vep_impact: 'HIGH',
     picked_consequences: ['splice_acceptor_variant', 'non_coding_transcript_exon_variant', 'intron_variant'],
+    somatic_pc_to_wgs: 3,
+    somatic_pn_to_wgs: 12,
+    somatic_pf_to_wgs: 25,
     somatic_pc_tn_wgs: 1,
     somatic_pn_tn_wgs: 7,
     somatic_pf_tn_wgs: 10,
     ad_alt: 2,
     ad_total: 53,
     ad_ratio: 0.03773585,
+    sq: 41.2,
+    aq: 8.7,
     filter: 'weak_evidence',
     gnomad_pli: 1.823e-29,
     gnomad_loeuf: 1.562,
