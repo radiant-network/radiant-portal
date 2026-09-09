@@ -58,11 +58,11 @@ func Load(path string) (*Config, error) {
 		return &Config{}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("read config %s: %w", path, err)
+		return nil, fmt.Errorf("read %s: %w", path, err)
 	}
 	var cfg Config
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("parse config %s: %w", path, err)
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
 	return &cfg, nil
 }
@@ -70,24 +70,24 @@ func Load(path string) (*Config, error) {
 // Save writes atomically (temp file + rename) with mode 0600: the file holds tokens.
 func Save(path string, cfg *Config) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-		return fmt.Errorf("create config dir: %w", err)
+		return fmt.Errorf("create %s: %w", filepath.Dir(path), err)
 	}
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
-		return fmt.Errorf("encode config: %w", err)
+		return fmt.Errorf("encode settings: %w", err)
 	}
 	tmp := path + ".tmp"
 	if err := os.WriteFile(tmp, data, 0o600); err != nil {
-		return fmt.Errorf("write config: %w", err)
+		return fmt.Errorf("write %s: %w", tmp, err)
 	}
 	if err := os.Chmod(tmp, 0o600); err != nil {
-		return fmt.Errorf("chmod config: %w", err)
+		return fmt.Errorf("chmod %s: %w", tmp, err)
 	}
 	if runtime.GOOS == "windows" {
 		_ = os.Remove(path)
 	}
 	if err := os.Rename(tmp, path); err != nil {
-		return fmt.Errorf("replace config: %w", err)
+		return fmt.Errorf("replace %s: %w", path, err)
 	}
 	return nil
 }

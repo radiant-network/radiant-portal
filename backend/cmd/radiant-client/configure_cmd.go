@@ -25,14 +25,14 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 			}
 			if reset {
 				if err := config.Save(path, &config.Config{}); err != nil {
-					return err
+					return fmt.Errorf("reset config: %w", err)
 				}
 				prompt.Printf(cmd.OutOrStdout(), "Configuration reset: %s\n", path)
 				return nil
 			}
 			cfg, err := config.Load(path)
 			if err != nil {
-				return err
+				return fmt.Errorf("load config: %w", err)
 			}
 			if apiURL == "" {
 				apiURL, err = prompt.Line(cmd.InOrStdin(), cmd.OutOrStdout(), "Radiant API URL", cfg.APIURL)
@@ -55,7 +55,7 @@ func configureCmd(resolve configPathResolver) *cobra.Command {
 				return fmt.Errorf("server returned an unusable configuration: %w", err)
 			}
 			if err := config.Save(path, cfg); err != nil {
-				return err
+				return fmt.Errorf("save config: %w", err)
 			}
 			p := style.For(cmd.OutOrStdout())
 			prompt.Printf(cmd.OutOrStdout(), "Configuration saved to %s\nAuthentication: %s flow on %s (realm %s, client %s)\n", p.Path(path), cfg.Auth.Method, p.URL(cfg.Auth.KeycloakURL), cfg.Auth.Realm, cfg.Auth.ClientID)

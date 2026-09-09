@@ -64,7 +64,7 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 	}
 	cfg, err := config.Load(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("load config: %w", err)
 	}
 	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("%w: run `radiant-client configure` first", err)
@@ -98,13 +98,13 @@ func runDownload(ctx context.Context, cmd *cobra.Command, f downloadFlags, resol
 		return err
 	}
 	if err := config.Save(path, cfg); err != nil {
-		return err
+		return fmt.Errorf("save tokens: %w", err)
 	}
 
 	total, unknown, toDownload := estimate(entries, outDir, f.resume)
 	available, err := diskspace.Available(outDir)
 	if err != nil {
-		return err
+		return fmt.Errorf("check disk space: %w", err)
 	}
 	if total > available {
 		return fmt.Errorf("not enough disk space: %s needed, %s available in %s", prompt.Bytes(total), prompt.Bytes(available), outDir)

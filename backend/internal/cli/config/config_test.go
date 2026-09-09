@@ -28,7 +28,7 @@ func Test_Load_InvalidJSON(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	require.NoError(t, os.WriteFile(path, []byte("{not json"), 0o600))
 	_, err := Load(path)
-	assert.ErrorContains(t, err, "parse config")
+	assert.ErrorContains(t, err, "parse ")
 }
 
 func Test_SaveLoad_RoundTrip(t *testing.T) {
