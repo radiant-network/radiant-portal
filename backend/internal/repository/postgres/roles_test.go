@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func roleByCodeIn(roles []types.RoleResult, code string) *types.RoleResult {
@@ -175,12 +176,20 @@ func Test_RolesRepository_ListTenantRoles_CountsHoldersAcrossOrganizations(t *te
 // cascades role_action.
 func withScratchTenant(t *testing.T, env *testutils.Env, code string, fn func(repo *RolesRepository, tenant string)) {
 	t.Helper()
-	defer func() {
-		env.Postgres.Exec("DELETE FROM role WHERE tenant_code = ?", code)
-		env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
-	}()
-	require.NoError(t, env.Postgres.Exec("INSERT INTO tenant (code, name) VALUES (?, ?)", code, code).Error)
+	scratchTenant(t, env.Postgres, code)
 	fn(NewRolesRepository(database.PostgresDB{DB: env.Postgres}), code)
+}
+
+// scratchTenant creates a throwaway tenant and drops it, with its roles, after the test.
+// Tests that write roles or grants use one instead of the seeded `radiant` tenant: the
+// read tests assert on radiant's exact role catalog and run in parallel with these writes.
+func scratchTenant(t *testing.T, db *gorm.DB, code string) {
+	t.Helper()
+	require.NoError(t, db.Exec("INSERT INTO tenant (code, name) VALUES (?, ?)", code, code).Error)
+	t.Cleanup(func() {
+		db.Exec("DELETE FROM role WHERE tenant_code = ?", code) // cascades role_action + user_role
+		db.Exec("DELETE FROM tenant WHERE code = ?", code)
+	})
 }
 
 func Test_RolesRepository_CreateRole_InsertsRoleWithItsActions(t *testing.T) {
