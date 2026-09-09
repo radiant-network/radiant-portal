@@ -446,15 +446,13 @@ func Test_GetById_NotFound(t *testing.T) {
 	})
 }
 
-func Test_GetById_FilteredIndexFile(t *testing.T) {
+func Test_GetById_IndexFile(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
-		var indexDoc Document
-		env.Starrocks.Table("document doc").Where("doc.format_code IN ('crai', 'tbi')").First(&indexDoc)
-		if indexDoc.ID > 0 {
-			document, err := repo.GetById(t.Context(), indexDoc.ID)
-			assert.NoError(t, err)
-			assert.Nil(t, document)
-		}
+		document, err := repo.GetById(t.Context(), 2)
+		assert.NoError(t, err)
+		assert.NotNil(t, document)
+		assert.Equal(t, "FI0037662.S13230.cram.crai", document.Name)
+		assert.Equal(t, "crai", document.FileFormatCode)
 	})
 }
