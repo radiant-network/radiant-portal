@@ -26,8 +26,7 @@
     "axios": "^1.16.1",
     "components": "file:../../components",
     "lucide-react": "^1.17.0",
-    "swr": "^2.4.1",
-    "utils": "file:../../utils"
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",

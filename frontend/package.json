@@ -2,9 +2,8 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "api/*",
     "apps/*",
-    "components/*",
+    "components",
     "portals/*"
   ],
   "lint-staged": {
