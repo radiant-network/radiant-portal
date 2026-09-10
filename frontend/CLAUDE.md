@@ -12,7 +12,7 @@ Node.js > 20.18.0 required.
 
 ```bash
 # From frontend/
-npm install             # Install all workspace dependencies (run once at root)
+npm install             # Install all workspace dependencies (see warning below)
 npm test                # Run Vitest unit tests
 npm run lint            # ESLint check
 npm run lint:fix        # ESLint auto-fix
@@ -25,6 +25,17 @@ npm run typecheck       # react-router typegen + tsc
 # Storybook (from frontend/components/)
 npm run storybook:radiant
 ```
+
+> [!IMPORTANT]
+> **Always run `npm install` from `frontend/`, never from a subdirectory.**
+>
+> `frontend/package-lock.json` is the single lockfile for the whole frontend. Running `npm install`
+> inside `components/`, an `apps/*` or `portals/radiant` creates a second, independent dependency
+> tree: the same `^` ranges get resolved to different versions, so Storybook ends up running the
+> components against different dependencies than the apps use.
+>
+> Commands *other than install* are fine from a subdirectory — Storybook is started from
+> `components/` but installs nothing, it resolves against the hoisted `frontend/node_modules`.
 
 To run a single test file:
 ```bash
