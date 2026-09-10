@@ -2390,14 +2390,6 @@ components:
           - long_read
           type: string
         status_code:
-          enum:
-          - unknown
-          - draft
-          - revoke
-          - completed
-          - incomplete
-          - submitted
-          - in_progress
           type: string
         submitter_sample_id:
           type: string

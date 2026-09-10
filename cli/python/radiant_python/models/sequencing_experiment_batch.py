@@ -55,13 +55,6 @@ class SequencingExperimentBatch(BaseModel):
             raise ValueError("must be one of enum values ('short_read', 'long_read')")
         return value
 
-    @field_validator('status_code')
-    def status_code_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['unknown', 'draft', 'revoke', 'completed', 'incomplete', 'submitted', 'in_progress']):
-            raise ValueError("must be one of enum values ('unknown', 'draft', 'revoke', 'completed', 'incomplete', 'submitted', 'in_progress')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

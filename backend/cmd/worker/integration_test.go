@@ -57,8 +57,8 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 				"patient_organization_code": "CHOP",
 				"sex_code": "female",
 				"life_status_code": "alive",
-				"date_of_birth": "2010-05-15"	
-			}	
+				"date_of_birth": "2010-05-15"
+			}
 		]
 		`
 		var id string
@@ -109,8 +109,8 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 				"last_name": "Gagnon",
 				"first_name": "Juliette",
 				"jhn": "GAG1202030277",
-				"date_of_birth": "2012-02-03"	
-			}	
+				"date_of_birth": "2012-02-03"
+			}
 		]
 		`
 		var id string
@@ -155,8 +155,8 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 				"last_name": "Gagnon",
 				"first_name": "Juliette",
 				"jhn": "GAG1202030277",
-				"date_of_birth": "2012-02-03"	
-			}	
+				"date_of_birth": "2012-02-03"
+			}
 		]
 		`
 		var id string
@@ -269,7 +269,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 				"life_status_code": "alive",
 				"date_of_birth": "2010-05-15",
 				"last_name": "(D)o-e"
-			}	
+			}
 		]
 		`
 		var id string
@@ -319,7 +319,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -367,7 +367,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -420,7 +420,7 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -463,7 +463,7 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -501,7 +501,7 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -660,7 +660,7 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -706,7 +706,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -759,7 +759,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -812,7 +812,7 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -856,7 +856,7 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -901,7 +901,7 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `
 		var id string
@@ -938,7 +938,7 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
                 "type_code": "dna",
                 "tissue_site": "blood",
                 "histology_code": "normal"
-            }	
+            }
         ]
         `, longString)
 		var id string
@@ -1036,7 +1036,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1088,7 +1088,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1164,7 +1164,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1236,7 +1236,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1270,7 +1270,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 				"sample_organization_code": "CQGC",
 				"submitter_sample_id": "S13224",
 				"experimental_strategy_code": "wgs",
-				"sequencing_read_technology_code": "long_read", 
+				"sequencing_read_technology_code": "long_read",
 				"platform_code": "illumina",
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
@@ -1278,7 +1278,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_progress"
-			}	
+			}
 		]
 		`
 		if err := env.Postgres.Raw(`
@@ -1330,7 +1330,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
 				"status_code": "in_slow_progress"
-			}	
+			}
 		]
 		`
 		var id string
@@ -1368,6 +1368,50 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 		assert.Len(t, resultBatch.Report.Infos, 0)
 		assert.Len(t, resultBatch.Report.Errors, 3)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Errors_UnknownStatusCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}
+		]
+		`
+
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, payload, types.BatchStatusPending, types.CreateSequencingExperimentBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "SEQ-002",
+				Message: `Invalid field status_code for create_sequencing_experiment (CQGC / S13224 / ALIQUOT-12345). Reason: "in_slow_progress" is not a valid status code. Valid values [completed, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].`,
+				Path:    "create_sequencing_experiment[0].status_code",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusError, false, "user123", emptyMsgs, emptyMsgs, errors)
+
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
 	})
 }
 
@@ -1718,8 +1762,8 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		payload := `[
 			{
-				"batch": "fake"	
-			}	
+				"batch": "fake"
+			}
 		]
 		`
 		var id string

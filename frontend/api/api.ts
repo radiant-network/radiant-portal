@@ -4815,7 +4815,7 @@ export interface SequencingExperimentBatch {
      * @type {string}
      * @memberof SequencingExperimentBatch
      */
-    'status_code': SequencingExperimentBatchStatusCodeEnum;
+    'status_code': string;
     /**
      * 
      * @type {string}
@@ -4838,17 +4838,6 @@ export const SequencingExperimentBatchSequencingReadTechnologyCodeEnum = {
 } as const;
 
 export type SequencingExperimentBatchSequencingReadTechnologyCodeEnum = typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum[keyof typeof SequencingExperimentBatchSequencingReadTechnologyCodeEnum];
-export const SequencingExperimentBatchStatusCodeEnum = {
-    Unknown: 'unknown',
-    Draft: 'draft',
-    Revoke: 'revoke',
-    Completed: 'completed',
-    Incomplete: 'incomplete',
-    Submitted: 'submitted',
-    InProgress: 'in_progress'
-} as const;
-
-export type SequencingExperimentBatchStatusCodeEnum = typeof SequencingExperimentBatchStatusCodeEnum[keyof typeof SequencingExperimentBatchStatusCodeEnum];
 
 /**
  * 

@@ -42,8 +42,8 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 					"aliquot": "aliquot1",
 					"sample_organization_code": "org1",
 					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
 					"experimental_strategy_code": "wgs",
 					"sequencing_read_technology_code": "short_read",
 					"status_code": "completed",
@@ -90,8 +90,8 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 					"aliquot": "aliquot1",
 					"sample_organization_code": "org1",
 					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
 					"experimental_strategy_code": "wgs",
 					"sequencing_read_technology_code": "short_read",
 					"status_code": "completed"
@@ -110,6 +110,76 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	assert.Equal(t, "create_sequencing_experiment", response.BatchType)
 	assert.Equal(t, "testuser", response.Username)
 	assert.Equal(t, types.BatchStatusPending, response.Status)
+}
+
+func TestPostSequencingExperimentBatchHandler_Success_DictionaryStatusCode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    types.BatchStatusPending,
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	body := `
+		{
+			"sequencing_experiments": [
+				{
+					"aliquot": "aliquot1",
+					"sample_organization_code": "org1",
+					"submitter_sample_id": "sample1",
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
+					"experimental_strategy_code": "wgs",
+					"sequencing_read_technology_code": "short_read",
+					"status_code": "in_review"
+				}
+			]
+		}`
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+}
+
+func TestPostSequencingExperimentBatchHandler_MissingStatusCode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
+
+	router := tenantRouter()
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	body := `
+		{
+			"sequencing_experiments": [
+				{
+					"aliquot": "aliquot1",
+					"sample_organization_code": "org1",
+					"submitter_sample_id": "sample1",
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
+					"experimental_strategy_code": "wgs",
+					"sequencing_read_technology_code": "short_read"
+				}
+			]
+		}`
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
@@ -137,10 +207,10 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 					"aliquot": "aliquot1",
 					"sample_organization_code": "org1",
 					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
 					"experimental_strategy_code": "unknown_strategy",
-					"sequencing_read_technology_code": "short_read",	
+					"sequencing_read_technology_code": "short_read",
 					"status_code": "completed"
 				}
 			]
@@ -178,12 +248,12 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 					"aliquot": "aliquot1",
 					"sample_organization_code": "org1",
 					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
 					"experimental_strategy_code": "unknown_strategy",
-					"sequencing_read_technology_code": "short_read",	
+					"sequencing_read_technology_code": "short_read",
 					"status_code": "completed",
-					"run_date": ""	
+					"run_date": ""
 				}
 			]
 		}`
@@ -220,12 +290,12 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 					"aliquot": "aliquot1",
 					"sample_organization_code": "org1",
 					"submitter_sample_id": "sample1",
-					"sequencing_lab_code": "org1", 
-					"platform_code": "illumina", 
+					"sequencing_lab_code": "org1",
+					"platform_code": "illumina",
 					"experimental_strategy_code": "unknown_strategy",
-					"sequencing_read_technology_code": "short_read",	
+					"sequencing_read_technology_code": "short_read",
 					"status_code": "completed",
-					"run_date": "2026-10-15"	
+					"run_date": "2026-10-15"
 				}
 			]
 		}`
