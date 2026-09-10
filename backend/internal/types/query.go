@@ -46,8 +46,15 @@ type ListQuery interface {
 	SortedFields() []SortField
 	HasFieldFromTables(tables ...Table) bool
 	GetFieldsFromTables(tables ...Table) []Field
+}
+
+// OccurrenceListQuery is a ListQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceListQuery interface {
+	ListQuery
 	WithNote() bool
 }
+
 type listQuery struct {
 	filters        FilterNode //Root node of the filter tree
 	filteredFields []Field    //Fields used in the filters
@@ -121,7 +128,7 @@ func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
 	return &p
 }
 
-func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...QueryOption) (ListQuery, error) {
+func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...QueryOption) (OccurrenceListQuery, error) {
 	options := resolveQueryOptions(opts)
 
 	// Define allowed selectedCols
@@ -232,6 +239,12 @@ type CountQuery interface {
 	Filters() FilterNode
 	HasFieldFromTables(tables ...Table) bool
 	GetFieldsFromTables(tables ...Table) []Field
+}
+
+// OccurrenceCountQuery is a CountQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceCountQuery interface {
+	CountQuery
 	WithNote() bool
 }
 
@@ -262,7 +275,7 @@ func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...QueryOption) (CountQuery, error) {
+func NewCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...QueryOption) (OccurrenceCountQuery, error) {
 	options := resolveQueryOptions(opts)
 
 	if sqon != nil {

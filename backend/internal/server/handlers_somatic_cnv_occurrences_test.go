@@ -36,7 +36,7 @@ func (m *MockSomaticCNVRepository) GetStatisticsOccurrences(context.Context, int
 
 // The first row carries the full ASCN block; the second has it entirely NULL, which is what
 // DRAGEN 3.10.8 files look like.
-func (m *MockSomaticCNVRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.SomaticCNVOccurrence, error) {
+func (m *MockSomaticCNVRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.SomaticCNVOccurrence, error) {
 	return []types.SomaticCNVOccurrence{
 		{
 			SeqID:      74,
@@ -102,7 +102,7 @@ func (m *MockSomaticCNVRepository) GetOccurrences(context.Context, int, int, int
 	}, nil
 }
 
-func (m *MockSomaticCNVRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
+func (m *MockSomaticCNVRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
 	return 15, nil
 }
 

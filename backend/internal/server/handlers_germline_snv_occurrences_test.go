@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
+func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
 	return []types.GermlineSNVOccurrence{
 		{
 			SeqId:              1,
@@ -44,7 +44,7 @@ func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.Li
 	}, nil
 }
 
-func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
+func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
 	return 15, nil
 }
 
@@ -448,16 +448,16 @@ func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
 // can be asserted without a database.
 type withNoteRecorder struct {
 	MockRepository
-	listQuery  types.ListQuery
-	countQuery types.CountQuery
+	listQuery  types.OccurrenceListQuery
+	countQuery types.OccurrenceCountQuery
 }
 
-func (m *withNoteRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
+func (m *withNoteRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
 	m.listQuery = query
 	return nil, nil
 }
 
-func (m *withNoteRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.CountQuery) (int64, error) {
+func (m *withNoteRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
 	m.countQuery = query
 	return 0, nil
 }

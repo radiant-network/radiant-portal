@@ -20,11 +20,11 @@ func NewSomaticCNVOccurrencesRepository(db database.StarrocksDB) *SomaticCNVOccu
 
 // The seqId these methods scope on is the tumor sequencing id: somatic CNV is germline-shaped and
 // keys on seq_id, unlike somatic SNV with its tumor_seq_id/normal_seq_id pair.
-func (r *SomaticCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticCNVOccurrence, error) {
+func (r *SomaticCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]SomaticCNVOccurrence, error) {
 	return listCNVOccurrences[SomaticCNVOccurrence](ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 
-func (r *SomaticCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (r *SomaticCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	return countCNVOccurrences(ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, seqId, taskId, userQuery)
 }
 

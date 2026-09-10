@@ -34,7 +34,7 @@ func (m *MockCNVRepository) GetStatisticsOccurrences(context.Context, int, int, 
 		nil
 }
 
-func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
+func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.GermlineCNVOccurrence, error) {
 	return []types.GermlineCNVOccurrence{
 		{
 			SeqID:      1,
@@ -93,7 +93,7 @@ func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types
 	}, nil
 }
 
-func (m *MockCNVRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
+func (m *MockCNVRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
 	return 15, nil
 }
 

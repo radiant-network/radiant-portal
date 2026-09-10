@@ -38,7 +38,7 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the
 // same column-agnostic query and differ solely in which DTO the rows are scanned into.
-func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]T, error) {
+func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]T, error) {
 	var occurrences []T
 	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
 	if err != nil {
@@ -92,7 +92,7 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	return occurrences, nil
 }
 
-func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)

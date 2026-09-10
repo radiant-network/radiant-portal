@@ -15,7 +15,7 @@ import (
 
 type MockSomaticSNVOccurrencesRepository struct{}
 
-func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	return 1111, nil
 }
 
@@ -46,7 +46,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Cont
 	}, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error) {
 	somaticPfTn := 0.55
 	somaticPcTn := 6
 	somaticPfTo := 0.42
