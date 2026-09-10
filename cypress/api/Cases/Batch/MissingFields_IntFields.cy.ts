@@ -13,6 +13,7 @@ describe('Cases - Batch - Missing fields - Int fields', () => {
         "type": "germline",
         "status_code": "completed",
         "project_code": "Cypress",
+        "diagnostic_lab_code": "CHUSJ",
         "category_code": "postnatal",
         "analysis_code": "Cypress",
         "patients": [

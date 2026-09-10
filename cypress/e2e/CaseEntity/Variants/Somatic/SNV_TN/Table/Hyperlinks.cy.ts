@@ -27,7 +27,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'gene');
   });
 
-  it('Gene Plus [SJRA-1682]', () => {
+  it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
     const resultCount = CaseEntity_Variants_SNV_Table.somatic.actions.getResultsCount();

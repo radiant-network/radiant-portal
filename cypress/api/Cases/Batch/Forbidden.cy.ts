@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Cases - Batch - Invalid values - Enum fields', () => {
+describe('Cases - Batch - Forbidden', () => {
   let response: any;
 
   before(() => {
@@ -9,16 +9,22 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
     const body: string = `{
       "cases": [
         {
-        "submitter_case_id": "Cypress0001",
-        "type": "InvalidValue",
+        "submitter_case_id": "NotFoundCase",
+        "type": "germline",
         "status_code": "completed",
         "project_code": "Cypress",
-        "diagnostic_lab_code": "CHUSJ",
-        "category_code": "InvalidValue",
+        "primary_condition_code_system": "Cypress",
+        "primary_condition_value": "Cypress",
+        "priority_code": "Cypress",
+        "category_code": "postnatal",
         "analysis_code": "Cypress",
+        "resolution_status_code": "Cypress",
+        "note": "Cypress",
+        "ordering_physician": "Cypress",
+        "ordering_organization_code": "Cypress",
         "patients": [
             {
-            "affected_status_code": "InvalidValue",
+            "affected_status_code": "affected",
             "family_history": [
                 {
                     "family_member_code": "Cypress",
@@ -31,7 +37,8 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
                     "system": "Cypress",
                     "value": "Cypress",
                     "onset_code": "Cypress",
-                    "interpretation_code": "InvalidValue"
+                    "interpretation_code": "positive",
+                    "note": "Cypress"
                 }
             ],
             "observations_text": [
@@ -42,7 +49,7 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
             ],
             "submitter_patient_id": "Cypress0001",
             "patient_organization_code": "Cypress",
-            "relation_to_proband_code": "InvalidValue"
+            "relation_to_proband_code": "proband"
             }
         ],
         "sequencing_experiments": [
@@ -72,7 +79,9 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
                 "url": "Cypress"
                 }
             ],
-            "pipeline_version": "Cypress"
+            "pipeline_name": "Cypress",
+            "pipeline_version": "Cypress",
+            "genome_build": "Cypress"
             }
         ]
         }
@@ -85,14 +94,13 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
   });
 
   it('Request status', () => {
-    expect(response.status).to.eq(400);
+    expect(response.status).to.eq(403);
   });
 
   it('Return content', () => {
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'Type', 'oneof'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'CategoryCode', 'oneof'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0]', 'AffectedStatusCode', 'oneof'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'InterpretationCode', 'oneof'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0]', 'RelationToProbandCode', 'oneof'));
+    expect(response.body).to.have.all.keys('status', 'message');
+    expect(response.body).to.include({
+      message: apiMessages.Forbidden,
+    });
   });
 });

@@ -10,6 +10,7 @@ describe('Cases - Batch - Missing fields - String fields', () => {
       "cases": [
         {
         "type": "germline",
+        "diagnostic_lab_code": "CHUSJ",
         "patients": [
             {
             "affected_status_code": "affected",
@@ -62,7 +63,6 @@ describe('Cases - Batch - Missing fields - String fields', () => {
   it('Message', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'DiagnosticLabCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'CategoryCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'AnalysisCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'OrderingOrganizationCode', 'required'));

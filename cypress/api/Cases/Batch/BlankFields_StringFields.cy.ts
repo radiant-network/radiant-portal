@@ -13,7 +13,7 @@ describe('Cases - Batch - Blank fields - String fields', () => {
         "type": "germline",
         "status_code": "",
         "project_code": "",
-        "diagnostic_lab_code": "",
+        "diagnostic_lab_code": "CHUSJ",
         "category_code": "",
         "analysis_code": "",
         "ordering_organization_code": "",
@@ -91,7 +91,6 @@ describe('Cases - Batch - Blank fields - String fields', () => {
   it('Message', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'DiagnosticLabCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'CategoryCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'AnalysisCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'OrderingOrganizationCode', 'required'));

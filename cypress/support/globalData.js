@@ -642,6 +642,12 @@ const globalData = {
       ],
       Frequency: [
         {
+          field: 'somatic_pf_to_wgs',
+          value: '0.5',
+          op: '<',
+          count: /\d{1}/,
+        },
+        {
           field: 'somatic_pf_tn_wgs',
           value: '0.5',
           op: '<',
@@ -714,6 +720,18 @@ const globalData = {
           value: '0.5',
           op: '<',
           count: /\d{1}/,
+        },
+        {
+          field: 'sq',
+          value: '0',
+          op: '>',
+          count: 0,
+        },
+        {
+          field: 'aq',
+          value: '0',
+          op: '>',
+          count: 0,
         },
       ],
       Complex: {
