@@ -13,6 +13,25 @@ type Query interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
+type queryOptions struct {
+	withNote bool
+}
+
+type QueryOption func(*queryOptions)
+
+// WithNoteFilter restricts a list or count query to the occurrences having at least one note.
+func WithNoteFilter(withNote bool) QueryOption {
+	return func(o *queryOptions) { o.withNote = withNote }
+}
+
+func resolveQueryOptions(opts []QueryOption) queryOptions {
+	var resolved queryOptions
+	for _, opt := range opts {
+		opt(&resolved)
+	}
+	return resolved
+}
+
 type QueryConfig struct {
 	AllFields     []Field
 	DefaultFields []Field
@@ -27,6 +46,7 @@ type ListQuery interface {
 	SortedFields() []SortField
 	HasFieldFromTables(tables ...Table) bool
 	GetFieldsFromTables(tables ...Table) []Field
+	WithNote() bool
 }
 type listQuery struct {
 	filters        FilterNode //Root node of the filter tree
@@ -34,6 +54,7 @@ type listQuery struct {
 	selectedFields []Field    //Fields used for selection
 	pagination     *Pagination
 	sortedFields   []SortField
+	withNote       bool //Keep only the occurrences having at least one note
 }
 
 func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
@@ -71,6 +92,10 @@ func (l *listQuery) SortedFields() []SortField {
 	return l.sortedFields
 }
 
+func (l *listQuery) WithNote() bool {
+	return l.withNote
+}
+
 type SortField struct {
 	Field Field
 	Order string
@@ -96,7 +121,8 @@ func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
 	return &p
 }
 
-func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...QueryOption) (ListQuery, error) {
+	options := resolveQueryOptions(opts)
 
 	// Define allowed selectedCols
 	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
@@ -109,10 +135,10 @@ func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, p
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query from sqon %w", err)
 		}
-		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, nil
+		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField, withNote: options.withNote}, nil
 
 	} else {
-		return &listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, nil
+		return &listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField, withNote: options.withNote}, nil
 	}
 }
 
@@ -206,15 +232,21 @@ type CountQuery interface {
 	Filters() FilterNode
 	HasFieldFromTables(tables ...Table) bool
 	GetFieldsFromTables(tables ...Table) []Field
+	WithNote() bool
 }
 
 type countQuery struct {
 	filters        FilterNode //Root node of the filter tree
 	filteredFields []Field    //Fields used in the filters
+	withNote       bool       //Count only the occurrences having at least one note
 }
 
 func (l *countQuery) Filters() FilterNode {
 	return l.filters
+}
+
+func (l *countQuery) WithNote() bool {
+	return l.withNote
 }
 
 func (l *countQuery) HasFieldFromTables(tables ...Table) bool {
@@ -230,17 +262,18 @@ func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewCountQueryFromSqon(sqon *Sqon, fields []Field) (CountQuery, error) {
+func NewCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...QueryOption) (CountQuery, error) {
+	options := resolveQueryOptions(opts)
 
 	if sqon != nil {
 		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query %w", err)
 		}
-		return &countQuery{filteredFields: visitedFilteredFields, filters: root}, nil
+		return &countQuery{filteredFields: visitedFilteredFields, filters: root, withNote: options.withNote}, nil
 
 	} else {
-		return &countQuery{}, nil
+		return &countQuery{withNote: options.withNote}, nil
 	}
 }
 

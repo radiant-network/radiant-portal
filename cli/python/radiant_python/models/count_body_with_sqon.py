@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.sqon import Sqon
 from typing import Optional, Set
@@ -28,7 +28,8 @@ class CountBodyWithSqon(BaseModel):
     CountBodyWithSqon
     """ # noqa: E501
     sqon: Optional[Sqon] = None
-    __properties: ClassVar[List[str]] = ["sqon"]
+    with_note: Optional[StrictBool] = Field(default=None, description="Count only the occurrences having at least one note attached to them.")
+    __properties: ClassVar[List[str]] = ["sqon", "with_note"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,7 +85,8 @@ class CountBodyWithSqon(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None
+            "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None,
+            "with_note": obj.get("with_note")
         })
         return _obj
 
