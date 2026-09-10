@@ -36,7 +36,7 @@ func somaticCnvNames(occurrences []SomaticCNVOccurrence) []string {
 func Test_SomaticCNV_GetOccurrences(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -56,7 +56,7 @@ func Test_SomaticCNV_GetOccurrences(t *testing.T) {
 func Test_SomaticCNV_GetOccurrences_ScopesToSeqId(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 73, 85, query)
 		assert.NoError(t, err)
@@ -70,7 +70,7 @@ func Test_SomaticCNV_GetOccurrences_ScopesToSeqId(t *testing.T) {
 func Test_SomaticCNV_GetOccurrences_ScopesToTaskId(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 86, query)
 		assert.NoError(t, err)
@@ -90,7 +90,7 @@ func Test_SomaticCNV_GetOccurrences_AscnBlockReturnedWhenRequested(t *testing.T)
 			},
 			Op: "and",
 		}
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -123,7 +123,7 @@ func Test_SomaticCNV_GetOccurrences_AscnBlockAllNull(t *testing.T) {
 			},
 			Op: "and",
 		}
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -148,7 +148,7 @@ func Test_SomaticCNV_GetOccurrences_AscnBlockAllNull(t *testing.T) {
 func Test_SomaticCNV_GetOccurrences_DefaultFieldsExcludeAscnBlock(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(types.SomaticCNVOccurrencesQueryConfig, nil, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticCNVOccurrencesQueryConfig, nil, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -166,7 +166,7 @@ func Test_SomaticCNV_GetOccurrences_DefaultFieldsExcludeAscnBlock(t *testing.T) 
 func Test_SomaticCNV_GetOccurrences_NbSnv(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
@@ -192,7 +192,7 @@ func Test_SomaticCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testin
 			},
 			Op: "and",
 		}
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 
 		note, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
@@ -235,7 +235,7 @@ func Test_SomaticCNV_GetOccurrences_QualityFilter(t *testing.T) {
 			Op: "and",
 		}
 
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -251,7 +251,7 @@ func Test_SomaticCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 
 		sortedBody := []types.SortBody{{Field: "length", Order: "desc"}}
 
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, &types.Pagination{Limit: 1, Offset: 0}, sortedBody)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, &types.Pagination{Limit: 1, Offset: 0}, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -259,7 +259,7 @@ func Test_SomaticCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 			assert.Equal(t, "SCNV2", occurrences[0].Name, "longest segment sorts first")
 		}
 
-		query, err = types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, &types.Pagination{Limit: 2, Offset: 1}, sortedBody)
+		query, err = types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, &types.Pagination{Limit: 2, Offset: 1}, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err = repo.GetOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -270,7 +270,7 @@ func Test_SomaticCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 func Test_SomaticCNV_CountOccurrences(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -289,7 +289,7 @@ func Test_SomaticCNV_CountOccurrences_With_Filtering(t *testing.T) {
 			Op: "and",
 		}
 
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
@@ -367,7 +367,7 @@ func Test_SomaticCNV_GetOccurrences_PanelFilter(t *testing.T) {
 			Op: "and",
 		}
 
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -390,7 +390,7 @@ func Test_SomaticCNV_CountOccurrences_PanelFilter(t *testing.T) {
 			Op: "and",
 		}
 
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -439,7 +439,7 @@ func Test_SomaticCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_
 func Test_SomaticCNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 
 		case71Occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)

@@ -52,7 +52,7 @@ func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.Ha
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewListQueryFromSqon(types.GermlineCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote))
+		query, err := types.NewOccurrenceListQueryFromSqon(types.GermlineCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -116,7 +116,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQueryFromSqon(body.Sqon, types.GermlineCNVOccurrencesFields, types.WithNoteFilter(body.WithNote))
+		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.GermlineCNVOccurrencesFields, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
