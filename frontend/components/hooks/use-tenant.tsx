@@ -6,6 +6,8 @@ import { authApi, userPreferenceApi } from '../../utils/api';
 import Error403 from '../base/errors/403';
 import { Spinner } from '../base/spinner';
 
+import { hasOrgAction, orgsForAction, TENANT_ACTIONS } from './tenant-actions';
+
 export const TENANT_PREFERENCE_KEY = 'selected-tenant';
 
 export type TenantContextValue = {
@@ -24,22 +26,29 @@ export function useTenant() {
   return useContext(TenantContext);
 }
 
-/**
- * Tenant-scoped actions granting access to the admin section.
- * Backend catalog: `internal/types/auth.go`
- */
-export const TENANT_ACTIONS = {
-  manageUser: 'can_manage_user',
-  manageOrg: 'can_manage_org',
-  manageRole: 'can_manage_role',
-} as const;
+export { ORG_ACTIONS, TENANT_ACTIONS } from './tenant-actions';
 
 const ADMIN_TENANT_ACTIONS = Object.values(TENANT_ACTIONS);
 
+/** The caller's membership in the currently selected tenant, if any. */
+function useCurrentMembership(): TenantMembership | undefined {
+  const { tenant, tenants } = useTenant();
+  return tenants.find(membership => membership.code === tenant);
+}
+
 /** Tenant actions held by the caller in the currently selected tenant. */
 export function useTenantActions(): readonly string[] {
-  const { tenant, tenants } = useTenant();
-  return tenants.find(membership => membership.code === tenant)?.tenant_actions ?? [];
+  return useCurrentMembership()?.tenant_actions ?? [];
+}
+
+/** Orgs of the currently selected tenant where the caller holds `action`. */
+export function useOrgsForAction(action: string): readonly string[] {
+  return orgsForAction(useCurrentMembership(), action);
+}
+
+/** True when the caller holds the org-scoped `action` at `org` in the currently selected tenant. */
+export function useHasOrgAction(action: string, org: string | undefined): boolean {
+  return hasOrgAction(useCurrentMembership(), action, org);
 }
 
 /** True when the caller holds at least one of `actions` in the currently selected tenant. */

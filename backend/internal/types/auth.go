@@ -49,6 +49,9 @@ const (
 	ActionIngestData       = "can_ingest_data"
 )
 
+// ActionEditStatus gates changing a case's status (org-scoped), seeded by migration 000032.
+const ActionEditStatus = "can_edit_status"
+
 // Admin management action codes (tenant-scoped), seeded by migration 000018.
 const (
 	ActionManageUser = "can_manage_user"
