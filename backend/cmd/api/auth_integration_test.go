@@ -47,6 +47,7 @@ func Test_GetMeHandler_SeededUser(t *testing.T) {
 		"orgs_by_action": {
 			"can_comment_variant": ["CHOP"],
 			"can_download_file": ["CHOP"],
+			"can_edit_case": ["CHOP"],
 			"can_flag_variant": ["CHOP"],
 			"can_interpret_variant": ["CHOP"],
 			"can_read_pii": ["CHOP"]

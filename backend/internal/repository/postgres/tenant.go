@@ -42,7 +42,7 @@ var DefaultRoles = []roleSeed{
 		DescriptionEn: "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s).",
 		NameFr:        "Généticien",
 		DescriptionFr: "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées.",
-		Actions:       []string{"can_read_pii", "can_interpret_variant", "can_comment_variant", "can_flag_variant", "can_download_file"},
+		Actions:       []string{"can_read_pii", "can_interpret_variant", "can_comment_variant", "can_flag_variant", "can_download_file", "can_edit_case"},
 	},
 	{
 		Code:          "data_manager",

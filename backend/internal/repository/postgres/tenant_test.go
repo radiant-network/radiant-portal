@@ -71,6 +71,27 @@ func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.
 	})
 }
 
+// The create-tenant template must stay in step with what migration 000032 granted radiant's
+// geneticist, otherwise a new tenant's geneticists cannot edit a case status.
+func Test_TenantRepository_SeedDefaultRoles_GeneticistHoldsEditCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTenantRepository(database.PostgresDB{DB: env.Postgres})
+		const code = "zz_seed_edit_case"
+		defer func() {
+			env.Postgres.Exec("DELETE FROM role WHERE tenant_code = ?", code) // cascades role_action
+			env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
+		}()
+		require.NoError(t, repo.EnsureTenant(t.Context(), code, "Seed Edit Status"))
+		require.NoError(t, repo.SeedDefaultRoles(t.Context(), code))
+
+		var actions []string
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT action_code FROM role_action WHERE tenant_code = ? AND role_code = 'geneticist'", code).
+			Scan(&actions).Error)
+		assert.Contains(t, actions, types.ActionEditCase)
+	})
+}
+
 func Test_TenantRepository_ListTenants_IncludesSeededDefault(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		codes, err := NewTenantRepository(database.PostgresDB{DB: env.Postgres}).ListTenants(t.Context())

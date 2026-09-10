@@ -501,7 +501,7 @@ func Test_RolesRepository_GetTenantRole_ReturnsRoleWithItsActions(t *testing.T) 
 		assert.True(t, role.IsDefault, "geneticist is seeded by migration 000012, so it is locked")
 		assert.Equal(t, types.RoleScopeOrg, role.Scope)
 		assert.ElementsMatch(t,
-			[]string{types.ActionReadPII, types.ActionInterpretVariant, types.ActionCommentVariant, types.ActionFlagVariant, types.ActionDownloadFile},
+			[]string{types.ActionReadPII, types.ActionInterpretVariant, types.ActionCommentVariant, types.ActionFlagVariant, types.ActionDownloadFile, types.ActionEditCase},
 			actionCodes(role))
 		for _, action := range role.Actions {
 			assert.NotEmpty(t, action.Name, "action %q carries its labels so the detail needs no second call", action.Code)

@@ -56,6 +56,9 @@ const (
 	ActionManageRole = "can_manage_role"
 )
 
+// ActionEditCase gates editing a case (org-scoped) (migration 000032).
+const ActionEditCase = "can_edit_case"
+
 // ActionResponse carries the action catalog entry. name/description are the English labels for
 // now; resolving them by the caller's locale is a separate cross-cutting task.
 // @Description Action from the authorization catalog.
