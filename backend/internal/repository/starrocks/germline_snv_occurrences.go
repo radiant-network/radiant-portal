@@ -33,7 +33,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	var occurrences []GermlineSNVOccurrence
 
 	db := r.db.WithContext(ctx)
-	tx, part, err := PrepareSNVListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.GermlineSNVOccurrenceTable, caseId, seqId, taskId, userQuery, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -71,8 +71,8 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	return occurrences, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
-	return CountSNV(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+	return CountSNV(types.GermlineSNVOccurrenceTable, caseId, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 
 func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {

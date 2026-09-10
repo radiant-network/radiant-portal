@@ -131,6 +131,58 @@ func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t 
 	testList(t, "multiple", body, expected)
 }
 
+func Test_SNVOccurrences_List_Return_Only_Occurrences_Having_A_Note_When_With_Note_Is_True(t *testing.T) {
+	body := `{
+			"additional_fields":[
+				"seq_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
+			],
+			"with_note": true
+		}`
+	expected := `[
+			{
+				"ad_ratio": 1,
+				"chromosome": "1",
+				"filter": "PASS",
+				"end": 0,
+				"exomiser_acmg_classification": "",
+				"exomiser_acmg_evidence": null,
+				"exomiser_gene_combined_score": 0,
+				"exomiser_moi": "",
+				"exomiser_variant_score": 0,
+				"genotype_quality": 100,
+				"gnomad_v3_af": 0.001,
+				"has_interpretation": true,
+				"has_note": true,
+				"hgvsg": "hgvsg1",
+				"locus": "locus_1_1000",
+				"locus_id": "1000",
+				"max_impact_score": 4,
+				"is_canonical": false,
+				"is_mane_plus": false,
+				"is_mane_select": true,
+				"germline_pc_wgs": 3,
+				"germline_pf_wgs": 0.99,
+				"picked_consequences": null,
+				"seq_id": 1,
+				"task_id": 5,
+				"start": 1111,
+				"symbol": "BRAF",
+				"variant_class": "class1",
+				"vep_impact": "MODIFIER",
+				"zygosity": "HET"
+			}
+		]`
+	testList(t, "multiple", body, expected)
+}
+
+func Test_SNVOccurrences_Count_Return_Only_Occurrences_Having_A_Note_When_With_Note_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_note":true}`, 1)
+}
+
+func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Note_Is_False(t *testing.T) {
+	testCount(t, "multiple", `{"with_note":false}`, 2)
+}
+
 func Test_SNVOccurrences_Count(t *testing.T) {
 	testCount(t, "simple", "{}", 1)
 }

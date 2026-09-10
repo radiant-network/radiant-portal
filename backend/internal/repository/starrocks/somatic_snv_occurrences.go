@@ -28,7 +28,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	var occurrences []SomaticSNVOccurrence
 
 	db := r.db.WithContext(ctx)
-	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, caseId, seqId, taskId, userQuery, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -66,8 +66,8 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	return occurrences, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
-	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
+func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+	return CountSNV(types.SomaticSNVOccurrenceTable, caseId, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 
 func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
