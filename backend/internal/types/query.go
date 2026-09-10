@@ -13,12 +13,6 @@ type Query interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
-// ListOrCountQuery is the subset shared by ListQuery and CountQuery: both are satisfied by it.
-type ListOrCountQuery interface {
-	Query
-	WithNote() bool
-}
-
 type occurrenceQueryOptions struct {
 	withNote bool
 }
