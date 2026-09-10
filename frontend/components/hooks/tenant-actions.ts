@@ -22,7 +22,7 @@ export const TENANT_ACTIONS = {
  * Backend catalog: `internal/types/auth.go`
  */
 export const ORG_ACTIONS = {
-  editStatus: 'can_edit_status',
+  editCase: 'can_edit_case',
 } as const;
 
 /** Orgs where `action` applies. The API has already expanded a '*' grant to the tenant's orgs. */

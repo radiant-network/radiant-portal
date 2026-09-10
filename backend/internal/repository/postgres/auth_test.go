@@ -163,11 +163,11 @@ func Test_AuthRepository_ListActions(t *testing.T) {
 		assert.Equal(t, "Create and edit organizations in the network.", mo.Description)
 		assert.True(t, mo.Grantable, "a custom role may confer can_manage_org")
 
-		es := byCode[types.ActionEditStatus]
-		assert.Equal(t, "org", es.Scope)
-		assert.Equal(t, "Edit case status", es.Name)
-		assert.Equal(t, "Change the status of a case at the selected organization(s).", es.Description)
-		assert.True(t, es.Grantable, "a custom role may confer can_edit_status")
+		ec := byCode[types.ActionEditCase]
+		assert.Equal(t, "org", ec.Scope)
+		assert.Equal(t, "Edit cases", ec.Name)
+		assert.Equal(t, "Change a case's status as it is reviewed and interpreted.", ec.Description)
+		assert.True(t, ec.Grantable, "a custom role may confer can_edit_case")
 
 		// can_manage_user is the one reserved action: it never reaches the create-role picker.
 		assert.False(t, byCode[types.ActionManageUser].Grantable)
@@ -258,7 +258,7 @@ func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T)
 				OrgsByAction: map[string][]string{
 					"can_comment_variant":   {"CHOP"},
 					"can_download_file":     {"CHOP"},
-					"can_edit_status":       {"CHOP"},
+					"can_edit_case":         {"CHOP"},
 					"can_flag_variant":      {"CHOP"},
 					"can_interpret_variant": {"CHOP"},
 					"can_read_pii":          {"CHOP"},
@@ -287,7 +287,7 @@ func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testi
 				OrgsByAction: map[string][]string{
 					"can_comment_variant":   radiantOrgs,
 					"can_download_file":     radiantOrgs,
-					"can_edit_status":       radiantOrgs,
+					"can_edit_case":         radiantOrgs,
 					"can_flag_variant":      radiantOrgs,
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
@@ -378,7 +378,7 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 				OrgsByAction: map[string][]string{
 					"can_comment_variant":   radiantOrgs,
 					"can_download_file":     radiantOrgs,
-					"can_edit_status":       radiantOrgs,
+					"can_edit_case":         radiantOrgs,
 					"can_flag_variant":      radiantOrgs,
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
