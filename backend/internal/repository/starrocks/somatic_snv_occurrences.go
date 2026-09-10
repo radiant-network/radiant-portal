@@ -24,7 +24,7 @@ func NewSomaticSNVOccurrencesRepository(db database.StarrocksDB) *SomaticSNVOccu
 	return &SomaticSNVOccurrencesRepository{db: db.DB}
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
+func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]SomaticSNVOccurrence, error) {
 	var occurrences []SomaticSNVOccurrence
 
 	db := r.db.WithContext(ctx)
@@ -66,7 +66,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	return occurrences, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 

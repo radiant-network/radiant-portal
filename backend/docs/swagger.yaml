@@ -857,6 +857,10 @@ components:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_note:
+          description: Count only the occurrences having at least one note attached
+            to them.
+          type: boolean
       type: object
     CreateBatchResponse:
       description: CreateBatchResponse represents the response returned when creating
@@ -1974,6 +1978,10 @@ components:
           uniqueItems: false
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_note:
+          description: Return only the occurrences having at least one note attached
+            to them.
+          type: boolean
       type: object
     ObservationCategoricalBatch:
       properties:

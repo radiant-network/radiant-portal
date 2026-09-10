@@ -18,11 +18,11 @@ func NewGermlineCNVOccurrencesRepository(db database.StarrocksDB) *GermlineCNVOc
 	return &GermlineCNVOccurrencesRepository{db: db.DB}
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
+func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]GermlineCNVOccurrence, error) {
 	return listCNVOccurrences[GermlineCNVOccurrence](ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 
-func (r *GermlineCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (r *GermlineCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	return countCNVOccurrences(ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, seqId, taskId, userQuery)
 }
 

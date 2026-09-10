@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.sort_body import SortBody
 from radiant_python.models.sqon import Sqon
@@ -34,7 +34,8 @@ class ListBodyWithSqon(BaseModel):
     page_index: Optional[StrictInt] = None
     sort: Optional[List[SortBody]] = None
     sqon: Optional[Sqon] = None
-    __properties: ClassVar[List[str]] = ["additional_fields", "limit", "offset", "page_index", "sort", "sqon"]
+    with_note: Optional[StrictBool] = Field(default=None, description="Return only the occurrences having at least one note attached to them.")
+    __properties: ClassVar[List[str]] = ["additional_fields", "limit", "offset", "page_index", "sort", "sqon", "with_note"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,7 +103,8 @@ class ListBodyWithSqon(BaseModel):
             "offset": obj.get("offset"),
             "page_index": obj.get("page_index"),
             "sort": [SortBody.from_dict(_item) for _item in obj["sort"]] if obj.get("sort") is not None else None,
-            "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None
+            "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None,
+            "with_note": obj.get("with_note")
         })
         return _obj
 

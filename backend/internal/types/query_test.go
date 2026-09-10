@@ -93,25 +93,25 @@ func Test_NewAggregationQueryFromSqon_Return_Empty_Filter_If_Empty_Or(t *testing
 	}
 }
 
-func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedList(t *testing.T) {
+func Test_NewOccurrenceListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary", "department_name"}
-	query, err := NewListQueryFromSqon(queryConfig, fields, nil, nil, nil)
+	query, err := NewOccurrenceListQueryFromSqon(queryConfig, fields, nil, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func Test_NewListQueryFromSqon_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
+func Test_NewOccurrenceListQueryFromSqon_HasFieldFromTables_Return_False_If_Not_Contains_Field_In_SelectedList(t *testing.T) {
 	t.Parallel()
 	fields := []string{"age", "salary"}
-	query, err := NewListQueryFromSqon(queryConfig, fields, nil, nil, nil)
+	query, err := NewOccurrenceListQueryFromSqon(queryConfig, fields, nil, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
 }
 
-func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewOccurrenceListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	fields := []string{"department_name"}
 	sqon := Sqon{
@@ -120,13 +120,13 @@ func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
+	query, err := NewOccurrenceListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
 }
 
-func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Selected_Fields(t *testing.T) {
+func Test_NewOccurrenceListQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields_Or_Selected_Fields(t *testing.T) {
 	t.Parallel()
 	fields := []string{"salary"}
 	sqon := Sqon{
@@ -135,7 +135,7 @@ func Test_NewListQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Fi
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
+	query, err := NewOccurrenceListQueryFromSqon(queryConfig, fields, &sqon, nil, nil)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}
@@ -186,7 +186,7 @@ func Test_NewAggregationQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Cont
 	}
 }
 
-func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewOccurrenceCountQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
@@ -194,13 +194,13 @@ func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewCountQueryFromSqon(&sqon, allFields)
+	query, err := NewOccurrenceCountQueryFromSqon(&sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.True(t, query.HasFieldFromTables(EmployeeTable, DepartmentTable))
 	}
 }
 
-func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields(t *testing.T) {
+func Test_NewOccurrenceCountQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_Field_In_FilerFields(t *testing.T) {
 	t.Parallel()
 	sqon := Sqon{
 		Op: "not",
@@ -208,7 +208,7 @@ func Test_NewCountQueryFromSqon_HasFieldFromTables_Return_True_If_Not_Contains_F
 			{Op: "in", Content: LeafContent{Field: "age", Value: []interface{}{30, 40}}},
 		},
 	}
-	query, err := NewCountQueryFromSqon(&sqon, allFields)
+	query, err := NewOccurrenceCountQueryFromSqon(&sqon, allFields)
 	if assert.NoError(t, err) {
 		assert.False(t, query.HasFieldFromTables(DepartmentTable))
 	}

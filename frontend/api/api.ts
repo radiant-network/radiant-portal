@@ -1634,6 +1634,12 @@ export interface CountBodyWithSqon {
      * @memberof CountBodyWithSqon
      */
     'sqon'?: Sqon;
+    /**
+     * Count only the occurrences having at least one note attached to them.
+     * @type {boolean}
+     * @memberof CountBodyWithSqon
+     */
+    'with_note'?: boolean;
 }
 /**
  * CreateBatchResponse represents the response returned when creating a new batch
@@ -4008,6 +4014,12 @@ export interface ListBodyWithSqon {
      * @memberof ListBodyWithSqon
      */
     'sqon'?: Sqon;
+    /**
+     * Return only the occurrences having at least one note attached to them.
+     * @type {boolean}
+     * @memberof ListBodyWithSqon
+     */
+    'with_note'?: boolean;
 }
 /**
  * 

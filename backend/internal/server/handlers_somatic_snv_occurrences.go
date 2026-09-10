@@ -14,8 +14,8 @@ type somaticInterpretationCountsReader interface {
 }
 
 type somaticSNVOccurrencesReader interface {
-	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticSNVOccurrence, error)
-	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error)
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
 	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
@@ -46,7 +46,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
-			query types.ListQuery
+			query types.OccurrenceListQuery
 		)
 
 		// Bind JSON to the struct
@@ -56,7 +56,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -112,7 +112,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
-			query types.CountQuery
+			query types.OccurrenceCountQuery
 		)
 
 		// Bind JSON to the struct
@@ -121,7 +121,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQueryFromSqon(body.Sqon, types.SomaticSNVOccurrencesFields)
+		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.SomaticSNVOccurrencesFields, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return

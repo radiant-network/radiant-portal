@@ -29,7 +29,7 @@ func NewGermlineSNVOccurrencesRepository(db database.StarrocksDB) *GermlineSNVOc
 	return &GermlineSNVOccurrencesRepository{db: db.DB}
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
 
 	db := r.db.WithContext(ctx)
@@ -71,7 +71,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	return occurrences, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	return CountSNV(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 

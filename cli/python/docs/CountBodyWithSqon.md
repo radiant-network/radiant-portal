@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **sqon** | [**Sqon**](Sqon.md) |  | [optional] 
+**with_note** | **bool** | Count only the occurrences having at least one note attached to them. | [optional] 
 
 ## Example
 

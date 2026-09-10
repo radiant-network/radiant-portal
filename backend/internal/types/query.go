@@ -13,6 +13,25 @@ type Query interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
+type occurrenceQueryOptions struct {
+	withNote bool
+}
+
+type OccurrenceQueryOption func(*occurrenceQueryOptions)
+
+// WithNoteFilter restricts a list or count query to the occurrences having at least one note.
+func WithNoteFilter(withNote bool) OccurrenceQueryOption {
+	return func(o *occurrenceQueryOptions) { o.withNote = withNote }
+}
+
+func resolveOccurrenceQueryOptions(opts []OccurrenceQueryOption) occurrenceQueryOptions {
+	var resolved occurrenceQueryOptions
+	for _, opt := range opts {
+		opt(&resolved)
+	}
+	return resolved
+}
+
 type QueryConfig struct {
 	AllFields     []Field
 	DefaultFields []Field
@@ -28,12 +47,30 @@ type ListQuery interface {
 	HasFieldFromTables(tables ...Table) bool
 	GetFieldsFromTables(tables ...Table) []Field
 }
+
+// OccurrenceListQuery is a ListQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceListQuery interface {
+	ListQuery
+	WithNote() bool
+}
+
 type listQuery struct {
 	filters        FilterNode //Root node of the filter tree
 	filteredFields []Field    //Fields used in the filters
 	selectedFields []Field    //Fields used for selection
 	pagination     *Pagination
 	sortedFields   []SortField
+}
+
+// occurrenceListQuery adds the occurrence-only note filter on top of a plain list query.
+type occurrenceListQuery struct {
+	listQuery
+	withNote bool
+}
+
+func (l *occurrenceListQuery) WithNote() bool {
+	return l.withNote
 }
 
 func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
@@ -96,7 +133,8 @@ func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
 	return &p
 }
 
-func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+func NewOccurrenceListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...OccurrenceQueryOption) (OccurrenceListQuery, error) {
+	options := resolveOccurrenceQueryOptions(opts)
 
 	// Define allowed selectedCols
 	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
@@ -109,10 +147,10 @@ func NewListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, p
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query from sqon %w", err)
 		}
-		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, nil
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, withNote: options.withNote}, nil
 
 	} else {
-		return &listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, nil
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, withNote: options.withNote}, nil
 	}
 }
 
@@ -208,9 +246,26 @@ type CountQuery interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
+// OccurrenceCountQuery is a CountQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceCountQuery interface {
+	CountQuery
+	WithNote() bool
+}
+
 type countQuery struct {
 	filters        FilterNode //Root node of the filter tree
 	filteredFields []Field    //Fields used in the filters
+}
+
+// occurrenceCountQuery adds the occurrence-only note filter on top of a plain count query.
+type occurrenceCountQuery struct {
+	countQuery
+	withNote bool
+}
+
+func (l *occurrenceCountQuery) WithNote() bool {
+	return l.withNote
 }
 
 func (l *countQuery) Filters() FilterNode {
@@ -230,17 +285,18 @@ func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewCountQueryFromSqon(sqon *Sqon, fields []Field) (CountQuery, error) {
+func NewOccurrenceCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...OccurrenceQueryOption) (OccurrenceCountQuery, error) {
+	options := resolveOccurrenceQueryOptions(opts)
 
 	if sqon != nil {
 		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query %w", err)
 		}
-		return &countQuery{filteredFields: visitedFilteredFields, filters: root}, nil
+		return &occurrenceCountQuery{countQuery: countQuery{filteredFields: visitedFilteredFields, filters: root}, withNote: options.withNote}, nil
 
 	} else {
-		return &countQuery{}, nil
+		return &occurrenceCountQuery{withNote: options.withNote}, nil
 	}
 }
 

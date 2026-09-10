@@ -30,7 +30,7 @@ var GermlineSNVQueryConfigForTest = types.QueryConfig{
 func Test_Germline_SNV_GetOccurrences(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -56,7 +56,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T)
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "filter"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -73,7 +73,7 @@ func Test_Germline_SNV_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -93,7 +93,7 @@ func Test_Germline_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T)
 		sort := []types.SortBody{
 			{Field: "locus_id", Order: "asc"},
 		}
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, nil, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, nil, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -128,7 +128,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exo
 		}
 		selectedFields := []string{"locus_id", "exomiser_gene_combined_score", "exomiser_acmg_evidence"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -152,7 +152,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Count_That_Match_Filters(t *testi
 
 			Op: "in",
 		}
-		query, err := types.NewCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
 		c, err2 := repo.CountOccurrences(t.Context(), 1, 1, 5, query)
 
@@ -173,7 +173,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 			},
 			Op: "in",
 		}
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -201,7 +201,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 func Test_Germline_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 
 		// Case 1 (task_id=5) sees only its own loci {1000,2000} at seq_id=1, each
@@ -245,7 +245,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array(t *
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -276,7 +276,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array_Whe
 		}
 		selectedFields := []string{"locus_id", "clinvar"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -298,7 +298,7 @@ func Test_Germline_SNV_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(
 			Limit:  5,
 			Offset: 0,
 		}
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, pagination, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, pagination, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -322,7 +322,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 			Offset: 5,
 		}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -349,7 +349,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 			PageIndex: 1,
 		}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
@@ -379,7 +379,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By
 			},
 		}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, sortedBody)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -408,7 +408,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By
 			},
 		}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, sortedBody)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -559,7 +559,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_pane
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -587,7 +587,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_pane
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -615,7 +615,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Multiple_
 		}
 		selectedFields := []string{"locus_id"}
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -638,7 +638,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Multi
 			Op: "and",
 		}
 
-		query, err := types.NewCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
 		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
@@ -733,7 +733,7 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
 
-		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 
 		note, err := notesRepo.Create(t.Context(), types.OccurrenceNote{

@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **page_index** | **int** |  | [optional] 
 **sort** | [**List[SortBody]**](SortBody.md) |  | [optional] 
 **sqon** | [**Sqon**](Sqon.md) |  | [optional] 
+**with_note** | **bool** | Return only the occurrences having at least one note attached to them. | [optional] 
 
 ## Example
 

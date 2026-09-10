@@ -10,8 +10,8 @@ import (
 )
 
 type germlineCNVOccurrencesReader interface {
-	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineCNVOccurrence, error)
-	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.GermlineCNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceCountQuery) (int64, error)
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
 	GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
@@ -42,7 +42,7 @@ func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.Ha
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
-			query types.ListQuery
+			query types.OccurrenceListQuery
 		)
 
 		// Bind JSON to the struct
@@ -52,7 +52,7 @@ func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.Ha
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewListQueryFromSqon(types.GermlineCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort)
+		query, err := types.NewOccurrenceListQueryFromSqon(types.GermlineCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -107,7 +107,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
-			query types.CountQuery
+			query types.OccurrenceCountQuery
 		)
 
 		// Bind JSON to the struct
@@ -116,7 +116,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewCountQueryFromSqon(body.Sqon, types.GermlineCNVOccurrencesFields)
+		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.GermlineCNVOccurrencesFields, types.WithNoteFilter(body.WithNote))
 		if err != nil {
 			HandleValidationError(c, err)
 			return

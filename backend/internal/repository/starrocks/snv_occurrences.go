@@ -139,7 +139,7 @@ func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, taskId int,
 	return tx, part, nil
 }
 
-func CountSNV(snvTable types.Table, seqId int, taskId int, userQuery types.CountQuery, db *gorm.DB) (int64, error) {
+func CountSNV(snvTable types.Table, seqId int, taskId int, userQuery types.OccurrenceCountQuery, db *gorm.DB) (int64, error) {
 	tx, _, err := PrepareSNVListOrCountQuery(snvTable, seqId, taskId, userQuery, db)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)

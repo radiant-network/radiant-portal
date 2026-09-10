@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
+func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
 	return []types.GermlineSNVOccurrence{
 		{
 			SeqId:              1,
@@ -44,7 +44,7 @@ func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.Li
 	}, nil
 }
 
-func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
+func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
 	return 15, nil
 }
 
@@ -442,4 +442,82 @@ func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
     			"status": 404,
     			"message": "facet not found"
 		}`, w.Body.String())
+}
+
+// withNoteRecorder captures the queries the handlers build so the wiring of the with_note body flag
+// can be asserted without a database.
+type withNoteRecorder struct {
+	MockRepository
+	listQuery  types.OccurrenceListQuery
+	countQuery types.OccurrenceCountQuery
+}
+
+func (m *withNoteRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
+	m.listQuery = query
+	return nil, nil
+}
+
+func (m *withNoteRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
+	m.countQuery = query
+	return 0, nil
+}
+
+func Test_OccurrencesListHandler_Forwards_WithNote(t *testing.T) {
+	repo := &withNoteRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_note":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.True(t, repo.listQuery.WithNote())
+	}
+}
+
+func Test_OccurrencesListHandler_Defaults_WithNote_To_False(t *testing.T) {
+	repo := &withNoteRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.False(t, repo.listQuery.WithNote())
+	}
+}
+
+func Test_OccurrencesCountHandler_Forwards_WithNote(t *testing.T) {
+	repo := &withNoteRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte(`{"with_note":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.True(t, repo.countQuery.WithNote())
+	}
+}
+
+func Test_OccurrencesCountHandler_Defaults_WithNote_To_False(t *testing.T) {
+	repo := &withNoteRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte(`{}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.False(t, repo.countQuery.WithNote())
+	}
 }
