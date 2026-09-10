@@ -178,9 +178,9 @@ func filterOutIndexFiles(tx *gorm.DB) {
 func (r *DocumentsRepository) GetById(ctx context.Context, id int) (*Document, error) {
 	var document Document
 	// Keep Take (not First): First can build invalid SQL when the table name carries a database prefix.
+	// Index files (crai, tbi) are hidden from listings but stay downloadable by id.
 	err := r.db.WithContext(ctx).Table(types.DocumentTable.TenantQualifiedName(ctx)).
 		Where("id = ?", id).
-		Where("format_code not in ?", []string{"crai", "tbi"}).
 		Take(&document).Error
 
 	if err != nil {

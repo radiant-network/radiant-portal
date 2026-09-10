@@ -282,3 +282,28 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 		assert.True(t, strings.HasPrefix(actual.URL, expectedURLPrefix))
 	})
 }
+
+func Test_GetDocumentsDownloadUrl_IndexFile(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		_ = os.Setenv("AWS_REGION", "us-east-1")
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
+		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
+		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
+		_ = os.Setenv("AWS_USE_SSL", "false")
+
+		repo := starrocks.NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
+
+		// Document 2 is the .crai of document 1: index files are presigned like any other file.
+		req, _ := http.NewRequest("GET", "/radiant/documents/2/download_url", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var actual utils.PreSignedURL
+		assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &actual))
+		assert.NotEmpty(t, actual.URL)
+		assert.Greater(t, actual.URLExpireAt, int64(0))
+	})
+}
