@@ -528,7 +528,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	assert.Empty(t, records[0].Errors)
 	assert.Equal(t, 1, len(records[1].Errors))
 	assert.Equal(t, "SEQ-006", records[1].Errors[0].Code)
-	assert.Equal(t, "Create_sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
+	assert.Equal(t, "Sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
 	assert.Equal(t, "create_sequencing_experiment[1]", records[1].Errors[0].Path)
 }
 

@@ -441,7 +441,7 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for create_case 0")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for case 0")
 	assert.Nil(t, proband)
 }
 
@@ -1509,7 +1509,7 @@ func Test_validateCaseField_EmptyRequired(t *testing.T) {
 	cr.validateCaseField("", "test_field", "create_case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0. Reason: field is empty.")
+	assert.Equal(t, cr.Errors[0].Message, "Invalid field test_field for case 0. Reason: field is empty.")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
 }
@@ -1522,7 +1522,7 @@ func Test_validateCaseField_InvalidRegex(t *testing.T) {
 	cr.validateCaseField("Invalid@Value!", "test_field", "create_case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
@@ -1537,7 +1537,7 @@ func Test_validateCaseField_TooLong(t *testing.T) {
 	cr.validateCaseField(longValue, "test_field", "create_case[0]", TextRegExpCompiled, 50, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "field is too long, maximum length allowed is 50")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
@@ -1596,7 +1596,7 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr.validateCodes()
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "\"unknown_status\" is not a valid status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0].status_code", cr.Errors[0].Path)
@@ -1892,7 +1892,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, "Invalid field note for create_case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
+	assert.Equal(t, "Invalid field note for case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
 }
@@ -2172,7 +2172,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	assert.Empty(t, vr[1].Infos)
 	assert.Empty(t, vr[1].Warnings)
 	assert.Equal(t, vr[1].Errors[0].Code, "CASE-011")
-	assert.Equal(t, vr[1].Errors[0].Message, "Create_case (PROJ-1 / CASE-1) appears multiple times in the batch.")
+	assert.Equal(t, vr[1].Errors[0].Message, "Case (PROJ-1 / CASE-1) appears multiple times in the batch.")
 	assert.Equal(t, vr[1].Errors[0].Path, "create_case[1]")
 }
 
@@ -2922,7 +2922,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseDuplicatePatient, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Duplicate patient (CHUSJ / PAT-1)")
-	assert.Contains(t, record.Errors[0].Message, "for create_case 0")
+	assert.Contains(t, record.Errors[0].Message, "for case 0")
 	assert.Equal(t, "create_case[0].patients", record.Errors[0].Path)
 }
 
@@ -3393,7 +3393,7 @@ func Test_validateSeqExpPatientInCase_PatientNotFound(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseSeqExpNotFoundForPatient, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "does not belong to any patient from create_case 0")
+	assert.Contains(t, record.Errors[0].Message, "does not belong to any patient from case 0")
 	assert.Equal(t, "create_case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
 
@@ -3597,7 +3597,7 @@ func Test_validateTaskTextField_RegexError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field test_field for create_case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
 		Path:    "create_case[0].tasks[0].test_field",
 	}
 
@@ -3613,7 +3613,7 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field test_field for create_case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "create_case[0].tasks[0].test_field",
 	}
 
@@ -3659,7 +3659,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
+		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
 		Path:    "create_case[0].tasks[0].type_code",
 	}
 
@@ -3708,7 +3708,7 @@ func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-002",
-		Message: "Sequencing \"ALIQUOT-1\" is not defined for create_case 0 - task 0.",
+		Message: "Sequencing \"ALIQUOT-1\" is not defined for case 0 - task 0.",
 		Path:    "create_case[0].tasks[0]",
 	}
 
@@ -3895,7 +3895,7 @@ func Test_validateTaskDocuments_MissingInputDocumentsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-003",
-		Message: "Missing input documents for create_case 0 - task 0 of type family_variant_calling.",
+		Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
 		Path:    "create_case[0].tasks[0]",
 	}
 
@@ -3930,7 +3930,7 @@ func Test_validateTaskDocuments_MissingOutputDocumentsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-004",
-		Message: "Missing output documents for create_case 0 - task 0 of type family_variant_calling.",
+		Message: "Missing output documents for case 0 - task 0 of type family_variant_calling.",
 		Path:    "create_case[0].tasks[0]",
 	}
 
@@ -3970,7 +3970,7 @@ func Test_validateTaskDocuments_InputDocumentDoesNotExistsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-005",
-		Message: "Input document with URL s3://input/notfoo/bar.txt does not exist for create_case 0 - task 0.",
+		Message: "Input document with URL s3://input/notfoo/bar.txt does not exist for case 0 - task 0.",
 		Path:    "create_case[0].tasks[0]",
 	}
 
@@ -4013,7 +4013,7 @@ func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-006",
-		Message: "Input document with URL s3://input/foo/bar.txt for create_case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+		Message: "Input document with URL s3://input/foo/bar.txt for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
 		Path:    "create_case[0].tasks[0]",
 	}
 
@@ -4185,7 +4185,7 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid field test_field for create_case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
 		Path:    "create_case[0].tasks[0].documents[1]",
 	})
 }
@@ -4213,7 +4213,7 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid field test_field for create_case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "create_case[0].tasks[0].documents[1]",
 	})
 }
@@ -4483,7 +4483,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-002",
-			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for create_case 0 - task 0 - output document 1.",
+			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4533,7 +4533,7 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-009",
-			Message: "Document name another_name.txt is not consistent with URL s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document name another_name.txt is not consistent with URL s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4583,7 +4583,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-006",
-			Message: "Document size does not match the actual size of the document s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document size does not match the actual size of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4633,7 +4633,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-007",
-			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
