@@ -24,8 +24,8 @@ func (r *SomaticCNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	return listCNVOccurrences[SomaticCNVOccurrence](ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 
-func (r *SomaticCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
-	return countCNVOccurrences(ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, seqId, taskId, userQuery)
+func (r *SomaticCNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+	return countCNVOccurrences(ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 
 func (r *SomaticCNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {

@@ -47,6 +47,9 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	alias := cnvTable.Alias
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	if userQuery != nil && userQuery.WithNote() {
+		tx = tx.Where("note.occurrence_id IS NOT NULL")
+	}
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by cnv_id to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
@@ -92,10 +95,14 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	return occurrences, nil
 }
 
-func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
 	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
+	}
+
+	if userQuery != nil && userQuery.WithNote() {
+		tx = keepOccurrencesWithNote(cnvTable, "cnv_id", caseId, seqId, tx)
 	}
 
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {

@@ -272,3 +272,42 @@ func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
 	})
 }
+
+func Test_Somatic_SNV_GetOccurrences_WithNote_Keeps_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 3)
+
+		queryWithNote, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 71, 74, 74, queryWithNote)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.True(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count)
+
+		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 71, 74, 74, queryWithNote)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}

@@ -404,3 +404,68 @@ func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 		}
 	})
 }
+
+func Test_GermlineCNV_GetOccurrences_WithNote_Keeps_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, query)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 2)
+
+		queryWithNote, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 1, queryWithNote)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+			assert.True(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		query, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 1, 1, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, count)
+
+		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 1, 1, queryWithNote)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}

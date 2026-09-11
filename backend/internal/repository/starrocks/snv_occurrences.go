@@ -32,7 +32,15 @@ func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *g
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", types.ThousandGenomesTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
-func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
+// occurrenceQuery is what the list and count builders need from a query: the filter tree, plus
+// whether to keep only the occurrences carrying a note. Satisfied by types.OccurrenceListQuery and
+// types.OccurrenceCountQuery; a plain types.ListQuery or types.CountQuery does not qualify.
+type occurrenceQuery interface {
+	types.Query
+	WithNote() bool
+}
+
+func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, taskId int, userQuery occurrenceQuery, db *gorm.DB) (*gorm.DB, int, error) {
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
@@ -40,6 +48,10 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, use
 	tx := AddImplicitSNVOccurrencesFilters(snvTable, seqId, taskId, db, part)
 	if userQuery != nil {
 		tx = JoinSNVOccurrencesWithVariants(snvTable, tx)
+
+		if userQuery.WithNote() {
+			tx = keepOccurrencesWithNote(snvTable, "locus_id", caseId, seqId, tx)
+		}
 
 		if userQuery.HasFieldFromTables(types.TopmedTable) {
 			tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)
@@ -139,8 +151,8 @@ func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, taskId int,
 	return tx, part, nil
 }
 
-func CountSNV(snvTable types.Table, seqId int, taskId int, userQuery types.OccurrenceCountQuery, db *gorm.DB) (int64, error) {
-	tx, _, err := PrepareSNVListOrCountQuery(snvTable, seqId, taskId, userQuery, db)
+func CountSNV(snvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery, db *gorm.DB) (int64, error) {
+	tx, _, err := PrepareSNVListOrCountQuery(snvTable, caseId, seqId, taskId, userQuery, db)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}

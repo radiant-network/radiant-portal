@@ -764,3 +764,54 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		}
 	})
 }
+
+func Test_Germline_SNV_GetOccurrences_WithNote_Keeps_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 2)
+
+		queryWithNote, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 1, 1, 5, queryWithNote)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.True(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, count)
+
+		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 1, 1, 5, queryWithNote)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_WithNote_Ignores_Notes_Of_Another_Case(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 999, 1, 5, queryWithNote)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, count)
+	})
+}
