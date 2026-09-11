@@ -29,7 +29,7 @@ func (r *OrganizationsRepository) ListOrganizations(ctx context.Context) ([]type
 		Table(fmt.Sprintf("%s %s", types.OrganizationTable.TenantQualifiedName(ctx), types.OrganizationTable.Alias)).
 		Select("org.code, org.name, org.category_code, org_cat.name_en AS category_name")
 	tx = r.joiner.OrganizationWithCategory(tx)
-	if err := tx.Order("org.name").Scan(&organizations).Error; err != nil {
+	if err := tx.Order("lower(org.name)").Scan(&organizations).Error; err != nil {
 		return nil, fmt.Errorf("error listing organizations: %w", err)
 	}
 	return organizations, nil

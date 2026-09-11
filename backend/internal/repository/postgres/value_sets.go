@@ -109,7 +109,7 @@ func (r *ValueSetsRepository) GetCodes(ctx context.Context, vsType ValueSetType)
 	err := r.db.WithContext(ctx).
 		Table(tableName).
 		Select("code").
-		Order("code asc").
+		Order("lower(code) asc").
 		Find(&codes).Error
 
 	if err != nil {
@@ -127,7 +127,7 @@ func (r *ValueSetsRepository) GetExamCodes(ctx context.Context, tenantCode strin
 		Table(types.ExamTable.Name).
 		Select("code").
 		Where("tenant_code = ?", tenantCode).
-		Order("code asc").
+		Order("lower(code) asc").
 		Find(&codes).Error
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving exam codes for tenant %q: %w", tenantCode, err)
