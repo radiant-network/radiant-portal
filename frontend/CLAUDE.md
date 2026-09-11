@@ -27,15 +27,16 @@ npm run storybook:radiant
 ```
 
 > [!IMPORTANT]
-> **Always run `npm install` from `frontend/`, never from a subdirectory.**
+> **`frontend/package-lock.json` is the single lockfile for the whole frontend.**
 >
-> `frontend/package-lock.json` is the single lockfile for the whole frontend. Running `npm install`
-> inside `components/`, an `apps/*` or `portals/radiant` creates a second, independent dependency
-> tree: the same `^` ranges get resolved to different versions, so Storybook ends up running the
-> components against different dependencies than the apps use.
+> npm resolves up to the workspace root from any declared member, so running `npm install` from
+> `components/`, an `apps/*` or `portals/radiant` is safe — it installs the one shared tree.
+> Running it from a directory that is *not* a workspace member is what breaks: npm then treats it
+> as a standalone project, writes its own lockfile and resolves the same `^` ranges independently.
 >
-> Commands *other than install* are fine from a subdirectory — Storybook is started from
-> `components/` but installs nothing, it resolves against the hoisted `frontend/node_modules`.
+> That is how `components/` ended up with a second tree of 484 packages and a `lucide-react` 26
+> minors apart from the apps — it was excluded by a `components/*` glob that matched nothing.
+> Never commit a `package-lock.json` outside `frontend/`.
 
 To run a single test file:
 ```bash
