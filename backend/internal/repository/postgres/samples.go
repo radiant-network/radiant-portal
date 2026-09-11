@@ -97,7 +97,7 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 func (r *SamplesRepository) GetTypeCodes(ctx context.Context) ([]string, error) {
 	var typeCodes []string
 	tx := r.db.WithContext(ctx).
-		Table(types.SampleTypeTable.Name).Select("code").Order("code asc")
+		Table(types.SampleTypeTable.Name).Select("code").Order("lower(code) asc")
 	if err := tx.Find(&typeCodes).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving sample type codes: %w", err)
 	}
