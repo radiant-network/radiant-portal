@@ -52,19 +52,19 @@ func (cr *CaseValidationRecord) formatFetusesFieldPath(fetusIndex *int, collecti
 
 func (cr *CaseValidationRecord) validateFetusSexCode(fetusIndex int) {
 	path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".sex_code"
-	res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+	res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 	cr.ValidateCode(res, path, "sex_code", FetusInvalidField, cr.Case.Fetuses[fetusIndex].SexCode, cr.SexCodes, []string{}, true)
 }
 
 func (cr *CaseValidationRecord) validateFetusLifeStatusCode(fetusIndex int) {
 	path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".life_status_code"
-	res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+	res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 	cr.ValidateCode(res, path, "life_status_code", FetusInvalidField, cr.Case.Fetuses[fetusIndex].LifeStatusCode, cr.LifeStatusCodes, []string{}, true)
 }
 
 func (cr *CaseValidationRecord) validateFetusAffectedStatusCode(fetusIndex int) {
 	path := cr.formatFetusesFieldPath(&fetusIndex, "", nil) + ".affected_status_code"
-	res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+	res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 	cr.ValidateCode(res, path, "affected_status_code", FetusInvalidField, cr.Case.Fetuses[fetusIndex].AffectedStatusCode, cr.PatientAffectedStatusCodes, []string{}, true)
 }
 
@@ -78,7 +78,7 @@ func todayUTC() time.Time {
 
 func (cr *CaseValidationRecord) validateFetusDates(fetusIndex int) {
 	fb := cr.Case.Fetuses[fetusIndex]
-	res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+	res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 	today := todayUTC()
 
 	if fb.LastMenstrualPeriod != nil && time.Time(*fb.LastMenstrualPeriod).After(today) {
@@ -99,7 +99,7 @@ func (cr *CaseValidationRecord) validateFetusDates(fetusIndex int) {
 func (cr *CaseValidationRecord) validateFetusObservationsCategorical(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsCategorical {
 		obsPath := cr.formatFetusesFieldPath(&fetusIndex, "observations_categorical", &obsIndex)
-		res := fmt.Sprintf("create_case %d - fetus %d - observations_categorical %d", cr.Index, fetusIndex, obsIndex)
+		res := fmt.Sprintf("case %d - fetus %d - observations_categorical %d", cr.Index, fetusIndex, obsIndex)
 		cr.validateObservationCategoricalItem(obs, obsPath, res)
 	}
 }
@@ -107,7 +107,7 @@ func (cr *CaseValidationRecord) validateFetusObservationsCategorical(fetusIndex 
 func (cr *CaseValidationRecord) validateFetusObservationsText(fetusIndex int) {
 	for obsIndex, obs := range cr.Case.Fetuses[fetusIndex].ObservationsText {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "observations_text", &obsIndex)
-		res := fmt.Sprintf("create_case %d - fetus %d - observations_text %d", cr.Index, fetusIndex, obsIndex)
+		res := fmt.Sprintf("case %d - fetus %d - observations_text %d", cr.Index, fetusIndex, obsIndex)
 		if obs == nil {
 			cr.addNullObservationError(res, path)
 			continue
@@ -131,7 +131,7 @@ func (cr *CaseValidationRecord) validateCaseFetuses(ctx context.Context, seenFet
 	for fetusIndex := range cr.Case.Fetuses {
 		if cr.Case.Fetuses[fetusIndex] == nil {
 			path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
-			res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+			res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 			cr.AddErrors(fmt.Sprintf("Invalid fetus for %s. Reason: entry is null.", res), FetusInvalidField, path)
 			continue
 		}
@@ -178,7 +178,7 @@ func (cr *CaseValidationRecord) validateFetusOrgUniqueness(ctx context.Context, 
 	}
 	if conflicting != nil {
 		path := cr.formatFetusesFieldPath(&fetusIndex, "", nil)
-		res := fmt.Sprintf("create_case %d - fetus %d", cr.Index, fetusIndex)
+		res := fmt.Sprintf("case %d - fetus %d", cr.Index, fetusIndex)
 		message := fmt.Sprintf("Invalid fetus for %s. Reason: submitter_fetus_id %q already exists for organization %q.", res, submitterFetusId, organizationCode)
 		cr.AddErrors(message, FetusOrgConflictCode, path)
 	}
@@ -200,10 +200,10 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 
 	proband, err := cr.getProbandFromPatients()
 	if err != nil {
-		return fmt.Errorf("failed to get proband patient for fetuses in create_case %d: %w", cr.Index, err)
+		return fmt.Errorf("failed to get proband patient for fetuses in case %d: %w", cr.Index, err)
 	}
 	if proband == nil {
-		return fmt.Errorf("proband patient not found for fetuses in create_case %d", cr.Index)
+		return fmt.Errorf("proband patient not found for fetuses in case %d", cr.Index)
 	}
 
 	for fetusIndex, fb := range cr.Case.Fetuses {
@@ -223,7 +223,7 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 				return fmt.Errorf("failed to update fetus %q for case %d: %w", fetus.SubmitterFetusId, cr.Index, err)
 			}
 		} else if err := sc.FetusRepo.CreateFetus(ctx, &fetus); err != nil {
-			return fmt.Errorf("failed to persist fetus %d for create_case %d: %w", fetusIndex, cr.Index, err)
+			return fmt.Errorf("failed to persist fetus %d for case %d: %w", fetusIndex, cr.Index, err)
 		}
 
 		familyMember := types.Family{
@@ -234,7 +234,7 @@ func persistFetuses(ctx context.Context, sc *StorageContext, cr *CaseValidationR
 			TenantCode:                sc.TenantCode,
 		}
 		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
-			return fmt.Errorf("failed to persist family for fetus %d in create_case %d: %w", fetusIndex, cr.Index, err)
+			return fmt.Errorf("failed to persist family for fetus %d in case %d: %w", fetusIndex, cr.Index, err)
 		}
 
 		if err := persistFetusObservationsCategorical(ctx, sc, cr, fetus.ID, fb); err != nil {
@@ -262,7 +262,7 @@ func persistFetusObservationsCategorical(ctx context.Context, sc *StorageContext
 			TenantCode:         sc.TenantCode,
 		}
 		if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
-			return fmt.Errorf("failed to persist observation categorical for fetus %d in create_case %d: %w", fetusID, cr.Index, err)
+			return fmt.Errorf("failed to persist observation categorical for fetus %d in case %d: %w", fetusID, cr.Index, err)
 		}
 	}
 	return nil
@@ -280,7 +280,7 @@ func persistFetusObservationsText(ctx context.Context, sc *StorageContext, cr *C
 			TenantCode:         sc.TenantCode,
 		}
 		if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
-			return fmt.Errorf("failed to persist observation text for fetus %d in create_case %d: %w", fetusID, cr.Index, err)
+			return fmt.Errorf("failed to persist observation text for fetus %d in case %d: %w", fetusID, cr.Index, err)
 		}
 	}
 	return nil

@@ -250,7 +250,7 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "PATIENT-006",
-				Message: "Create_patient (CHUSJ / ABC123457) appears multiple times in the batch.",
+				Message: "Patient (CHUSJ / ABC123457) appears multiple times in the batch.",
 				Path:    "create_patient[5]",
 			},
 		}
@@ -1012,7 +1012,7 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SAMPLE-008",
-				Message: "Create_sample (CQGC / ABCD3) appears multiple times in the batch.",
+				Message: "Sample (CQGC / ABCD3) appears multiple times in the batch.",
 				Path:    "create_sample[5]",
 			},
 		}
@@ -1608,12 +1608,12 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SEQ-006",
-				Message: "Create_sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
+				Message: "Sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
 				Path:    "create_sequencing_experiment[4]",
 			},
 			{
 				Code:    "SEQ-006",
-				Message: "Create_sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
+				Message: "Sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
 				Path:    "create_sequencing_experiment[5]",
 			},
 		}
