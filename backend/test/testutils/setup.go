@@ -211,7 +211,7 @@ func startMinioContainer() (testcontainers.Container, error) {
 	aliases := []string{ObjectStoreContainerName}
 
 	req := testcontainers.ContainerRequest{
-		Image:        "minio/minio:latest",
+		Image:        "quay.io/minio/minio:latest",
 		ExposedPorts: []string{"9000/tcp"},
 		Env: map[string]string{
 			"MINIO_ROOT_USER":     "admin",
