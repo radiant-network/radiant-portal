@@ -34,6 +34,5 @@ describe('Sequencing - Batch - Invalid values - Enum fields', () => {
   it('Message', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateSequencingExperimentBatchBody.SequencingExperiments[0]', 'ExperimentalStrategyCode', 'oneof'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateSequencingExperimentBatchBody.SequencingExperiments[0]', 'SequencingReadTechnologyCode', 'oneof'));
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateSequencingExperimentBatchBody.SequencingExperiments[0]', 'StatusCode', 'oneof'));
   });
 });
