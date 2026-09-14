@@ -1,9 +1,9 @@
--- Pre-migration check for 000033_case_insensitive_code_unique_indexes.
+-- Pre-migration check for 000034_case_insensitive_code_unique_indexes.
 --
--- Run against every environment BEFORE deploying. Migration 000033 adds unique indexes on
+-- Run against every environment BEFORE deploying. Migration 000034 adds unique indexes on
 -- lower(code) across every code-keyed table and aborts if any already holds two codes differing
 -- only by case. This runs the same scan and reports instead of raising, so the offending rows can
--- be renamed first. "no collisions" means 000033 will apply.
+-- be renamed first. "no collisions" means 000034 will apply.
 --
 --   psql "$DATABASE_URL" -f backend/scripts/init-sql/check_code_collisions.sql
 
@@ -45,7 +45,7 @@ BEGIN
     END LOOP;
 
     IF total = 0 THEN
-        RAISE NOTICE 'no collisions — migration 000033 will apply';
+        RAISE NOTICE 'no collisions — migration 000034 will apply';
     ELSE
         RAISE NOTICE '% collision group(s) must be resolved before migrating', total;
     END IF;
