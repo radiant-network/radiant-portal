@@ -18,9 +18,11 @@ type BaseValidationRecord struct {
 	Context *BatchValidationContext
 	Cache   *BatchValidationCache
 
-	// ResourceType is the batch type of the batch being processed (types.Create*/Update*/Patch*
-	// BatchType). It labels report paths and messages ("create_case[0]", "Invalid field x for
-	// update_patient 0"), so the same record struct reports correctly for create and update flows.
+	// ResourceType is the label this record reports under, in both report paths and messages
+	// ("patient[0].jhn", "Invalid field jhn for patient (CHUSJ / id)"). It is the entity name,
+	// not the batch type, so a create and an update batch of the same entity read alike. The
+	// exception is UpdateCaseValidationRecord / PatchCaseValidationRecord, which report under
+	// types.UpdateCaseBatchType / types.PatchCaseBatchType to distinguish them from create_case.
 	ResourceType string
 
 	Index    int

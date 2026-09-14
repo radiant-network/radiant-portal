@@ -34,6 +34,8 @@ const (
 	PatientNotExistForUpdateCode             = "PATIENT-007"
 )
 
+const patientResourceLabel = "patient"
+
 type PatientValidationRecord struct {
 	batchval.BaseValidationRecord
 	Patient          types.PatientBatch
@@ -291,7 +293,7 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 			Context:      bv,
 			Cache:        cache,
 			Index:        index,
-			ResourceType: types.CreatePatientBatchType,
+			ResourceType: patientResourceLabel,
 		},
 		Patient: patient,
 	}
@@ -441,7 +443,7 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 			Context:      bv,
 			Cache:        cache,
 			Index:        index,
-			ResourceType: types.UpdatePatientBatchType,
+			ResourceType: patientResourceLabel,
 		},
 		Patient: patient,
 	}

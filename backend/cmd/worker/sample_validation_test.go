@@ -118,14 +118,14 @@ func (m *MockValueSetRepository) GetCodes(_ context.Context, vsType postgres.Val
 
 func Test_ValidateSubmitterPatientId_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "PAT-123"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterPatientId()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateSubmitterPatientId_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "INVALID$ID"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterPatientId()
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -134,14 +134,14 @@ func Test_ValidateSubmitterPatientId_Invalid(t *testing.T) {
 
 func Test_ValidateSubmitterSampleId_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "SAMPLE-456"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterSampleId()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateSubmitterSampleId_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "BAD@SAMPLE"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterSampleId()
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -149,21 +149,21 @@ func Test_ValidateSubmitterSampleId_Invalid(t *testing.T) {
 
 func Test_ValidateSubmitterParentSampleId_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: "PARENT-123"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterParentSampleId()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateSubmitterParentSampleId_Empty(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: ""}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterParentSampleId()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateSubmitterParentSampleId_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: "INVALID$PARENT"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateSubmitterParentSampleId()
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -171,21 +171,21 @@ func Test_ValidateSubmitterParentSampleId_Invalid(t *testing.T) {
 
 func Test_ValidateTissueSite_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: "Blood-Derived"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateTissueSite()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateTissueSite_Empty(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: ""}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateTissueSite()
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateTissueSite_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: "Blood123"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateTissueSite()
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -201,7 +201,7 @@ func Test_ValidateTypeCode_Valid(t *testing.T) {
 	}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode(t.Context())
@@ -218,21 +218,21 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 	}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
-	assert.Equal(t, rec.Errors[0].Message, "Invalid field type_code for create_sample (CHUSJ / S1). Reason: \"invalid_type\" is not a valid type code. Valid values [blood, dna].")
+	assert.Equal(t, rec.Errors[0].Message, "Invalid field type_code for sample (CHUSJ / S1). Reason: \"invalid_type\" is not a valid type code. Valid values [blood, dna].")
 }
 
 func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "normal"}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode(t.Context())
@@ -244,14 +244,14 @@ func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "invalid_histology"}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode(t.Context())
 	expected := types.BatchMessage{
 		Code:    SampleInvalidValueCode,
-		Message: "Invalid field histology_code for create_sample (CHUSJ / S1). Reason: \"invalid_histology\" is not a valid histology code. Valid values [tumoral, normal].",
-		Path:    "create_sample[0].histology_code",
+		Message: "Invalid field histology_code for sample (CHUSJ / S1). Reason: \"invalid_histology\" is not a valid histology code. Valid values [tumoral, normal].",
+		Path:    "sample[0].histology_code",
 	}
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
@@ -260,16 +260,16 @@ func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 
 func Test_ValidatePatient_NotFound(t *testing.T) {
 	sample := types.SampleBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", SubmitterSampleId: "S1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validatePatient(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SamplePatientNotExistCode, rec.Errors[0].Code)
-	assert.Equal(t, "create_sample[0].submitter_patient_id", rec.Errors[0].Path)
+	assert.Equal(t, "sample[0].submitter_patient_id", rec.Errors[0].Path)
 }
 
 func Test_ValidateFetus_NotProvided(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample, PatientId: 63}
 	rec.validateFetus(nil)
 	assert.Empty(t, rec.Errors)
 	assert.Nil(t, rec.FetusId)
@@ -279,17 +279,17 @@ func Test_ValidateFetus_NotProvided(t *testing.T) {
 // mother, so it is simply not found — there is no distinct "wrong patient" outcome any more.
 func Test_ValidateFetus_NotFound(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283836", SubmitterFetusId: "F-UNKNOWN"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample, PatientId: 63}
 	rec.validateFetus(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleFetusNotExistCode, rec.Errors[0].Code)
-	assert.Equal(t, "create_sample[0].submitter_fetus_id", rec.Errors[0].Path)
+	assert.Equal(t, "sample[0].submitter_fetus_id", rec.Errors[0].Path)
 	assert.Nil(t, rec.FetusId)
 }
 
 func Test_ValidateFetus_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "MRN-283835", SubmitterFetusId: "F-1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 63}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample, PatientId: 63}
 	rec.validateFetus(&types.Fetus{ID: 1, SubmitterFetusId: "F-1", MotherID: 63})
 	assert.Empty(t, rec.Errors)
 	require.NotNil(t, rec.FetusId)
@@ -298,17 +298,17 @@ func Test_ValidateFetus_Valid(t *testing.T) {
 
 func Test_ValidateOrganization_NotFound(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateOrganization(nil)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleOrgNotExistCode, rec.Errors[0].Code)
-	assert.Equal(t, "create_sample[0].sample_organization_code", rec.Errors[0].Path)
+	assert.Equal(t, "sample[0].sample_organization_code", rec.Errors[0].Path)
 }
 
 func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", TissueSite: "blood", HistologyCode: "9000/0"}
 	existing := &types.Sample{TypeCode: "dna", TissueSite: "dna", HistologyCode: "8041/3"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateExistingSampleInDb(existing)
 
 	assert.True(t, rec.Skipped)
@@ -321,7 +321,7 @@ func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 
 func Test_ValidateParentSample_DifferentPatient(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterParentSampleId: "P1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample, PatientId: 1}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample, PatientId: 1}
 	parentSample := &types.Sample{PatientID: 2} // Different patient ID
 	rec.validateExistingParentSampleInDb(parentSample)
 
@@ -457,9 +457,9 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 }
 
 func Test_reorderSampleRecords_Duplicates(t *testing.T) {
-	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}
-	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
-	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Duplicate S2
+	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}
+	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
+	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Duplicate S2
 
 	// Input in reverse order to force reordering
 	records := []*SampleValidationRecord{r2, r3, r1}
@@ -495,9 +495,9 @@ func Test_reorderSampleRecords_Duplicates(t *testing.T) {
 }
 
 func Test_reorderSampleRecords_DeepHierarchy(t *testing.T) {
-	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
-	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
-	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
 
 	// Order: Child, Parent, Grandparent
 	records := []*SampleValidationRecord{r3, r2, r1}
@@ -522,12 +522,12 @@ func Test_reorderSampleRecords_DeepHierarchy(t *testing.T) {
 }
 
 func Test_reorderSampleRecords_DeepHierarchy_With_Duplicates(t *testing.T) {
-	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
-	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
-	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
-	r4 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
-	r5 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
-	r6 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r3 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r4 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r5 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+	r6 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
 
 	// Order: Child, Parent, Grandparent
 	records := []*SampleValidationRecord{r6, r5, r4, r3, r2, r1}
@@ -568,8 +568,8 @@ func Test_reorderSampleRecords_DeepHierarchy_With_Duplicates(t *testing.T) {
 
 func Test_reorderSampleRecords_Cycle(t *testing.T) {
 	// S1 -> S2 -> S1 (Cycle)
-	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}}
-	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
+	r1 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}}
+	r2 := &SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
 
 	records := []*SampleValidationRecord{r1, r2}
 
@@ -580,7 +580,7 @@ func Test_reorderSampleRecords_Cycle(t *testing.T) {
 
 func Test_ValidateExistingSampleForUpdate_Nil(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateExistingSampleForUpdate(nil)
 	assert.True(t, rec.Skipped)
 	assert.Len(t, rec.Errors, 1)
@@ -590,7 +590,7 @@ func Test_ValidateExistingSampleForUpdate_Nil(t *testing.T) {
 
 func Test_ValidateExistingSampleForUpdate_Found(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1"}
-	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType}, Sample: sample}
+	rec := SampleValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel}, Sample: sample}
 	rec.validateExistingSampleForUpdate(&types.Sample{ID: 1})
 	assert.False(t, rec.Skipped)
 	assert.Empty(t, rec.Errors)
@@ -720,8 +720,8 @@ func Test_ValidateUpdateSamplesBatch_MissingParentSampleReportsError(t *testing.
 func Test_UpdateSampleRecords_SkipsMissingRecords(t *testing.T) {
 	mockRepo := &MockSamplesRepository{}
 	records := []*SampleValidationRecord{
-		{Sample: types.SampleBatch{SubmitterSampleId: "S1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Skipped: false}},
-		{Sample: types.SampleBatch{SubmitterSampleId: "S2"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateSampleBatchType, Skipped: true}},
+		{Sample: types.SampleBatch{SubmitterSampleId: "S1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Skipped: false}},
+		{Sample: types.SampleBatch{SubmitterSampleId: "S2"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sampleResourceLabel, Skipped: true}},
 	}
 
 	err := updateSampleRecords(t.Context(), records, mockRepo, types.DefaultTenantCode)

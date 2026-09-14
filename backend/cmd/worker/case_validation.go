@@ -217,7 +217,7 @@ func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchv
 			Context:      ctx,
 			Cache:        cache,
 			Index:        index,
-			ResourceType: types.CreateCaseBatchType,
+			ResourceType: caseResourceLabel,
 		},
 		Case:                  c,
 		TenantCode:            tenantCode,
@@ -631,7 +631,7 @@ func (cr *CaseValidationRecord) formatTaskFieldErrorMessage(fieldName string, ca
 func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex *int) string {
 	var path string
 	if entityType != "" {
-		path = fmt.Sprintf("create_case[%d].%s", cr.Index, entityType)
+		path = fmt.Sprintf("case[%d].%s", cr.Index, entityType)
 		if entityIndex != nil {
 			path = fmt.Sprintf("%s[%d]", path, *entityIndex)
 		}
@@ -642,7 +642,7 @@ func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *
 			}
 		}
 	} else {
-		path = fmt.Sprintf("create_case[%d]", cr.Index)
+		path = fmt.Sprintf("case[%d]", cr.Index)
 	}
 	return path
 }
@@ -1305,7 +1305,7 @@ func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocum
 }
 
 func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentBatch, taskIndex int, docIndex int) {
-	path := fmt.Sprintf("create_case[%d].tasks[%d].output_documents[%d]", cr.Index, taskIndex, docIndex)
+	path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, taskIndex, docIndex)
 
 	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
 		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("data_type_code", fmt.Sprintf("case %d", cr.Index)), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
@@ -1335,7 +1335,7 @@ func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
 		for did, doc := range t.OutputDocuments {
-			path := fmt.Sprintf("create_case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
+			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
 			cr.validateDocumentDataTypeForTaskType(t.TypeCode, doc, path)
 			if d, ok := cr.Documents[doc.Url]; ok {
 				cr.validateDocumentExists(doc, d, path)
