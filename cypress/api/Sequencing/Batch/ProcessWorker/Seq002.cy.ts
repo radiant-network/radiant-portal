@@ -21,7 +21,7 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
           "run_alias": "Cypress",
           "run_date": "9999-01-01T00:00:00Z",
           "run_name": "Cypress",
-          "status_code": "completed"
+          "status_code": "Cypress"
         }
       ]
     }`;
@@ -45,7 +45,7 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
   });
 
   it('Validate report error count', () => {
-    expect(Object.keys(response.body.report.error)).to.have.lengthOf(6);
+    expect(Object.keys(response.body.report.error)).to.have.lengthOf(7);
   });
 
   it('Validate report create_sequencing_experiment[0] aliquot 1', () => {
@@ -70,5 +70,9 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
 
   it('Validate report create_sequencing_experiment[0] run_date', () => {
     cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorPastDate('create_sequencing_experiment', 'run_date', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'create_sequencing_experiment[0].run_date');
+  });
+
+  it('Validate report create_sequencing_experiment[0] status_code', () => {
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorOneOfStatutCode('create_sequencing_experiment', 'status_code', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!', 'Cypress'), 'create_sequencing_experiment[0].status_code');
   });
 });
