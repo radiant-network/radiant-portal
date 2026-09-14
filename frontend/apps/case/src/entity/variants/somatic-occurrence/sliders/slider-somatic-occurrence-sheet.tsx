@@ -31,6 +31,7 @@ import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import SliderVariantsOnboardingWizard from '../../onboardings/slider-variant-onboarding';
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
 type SomaticOccurrenceSheetProps = {
@@ -130,6 +131,7 @@ export function SomaticOccurrenceSheetContent({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
+  const { canFlag } = useCaseVariantPermissions();
 
   const { list } = useDataTable();
 
@@ -212,6 +214,7 @@ export function SomaticOccurrenceSheetContent({
               seqId={occurrence.seq_id}
               occurrenceId={occurrence.locus_id}
               flag={occurrence.flag_type}
+              canFlag={canFlag}
             />
             <NotesProvider value={{ onChangeCallback: () => list?.mutate }}>
               <NotesSliderSheet

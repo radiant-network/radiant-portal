@@ -25,6 +25,7 @@ import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import SliderVariantsOnboardingWizard from '../../onboardings/slider-variant-onboarding';
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
 type InterpretationInput = {
@@ -97,6 +98,7 @@ export function GermlineOccurrenceSheetContent({
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const { list } = useDataTable();
+  const { canFlag } = useCaseVariantPermissions();
 
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
@@ -155,6 +157,7 @@ export function GermlineOccurrenceSheetContent({
               seqId={occurrence.seq_id}
               occurrenceId={occurrence.locus_id}
               flag={occurrence.flag_type}
+              canFlag={canFlag}
             />
             <NotesProvider value={{ onChangeCallback: () => list?.mutate() }}>
               <NotesSliderSheet

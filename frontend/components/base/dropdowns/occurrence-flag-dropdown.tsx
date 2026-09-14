@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
@@ -35,6 +36,7 @@ export type OccurrenceFlagDropdownProps = ButtonProps & {
   taskId: number;
   seqId: number;
   flag?: OccurrenceFlagType;
+  canFlag?: boolean;
 };
 
 type OccurrenceFlagConfig = Record<
@@ -94,6 +96,7 @@ function OccurrenceFlagDropdown({
   occurrenceId,
   flag,
   variant,
+  canFlag = true,
   ...props
 }: OccurrenceFlagDropdownProps) {
   const { t } = useI18n();
@@ -115,15 +118,34 @@ function OccurrenceFlagDropdown({
     setSelectedFlag(flag ?? null);
   }, [flag, caseId, taskId, seqId, occurrenceId]);
 
+  const flagIcon = selectedFlagConfig ? (
+    <selectedFlagConfig.Icon size={16} className={selectedFlagConfig.className} />
+  ) : (
+    <Flag size={16} className={cn({ 'text-muted-foreground/40': variant === 'ghost' })} />
+  );
+
+  if (!canFlag) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex" tabIndex={0}>
+            <Button {...props} variant={variant} iconOnly disabled className="disabled:opacity-100">
+              {flagIcon}
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {selectedFlag ? t('occurrence_flag.tooltip.flagged') : t('occurrence_flag.tooltip.unflagged')}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button {...props} variant={variant} iconOnly>
-          {selectedFlagConfig ? (
-            <selectedFlagConfig.Icon size={16} className={selectedFlagConfig.className} />
-          ) : (
-            <Flag size={16} className={cn({ 'text-muted-foreground/40': variant === 'ghost' })} />
-          )}
+          {flagIcon}
         </Button>
       </DropdownMenuTrigger>
 
