@@ -3,6 +3,7 @@ import { MessageSquare } from 'lucide-react';
 import useSWR from 'swr';
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { occurencesNotesApi } from '@/utils/api';
@@ -55,6 +56,21 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
     setIsOpen(false);
     mutate();
   }, []);
+
+  if (!props.canComment && !isLoading && (data?.count ?? 0) === 0) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex" tabIndex={0}>
+            <Button variant="outline" size="sm" disabled className="disabled:opacity-100">
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{t('notes.variant.tooltip.none')}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <div>

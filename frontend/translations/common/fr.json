@@ -2328,7 +2328,8 @@
       },
       "tooltip": {
         "add": "Ajouter un commentaire",
-        "view": "Voir les commentaires"
+        "view": "Voir les commentaires",
+        "none": "Aucun commentaire pour ce variant"
       }
     }
   },

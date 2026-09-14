@@ -2324,7 +2324,8 @@
       },
       "tooltip": {
         "add": "Add a comment",
-        "view": "View comments"
+        "view": "View comments",
+        "none": "No comments for this variant"
       }
     }
   },

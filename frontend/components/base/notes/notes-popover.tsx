@@ -16,7 +16,7 @@ type NotesPopoverProps = NotesContainerProps & {
 /**
  * Simple call to see if has comment
  */
-function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps) {
+function NotesPopover({ hasNotes, loading = false, canComment = true, ...props }: NotesPopoverProps) {
   const { t } = useI18n();
 
   /*
@@ -25,6 +25,23 @@ function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps
   const handlePreventClosing = useCallback((e: { preventDefault: () => void }) => {
     if (document.querySelector('[role="alertdialog"]')) e.preventDefault();
   }, []);
+
+  if (!canComment && !hasNotes) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex" tabIndex={0}>
+              <Button className="relative size-6 disabled:opacity-100" iconOnly variant="ghost" disabled>
+                <MessageSquare className="text-muted-foreground/40" size={16} />
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{t('notes.variant.tooltip.none')}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <Popover>
@@ -52,7 +69,7 @@ function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps
         onFocusOutside={handlePreventClosing}
         onInteractOutside={handlePreventClosing}
       >
-        <NotesContainer {...props} enableSkeletonLoading={false} withHeader />
+        <NotesContainer {...props} canComment={canComment} enableSkeletonLoading={false} withHeader />
       </PopoverContent>
     </Popover>
   );

@@ -131,7 +131,7 @@ export function SomaticOccurrenceSheetContent({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
-  const { canFlag } = useCaseVariantPermissions();
+  const { canFlag, canComment } = useCaseVariantPermissions();
 
   const { list } = useDataTable();
 
@@ -222,6 +222,7 @@ export function SomaticOccurrenceSheetContent({
                 seqId={occurrence.seq_id}
                 taskId={occurrence.task_id}
                 occurrenceId={occurrence.locus_id}
+                canComment={canComment}
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (

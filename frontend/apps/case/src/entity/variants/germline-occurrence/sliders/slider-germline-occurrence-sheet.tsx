@@ -98,7 +98,7 @@ export function GermlineOccurrenceSheetContent({
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const { list } = useDataTable();
-  const { canFlag } = useCaseVariantPermissions();
+  const { canFlag, canComment } = useCaseVariantPermissions();
 
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
@@ -165,6 +165,7 @@ export function GermlineOccurrenceSheetContent({
                 seqId={occurrence.seq_id}
                 taskId={occurrence.task_id}
                 occurrenceId={occurrence.locus_id}
+                canComment={canComment}
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (
