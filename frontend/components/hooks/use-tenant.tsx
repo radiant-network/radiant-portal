@@ -26,7 +26,6 @@ export function useTenant() {
 
 /**
  * Tenant-scoped actions granting access to the admin section.
- * Backend catalog: `internal/types/auth.go`
  */
 export const TENANT_ACTIONS = {
   manageUser: 'can_manage_user',
@@ -51,6 +50,30 @@ export function useHasAnyTenantAction(actions: readonly string[]) {
 /** True when the caller may reach the admin section of the currently selected tenant. */
 export function useCanAdministerTenant() {
   return useHasAnyTenantAction(ADMIN_TENANT_ACTIONS);
+}
+
+/**
+ * Org-scoped actions: granted per organization rather than tenant-wide.
+ */
+export const ORG_ACTIONS = {
+  interpretVariant: 'can_interpret_variant',
+  commentVariant: 'can_comment_variant',
+  flagVariant: 'can_flag_variant',
+} as const;
+
+/** Org codes where the caller holds each org-scoped action, in the currently selected tenant. */
+export function useOrgsByAction(): Record<string, string[]> {
+  const { tenant, tenants } = useTenant();
+  return tenants.find(membership => membership.code === tenant)?.orgs_by_action ?? {};
+}
+
+/**
+ * True when the caller holds `action` at `orgCode`.
+ */
+export function useHasOrgAction(action: string, orgCode?: string) {
+  const orgsByAction = useOrgsByAction();
+  if (!orgCode) return false;
+  return (orgsByAction[action] ?? []).includes(orgCode);
 }
 
 async function fetchTenants(): Promise<TenantMembership[]> {
