@@ -13,7 +13,7 @@ import (
 
 func Test_fetchFetusCodes_OK(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: &CodesMockRepo{}}
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext}}
 	record.Cache = batchval.NewBatchValidationCache(mockContext)
 
 	err := record.fetchFetusCodes(t.Context())
@@ -32,7 +32,7 @@ func Test_fetchFetusCodes_SexCodesError(t *testing.T) {
 		},
 	}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockRepo}
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext}}
 	record.Cache = batchval.NewBatchValidationCache(mockContext)
 
 	err := record.fetchFetusCodes(t.Context())
@@ -50,7 +50,7 @@ func Test_fetchFetusCodes_LifeStatusCodesError(t *testing.T) {
 		},
 	}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockRepo}
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext}}
 	record.Cache = batchval.NewBatchValidationCache(mockContext)
 
 	err := record.fetchFetusCodes(t.Context())
@@ -68,7 +68,7 @@ func Test_fetchPatientCodes_ExcludesFetusRelationship(t *testing.T) {
 		},
 	}
 	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockRepo}
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext}}
 	record.Cache = batchval.NewBatchValidationCache(mockContext)
 
 	err := record.fetchPatientCodes(t.Context())
@@ -78,7 +78,7 @@ func Test_fetchPatientCodes_ExcludesFetusRelationship(t *testing.T) {
 
 func newFetusValidationRecord(fetuses []*types.CaseFetusBatch) *CaseValidationRecord {
 	return &CaseValidationRecord{
-		BaseValidationRecord:       batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord:       batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case:                       types.CaseBatch{Fetuses: fetuses},
 		SexCodes:                   []string{"male", "female", "unknown"},
 		LifeStatusCodes:            []string{"alive", "deceased", "unknown"},
@@ -100,7 +100,7 @@ func Test_validateFetusSexCode_Invalid(t *testing.T) {
 	cr.validateFetusSexCode(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].sex_code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].sex_code", cr.Errors[0].Path)
 }
 
 func Test_validateFetusSexCode_Missing(t *testing.T) {
@@ -121,7 +121,7 @@ func Test_validateFetusLifeStatusCode_Invalid(t *testing.T) {
 	cr.validateFetusLifeStatusCode(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].life_status_code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].life_status_code", cr.Errors[0].Path)
 }
 
 func Test_validateFetusLifeStatusCode_Missing(t *testing.T) {
@@ -169,7 +169,7 @@ func Test_validateFetusDates_InvalidWhenAliveWithNoDates(t *testing.T) {
 	cr.validateFetusDates(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0]", cr.Errors[0].Path)
 }
 
 func Test_validateFetusDates_InvalidWhenUnknownLifeStatusWithNoDates(t *testing.T) {
@@ -185,7 +185,7 @@ func Test_validateFetusDates_InvalidWhenLastMenstrualPeriodInFuture(t *testing.T
 	cr.validateFetusDates(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
 }
 
 func Test_validateFetusDates_ValidWhenLastMenstrualPeriodIsToday(t *testing.T) {
@@ -209,7 +209,7 @@ func Test_validateFetusDates_InvalidWhenDeceasedWithFutureLastMenstrualPeriod(t 
 	cr := newFetusValidationRecord([]*types.CaseFetusBatch{{LifeStatusCode: "deceased", LastMenstrualPeriod: &future}})
 	cr.validateFetusDates(0)
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, "create_case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].last_menstrual_period", cr.Errors[0].Path)
 }
 
 func Test_validateFetusUniquenessInBatch_FirstOccurrence(t *testing.T) {
@@ -226,7 +226,7 @@ func Test_validateFetusUniquenessInBatch_Duplicate(t *testing.T) {
 	cr.validateFetusUniquenessInBatch(0, "ORG1", seen)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusDuplicateInBatchCode, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0]", cr.Errors[0].Path)
 }
 
 // Uniqueness is scoped by organization, so the same key under a different org is not a conflict.
@@ -257,7 +257,7 @@ func Test_validateCaseFetuses_DuplicateSubmitterFetusIdAcrossFetuses(t *testing.
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusDuplicateInBatchCode, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[1]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[1]", cr.Errors[0].Path)
 }
 
 // End-to-end through validateCaseFetuses: a key that collides with another mother's fetus in the
@@ -284,7 +284,7 @@ func Test_validateCaseFetuses_OrgConflictWithAnotherMother(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusOrgConflictCode, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0]", cr.Errors[0].Path)
 }
 
 func Test_validateFetusOrgUniqueness_NoConflict(t *testing.T) {
@@ -326,7 +326,7 @@ func Test_validateFetusOrgUniqueness_ConflictWithAnotherMother(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusOrgConflictCode, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0]", cr.Errors[0].Path)
 }
 
 // A key already attached to this case (e.g. an update in place) must not be looked up at all —
@@ -376,7 +376,7 @@ func Test_validateFetusObservationsCategorical_InvalidCode(t *testing.T) {
 	cr.validateFetusObservationsCategorical(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0].code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_categorical[0].code", cr.Errors[0].Path)
 }
 
 func Test_validateFetusObservationsText_Valid(t *testing.T) {
@@ -404,7 +404,7 @@ func Test_validateFetusObservationsText_InvalidCode(t *testing.T) {
 	cr.validateFetusObservationsText(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_text[0].code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_text[0].code", cr.Errors[0].Path)
 }
 
 func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
@@ -416,8 +416,8 @@ func Test_validateCaseFetuses_MultipleFetuses(t *testing.T) {
 	err := cr.validateCaseFetuses(t.Context(), map[FetusKey]struct{}{}, nil)
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 2)
-	assert.Equal(t, "create_case[0].fetuses[1].sex_code", cr.Errors[0].Path)
-	assert.Equal(t, "create_case[0].fetuses[1].life_status_code", cr.Errors[1].Path)
+	assert.Equal(t, "case[0].fetuses[1].sex_code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[1].life_status_code", cr.Errors[1].Path)
 }
 
 // `dive` without `required` lets a null entry through binding, so the worker must report it as a
@@ -428,7 +428,7 @@ func Test_validateCaseFetuses_NullEntry(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, FetusInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0]", cr.Errors[0].Path)
 }
 
 func Test_validateFetusObservationsCategorical_NullEntry(t *testing.T) {
@@ -438,7 +438,7 @@ func Test_validateFetusObservationsCategorical_NullEntry(t *testing.T) {
 	cr.validateFetusObservationsCategorical(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
 }
 
 func Test_validateFetusObservationsText_NullEntry(t *testing.T) {
@@ -448,7 +448,7 @@ func Test_validateFetusObservationsText_NullEntry(t *testing.T) {
 	cr.validateFetusObservationsText(0)
 	assert.Len(t, cr.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_text[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_text[0]", cr.Errors[0].Path)
 }
 
 // A valid fetus whose observation entries are null: validateCaseFetuses reaches both arrays in the
@@ -468,8 +468,8 @@ func Test_validateCaseFetuses_NullObservationEntries(t *testing.T) {
 	err := cr.validateCaseFetuses(t.Context(), map[FetusKey]struct{}{}, nil)
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 2)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
-	assert.Equal(t, "create_case[0].fetuses[0].observations_text[0]", cr.Errors[1].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_categorical[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].fetuses[0].observations_text[0]", cr.Errors[1].Path)
 }
 
 func Test_dateISO8601ToTimePtr_Nil(t *testing.T) {

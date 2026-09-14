@@ -65,3 +65,22 @@ func Test_FormatDuplicateInBatch(t *testing.T) {
 	expected := "Test_resource (ORG1 / P123) appears multiple times in the batch."
 	assert.Equal(t, expected, message)
 }
+
+func Test_FormatDuplicateInBatch_StripsCreatePrefix(t *testing.T) {
+	message := FormatDuplicateInBatch("create_patient", []string{"CHUSJ", "P123"})
+	assert.Equal(t, "Patient (CHUSJ / P123) appears multiple times in the batch.", message)
+}
+
+func Test_FormatDuplicateInBatch_StripsUpdatePrefix(t *testing.T) {
+	message := FormatDuplicateInBatch("update_sequencing_experiment", []string{"CQGC", "S1", "A1"})
+	assert.Equal(t, "Sequencing_experiment (CQGC / S1 / A1) appears multiple times in the batch.", message)
+}
+
+func Test_FormatDuplicateInBatch_StripsPatchPrefix(t *testing.T) {
+	message := FormatDuplicateInBatch("patch_case", []string{"PROJ-1", "CASE-1"})
+	assert.Equal(t, "Case (PROJ-1 / CASE-1) appears multiple times in the batch.", message)
+}
+
+func Test_FormatResourceLabel_EmptyResourceType(t *testing.T) {
+	assert.Equal(t, "", FormatResourceLabel(""))
+}

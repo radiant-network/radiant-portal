@@ -34,6 +34,8 @@ const (
 	SeqExpNotExistForUpdateCode              = "SEQ-007"
 )
 
+const sequencingExperimentResourceLabel = "sequencing_experiment"
+
 type SequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
 
@@ -398,7 +400,7 @@ func validateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchV
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context:      bv,
 			Cache:        cache,
-			ResourceType: types.CreateSequencingExperimentBatchType,
+			ResourceType: sequencingExperimentResourceLabel,
 			Index:        index,
 		},
 		SequencingExperiment: seqExp,
@@ -556,7 +558,7 @@ func validateUpdateSequencingExperimentRecord(ctx context.Context, bv *batchval.
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context:      bv,
 			Cache:        cache,
-			ResourceType: types.UpdateSequencingExperimentBatchType,
+			ResourceType: sequencingExperimentResourceLabel,
 			Index:        index,
 		},
 		SequencingExperiment: seqExp,

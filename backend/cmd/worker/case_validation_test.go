@@ -392,8 +392,8 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentDetailById(seqId int) (*
 }
 
 func Test_GetResourceType_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
-	assert.Equal(t, types.CreateCaseBatchType, record.GetResourceType())
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
+	assert.Equal(t, "case", record.GetResourceType())
 }
 
 func Test_getProbandFromPatients_OK(t *testing.T) {
@@ -441,17 +441,17 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for create_case 0")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for case 0")
 	assert.Nil(t, proband)
 }
 
 func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	record.ValidateRegexPattern(
-		"create_case[0].field",
+		"case[0].field",
 		"Valid-Value123",
 		"testField",
 		"TEST-001",
@@ -465,12 +465,12 @@ func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 
 func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	record.ValidateRegexPattern(
 		"case",
-		"create_case[0].field",
+		"case[0].field",
 		"testField",
 		"Invalid@Value",
 		"TEST-001",
@@ -480,18 +480,18 @@ func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, "TEST-001", record.Errors[0].Code)
-	assert.Equal(t, "create_case[0].field", record.Errors[0].Path)
+	assert.Equal(t, "case[0].field", record.Errors[0].Path)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 }
 
 func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	record.ValidateRegexPattern(
 		"case",
-		"create_case[0].field",
+		"case[0].field",
 		"fieldName",
 		"",
 		"TEST-001",
@@ -506,13 +506,13 @@ func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 
 func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	// Valid family member code
 	record.ValidateRegexPattern(
 		"case",
-		"create_case[0].patients[0].family_history[0]",
+		"case[0].patients[0].family_history[0]",
 		"familyMemberCode",
 		"Mother-Paternal",
 		"PATIENT-004",
@@ -525,7 +525,7 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	// Invalid family member code (contains numbers)
 	record.ValidateRegexPattern(
 		"case",
-		"create_case[0].patients[0].family_history[1]",
+		"case[0].patients[0].family_history[1]",
 		"familyMemberCode",
 		"Mother123",
 		"PATIENT-004",
@@ -540,11 +540,11 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 
 func Test_validateTextLength_ValidLength(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	record.ValidateTextLength(
-		"create_case[0].field",
+		"case[0].field",
 		"Short text",
 		"testField",
 		"TEST-002",
@@ -558,13 +558,13 @@ func Test_validateTextLength_ValidLength(t *testing.T) {
 
 func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	longText := strings.Repeat("a", 101)
 	record.ValidateTextLength(
 		"case",
-		"create_case[0].field",
+		"case[0].field",
 		"testField",
 		longText,
 		"TEST-002",
@@ -574,17 +574,17 @@ func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
 
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, "TEST-002", record.Errors[0].Code)
-	assert.Equal(t, "create_case[0].field", record.Errors[0].Path)
+	assert.Equal(t, "case[0].field", record.Errors[0].Path)
 	assert.Contains(t, record.Errors[0].Message, "field is too long, maximum length allowed is 100.")
 }
 
 func Test_validateTextLength_EmptyString(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	record.ValidateTextLength(
-		"create_case[0].field",
+		"case[0].field",
 		"",
 		"testField",
 		"TEST-002",
@@ -598,12 +598,12 @@ func Test_validateTextLength_EmptyString(t *testing.T) {
 
 func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	exactText := strings.Repeat("a", 100)
 	record.ValidateTextLength(
-		"create_case[0].field",
+		"case[0].field",
 		exactText,
 		"testField",
 		"TEST-002",
@@ -617,13 +617,13 @@ func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 
 func Test_validateTextLength_FreeTextMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	longText := strings.Repeat("a", FreeTextMaxLength+1)
 	record.ValidateTextLength(
 		"case",
-		"create_case[0].note",
+		"case[0].note",
 		"note",
 		longText,
 		CaseInvalidField,
@@ -645,7 +645,7 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 		ValueSetsRepo: &CodesMockRepo{},
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchStatusCodes(t.Context())
 	assert.NoError(t, err)
@@ -663,7 +663,7 @@ func Test_fetchStatusCodes_Error(t *testing.T) {
 		ValueSetsRepo: mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchStatusCodes(t.Context())
 	assert.Error(t, err)
@@ -677,7 +677,7 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 		ValueSetsRepo: &CodesMockRepo{},
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchObservationCodes(t.Context())
 	assert.NoError(t, err)
@@ -695,7 +695,7 @@ func Test_fetchObservationCodes_Error(t *testing.T) {
 		ValueSetsRepo: mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchObservationCodes(t.Context())
 	assert.Error(t, err)
@@ -710,7 +710,7 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 		ValueSetsRepo: mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchOnsetCodes(t.Context())
 	assert.NoError(t, err)
@@ -728,7 +728,7 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 		ValueSetsRepo: mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: mockContext, Cache: cache}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: mockContext, Cache: cache}}
 
 	err := record.fetchOnsetCodes(t.Context())
 	assert.Error(t, err)
@@ -739,7 +739,7 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 
 func Test_fetchCodeInfos_OK(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: &CodesMockRepo{},
 				TaskRepo:      &CaseValidationMockRepo{},
@@ -766,7 +766,7 @@ func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
 			},
@@ -788,7 +788,7 @@ func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
 			},
@@ -810,7 +810,7 @@ func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
 			},
@@ -830,7 +830,7 @@ func Test_fetchTaskTypeCodes_OK(t *testing.T) {
 		ValueSetsRepo: &mockRepo,
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
-	mockRecord := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Context: &mockContext, Cache: cache}}
+	mockRecord := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Context: &mockContext, Cache: cache}}
 
 	err := mockRecord.fetchTaskTypeCodes(t.Context())
 	assert.NoError(t, err)
@@ -853,7 +853,7 @@ func Test_fetchProject_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -875,7 +875,7 @@ func Test_fetchProject_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -896,7 +896,7 @@ func Test_fetchProject_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -917,7 +917,7 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -939,7 +939,7 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -960,7 +960,7 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -981,7 +981,7 @@ func Test_ResolveOrganizations_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1004,7 +1004,7 @@ func Test_ResolveOrganizations_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1027,7 +1027,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1043,7 +1043,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 	assert.False(t, record.DiagnosisLabExists)
 
 	record = CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1066,7 +1066,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1099,7 +1099,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1138,7 +1138,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1173,7 +1173,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 		},
@@ -1259,51 +1259,51 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 
 func Test_formatFieldPath_WithEntityAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 2},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 2},
 	}
 
 	index := 1
 	path := record.formatFieldPath("entity_type", &index, "", nil)
-	assert.Equal(t, "create_case[2].entity_type[1]", path)
+	assert.Equal(t, "case[2].entity_type[1]", path)
 }
 
 func Test_formatFieldPath_WithoutEntity(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	path := record.formatFieldPath("", nil, "", nil)
-	assert.Equal(t, "create_case[0]", path)
+	assert.Equal(t, "case[0]", path)
 }
 
 func Test_formatFieldPath_WithoutIndex(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	path := record.formatFieldPath("entity_type", nil, "", nil)
-	assert.Equal(t, "create_case[0].entity_type", path)
+	assert.Equal(t, "case[0].entity_type", path)
 }
 
 func Test_formatFieldPath_WithCollection(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	index := 3
 	path := record.formatFieldPath("entity_type", &index, "sub_collection", nil)
-	assert.Equal(t, "create_case[0].entity_type[3].sub_collection", path)
+	assert.Equal(t, "case[0].entity_type[3].sub_collection", path)
 }
 
 func Test_formatFieldPath_WithCollectionAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 5},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 5},
 	}
 
 	index := 0
 	collectionIndex := 1
 	path := record.formatFieldPath("entity_type", &index, "sub_collection", &collectionIndex)
-	assert.Equal(t, "create_case[5].entity_type[0].sub_collection[1]", path)
+	assert.Equal(t, "case[5].entity_type[0].sub_collection[1]", path)
 }
 
 func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
@@ -1483,86 +1483,86 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 
 func Test_validateCaseField_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
-	cr.validateCaseField("Valid-Value_123", "test_field", "create_case[0]", TextRegExpCompiled, 100, true)
+	cr.validateCaseField("Valid-Value_123", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Empty(t, cr.Errors)
 }
 
 func Test_validateCaseField_EmptyOptional(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
-	cr.validateCaseField("", "test_field", "create_case[0]", TextRegExpCompiled, 100, false)
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, 100, false)
 
 	assert.Empty(t, cr.Errors)
 }
 
 func Test_validateCaseField_EmptyRequired(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
-	cr.validateCaseField("", "test_field", "create_case[0]", TextRegExpCompiled, 100, true)
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0. Reason: field is empty.")
+	assert.Equal(t, cr.Errors[0].Message, "Invalid field test_field for case 0. Reason: field is empty.")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCaseField_InvalidRegex(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
-	cr.validateCaseField("Invalid@Value!", "test_field", "create_case[0]", TextRegExpCompiled, 100, true)
+	cr.validateCaseField("Invalid@Value!", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCaseField_TooLong(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	longValue := "A-very-long-value-that-exceeds-the-maximum-allowed-length-for-this-field-and-should-trigger-an-error"
-	cr.validateCaseField(longValue, "test_field", "create_case[0]", TextRegExpCompiled, 50, true)
+	cr.validateCaseField(longValue, "test_field", "case[0]", TextRegExpCompiled, 50, true)
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "field is too long, maximum length allowed is 50")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCaseField_MultipleErrors(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
 	invalidValue := "Invalid@Value!-This-is-a-very-long-value-that-both-fails-regex-and-exceeds-maximum-length-constraints"
-	cr.validateCaseField(invalidValue, "test_field", "create_case[0]", TextRegExpCompiled, 50, true)
+	cr.validateCaseField(invalidValue, "test_field", "case[0]", TextRegExpCompiled, 50, true)
 
 	assert.Len(t, cr.Errors, 2)
 	assert.Contains(t, cr.Errors[0].Message, "field is too long")
 	assert.Contains(t, cr.Errors[1].Message, "does not match the regular expression")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 	assert.Equal(t, CaseInvalidField, cr.Errors[1].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[1].Path)
+	assert.Equal(t, "case[0]", cr.Errors[1].Path)
 }
 
 func Test_validateStatusCode_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			StatusCode:   "in_progress",
 			PriorityCode: "routine",
@@ -1581,7 +1581,7 @@ func Test_validateStatusCode_Valid(t *testing.T) {
 
 func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			StatusCode:   "unknown_status",
 			PriorityCode: "routine",
@@ -1596,10 +1596,10 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr.validateCodes()
 
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for create_case 0")
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "\"unknown_status\" is not a valid status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].status_code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].status_code", cr.Errors[0].Path)
 }
 
 // -----------------------------------------------------------------------------
@@ -1615,7 +1615,7 @@ func Test_validateCase_Valid(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1658,7 +1658,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1689,7 +1689,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "UNKNOWN-PROJ")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
 	assert.Equal(t, CaseUnknownProject, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
@@ -1701,7 +1701,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1731,7 +1731,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "Diagnostic lab")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
 	assert.Equal(t, CaseUnknownDiagnosticLab, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
@@ -1742,7 +1742,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1771,7 +1771,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "Analysis")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
 	assert.Equal(t, CaseUnknownAnalysisCode, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
@@ -1783,7 +1783,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1813,7 +1813,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "Ordering organization")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
 	assert.Equal(t, CaseUnknownOrderingOrganization, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCase_InvalidStatusCode(t *testing.T) {
@@ -1825,7 +1825,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1853,7 +1853,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0].status_code", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].status_code", cr.Errors[0].Path)
 }
 
 func Test_validateCase_InvalidFieldFormat(t *testing.T) {
@@ -1865,7 +1865,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1892,9 +1892,9 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, "Invalid field note for create_case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
+	assert.Equal(t, "Invalid field note for case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "create_case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
 func Test_validateCase_CaseAlreadyExists(t *testing.T) {
@@ -1914,7 +1914,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1938,7 +1938,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	assert.Contains(t, cr.Infos[0].Message, "already exists")
 	assert.Equal(t, CaseAlreadyExists, cr.Infos[0].Code)
 	assert.True(t, cr.Skipped)
-	assert.Equal(t, "create_case[0]", cr.Infos[0].Path)
+	assert.Equal(t, "case[0]", cr.Infos[0].Path)
 }
 
 func Test_validateCase_MultipleErrors(t *testing.T) {
@@ -1950,7 +1950,7 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -1997,7 +1997,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
@@ -2172,8 +2172,8 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	assert.Empty(t, vr[1].Infos)
 	assert.Empty(t, vr[1].Warnings)
 	assert.Equal(t, vr[1].Errors[0].Code, "CASE-011")
-	assert.Equal(t, vr[1].Errors[0].Message, "Create_case (PROJ-1 / CASE-1) appears multiple times in the batch.")
-	assert.Equal(t, vr[1].Errors[0].Path, "create_case[1]")
+	assert.Equal(t, vr[1].Errors[0].Message, "Case (PROJ-1 / CASE-1) appears multiple times in the batch.")
+	assert.Equal(t, vr[1].Errors[0].Path, "case[1]")
 }
 
 // -----------------------------------------------------------------------------
@@ -2182,7 +2182,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 
 func Test_validateFamilyMemberCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2207,7 +2207,7 @@ func Test_validateFamilyMemberCode_Valid(t *testing.T) {
 
 func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2230,12 +2230,12 @@ func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2259,12 +2259,12 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Contains(t, record.Errors[0].Message, "maximum length allowed is 100")
-	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2289,7 +2289,7 @@ func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 
 func Test_validateCondition_Valid(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2314,7 +2314,7 @@ func Test_validateCondition_Valid(t *testing.T) {
 
 func Test_validateCondition_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2339,7 +2339,7 @@ func Test_validateCondition_AcceptsAnyCharacter(t *testing.T) {
 
 func Test_validateCondition_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2362,12 +2362,12 @@ func Test_validateCondition_TooLong(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "create_case[0].patients[0].family_history[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyHistory_NoHistory(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2387,7 +2387,7 @@ func Test_validateFamilyHistory_NoHistory(t *testing.T) {
 
 func Test_validateFamilyHistory_MultipleEntries(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2416,7 +2416,7 @@ func Test_validateFamilyHistory_MultipleEntries(t *testing.T) {
 
 func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2446,7 +2446,7 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 
 func Test_validateObservationsCategorical_Valid(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		ObservationCodes:     []string{"phenotype", "condition"},
 		OnsetCodes:           []string{"childhood", "juvenile"},
 		InterpretationCodes:  []string{"positive", "negative"},
@@ -2487,7 +2487,7 @@ func Test_validateObservationsCategorical_Valid(t *testing.T) {
 
 func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		InterpretationCodes:  []string{"positive", "negative"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2518,7 +2518,7 @@ func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 
 func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2539,7 +2539,7 @@ func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 
 func Test_validateObsTextValue_Valid(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2564,7 +2564,7 @@ func Test_validateObsTextValue_Valid(t *testing.T) {
 
 func Test_validateObsTextValue_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2589,7 +2589,7 @@ func Test_validateObsTextValue_AcceptsAnyCharacter(t *testing.T) {
 
 func Test_validateObsTextValue_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2612,12 +2612,12 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "create_case[0].patients[0].observations_text[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
 
 func Test_validateObservationsText_Valid(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		ObservationCodes:     []string{"phenotype", "note"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2648,7 +2648,7 @@ func Test_validateObservationsText_Valid(t *testing.T) {
 
 func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2674,7 +2674,7 @@ func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 
 func Test_validateObservationsText_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2699,7 +2699,7 @@ func Test_validateObservationsText_NoObservations(t *testing.T) {
 
 func Test_validatePatient_PatientExists(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2724,7 +2724,7 @@ func Test_validatePatient_PatientExists(t *testing.T) {
 
 func Test_validatePatient_PatientNotFound(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2742,12 +2742,12 @@ func Test_validatePatient_PatientNotFound(t *testing.T) {
 	assert.Equal(t, PatientNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Patient (CHUSJ / PAT-999)")
 	assert.Contains(t, record.Errors[0].Message, "does not exist")
-	assert.Equal(t, "create_case[0].patients[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0]", record.Errors[0].Path)
 }
 
 func Test_validatePatient_MultiplePatients(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2779,7 +2779,7 @@ func Test_validatePatient_MultiplePatients(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, PatientNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "PAT-999")
-	assert.Equal(t, "create_case[0].patients[1]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[1]", record.Errors[0].Path)
 }
 
 // -----------------------------------------------------------------------------
@@ -2792,7 +2792,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -2824,7 +2824,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
-	assert.Equal(t, "create_case[0].patients", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
 func Test_validateCasePatients_MultipleProbands(t *testing.T) {
@@ -2833,7 +2833,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -2875,7 +2875,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
-	assert.Equal(t, "create_case[0].patients", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
 func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
@@ -2884,7 +2884,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -2922,8 +2922,8 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseDuplicatePatient, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Duplicate patient (CHUSJ / PAT-1)")
-	assert.Contains(t, record.Errors[0].Message, "for create_case 0")
-	assert.Equal(t, "create_case[0].patients", record.Errors[0].Path)
+	assert.Contains(t, record.Errors[0].Message, "for case 0")
+	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
 func Test_validateCasePatients_Valid(t *testing.T) {
@@ -2975,7 +2975,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		OnsetCodes:           []string{"unknown"},
 		ObservationCodes:     []string{"phenotype", "condition"},
 		InterpretationCodes:  []string{"positive", "negative"},
@@ -3009,7 +3009,7 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -3080,7 +3080,7 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -3110,7 +3110,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -3134,7 +3134,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not exist")
-	assert.Equal(t, "create_case[0].sequencing_experiments[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
 
 func Test_validateSeqExpSample_Valid(t *testing.T) {
@@ -3157,7 +3157,7 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 		SampleRepo: samplesMockRepo,
 	}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -3194,7 +3194,7 @@ func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
 		SampleRepo: samplesMockRepo,
 	}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
 			Index:   0,
@@ -3223,7 +3223,7 @@ func Test_validateCaseSequencingExperiments_NoSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -3247,7 +3247,7 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -3293,7 +3293,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -3331,9 +3331,9 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 2)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
-	assert.Equal(t, "create_case[0].sequencing_experiments[1]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[1].Code)
-	assert.Equal(t, "create_case[0].sequencing_experiments[2]", record.Errors[1].Path)
+	assert.Equal(t, "case[0].sequencing_experiments[2]", record.Errors[1].Path)
 }
 
 func Test_validateSeqExpPatientInCase_Valid(t *testing.T) {
@@ -3343,7 +3343,7 @@ func Test_validateSeqExpPatientInCase_Valid(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3375,7 +3375,7 @@ func Test_validateSeqExpPatientInCase_PatientNotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3393,8 +3393,8 @@ func Test_validateSeqExpPatientInCase_PatientNotFound(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseSeqExpNotFoundForPatient, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "does not belong to any patient from create_case 0")
-	assert.Equal(t, "create_case[0].sequencing_experiments[0]", record.Errors[0].Path)
+	assert.Contains(t, record.Errors[0].Message, "does not belong to any patient from case 0")
+	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
 
 func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
@@ -3404,7 +3404,7 @@ func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3426,7 +3426,7 @@ func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
 
 func Test_validateSeqExpCaseType_GermlineWithGermlineSample(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "germline",
 			ProjectCode:     "PROJ-1",
@@ -3454,7 +3454,7 @@ func Test_validateSeqExpCaseType_GermlineWithGermlineSample(t *testing.T) {
 
 func Test_validateSeqExpCaseType_GermlineWithTumoralSample(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "germline",
 			ProjectCode:     "PROJ-1",
@@ -3481,12 +3481,12 @@ func Test_validateSeqExpCaseType_GermlineWithTumoralSample(t *testing.T) {
 	assert.Equal(t, CaseInvalidSeqExpForType, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Tumor sequencing experiment")
 	assert.Contains(t, record.Errors[0].Message, "should not be sequenced in a germline case")
-	assert.Equal(t, "create_case[0].sequencing_experiments[0]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
 
 func Test_validateSeqExpCaseType_SomaticWithTumoralSample(t *testing.T) {
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "somatic",
 			ProjectCode:     "PROJ-1",
@@ -3538,7 +3538,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -3574,7 +3574,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	assert.Equal(t, CaseInvalidSeqExpForType, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Tumor sequencing experiment")
 	assert.Contains(t, record.Errors[0].Message, "LAB-2 / SAMPLE-2 / ALIQUOT-2")
-	assert.Equal(t, "create_case[0].sequencing_experiments[1]", record.Errors[0].Path)
+	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)
 }
 
 // -----------------------------------------------------------------------------
@@ -3582,7 +3582,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 // -----------------------------------------------------------------------------
 
 func Test_validateTaskTextField_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
 	record.validateTaskTextField("validText123", "test_field", 0, regex, true)
 	assert.Len(t, record.Infos, 0)
@@ -3591,14 +3591,14 @@ func Test_validateTaskTextField_OK(t *testing.T) {
 }
 
 func Test_validateTaskTextField_RegexError(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
 	record.validateTaskTextField("validText123!", "test_field", 0, regex, true)
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field test_field for create_case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
-		Path:    "create_case[0].tasks[0].test_field",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3607,14 +3607,14 @@ func Test_validateTaskTextField_RegexError(t *testing.T) {
 }
 
 func Test_validateTaskTextField_LengthError(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
 	record.validateTaskTextField(strings.Repeat("a", 101), "test_field", 0, regex, true)
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field test_field for create_case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
-		Path:    "create_case[0].tasks[0].test_field",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3626,7 +3626,7 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 // (used for pipeline_version, aliquots, type_code, genome_build, pipeline_name) stays strict: dropping
 // the character constraint on clinical free text must not loosen these technical fields.
 func Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	record.validateTaskTextField("pipeline-v1.2 (été)", "pipeline_version", 0, TextRegExpCompiled, true)
 
 	assert.Len(t, record.Errors, 1)
@@ -3635,7 +3635,7 @@ func Test_validateTaskTextField_PipelineVersionRegex_RejectsAccentedText(t *test
 }
 
 func Test_validateTaskTextField_AliquotRegex_RejectsAccentedText(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	record.validateTaskTextField("ALIQUOT-é(1)", "aliquots", 0, TextRegExpCompiled, true)
 
 	assert.Len(t, record.Errors, 1)
@@ -3644,7 +3644,7 @@ func Test_validateTaskTextField_AliquotRegex_RejectsAccentedText(t *testing.T) {
 }
 
 func Test_validateTaskTypeCode_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	record.TaskTypeCodes = []string{"foo"}
 	record.validateTaskTypeCode("foo", 0)
 	assert.Len(t, record.Infos, 0)
@@ -3653,14 +3653,14 @@ func Test_validateTaskTypeCode_OK(t *testing.T) {
 }
 
 func Test_validateTaskTypeCode_Error(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	record.TaskTypeCodes = []string{"foo", "bar"}
 	record.validateTaskTypeCode("foobar", 0)
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field type_code for create_case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
-		Path:    "create_case[0].tasks[0].type_code",
+		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
+		Path:    "case[0].tasks[0].type_code",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3708,8 +3708,8 @@ func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-002",
-		Message: "Sequencing \"ALIQUOT-1\" is not defined for create_case 0 - task 0.",
-		Path:    "create_case[0].tasks[0]",
+		Message: "Sequencing \"ALIQUOT-1\" is not defined for case 0 - task 0.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3741,7 +3741,7 @@ func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-007",
 		Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
-		Path:    "create_case[0].tasks[0]",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3773,7 +3773,7 @@ func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Ali
 	expected := types.BatchMessage{
 		Code:    "TASK-007",
 		Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
-		Path:    "create_case[0].tasks[0]",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3801,7 +3801,7 @@ func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliq
 	expected := types.BatchMessage{
 		Code:    "TASK-007",
 		Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
-		Path:    "create_case[0].tasks[0]",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3895,8 +3895,8 @@ func Test_validateTaskDocuments_MissingInputDocumentsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-003",
-		Message: "Missing input documents for create_case 0 - task 0 of type family_variant_calling.",
-		Path:    "create_case[0].tasks[0]",
+		Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3930,8 +3930,8 @@ func Test_validateTaskDocuments_MissingOutputDocumentsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-004",
-		Message: "Missing output documents for create_case 0 - task 0 of type family_variant_calling.",
-		Path:    "create_case[0].tasks[0]",
+		Message: "Missing output documents for case 0 - task 0 of type family_variant_calling.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3970,8 +3970,8 @@ func Test_validateTaskDocuments_InputDocumentDoesNotExistsError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-005",
-		Message: "Input document with URL s3://input/notfoo/bar.txt does not exist for create_case 0 - task 0.",
-		Path:    "create_case[0].tasks[0]",
+		Message: "Input document with URL s3://input/notfoo/bar.txt does not exist for case 0 - task 0.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -4013,8 +4013,8 @@ func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-006",
-		Message: "Input document with URL s3://input/foo/bar.txt for create_case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
-		Path:    "create_case[0].tasks[0]",
+		Message: "Input document with URL s3://input/foo/bar.txt for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -4058,7 +4058,7 @@ func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4100,7 +4100,7 @@ func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4142,7 +4142,7 @@ func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 func Test_validateDocumentTextField_OK(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4150,7 +4150,7 @@ func Test_validateDocumentTextField_OK(t *testing.T) {
 	}
 	fieldValue := "test value"
 	fieldName := "test_field"
-	path := "create_case[0].tasks[0].documents[1]"
+	path := "case[0].tasks[0].documents[1]"
 	taskIndex := 0
 	documentIndex := 1
 	regExpStr := "^[a-zA-Z0-9 ]+$"
@@ -4165,7 +4165,7 @@ func Test_validateDocumentTextField_OK(t *testing.T) {
 func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4173,7 +4173,7 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	}
 	fieldValue := "test value %$#%"
 	fieldName := "test_field"
-	path := "create_case[0].tasks[0].documents[1]"
+	path := "case[0].tasks[0].documents[1]"
 	taskIndex := 0
 	documentIndex := 1
 	regExpStr := "^[a-zA-Z0-9 ]+$"
@@ -4185,15 +4185,15 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid field test_field for create_case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
-		Path:    "create_case[0].tasks[0].documents[1]",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
+		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
 
 func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4201,7 +4201,7 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	}
 	fieldValue := strings.Repeat("A", 300)
 	fieldName := "test_field"
-	path := "create_case[0].tasks[0].documents[1]"
+	path := "case[0].tasks[0].documents[1]"
 	taskIndex := 0
 	documentIndex := 1
 	regExpStr := "^[a-zA-Z0-9 ]+$"
@@ -4213,8 +4213,8 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid field test_field for create_case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
-		Path:    "create_case[0].tasks[0].documents[1]",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
+		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
 
@@ -4224,14 +4224,14 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
 		},
 	}
 
-	record.validateDocumentTextField("hash-é(1)", "hash", "create_case[0].tasks[0].documents[1]", 0, 1, TextRegExpCompiled, true)
+	record.validateDocumentTextField("hash-é(1)", "hash", "case[0].tasks[0].documents[1]", 0, 1, TextRegExpCompiled, true)
 
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, "DOCUMENT-001", record.Errors[0].Code)
@@ -4241,7 +4241,7 @@ func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) 
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4279,7 +4279,7 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
 			Index:   0,
@@ -4310,15 +4310,15 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 }
 
 func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantVCF_Error(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "ssnv", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "case[0].tasks[0].output_documents[0]")
 
 	expected := types.BatchMessage{
 		Code:    "DOCUMENT-010",
 		Message: "A document with a data type ssnv and format type vcf cannot be linked to a task of type clinical_report.",
-		Path:    "create_case[0].tasks[0].output_documents[0]",
+		Path:    "case[0].tasks[0].output_documents[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -4327,15 +4327,15 @@ func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantVCF_E
 }
 
 func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithGermlineCNVVCF_Error(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "gcnv", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "case[0].tasks[0].output_documents[0]")
 
 	expected := types.BatchMessage{
 		Code:    "DOCUMENT-010",
 		Message: "A document with a data type gcnv and format type vcf cannot be linked to a task of type clinical_report.",
-		Path:    "create_case[0].tasks[0].output_documents[0]",
+		Path:    "case[0].tasks[0].output_documents[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -4344,10 +4344,10 @@ func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithGermlineCNVV
 }
 
 func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithClinicalReportVCF_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "clinical_report", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "case[0].tasks[0].output_documents[0]")
 
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
@@ -4355,10 +4355,10 @@ func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithClinicalRepo
 }
 
 func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantPDF_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "ssnv", FormatCode: "pdf"}
 
-	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "case[0].tasks[0].output_documents[0]")
 
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
@@ -4367,10 +4367,10 @@ func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithVariantPDF_O
 
 // A non-variant data type is left alone: the ETL only reads snv / ssnv / gcnv out of a VCF.
 func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithNonVariantVCF_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "ssup", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.ClinicalReportTaskTypeCode, &doc, "case[0].tasks[0].output_documents[0]")
 
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
@@ -4378,10 +4378,10 @@ func Test_validateDocumentDataTypeForTaskType_ClinicalReportTaskWithNonVariantVC
 }
 
 func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithVariantVCF_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "snv", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.RadiantGermlineAnnotationTask, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.RadiantGermlineAnnotationTask, &doc, "case[0].tasks[0].output_documents[0]")
 
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
@@ -4389,10 +4389,10 @@ func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithVariantVCF_OK(t 
 }
 
 func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithClinicalReportVCF_OK(t *testing.T) {
-	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType}}
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel}}
 	doc := types.OutputDocumentBatch{DataTypeCode: "clinical_report", FormatCode: "vcf"}
 
-	record.validateDocumentDataTypeForTaskType(types.RadiantSomaticAnnotationTask, &doc, "create_case[0].tasks[0].output_documents[0]")
+	record.validateDocumentDataTypeForTaskType(types.RadiantSomaticAnnotationTask, &doc, "case[0].tasks[0].output_documents[0]")
 
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
@@ -4414,7 +4414,7 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4458,7 +4458,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4483,7 +4483,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-002",
-			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for create_case 0 - task 0 - output document 1.",
+			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4508,7 +4508,7 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4533,7 +4533,7 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-009",
-			Message: "Document name another_name.txt is not consistent with URL s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document name another_name.txt is not consistent with URL s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4558,7 +4558,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4583,7 +4583,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-006",
-			Message: "Document size does not match the actual size of the document s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document size does not match the actual size of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4608,7 +4608,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4633,7 +4633,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-007",
-			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for create_case 0 - task 0 - output document 1.",
+			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4658,7 +4658,7 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType,
+			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
 				Index:   0,
@@ -4820,24 +4820,24 @@ func Test_validateObservationsCategorical_ExamCode_InterpretationStillRequired(t
 
 func examCodeRecord() CaseValidationRecord {
 	return CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: types.CreateCaseBatchType, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		ExamCodes:            []string{"eeg", "emg", "other"},
 	}
 }
 
 func Test_validateExamCode_RequiredWhenObservationIsAnExam(t *testing.T) {
 	record := examCodeRecord()
-	record.validateExamCode(types.ObsCodeExam, "", "create_case[0].patients[0].observations_text[0]", "res")
+	record.validateExamCode(types.ObsCodeExam, "", "case[0].patients[0].observations_text[0]", "res")
 
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "exam code")
-	assert.Equal(t, "create_case[0].patients[0].observations_text[0].exam_code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0].exam_code", record.Errors[0].Path)
 }
 
 func Test_validateExamCode_RejectsCodeOutsideTheCatalog(t *testing.T) {
 	record := examCodeRecord()
-	record.validateExamCode(types.ObsCodeExam, "irmc", "create_case[0].patients[0].observations_text[0]", "res")
+	record.validateExamCode(types.ObsCodeExam, "irmc", "case[0].patients[0].observations_text[0]", "res")
 
 	assert.Len(t, record.Errors, 1)
 	assert.Contains(t, record.Errors[0].Message, `"irmc" is not a valid exam code`)
@@ -4845,21 +4845,21 @@ func Test_validateExamCode_RejectsCodeOutsideTheCatalog(t *testing.T) {
 
 func Test_validateExamCode_AcceptsCodeFromTheCatalog(t *testing.T) {
 	record := examCodeRecord()
-	record.validateExamCode(types.ObsCodeExam, "eeg", "create_case[0].patients[0].observations_text[0]", "res")
+	record.validateExamCode(types.ObsCodeExam, "eeg", "case[0].patients[0].observations_text[0]", "res")
 
 	assert.Empty(t, record.Errors)
 }
 
 func Test_validateExamCode_OptionalOnANonExamObservation(t *testing.T) {
 	record := examCodeRecord()
-	record.validateExamCode(types.ObsCodePhenotype, "", "create_case[0].patients[0].observations_categorical[0]", "res")
+	record.validateExamCode(types.ObsCodePhenotype, "", "case[0].patients[0].observations_categorical[0]", "res")
 
 	assert.Empty(t, record.Errors)
 }
 
 func Test_validateExamCode_RejectsUnknownCodeOnANonExamObservation(t *testing.T) {
 	record := examCodeRecord()
-	record.validateExamCode(types.ObsCodePhenotype, "irmc", "create_case[0].patients[0].observations_categorical[0]", "res")
+	record.validateExamCode(types.ObsCodePhenotype, "irmc", "case[0].patients[0].observations_categorical[0]", "res")
 
 	assert.Len(t, record.Errors, 1)
 }

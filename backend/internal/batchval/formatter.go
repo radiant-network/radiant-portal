@@ -44,7 +44,23 @@ func FormatFieldTooLong(resourceType, fieldName string, maxLength int, ids []str
 
 func FormatDuplicateInBatch(resourceType string, ids []string) string {
 	formatResourceIds := FormatIds(ids)
-	capitalizedResourceType := strings.ToUpper(string(resourceType[0])) + resourceType[1:]
-	message := fmt.Sprintf("%s %s appears multiple times in the batch.", capitalizedResourceType, formatResourceIds)
+	resourceLabel := FormatResourceLabel(resourceType)
+	message := fmt.Sprintf("%s %s appears multiple times in the batch.", resourceLabel, formatResourceIds)
 	return message
+}
+
+// FormatResourceLabel turns a batch resource type ("create_patient") into the entity label used in
+// user facing messages ("Patient"), so create/update/patch flows report the same wording.
+func FormatResourceLabel(resourceType string) string {
+	if resourceType == "" {
+		return ""
+	}
+	label := resourceType
+	for _, prefix := range []string{"create_", "update_", "patch_"} {
+		if after, found := strings.CutPrefix(label, prefix); found {
+			label = after
+			break
+		}
+	}
+	return strings.ToUpper(label[:1]) + label[1:]
 }

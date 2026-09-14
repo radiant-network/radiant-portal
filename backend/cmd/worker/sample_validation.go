@@ -41,6 +41,8 @@ type SampleKey struct {
 	SubmitterSampleId string
 }
 
+const sampleResourceLabel = "sample"
+
 type SampleValidationRecord struct {
 	batchval.BaseValidationRecord
 	Sample           types.SampleBatch
@@ -372,7 +374,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 				Context:      bv,
 				Cache:        cache,
 				Index:        index,
-				ResourceType: types.CreateSampleBatchType,
+				ResourceType: sampleResourceLabel,
 			},
 			Sample: sample,
 		}
@@ -559,7 +561,7 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 				Context:      bv,
 				Cache:        cache,
 				Index:        index,
-				ResourceType: types.UpdateSampleBatchType,
+				ResourceType: sampleResourceLabel,
 			},
 			Sample: sample,
 		}
