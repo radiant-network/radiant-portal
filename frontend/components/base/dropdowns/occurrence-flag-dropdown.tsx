@@ -128,11 +128,15 @@ function OccurrenceFlagDropdown({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex" tabIndex={0}>
-            <Button {...props} variant={variant} iconOnly disabled className="disabled:opacity-100">
-              {flagIcon}
-            </Button>
-          </span>
+          <Button
+            {...props}
+            variant={variant}
+            iconOnly
+            aria-disabled
+            className={cn('cursor-default hover:bg-transparent', props.className)}
+          >
+            {flagIcon}
+          </Button>
         </TooltipTrigger>
         <TooltipContent>
           {selectedFlag ? t('occurrence_flag.tooltip.flagged') : t('occurrence_flag.tooltip.unflagged')}

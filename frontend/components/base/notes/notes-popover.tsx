@@ -31,11 +31,14 @@ function NotesPopover({ hasNotes, loading = false, canComment = true, ...props }
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex" tabIndex={0}>
-              <Button className="relative size-6 disabled:opacity-100" iconOnly variant="ghost" disabled>
-                <MessageSquare className="text-muted-foreground/40" size={16} />
-              </Button>
-            </span>
+            <Button
+              className="relative size-6 cursor-default hover:bg-transparent"
+              iconOnly
+              variant="ghost"
+              aria-disabled
+            >
+              <MessageSquare className="text-muted-foreground/40" size={16} />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>{t('notes.variant.tooltip.none')}</TooltipContent>
         </Tooltip>

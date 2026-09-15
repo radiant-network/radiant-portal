@@ -61,11 +61,9 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex" tabIndex={0}>
-            <Button variant="outline" size="sm" disabled className="disabled:opacity-100">
-              <MessageSquare className="h-4 w-4" />
-            </Button>
-          </span>
+          <Button variant="outline" size="sm" aria-disabled className="cursor-default hover:bg-background">
+            <MessageSquare className="h-4 w-4" />
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t('notes.variant.tooltip.none')}</TooltipContent>
       </Tooltip>
