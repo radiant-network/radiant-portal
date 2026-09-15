@@ -32,12 +32,14 @@ func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *g
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", types.ThousandGenomesTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
-// occurrenceQuery is what the list and count builders need from a query: the filter tree, plus
-// whether to keep only the occurrences carrying a note. Satisfied by types.OccurrenceListQuery and
-// types.OccurrenceCountQuery; a plain types.ListQuery or types.CountQuery does not qualify.
+// occurrenceQuery is what the list and count builders need from a query: the filter tree, plus the
+// annotation filters. Satisfied by types.OccurrenceListQuery and types.OccurrenceCountQuery; a plain
+// types.ListQuery or types.CountQuery does not qualify.
 type occurrenceQuery interface {
 	types.Query
 	WithNote() bool
+	WithFlag() []types.OccurrenceFlagType
+	WithInterpretation() bool
 }
 
 func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, taskId int, userQuery occurrenceQuery, db *gorm.DB) (*gorm.DB, int, error) {
@@ -51,6 +53,14 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, tas
 
 		if userQuery.WithNote() {
 			tx = keepOccurrencesWithNote(snvTable, "locus_id", caseId, seqId, tx)
+		}
+
+		if len(userQuery.WithFlag()) > 0 {
+			tx = keepOccurrencesWithFlag(snvTable, "locus_id", userQuery.WithFlag(), caseId, seqId, tx)
+		}
+
+		if userQuery.WithInterpretation() {
+			tx = keepOccurrencesWithInterpretation(snvTable, caseId, seqId, tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.TopmedTable) {
