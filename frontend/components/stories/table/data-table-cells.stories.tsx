@@ -188,12 +188,16 @@ export const ApplicationFeatureCell: Story = {
   },
   render: args => (
     <StorySection title="Application feature cell">
-      <DataTable
-        {...args}
-        columns={applicationFirstSetCellColumns}
-        data={applicationCellData}
-        defaultColumnSettings={defaultColumnSettings}
-      />
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ width: 2000, paddingRight: 16, boxSizing: 'content-box' }}>
+          <DataTable
+            {...args}
+            columns={applicationFirstSetCellColumns}
+            data={applicationCellData}
+            defaultColumnSettings={defaultColumnSettings}
+          />
+        </div>
+      </div>
     </StorySection>
   ),
 };
