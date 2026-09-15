@@ -2,7 +2,6 @@
 import { createRequire } from "node:module";
 import type { StorybookConfig } from "@storybook/react-vite";
 import { mergeConfig } from "vite";
-import tsConfigPaths from "vite-tsconfig-paths";
 
 import { join, dirname } from "path";
 
@@ -35,7 +34,7 @@ const config: StorybookConfig = {
   },
   viteFinal: async (config) => {
     return mergeConfig(config, {
-      plugins: [tsConfigPaths()],
+      resolve: { tsconfigPaths: true },
       define: {
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'development'),
       },

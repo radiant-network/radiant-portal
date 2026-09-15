@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 React 19 + React Router 7 monorepo for the Radiant Portal — a medical/genomic data platform. Supports multiple portal builds (radiant, kf) from a single codebase via compile-time configuration.
 
-Node.js > 20.18.0 required.
+Node.js `^20.19.0 || >=22.12.0` required (Vite 8's floor). The repo's `.nvmrc` pins 22.
 
 ## Common Commands
 
