@@ -1514,7 +1514,8 @@
     "interpretation": {
       "tooltip": {
         "add": "Add variant interpretation",
-        "view": "View interpretation"
+        "view": "View interpretation",
+        "none": "No interpretation for this variant"
       },
       "classifications": {
         "all_classifications": "All Classifications",
@@ -2303,7 +2304,11 @@
     "flag": "Flag",
     "pin": "Pin",
     "star": "Star",
-    "error": "Update failed. Please try again."
+    "error": "Update failed. Please try again.",
+    "tooltip": {
+      "flagged": "Flagged variant",
+      "unflagged": "Unflagged variant"
+    }
   },
   "notes": {
     "variant": {
@@ -2320,7 +2325,8 @@
       },
       "tooltip": {
         "add": "Add a comment",
-        "view": "View comments"
+        "view": "View comments",
+        "none": "No comments for this variant"
       }
     }
   },

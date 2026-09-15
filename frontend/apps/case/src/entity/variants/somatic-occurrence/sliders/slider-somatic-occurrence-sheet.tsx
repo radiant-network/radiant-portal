@@ -31,6 +31,7 @@ import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import SliderVariantsOnboardingWizard from '../../onboardings/slider-variant-onboarding';
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
 type SomaticOccurrenceSheetProps = {
@@ -130,6 +131,7 @@ export function SomaticOccurrenceSheetContent({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
+  const { canFlag, canComment, canInterpret } = useCaseVariantPermissions();
 
   const { list } = useDataTable();
 
@@ -212,6 +214,7 @@ export function SomaticOccurrenceSheetContent({
               seqId={occurrence.seq_id}
               occurrenceId={occurrence.locus_id}
               flag={occurrence.flag_type}
+              canFlag={canFlag}
             />
             <NotesProvider value={{ onChangeCallback: () => list?.mutate }}>
               <NotesSliderSheet
@@ -219,9 +222,10 @@ export function SomaticOccurrenceSheetContent({
                 seqId={occurrence.seq_id}
                 taskId={occurrence.task_id}
                 occurrenceId={occurrence.locus_id}
+                canComment={canComment}
               />
             </NotesProvider>
-            {!occurrence.has_interpretation && (
+            {!occurrence.has_interpretation && canInterpret && (
               <SomaticInterpretationDialog
                 isCreation
                 locusId={occurrence.locus_id}
@@ -252,19 +256,21 @@ export function SomaticOccurrenceSheetContent({
           isCanonical={occurrence?.is_canonical}
           transcriptId={expandResult.data?.transcript_id}
           actions={
-            <SomaticInterpretationDialog
-              locusId={occurrence.locus_id}
-              taskId={occurrence.task_id}
-              transcriptId={expandResult.data.transcript_id}
-              handleSaveCallback={handleInterpretationSaveCallback}
-              patientId={patient?.patient_id}
-              renderTrigger={handleOpen => (
-                <Button size="sm" onClick={handleOpen}>
-                  <SquarePen />
-                  {t('common.edit')}
-                </Button>
-              )}
-            />
+            canInterpret ? (
+              <SomaticInterpretationDialog
+                locusId={occurrence.locus_id}
+                taskId={occurrence.task_id}
+                transcriptId={expandResult.data.transcript_id}
+                handleSaveCallback={handleInterpretationSaveCallback}
+                patientId={patient?.patient_id}
+                renderTrigger={handleOpen => (
+                  <Button size="sm" onClick={handleOpen}>
+                    <SquarePen />
+                    {t('common.edit')}
+                  </Button>
+                )}
+              />
+            ) : null
           }
         />
       )}

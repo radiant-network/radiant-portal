@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 
-import type { Term, VepImpact } from '@/api/api';
+import type { CaseEntity, Term, VepImpact } from '@/api/api';
+import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
@@ -47,6 +49,7 @@ import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createColumnSettings } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { TenantContext } from '@/components/hooks/use-tenant';
 
 const observed_phenotypes = [
   {
@@ -858,6 +861,34 @@ export const thirdSetCellData = [
  *   - CNVNameCell (Variant-Entity/CNV)
  *   - ClingenCell (Variant-Entity/CNV)
  */
+const STORYBOOK_TENANT = 'radiant';
+const STORYBOOK_DIAGNOSIS_LAB = 'CHUSJ';
+
+/**
+ * Feeds the real permission path — tenant membership, `orgs_by_action` and the case's diagnosis
+ * lab — so both states of the cell can be shown side by side.
+ */
+function WithInterpretPermission({ granted, children }: { granted: boolean; children: ReactNode }) {
+  return (
+    <TenantContext.Provider
+      value={{
+        tenant: STORYBOOK_TENANT,
+        tenants: [
+          {
+            code: STORYBOOK_TENANT,
+            orgs_by_action: granted ? { can_interpret_variant: [STORYBOOK_DIAGNOSIS_LAB] } : {},
+          },
+        ],
+        setTenant: async () => {},
+      }}
+    >
+      <CaseEntityContext.Provider value={{ diagnosis_lab_code: STORYBOOK_DIAGNOSIS_LAB } as CaseEntity}>
+        {children}
+      </CaseEntityContext.Provider>
+    </TenantContext.Provider>
+  );
+}
+
 export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'hgvsg',
@@ -866,21 +897,44 @@ export const applicationFirstSetCellColumns = [
       return <HgvsgCell locusId={row.locus_id} hgvsg={row.hgvsg} />;
     },
     header: 'HgvsgCell',
+    size: 150,
   }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'clinical_interpretation',
     cell: info => (
-      <InterpretationCell
-        locusId={info.getValue().locus_id ?? ''}
-        transcriptId={info.getValue().transcript_id}
-        hasInterpretation={info.getValue().has_interpretation ?? false}
-        patientId={info.getValue().patient_id}
-        taskId={info.getValue().task_id ?? 1}
-        InterpretationDialog={GermlineInterpretationDialog}
-      />
+      <WithInterpretPermission granted>
+        <InterpretationCell
+          locusId={info.getValue().locus_id ?? ''}
+          transcriptId={info.getValue().transcript_id}
+          hasInterpretation={info.getValue().has_interpretation ?? false}
+          patientId={info.getValue().patient_id}
+          taskId={info.getValue().task_id ?? 1}
+          InterpretationDialog={GermlineInterpretationDialog}
+        />
+      </WithInterpretPermission>
     ),
     header: 'InterpretationCell (Variant-Entity)',
-    size: 40,
+    size: 180,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'clinical_interpretation_read_only',
+    cell: info => (
+      <WithInterpretPermission granted={false}>
+        <InterpretationCell
+          locusId={info.getValue().locus_id ?? ''}
+          transcriptId={info.getValue().transcript_id}
+          hasInterpretation={info.getValue().has_interpretation ?? false}
+          patientId={info.getValue().patient_id}
+          taskId={info.getValue().task_id ?? 1}
+          InterpretationDialog={GermlineInterpretationDialog}
+        />
+      </WithInterpretPermission>
+    ),
+    header: 'InterpretationCell (no permission)',
+    size: 170,
     enablePinning: false,
     enableResizing: false,
     enableSorting: false,
@@ -889,7 +943,7 @@ export const applicationFirstSetCellColumns = [
     id: 'cnv_name',
     cell: info => <CNVNameCell occurrence={info.getValue() as any} />,
     header: 'CNVNameCell(Variant-Tab/CNV)',
-    size: 40,
+    size: 150,
     enablePinning: false,
     enableResizing: false,
     enableSorting: false,
@@ -898,7 +952,7 @@ export const applicationFirstSetCellColumns = [
     id: 'clingen',
     cell: info => <ClingenCell occurrence={info.getValue() as any} />,
     header: 'Clingen (Variant-Tab/CNV)',
-    size: 40,
+    size: 150,
     enablePinning: false,
     enableResizing: false,
     enableSorting: false,
@@ -907,7 +961,7 @@ export const applicationFirstSetCellColumns = [
     id: 'overlap_type_gene_cell',
     cell: info => <OverlapTypeGeneCell type={info.getValue()} />,
     header: 'Clingen (Variant-Tab/CNV)',
-    size: 40,
+    size: 150,
     enablePinning: false,
     enableResizing: false,
     enableSorting: false,
@@ -920,7 +974,7 @@ export const applicationFirstSetCellColumns = [
       </OverlappingGeneLinkCell>
     ),
     header: 'Clingen (Variant-Tab/CNV)',
-    size: 40,
+    size: 150,
     enablePinning: false,
     enableResizing: false,
     enableSorting: false,
@@ -929,8 +983,8 @@ export const applicationFirstSetCellColumns = [
     id: 'case-actions-menu',
     cell: CaseActionsMenuCell,
     header: 'CaseActionsMenuCell (Case-Exploration)',
-    size: 64,
-    maxSize: 64,
+    size: 80,
+    maxSize: 80,
     enableResizing: false,
     enablePinning: false,
   },
@@ -938,8 +992,8 @@ export const applicationFirstSetCellColumns = [
     id: 'occurrence-actions-menu',
     cell: OccurrenceActionsMenu,
     header: 'OccurrenceActionsMenu (Case-Entity#variant)',
-    size: 64,
-    maxSize: 64,
+    size: 80,
+    maxSize: 80,
     enableResizing: false,
     enablePinning: false,
   },

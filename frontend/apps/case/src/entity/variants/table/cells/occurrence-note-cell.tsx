@@ -10,6 +10,8 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { occurencesNotesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
+
 type VariantNoteCellProps = {
   seqId: number;
   taskId: number;
@@ -32,6 +34,7 @@ function OccurrenceNoteCell({ seqId, taskId, occurrenceId, hasNote }: VariantNot
   const caseId = useCaseIdFromParam();
   const { tenant } = useTenant();
   const { list } = useDataTable();
+  const { canComment } = useCaseVariantPermissions();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { trigger } = useSWRMutation<Count, Error, string, GetOccurrenceNoteInput>(
     `list/notes/cout/${caseId}/${seqId}/${taskId}/${occurrenceId}`,
@@ -59,6 +62,7 @@ function OccurrenceNoteCell({ seqId, taskId, occurrenceId, hasNote }: VariantNot
         occurrenceId={occurrenceId}
         hasNotes={hasNote}
         loading={isLoading}
+        canComment={canComment}
       />
     </NotesProvider>
   );
