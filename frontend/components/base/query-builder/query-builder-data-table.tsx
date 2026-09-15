@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { PaginationState } from '@tanstack/react-table';
+import type { PaginationState, RowData } from '@tanstack/react-table';
 import useSWR from 'swr';
 
 import type { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
@@ -10,7 +10,10 @@ import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
-type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
+type QueryBuilderDataTableProps<T extends RowData> = Omit<
+  TableProps<T>,
+  'loadingStates' | 'data' | 'pagination' | 'serverOptions'
+> & {
   defaultPageSize?: number;
   swrId?: string | number;
   paginationType?: 'server' | 'hidden';
@@ -20,7 +23,7 @@ type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({
+function QueryBuilderDataTable<T extends RowData>({
   defaultPageSize = 10,
   swrId,
   paginationType = 'server',

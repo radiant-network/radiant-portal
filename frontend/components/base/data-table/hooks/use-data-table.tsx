@@ -5,7 +5,7 @@ import type { SWRResponse } from 'swr';
 type IDataTableContext = {
   list?: SWRResponse;
   count?: SWRResponse;
-  rowSelection?: Record<string, boolean>;
+  rowSelection?: Record<string, true>;
 };
 
 export const DataTableContext = createContext<IDataTableContext>({});
@@ -13,7 +13,7 @@ export const DataTableContext = createContext<IDataTableContext>({});
 type ActionType = {
   type: 'SET_ROW_SELECTION';
   payload: {
-    rowSelection: Record<string, boolean>;
+    rowSelection: Record<string, true>;
   };
 };
 type DataTableDispatch = Dispatch<ActionType>;

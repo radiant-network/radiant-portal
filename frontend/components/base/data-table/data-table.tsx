@@ -2,26 +2,41 @@ import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } fr
 import {
   type Column,
   type ColumnDef,
+  columnFilteringFeature,
+  columnGroupingFeature,
+  columnOrderingFeature,
   type ColumnOrderState,
+  columnPinningFeature,
   type ColumnPinningPosition,
   type ColumnPinningState,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFilteredRowModel,
+  createGroupedRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  createTableHook,
   type ExpandedState,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFilteredRowModel,
-  getGroupedRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   type GroupingState,
   type Header,
   type OnChangeFn,
   type PaginationState,
+  type ReactTable,
   type Row,
+  rowAggregationFeature,
+  type RowData,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowPinningFeature,
   type RowPinningState,
+  rowSelectionFeature,
+  type RowSelectionState,
+  rowSortingFeature,
   type SortingState,
-  type Table as TableType,
-  useReactTable,
+  tableFeatures,
 } from '@tanstack/react-table';
 import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
@@ -77,9 +92,59 @@ export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
 
 /**
+ * Tanstack v9 feature registry shared by every data table in the app.
+ * Kept here rather than in a separate module so callers only need to reach
+ * into `@/components/base/data-table/data-table` for both the component and
+ * its helpers.
+ */
+export const features = tableFeatures({
+  columnFilteringFeature,
+  columnGroupingFeature,
+  columnOrderingFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowAggregationFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowPinningFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  expandedRowModel: createExpandedRowModel(),
+  groupedRowModel: createGroupedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+});
+
+export type AppFeatures = typeof features;
+
+export const { createAppColumnHelper, useAppTable, useTableContext } = createTableHook({
+  features,
+});
+
+// Re-export common tanstack v9 types so apps (which do not depend on
+// @tanstack/react-table directly) can reach them through this module.
+export type {
+  CellContext,
+  ColumnPinningPosition,
+  Header,
+  HeaderContext,
+  OnChangeFn,
+  PaginationState,
+  Row,
+  RowData,
+  RowSelectionState,
+  SortDirection,
+  Table,
+  TableState,
+} from '@tanstack/react-table';
+
+/**
  * Interface and types
  */
-export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id'> {
+export interface TableColumnDef<TData extends RowData, TValue> extends Omit<ColumnDef<AppFeatures, TData, TValue>, 'id'> {
   id: string;
   subComponent?: string;
 }
@@ -102,7 +167,7 @@ export type LoadingStates = {
   list?: boolean;
 };
 
-export type TableProps<TData> = {
+export type TableProps<TData extends RowData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
   className?: string;
@@ -116,8 +181,8 @@ export type TableProps<TData> = {
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
-  rowSelection?: Record<string, boolean>;
-  onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   pagination: PaginationSettings;
   serverOptions?: ServerOptions;
   extras?: React.ReactElement[];
@@ -192,15 +257,15 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
  * @param settings
  */
 function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningState {
-  const result: { left: string[]; right: string[] } = {
-    left: [],
-    right: [],
+  const result: ColumnPinningState = {
+    start: [],
+    end: [],
   };
   settings.forEach(setting => {
-    if (setting.pinningPosition == 'left') {
-      result.left.push(setting.id);
-    } else if (setting.pinningPosition == 'right') {
-      result.right.push(setting.id);
+    if (setting.pinningPosition == 'start') {
+      result.start.push(setting.id);
+    } else if (setting.pinningPosition == 'end') {
+      result.end.push(setting.id);
     }
   });
   return result;
@@ -240,33 +305,33 @@ function getPageCount(pagination: PaginationState, total: number) {
  * That why we must determ in witch header the pinned column is displayed to applied the correct css class
  * For that, we use subheaders property.
  */
-function getColumnHeaderPinningExtraCN(header: Header<any, any>): string {
+function getColumnHeaderPinningExtraCN<TData extends RowData>(header: Header<AppFeatures, TData, unknown>): string {
   const column = header.column;
   const isPinned = column.getIsPinned();
   if (!isPinned) return '';
 
-  const isLeftPinned = isPinned === 'left';
-  const isRightPinned = isPinned === 'right';
+  const isStartPinned = isPinned === 'start';
+  const isEndPinned = isPinned === 'end';
 
   // Column is a common header, not a headerGroup
   if (header.subHeaders.length === 0) {
     return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
-      'border-r-[3px]': isLeftPinned && column.getIsLastColumn('left'),
-      'border-l-[3px]': isRightPinned && column.getIsFirstColumn('right'),
+      'border-r-[3px]': isStartPinned && column.getIsLastColumn('start'),
+      'border-l-[3px]': isEndPinned && column.getIsFirstColumn('end'),
     });
   }
 
-  let isLastLeftPinnedColumn = false;
-  let isFirstRightPinnedColumn = false;
+  let isLastStartPinnedColumn = false;
+  let isFirstEndPinnedColumn = false;
   const targetPinnedColumn = column.getFlatColumns().find(c => {
     if (c.getIsPinned()) {
-      if (isLeftPinned) {
-        isLastLeftPinnedColumn = true;
-        return c.getIsLastColumn('left');
+      if (isStartPinned) {
+        isLastStartPinnedColumn = true;
+        return c.getIsLastColumn('start');
       }
-      if (isRightPinned) {
-        isFirstRightPinnedColumn = true;
-        return c.getIsFirstColumn('right');
+      if (isEndPinned) {
+        isFirstEndPinnedColumn = true;
+        return c.getIsFirstColumn('end');
       }
     }
     return false;
@@ -277,33 +342,37 @@ function getColumnHeaderPinningExtraCN(header: Header<any, any>): string {
   }
 
   return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
-    'border-r-[3px]': isLastLeftPinnedColumn,
-    'border-l-[3px]': isFirstRightPinnedColumn,
+    'border-r-[3px]': isLastStartPinnedColumn,
+    'border-l-[3px]': isFirstEndPinnedColumn,
   });
 }
 
 /**
- * Return the needed style to pin a column. Must be applied to <TableHead />
+ * Return the needed style to pin a column. Must be applied to <Ta
+  bleHead />,
+
  * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
  */
-function getColumnHeaderPinningExtraStyles(header: Header<any, any>): CSSProperties {
+function getColumnHeaderPinningExtraStyles<TData extends RowData>(
+  header: Header<AppFeatures, TData, unknown>,
+): CSSProperties {
   const column = header.column;
   const isPinned = column.getIsPinned();
 
-  const isLeftPinned = isPinned === 'left';
-  const isRightPinned = isPinned === 'right';
+  const isStartPinned = isPinned === 'start';
+  const isEndPinned = isPinned === 'end';
 
   if (header.subHeaders.length > 0) {
     return {
-      left: isLeftPinned ? `0px` : undefined,
-      right: isRightPinned ? `0px` : undefined,
+      left: isStartPinned ? `0px` : undefined,
+      right: isEndPinned ? `0px` : undefined,
       width: header.getSize(),
     };
   }
 
   return {
-    left: isLeftPinned ? `${column.getStart('left')}px` : undefined,
-    right: isRightPinned ? `${column.getAfter('right')}px` : undefined,
+    left: isStartPinned ? `${column.getStart('start')}px` : undefined,
+    right: isEndPinned ? `${column.getAfter('end')}px` : undefined,
     width: header.getSize(),
   };
 }
@@ -311,7 +380,9 @@ function getColumnHeaderPinningExtraStyles(header: Header<any, any>): CSSPropert
 /**
  * Return the data-cy attribute for a pinned column header, undefined otherwise.
  */
-function getColumnHeaderPinningDataCy(header: Header<any, any>): string | undefined {
+function getColumnHeaderPinningDataCy<TData extends RowData>(
+  header: Header<AppFeatures, TData, unknown>,
+): string | undefined {
   const isPinned = header.column.getIsPinned();
   return isPinned ? `pinned-${isPinned}` : undefined;
 }
@@ -319,16 +390,16 @@ function getColumnHeaderPinningDataCy(header: Header<any, any>): string | undefi
 /**
  * <TableCell /> specific function to return the needed tailwind class when pinned.
  */
-function getColumnRowPinningExtraCN(column: Column<any>): string {
+function getColumnRowPinningExtraCN<TData extends RowData>(column: Column<AppFeatures, TData>): string {
   const isPinned = column.getIsPinned();
   if (!isPinned) return '';
 
-  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
-  const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+  const isLastStartPinnedColumn = isPinned === 'start' && column.getIsLastColumn('start');
+  const isFirstEndPinnedColumn = isPinned === 'end' && column.getIsFirstColumn('end');
 
   return cn('sticky z-10 group-data-[state=selected]:bg-table-active bg-background', {
-    'border-r-[3px]': isLastLeftPinnedColumn,
-    'border-l-[3px]': isFirstRightPinnedColumn,
+    'border-r-[3px]': isLastStartPinnedColumn,
+    'border-l-[3px]': isFirstEndPinnedColumn,
   });
 }
 
@@ -336,12 +407,12 @@ function getColumnRowPinningExtraCN(column: Column<any>): string {
  * Return the needed style to pin a column. Must be applied to <TableCell />
  * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
  */
-function getColumnRowPinningExtraStyles(column: Column<any>): CSSProperties {
+function getColumnRowPinningExtraStyles<TData extends RowData>(column: Column<AppFeatures, TData>): CSSProperties {
   const isPinned = column.getIsPinned();
 
   return {
-    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
-    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    left: isPinned === 'start' ? `${column.getStart('start')}px` : undefined,
+    right: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
     width: column.getSize(),
   };
 }
@@ -349,7 +420,7 @@ function getColumnRowPinningExtraStyles(column: Column<any>): CSSProperties {
 /**
  * Return the needed tailwind class to pin a row. Must be applied to <TableRow />
  */
-function getRowPinningExtraCN(row: Row<any>): string {
+function getRowPinningExtraCN<TData extends RowData>(row: Row<AppFeatures, TData>): string {
   return cn({ 'sticky z-20 bg-muted': row.getIsPinned() });
 }
 
@@ -357,7 +428,7 @@ function getRowPinningExtraCN(row: Row<any>): string {
  * Return the needed style to pin a row. Must be applied to <TableRow />
  * @see https://tanstack.com/table/v8/docs/framework/react/examples/row-pinning
  */
-function getRowPinningExtraStyles(row: Row<any>): CSSProperties {
+function getRowPinningExtraStyles<TData extends RowData>(row: Row<AppFeatures, TData>): CSSProperties {
   const isPinned = row.getIsPinned();
   if (!isPinned) return {};
 
@@ -369,7 +440,7 @@ function getRowPinningExtraStyles(row: Row<any>): CSSProperties {
 /**
  * Return the needed tailwind class to pin a row. Must be applied to <TableCell />
  */
-function getRowPinningCellExtraCN(row: Row<any>): string {
+function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, TData>): string {
   return cn({ 'bg-muted': row.getIsPinned() });
 }
 
@@ -377,7 +448,10 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
  * Reusable flex header function
  * Used to render header group and header
  */
-function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
+function getHeaderFlexRender<TData extends RowData>(
+  table: ReactTable<AppFeatures, TData>,
+  header: Header<AppFeatures, TData, unknown>,
+) {
   if (header.isPlaceholder) return null;
   return (
     <>
@@ -414,14 +488,14 @@ function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
  * Reusable flex row function
  * Used to render top, centered or bottom rows
  */
-function getRowFlexRender<T>({
+function getRowFlexRender<T extends RowData>({
   subComponent,
   containerWidth,
 }: {
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return (row: Row<any>) => (
+  return (row: Row<AppFeatures, T>) => (
     <Fragment key={row.id}>
       <TableRow
         key={`row-${row.id}`}
@@ -594,7 +668,7 @@ function getRowFlexRender<T>({
  * }
  */
 // eslint-disable-next-line complexity
-function DataTable<T>({
+function DataTable<T extends RowData>({
   id,
   columns,
   className,
@@ -653,7 +727,7 @@ function DataTable<T>({
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
     })) as SortingState) || [],
   );
-  const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
+  const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
   const tableState = useTableState({
@@ -688,23 +762,18 @@ function DataTable<T>({
   const lastFilteredAdditionalFields = useRef<string[]>([]);
 
   // Initialize tanstack table
-  const table = useReactTable({
+  const table = useAppTable({
     columns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     data,
     enableColumnResizing: true,
     enableRowSelection: true,
-    getSortedRowModel: serverOptions?.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getGroupedRowModel: getGroupedRowModel(),
-    getPaginationRowModel: pagination.type === 'hidden' ? undefined : getPaginationRowModel(),
     getRowCanExpand: () => true,
     isMultiSortEvent: () => true,
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
     manualPagination: pagination.type === 'server',
+    manualSorting: serverOptions?.onSortingChange !== undefined, // client-side sorting when no server callback
     onColumnPinningChange: setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
@@ -795,7 +864,7 @@ function DataTable<T>({
    * Update custom Sizing
    */
   useTableSizingEffect({
-    state: table.getState(),
+    state: table.state,
     columns,
     setColumnSizing,
   });
@@ -914,8 +983,8 @@ function DataTable<T>({
           <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
             <TableIndexResult
               loading={loadingStates?.total}
-              pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
-              pageSize={table.getState().pagination?.pageSize ?? 20}
+              pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+              pageSize={table.state.pagination?.pageSize ?? 20}
               total={total}
             />
           </div>
@@ -1071,8 +1140,8 @@ function DataTable<T>({
             {tableIndexResultPosition === 'bottom' && (
               <TableIndexResult
                 loading={loadingStates?.total}
-                pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.getState().pagination?.pageSize ?? 20}
+                pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                pageSize={table.state.pagination?.pageSize ?? 20}
                 total={total}
               />
             )}
@@ -1081,7 +1150,7 @@ function DataTable<T>({
             <div>
               {/* PageSize select */}
               <PaginationPageSize
-                pageSize={table.getState().pagination?.pageSize ?? 20}
+                pageSize={table.state.pagination?.pageSize ?? 20}
                 onPageSizeChange={pageSize => {
                   table.setPageSize(pageSize);
                 }}

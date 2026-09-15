@@ -1,14 +1,16 @@
-import type { Header } from '@tanstack/react-table';
+import type { Header, RowData } from '@tanstack/react-table';
+
+import type { AppFeatures } from '../data-table';
 
 /**
  * Works like getFlatColumns of stantacks.
  *
  * Return all subheaders of a header
  */
-export function getFlatSubheaders(header: Header<any, any>) {
-  const result: Header<any, any>[] = [];
+export function getFlatSubheaders<TData extends RowData>(header: Header<AppFeatures, TData, unknown>) {
+  const result: Header<AppFeatures, TData, unknown>[] = [];
 
-  const generateFlatmap = (h: Header<any, any>) => {
+  const generateFlatmap = (h: Header<AppFeatures, TData, unknown>) => {
     for (const subheader of h.subHeaders) {
       result.push(subheader);
       generateFlatmap(subheader);

@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 import { CopyIcon, EllipsisVerticalIcon, EyeIcon, LockIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 
@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { ScopeBadges } from './role-scope-badges';
 import { ADMIN_ROLE_CODE } from './roles-utils';
 
-const columnHelper = createColumnHelper<RoleResult>();
+const columnHelper = createAppColumnHelper<RoleResult>();
 
 type RolesColumnsActions = {
   onViewPermissions: (role: RoleResult) => void;

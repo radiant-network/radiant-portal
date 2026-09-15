@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
@@ -22,7 +22,7 @@ import {
 } from './cells-mock';
 import { data, type TableMockData } from './table-mock';
 
-const columnHelper = createColumnHelper<TableMockData>();
+const columnHelper = createAppColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {

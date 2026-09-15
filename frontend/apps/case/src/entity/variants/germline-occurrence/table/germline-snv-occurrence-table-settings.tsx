@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
@@ -26,7 +26,7 @@ import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
-const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
+const columnHelper = createAppColumnHelper<GermlineSNVOccurrence>();
 
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
@@ -278,13 +278,13 @@ const defaultGermlineSNVSettings = createColumnSettings([
     id: 'row-info',
     visible: true,
     fixed: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     additionalFields: ['transcript_id', 'has_interpretation'],
   },
   {
     id: 'hgvsg',
     visible: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     label: 'variant.headers.hgvsg',
   },
   {
@@ -375,7 +375,7 @@ const defaultGermlineSNVSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);
 

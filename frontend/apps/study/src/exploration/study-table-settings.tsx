@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
@@ -9,7 +9,7 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import type { Study } from './mocks/study-model';
 
-const columnHelper = createColumnHelper<Study>();
+const columnHelper = createAppColumnHelper<Study>();
 
 /**
  * Sums a numeric field across the rows currently in the table.

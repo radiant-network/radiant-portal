@@ -2,8 +2,10 @@ import type { Row } from '@tanstack/react-table';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 
+import type { AppFeatures } from '../data-table';
+
 type TableRowSelectionCellProps = {
-  row: Row<any>;
+  row: Row<AppFeatures, any>;
 };
 
 function RowSelectionCell({ row }: TableRowSelectionCellProps) {

@@ -1,4 +1,4 @@
-import type { GroupingState, Table } from '@tanstack/react-table';
+import type { GroupingState, ReactTable, RowData } from '@tanstack/react-table';
 import { CombineIcon } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';
@@ -15,11 +15,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 
 import type { ColumnSettings, TableColumnDef } from './data-table';
+import type { AppFeatures } from './data-table';
 
-type DataTableGroupByProps = {
+type DataTableGroupByProps<TData extends RowData> = {
   grouping: GroupingState;
-  table: Table<any>;
-  groupByColumns: TableColumnDef<any, any>[];
+  table: ReactTable<AppFeatures, TData>;
+  groupByColumns: TableColumnDef<TData, any>[];
   defaultColumnSettings: ColumnSettings[];
 };
 
@@ -42,7 +43,12 @@ type DataTableGroupByProps = {
  *  }]*
  *
  */
-function DataTableGroupBy({ table, grouping, groupByColumns, defaultColumnSettings }: DataTableGroupByProps) {
+function DataTableGroupBy<TData extends RowData>({
+  table,
+  grouping,
+  groupByColumns,
+  defaultColumnSettings,
+}: DataTableGroupByProps<TData>) {
   const { t } = useI18n();
 
   const hasGroupedValue = grouping.length > 0;

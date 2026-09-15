@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CNVGeneOverlap } from '@/api/api';
@@ -10,13 +10,13 @@ import { toKiloBases } from '@/components/lib/number-format';
 
 import OverlapTypeGeneCell from './cells/overlap-type-gene-cell';
 
-const columnHelper = createColumnHelper<CNVGeneOverlap>();
+const columnHelper = createAppColumnHelper<CNVGeneOverlap>();
 
 function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
   return [
     columnHelper.group({
       id: 'unamed',
-      columns: [
+      columns: columnHelper.columns([
         // Genes
         columnHelper.accessor(row => row.symbol, {
           id: 'symbol',
@@ -74,13 +74,13 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           enableSorting: true,
           enablePinning: false,
         }),
-      ],
+      ]),
     }),
     // Panel
     columnHelper.group({
       id: 'panels',
       header: t('variant.headers.panels'),
-      columns: [
+      columns: columnHelper.columns([
         // # Bases
         columnHelper.accessor(row => row.nb_overlap_bases, {
           id: 'nb_overlap_bases',
@@ -151,7 +151,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           enableSorting: true,
           enablePinning: false,
         }),
-      ],
+      ]),
     }),
   ] as TableColumnDef<CNVGeneOverlap, any>[];
 }

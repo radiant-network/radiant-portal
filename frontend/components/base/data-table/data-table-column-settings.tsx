@@ -81,8 +81,8 @@ function TableColumnSettings({
 }: TableColumnSettingsProps) {
   const { t } = useI18n();
   const fixedColumns = deserializeColumnsFixed(defaultSettings);
-  const columnsLeft = (columnPinning.left ?? []).map(filterColumnById(defaultSettings));
-  const columnsRight = (columnPinning.right ?? []).map(filterColumnById(defaultSettings));
+  const columnsStart = (columnPinning.start ?? []).map(filterColumnById(defaultSettings));
+  const columnsEnd = (columnPinning.end ?? []).map(filterColumnById(defaultSettings));
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -123,7 +123,7 @@ function TableColumnSettings({
           <DropdownMenuContent id="data-table-column-settings-dropdown">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
-                {columnsLeft.map(column => {
+                {columnsStart.map(column => {
                   if (!column || fixedColumns.includes(column.id)) return null;
                   return (
                     <TableSortableColumnSetting
@@ -141,8 +141,8 @@ function TableColumnSettings({
                   const column = defaultSettings.find(column => column.id === itemId);
                   if (
                     !column ||
-                    (columnPinning.left ?? []).includes(column.id) ||
-                    (columnPinning.right ?? []).includes(column.id) ||
+                    (columnPinning.start ?? []).includes(column.id) ||
+                    (columnPinning.end ?? []).includes(column.id) ||
                     fixedColumns.includes(column.id)
                   ) {
                     return null;
@@ -160,7 +160,7 @@ function TableColumnSettings({
                   );
                 })}
 
-                {columnsRight.map(column => {
+                {columnsEnd.map(column => {
                   if (!column || fixedColumns.includes(column.id)) return null;
                   return (
                     <TableSortableColumnSetting

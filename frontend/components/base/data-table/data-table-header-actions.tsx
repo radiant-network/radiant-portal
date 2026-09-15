@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import type { ColumnPinningPosition, Header, SortDirection } from '@tanstack/react-table';
+import type { ColumnPinningPosition, Header, RowData, SortDirection } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
+import type { AppFeatures } from './data-table';
+
 const PIN_COLUMN_ACTIONS: {
   key: string;
   position: ColumnPinningPosition;
@@ -22,12 +24,12 @@ const PIN_COLUMN_ACTIONS: {
 }[] = [
   {
     key: 'common.table.pin.left',
-    position: 'left',
+    position: 'start',
     icon: <PinIcon className="rotate-90" />,
   },
   {
     key: 'common.table.pin.right',
-    position: 'right',
+    position: 'end',
     icon: <PinIcon className="ransform -rotate-90" />,
   },
   {
@@ -62,11 +64,11 @@ function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: So
  * - Pin (left, right, false)
  * - Sort (asc, desc)
  */
-type TableHeaderActionsProps<TData> = {
-  header: Header<TData, unknown>;
+type TableHeaderActionsProps<TData extends RowData> = {
+  header: Header<AppFeatures, TData, unknown>;
 };
 
-function TableHeaderActions({ header }: TableHeaderActionsProps<any>) {
+function TableHeaderActions<TData extends RowData>({ header }: TableHeaderActionsProps<TData>) {
   const { t } = useI18n();
 
   // Header group contains subgroup, they shouldn't have actions

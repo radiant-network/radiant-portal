@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { createColumnHelper, type OnChangeFn, type RowSelectionState } from '@tanstack/react-table';
+import { type OnChangeFn, type RowSelectionState } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { User } from 'lucide-react';
 
 import { useI18n } from '@/components/hooks/i18n';
@@ -11,7 +12,7 @@ import { Checkbox } from '../../shadcn/checkbox';
 
 import type { VennOperation } from './venn-chart';
 
-const columnHelper = createColumnHelper<VennOperation>();
+const columnHelper = createAppColumnHelper<VennOperation>();
 
 type VennChartOperationTableProps = {
   data: VennOperation[];
@@ -35,7 +36,13 @@ function VennChartOperationTable({ data, rowSelection, onRowSelectionChange }: V
           ),
           header: ({ table }) => (
             <Checkbox
-              checked={table.getIsSomeRowsSelected() ? 'indeterminate' : table.getIsAllRowsSelected()}
+              checked={
+                table.getIsAllRowsSelected()
+                  ? true
+                  : table.getIsSomeRowsSelected()
+                    ? 'indeterminate'
+                    : false
+              }
               onCheckedChange={(checked: boolean) => {
                 table.toggleAllRowsSelected(checked);
               }}

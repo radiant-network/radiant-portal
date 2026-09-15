@@ -198,10 +198,15 @@ Cypress.Commands.add('shouldBePinnable', { prevSubject: 'element' }, (subject, i
  * @param position The side of the pinned column ('left', 'right', or null if not pinned).
  */
 Cypress.Commands.add('shouldBePinned', { prevSubject: 'element' }, (subject, position: 'left' | 'right' | null) => {
+  const pinnedDataCyPosition = {
+    left: 'start',
+    right: 'end',
+  } as const;
+
   if (position) {
-    cy.wrap(subject).should('match', CommonSelectors.pinned(position));
+    cy.wrap(subject).should('match', CommonSelectors.pinned(pinnedDataCyPosition[position]));
   } else {
-    cy.wrap(subject).should('not.match', `${CommonSelectors.pinned('left')}, ${CommonSelectors.pinned('right')}`);
+    cy.wrap(subject).should('not.match', `${CommonSelectors.pinned(pinnedDataCyPosition.left)}, ${CommonSelectors.pinned(pinnedDataCyPosition.right)}`);
   }
 });
 

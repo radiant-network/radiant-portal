@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { CellContext } from '@tanstack/react-table';
+import type { AppFeatures, CellContext } from '@/components/base/data-table/data-table';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
 import type { VariantUninterpretedCase } from '@/api/api';
@@ -13,7 +13,7 @@ import {
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
-function UninterpretedCaseActionsCell({ row }: CellContext<VariantUninterpretedCase, any>) {
+function UninterpretedCaseActionsCell({ row }: CellContext<AppFeatures, VariantUninterpretedCase, any>) {
   const { t } = useI18n();
   const navigate = useNavigate();
   return (

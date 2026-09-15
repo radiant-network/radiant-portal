@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { Row } from '@tanstack/react-table';
+import type { AppFeatures, Row } from '@/components/base/data-table/data-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
@@ -12,7 +12,7 @@ import IGVDialog from 'components/base/igv/igv-dialog';
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 
 type OccurrenceActionsMenuProps = {
-  row: Row<GermlineSNVOccurrence>;
+  row: Row<AppFeatures, GermlineSNVOccurrence>;
   caseEntity?: CaseEntity;
 };
 

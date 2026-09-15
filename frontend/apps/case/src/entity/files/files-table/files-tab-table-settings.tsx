@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { DocumentResult } from '@/api/api';
@@ -11,7 +11,7 @@ import TextCell from '@/components/base/data-table/cells/text-cell';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
-const columnHelper = createColumnHelper<DocumentResult>();
+const columnHelper = createAppColumnHelper<DocumentResult>();
 
 export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
   return [
@@ -209,6 +209,6 @@ export const defaultSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);

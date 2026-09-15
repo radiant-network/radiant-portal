@@ -62,7 +62,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@shadcn/react": "^0.2.1",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "^9.2.4",
     "@tiptap/extension-heading": "^3.31.3",
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/extension-underline": "^3.31.3",
