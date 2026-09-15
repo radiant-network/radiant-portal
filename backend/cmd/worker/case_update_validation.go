@@ -295,7 +295,7 @@ func updateCaseAndReplaceClinicalData(ctx context.Context, sc *StorageContext, c
 		CaseCategoryCode:         u.CategoryCode,
 		AnalysisCatalogID:        *rec.Record.AnalysisCatalogID,
 		Note:                     u.Note,
-		DiagnosisHypothesis:      rec.Record.diagnosisHypothesis(),
+		DiagnosisHypothesis:      u.DiagnosisHypothesis,
 		OrderingOrganizationCode: &u.OrderingOrganizationCode,
 		OrderingPhysician:        u.OrderingPhysician,
 	}); err != nil {
