@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { Term, VariantUninterpretedCase } from '@/api/api';
@@ -20,7 +20,7 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import UninterpretedCaseActionsCell from './cells/uninterpreted-case-actions-cell';
 import UninterpretedCasePreviewCell from './cells/uninterpreted-case-preview-cell';
 
-const columnHelper = createColumnHelper<VariantUninterpretedCase>();
+const columnHelper = createAppColumnHelper<VariantUninterpretedCase>();
 
 function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
   return [
@@ -409,7 +409,7 @@ const uninterpretedCasesDefaultSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);
 

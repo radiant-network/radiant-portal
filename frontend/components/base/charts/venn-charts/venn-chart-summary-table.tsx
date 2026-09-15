@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { User } from 'lucide-react';
 
 import type { TableColumnDef } from '@/components/base/data-table/data-table';
@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import type { VennSummary } from './venn-chart';
 
-const columnHelper = createColumnHelper<VennSummary>();
+const columnHelper = createAppColumnHelper<VennSummary>();
 
 type VennChartSummaryTableProps = {
   data: VennSummary[];

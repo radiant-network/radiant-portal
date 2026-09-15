@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import uniqBy from 'lodash/uniqBy';
 
 import NumberCell from '@/components/base/data-table/cells/number-cell';
@@ -15,7 +15,7 @@ export type TableMockData = {
   isActive?: boolean;
 };
 
-export const mockColumnHelper = createColumnHelper<TableMockData>();
+export const mockColumnHelper = createAppColumnHelper<TableMockData>();
 export const mockColumns = [
   mockColumnHelper.accessor('firstName', {
     cell: info => info.getValue(),

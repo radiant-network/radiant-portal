@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { InfoIcon, Paperclip, UploadIcon } from 'lucide-react';
 
 import { type GeneResult, SqonOpEnum } from '@/api/api';
@@ -36,7 +36,7 @@ type UploadIdTableEntry = {
   omim_gene_id: string;
 };
 
-const columnHelper = createColumnHelper<UploadIdTableEntry>();
+const columnHelper = createAppColumnHelper<UploadIdTableEntry>();
 
 const getMatchedColumns = (variant: string, t: any) =>
   [
@@ -47,7 +47,7 @@ const getMatchedColumns = (variant: string, t: any) =>
     columnHelper.group({
       id: 'mapped_to',
       header: () => <span className="flex justify-center w-full">{t('common.upload_id.mapped_to')}</span>,
-      columns: [
+      columns: columnHelper.columns([
         columnHelper.accessor('omim_gene_id', {
           header: t(`common.upload_id.${variant}.omim_gene_id`),
           cell: info => info.getValue(),
@@ -56,7 +56,7 @@ const getMatchedColumns = (variant: string, t: any) =>
           header: t(`common.upload_id.${variant}.symbol`),
           cell: info => info.getValue(),
         }),
-      ],
+      ]),
     }),
   ] as TableColumnDef<UploadIdTableEntry, any>[];
 

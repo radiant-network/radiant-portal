@@ -4,7 +4,7 @@
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from 'react';
 import type { TableState } from '@tanstack/react-table';
 
-import type { DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import type { AppFeatures, DefaultColumnTableState } from '@/components/base/data-table/data-table';
 
 import { DEFAULT_TABLE_OBSERVER, type TableObserverColumn, type TableObserverProps } from '../type/data-table-type';
 
@@ -13,7 +13,7 @@ export const IS_SERVER = typeof window === 'undefined';
 
 type useTableStateObserverProps = {
   id: string;
-  state: TableState;
+  state: TableState<AppFeatures>;
   // rows: Row<any>[];
   previousTableCache: TableObserverProps;
 };
@@ -53,7 +53,7 @@ export function useTableStorageObserver({ id, state, previousTableCache }: useTa
 
   // column sizing
   useEffect(() => {
-    if (state.columnSizingInfo && !state.columnSizingInfo?.isResizingColumn && columnResizeRef.current) {
+    if (state.columnResizing && !state.columnResizing?.isResizingColumn && columnResizeRef.current) {
       const column = tableCache.columns.find(column => column.id === columnResizeRef.current);
       let size = state.columnSizing[columnResizeRef.current];
 
@@ -76,8 +76,8 @@ export function useTableStorageObserver({ id, state, previousTableCache }: useTa
         },
       });
     }
-    columnResizeRef.current = state.columnSizingInfo?.isResizingColumn;
-  }, [state.columnSizingInfo, state.columnSizing]);
+    columnResizeRef.current = state.columnResizing?.isResizingColumn;
+  }, [state.columnResizing, state.columnSizing]);
 
   // row pinning
   // @TODO: should be re-added when feature is used by table

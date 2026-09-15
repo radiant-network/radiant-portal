@@ -1,5 +1,5 @@
 import { type ComponentProps, useMemo } from 'react';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseTask } from '@/api/api';
@@ -22,7 +22,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
-const columnHelper = createColumnHelper<CaseTask>();
+const columnHelper = createAppColumnHelper<CaseTask>();
 
 function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewAll: boolean) {
   const columns = [

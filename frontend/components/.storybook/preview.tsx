@@ -28,9 +28,6 @@ sb.mock(import('../../utils/helper.ts'), { spy: true });
 let options = {};
 if (location.hostname === 'radiant-network.github.io') {
   console.log(`Configure MSW service worker for radiant-network.github.io`);
-  // Storybook is served under /radiant-portal/storybook/, which limits the MSW
-  // service worker scope to that subpath. Prefix axios requests so they fall
-  // within the SW scope and match the relative handler URLs registered by MSW.
   axiosClient.defaults.baseURL = '/radiant-portal/storybook/api';
   options = {
     serviceWorker: {

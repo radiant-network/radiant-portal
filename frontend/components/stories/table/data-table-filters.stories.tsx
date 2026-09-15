@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { http } from 'msw';
 
 import { SortBodyOrderEnum } from '@/api/api';
@@ -21,7 +21,7 @@ import { StorySection } from '../story-section';
 
 import { data, type TableMockData } from './table-mock';
 
-const columnHelper = createColumnHelper<TableMockData>();
+const columnHelper = createAppColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {

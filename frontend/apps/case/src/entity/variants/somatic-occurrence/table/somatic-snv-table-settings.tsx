@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
@@ -27,7 +27,7 @@ import SomaticInterpretationDialog from '../interpretation/somatic-interpretatio
 
 import SomaticHotspotCell from './cells/somatic-hotspot-cell';
 
-const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
+const columnHelper = createAppColumnHelper<SomaticSNVOccurrence>();
 
 type SomaticSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
@@ -298,13 +298,13 @@ const defaultSomaticSNVSettings = createColumnSettings([
     id: 'row-info',
     visible: true,
     fixed: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     additionalFields: ['transcript_id', 'has_interpretation'],
   },
   {
     id: 'hgvsg',
     visible: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     label: 'variant.headers.hgvsg',
   },
   {
@@ -402,7 +402,7 @@ const defaultSomaticSNVSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);
 

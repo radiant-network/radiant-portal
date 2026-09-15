@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper, type HeaderContext, type RowSelectionState } from '@tanstack/react-table';
+import { type CellContext, type HeaderContext, type RowSelectionState } from '@tanstack/react-table';
 
 import { SavedFilterType } from '@/api/api';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import type { TableColumnDef } from '@/components/base/data-table/data-table';
+import {
+  type AppFeatures,
+  createAppColumnHelper,
+  type TableColumnDef,
+} from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
@@ -14,7 +18,7 @@ import { StorySection } from '../story-section';
 
 import { data, type TableMockData } from './table-mock';
 
-const columnHelper = createColumnHelper<TableMockData>();
+const columnHelper = createAppColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {
@@ -138,7 +142,7 @@ export const WithHeaderGroups: Story = {
       columnHelper.group({
         id: 'group_1',
         header: () => <span>Group 1</span>,
-        columns: [
+        columns: columnHelper.columns([
           columnHelper.accessor('firstName', {
             cell: info => info.getValue(),
             footer: props => props.column.id,
@@ -149,18 +153,18 @@ export const WithHeaderGroups: Story = {
             header: () => <span>Last Name</span>,
             footer: props => props.column.id,
           }),
-        ],
+        ]),
       }),
       columnHelper.group({
         header: 'group_2',
-        columns: [
+        columns: columnHelper.columns([
           columnHelper.accessor('age', {
             header: () => 'Age',
             footer: props => props.column.id,
           }),
           columnHelper.group({
             header: 'More Info',
-            columns: [
+            columns: columnHelper.columns([
               columnHelper.accessor('visits', {
                 header: () => <span>Visits</span>,
               }),
@@ -170,9 +174,9 @@ export const WithHeaderGroups: Story = {
               columnHelper.accessor('progress', {
                 header: 'Profile Progress',
               }),
-            ],
+            ]),
           }),
-        ],
+        ]),
       }),
     ] as TableColumnDef<TableMockData, any>[],
   },
@@ -201,8 +205,10 @@ export const WithRowSelection: Story = {
         id: 'rowSelection',
         size: 48,
         maxSize: 48,
-        header: (header: HeaderContext<TableMockData, unknown>) => <RowSelectionHeader table={header.table} />,
-        cell: info => <RowSelectionCell row={info.row} />,
+        header: (header: HeaderContext<AppFeatures, any, unknown>) => (
+          <RowSelectionHeader table={header.table} />
+        ),
+        cell: (info: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={info.row} />,
       },
       columnHelper.accessor('firstName', {
         cell: info => info.getValue(),

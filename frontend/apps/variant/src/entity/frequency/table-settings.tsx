@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import {
@@ -17,8 +17,8 @@ import { toExponentialNotation } from '@/components/lib/number-format';
 
 import FrequencyCell from './frequency-cell';
 
-const publicCohortsColumnHelper = createColumnHelper<ExternalFrequencies>();
-const myNetworkColumnHelper = createColumnHelper<InternalFrequenciesSplitBy>();
+const publicCohortsColumnHelper = createAppColumnHelper<ExternalFrequencies>();
+const myNetworkColumnHelper = createAppColumnHelper<InternalFrequenciesSplitBy>();
 
 function getPublicCohortsColumns(t: TFunction<string, undefined>, locusId?: string) {
   return [
@@ -75,7 +75,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
   return [
     myNetworkColumnHelper.group({
       id: 'split_name',
-      columns: [
+      columns: myNetworkColumnHelper.columns([
         // Split
         myNetworkColumnHelper.accessor(row => row.split_value_code, {
           id: 'split_value_code',
@@ -100,14 +100,14 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
             );
           },
         }),
-      ],
+      ]),
     }),
     myNetworkColumnHelper.group({
       id: 'all_patients',
       header: t('variant_entity.frequency.my_network.all_patients'),
       size: 300,
       minSize: 100,
-      columns: [
+      columns: myNetworkColumnHelper.columns([
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_all, {
           id: 'frequencies.pc_all',
@@ -130,14 +130,14 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
-      ],
+      ]),
     }),
     myNetworkColumnHelper.group({
       id: 'affected_patients',
       header: t('variant_entity.frequency.my_network.affected_patients'),
       size: 300,
       minSize: 100,
-      columns: [
+      columns: myNetworkColumnHelper.columns([
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_affected, {
           id: 'frequencies.pc_affected',
@@ -160,14 +160,14 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
-      ],
+      ]),
     }),
     myNetworkColumnHelper.group({
       id: 'non_affected_patients',
       header: t('variant_entity.frequency.my_network.non_affected_patients'),
       size: 300,
       minSize: 100,
-      columns: [
+      columns: myNetworkColumnHelper.columns([
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_non_affected, {
           id: 'frequencies.pc_non_affected',
@@ -190,7 +190,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
-      ],
+      ]),
     }),
   ] as TableColumnDef<InternalFrequenciesSplitBy, any>[];
 }

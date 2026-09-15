@@ -1,6 +1,3 @@
-import type { ReactNode } from 'react';
-import { createColumnHelper } from '@tanstack/react-table';
-
 import type { CaseEntity, Term, VepImpact } from '@/api/api';
 import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
@@ -46,6 +43,7 @@ import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -183,7 +181,7 @@ export type BaseCellMockData = {
   has_interpretation?: boolean;
 };
 
-const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
+const baseCellColumnHelper = createAppColumnHelper<BaseCellMockData>();
 
 /*
  * First set of cell components

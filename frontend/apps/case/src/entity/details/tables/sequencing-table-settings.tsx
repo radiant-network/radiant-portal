@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseSequencingExperiment } from '@/api/api';
@@ -11,7 +11,7 @@ import StatusCell from 'components/base/data-table/cells/status-cell';
 
 import SequencingActionsCell from './cells/sequencing-actions-cell';
 
-const columnHelper = createColumnHelper<CaseSequencingExperiment>();
+const columnHelper = createAppColumnHelper<CaseSequencingExperiment>();
 
 function getColumns(t: TFunction<string, undefined>) {
   return [
@@ -164,7 +164,7 @@ const defaultSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);
 

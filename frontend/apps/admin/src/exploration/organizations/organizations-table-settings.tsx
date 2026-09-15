@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 import { Pencil } from 'lucide-react';
 
@@ -12,7 +12,7 @@ import {
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/shadcn/button';
 
-const columnHelper = createColumnHelper<OrganizationResponse>();
+const columnHelper = createAppColumnHelper<OrganizationResponse>();
 
 export function getOrganizationsColumns(
   t: TFunction<string, undefined>,

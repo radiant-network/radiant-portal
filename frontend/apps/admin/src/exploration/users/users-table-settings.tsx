@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 import { Pencil } from 'lucide-react';
 
@@ -14,7 +14,7 @@ import { Button } from '@/components/base/shadcn/button';
 
 import { ADMIN_ROLE_CODE, MEMBER_ROLE_CODE } from '../roles/roles-utils';
 
-const columnHelper = createColumnHelper<UserResult>();
+const columnHelper = createAppColumnHelper<UserResult>();
 
 function adminFirst(a: UserRoleResult, b: UserRoleResult) {
   return Number(b.role_code === ADMIN_ROLE_CODE) - Number(a.role_code === ADMIN_ROLE_CODE);

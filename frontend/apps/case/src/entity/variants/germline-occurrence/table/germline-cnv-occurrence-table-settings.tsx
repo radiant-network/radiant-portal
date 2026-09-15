@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineCNVOccurrence } from '@/api/api';
@@ -17,7 +17,7 @@ import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
 import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
-const columnHelper = createColumnHelper<GermlineCNVOccurrence>();
+const columnHelper = createAppColumnHelper<GermlineCNVOccurrence>();
 
 type GermlineCNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
@@ -254,7 +254,7 @@ const defaultGermlineCNVSettings = createColumnSettings([
     id: 'row-info',
     visible: true,
     fixed: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
   },
   {
     id: 'symbol',

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
@@ -22,14 +22,14 @@ import {
   type TableMockData,
 } from './table-mock';
 
-const columnHelper = createColumnHelper<TableMockData>();
+const columnHelper = createAppColumnHelper<TableMockData>();
 
 const defaultMockColumnSettings = createColumnSettings([
   {
     id: 'pinRow',
     visible: true,
     label: 'Pin Row',
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     fixed: true,
     variant: 'ghost',
   },
@@ -37,7 +37,7 @@ const defaultMockColumnSettings = createColumnSettings([
     id: 'rowSelection',
     visible: true,
     label: 'Row Selection',
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     fixed: true,
   },
   {
@@ -78,7 +78,7 @@ const defaultAdvancedColumnSettings = createColumnSettings([
     visible: true,
     label: 'Pin Row',
     fixed: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
     variant: 'ghost',
   },
   {
@@ -86,7 +86,7 @@ const defaultAdvancedColumnSettings = createColumnSettings([
     visible: true,
     label: 'Row Selection',
     fixed: true,
-    pinningPosition: 'left',
+    pinningPosition: 'start',
   },
   {
     id: 'firstName',
