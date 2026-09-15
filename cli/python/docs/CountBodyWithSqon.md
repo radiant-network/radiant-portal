@@ -6,7 +6,9 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **sqon** | [**Sqon**](Sqon.md) |  | [optional] 
-**with_note** | **bool** | Count only the occurrences having at least one note attached to them. | [optional] 
+**with_flag** | [**List[OccurrenceFlagType]**](OccurrenceFlagType.md) |  | [optional] 
+**with_interpretation** | **bool** |  | [optional] 
+**with_note** | **bool** |  | [optional] 
 
 ## Example
 

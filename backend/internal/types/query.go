@@ -13,19 +13,37 @@ type Query interface {
 	GetFieldsFromTables(tables ...Table) []Field
 }
 
-type occurrenceQueryOptions struct {
-	withNote bool
+type OccurrenceFilterOption func(*occurrenceFilters)
+
+// occurrenceFilters carries the annotation filters shared by occurrence list and count queries.
+type occurrenceFilters struct {
+	withNote           bool
+	withFlag           []OccurrenceFlagType
+	withInterpretation bool
 }
 
-type OccurrenceQueryOption func(*occurrenceQueryOptions)
+func (f occurrenceFilters) WithNote() bool                 { return f.withNote }
+func (f occurrenceFilters) WithFlag() []OccurrenceFlagType { return f.withFlag }
+func (f occurrenceFilters) WithInterpretation() bool       { return f.withInterpretation }
 
 // WithNoteFilter restricts a list or count query to the occurrences having at least one note.
-func WithNoteFilter(withNote bool) OccurrenceQueryOption {
-	return func(o *occurrenceQueryOptions) { o.withNote = withNote }
+func WithNoteFilter(withNote bool) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withNote = withNote }
 }
 
-func resolveOccurrenceQueryOptions(opts []OccurrenceQueryOption) occurrenceQueryOptions {
-	var resolved occurrenceQueryOptions
+// WithFlagFilter restricts a list or count query to the occurrences flagged with one of flagTypes.
+// An empty slice means no filtering.
+func WithFlagFilter(flagTypes []OccurrenceFlagType) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withFlag = flagTypes }
+}
+
+// WithInterpretationFilter restricts a list or count query to the occurrences having an interpretation.
+func WithInterpretationFilter(withInterpretation bool) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withInterpretation = withInterpretation }
+}
+
+func resolveOccurrenceFilters(opts []OccurrenceFilterOption) occurrenceFilters {
+	var resolved occurrenceFilters
 	for _, opt := range opts {
 		opt(&resolved)
 	}
@@ -53,6 +71,8 @@ type ListQuery interface {
 type OccurrenceListQuery interface {
 	ListQuery
 	WithNote() bool
+	WithFlag() []OccurrenceFlagType
+	WithInterpretation() bool
 }
 
 type listQuery struct {
@@ -66,11 +86,7 @@ type listQuery struct {
 // occurrenceListQuery adds the occurrence-only note filter on top of a plain list query.
 type occurrenceListQuery struct {
 	listQuery
-	withNote bool
-}
-
-func (l *occurrenceListQuery) WithNote() bool {
-	return l.withNote
+	occurrenceFilters
 }
 
 func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
@@ -133,8 +149,8 @@ func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
 	return &p
 }
 
-func NewOccurrenceListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...OccurrenceQueryOption) (OccurrenceListQuery, error) {
-	options := resolveOccurrenceQueryOptions(opts)
+func NewOccurrenceListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...OccurrenceFilterOption) (OccurrenceListQuery, error) {
+	annotationFilters := resolveOccurrenceFilters(opts)
 
 	// Define allowed selectedCols
 	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
@@ -147,10 +163,10 @@ func NewOccurrenceListQueryFromSqon(config QueryConfig, additional []string, sqo
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query from sqon %w", err)
 		}
-		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, withNote: options.withNote}, nil
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, occurrenceFilters: annotationFilters}, nil
 
 	} else {
-		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, withNote: options.withNote}, nil
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, occurrenceFilters: annotationFilters}, nil
 	}
 }
 
@@ -251,6 +267,8 @@ type CountQuery interface {
 type OccurrenceCountQuery interface {
 	CountQuery
 	WithNote() bool
+	WithFlag() []OccurrenceFlagType
+	WithInterpretation() bool
 }
 
 type countQuery struct {
@@ -261,11 +279,7 @@ type countQuery struct {
 // occurrenceCountQuery adds the occurrence-only note filter on top of a plain count query.
 type occurrenceCountQuery struct {
 	countQuery
-	withNote bool
-}
-
-func (l *occurrenceCountQuery) WithNote() bool {
-	return l.withNote
+	occurrenceFilters
 }
 
 func (l *countQuery) Filters() FilterNode {
@@ -285,18 +299,18 @@ func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
 	return sliceutils.Unique(filtered)
 }
 
-func NewOccurrenceCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...OccurrenceQueryOption) (OccurrenceCountQuery, error) {
-	options := resolveOccurrenceQueryOptions(opts)
+func NewOccurrenceCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...OccurrenceFilterOption) (OccurrenceCountQuery, error) {
+	annotationFilters := resolveOccurrenceFilters(opts)
 
 	if sqon != nil {
 		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error during build list query %w", err)
 		}
-		return &occurrenceCountQuery{countQuery: countQuery{filteredFields: visitedFilteredFields, filters: root}, withNote: options.withNote}, nil
+		return &occurrenceCountQuery{countQuery: countQuery{filteredFields: visitedFilteredFields, filters: root}, occurrenceFilters: annotationFilters}, nil
 
 	} else {
-		return &occurrenceCountQuery{withNote: options.withNote}, nil
+		return &occurrenceCountQuery{occurrenceFilters: annotationFilters}, nil
 	}
 }
 
