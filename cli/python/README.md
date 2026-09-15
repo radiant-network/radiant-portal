@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
+*CasesApi* | [**patch_case_status**](docs/CasesApi.md#patch_case_status) | **PATCH** /{tenant}/cases/{case_id}/status | Change a case&#39;s status
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
@@ -219,6 +220,7 @@ Class | Method | HTTP request | Description
  - [CaseResult](docs/CaseResult.md)
  - [CaseSequencingExperiment](docs/CaseSequencingExperiment.md)
  - [CaseSequencingExperimentBatch](docs/CaseSequencingExperimentBatch.md)
+ - [CaseStatusResponse](docs/CaseStatusResponse.md)
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
@@ -300,6 +302,7 @@ Class | Method | HTTP request | Description
  - [Transcript](docs/Transcript.md)
  - [UpdateCaseBatch](docs/UpdateCaseBatch.md)
  - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)
+ - [UpdateCaseStatusInput](docs/UpdateCaseStatusInput.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)
  - [UpdateOrganizationRequest](docs/UpdateOrganizationRequest.md)
  - [UpdateRoleRequest](docs/UpdateRoleRequest.md)

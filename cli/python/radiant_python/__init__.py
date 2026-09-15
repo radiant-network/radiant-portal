@@ -79,6 +79,7 @@ from radiant_python.models.case_patient_clinical_information import CasePatientC
 from radiant_python.models.case_result import CaseResult
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
+from radiant_python.models.case_status_response import CaseStatusResponse
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
@@ -160,6 +161,7 @@ from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
 from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
+from radiant_python.models.update_case_status_input import UpdateCaseStatusInput
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
 from radiant_python.models.update_organization_request import UpdateOrganizationRequest
 from radiant_python.models.update_role_request import UpdateRoleRequest

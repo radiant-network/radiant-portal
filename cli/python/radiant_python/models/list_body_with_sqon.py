@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.sort_body import SortBody
 from radiant_python.models.sqon import Sqon
@@ -34,7 +34,7 @@ class ListBodyWithSqon(BaseModel):
     page_index: Optional[StrictInt] = None
     sort: Optional[List[SortBody]] = None
     sqon: Optional[Sqon] = None
-    with_note: Optional[StrictBool] = Field(default=None, description="Return only the occurrences having at least one note attached to them.")
+    with_note: Optional[StrictBool] = None
     __properties: ClassVar[List[str]] = ["additional_fields", "limit", "offset", "page_index", "sort", "sqon", "with_note"]
 
     model_config = ConfigDict(
