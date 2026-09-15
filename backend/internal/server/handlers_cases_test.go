@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -219,7 +220,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"analysis_catalog_code":[
-			{"key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"key":"WGA", "label":"Whole Genome Analysis"},
 			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
 		], "diagnosis_lab_code":[
 			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
@@ -283,7 +284,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"sequencing_experiments":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true}, 
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
 			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
 		],
@@ -292,16 +293,16 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"case_category_code": "postnatal",
 		"case_category_name": "Postnatal",
 		"case_id":1,
-		"case_type":"germline_family", 
-		"created_on":"2000-01-01T00:00:00Z", 
+		"case_type":"germline_family",
+		"created_on":"2000-01-01T00:00:00Z",
 		"members":[
 			{
-				"affected_status_code":"affected", 
+				"affected_status_code":"affected",
 				"date_of_birth":"1973-03-23T00:00:00Z",
-				"organization_code":"CHUSJ", 
-				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"submitter_patient_id":"MRN-283775", 
-				"patient_id":3, 
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283775",
+				"patient_id":3,
 				"relationship_to_proband":"proband",
 				"sex_code":"male",
 				"first_name":"Marie",
@@ -311,13 +312,13 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
 			},
 			{
-				"affected_status_code":"affected", 
-				"date_of_birth":"2012-02-03T00:00:00Z", 
-				"organization_code":"CHUSJ", 
-				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"submitter_patient_id":"MRN-283773", 
-				"patient_id":1, 
-				"relationship_to_proband":"mother", 
+				"affected_status_code":"affected",
+				"date_of_birth":"2012-02-03T00:00:00Z",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283773",
+				"patient_id":1,
+				"relationship_to_proband":"mother",
 				"sex_code":"female",
 				"first_name":"Juliette",
 				"jhn":"GAG1202030277",
@@ -325,33 +326,33 @@ func Test_CaseEntityHandler(t *testing.T) {
 				"life_status_code":"alive"
 			},
 			{
-				"affected_status_code":"non_affected", 
-				"date_of_birth":"1970-01-30T00:00:00Z", 
-				"organization_code":"CHUSJ", 
-				"organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-				"submitter_patient_id":"MRN-283774", 
-				"patient_id":2, 
-				"relationship_to_proband":"father", 
+				"affected_status_code":"non_affected",
+				"date_of_birth":"1970-01-30T00:00:00Z",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283774",
+				"patient_id":2,
+				"relationship_to_proband":"father",
 				"sex_code":"male",
 				"first_name":"Antoine",
 				"jhn":"LEF7001303889",
 				"last_name":"Lefebvre",
 				"life_status_code":"alive"
 			}
-		], 
-		"diagnosis_lab_code":"CQGC", 
+		],
+		"diagnosis_lab_code":"CQGC",
 		"diagnosis_lab_name":"Quebec Clinical Genomic Center",
 		"has_igv_files":true,
 		"panel_code": "EPILEP",
-		"panel_name": "Epilepsy",		
-		"prescriber":"Felix Laflamme", 
-		"primary_condition_id":"MONDO:0700092", 
-		"primary_condition_name":"neurodevelopmental disorder", 
+		"panel_name": "Epilepsy",
+		"prescriber":"Felix Laflamme",
+		"primary_condition_id":"MONDO:0700092",
+		"primary_condition_name":"neurodevelopmental disorder",
 		"project_code": "N1",
-		"project_name": "NeuroDev Phase I", 
-		"ordering_organization_code":"CHUSJ", 
-		"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", 
-		"status_code":"", 
+		"project_name": "NeuroDev Phase I",
+		"ordering_organization_code":"CHUSJ",
+		"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
+		"status_code":"",
 		"tasks":[
 			{"id": 1, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
 		],
@@ -413,21 +414,21 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"list": [{
-			"case_id":20, 
+			"case_id":20,
 			"created_on": "2000-01-01T00:00:00Z",
-			"data_type_code":"snv", 
-			"document_id":203, 
-			"format_code":"vcf", 
-			"hash":"5d41402abc4b2a76b9719d911017c794", 
-			"name":"FI0037905.S14786.vcf.gz", 
-			"patient_id":58, 
-			"diagnosis_lab_code":"CQGC", 
-			"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
-			"relationship_to_proband_code":"proband", 
-			"run_alias":"A00516_0224", 
-			"submitter_sample_id":"S14786", 
-			"seq_id":56, 
-			"size":325362647, 
+			"data_type_code":"snv",
+			"document_id":203,
+			"format_code":"vcf",
+			"hash":"5d41402abc4b2a76b9719d911017c794",
+			"name":"FI0037905.S14786.vcf.gz",
+			"patient_id":58,
+			"diagnosis_lab_code":"CQGC",
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+			"relationship_to_proband_code":"proband",
+			"run_alias":"A00516_0224",
+			"submitter_sample_id":"S14786",
+			"seq_id":56,
+			"size":325362647,
 			"task_id":20
 		}],
 		"count": 1
@@ -446,25 +447,136 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"data_type_code":[
-			{"key":"alignment", "label":"Aligned Reads"}, 
-			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"snv", "label":"Germline SNV"},
 			{"key":"ssnv", "label":"Somatic SNV"}
-		], 
+		],
 		"format_code":[
-			{"key":"cram", "label":"CRAM File"}, 
+			{"key":"cram", "label":"CRAM File"},
 			{"key":"vcf", "label":"VCF File"}
-		], 
+		],
 		"diagnosis_lab_code":[
-			{"key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
 			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
-		], 
+		],
 		"project_code":[
-			{"key":"N1", "label":"NeuroDev Phase I"}, 
+			{"key":"N1", "label":"NeuroDev Phase I"},
 			{"key":"N2", "label":"NeuroDev Phase II"}
-		], 
+		],
 		"relationship_to_proband_code":[
-			{"key":"proband", "label":"Proband"}, 
-			{"key":"father", "label":"Father"}, 
+			{"key":"proband", "label":"Proband"},
+			{"key":"father", "label":"Father"},
 			{"key":"mother", "label":"Mother"}
 		]}`, w.Body.String())
+}
+
+type caseStatusWriterMock struct {
+	found     bool
+	err       error
+	calls     int
+	gotCaseId int
+	gotStatus string
+}
+
+func (m *caseStatusWriterMock) UpdateCaseStatus(_ context.Context, caseId int, statusCode string) (bool, error) {
+	m.calls++
+	m.gotCaseId = caseId
+	m.gotStatus = statusCode
+	return m.found, m.err
+}
+
+func servePatchCaseStatus(repo caseStatusWriter, path string, body string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.PATCH("/:tenant/cases/:case_id/status", PatchCaseStatusHandler(repo))
+
+	req, _ := http.NewRequest("PATCH", path, bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PatchCaseStatusHandler_AppliesUserStatus(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"case_id":1,"status_code":"in_review"}`, w.Body.String())
+	assert.Equal(t, 1, repo.gotCaseId)
+	assert.Equal(t, "in_review", repo.gotStatus)
+}
+
+func Test_PatchCaseStatusHandler_AppliesStatusesInAnyOrder(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"reopened"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "reopened", repo.gotStatus)
+}
+
+func Test_PatchCaseStatusHandler_RejectsSubmitted(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"submitted"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"status_code \"submitted\" is system-applied and cannot be set by a user"}`, w.Body.String())
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseStatusHandler_RejectsProcessing(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"processing"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseStatusHandler_RejectsUnknownStatus(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"archived"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseStatusHandler_RejectsMissingStatus(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseStatusHandler_RejectsMalformedBody(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", "not json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseStatusHandler_UnmatchedCaseNotFound(t *testing.T) {
+	repo := &caseStatusWriterMock{found: false}
+	w := servePatchCaseStatus(repo, "/radiant/cases/999999/status", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"case not found"}`, w.Body.String())
+}
+
+func Test_PatchCaseStatusHandler_MalformedCaseIdNotFound(t *testing.T) {
+	repo := &caseStatusWriterMock{found: true}
+	w := servePatchCaseStatus(repo, "/radiant/cases/not-a-number/status", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"case_id not found"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
+	repo := &caseStatusWriterMock{err: errors.New("connection refused")}
+	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.NotContains(t, w.Body.String(), "connection refused")
 }

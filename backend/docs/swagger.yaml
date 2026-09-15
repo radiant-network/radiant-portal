@@ -700,6 +700,14 @@ components:
       - sample_organization_code
       - submitter_sample_id
       type: object
+    CaseStatusResponse:
+      description: A case's status after a successful change.
+      properties:
+        case_id:
+          type: integer
+        status_code:
+          type: string
+      type: object
     CaseTask:
       properties:
         created_on:
@@ -858,8 +866,6 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
         with_note:
-          description: Count only the occurrences having at least one note attached
-            to them.
           type: boolean
       type: object
     CreateBatchResponse:
@@ -1979,8 +1985,6 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
         with_note:
-          description: Return only the occurrences having at least one note attached
-            to them.
           type: boolean
       type: object
     ObservationCategoricalBatch:
@@ -2940,6 +2944,13 @@ components:
       required:
       - cases
       type: object
+    UpdateCaseStatusInput:
+      description: A case status change applied by a user.
+      properties:
+        status_code:
+          example: in_review
+          type: string
+      type: object
     UpdateOccurrenceNoteInput:
       properties:
         content:
@@ -3813,6 +3824,78 @@ paths:
       security:
       - bearerauth: []
       summary: Search DocumentResult list for a case entity
+      tags:
+      - cases
+  /{tenant}/cases/{case_id}/status:
+    patch:
+      description: Apply a user-chosen status to a case.
+      operationId: patchCaseStatus
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseStatusInput'
+        description: Status to apply
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseStatusResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Change a case's status
       tags:
       - cases
   /{tenant}/cases/autocomplete:

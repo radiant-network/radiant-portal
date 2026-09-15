@@ -65,6 +65,20 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 	return nil
 }
 
+// UpdateCaseStatus applies a status to one case and reports whether such a case exists. It is
+// constrained to the active tenant, so another tenant's case matches nothing and comes back as
+// missing rather than updated .
+func (r *CasesRepository) UpdateCaseStatus(ctx context.Context, caseID int, statusCode string) (bool, error) {
+	tx := r.db.WithContext(ctx).Model(&types.Case{}).
+		Scopes(WithTenant(ctx)).
+		Where("id = ?", caseID).
+		Update("status_code", statusCode)
+	if tx.Error != nil {
+		return false, fmt.Errorf("error updating status of case %d: %w", caseID, tx.Error)
+	}
+	return tx.RowsAffected > 0, nil
+}
+
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(ctx context.Context, caseHasSeqExp *types.CaseHasSequencingExperiment) error {
 	return r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{

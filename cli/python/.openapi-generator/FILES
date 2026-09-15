@@ -26,6 +26,7 @@ docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
 docs/CaseSequencingExperiment.md
 docs/CaseSequencingExperimentBatch.md
+docs/CaseStatusResponse.md
 docs/CaseTask.md
 docs/CaseTaskBatch.md
 docs/CasesApi.md
@@ -125,6 +126,7 @@ docs/Term.md
 docs/Transcript.md
 docs/UpdateCaseBatch.md
 docs/UpdateCaseBatchBody.md
+docs/UpdateCaseStatusInput.md
 docs/UpdateOccurrenceNoteInput.md
 docs/UpdateOrganizationRequest.md
 docs/UpdateRoleRequest.md
@@ -208,6 +210,7 @@ radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
 radiant_python/models/case_sequencing_experiment.py
 radiant_python/models/case_sequencing_experiment_batch.py
+radiant_python/models/case_status_response.py
 radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py
@@ -290,6 +293,7 @@ radiant_python/models/term.py
 radiant_python/models/transcript.py
 radiant_python/models/update_case_batch.py
 radiant_python/models/update_case_batch_body.py
+radiant_python/models/update_case_status_input.py
 radiant_python/models/update_occurrence_note_input.py
 radiant_python/models/update_organization_request.py
 radiant_python/models/update_role_request.py

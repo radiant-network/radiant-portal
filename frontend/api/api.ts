@@ -1369,6 +1369,25 @@ export interface CaseSequencingExperimentBatch {
     'submitter_sample_id': string;
 }
 /**
+ * A case\'s status after a successful change.
+ * @export
+ * @interface CaseStatusResponse
+ */
+export interface CaseStatusResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseStatusResponse
+     */
+    'case_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseStatusResponse
+     */
+    'status_code'?: string;
+}
+/**
  * 
  * @export
  * @interface CaseTask
@@ -1635,7 +1654,7 @@ export interface CountBodyWithSqon {
      */
     'sqon'?: Sqon;
     /**
-     * Count only the occurrences having at least one note attached to them.
+     * 
      * @type {boolean}
      * @memberof CountBodyWithSqon
      */
@@ -4015,7 +4034,7 @@ export interface ListBodyWithSqon {
      */
     'sqon'?: Sqon;
     /**
-     * Return only the occurrences having at least one note attached to them.
+     * 
      * @type {boolean}
      * @memberof ListBodyWithSqon
      */
@@ -5968,6 +5987,19 @@ export interface UpdateCaseBatchBody {
     'cases': Array<UpdateCaseBatch>;
 }
 /**
+ * A case status change applied by a user.
+ * @export
+ * @interface UpdateCaseStatusInput
+ */
+export interface UpdateCaseStatusInput {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseStatusInput
+     */
+    'status_code'?: string;
+}
+/**
  * 
  * @export
  * @interface UpdateOccurrenceNoteInput
@@ -7635,6 +7667,54 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Apply a user-chosen status to a case.
+         * @summary Change a case\'s status
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseStatusInput} updateCaseStatusInput Status to apply
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCaseStatus: async (tenant: string, caseId: number, updateCaseStatusInput: UpdateCaseStatusInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patchCaseStatus', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('patchCaseStatus', 'caseId', caseId)
+            // verify required parameter 'updateCaseStatusInput' is not null or undefined
+            assertParamExists('patchCaseStatus', 'updateCaseStatusInput', updateCaseStatusInput)
+            const localVarPath = `/{tenant}/cases/{case_id}/status`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateCaseStatusInput, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {string} tenant Tenant code
@@ -7889,6 +7969,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Apply a user-chosen status to a case.
+         * @summary Change a case\'s status
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseStatusInput} updateCaseStatusInput Status to apply
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patchCaseStatus(tenant: string, caseId: number, updateCaseStatusInput: UpdateCaseStatusInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCaseStatus(tenant, caseId, updateCaseStatusInput, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCaseStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {string} tenant Tenant code
@@ -8022,6 +8117,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Apply a user-chosen status to a case.
+         * @summary Change a case\'s status
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseStatusInput} updateCaseStatusInput Status to apply
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCaseStatus(tenant: string, caseId: number, updateCaseStatusInput: UpdateCaseStatusInput, options?: RawAxiosRequestConfig): AxiosPromise<CaseStatusResponse> {
+            return localVarFp.patchCaseStatus(tenant, caseId, updateCaseStatusInput, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
@@ -8161,6 +8268,20 @@ export class CasesApi extends BaseAPI {
      */
     public patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Apply a user-chosen status to a case.
+     * @summary Change a case\'s status
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {UpdateCaseStatusInput} updateCaseStatusInput Status to apply
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public patchCaseStatus(tenant: string, caseId: number, updateCaseStatusInput: UpdateCaseStatusInput, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCaseStatus(tenant, caseId, updateCaseStatusInput, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

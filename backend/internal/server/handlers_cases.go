@@ -25,6 +25,10 @@ type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
+type caseStatusWriter interface {
+	UpdateCaseStatus(ctx context.Context, caseId int, statusCode string) (bool, error)
+}
+
 // SearchCasesHandler handles search of cases
 // @Summary Search cases
 // @Id searchCases
@@ -167,6 +171,58 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 		}
 		caseEntity.HasIGVFiles = len(igvTracks) > 0
 		c.JSON(http.StatusOK, caseEntity)
+	}
+}
+
+// PatchCaseStatusHandler applies a user-chosen status to a case.
+//
+// @Summary Change a case's status
+// @Id patchCaseStatus
+// @Description Apply a user-chosen status to a case.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param message body types.UpdateCaseStatusInput true "Status to apply"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.CaseStatusResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id}/status [patch]
+func PatchCaseStatusHandler(repo caseStatusWriter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+
+		var body types.UpdateCaseStatusInput
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := types.ValidateUserAppliedCaseStatus(body.StatusCode); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		found, err := repo.UpdateCaseStatus(c.Request.Context(), caseId, body.StatusCode)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !found {
+			HandleNotFoundError(c, "case")
+			return
+		}
+
+		c.JSON(http.StatusOK, types.CaseStatusResponse{CaseID: caseId, StatusCode: body.StatusCode})
 	}
 }
 
