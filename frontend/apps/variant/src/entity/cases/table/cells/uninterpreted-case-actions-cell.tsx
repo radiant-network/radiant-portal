@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom';
-import type { AppFeatures, CellContext } from '@/components/base/data-table/data-table';
+import { useNavigate } from 'react-router';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
 import type { VariantUninterpretedCase } from '@/api/api';
+import type { AppFeatures, CellContext } from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,

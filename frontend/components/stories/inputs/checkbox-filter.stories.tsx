@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TestTubeDiagonalIcon } from 'lucide-react';
 
