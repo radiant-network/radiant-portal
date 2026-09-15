@@ -1,15 +1,11 @@
 import { useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { type CellContext, type HeaderContext, type RowSelectionState } from '@tanstack/react-table';
+import type { CellContext, HeaderContext, RowSelectionState } from '@tanstack/react-table';
 
 import { SavedFilterType } from '@/api/api';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import {
-  type AppFeatures,
-  createAppColumnHelper,
-  type TableColumnDef,
-} from '@/components/base/data-table/data-table';
+import { type AppFeatures, createAppColumnHelper, type TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
@@ -205,9 +201,7 @@ export const WithRowSelection: Story = {
         id: 'rowSelection',
         size: 48,
         maxSize: 48,
-        header: (header: HeaderContext<AppFeatures, any, unknown>) => (
-          <RowSelectionHeader table={header.table} />
-        ),
+        header: (header: HeaderContext<AppFeatures, any, unknown>) => <RowSelectionHeader table={header.table} />,
         cell: (info: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={info.row} />,
       },
       columnHelper.accessor('firstName', {

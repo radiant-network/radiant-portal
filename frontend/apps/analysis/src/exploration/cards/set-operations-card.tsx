@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { BarChart3 } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';

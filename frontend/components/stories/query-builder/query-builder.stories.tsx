@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import axios from 'axios';
 import { delay, http, HttpResponse } from 'msw';
