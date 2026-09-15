@@ -6,6 +6,9 @@
     "components",
     "portals/*"
   ],
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "lint-staged": {
     "**/*.{ts,tsx}": [
       "eslint --fix"
