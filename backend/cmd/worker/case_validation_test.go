@@ -615,6 +615,27 @@ func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 	assert.Empty(t, record.Errors)
 }
 
+// The cap counts bytes, so accented French text hits it at roughly half the characters.
+func Test_validateTextLength_FreeTextMaxLengthCountsBytes(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
+	}
+
+	twoBytesEach := strings.Repeat("é", FreeTextMaxLength/2+1)
+	record.ValidateTextLength(
+		"case",
+		"case[0].note",
+		"note",
+		twoBytesEach,
+		CaseInvalidField,
+		FreeTextMaxLength,
+		[]string{},
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Less(t, len([]rune(twoBytesEach)), FreeTextMaxLength)
+}
+
 func Test_validateTextLength_FreeTextMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
@@ -1881,7 +1902,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-1",
 			StatusCode:      "completed",
-			Note:            strings.Repeat("a", 1001),
+			Note:            createString(FreeTextMaxLength + 1),
 			PriorityCode:    "routine",
 			CategoryCode:    "clinical",
 			AnalysisCode:    "WGA",
@@ -1892,7 +1913,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
-	assert.Equal(t, "Invalid field note for case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid field note for case 0. Reason: field is too long, maximum length allowed is %d.", FreeTextMaxLength), cr.Errors[0].Message)
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
