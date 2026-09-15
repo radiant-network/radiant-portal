@@ -1515,7 +1515,8 @@
     "interpretation": {
       "tooltip": {
         "add": "Ajouter une interprétation",
-        "view": "Voir l’interprétation"
+        "view": "Voir l’interprétation",
+        "none": "Aucune interprétation pour ce variant"
       },
       "classifications": {
         "all_classifications": "Toutes les classifications",

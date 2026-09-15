@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 
 import { SELECTED_VARIANT_PARAM } from '../constants';
+import { useCaseVariantPermissions } from '../use-case-variant-permissions';
 
 type InterpretationDialogProps = {
   locusId: string;
@@ -39,6 +40,7 @@ function InterpretationCell({
   const { t } = useI18n();
   const [_, setSearchParams] = useSearchParams();
   const { list } = useDataTable();
+  const { canInterpret } = useCaseVariantPermissions();
 
   const handleClick = () => {
     setSearchParams(prev => {
@@ -48,6 +50,19 @@ function InterpretationCell({
   };
 
   if (!hasInterpretation) {
+    if (!canInterpret) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className="size-6 cursor-default hover:bg-transparent" iconOnly variant="ghost" aria-disabled>
+              <ClipboardList className="text-muted-foreground/40" size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('variant.interpretation.tooltip.none')}</TooltipContent>
+        </Tooltip>
+      );
+    }
+
     return (
       <InterpretationDialog
         isCreation

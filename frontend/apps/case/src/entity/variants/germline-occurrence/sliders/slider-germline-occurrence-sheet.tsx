@@ -98,7 +98,7 @@ export function GermlineOccurrenceSheetContent({
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const { list } = useDataTable();
-  const { canFlag, canComment } = useCaseVariantPermissions();
+  const { canFlag, canComment, canInterpret } = useCaseVariantPermissions();
 
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
@@ -168,7 +168,7 @@ export function GermlineOccurrenceSheetContent({
                 canComment={canComment}
               />
             </NotesProvider>
-            {!occurrence.has_interpretation && (
+            {!occurrence.has_interpretation && canInterpret && (
               <GermlineInterpretationDialog
                 isCreation
                 locusId={occurrence.locus_id}
@@ -198,19 +198,21 @@ export function GermlineOccurrenceSheetContent({
           isCanonical={occurrence?.is_canonical}
           transcriptId={occurrence?.transcript_id}
           actions={
-            <GermlineInterpretationDialog
-              locusId={occurrence.locus_id}
-              taskId={occurrence.task_id}
-              transcriptId={expandResult.data.transcript_id}
-              patientId={patient?.patient_id}
-              handleSaveCallback={handleInterpretationSaved}
-              renderTrigger={handleOpen => (
-                <Button size="sm" onClick={handleOpen}>
-                  <SquarePen />
-                  {t('common.edit')}
-                </Button>
-              )}
-            />
+            canInterpret ? (
+              <GermlineInterpretationDialog
+                locusId={occurrence.locus_id}
+                taskId={occurrence.task_id}
+                transcriptId={expandResult.data.transcript_id}
+                patientId={patient?.patient_id}
+                handleSaveCallback={handleInterpretationSaved}
+                renderTrigger={handleOpen => (
+                  <Button size="sm" onClick={handleOpen}>
+                    <SquarePen />
+                    {t('common.edit')}
+                  </Button>
+                )}
+              />
+            ) : null
           }
         />
       )}

@@ -131,7 +131,7 @@ export function SomaticOccurrenceSheetContent({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
-  const { canFlag, canComment } = useCaseVariantPermissions();
+  const { canFlag, canComment, canInterpret } = useCaseVariantPermissions();
 
   const { list } = useDataTable();
 
@@ -225,7 +225,7 @@ export function SomaticOccurrenceSheetContent({
                 canComment={canComment}
               />
             </NotesProvider>
-            {!occurrence.has_interpretation && (
+            {!occurrence.has_interpretation && canInterpret && (
               <SomaticInterpretationDialog
                 isCreation
                 locusId={occurrence.locus_id}
@@ -256,19 +256,21 @@ export function SomaticOccurrenceSheetContent({
           isCanonical={occurrence?.is_canonical}
           transcriptId={expandResult.data?.transcript_id}
           actions={
-            <SomaticInterpretationDialog
-              locusId={occurrence.locus_id}
-              taskId={occurrence.task_id}
-              transcriptId={expandResult.data.transcript_id}
-              handleSaveCallback={handleInterpretationSaveCallback}
-              patientId={patient?.patient_id}
-              renderTrigger={handleOpen => (
-                <Button size="sm" onClick={handleOpen}>
-                  <SquarePen />
-                  {t('common.edit')}
-                </Button>
-              )}
-            />
+            canInterpret ? (
+              <SomaticInterpretationDialog
+                locusId={occurrence.locus_id}
+                taskId={occurrence.task_id}
+                transcriptId={expandResult.data.transcript_id}
+                handleSaveCallback={handleInterpretationSaveCallback}
+                patientId={patient?.patient_id}
+                renderTrigger={handleOpen => (
+                  <Button size="sm" onClick={handleOpen}>
+                    <SquarePen />
+                    {t('common.edit')}
+                  </Button>
+                )}
+              />
+            ) : null
           }
         />
       )}

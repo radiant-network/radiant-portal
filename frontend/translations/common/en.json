@@ -1514,7 +1514,8 @@
     "interpretation": {
       "tooltip": {
         "add": "Add variant interpretation",
-        "view": "View interpretation"
+        "view": "View interpretation",
+        "none": "No interpretation for this variant"
       },
       "classifications": {
         "all_classifications": "All Classifications",
