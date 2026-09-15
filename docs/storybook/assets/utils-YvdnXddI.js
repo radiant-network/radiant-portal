@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";var t,n,r;function i(){return(i=e((()=>{t=[`default`,`secondary`,`destructive`,`outline`,`red`,`orange`,`yellow`,`lime`,`green`,`cyan`,`blue`,`violet`,`fuchsia`,`neutral`],n=[`red`,`amber`,`emerald`,`blue`,`fuchsia`,`grey`],r=[`default`,`ghost`,`destructive`]})))()}export{r as i,n,i as r,t};

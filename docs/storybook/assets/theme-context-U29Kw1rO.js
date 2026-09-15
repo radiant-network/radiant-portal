@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./react-BRh_h4kc.js";var n,r,i,a;function o(){return(o=e((()=>{n=t(),r=function(e){return e.LIGHT=`light`,e.DARK=`dark`,e}({}),i=(0,n.createContext)(null),a=()=>{let e=(0,n.useContext)(i);if(!e)throw Error(`useTheme must be used within a ThemeProvider`);return e}})))()}export{a as i,i as n,o as r,r as t};

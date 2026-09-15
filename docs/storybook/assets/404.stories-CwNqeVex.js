@@ -1,0 +1,13 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import{n,t as r}from"./button-Cn480Lud.js";import{n as i,t as a}from"./center-layout-CIMc7AX0.js";import{i as o,n as s}from"./story-section-DVTm6cGm.js";function c({message:e,extra:t,className:n,...r}){return(0,l.jsx)(a,{className:n,...r,children:(0,l.jsxs)(`div`,{className:`flex flex-col items-center gap-3 text-center`,children:[(0,l.jsxs)(`div`,{className:`space-y-2`,children:[(0,l.jsx)(`h1`,{className:`text-6xl font-semibold`,children:`404`}),e&&(0,l.jsx)(`p`,{className:`text-muted-foreground`,children:e})]}),t]})})}var l;function u(){return(u=e((()=>{i(),l=t(),c.__docgenInfo={description:``,methods:[],displayName:`Error404`,props:{message:{required:!1,tsType:{name:`string`},description:``},extra:{required:!1,tsType:{name:`ReactNode`},description:``}},composes:[`HTMLAttributes`]}})))()}var d,f,p,m,h;function g(){return(g=e((()=>{u(),n(),o(),d=t(),f={title:`Layout/Page Error/404`,component:c,args:{message:`Page not found`,extra:(0,d.jsx)(r,{children:`Go to list`})}},p={render:e=>(0,d.jsx)(s,{title:`Not found (404)`,description:`Rendered within the app layout (navbar/sidebar), not a full-screen takeover like the 403 page — for now.`,children:(0,d.jsx)(`div`,{className:`flex w-full p-24 justify-center`,children:(0,d.jsx)(c,{...e})})})},m={render:()=>(0,d.jsx)(s,{title:`With custom props`,description:`Rendered within the app layout (navbar/sidebar), not a full-screen takeover like the 403 page — for now.`,children:(0,d.jsx)(`div`,{className:`flex w-full p-24 justify-center`,children:(0,d.jsx)(c,{message:`Custom message`,extra:(0,d.jsx)(r,{variant:`outline`,children:`Custom button`})})})})},p.parameters={...p.parameters,docs:{...p.parameters?.docs,source:{originalSource:`{
+  render: args => <StorySection title="Not found (404)" description="Rendered within the app layout (navbar/sidebar), not a full-screen takeover like the 403 page — for now.">
+      <div className="flex w-full p-24 justify-center">
+        <Error404 {...args} />
+      </div>
+    </StorySection>
+}`,...p.parameters?.docs?.source}}},m.parameters={...m.parameters,docs:{...m.parameters?.docs,source:{originalSource:`{
+  render: () => <StorySection title="With custom props" description="Rendered within the app layout (navbar/sidebar), not a full-screen takeover like the 403 page — for now.">
+      <div className="flex w-full p-24 justify-center">
+        <Error404 message="Custom message" extra={<Button variant="outline">Custom button</Button>} />
+      </div>
+    </StorySection>
+}`,...m.parameters?.docs?.source}}},h=[`NotFound404`,`NotFound404CustomProps`]})))()}g();export{p as NotFound404,m as NotFound404CustomProps,h as __namedExportsOrder,f as default};

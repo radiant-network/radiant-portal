@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";var t;function n(){return(n=e((()=>{t=({children:e,condition:t,wrapper:n})=>t?n(e):e})))()}export{n,t};

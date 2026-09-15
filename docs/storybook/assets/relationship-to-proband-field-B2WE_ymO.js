@@ -1,0 +1,3 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";function n({relationship:e}){return(0,r.jsx)(`span`,{className:`capitalize`,children:e})}var r;function i(){return(i=e((()=>{r=t(),n.__docgenInfo={description:`Display RAW data
+Must not be translated
+@SEE: https://www.notion.so/ferlab/254b0fcecb3d80ada7aafa47c715b07c?v=254b0fcecb3d8106927b000cc6a71e78`,methods:[],displayName:`RelationshipToProbandField`,props:{relationship:{required:!0,tsType:{name:`string`},description:``}}}})))()}export{i as n,n as t};

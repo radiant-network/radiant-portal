@@ -1,0 +1,6 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import{n,t as r}from"./utils-hYbUpBR2.js";import{n as i,t as a}from"./chevron-left-Ct5yFWQm.js";import{i as o,n as s}from"./story-section-DVTm6cGm.js";function c({children:e,...t}){return(0,l.jsxs)(`div`,{...t,className:r(`flex items-center gap-2.5 hover:cursor-pointer`,t.className),children:[(0,l.jsx)(a,{size:15,className:`text-muted-foreground`}),(0,l.jsx)(`span`,{className:`text-sm text-muted-foreground hover:text-foreground`,children:e})]})}var l;function u(){return(u=e((()=>{i(),n(),l=t(),c.__docgenInfo={description:``,methods:[],displayName:`BackLink`}})))()}var d,f,p,m;function h(){return(h=e((()=>{u(),o(),d=t(),f={title:`Components/Links/Back Link`,component:c,args:{}},p={args:{},render:()=>(0,d.jsx)(s,{title:`Back link`,children:(0,d.jsx)(c,{children:`Back`})})},p.parameters={...p.parameters,docs:{...p.parameters?.docs,source:{originalSource:`{
+  args: {},
+  render: () => <StorySection title="Back link">
+      <BackLink>Back</BackLink>
+    </StorySection>
+}`,...p.parameters?.docs?.source}}},m=[`Default`]})))()}h();export{p as Default,m as __namedExportsOrder,f as default};
