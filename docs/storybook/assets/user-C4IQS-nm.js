@@ -1,0 +1,1 @@
+import{a}from"./iframe-iq8cIiFW.js";const e={name:"user",size:24,node:[["path",{d:"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",key:"975kel"}],["circle",{cx:"12",cy:"7",r:"4",key:"17ys0d"}]]};e.node;const o=a(e);export{o as U};
