@@ -293,3 +293,55 @@ func Test_CNVOccurrencesGenesOverlapHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
+
+// CNV has no interpretation table yet, so the filter is rejected rather than silently ignored.
+func Test_CNVOccurrencesListHandler_Rejects_WithInterpretation(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "with_interpretation is not supported for CNV occurrences")
+}
+
+func Test_CNVOccurrencesCountHandler_Rejects_WithInterpretation(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineCNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "with_interpretation is not supported for CNV occurrences")
+}
+
+func Test_CNVOccurrencesListHandler_Accepts_WithFlag(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["star"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_CNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
+	repo := &MockCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid flag type")
+}

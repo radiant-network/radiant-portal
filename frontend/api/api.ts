@@ -1635,7 +1635,19 @@ export interface CountBodyWithSqon {
      */
     'sqon'?: Sqon;
     /**
-     * Count only the occurrences having at least one note attached to them.
+     * 
+     * @type {Array<OccurrenceFlagType>}
+     * @memberof CountBodyWithSqon
+     */
+    'with_flag'?: Array<OccurrenceFlagType>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CountBodyWithSqon
+     */
+    'with_interpretation'?: boolean;
+    /**
+     * 
      * @type {boolean}
      * @memberof CountBodyWithSqon
      */
@@ -4015,7 +4027,19 @@ export interface ListBodyWithSqon {
      */
     'sqon'?: Sqon;
     /**
-     * Return only the occurrences having at least one note attached to them.
+     * 
+     * @type {Array<OccurrenceFlagType>}
+     * @memberof ListBodyWithSqon
+     */
+    'with_flag'?: Array<OccurrenceFlagType>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ListBodyWithSqon
+     */
+    'with_interpretation'?: boolean;
+    /**
+     * 
      * @type {boolean}
      * @memberof ListBodyWithSqon
      */

@@ -319,3 +319,71 @@ func Test_SomaticSNVStatisticsHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
+
+// somaticSNVFiltersRecorder captures the query the handlers build, so the wiring of the annotation
+// filters can be asserted without a database.
+type somaticSNVFiltersRecorder struct {
+	MockSomaticSNVOccurrencesRepository
+	listQuery  types.OccurrenceListQuery
+	countQuery types.OccurrenceCountQuery
+}
+
+func (m *somaticSNVFiltersRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error) {
+	m.listQuery = query
+	return nil, nil
+}
+
+func (m *somaticSNVFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
+	m.countQuery = query
+	return 0, nil
+}
+
+func Test_SomaticSNVOccurrencesListHandler_Forwards_Annotation_Filters(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
+
+	body := `{"with_note":true,"with_flag":["pin","star"],"with_interpretation":true}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.True(t, repo.listQuery.WithNote())
+		assert.Equal(t, []types.OccurrenceFlagType{"pin", "star"}, repo.listQuery.WithFlag())
+		assert.True(t, repo.listQuery.WithInterpretation())
+	}
+}
+
+func Test_SomaticSNVOccurrencesCountHandler_Forwards_Annotation_Filters(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", OccurrencesSomaticSNVCountHandler(repo))
+
+	body := `{"with_note":true,"with_flag":["flag"],"with_interpretation":true}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/count", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.True(t, repo.countQuery.WithNote())
+		assert.Equal(t, []types.OccurrenceFlagType{"flag"}, repo.countQuery.WithFlag())
+		assert.True(t, repo.countQuery.WithInterpretation())
+	}
+}
+
+func Test_SomaticSNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid flag type")
+	assert.Nil(t, repo.listQuery)
+}

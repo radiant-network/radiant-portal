@@ -857,9 +857,14 @@ components:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_flag:
+          items:
+            $ref: '#/components/schemas/OccurrenceFlagType'
+          type: array
+          uniqueItems: false
+        with_interpretation:
+          type: boolean
         with_note:
-          description: Count only the occurrences having at least one note attached
-            to them.
           type: boolean
       type: object
     CreateBatchResponse:
@@ -1978,9 +1983,14 @@ components:
           uniqueItems: false
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_flag:
+          items:
+            $ref: '#/components/schemas/OccurrenceFlagType'
+          type: array
+          uniqueItems: false
+        with_interpretation:
+          type: boolean
         with_note:
-          description: Return only the occurrences having at least one note attached
-            to them.
           type: boolean
       type: object
     ObservationCategoricalBatch:

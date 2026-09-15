@@ -444,26 +444,26 @@ func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
 		}`, w.Body.String())
 }
 
-// withNoteRecorder captures the queries the handlers build so the wiring of the with_note body flag
+// occurrenceFiltersRecorder captures the queries the handlers build so the wiring of the with_note body flag
 // can be asserted without a database.
-type withNoteRecorder struct {
+type occurrenceFiltersRecorder struct {
 	MockRepository
 	listQuery  types.OccurrenceListQuery
 	countQuery types.OccurrenceCountQuery
 }
 
-func (m *withNoteRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
+func (m *occurrenceFiltersRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
 	m.listQuery = query
 	return nil, nil
 }
 
-func (m *withNoteRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
+func (m *occurrenceFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
 	m.countQuery = query
 	return 0, nil
 }
 
 func Test_OccurrencesListHandler_Forwards_WithNote(t *testing.T) {
-	repo := &withNoteRecorder{}
+	repo := &occurrenceFiltersRecorder{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
 
@@ -478,7 +478,7 @@ func Test_OccurrencesListHandler_Forwards_WithNote(t *testing.T) {
 }
 
 func Test_OccurrencesListHandler_Defaults_WithNote_To_False(t *testing.T) {
-	repo := &withNoteRecorder{}
+	repo := &occurrenceFiltersRecorder{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
 
@@ -493,7 +493,7 @@ func Test_OccurrencesListHandler_Defaults_WithNote_To_False(t *testing.T) {
 }
 
 func Test_OccurrencesCountHandler_Forwards_WithNote(t *testing.T) {
-	repo := &withNoteRecorder{}
+	repo := &occurrenceFiltersRecorder{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
 
@@ -508,7 +508,7 @@ func Test_OccurrencesCountHandler_Forwards_WithNote(t *testing.T) {
 }
 
 func Test_OccurrencesCountHandler_Defaults_WithNote_To_False(t *testing.T) {
-	repo := &withNoteRecorder{}
+	repo := &occurrenceFiltersRecorder{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
 
@@ -519,5 +519,94 @@ func Test_OccurrencesCountHandler_Defaults_WithNote_To_False(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	if assert.NotNil(t, repo.countQuery) {
 		assert.False(t, repo.countQuery.WithNote())
+	}
+}
+
+func Test_OccurrencesListHandler_Forwards_WithFlag(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["pin","star"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.Equal(t, []types.OccurrenceFlagType{"pin", "star"}, repo.listQuery.WithFlag())
+	}
+}
+
+func Test_OccurrencesListHandler_Defaults_WithFlag_To_Empty(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.Empty(t, repo.listQuery.WithFlag())
+	}
+}
+
+func Test_OccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid flag type")
+	assert.Nil(t, repo.listQuery)
+}
+
+func Test_OccurrencesCountHandler_Forwards_WithFlag(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte(`{"with_flag":["flag"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.Equal(t, []types.OccurrenceFlagType{"flag"}, repo.countQuery.WithFlag())
+	}
+}
+
+func Test_OccurrencesListHandler_Forwards_WithInterpretation(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.True(t, repo.listQuery.WithInterpretation())
+	}
+}
+
+func Test_OccurrencesCountHandler_Forwards_WithInterpretation(t *testing.T) {
+	repo := &occurrenceFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.True(t, repo.countQuery.WithInterpretation())
 	}
 }

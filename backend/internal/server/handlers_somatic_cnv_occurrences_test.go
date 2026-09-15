@@ -322,3 +322,55 @@ func Test_SomaticCNVOccurrencesListHandler_NonNumericSeqId_Returns404(t *testing
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
+
+// CNV has no interpretation table yet, so the filter is rejected rather than silently ignored.
+func Test_SomaticCNVOccurrencesListHandler_Rejects_WithInterpretation(t *testing.T) {
+	repo := &MockSomaticCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "with_interpretation is not supported for CNV occurrences")
+}
+
+func Test_SomaticCNVOccurrencesCountHandler_Rejects_WithInterpretation(t *testing.T) {
+	repo := &MockSomaticCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/count", OccurrencesSomaticCNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/cnv/1/1/1/count", bytes.NewBuffer([]byte(`{"with_interpretation":true}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "with_interpretation is not supported for CNV occurrences")
+}
+
+func Test_SomaticCNVOccurrencesListHandler_Accepts_WithFlag(t *testing.T) {
+	repo := &MockSomaticCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["star"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_SomaticCNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
+	repo := &MockSomaticCNVRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticCNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/cnv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid flag type")
+}

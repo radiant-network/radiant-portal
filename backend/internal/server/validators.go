@@ -1,10 +1,14 @@
 package server
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
+	"slices"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 // notnull rejects a null entry inside an array of pointers, e.g. `"fetuses": [null]`.
@@ -37,4 +41,19 @@ func init() {
 	if err := v.RegisterValidation("notnull", notnull); err != nil {
 		panic("registering the notnull validation: " + err.Error())
 	}
+}
+
+// validateOccurrenceAnnotationFilters checks the with_flag / with_interpretation filters of a list or
+// count body. interpretationSupported is false for CNV: interpretations key on the variant locus and
+// there is no CNV interpretation table yet, so the filter is rejected rather than silently ignored.
+func validateOccurrenceAnnotationFilters(withFlag []types.OccurrenceFlagType, withInterpretation bool, interpretationSupported bool) error {
+	for _, flagType := range withFlag {
+		if !slices.Contains(types.ValidOccurrenceFlagTypes, flagType) {
+			return fmt.Errorf("invalid flag type %q; must be one of %v", flagType, types.ValidOccurrenceFlagTypes)
+		}
+	}
+	if withInterpretation && !interpretationSupported {
+		return errors.New("with_interpretation is not supported for CNV occurrences")
+	}
+	return nil
 }

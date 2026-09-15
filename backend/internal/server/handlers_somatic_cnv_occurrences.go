@@ -51,8 +51,12 @@ func OccurrencesSomaticCNVListHandler(repo somaticCNVOccurrencesReader) gin.Hand
 			HandleValidationError(c, err)
 			return
 		}
+		if err := validateOccurrenceAnnotationFilters(body.WithFlag, body.WithInterpretation, false); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote))
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticCNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -116,7 +120,11 @@ func OccurrencesSomaticCNVCountHandler(repo somaticCNVOccurrencesReader) gin.Han
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.SomaticCNVOccurrencesFields, types.WithNoteFilter(body.WithNote))
+		if err := validateOccurrenceAnnotationFilters(body.WithFlag, body.WithInterpretation, false); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.SomaticCNVOccurrencesFields, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
 		if err != nil {
 			HandleValidationError(c, err)
 			return

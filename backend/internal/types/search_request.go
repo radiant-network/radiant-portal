@@ -96,7 +96,10 @@ type ListBodyWithSqon struct {
 	Offset           int        `json:"offset"`
 	PageIndex        int        `json:"page_index"`
 	Sort             []SortBody `json:"sort"`
-	WithNote         bool       `json:"with_note"`
+
+	WithNote           bool                 `json:"with_note"`
+	WithFlag           []OccurrenceFlagType `json:"with_flag" enums:"flag,pin,star"`
+	WithInterpretation bool                 `json:"with_interpretation"`
 }
 
 type SortBody struct {
@@ -105,8 +108,11 @@ type SortBody struct {
 } // @Name SortBody
 
 type CountBodyWithSqon struct {
-	Sqon     *Sqon `json:"sqon"`
-	WithNote bool  `json:"with_note"`
+	Sqon *Sqon `json:"sqon"`
+
+	WithNote           bool                 `json:"with_note"`
+	WithFlag           []OccurrenceFlagType `json:"with_flag" enums:"flag,pin,star"`
+	WithInterpretation bool                 `json:"with_interpretation"`
 } // @Name CountBodyWithSqon
 
 type AggregationBodyWithSqon struct {
