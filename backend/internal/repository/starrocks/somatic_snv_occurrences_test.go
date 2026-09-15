@@ -311,3 +311,55 @@ func Test_Somatic_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A
 		assert.EqualValues(t, 1, count)
 	})
 }
+
+func Test_Somatic_SNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_With_A_Listed_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        74,
+			TaskID:       74,
+			OccurrenceID: "1000",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count)
+
+		starred, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, starred)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}
+
+// The somatic interpretation fixtures key on sequencing 1, which no somatic occurrence uses, so the
+// row is seeded here; cleanUp drops it afterwards because its case is not 1.
+func Test_Somatic_SNV_CountOccurrences_WithInterpretation_Counts_Only_Interpreted_Occurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_somatic (sequencing_id, case_id, locus_id, transcript_id, tenant_code) VALUES ('74', '2', '1000', 'T999', ?)`, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count)
+
+		interpreted, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, interpreted)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}

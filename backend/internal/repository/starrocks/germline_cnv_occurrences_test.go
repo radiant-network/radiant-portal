@@ -469,3 +469,64 @@ func Test_GermlineCNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A
 		assert.EqualValues(t, 1, count)
 	})
 }
+
+func Test_GermlineCNV_GetOccurrences_WithFlag_Keeps_Only_Occurrences_Flagged_With_A_Listed_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			FlagType:     types.OccurrenceFlagTypePin,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		pinned, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypePin}))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, pinned)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+			assert.Equal(t, types.OccurrenceFlagTypePin, occurrences[0].FlagType)
+		}
+
+		starred, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 1, starred)
+		assert.NoError(t, err)
+		assert.Empty(t, occurrences)
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_With_A_Listed_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			FlagType:     types.OccurrenceFlagTypePin,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 1, 1, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, count)
+
+		pinned, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypePin}))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 1, 1, pinned)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}

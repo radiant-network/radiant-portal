@@ -539,3 +539,32 @@ func Test_SomaticCNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_
 		assert.EqualValues(t, 1, count)
 	})
 }
+
+func Test_SomaticCNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_With_A_Listed_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        74,
+			TaskID:       74,
+			OccurrenceID: "1",
+			FlagType:     types.OccurrenceFlagTypeFlag,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticCNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, count)
+
+		flagged, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticCNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeFlag}))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, flagged)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count)
+	})
+}

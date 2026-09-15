@@ -47,8 +47,13 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	alias := cnvTable.Alias
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
+	// row per occurrence, so filtering on them beats a second scan of the federated tables.
 	if userQuery != nil && userQuery.WithNote() {
 		tx = tx.Where("note.occurrence_id IS NOT NULL")
+	}
+	if userQuery != nil && len(userQuery.WithFlag()) > 0 {
+		tx = tx.Where("flag.flag_type IN (?)", userQuery.WithFlag())
 	}
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by cnv_id to avoid duplicates when joining with gene panels tables
@@ -103,6 +108,10 @@ func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table,
 
 	if userQuery != nil && userQuery.WithNote() {
 		tx = keepOccurrencesWithNote(cnvTable, "cnv_id", caseId, seqId, tx)
+	}
+
+	if userQuery != nil && len(userQuery.WithFlag()) > 0 {
+		tx = keepOccurrencesWithFlag(cnvTable, "cnv_id", userQuery.WithFlag(), caseId, seqId, tx)
 	}
 
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
