@@ -335,6 +335,37 @@ export interface CNVGeneOverlap {
     'symbol': string;
 }
 /**
+ * User assigned to a case, as shown in the cases list and on the case entity page. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
+ * @export
+ * @interface CaseAssignee
+ */
+export interface CaseAssignee {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssignee
+     */
+    'email'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssignee
+     */
+    'first_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssignee
+     */
+    'last_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseAssignee
+     */
+    'user_id': string;
+}
+/**
  * 
  * @export
  * @interface CaseBatch
@@ -518,6 +549,12 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'analysis_catalog_name'?: string;
+    /**
+     * 
+     * @type {Array<CaseAssignee>}
+     * @memberof CaseEntity
+     */
+    'assignees': Array<CaseAssignee>;
     /**
      * 
      * @type {string}
@@ -1101,6 +1138,12 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'analysis_catalog_name'?: string;
+    /**
+     * 
+     * @type {Array<CaseAssignee>}
+     * @memberof CaseResult
+     */
+    'assignees': Array<CaseAssignee>;
     /**
      * 
      * @type {string}

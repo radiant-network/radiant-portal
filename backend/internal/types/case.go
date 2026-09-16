@@ -37,36 +37,37 @@ type Case struct {
 // @Description Line represented a case in case list
 // @Name CaseResult
 type CaseResult struct {
-	CaseID                   int       `json:"case_id" validate:"required"`
-	ProbandID                int       `json:"proband_id,omitempty"`
-	SubmitterProbandId       string    `json:"submitter_proband_id,omitempty"`
-	PriorityCode             string    `json:"priority_code,omitempty"`
-	StatusCode               string    `json:"status_code" validate:"required"`
-	CaseTypeCode             string    `json:"-"`
-	AnalysisCatalogCode      string    `json:"analysis_catalog_code,omitempty"`
-	AnalysisCatalogName      string    `json:"analysis_catalog_name,omitempty"`
-	CaseType                 string    `json:"case_type,omitempty"`
-	PrimaryConditionID       string    `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName     string    `json:"primary_condition_name,omitempty"`
-	OrderingOrganizationCode string    `json:"ordering_organization_code,omitempty"`
-	OrderingOrganizationName string    `json:"ordering_organization_name,omitempty"`
-	ProjectCode              string    `json:"project_code,omitempty"`
-	ProjectName              string    `json:"project_name,omitempty"`
-	CreatedOn                time.Time `json:"created_on" validate:"required"`
-	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
-	Prescriber               string    `json:"prescriber,omitempty"`
-	DiagnosisLabCode         string    `json:"diagnosis_lab_code,omitempty"`
-	DiagnosisLabName         string    `json:"diagnosis_lab_name,omitempty"`
-	OrganizationCode         string    `json:"organization_code,omitempty"`
-	OrganizationName         string    `json:"organization_name,omitempty"`
-	HasVariants              bool      `json:"has_variants" validate:"required"`
-	PanelCode                string    `json:"panel_code,omitempty"`
-	PanelName                string    `json:"panel_name,omitempty"`
-	CaseCategoryCode         string    `json:"case_category_code,omitempty"`
-	ProbandJhn               string    `json:"proband_jhn,omitempty"`
-	ProbandLifeStatusCode    string    `json:"proband_life_status_code,omitempty"`
-	ProbandFirstName         string    `json:"proband_first_name,omitempty"`
-	ProbandLastName          string    `json:"proband_last_name,omitempty"`
+	CaseID                   int                     `json:"case_id" validate:"required"`
+	ProbandID                int                     `json:"proband_id,omitempty"`
+	SubmitterProbandId       string                  `json:"submitter_proband_id,omitempty"`
+	PriorityCode             string                  `json:"priority_code,omitempty"`
+	StatusCode               string                  `json:"status_code" validate:"required"`
+	CaseTypeCode             string                  `json:"-"`
+	AnalysisCatalogCode      string                  `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName      string                  `json:"analysis_catalog_name,omitempty"`
+	CaseType                 string                  `json:"case_type,omitempty"`
+	PrimaryConditionID       string                  `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName     string                  `json:"primary_condition_name,omitempty"`
+	OrderingOrganizationCode string                  `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName string                  `json:"ordering_organization_name,omitempty"`
+	ProjectCode              string                  `json:"project_code,omitempty"`
+	ProjectName              string                  `json:"project_name,omitempty"`
+	CreatedOn                time.Time               `json:"created_on" validate:"required"`
+	UpdatedOn                time.Time               `json:"updated_on" validate:"required"`
+	Prescriber               string                  `json:"prescriber,omitempty"`
+	DiagnosisLabCode         string                  `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName         string                  `json:"diagnosis_lab_name,omitempty"`
+	OrganizationCode         string                  `json:"organization_code,omitempty"`
+	OrganizationName         string                  `json:"organization_name,omitempty"`
+	HasVariants              bool                    `json:"has_variants" validate:"required"`
+	PanelCode                string                  `json:"panel_code,omitempty"`
+	PanelName                string                  `json:"panel_name,omitempty"`
+	CaseCategoryCode         string                  `json:"case_category_code,omitempty"`
+	ProbandJhn               string                  `json:"proband_jhn,omitempty"`
+	ProbandLifeStatusCode    string                  `json:"proband_life_status_code,omitempty"`
+	ProbandFirstName         string                  `json:"proband_first_name,omitempty"`
+	ProbandLastName          string                  `json:"proband_last_name,omitempty"`
+	Assignees                JsonArray[CaseAssignee] `json:"assignees" validate:"required"`
 }
 
 // CaseEntity - Case Entity data
@@ -102,6 +103,7 @@ type CaseEntity struct {
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
 	HasIGVFiles              bool                                      `json:"has_igv_files" validate:"required"`
+	Assignees                JsonArray[CaseAssignee]                   `json:"assignees" validate:"required"`
 }
 
 // CaseSequencingExperiment - Sequencing experiment to display in a Case

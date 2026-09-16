@@ -48,6 +48,20 @@ func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQu
 	}, &count, nil
 }
 
+// ListForCases stands in for the case assignments repository. Only case 1 is assigned, so the
+// handler tests cover both a populated avatar stack and the unassigned state.
+func (m *MockRepository) ListForCases(ctx context.Context, caseIDs []int) (map[int][]types.CaseAssignee, error) {
+	assignees := map[int][]types.CaseAssignee{}
+	for _, caseID := range caseIDs {
+		if caseID == 1 {
+			assignees[caseID] = []types.CaseAssignee{
+				{UserID: "79a8855e-3782-4dc8-be2a-8afdb34d6359", FirstName: "Wendy", LastName: "Walsh", Email: "wendy@test.authz"},
+			}
+		}
+	}
+	return assignees, nil
+}
+
 func (m *MockRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error) {
 	var result = []types.AutocompleteResult{
 		{Type: "case_id", Value: "1"},
@@ -152,7 +166,7 @@ func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) err
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/:tenant/cases/search", SearchCasesHandler(repo))
+	router.POST("/:tenant/cases/search", SearchCasesHandler(repo, repo))
 	body := `{
 			"additional_fields":[]
 	}`
@@ -166,7 +180,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"analysis_catalog_code":"WGA",
 			"analysis_catalog_name":"Whole Genome Analysis",
 			"case_type": "germline_family",
-			"case_id":1,
+			"assignees":[{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"}], "case_id":1,
 			"created_on":"2000-01-01T00:00:00Z",
 			"ordering_organization_code":"CHUSJ",
 			"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
@@ -274,7 +288,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -291,7 +305,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"analysis_catalog_name":"Whole Genome Analysis",
 		"case_category_code": "postnatal",
 		"case_category_name": "Postnatal",
-		"case_id":1,
+		"assignees":[{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"}], "case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2000-01-01T00:00:00Z", 
 		"members":[
@@ -366,7 +380,7 @@ func Test_CaseEntityHandler_NoIGVTracks(t *testing.T) {
 	igvRepo := &MockIGVRepository{}
 
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -390,7 +404,7 @@ func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
