@@ -470,24 +470,24 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		]}`, w.Body.String())
 }
 
-type caseStatusWriterMock struct {
+type casePatcherMock struct {
 	found     bool
 	err       error
 	calls     int
 	gotCaseId int
-	gotStatus string
+	gotPatch  types.CasePatch
 }
 
-func (m *caseStatusWriterMock) UpdateCaseStatus(_ context.Context, caseId int, statusCode string) (bool, error) {
+func (m *casePatcherMock) PatchCase(_ context.Context, caseId int, patch types.CasePatch) (bool, error) {
 	m.calls++
 	m.gotCaseId = caseId
-	m.gotStatus = statusCode
+	m.gotPatch = patch
 	return m.found, m.err
 }
 
-func servePatchCaseStatus(repo caseStatusWriter, path string, body string) *httptest.ResponseRecorder {
+func servePatchCase(repo casePatcher, path string, body string) *httptest.ResponseRecorder {
 	router := gin.Default()
-	router.PATCH("/:tenant/cases/:case_id/status", PatchCaseStatusHandler(repo))
+	router.PATCH("/:tenant/cases/:case_id", PatchCaseHandler(repo))
 
 	req, _ := http.NewRequest("PATCH", path, bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -496,86 +496,104 @@ func servePatchCaseStatus(repo caseStatusWriter, path string, body string) *http
 	return w
 }
 
-func Test_PatchCaseStatusHandler_AppliesUserStatus(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"in_review"}`)
+func Test_PatchCaseHandler_AppliesUserStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review"}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"case_id":1,"status_code":"in_review"}`, w.Body.String())
 	assert.Equal(t, 1, repo.gotCaseId)
-	assert.Equal(t, "in_review", repo.gotStatus)
+	assert.Equal(t, "in_review", *repo.gotPatch.StatusCode)
 }
 
-func Test_PatchCaseStatusHandler_AppliesStatusesInAnyOrder(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"reopened"}`)
+func Test_PatchCaseHandler_AppliesStatusesInAnyOrder(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"reopened"}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "reopened", repo.gotStatus)
+	assert.Equal(t, "reopened", *repo.gotPatch.StatusCode)
 }
 
-func Test_PatchCaseStatusHandler_RejectsSubmitted(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"submitted"}`)
+func Test_PatchCaseHandler_RejectsBodyWithNoPatchableField(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"note":"not patchable here"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"no field to update, expected at least one of: status_code"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_RejectsEmptyBody(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"no field to update, expected at least one of: status_code"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_RejectsSubmitted(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"submitted"}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, `{"status":400,"message":"status_code \"submitted\" is system-applied and cannot be set by a user"}`, w.Body.String())
 	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
 }
 
-func Test_PatchCaseStatusHandler_RejectsProcessing(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"processing"}`)
+func Test_PatchCaseHandler_RejectsProcessing(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"processing"}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
 }
 
-func Test_PatchCaseStatusHandler_RejectsUnknownStatus(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"archived"}`)
+func Test_PatchCaseHandler_RejectsUnknownStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"archived"}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
 }
 
-func Test_PatchCaseStatusHandler_RejectsMissingStatus(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{}`)
+func Test_PatchCaseHandler_RejectsEmptyStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":""}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
 }
 
-func Test_PatchCaseStatusHandler_RejectsMalformedBody(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", "not json")
+func Test_PatchCaseHandler_RejectsMalformedBody(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", "not json")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls)
 }
 
-func Test_PatchCaseStatusHandler_UnmatchedCaseNotFound(t *testing.T) {
-	repo := &caseStatusWriterMock{found: false}
-	w := servePatchCaseStatus(repo, "/radiant/cases/999999/status", `{"status_code":"in_review"}`)
+func Test_PatchCaseHandler_UnmatchedCaseNotFound(t *testing.T) {
+	repo := &casePatcherMock{found: false}
+	w := servePatchCase(repo, "/radiant/cases/999999", `{"status_code":"in_review"}`)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.JSONEq(t, `{"status":404,"message":"case not found"}`, w.Body.String())
 }
 
-func Test_PatchCaseStatusHandler_MalformedCaseIdNotFound(t *testing.T) {
-	repo := &caseStatusWriterMock{found: true}
-	w := servePatchCaseStatus(repo, "/radiant/cases/not-a-number/status", `{"status_code":"in_review"}`)
+func Test_PatchCaseHandler_MalformedCaseIdNotFound(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/not-a-number", `{"status_code":"in_review"}`)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.JSONEq(t, `{"status":404,"message":"case_id not found"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
 }
 
-func Test_PatchCaseStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
-	repo := &caseStatusWriterMock{err: errors.New("connection refused")}
-	w := servePatchCaseStatus(repo, "/radiant/cases/1/status", `{"status_code":"in_review"}`)
+func Test_PatchCaseHandler_RepositoryErrorIsInternal(t *testing.T) {
+	repo := &casePatcherMock{err: errors.New("connection refused")}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review"}`)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.NotContains(t, w.Body.String(), "connection refused")

@@ -22,9 +22,9 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateCaseStatusInput(BaseModel):
+class CasePatch(BaseModel):
     """
-    A case status change applied by a user.
+    Case fields to change. Omitted fields are left untouched.
     """ # noqa: E501
     status_code: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["status_code"]
@@ -47,7 +47,7 @@ class UpdateCaseStatusInput(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateCaseStatusInput from a JSON string"""
+        """Create an instance of CasePatch from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,7 +72,7 @@ class UpdateCaseStatusInput(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateCaseStatusInput from a dict"""
+        """Create an instance of CasePatch from a dict"""
         if obj is None:
             return None
 

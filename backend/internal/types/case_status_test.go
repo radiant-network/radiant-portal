@@ -37,3 +37,28 @@ func Test_CaseStatuses_UserAndSystemSetsAreDisjoint(t *testing.T) {
 		assert.NotContainsf(t, UserAppliedCaseStatuses, code, "%q is listed as both system- and user-applied", code)
 	}
 }
+
+func Test_CasePatch_AcceptsAStatusChange(t *testing.T) {
+	assert.NoError(t, CasePatch{StatusCode: strPtr(CaseStatusInReview)}.Validate())
+}
+
+func Test_CasePatch_RejectsEmptyPatch(t *testing.T) {
+	err := CasePatch{}.Validate()
+	assert.EqualError(t, err, "no field to update, expected at least one of: status_code")
+}
+
+func Test_CasePatch_RejectsEmptyStatusCode(t *testing.T) {
+	err := CasePatch{StatusCode: strPtr("")}.Validate()
+	assert.EqualError(t, err, "status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked")
+}
+
+func Test_CasePatch_RejectsSystemAppliedStatus(t *testing.T) {
+	err := CasePatch{StatusCode: strPtr(CaseStatusProcessing)}.Validate()
+	assert.EqualError(t, err, `status_code "processing" is system-applied and cannot be set by a user`)
+}
+
+func Test_CasePatch_RejectsUnknownStatus(t *testing.T) {
+	assert.Error(t, CasePatch{StatusCode: strPtr("archived")}.Validate())
+}
+
+func strPtr(s string) *string { return &s }

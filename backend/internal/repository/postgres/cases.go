@@ -65,16 +65,28 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 	return nil
 }
 
-// UpdateCaseStatus applies a status to one case and reports whether such a case exists. It is
-// constrained to the active tenant, so another tenant's case matches nothing and comes back as
-// missing rather than updated .
-func (r *CasesRepository) UpdateCaseStatus(ctx context.Context, caseID int, statusCode string) (bool, error) {
+// PatchCase applies the fields a patch carries to one case and reports whether such a case
+// exists. Unlike UpdateCase, which replaces every scalar field for the batch path, it touches
+// only the columns the patch.
+//
+// It is constrained to the active tenant, so another tenant's case matches nothing and comes
+// back as missing rather than updated. The caller validates first (types.CasePatch.Validate):
+// an empty patch would build an UPDATE with no assignments.
+func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, patch types.CasePatch) (bool, error) {
+	updates := map[string]any{}
+	if patch.StatusCode != nil {
+		updates["status_code"] = *patch.StatusCode
+	}
+	if len(updates) == 0 {
+		return false, fmt.Errorf("no field to update on case %d", caseID)
+	}
+
 	tx := r.db.WithContext(ctx).Model(&types.Case{}).
 		Scopes(WithTenant(ctx)).
 		Where("id = ?", caseID).
-		Update("status_code", statusCode)
+		Updates(updates)
 	if tx.Error != nil {
-		return false, fmt.Errorf("error updating status of case %d: %w", caseID, tx.Error)
+		return false, fmt.Errorf("error patching case %d: %w", caseID, tx.Error)
 	}
 	return tx.RowsAffected > 0, nil
 }

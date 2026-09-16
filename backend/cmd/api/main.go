@@ -163,7 +163,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.POST("/:case_id/documents/search", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))
-	casesGroup.PATCH("/:case_id/status", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseStatusHandler(repoCasesWrite))
+	casesGroup.PATCH("/:case_id", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseHandler(repoCasesWrite))
 
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))

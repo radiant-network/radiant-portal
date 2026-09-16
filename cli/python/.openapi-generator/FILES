@@ -21,12 +21,12 @@ docs/CaseExam.md
 docs/CaseFamilyHistory.md
 docs/CaseFetusBatch.md
 docs/CaseFilters.md
+docs/CasePatch.md
 docs/CasePatientBatch.md
 docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
 docs/CaseSequencingExperiment.md
 docs/CaseSequencingExperimentBatch.md
-docs/CaseStatusResponse.md
 docs/CaseTask.md
 docs/CaseTaskBatch.md
 docs/CasesApi.md
@@ -94,6 +94,7 @@ docs/OrganizationResponse.md
 docs/OrganizationsApi.md
 docs/OutputDocumentBatch.md
 docs/PatchCaseBatchBody.md
+docs/PatchCaseResponse.md
 docs/PatientBatch.md
 docs/PatientsApi.md
 docs/PubmedCitation.md
@@ -126,7 +127,6 @@ docs/Term.md
 docs/Transcript.md
 docs/UpdateCaseBatch.md
 docs/UpdateCaseBatchBody.md
-docs/UpdateCaseStatusInput.md
 docs/UpdateOccurrenceNoteInput.md
 docs/UpdateOrganizationRequest.md
 docs/UpdateRoleRequest.md
@@ -205,12 +205,12 @@ radiant_python/models/case_exam.py
 radiant_python/models/case_family_history.py
 radiant_python/models/case_fetus_batch.py
 radiant_python/models/case_filters.py
+radiant_python/models/case_patch.py
 radiant_python/models/case_patient_batch.py
 radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
 radiant_python/models/case_sequencing_experiment.py
 radiant_python/models/case_sequencing_experiment_batch.py
-radiant_python/models/case_status_response.py
 radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py
@@ -267,6 +267,7 @@ radiant_python/models/omim_gene_panel.py
 radiant_python/models/organization_response.py
 radiant_python/models/output_document_batch.py
 radiant_python/models/patch_case_batch_body.py
+radiant_python/models/patch_case_response.py
 radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py
@@ -293,7 +294,6 @@ radiant_python/models/term.py
 radiant_python/models/transcript.py
 radiant_python/models/update_case_batch.py
 radiant_python/models/update_case_batch_body.py
-radiant_python/models/update_case_status_input.py
 radiant_python/models/update_occurrence_note_input.py
 radiant_python/models/update_organization_request.py
 radiant_python/models/update_role_request.py

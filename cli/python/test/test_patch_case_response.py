@@ -14,10 +14,10 @@
 
 import unittest
 
-from radiant_python.models.case_status_response import CaseStatusResponse
+from radiant_python.models.patch_case_response import PatchCaseResponse
 
-class TestCaseStatusResponse(unittest.TestCase):
-    """CaseStatusResponse unit test stubs"""
+class TestPatchCaseResponse(unittest.TestCase):
+    """PatchCaseResponse unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,26 +25,26 @@ class TestCaseStatusResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> CaseStatusResponse:
-        """Test CaseStatusResponse
+    def make_instance(self, include_optional) -> PatchCaseResponse:
+        """Test PatchCaseResponse
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `CaseStatusResponse`
+        # uncomment below to create an instance of `PatchCaseResponse`
         """
-        model = CaseStatusResponse()
+        model = PatchCaseResponse()
         if include_optional:
-            return CaseStatusResponse(
+            return PatchCaseResponse(
                 case_id = 56,
                 status_code = ''
             )
         else:
-            return CaseStatusResponse(
+            return PatchCaseResponse(
         )
         """
 
-    def testCaseStatusResponse(self):
-        """Test CaseStatusResponse"""
+    def testPatchCaseResponse(self):
+        """Test PatchCaseResponse"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

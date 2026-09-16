@@ -1810,7 +1810,7 @@
           "response": []
         },
         {
-          "name": "Update Status",
+          "name": "Update Case",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1834,15 +1834,14 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/cases/1/status",
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/1",
               "host": [
                 "{{radiant-api-url}}"
               ],
               "path": [
                 "{{tenant}}",
                 "cases",
-                "1",
-                "status"
+                "1"
               ]
             }
           },

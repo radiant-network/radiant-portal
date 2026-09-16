@@ -32,12 +32,12 @@ from radiant_python.models.case_exam import CaseExam
 from radiant_python.models.case_family_history import CaseFamilyHistory
 from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.case_patch import CasePatch
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_result import CaseResult
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
-from radiant_python.models.case_status_response import CaseStatusResponse
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
@@ -93,6 +93,7 @@ from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.organization_response import OrganizationResponse
 from radiant_python.models.output_document_batch import OutputDocumentBatch
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
+from radiant_python.models.patch_case_response import PatchCaseResponse
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
@@ -119,7 +120,6 @@ from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
 from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
-from radiant_python.models.update_case_status_input import UpdateCaseStatusInput
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
 from radiant_python.models.update_organization_request import UpdateOrganizationRequest
 from radiant_python.models.update_role_request import UpdateRoleRequest

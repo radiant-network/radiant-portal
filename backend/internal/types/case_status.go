@@ -50,13 +50,25 @@ func ValidateUserAppliedCaseStatus(code string) error {
 	return nil
 }
 
-// @Description A case status change applied by a user.
-type UpdateCaseStatusInput struct {
-	StatusCode string `json:"status_code" example:"in_review"`
-} // @name UpdateCaseStatusInput
+// CasePatch carries the case fields a PATCH may change. status_code is the only one so far.
+// @Description Case fields to change. Omitted fields are left untouched.
+type CasePatch struct {
+	StatusCode *string `json:"status_code,omitempty" example:"in_review"`
+} // @name CasePatch
 
-// @Description A case's status after a successful change.
-type CaseStatusResponse struct {
+// Validate checks the fields the patch actually carries. An empty patch is refused rather than
+// treated as a no-op: a request that changes nothing is a client bug worth surfacing.
+func (p CasePatch) Validate() error {
+	if p.StatusCode == nil {
+		return fmt.Errorf("no field to update, expected at least one of: %s", strings.Join(patchableCaseFields, ", "))
+	}
+	return ValidateUserAppliedCaseStatus(*p.StatusCode)
+}
+
+var patchableCaseFields = []string{"status_code"}
+
+// @Description A case after a successful patch, echoing the fields that were applied.
+type PatchCaseResponse struct {
 	CaseID     int    `json:"case_id"`
-	StatusCode string `json:"status_code"`
-} // @name CaseStatusResponse
+	StatusCode string `json:"status_code,omitempty"`
+} // @name PatchCaseResponse
