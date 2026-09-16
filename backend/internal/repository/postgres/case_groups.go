@@ -84,18 +84,3 @@ func (r *CaseGroupsRepository) GetCaseGroupByName(ctx context.Context, tenantCod
 	}
 	return &group, nil
 }
-
-// ListCaseGroupsByCaseID is the reverse lookup: every group of the tenant that contains the case.
-// The predicate is the exact expression of the GIN index case_group_case_ids_idx, and only the
-// `@>` operator is indexable; `? = ANY(...)` would be correct but scan the table.
-func (r *CaseGroupsRepository) ListCaseGroupsByCaseID(ctx context.Context, tenantCode string, caseID int) ([]types.CaseGroup, error) {
-	groups := []types.CaseGroup{}
-	err := r.db.WithContext(ctx).
-		Where("tenant_code = ? AND string_to_array(case_ids, ',')::int[] @> ARRAY[?]::int[]", tenantCode, caseID).
-		Order("name").
-		Find(&groups).Error
-	if err != nil {
-		return nil, fmt.Errorf("error listing case groups of case %d in tenant %q: %w", caseID, tenantCode, err)
-	}
-	return groups, nil
-}

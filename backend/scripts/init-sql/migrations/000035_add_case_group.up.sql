@@ -10,8 +10,3 @@ CREATE TABLE public.case_group (
     created_by  text,
     PRIMARY KEY (tenant_code, name)
 );
-
--- Reverse lookup (the groups a case belongs to) stays an index probe as the table grows.
--- Only `string_to_array(case_ids, ',')::int[] @> ARRAY[?]` on this exact expression uses it;
--- `? = ANY(...)` does not.
-CREATE INDEX case_group_case_ids_idx ON public.case_group USING GIN ((string_to_array(case_ids, ',')::int[]));

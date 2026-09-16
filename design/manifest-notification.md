@@ -23,11 +23,11 @@ Deliverables: a French design page presented to the team, this file (EN, file-le
 | STAT / RAPIDE | Template data exposes `HasStat` (any case `priority_code = 'stat'`), `AnalysisCodes`, and the func `HasAnalysis "CODE"`; the QLIN `[STAT]`/`[RAPIDE]` prefixes live in `manifest_qlin.tmpl`. |
 | Locale | None. One template per tenant, in the tenant's language. If a bilingual mail is wanted later, the template carries both languages in one message (Government of Canada style). |
 | SMTP | `github.com/wneessen/go-mail`. Env read lazily (`SMTP_*`, `NOTIFICATION_CC/BCC`, `PORTAL_URL`, `NOTIFICATION_TIMEZONE`). Prod relay is plain port 25, so `SMTP_TLS=none` must be supported. |
-| Gate | `can_ingest_data` (`data_manager` role) for the `case_groups` routes: caller is the pipeline service account. Org-scoped action, request names no org → `requireActionInTenant` (like the patient/sample/sequencing batches); routes listed in `expectedTenantActions` and `inTenantOrgActionRoutes` of `cmd/api/action_enforcement_integration_test.go`. |
+| Gate | `can_ingest_data` (`data_manager` role) to write case groups and to notify: caller is the pipeline service account. `GET /case_groups/{name}` is `can_search_case` (PR review 2026-09-16) so a portal user can resolve a group into a case filter (CLIN-6229). Org-scoped action, request names no org → `requireActionInTenant` (like the patient/sample/sequencing batches); routes listed in `expectedTenantActions` and `inTenantOrgActionRoutes` of `cmd/api/action_enforcement_integration_test.go`. |
 | Read path | Postgres-direct (like interpretations / batch). `postgres.WithTenant(ctx)` is a no-op unless `TENANT_VIEWS_READ_ENABLED`, so every repo method takes `tenantCode` explicitly (precedent `AuthRepository.OrgsForDocument`). Nothing new is federated; `case_group` is Postgres-only. |
 | Group name | Client-chosen, in the body of `POST /case_groups` and in the URL of `GET` / `notify`. Pipeline uses `postprocessing-<run_tag>` (`sanitize_run_tag(run_id)`, datetime-based, unique, stable across retries); manual DAG defaults to `manual-<run_tag>`. Becomes a filename and an SMTP header: `^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$`, 400 otherwise (`types.ValidateCaseGroupName`). |
 | Notify response | 200 with the group `{name, tenant_code, case_ids}` (no id) and per-lab entries: `organization_code`, `recipients`, `case_count`, `document_count`, `status` (`sent`, `skipped_no_contact`, `skipped_no_documents`, `failed`), `error?`, plus **template context** (team 2026-09-15): `template` (file name used) and `context` (`has_stat`, `analysis_codes`, `case_ids`, `manifest_filename`). 404 unknown group; 400 bad name; 500 when the request fails before any send (settings, template missing for the tenant, DB reads). Partial failure stays 200. |
-| Case → groups lookup (UI filter, CLIN-6229) | The URL filter goes group → cases: handler reads `case_group.case_ids` by name and injects `case_id in (...)` (precedent `caseIdFilter`, `handlers_cases.go`). No column on `cases`, a case can belong to several groups (re-runs). The reverse direction (groups of a case, if ever shown on the case page) is exact in Postgres without a `LIKE`: `WHERE tenant_code = ? AND string_to_array(case_ids, ',')::int[] @> ARRAY[?::int]`, served by the GIN expression index `case_group_case_ids_idx` (A1). `= ANY(...)` would be correct too but ignores the index; use `@>`. |
+| Case → groups lookup (UI filter, CLIN-6229) | The URL filter goes group → cases: handler reads `case_group.case_ids` by name and injects `case_id in (...)` (precedent `caseIdFilter`, `handlers_cases.go`). No column on `cases`, a case can belong to several groups (re-runs). No reverse lookup and no index on `case_ids` (PR review 2026-09-16: no caller; hundreds of rows a year, a seq scan is fine and an expression GIN index is one migration away if a screen ever needs groups-of-a-case). |
 
 Open questions still for the team: trio with 2/3 members sequenced (second email later, same as QLIN per batch); `patient_id` = internal Radiant id, not MRN.
 
@@ -45,9 +45,6 @@ CREATE TABLE public.case_group (
     created_on timestamptz NOT NULL DEFAULT now(),
     created_by text,
     PRIMARY KEY (tenant_code, name));
--- Reverse lookup (groups of a case) stays an index probe as the table grows. Only `@>` on this exact
--- expression uses it; `= ANY(...)` does not.
-CREATE INDEX case_group_case_ids_idx ON public.case_group USING GIN ((string_to_array(case_ids, ',')::int[]));
 
 ALTER TABLE public.organization ADD COLUMN notification_emails text;
 ```

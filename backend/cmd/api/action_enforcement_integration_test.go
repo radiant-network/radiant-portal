@@ -212,7 +212,6 @@ var orgResolvedTenantRoutes = map[string]bool{
 var inTenantOrgActionRoutes = map[string]bool{
 	"GET /:tenant/batches/:batch_id": true,
 	"POST /:tenant/case_groups":      true,
-	"GET /:tenant/case_groups/:name": true,
 	"POST /:tenant/patients/batch":   true,
 	"PUT /:tenant/patients/batch":    true,
 	"POST /:tenant/samples/batch":    true,
@@ -269,7 +268,7 @@ var expectedTenantActions = map[string]string{
 	"POST /:tenant/organizations":                                types.ActionManageOrg,
 	"PUT /:tenant/organizations/:code":                           types.ActionManageOrg,
 	"POST /:tenant/case_groups":                                  types.ActionIngestData,
-	"GET /:tenant/case_groups/:name":                             types.ActionIngestData,
+	"GET /:tenant/case_groups/:name":                             types.ActionSearchCase,
 	"POST /:tenant/cases/search":                                 types.ActionSearchCase,
 	"GET /:tenant/cases/autocomplete":                            types.ActionSearchCase,
 	"GET /:tenant/cases/filters":                                 types.ActionSearchCase,

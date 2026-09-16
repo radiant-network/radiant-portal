@@ -74,7 +74,7 @@ func PostCaseGroupHandler(store caseGroupStore, auth utils.Auth) gin.HandlerFunc
 // @Summary Get a case group
 // @Id getCaseGroup
 // @Description Returns the case group with this name in the tenant in the path, with its case ids.
-// @Description Requires the `can_ingest_data` action.
+// @Description Requires the `can_search_case` action, so the portal can turn a group into a case filter.
 // @Tags case_groups
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"

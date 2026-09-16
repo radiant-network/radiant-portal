@@ -295,7 +295,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	caseGroupsGroup := tenantRoutes.Group("/case_groups")
 	caseGroupsGroup.POST("", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupHandler(repoCaseGroups, auth))
-	caseGroupsGroup.GET("/:name", requireActionInTenant(types.ActionIngestData), server.GetCaseGroupHandler(repoCaseGroups))
+	caseGroupsGroup.GET("/:name", requireAction(types.ActionSearchCase), server.GetCaseGroupHandler(repoCaseGroups))
 
 	batchesGroup := tenantRoutes.Group("/batches")
 	batchesGroup.GET("/:batch_id", requireActionInTenant(types.ActionIngestData), server.GetBatchHandler(repoBatches))
