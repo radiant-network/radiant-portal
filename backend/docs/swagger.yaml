@@ -155,6 +155,22 @@ components:
       - overlapping_gene_percent
       - symbol
       type: object
+    CaseAssignee:
+      description: User assigned to a case, as shown in the cases list and on the
+        case entity page. Name and email are the attributes the identity registry
+        holds for them, and are absent for an account that never filled them in.
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        user_id:
+          type: string
+      required:
+      - user_id
+      type: object
     CaseBatch:
       properties:
         analysis_code:
@@ -253,6 +269,11 @@ components:
           type: string
         analysis_catalog_name:
           type: string
+        assignees:
+          items:
+            $ref: '#/components/schemas/CaseAssignee'
+          type: array
+          uniqueItems: false
         case_category_code:
           type: string
         case_category_name:
@@ -313,6 +334,7 @@ components:
         updated_on:
           type: string
       required:
+      - assignees
       - case_category_code
       - case_category_name
       - case_id
@@ -588,6 +610,11 @@ components:
           type: string
         analysis_catalog_name:
           type: string
+        assignees:
+          items:
+            $ref: '#/components/schemas/CaseAssignee'
+          type: array
+          uniqueItems: false
         case_category_code:
           type: string
         case_id:
@@ -643,6 +670,7 @@ components:
         updated_on:
           type: string
       required:
+      - assignees
       - case_id
       - created_on
       - has_variants

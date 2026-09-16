@@ -25,6 +25,7 @@ from radiant_python.models.batch_message import BatchMessage
 from radiant_python.models.batch_report import BatchReport
 from radiant_python.models.batch_summary import BatchSummary
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.case_batch import CaseBatch
 from radiant_python.models.case_batch_patch import CaseBatchPatch
 from radiant_python.models.case_entity import CaseEntity

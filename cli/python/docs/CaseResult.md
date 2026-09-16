@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
+**assignees** | [**List[CaseAssignee]**](CaseAssignee.md) |  | 
 **case_category_code** | **str** |  | [optional] 
 **case_id** | **int** |  | 
 **case_type** | **str** |  | [optional] 
