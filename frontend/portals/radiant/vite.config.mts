@@ -17,24 +17,6 @@ const configs: Record<string, PortalConfig> = {
 const project = process.env.THEME || 'radiant';
 
 export default defineConfig({
-  // Reached only from lazily-loaded route chunks, so Vite discovers them one at a
-  // time and re-optimizes on each.
-  optimizeDeps: {
-    include: [
-      '@dnd-kit/core',
-      '@dnd-kit/sortable',
-      '@dnd-kit/utilities',
-      'filesize',
-      'uuid',
-      'lodash',
-      'lodash/capitalize',
-      'lodash/cloneDeep',
-      'lodash/isEqual',
-      'lodash/take',
-      'lodash/uniq',
-      'lodash/uniqBy',
-    ],
-  },
   define: {
     __PROJECT__: configs[project],
     __THEME__: JSON.stringify(project),
