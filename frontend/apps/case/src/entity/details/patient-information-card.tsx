@@ -1,5 +1,4 @@
 import { type ComponentProps, useEffect, useState } from 'react';
-import { formatDate } from 'date-fns';
 
 import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shad
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { getMemberKey } from '@/components/lib/case-entity';
+import { formatDate } from '@/components/lib/date';
 import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
@@ -50,7 +50,7 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
             label={t('case_entity.patient_information.dob')}
             labelTooltipText={t('case_entity.details.date_format_tooltip')}
           >
-            {formatDate(member.date_of_birth, t('common.date.year_month_day'))}
+            {formatDate(member.date_of_birth, t('common.date.year_month_day'), true)}
           </InformationField>
         )}
 

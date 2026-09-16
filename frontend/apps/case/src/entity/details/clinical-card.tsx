@@ -4,6 +4,7 @@ import { ArrowUpRightIcon, AudioWaveformIcon } from 'lucide-react';
 
 import type { CaseEntity, Term } from '@/api/api';
 import AffectedStatusBadge, { type AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
+import { PROBAND } from '@/components/base/constants';
 import ExpandableList from '@/components/base/list/expandable-list';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Button } from '@/components/base/shadcn/button';
@@ -13,7 +14,6 @@ import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { getMemberKey } from '@/components/lib/case-entity';
 import { cn } from '@/components/lib/utils';
-import { PROBAND } from 'components/base/constants';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
 
@@ -44,6 +44,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const proband = data.members.find(member => member.relationship_to_proband === PROBAND);
+  const probandNotes = proband?.notes ?? [];
   const family = data.members.filter(
     member => member.relationship_to_proband && member.relationship_to_proband != PROBAND,
   );
@@ -103,10 +104,18 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           </div>
 
           {/* Clinical Note */}
-          <Card className="p-4 gap-4 shadow-none">
-            <CardTitle className="text-base">{t('case_entity.details.clinical_note')}</CardTitle>
-            <p className="text-sm">{data.note}</p>
-          </Card>
+          {probandNotes.length > 0 && (
+            <Card className="p-4 gap-4 shadow-none">
+              <CardTitle className="text-base">{t('case_entity.details.clinical_note')}</CardTitle>
+              <div className="flex flex-col gap-2">
+                {probandNotes.map((note, index) => (
+                  <p key={index} className="text-sm whitespace-pre-line">
+                    {note}
+                  </p>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Family member */}
@@ -115,32 +124,45 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             <CardSeparator />
 
             <div className={cn('flex flex-col gap-4 flex-1')}>
-              {family.map(member => (
-                <Card key={getMemberKey(member)} className="p-4 gap-4 flex shadow-none">
-                  {/* Relationship */}
-                  <CardTitle>{t(`common.relationships.${member.relationship_to_proband}`)}</CardTitle>
+              {family.map(member => {
+                const hasNonObservedPhenotypes = (member.non_observed_phenotypes?.length ?? 0) > 0;
+                const hasPhenotypes = (member.observed_phenotypes?.length ?? 0) > 0 || hasNonObservedPhenotypes;
 
-                  {/* Affected Status Code */}
-                  {member.affected_status_code && (
-                    <div>
-                      <AffectedStatusBadge status={member.affected_status_code as AffectedStatusProps} />
+                return (
+                  <Card key={getMemberKey(member)} className="p-4 gap-4 flex shadow-none">
+                    {/* Relationship */}
+                    <CardTitle>{t(`common.relationships.${member.relationship_to_proband}`)}</CardTitle>
+
+                    {/* Affected Status Code */}
+                    {member.affected_status_code && (
+                      <div>
+                        <AffectedStatusBadge status={member.affected_status_code as AffectedStatusProps} />
+                      </div>
+                    )}
+
+                    {/* Phenotypes */}
+                    <div className="flex flex-col gap-2">
+                      {hasPhenotypes ? (
+                        <>
+                          <PhenotypeSection
+                            title={t('case_entity.details.phenotypes_observed')}
+                            phenotypes={member.observed_phenotypes}
+                          />
+
+                          {hasNonObservedPhenotypes && (
+                            <PhenotypeSection
+                              title={t('case_entity.details.phenotypes_non_observed')}
+                              phenotypes={member.non_observed_phenotypes}
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{t('case_entity.details.no_phenotype')}</span>
+                      )}
                     </div>
-                  )}
-
-                  {/* Phenotypes */}
-                  <div className="flex flex-col gap-2">
-                    <PhenotypeSection
-                      title={t('case_entity.details.phenotypes_observed')}
-                      phenotypes={member.observed_phenotypes}
-                    />
-
-                    <PhenotypeSection
-                      title={t('case_entity.details.phenotypes_non_observed')}
-                      phenotypes={member.non_observed_phenotypes}
-                    />
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           </>
         )}
