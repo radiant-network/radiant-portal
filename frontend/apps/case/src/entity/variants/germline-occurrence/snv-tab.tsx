@@ -11,6 +11,7 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import AnnotationsTableFilters from '../filters/annotations-table-filters';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
 
 import { isValidSeqId } from './libs/seq-id';
@@ -71,6 +72,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
           defaultPageSize={30}
           enableColumnOrdering
           enableFullscreen
+          TableFilters={<AnnotationsTableFilters />}
           extras={[
             <SliderGermlineOccurrenceSheet key="germline-snv-occurrence-sheet" patientSelected={patientSelected} />,
           ]}

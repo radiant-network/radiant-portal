@@ -133,7 +133,7 @@ export function SomaticOccurrenceSheetContent({
   const caseId = useCaseIdFromParam();
   const { canFlag, canComment, canInterpret } = useCaseVariantPermissions();
 
-  const { list } = useDataTable();
+  const { list, count } = useDataTable();
 
   // somatic/expand
   const expandResult = useSWR<ExpandedSomaticSNVOccurrence, any, OccurrenceExpandInput>(
@@ -182,8 +182,9 @@ export function SomaticOccurrenceSheetContent({
 
   const handleInterpretationSaveCallback = useCallback(() => {
     list?.mutate();
+    count?.mutate();
     interpretation.mutate();
-  }, [list, interpretation]);
+  }, [list, count, interpretation]);
 
   if (caseEntity.isLoading || !expandResult.data) {
     return <SliderSheetSkeleton />;
@@ -216,7 +217,14 @@ export function SomaticOccurrenceSheetContent({
               flag={occurrence.flag_type}
               canFlag={canFlag}
             />
-            <NotesProvider value={{ onChangeCallback: () => list?.mutate }}>
+            <NotesProvider
+              value={{
+                onChangeCallback: () => {
+                  list?.mutate();
+                  count?.mutate();
+                },
+              }}
+            >
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}

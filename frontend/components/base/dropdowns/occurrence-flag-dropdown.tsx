@@ -101,7 +101,7 @@ function OccurrenceFlagDropdown({
 }: OccurrenceFlagDropdownProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
-  const { list } = useDataTable();
+  const { list, count } = useDataTable();
   const saveFlag = useSWRMutation(
     `upsert-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
     (key: string, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
@@ -173,6 +173,7 @@ function OccurrenceFlagDropdown({
                       occurrenceId,
                     })
                     .then(() => {
+                      count?.mutate();
                       list?.mutate();
                     })
                     .catch(() => {
@@ -192,6 +193,7 @@ function OccurrenceFlagDropdown({
                   })
                   .then(() => {
                     list?.mutate();
+                    count?.mutate();
                   })
                   .catch(() => {
                     setSelectedFlag(flag ?? null);

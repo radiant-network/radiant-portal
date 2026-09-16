@@ -12,6 +12,7 @@ import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import { type SomaticSNVCohort, SomaticVariantInterface } from '../constants';
+import AnnotationsTableFilters from '../filters/annotations-table-filters';
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
 
@@ -84,6 +85,7 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
           enableColumnOrdering
           enableFullscreen
           extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}
+          TableFilters={<AnnotationsTableFilters />}
         />
       </QueryBuilder>
       <VariantsOnboardingWizard />

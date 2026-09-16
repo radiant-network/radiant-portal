@@ -33,7 +33,7 @@ async function fetchNotesCount(_url: string, { arg }: { arg: GetOccurrenceNoteIn
 function OccurrenceNoteCell({ seqId, taskId, occurrenceId, hasNote }: VariantNoteCellProps) {
   const caseId = useCaseIdFromParam();
   const { tenant } = useTenant();
-  const { list } = useDataTable();
+  const { list, count } = useDataTable();
   const { canComment } = useCaseVariantPermissions();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { trigger } = useSWRMutation<Count, Error, string, GetOccurrenceNoteInput>(
@@ -49,9 +49,10 @@ function OccurrenceNoteCell({ seqId, taskId, occurrenceId, hasNote }: VariantNot
       taskId,
       occurrenceId,
     }).then(() => {
+      count?.mutate();
       list?.mutate().then(() => setIsLoading(false));
     });
-  }, [caseId, seqId, taskId, occurrenceId, list]);
+  }, [caseId, seqId, taskId, occurrenceId, list, count]);
 
   return (
     <NotesProvider value={{ onChangeCallback }}>
