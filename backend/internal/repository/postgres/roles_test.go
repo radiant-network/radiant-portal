@@ -391,6 +391,30 @@ func Test_RolesRepository_CreateRole_DuplicateCodeIsRefused(t *testing.T) {
 	})
 }
 
+func Test_RolesRepository_CreateRole_DuplicateCodeIsRefusedCaseInsensitively(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		withScratchTenant(t, env, "zz_create_dup_code_ci", func(repo *RolesRepository, tenant string) {
+			err := repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "twice", NameEn: "First", Actions: []string{types.ActionViewKb},
+			})
+			require.NoError(t, err)
+
+			// Same code in different case with a distinct name: the PK compares exactly and lets
+			// this through, so only 000034's functional index catches it. Must still read as a
+			// code conflict (409) rather than falling through to a 500.
+			err = repo.CreateRole(t.Context(), tenant, types.CreateRoleRequest{
+				Code: "TWICE", NameEn: "Second", Actions: []string{types.ActionViewKb},
+			})
+			assert.Equal(t, types.RoleFieldCode, conflictField(t, err))
+
+			var count int64
+			require.NoError(t, env.Postgres.Raw(
+				`SELECT count(*) FROM role WHERE tenant_code = ?`, tenant).Scan(&count).Error)
+			assert.EqualValues(t, 1, count, "the refused create must leave nothing behind")
+		})
+	})
+}
+
 func Test_RolesRepository_CreateRole_DuplicateNameIsRefusedCaseInsensitively(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		withScratchTenant(t, env, "zz_create_dup_name", func(repo *RolesRepository, tenant string) {
