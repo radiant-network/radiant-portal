@@ -97,7 +97,7 @@ export function GermlineOccurrenceSheetContent({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
-  const { list } = useDataTable();
+  const { list, count } = useDataTable();
   const { canFlag, canComment, canInterpret } = useCaseVariantPermissions();
 
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
@@ -125,8 +125,9 @@ export function GermlineOccurrenceSheetContent({
 
   const handleInterpretationSaved = useCallback(() => {
     list?.mutate();
+    count?.mutate();
     interpretation.mutate();
-  }, [list, interpretation]);
+  }, [list, count, interpretation]);
 
   if (isLoading || !expandResult.data) {
     return <SliderSheetSkeleton />;
@@ -159,7 +160,14 @@ export function GermlineOccurrenceSheetContent({
               flag={occurrence.flag_type}
               canFlag={canFlag}
             />
-            <NotesProvider value={{ onChangeCallback: () => list?.mutate() }}>
+            <NotesProvider
+              value={{
+                onChangeCallback: () => {
+                  list?.mutate();
+                  count?.mutate();
+                },
+              }}
+            >
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}

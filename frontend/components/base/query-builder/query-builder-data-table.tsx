@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import type { PaginationState, RowData } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import type { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
+import type { OccurrenceCount, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
 import DataTable, { type TableProps } from '../data-table/data-table';
 import { DataTableProvider } from '../data-table/hooks/use-data-table';
 import { Card, CardContent } from '../shadcn/card';
 
-import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
+import { useQBActiveQuery, useQBContext, useQBExtraBodyParams, useQBExtraTableProps } from './hooks/use-query-builder';
 
 type QueryBuilderDataTableProps<T extends RowData> = Omit<
   TableProps<T>,
@@ -30,6 +30,8 @@ function QueryBuilderDataTable<T extends RowData>({
   ...props
 }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
+  const extraBodyParams = useQBExtraBodyParams();
+  const extraTableProps = useQBExtraTableProps();
   const { fetcher } = useQBContext();
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
@@ -54,6 +56,7 @@ function QueryBuilderDataTable<T extends RowData>({
           content: activeQuery.content as SqonContent,
           op: activeQuery.op as SqonOpEnum,
         },
+        ...extraBodyParams,
       },
     },
     fetcher.list,
@@ -64,7 +67,7 @@ function QueryBuilderDataTable<T extends RowData>({
     },
   );
 
-  const fetchCount = useSWR<Count>(
+  const fetchCount = useSWR<OccurrenceCount>(
     {
       id: swrKey,
       countBody: {
@@ -72,6 +75,7 @@ function QueryBuilderDataTable<T extends RowData>({
           content: activeQuery.content as SqonContent,
           op: activeQuery.op as SqonOpEnum,
         },
+        ...extraBodyParams,
       },
     },
     fetcher.count,
@@ -87,7 +91,7 @@ function QueryBuilderDataTable<T extends RowData>({
       pageIndex: 0,
       pageSize: pagination.pageSize,
     });
-  }, [activeQuery]);
+  }, [activeQuery, extraBodyParams]);
 
   return (
     <Card>
@@ -107,6 +111,10 @@ function QueryBuilderDataTable<T extends RowData>({
                 : { state: pagination, type: 'server', onPaginationChange: setPagination }
             }
             {...props}
+            quickfilters={{
+              enabled: extraTableProps.quickfilters?.enabled ?? false,
+              total: fetchCount.data?.filtered_count ?? 0,
+            }}
           />
         </DataTableProvider>
       </CardContent>
