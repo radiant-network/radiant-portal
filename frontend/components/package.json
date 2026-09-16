@@ -34,8 +34,7 @@
     "playwright": "^1.60.0",
     "storybook": "^10.5.5",
     "tailwindcss": "^4.1.8",
-    "vite": "^7.3.5",
-    "vite-tsconfig-paths": "^6.1.1",
+    "vite": "^8.3.0",
     "vitest": "^4.1.11"
   },
   "dependencies": {
@@ -62,7 +61,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@shadcn/react": "^0.2.1",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "^9.2.4",
     "@tiptap/extension-heading": "^3.31.3",
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/extension-underline": "^3.31.3",

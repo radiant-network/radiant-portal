@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.sqon import Sqon
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,8 +29,10 @@ class CountBodyWithSqon(BaseModel):
     CountBodyWithSqon
     """ # noqa: E501
     sqon: Optional[Sqon] = None
+    with_flag: Optional[List[OccurrenceFlagType]] = None
+    with_interpretation: Optional[StrictBool] = None
     with_note: Optional[StrictBool] = None
-    __properties: ClassVar[List[str]] = ["sqon", "with_note"]
+    __properties: ClassVar[List[str]] = ["sqon", "with_flag", "with_interpretation", "with_note"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,6 +89,8 @@ class CountBodyWithSqon(BaseModel):
 
         _obj = cls.model_validate({
             "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None,
+            "with_flag": obj.get("with_flag"),
+            "with_interpretation": obj.get("with_interpretation"),
             "with_note": obj.get("with_note")
         })
         return _obj

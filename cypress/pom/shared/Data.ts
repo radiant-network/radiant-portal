@@ -220,8 +220,13 @@ export const data = {
     },
     clinvar: ['Uncertain_significance', 'Conflicting_interpretations_of_pathogenicity', 'Likely_benign'],
     gnomad: '1.31e-4',
+    hotspot: false,
+    freq_to: '1 (1.00e+0)',
     freq_tn: '1 (1.00e+0)',
     freq_g: '0 (0)',
+    sq: null,
+    aq: null,
+    ad_ratio: '0.24',
     sqon: '{"content":[{"content":{"field":"hgvsg","value":["chr1:g.21836953C>T"]},"op":"in"}],"op":"and"}',
   },
   cnvGermline: {

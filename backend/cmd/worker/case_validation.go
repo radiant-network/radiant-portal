@@ -20,7 +20,7 @@ import (
 
 const TextMaxLength = 100
 
-const FreeTextMaxLength = 1000
+const FreeTextMaxLength = 2000
 
 // Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
@@ -955,23 +955,6 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Co
 	return nil
 }
 
-// Transitional: drop the fallback once the ingester fills DiagnosisHypothesis instead of sending a
-// 'condition' observation.
-func (cr *CaseValidationRecord) diagnosisHypothesis() string {
-	if cr.Case.DiagnosisHypothesis != "" {
-		return cr.Case.DiagnosisHypothesis
-	}
-	var legacy []string
-	for _, p := range cr.Case.Patients {
-		for _, o := range p.ObservationsText {
-			if o != nil && o.Code == types.ObsCodeCondition && o.Value != "" {
-				legacy = append(legacy, o.Value)
-			}
-		}
-	}
-	return strings.Join(legacy, "\n")
-}
-
 func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
 	cr.ValidateStringField(value, fieldName, path, CaseInvalidField, fmt.Sprintf("%s %d", caseResourceLabel, cr.Index), maxLength, regExp, []string{}, required)
 }
@@ -1511,7 +1494,7 @@ func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 		OrderingPhysician:        cr.Case.OrderingPhysician,
 		SubmitterCaseID:          cr.Case.SubmitterCaseId,
 		Note:                     cr.Case.Note,
-		DiagnosisHypothesis:      cr.diagnosisHypothesis(),
+		DiagnosisHypothesis:      cr.Case.DiagnosisHypothesis,
 		TenantCode:               sc.TenantCode,
 		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
 		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
@@ -1642,10 +1625,6 @@ func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseVal
 		}
 
 		for _, o := range p.ObservationsText {
-			// Diverted to cases.diagnosis_hypothesis — see diagnosisHypothesis.
-			if o.Code == types.ObsCodeCondition {
-				continue
-			}
 			obs := types.ObsString{
 				CaseID:             *cr.CaseID,
 				PatientID:          utils.IntPtr(patient.ID),

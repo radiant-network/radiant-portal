@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { PaginationState } from '@tanstack/react-table';
+import type { PaginationState } from '@/components/base/data-table/data-table';
 import { Plus } from 'lucide-react';
 import useSWR from 'swr';
 

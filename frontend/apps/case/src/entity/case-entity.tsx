@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
 import useSWR from 'swr';
@@ -20,8 +20,7 @@ import FilesTab from './files/files-tab';
 import Header from './layout/header';
 import GermlineVariantsTab from './variants/germline-variants-tab';
 import SomaticVariantsTab from './variants/somatic-variants-tab';
-
-export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
+import { CaseEntityContext } from './case-entity-context';
 
 type CaseEntityInput = {
   key: string;

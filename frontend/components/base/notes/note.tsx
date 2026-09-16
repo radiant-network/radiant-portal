@@ -27,6 +27,7 @@ import NoteSkeleton from './note-skeleton';
 
 export type NoteProps = OccurrenceNote & {
   isOwner: boolean;
+  canEdit?: boolean;
   onChanged: () => Promise<OccurrenceNote[] | undefined>;
 };
 
@@ -44,7 +45,17 @@ async function deleteNote(_url: string, { arg }: { arg: string }, tenant: string
   return response.data;
 }
 
-function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner, onChanged }: NoteProps) {
+function Note({
+  id,
+  user_id,
+  user_name,
+  created_at,
+  updated_at,
+  content,
+  isOwner,
+  canEdit = true,
+  onChanged,
+}: NoteProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const { onChangeCallback } = useNotesContext();
@@ -146,7 +157,7 @@ function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner
               </Tooltip>
             )}
           </span>
-          {isOwner && (
+          {isOwner && canEdit && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="2xs" iconOnly className="ml-auto shrink-0">

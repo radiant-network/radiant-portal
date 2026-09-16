@@ -6,7 +6,7 @@ import useSWRMutation from 'swr/mutation';
 import type { UserPreference } from '@/api/api';
 import { userPreferenceApi } from '@/utils/api';
 
-import type { ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
+import type { AppFeatures, ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
 import type { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
 import { getFilteredAdditionalFields } from '../utils';
 
@@ -49,7 +49,7 @@ type useTableStateProps = {
 
 type useTableColumnSizingProps = {
   columns: TableObserverColumn[];
-  state: TableState;
+  state: TableState<AppFeatures>;
   setColumnSizing: (value: Record<string, number>) => void;
 };
 
@@ -125,7 +125,7 @@ export function useTableGetPreferenceEffect({
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
       setColumnOrder(tablePreference.columnOrder);
-      setColumnPinning(tablePreference.columnPinning);
+      setColumnPinning(normalizeColumnPinning(tablePreference.columnPinning));
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(tablePreference.columnVisibility);
       setPagination({ pageSize: tablePreference.pagination?.pageSize ?? 30, pageIndex: 0 });
@@ -135,6 +135,24 @@ export function useTableGetPreferenceEffect({
       setFetched(true);
     }
   }, [tableUserPreference.isLoading, tableUserPreference.isValidating, tableUserPreference.data]);
+}
+
+/**
+ * Migrate persisted column pinning from the tanstack v8 shape (`left` / `right`)
+ * to the v9 shape (`start` / `end`), and guarantee both arrays exist so that
+ * `table.getFooterGroups()` / `getHeaderGroups()` never see `undefined`.
+ */
+function normalizeColumnPinning(pinning: unknown): ColumnPinningState {
+  const p = (pinning ?? {}) as {
+    start?: string[];
+    end?: string[];
+    left?: string[];
+    right?: string[];
+  };
+  return {
+    start: p.start ?? p.left ?? [],
+    end: p.end ?? p.right ?? [],
+  };
 }
 
 /**
@@ -187,7 +205,7 @@ export function useTableSizingEffect({ state: tableState, columns, setColumnSizi
   const columnResizeRef = useRef<string | false>(false);
 
   useEffect(() => {
-    if (tableState.columnSizingInfo && !tableState.columnSizingInfo?.isResizingColumn && columnResizeRef.current) {
+    if (tableState.columnResizing && !tableState.columnResizing?.isResizingColumn && columnResizeRef.current) {
       const column = columns.find(column => column.id === columnResizeRef.current);
       let size = tableState.columnSizing[columnResizeRef.current];
 
@@ -207,8 +225,8 @@ export function useTableSizingEffect({ state: tableState, columns, setColumnSizi
         [columnResizeRef.current]: size,
       });
     }
-    columnResizeRef.current = tableState.columnSizingInfo?.isResizingColumn;
-  }, [tableState.columnSizingInfo, tableState.columnSizing]);
+    columnResizeRef.current = tableState.columnResizing?.isResizingColumn;
+  }, [tableState.columnResizing, tableState.columnSizing]);
 }
 
 /**

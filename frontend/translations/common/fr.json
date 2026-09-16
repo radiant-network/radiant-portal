@@ -1515,7 +1515,8 @@
     "interpretation": {
       "tooltip": {
         "add": "Ajouter une interprétation",
-        "view": "Voir l’interprétation"
+        "view": "Voir l’interprétation",
+        "none": "Aucune interprétation pour ce variant"
       },
       "classifications": {
         "all_classifications": "Toutes les classifications",
@@ -2307,7 +2308,11 @@
     "flag": "Drapeau",
     "pin": "Épingle",
     "star": "Étoile",
-    "error": "Échec de la mise à jour. Veuillez réessayer."
+    "error": "Échec de la mise à jour. Veuillez réessayer.",
+    "tooltip": {
+      "flagged": "Variant avec drapeau",
+      "unflagged": "Aucun drapeau pour ce variant"
+    }
   },
   "notes": {
     "variant": {
@@ -2324,7 +2329,8 @@
       },
       "tooltip": {
         "add": "Ajouter un commentaire",
-        "view": "Voir les commentaires"
+        "view": "Voir les commentaires",
+        "none": "Aucun commentaire pour ce variant"
       }
     }
   },

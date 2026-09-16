@@ -1655,6 +1655,18 @@ export interface CountBodyWithSqon {
     'sqon'?: Sqon;
     /**
      * 
+     * @type {Array<OccurrenceFlagType>}
+     * @memberof CountBodyWithSqon
+     */
+    'with_flag'?: Array<OccurrenceFlagType>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CountBodyWithSqon
+     */
+    'with_interpretation'?: boolean;
+    /**
+     * 
      * @type {boolean}
      * @memberof CountBodyWithSqon
      */
@@ -4033,6 +4045,18 @@ export interface ListBodyWithSqon {
      * @memberof ListBodyWithSqon
      */
     'sqon'?: Sqon;
+    /**
+     * 
+     * @type {Array<OccurrenceFlagType>}
+     * @memberof ListBodyWithSqon
+     */
+    'with_flag'?: Array<OccurrenceFlagType>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ListBodyWithSqon
+     */
+    'with_interpretation'?: boolean;
     /**
      * 
      * @type {boolean}

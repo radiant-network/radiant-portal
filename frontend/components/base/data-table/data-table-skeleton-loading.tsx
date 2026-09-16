@@ -4,8 +4,10 @@ import type { ColumnSettings } from '@/components/base/data-table/data-table';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 
+import type { AppFeatures } from './data-table';
+
 type DataTableSkeletonLoadingProps = {
-  headerGroups: HeaderGroup<any>[];
+  headerGroups: HeaderGroup<AppFeatures, any>[];
   pagination: PaginationState;
   columnSettings: ColumnSettings[];
 };

@@ -2,8 +2,10 @@ import type { Table } from '@tanstack/react-table';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 
+import type { AppFeatures } from '../data-table';
+
 type RowSelectionHeaderProps = {
-  table: Table<any>;
+  table: Table<AppFeatures, any>;
 };
 
 function RowSelectionHeader({ table }: RowSelectionHeaderProps) {

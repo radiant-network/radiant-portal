@@ -1,10 +1,4 @@
-import {
-  flexRender,
-  getCoreRowModel,
-  type OnChangeFn,
-  type RowSelectionState,
-  useReactTable,
-} from '@tanstack/react-table';
+import { flexRender, type OnChangeFn, type RowData, type RowSelectionState } from '@tanstack/react-table';
 import { SearchIcon } from 'lucide-react';
 
 import {
@@ -21,11 +15,11 @@ import { cn } from '@/components/lib/utils';
 
 import Empty from '../empties/empty';
 
-import { HEADER_HEIGHT, ROW_HEIGHT, type TableColumnDef } from './data-table';
+import { HEADER_HEIGHT, ROW_HEIGHT, type TableColumnDef, useAppTable } from './data-table';
 
 const TABLE_MAX_HEIGHT = HEADER_HEIGHT + ROW_HEIGHT * 10;
 
-type SimpleTableProps<TData> = {
+type SimpleTableProps<TData extends RowData> = {
   variant?: 'default' | 'borderless' | 'border';
   data: TData[];
   columns: TableColumnDef<TData, any>[];
@@ -48,14 +42,13 @@ function DisplayTable({
   dataCy,
 }: SimpleTableProps<any>) {
   const { t } = useI18n();
-  const table = useReactTable({
+  const table = useAppTable({
     state: {
       rowSelection,
     },
     data,
     columns,
     enableRowSelection: !!onRowSelectionChange && !!rowSelection,
-    getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: onRowSelectionChange,
   });
 

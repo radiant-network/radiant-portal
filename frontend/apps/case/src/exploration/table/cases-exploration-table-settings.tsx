@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseResult } from '@/api/api';
@@ -16,7 +16,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 
-const columnHelper = createColumnHelper<CaseResult>();
+const columnHelper = createAppColumnHelper<CaseResult>();
 
 function getCaseExplorationColumns(t: TFunction<string, undefined>) {
   return [
@@ -369,7 +369,7 @@ const defaultSettings = createColumnSettings([
     id: 'actions',
     visible: true,
     fixed: true,
-    pinningPosition: 'right',
+    pinningPosition: 'end',
   },
 ]);
 

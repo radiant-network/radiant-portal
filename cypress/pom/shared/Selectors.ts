@@ -49,6 +49,8 @@ export const CommonSelectors = {
   filterMoreButton: '[data-cy="filter-button-more"]',
   filterOption: (key: string, value?: string) => (value ? `[data-cy="filter-option-${key}-${value}"]` : `[data-cy^="filter-option-${key}-"]`),
   gnomadRedIcon: '[class*="text-red-500 bg-red-500"]',
+  hotspotOffIcon: '[class*="lucide-flame"][class*="text-muted-foreground/40"]',
+  hotspotOnIcon: '[class*="lucide-flame"][class*="fill-indicator-red"]',
   igvContainer: '[id="igvContainer"]',
   igvIcon: '[class*="lucide-flip-vertical2"]',
   igvError: '[class*="igv-ui-alert-dialog"]:contains("Error")',

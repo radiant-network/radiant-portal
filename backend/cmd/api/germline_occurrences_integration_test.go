@@ -175,6 +175,14 @@ func Test_SNVOccurrences_List_Return_Only_Occurrences_Having_A_Note_When_With_No
 	testList(t, "multiple", body, expected)
 }
 
+func Test_SNVOccurrences_Count_Return_Only_Interpreted_Occurrences_When_With_Interpretation_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_interpretation":true}`, 1)
+}
+
+func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Interpretation_Is_False(t *testing.T) {
+	testCount(t, "multiple", `{"with_interpretation":false}`, 2)
+}
+
 func Test_SNVOccurrences_Count_Return_Only_Occurrences_Having_A_Note_When_With_Note_Is_True(t *testing.T) {
 	testCount(t, "multiple", `{"with_note":true}`, 1)
 }

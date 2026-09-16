@@ -2,9 +2,8 @@ import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { type PortalConfig } from '../../components/cores/applications-config';
+import type { PortalConfig } from '../../components/cores/applications-config';
 
 import { kfConfig } from './config/kf';
 import { radiantConfig } from './config/radiant';
@@ -25,6 +24,7 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'development'),
   },
   resolve: {
+    tsconfigPaths: true,
     alias: {
       '@assets': path.resolve(__dirname, `../../themes/${process.env.THEME}/assets`),
       '@styles/tailwind.css': path.resolve(__dirname, `../../themes/tailwind.base.css`),
@@ -33,5 +33,5 @@ export default defineConfig({
       '@translations-merged': path.resolve(__dirname, `../../translations/merged/${project}`),
     },
   },
-  plugins: [reactRouter() as any, tsconfigPaths(), tailwindcss(), createMergeTranslationsPlugin(project, __dirname)],
+  plugins: [reactRouter() as any, tailwindcss(), createMergeTranslationsPlugin(project, __dirname)],
 });

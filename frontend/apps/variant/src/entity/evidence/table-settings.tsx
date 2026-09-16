@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import { type ClinvarRCV, type GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
@@ -13,8 +13,8 @@ import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from 'components/base/data-table/cells/classification-cell';
 import RatingCell from 'components/base/data-table/cells/rating-cell';
 
-const pathogenicEvidenceColumnHelper = createColumnHelper<ClinvarRCV>();
-const conditionPhenotypeColumnHelper = createColumnHelper<any>(); // todo replace with correct type when api is updated
+const pathogenicEvidenceColumnHelper = createAppColumnHelper<ClinvarRCV>();
+const conditionPhenotypeColumnHelper = createAppColumnHelper<any>(); // todo replace with correct type when api is updated
 
 function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
   return [

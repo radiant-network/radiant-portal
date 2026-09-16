@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.sort_body import SortBody
 from radiant_python.models.sqon import Sqon
 from typing import Optional, Set
@@ -34,8 +35,10 @@ class ListBodyWithSqon(BaseModel):
     page_index: Optional[StrictInt] = None
     sort: Optional[List[SortBody]] = None
     sqon: Optional[Sqon] = None
+    with_flag: Optional[List[OccurrenceFlagType]] = None
+    with_interpretation: Optional[StrictBool] = None
     with_note: Optional[StrictBool] = None
-    __properties: ClassVar[List[str]] = ["additional_fields", "limit", "offset", "page_index", "sort", "sqon", "with_note"]
+    __properties: ClassVar[List[str]] = ["additional_fields", "limit", "offset", "page_index", "sort", "sqon", "with_flag", "with_interpretation", "with_note"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -104,6 +107,8 @@ class ListBodyWithSqon(BaseModel):
             "page_index": obj.get("page_index"),
             "sort": [SortBody.from_dict(_item) for _item in obj["sort"]] if obj.get("sort") is not None else None,
             "sqon": Sqon.from_dict(obj["sqon"]) if obj.get("sqon") is not None else None,
+            "with_flag": obj.get("with_flag"),
+            "with_interpretation": obj.get("with_interpretation"),
             "with_note": obj.get("with_note")
         })
         return _obj

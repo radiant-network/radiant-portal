@@ -21,7 +21,7 @@ export type TableObserverColumn = {
 
 export const DEFAULT_TABLE_OBSERVER: TableObserverProps = {
   columnOrder: [],
-  columnPinning: {},
+  columnPinning: { start: [], end: [] },
   columnSizing: {},
   columnVisibility: {},
   columns: [],

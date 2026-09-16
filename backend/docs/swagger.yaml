@@ -865,6 +865,13 @@ components:
       properties:
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_flag:
+          items:
+            $ref: '#/components/schemas/OccurrenceFlagType'
+          type: array
+          uniqueItems: false
+        with_interpretation:
+          type: boolean
         with_note:
           type: boolean
       type: object
@@ -1984,6 +1991,13 @@ components:
           uniqueItems: false
         sqon:
           $ref: '#/components/schemas/Sqon'
+        with_flag:
+          items:
+            $ref: '#/components/schemas/OccurrenceFlagType'
+          type: array
+          uniqueItems: false
+        with_interpretation:
+          type: boolean
         with_note:
           type: boolean
       type: object

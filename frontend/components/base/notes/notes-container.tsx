@@ -34,6 +34,7 @@ export type NotesContainerProps = NoteContainerBaseProps & {
   enableEmptyIcon?: boolean;
   enableSkeletonLoading?: boolean;
   withHeader?: boolean;
+  canComment?: boolean;
 };
 
 export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
@@ -63,6 +64,7 @@ function NotesContainer({
   enableEmptyIcon = false,
   enableSkeletonLoading = true,
   withHeader = false,
+  canComment = true,
   ...props
 }: NotesContainerProps) {
   const { t } = useI18n();
@@ -120,26 +122,28 @@ function NotesContainer({
   return (
     <>
       {withHeader && <div className="px-4 pt-4 text-foreground text-sm font-semibold">{t('notes.variant.title')}</div>}
-      <div className={cn('shrink-0', withHeader ? 'p-4' : 'px-4 py-3')}>
-        <RichTextEditor
-          onChange={setContent}
-          clearContent={clearContent}
-          editable={!save.isMutating}
-          autofocus
-          resisizable={false}
-          actions={[
-            <Button
-              key="save"
-              size="2xs"
-              onClick={handleSave}
-              loading={save.isMutating}
-              disabled={isEditorHasEmptyContent(content)}
-            >
-              {t('common.save')}
-            </Button>,
-          ]}
-        />
-      </div>
+      {canComment && (
+        <div className={cn('shrink-0', withHeader ? 'p-4' : 'px-4 py-3')}>
+          <RichTextEditor
+            onChange={setContent}
+            clearContent={clearContent}
+            editable={!save.isMutating}
+            autofocus
+            resisizable={false}
+            actions={[
+              <Button
+                key="save"
+                size="2xs"
+                onClick={handleSave}
+                loading={save.isMutating}
+                disabled={isEditorHasEmptyContent(content)}
+              >
+                {t('common.save')}
+              </Button>,
+            ]}
+          />
+        </div>
+      )}
       <TooltipProvider>
         <div className="flex-1 overflow-y-auto">
           {enableSkeletonLoading &&
@@ -155,7 +159,13 @@ function NotesContainer({
             </div>
           )}
           {(fetcher.data ?? []).map((note: OccurrenceNote) => (
-            <Note key={note.id} {...note} isOwner={note.user_id === sub} onChanged={handleChanged} />
+            <Note
+              key={note.id}
+              {...note}
+              isOwner={note.user_id === sub}
+              canEdit={canComment}
+              onChanged={handleChanged}
+            />
           ))}
         </div>
       </TooltipProvider>
