@@ -99,6 +99,7 @@ Route groups:
 - `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
+- `/case_groups` — named sets of cases (one per pipeline run, the unit laboratories get notified about); `POST` creates or overwrites by name, `GET /{name}` reads. Same `can_ingest_data` gate as the batches, checked in-tenant. Table `case_group` is Postgres-only (not federated), PK `(tenant_code, name)`, `case_ids` comma-joined text like `interpretation_*.classification_criterias` with a GIN index on `string_to_array(case_ids, ',')::int[]` (query it with `@>`, `= ANY` ignores the index).
 
 Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → Keycloak authentication → recovery.
 

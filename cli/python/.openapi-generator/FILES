@@ -22,6 +22,9 @@ docs/CaseExam.md
 docs/CaseFamilyHistory.md
 docs/CaseFetusBatch.md
 docs/CaseFilters.md
+docs/CaseGroupRequest.md
+docs/CaseGroupResponse.md
+docs/CaseGroupsApi.md
 docs/CasePatientBatch.md
 docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
@@ -159,6 +162,7 @@ radiant_python/api/__init__.py
 radiant_python/api/actions_api.py
 radiant_python/api/auth_api.py
 radiant_python/api/batches_api.py
+radiant_python/api/case_groups_api.py
 radiant_python/api/cases_api.py
 radiant_python/api/config_api.py
 radiant_python/api/documents_api.py
@@ -205,6 +209,8 @@ radiant_python/models/case_exam.py
 radiant_python/models/case_family_history.py
 radiant_python/models/case_fetus_batch.py
 radiant_python/models/case_filters.py
+radiant_python/models/case_group_request.py
+radiant_python/models/case_group_response.py
 radiant_python/models/case_patient_batch.py
 radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
@@ -318,3 +324,6 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_case_group_request.py
+test/test_case_group_response.py
+test/test_case_groups_api.py
