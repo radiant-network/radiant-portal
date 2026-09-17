@@ -19,7 +19,7 @@ import {
   createSortedRowModel,
   createTableHook,
   type ExpandedState,
-  flexRender,
+  FlexRender,
   type GroupingState,
   type Header,
   type OnChangeFn,
@@ -461,7 +461,7 @@ function getHeaderFlexRender<TData extends RowData>(
       <div className="flex items-center justify-between gap-1">
         {/* Header rendering */}
         <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-          {flexRender(header.column.columnDef.header, header.getContext())}
+          <FlexRender header={header} />
         </div>
 
         {/* Table Header Actions, only display on hover */}
@@ -532,14 +532,8 @@ function getRowFlexRender<T extends RowData>({
                 </Button>
               )}
 
-              {/* Group By: Aggregated */}
-              {cell.getIsAggregated() &&
-                flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())}
-
-              {/* Placeholder OR normal rendering */}
-              {!cell.getIsAggregated() &&
-                !cell.getIsPlaceholder() &&
-                flexRender(cell.column.columnDef.cell, cell.getContext())}
+              {/* Aggregated, placeholder and normal rendering are all handled by FlexRender */}
+              <FlexRender cell={cell} />
             </>
           </TableCell>
         ))}
@@ -1127,7 +1121,7 @@ function DataTable<T extends RowData>({
                   <TableRow key={footerGroup.id}>
                     {footerGroup.headers.map(header => (
                       <TableCell key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                        {header.isPlaceholder ? null : <FlexRender footer={header} />}
                       </TableCell>
                     ))}
                   </TableRow>
