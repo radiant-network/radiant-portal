@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 // caseOrgLookup is the slice of the auth repository the org resolvers need. Each method
@@ -18,6 +19,7 @@ type caseOrgLookup interface {
 	OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error)
 	OrgsForDocument(ctx context.Context, tenantCode string, documentID int) ([]string, error)
 	OrgsForSubmitterCases(ctx context.Context, tenantCode string, pairs [][2]string) (map[[2]string]string, error)
+	OrgsForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error)
 }
 
 // OrgFromCaseParam resolves the org from the :case_id the route already names — occurrence
@@ -42,6 +44,49 @@ func OrgFromCaseBody(repo caseOrgLookup) OrgResolver {
 			return nil, nil
 		}
 		return orgsForCase(c, repo, body.CaseID)
+	}
+}
+
+// OrgsFromCaseIDsBody resolves the diagnosis labs of the cases named by the candidates request
+// body (POST /cases/assignment_candidates), for the all-of gate: listing who may be assigned a
+// case is only useful to someone who can assign it, so the caller must be able to edit every
+// case they named.
+//
+// A malformed or absent case_ids resolves to no org and is therefore denied, the same way
+// OrgFromCaseBody treats a body that names no case — the handler's 400 is for callers who got
+// past the gate. Binding goes through ShouldBindBodyWithJSON so the handler can bind the same
+// body again afterwards.
+func OrgsFromCaseIDsBody(repo caseOrgLookup) OrgResolver {
+	return func(c *gin.Context) ([]string, error) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			return nil, err
+		}
+
+		var body types.ListAssignmentCandidatesBody
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
+			return nil, nil
+		}
+		query, err := body.Resolve()
+		if err != nil {
+			return nil, nil
+		}
+
+		labByCase, err := repo.OrgsForCases(c.Request.Context(), *tenant, query.CaseIDs)
+		if err != nil {
+			return nil, err
+		}
+		// A case that does not exist attributes the request to nothing, which denies rather
+		// than silently authorizing against the labs of the cases that do exist.
+		orgs := map[string]bool{}
+		for _, caseID := range query.CaseIDs {
+			lab, exists := labByCase[caseID]
+			if !exists {
+				return nil, nil
+			}
+			orgs[lab] = true
+		}
+		return slices.Sorted(maps.Keys(orgs)), nil
 	}
 }
 

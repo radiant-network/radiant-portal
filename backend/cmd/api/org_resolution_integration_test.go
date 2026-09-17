@@ -78,6 +78,8 @@ var caseProbes = []probe{
 		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgFromDocumentParam(r) }, ""},
 	{"document via sequencing", "GET", "/probe/:document_id", "/radiant/probe/" + documentViaSequencing, types.ActionDownloadFile,
 		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgFromDocumentParam(r) }, ""},
+	{"case ids body", "POST", "/probe", "/radiant/probe", types.ActionEditCase,
+		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgsFromCaseIDsBody(r) }, `{"case_ids":[` + caseAtCQGC + `]}`},
 }
 
 // serveProbe mirrors the production wiring — RequireTenantAccess then RequireActionAt with the
@@ -369,4 +371,27 @@ func Test_PatientBatch_WithoutIngestActionDenied(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, serveInTenantBatchProbe(repo, wendyID).Code,
 			"ignoring the org must not turn into ignoring the action")
 	})
+}
+
+// The candidates picker names its cases in the body, so each way of failing to attribute the
+// request has to deny rather than fall through to the handler.
+func Test_OrgResolution_CaseIdsBody_UnknownCaseDenied(t *testing.T) {
+	p := probeByName("case ids body")
+	assertOrgResolved(t, wendyID, withRequest(p, p.requestPath, `{"case_ids":[`+caseAtCQGC+`,`+unknownCase+`]}`), http.StatusForbidden)
+}
+
+func Test_OrgResolution_CaseIdsBody_WithoutCaseIdsDenied(t *testing.T) {
+	p := probeByName("case ids body")
+	assertOrgResolved(t, wendyID, withRequest(p, p.requestPath, `{}`), http.StatusForbidden)
+}
+
+func Test_OrgResolution_CaseIdsBody_MalformedBodyDenied(t *testing.T) {
+	p := probeByName("case ids body")
+	assertOrgResolved(t, wendyID, withRequest(p, p.requestPath, `{"case_ids":"nope"}`), http.StatusForbidden)
+}
+
+// Several cases at the same lab resolve to that one lab, which is the batch picker's request.
+func Test_OrgResolution_CaseIdsBody_SeveralCasesOneLab(t *testing.T) {
+	p := probeByName("case ids body")
+	assertOrgResolved(t, wendyID, withRequest(p, p.requestPath, `{"case_ids":[1,2,3]}`), http.StatusOK)
 }

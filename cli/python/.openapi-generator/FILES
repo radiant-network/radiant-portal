@@ -82,6 +82,7 @@ docs/InterpretationPubmed.md
 docs/InterpretationSomatic.md
 docs/InterpretationsApi.md
 docs/LeafContent.md
+docs/ListAssignmentCandidatesBody.md
 docs/ListBodyWithCriteria.md
 docs/ListBodyWithSqon.md
 docs/MondoApi.md
@@ -263,6 +264,7 @@ radiant_python/models/interpretation_metadata.py
 radiant_python/models/interpretation_pubmed.py
 radiant_python/models/interpretation_somatic.py
 radiant_python/models/leaf_content.py
+radiant_python/models/list_assignment_candidates_body.py
 radiant_python/models/list_body_with_criteria.py
 radiant_python/models/list_body_with_sqon.py
 radiant_python/models/observation_categorical_batch.py

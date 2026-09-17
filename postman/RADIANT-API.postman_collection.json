@@ -1848,6 +1848,44 @@
           "response": []
         },
         {
+          "name": "Assignment Candidates",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"case_ids\": [\n        1\n    ],\n    \"search\": \"\",\n    \"limit\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/assignment_candidates",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "assignment_candidates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Documents - Filters",
           "request": {
             "auth": {

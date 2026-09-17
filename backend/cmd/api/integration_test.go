@@ -95,6 +95,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/roles",
 			"radiant/users",
 			"radiant/cases/search",
+			"radiant/cases/assignment_candidates",
 			"radiant/genes/search",
 			"radiant/interpretations/v2/germline/1/1/1/1",
 			"radiant/interpretations/v2/somatic/1/1/1/1",

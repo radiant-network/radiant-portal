@@ -4029,6 +4029,43 @@ export interface LeafContent {
     'value'?: Array<any>;
 }
 /**
+ * 
+ * @export
+ * @interface ListAssignmentCandidatesBody
+ */
+export interface ListAssignmentCandidatesBody {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ListAssignmentCandidatesBody
+     */
+    'case_ids'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListAssignmentCandidatesBody
+     */
+    'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListAssignmentCandidatesBody
+     */
+    'offset'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListAssignmentCandidatesBody
+     */
+    'page_index'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListAssignmentCandidatesBody
+     */
+    'search'?: string;
+}
+/**
  * Body of a list request with search criteria
  * @export
  * @interface ListBodyWithCriteria
@@ -7911,6 +7948,50 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases\' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned the given cases
+         * @param {string} tenant Tenant code
+         * @param {ListAssignmentCandidatesBody} listAssignmentCandidatesBody Candidates request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listCaseAssignmentCandidates: async (tenant: string, listAssignmentCandidatesBody: ListAssignmentCandidatesBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listCaseAssignmentCandidates', 'tenant', tenant)
+            // verify required parameter 'listAssignmentCandidatesBody' is not null or undefined
+            assertParamExists('listCaseAssignmentCandidates', 'listAssignmentCandidatesBody', listAssignmentCandidatesBody)
+            const localVarPath = `/{tenant}/cases/assignment_candidates`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listAssignmentCandidatesBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8247,6 +8328,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases\' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned the given cases
+         * @param {string} tenant Tenant code
+         * @param {ListAssignmentCandidatesBody} listAssignmentCandidatesBody Candidates request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listCaseAssignmentCandidates(tenant: string, listAssignmentCandidatesBody: ListAssignmentCandidatesBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CaseAssignee>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listCaseAssignmentCandidates(tenant, listAssignmentCandidatesBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.listCaseAssignmentCandidates']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8400,6 +8495,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases\' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned the given cases
+         * @param {string} tenant Tenant code
+         * @param {ListAssignmentCandidatesBody} listAssignmentCandidatesBody Candidates request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listCaseAssignmentCandidates(tenant: string, listAssignmentCandidatesBody: ListAssignmentCandidatesBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<CaseAssignee>> {
+            return localVarFp.listCaseAssignmentCandidates(tenant, listAssignmentCandidatesBody, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8547,6 +8653,19 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(tenant: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases\' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+     * @summary List the users who may be assigned the given cases
+     * @param {string} tenant Tenant code
+     * @param {ListAssignmentCandidatesBody} listAssignmentCandidatesBody Candidates request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public listCaseAssignmentCandidates(tenant: string, listAssignmentCandidatesBody: ListAssignmentCandidatesBody, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).listCaseAssignmentCandidates(tenant, listAssignmentCandidatesBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

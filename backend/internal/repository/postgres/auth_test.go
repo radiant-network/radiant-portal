@@ -20,6 +20,7 @@ const (
 	carolID = "b6e6d0dd-7aa5-4018-ae03-1f5076801360"
 	patID   = "6c330322-c746-4436-bb76-efd2cd943686"
 	twID    = "4a330f72-24a1-4d37-8ad7-ff9989245fd3"
+	gabeID  = "0a1b2c3d-4e5f-4061-8273-849506a7b8c9"
 	ghostID = "29cef9cb-e954-473b-b672-60b682a06afd"
 )
 
@@ -559,5 +560,51 @@ func Test_AuthRepository_HasActionInTenant_IgnoresOrgScope(t *testing.T) {
 		inTenant, err := repo.HasActionInTenant(t.Context(), userID, types.DefaultTenantCode, types.ActionIngestData)
 		require.NoError(t, err)
 		assert.True(t, inTenant, "a grant at any org admits the caller when the org is not consulted")
+	})
+}
+
+func Test_OrgsForCases_KeyedByCaseID(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		labs, err := repo.OrgsForCases(t.Context(), types.DefaultTenantCode, []int{1, 2})
+
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]string{1: "CQGC", 2: "CQGC"}, labs)
+	})
+}
+
+// A case the tenant does not hold is simply absent, which is what lets the caller tell
+// "unknown case" apart from "resolved to a lab" instead of defaulting to one.
+func Test_OrgsForCases_OmitsUnknownCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		labs, err := repo.OrgsForCases(t.Context(), types.DefaultTenantCode, []int{1, 999999})
+
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]string{1: "CQGC"}, labs)
+	})
+}
+
+func Test_OrgsForCases_ScopedToTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		labs, err := repo.OrgsForCases(t.Context(), "tenant_b", []int{1, 2})
+
+		assert.NoError(t, err)
+		assert.Empty(t, labs, "the radiant cases must not resolve for another tenant")
+	})
+}
+
+func Test_OrgsForCases_NoCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		labs, err := repo.OrgsForCases(t.Context(), types.DefaultTenantCode, nil)
+
+		assert.NoError(t, err)
+		assert.Empty(t, labs)
 	})
 }

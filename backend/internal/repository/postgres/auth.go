@@ -76,6 +76,33 @@ func (r *AuthRepository) OrgsForCase(ctx context.Context, tenantCode string, cas
 	return orgs, nil
 }
 
+// OrgsForCases returns the diagnosis lab of each case given, keyed by case id. A case absent
+// from the result does not exist in the tenant, which the caller must treat as unauthorized
+// rather than skip — the same contract as OrgsForSubmitterCases.
+func (r *AuthRepository) OrgsForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error) {
+	orgs := map[int]string{}
+	if len(caseIDs) == 0 {
+		return orgs, nil
+	}
+
+	var rows []struct {
+		ID               int
+		DiagnosisLabCode string
+	}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT id, diagnosis_lab_code
+		FROM cases
+		WHERE tenant_code = ? AND id IN ?`, tenantCode, caseIDs).Scan(&rows).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving orgs for %d cases: %w", len(caseIDs), err)
+	}
+
+	for _, row := range rows {
+		orgs[row.ID] = row.DiagnosisLabCode
+	}
+	return orgs, nil
+}
+
 // OrgsForNote returns the diagnosis lab of the case an occurrence note was written on.
 func (r *AuthRepository) OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error) {
 	orgs := []string{}

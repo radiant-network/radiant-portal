@@ -1998,6 +1998,22 @@ components:
           type: array
           uniqueItems: false
       type: object
+    ListAssignmentCandidatesBody:
+      properties:
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        limit:
+          type: integer
+        offset:
+          type: integer
+        page_index:
+          type: integer
+        search:
+          type: string
+      type: object
     ListBodyWithCriteria:
       description: Body of a list request with search criteria
       properties:
@@ -4090,6 +4106,74 @@ paths:
       security:
       - bearerauth: []
       summary: Search DocumentResult list for a case entity
+      tags:
+      - cases
+  /{tenant}/cases/assignment_candidates:
+    post:
+      description: |-
+        Retrieve the users eligible to be assigned the cases named by case_ids: those
+        holding at least one organization-scoped permission at the cases' diagnosis lab.
+        Every case named must belong to the same diagnosis lab, since eligibility is
+        decided there; a selection spanning several is rejected rather than merged.
+        Requires permission to edit every case named: the picker is only of use to a
+        caller who can then act on the assignment.
+      operationId: listCaseAssignmentCandidates
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListAssignmentCandidatesBody'
+        description: Candidates request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CaseAssignee'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the users who may be assigned the given cases
       tags:
       - cases
   /{tenant}/cases/autocomplete:
