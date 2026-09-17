@@ -20,6 +20,7 @@ __version__ = "0.1.0"
 from radiant_python.api.actions_api import ActionsApi
 from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
+from radiant_python.api.case_groups_api import CaseGroupsApi
 from radiant_python.api.cases_api import CasesApi
 from radiant_python.api.config_api import ConfigApi
 from radiant_python.api.documents_api import DocumentsApi
@@ -75,6 +76,8 @@ from radiant_python.models.case_exam import CaseExam
 from radiant_python.models.case_family_history import CaseFamilyHistory
 from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.case_group_request import CaseGroupRequest
+from radiant_python.models.case_group_response import CaseGroupResponse
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_result import CaseResult

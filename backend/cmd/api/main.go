@@ -88,6 +88,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoAuth := postgres.NewAuthRepository(postgresDB)
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
+	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
@@ -291,6 +292,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.DocumentsFiltersHandler(repoDocuments))
 	documentsGroup.GET("/:document_id/download_url", requireActionAt(types.ActionDownloadFile, orgFromDocument), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
+
+	caseGroupsGroup := tenantRoutes.Group("/case_groups")
+	caseGroupsGroup.POST("", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupHandler(repoCaseGroups, auth))
+	caseGroupsGroup.GET("/:name", requireAction(types.ActionSearchCase), server.GetCaseGroupHandler(repoCaseGroups))
 
 	batchesGroup := tenantRoutes.Group("/batches")
 	batchesGroup.GET("/:batch_id", requireActionInTenant(types.ActionIngestData), server.GetBatchHandler(repoBatches))

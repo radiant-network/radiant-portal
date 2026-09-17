@@ -490,6 +490,39 @@ components:
       - project_code
       - status_code
       type: object
+    CaseGroupRequest:
+      description: Payload to create a case group, or overwrite the case list of an
+        existing one (same name in the tenant). An empty case_ids list is accepted
+        and empties the group.
+      properties:
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+      required:
+      - case_ids
+      - name
+      type: object
+    CaseGroupResponse:
+      description: A named set of cases within a tenant.
+      properties:
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        tenant_code:
+          type: string
+      required:
+      - case_ids
+      - name
+      - tenant_code
+      type: object
     CasePatientBatch:
       properties:
         affected_status_code:
@@ -3584,6 +3617,136 @@ paths:
       summary: Retrieve a batch by ID
       tags:
       - batches
+  /{tenant}/case_groups:
+    post:
+      description: |-
+        Creates a named set of cases in the tenant in the path. The name is the key:
+        posting an existing name overwrites its case list, so a pipeline retry is idempotent.
+        Every case id must exist in the tenant. Requires the `can_ingest_data` action.
+      operationId: createCaseGroup
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseGroupRequest'
+        description: Case group to create or overwrite
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseGroupResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Create or overwrite a case group
+      tags:
+      - case_groups
+  /{tenant}/case_groups/{name}:
+    get:
+      description: |-
+        Returns the case group with this name in the tenant in the path, with its case ids.
+        Requires the `can_search_case` action, so the portal can turn a group into a case filter.
+      operationId: getCaseGroup
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case group name
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseGroupResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a case group
+      tags:
+      - case_groups
   /{tenant}/cases/{case_id}:
     get:
       description: Retrieve CaseEntity by its ID
