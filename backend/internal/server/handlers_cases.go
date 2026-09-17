@@ -21,6 +21,22 @@ type caseDocumentsReader interface {
 	GetDocumentsFilters(ctx context.Context, withProjectAndLab bool) (*types.DocumentFilters, error)
 }
 
+// caseAssignmentsReader loads the users assigned to a set of cases. Assignments live in
+// PostgreSQL while the cases themselves are read from StarRocks, so the two are joined here in
+// the handler rather than in a query.
+type caseAssignmentsReader interface {
+	ListForCases(ctx context.Context, caseIDs []int) (map[int][]types.CaseAssignee, error)
+}
+
+// assigneesOf reads one case out of the map, as a list that is empty rather than null so the
+// unassigned state serializes the same way as the assigned one.
+func assigneesOf(byCase map[int][]types.CaseAssignee, caseID int) types.JsonArray[types.CaseAssignee] {
+	if assignees, found := byCase[caseID]; found {
+		return assignees
+	}
+	return types.JsonArray[types.CaseAssignee]{}
+}
+
 type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
@@ -46,7 +62,7 @@ type casePatcher interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/search [post]
-func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
+func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -68,6 +84,20 @@ func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
 		if err != nil {
 			HandleError(c, err)
 			return
+		}
+
+		// One lookup for the whole page, whatever its size.
+		caseIDs := make([]int, len(*cases))
+		for i, caseResult := range *cases {
+			caseIDs[i] = caseResult.CaseID
+		}
+		assigneesByCase, err := assignmentsRepo.ListForCases(c.Request.Context(), caseIDs)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		for i := range *cases {
+			(*cases)[i].Assignees = assigneesOf(assigneesByCase, (*cases)[i].CaseID)
 		}
 
 		searchResponse := types.SearchResponse[types.CaseResult]{List: *cases, Count: *count}
@@ -148,7 +178,7 @@ func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id} [get]
-func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
+func CaseEntityHandler(repo casesReader, igvRepo igvReader, assignmentsRepo caseAssignmentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
 		if errCaseId != nil {
@@ -170,6 +200,14 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 			return
 		}
 		caseEntity.HasIGVFiles = len(igvTracks) > 0
+
+		assigneesByCase, err := assignmentsRepo.ListForCases(c.Request.Context(), []int{caseId})
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		caseEntity.Assignees = assigneesOf(assigneesByCase, caseId)
+
 		c.JSON(http.StatusOK, caseEntity)
 	}
 }

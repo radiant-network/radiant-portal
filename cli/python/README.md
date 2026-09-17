@@ -208,6 +208,7 @@ Class | Method | HTTP request | Description
  - [BatchReport](docs/BatchReport.md)
  - [BatchSummary](docs/BatchSummary.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
+ - [CaseAssignee](docs/CaseAssignee.md)
  - [CaseBatch](docs/CaseBatch.md)
  - [CaseBatchPatch](docs/CaseBatchPatch.md)
  - [CaseEntity](docs/CaseEntity.md)

@@ -210,7 +210,9 @@ const generateQueryBuilderFunctions = (
      * Checks that the active query contains a chromosome pill.
      */
     shouldHaveChromosomePill() {
-      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`).contains(findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).name).should('exist');
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`)
+        .contains(findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).name)
+        .should('exist');
     },
     /**
      * Checks that the active query displays its per-query result count.
@@ -251,7 +253,9 @@ const generateQueryBuilderFunctions = (
      * Checks that the active query contains a variant_type pill.
      */
     shouldHaveVariantTypePill() {
-      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`).contains(findFacetData(tableFacets, config.secondFacet.section, config.secondFacet.facet).name).should('exist');
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`)
+        .contains(findFacetData(tableFacets, config.secondFacet.section, config.secondFacet.facet).name)
+        .should('exist');
     },
     /**
      * Checks whether the pills of the active query display the multiselect (chromosome) field label.
@@ -259,7 +263,9 @@ const generateQueryBuilderFunctions = (
      */
     shouldShowLabels(shouldShow: boolean) {
       const strExist = shouldShow ? 'exist' : 'not.exist';
-      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`).contains(findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).name).should(strExist);
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`)
+        .contains(findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).name)
+        .should(strExist);
     },
     /**
      * Checks whether the clear-all button is displayed.

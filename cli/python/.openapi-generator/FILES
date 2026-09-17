@@ -14,6 +14,7 @@ docs/BatchReport.md
 docs/BatchSummary.md
 docs/BatchesApi.md
 docs/CNVGeneOverlap.md
+docs/CaseAssignee.md
 docs/CaseBatch.md
 docs/CaseBatchPatch.md
 docs/CaseEntity.md
@@ -197,6 +198,7 @@ radiant_python/models/autocomplete_result.py
 radiant_python/models/batch_message.py
 radiant_python/models/batch_report.py
 radiant_python/models/batch_summary.py
+radiant_python/models/case_assignee.py
 radiant_python/models/case_batch.py
 radiant_python/models/case_batch_patch.py
 radiant_python/models/case_entity.py

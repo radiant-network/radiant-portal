@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 

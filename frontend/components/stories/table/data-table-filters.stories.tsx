@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { http } from 'msw';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 

@@ -32,10 +32,14 @@
     ]
   },
   "dependencies": {
-    "cypress": "^15.11.0"
+    "cypress": "^15.21.1"
   },
   "overrides": {
+    "brace-expansion": "^2.1.4",
+    "diff": "^8.0.3",
+    "mocha": "^11.8.0",
     "picomatch": "^2.3.2",
+    "serialize-javascript": "^7.0.5",
     "yaml": "^2.9.0"
   }
 }

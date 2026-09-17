@@ -53,6 +53,7 @@ func (r *RolesRepository) GetTenantRole(ctx context.Context, tenantCode, roleCod
 
 const (
 	roleCodePrimaryKey    = "role_pkey"
+	roleCodeCIUniqueIndex = "role_code_ci_key"
 	roleNameEnUniqueIndex = "role_unique_name_en_per_tenant"
 	roleNameFrUniqueIndex = "role_unique_name_fr_per_tenant"
 )
@@ -60,6 +61,10 @@ const (
 func roleConflictField(err error) (string, bool) {
 	switch {
 	case uniqueViolationOn(err, roleCodePrimaryKey):
+		return types.RoleFieldCode, true
+	// 000034's functional index: the code differs from an existing one only by case, which the
+	// exact-match PK lets through.
+	case uniqueViolationOn(err, roleCodeCIUniqueIndex):
 		return types.RoleFieldCode, true
 	case uniqueViolationOn(err, roleNameEnUniqueIndex):
 		return types.RoleFieldNameEn, true

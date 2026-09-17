@@ -486,7 +486,7 @@ const globalData = {
       },
     },
     somatic: {
-    //TODO: Waiting for stable data to restore the counts
+      //TODO: Waiting for stable data to restore the counts
       case_id: 1008,
       seq_id: 1011,
       task_id: 1018,

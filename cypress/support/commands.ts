@@ -113,13 +113,8 @@ Cypress.Commands.add('logout', () => {
  * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
 Cypress.Commands.add('pinColumn', (position: number, tableId: string = '', headRowSelector?: string) => {
-  const headCellSelector = headRowSelector
-    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
-    : CommonSelectors.tableHeadCell(tableId);
-  cy.get(headCellSelector)
-    .eq(position)
-    .find(CommonSelectors.pinIcon)
-    .click({ force: true });
+  const headCellSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector).eq(position).find(CommonSelectors.pinIcon).click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.pinLeftIcon}`).click({ force: true });
   cy.get(CommonSelectors.menuPopper).should('not.exist');
 });
@@ -289,17 +284,9 @@ Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: s
  * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
 Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = '', headRowSelector?: string) => {
-  const headCellSelector = headRowSelector
-    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
-    : CommonSelectors.tableHeadCell(tableId);
-  cy.get(headCellSelector)
-    .eq(position)
-    .find(CommonSelectors.sortIcon)
-    .click({ force: true });
-  cy.get(headCellSelector)
-    .eq(position)
-    .find(CommonSelectors.sortIcon)
-    .should('exist');
+  const headCellSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector).eq(position).find(CommonSelectors.sortIcon).click({ force: true });
+  cy.get(headCellSelector).eq(position).find(CommonSelectors.sortIcon).should('exist');
 });
 
 /**
@@ -309,13 +296,8 @@ Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = ''
  * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
 Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '', headRowSelector?: string) => {
-  const headCellSelector = headRowSelector
-    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
-    : CommonSelectors.tableHeadCell(tableId);
-  cy.get(headCellSelector)
-    .eq(position)
-    .find(CommonSelectors.pinIcon)
-    .click({ force: true });
+  const headCellSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector).eq(position).find(CommonSelectors.pinIcon).click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.unpinIcon}`).click({ force: true });
   cy.get(CommonSelectors.menuPopper).should('not.exist');
 });

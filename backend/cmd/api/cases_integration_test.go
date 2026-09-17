@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -15,10 +16,11 @@ import (
 )
 
 func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
-	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo))
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo, assignmentsRepo))
 
 		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
@@ -30,7 +32,7 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 }
 
 func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "submitter_proband_id":"MRN-283792", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoked", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "assignees":[], "case_id":7, "created_on":"2021-09-12T13:08:00Z", "proband_id":20, "submitter_proband_id":"MRN-283792", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoked", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
 			"additional_fields":[],
 			"search_criteria":[{"field": "status_code", "value": ["revoked"]}]
@@ -39,7 +41,7 @@ func Test_SearchCasesHandler_WithCriteria(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithAdditionalFields(t *testing.T) {
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":7, "created_on":"2021-09-12T13:08:00Z", "organization_code":"CHUSJ", "proband_id":20, "submitter_proband_id":"MRN-283792", "primary_condition_id":"MONDO:0000003", "primary_condition_name":"colorblindness, partial", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoked", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "assignees":[], "case_id":7, "created_on":"2021-09-12T13:08:00Z", "organization_code":"CHUSJ", "proband_id":20, "submitter_proband_id":"MRN-283792", "primary_condition_id":"MONDO:0000003", "primary_condition_name":"colorblindness, partial", "priority_code":"routine", "project_code":"N2", "project_name":"NeuroDev Phase II", "ordering_organization_code":"CHOP", "ordering_organization_name":"Children Hospital of Philadelphia", "status_code":"revoked", "updated_on":"2021-09-12T13:08:00Z", "has_variants":true}], "count": 1}`
 	body := `{
 			"additional_fields":["primary_condition_id", "primary_condition_name", "organization_code"],
 			"search_criteria":[{"field": "status_code", "value": ["revoked"]}]
@@ -54,7 +56,7 @@ func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
 	// experiments. Case 73 (twins) is correctly "germline_family" — a fixed COUNT DISTINCT bug
 	// (see SearchCases's distinct_members_count) previously miscounted its 2 fetuses as 0 real
 	// members, wrongly leaving it classified as a singleton.
-	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":74, "created_on":"2019-01-03T13:08:00Z", "proband_id":65, "submitter_proband_id":"MRN-283837", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-03T13:08:00Z", "has_variants":false}, {"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "case_id":73, "created_on":"2019-01-02T13:08:00Z", "proband_id":64, "submitter_proband_id":"MRN-283836", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-02T13:08:00Z", "has_variants":false}], "count": 26}`
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "assignees":[], "case_id":74, "created_on":"2019-01-03T13:08:00Z", "proband_id":65, "submitter_proband_id":"MRN-283837", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-03T13:08:00Z", "has_variants":false}, {"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "case_type":"germline_family", "assignees":[], "case_id":73, "created_on":"2019-01-02T13:08:00Z", "proband_id":64, "submitter_proband_id":"MRN-283836", "priority_code":"asap", "project_code":"N1", "project_name":"NeuroDev Phase I", "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "status_code":"in_progress", "updated_on":"2019-01-02T13:08:00Z", "has_variants":false}], "count": 26}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "proband_id", "order": "desc"}],
@@ -64,7 +66,7 @@ func Test_SearchCasesHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func Test_SearchCasesHandler_WithVariants(t *testing.T) {
-	expected := `{"list":[{"case_id":1,"proband_id":3, "submitter_proband_id":"MRN-283775","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"case_id":2, "proband_id":4, "submitter_proband_id":"MRN-283776","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":26}`
+	expected := `{"list":[{"assignees":[], "case_id":1,"proband_id":3, "submitter_proband_id":"MRN-283775","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I","created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":true},{"assignees":[], "case_id":2, "proband_id":4, "submitter_proband_id":"MRN-283776","priority_code":"routine","status_code":"in_progress","analysis_catalog_code":"WGA","analysis_catalog_name":"Whole Genome Analysis","case_type":"germline_family","ordering_organization_code":"CHUSJ","ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine","project_code":"N1","project_name":"NeuroDev Phase I", "created_on":"2021-09-12T13:08:00Z","updated_on":"2021-09-12T13:08:00Z","has_variants":false}],"count":26}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "case_id", "order": "asc"}],
@@ -160,11 +162,12 @@ func Test_GetCasesFilters(t *testing.T) {
 }
 
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
-	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+		assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
+		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo, assignmentsRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -177,7 +180,7 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 
 func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 	expected := `{
-		"case_id":74,
+		"assignees":[], "case_id":74,
 		"case_type":"germline_family",
 		"diagnosis_hypothesis":"Suspected congenital myotonic dystrophy",
 		"analysis_catalog_code":"WGA",
@@ -281,7 +284,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"analysis_catalog_name":"Whole Genome Analysis",
 		"case_category_code": "postnatal",
 		"case_category_name": "Postnatal",
-		"case_id":1,
+		"assignees":[], "case_id":1,
 		"case_type":"germline_family", 
 		"created_on":"2021-09-12T13:08:00Z", 
 		"members":[

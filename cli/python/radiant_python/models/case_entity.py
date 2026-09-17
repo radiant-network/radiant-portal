@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_task import CaseTask
@@ -31,6 +32,7 @@ class CaseEntity(BaseModel):
     """ # noqa: E501
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
+    assignees: List[CaseAssignee]
     case_category_code: StrictStr
     case_category_name: StrictStr
     case_id: StrictInt
@@ -56,7 +58,7 @@ class CaseEntity(BaseModel):
     status_code: StrictStr
     tasks: List[CaseTask]
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_hypothesis", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assignees", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_hypothesis", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,6 +99,13 @@ class CaseEntity(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in assignees (list)
+        _items = []
+        if self.assignees:
+            for _item_assignees in self.assignees:
+                if _item_assignees:
+                    _items.append(_item_assignees.to_dict())
+            _dict['assignees'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in members (list)
         _items = []
         if self.members:
@@ -132,6 +141,7 @@ class CaseEntity(BaseModel):
         _obj = cls.model_validate({
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
+            "assignees": [CaseAssignee.from_dict(_item) for _item in obj["assignees"]] if obj.get("assignees") is not None else None,
             "case_category_code": obj.get("case_category_code"),
             "case_category_name": obj.get("case_category_name"),
             "case_id": obj.get("case_id"),
