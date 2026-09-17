@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_ValidateCaseGroupName_Valid(t *testing.T) {
@@ -35,51 +34,24 @@ func Test_UnknownCaseIDsError_Message(t *testing.T) {
 	assert.Equal(t, "unknown case ids in this tenant: [7 42]", err.Error())
 }
 
-func Test_JoinCaseIDs_SortsAndDedups(t *testing.T) {
-	assert.Equal(t, "1,2,10", JoinCaseIDs([]int{10, 2, 1, 2}))
+func Test_NormalizeCaseIDs_DedupsKeepingOrder(t *testing.T) {
+	assert.Equal(t, []int{10, 2, 1}, NormalizeCaseIDs([]int{10, 2, 1, 2, 10}))
 }
 
-func Test_JoinCaseIDs_Empty(t *testing.T) {
-	assert.Equal(t, "", JoinCaseIDs(nil))
-	assert.Equal(t, "", JoinCaseIDs([]int{}))
-}
-
-func Test_ParseCaseIDs_RoundTrip(t *testing.T) {
-	ids, err := ParseCaseIDs("1,2,10")
-	require.NoError(t, err)
-	assert.Equal(t, []int{1, 2, 10}, ids)
-}
-
-func Test_ParseCaseIDs_SortsDedupsAndTrims(t *testing.T) {
-	ids, err := ParseCaseIDs(" 10, 2,1,2")
-	require.NoError(t, err)
-	assert.Equal(t, []int{1, 2, 10}, ids)
-}
-
-func Test_ParseCaseIDs_Empty(t *testing.T) {
-	ids, err := ParseCaseIDs("")
-	require.NoError(t, err)
-	assert.Equal(t, []int{}, ids)
-	assert.NotNil(t, ids)
-}
-
-func Test_ParseCaseIDs_NonInteger_Error(t *testing.T) {
-	ids, err := ParseCaseIDs("1,abc")
-	assert.Error(t, err)
-	assert.Nil(t, ids)
+func Test_NormalizeCaseIDs_Empty_NotNil(t *testing.T) {
+	assert.Equal(t, []int{}, NormalizeCaseIDs(nil))
+	assert.NotNil(t, NormalizeCaseIDs([]int{}))
 }
 
 func Test_CaseGroupRequest_Validate_InvalidName(t *testing.T) {
 	assert.Error(t, CaseGroupRequest{Name: "bad/name", CaseIDs: []int{1}}.Validate())
 }
 
-func Test_CaseGroup_ToResponse(t *testing.T) {
-	resp, err := CaseGroup{TenantCode: "radiant", Name: "run_1", CaseIDs: "3,1"}.ToResponse()
-	require.NoError(t, err)
-	assert.Equal(t, &CaseGroupResponse{Name: "run_1", TenantCode: "radiant", CaseIDs: []int{1, 3}}, resp)
+func Test_NewCaseGroupResponse(t *testing.T) {
+	resp := NewCaseGroupResponse(CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1"}, []int{3, 1, 3})
+	assert.Equal(t, CaseGroupResponse{Name: "run_1", TenantCode: "radiant", CaseIDs: []int{3, 1}}, resp)
 }
 
-func Test_CaseGroup_ToResponse_CorruptColumn_Error(t *testing.T) {
-	_, err := CaseGroup{Name: "run_1", CaseIDs: "1,x"}.ToResponse()
-	assert.ErrorContains(t, err, `case group "run_1"`)
+func Test_NewCaseGroupResponse_NoCases_EmptyList(t *testing.T) {
+	assert.Equal(t, []int{}, NewCaseGroupResponse(CaseGroup{Name: "run_1"}, nil).CaseIDs)
 }

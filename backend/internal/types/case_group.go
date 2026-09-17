@@ -4,9 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"slices"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -16,11 +13,16 @@ import (
 var caseGroupNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$`)
 
 type CaseGroup struct {
-	TenantCode string `gorm:"primaryKey"`
-	Name       string `gorm:"primaryKey"`
-	CaseIDs    string
+	ID         int `gorm:"primaryKey;autoIncrement"`
+	TenantCode string
+	Name       string
 	CreatedOn  time.Time `gorm:"autoCreateTime"`
 	CreatedBy  string
+}
+
+type CaseGroupCase struct {
+	CaseGroupID int `gorm:"primaryKey"`
+	CaseID      int `gorm:"primaryKey"`
 }
 
 var CaseGroupTable = Table{
@@ -28,8 +30,17 @@ var CaseGroupTable = Table{
 	Alias: "cg",
 }
 
+var CaseGroupCaseTable = Table{
+	Name:  "case_group_case",
+	Alias: "cgc",
+}
+
 func (CaseGroup) TableName() string {
 	return CaseGroupTable.Name
+}
+
+func (CaseGroupCase) TableName() string {
+	return CaseGroupCaseTable.Name
 }
 
 var ErrCaseGroupNotFound = errors.New("case group not found in this tenant")
@@ -50,34 +61,18 @@ func ValidateCaseGroupName(name string) error {
 	return nil
 }
 
-// JoinCaseIDs serializes ids for the case_ids column: sorted, deduplicated, comma-joined.
-func JoinCaseIDs(ids []int) string {
-	sorted := slices.Clone(ids)
-	slices.Sort(sorted)
-	sorted = slices.Compact(sorted)
-	parts := make([]string, len(sorted))
-	for i, id := range sorted {
-		parts[i] = strconv.Itoa(id)
-	}
-	return strings.Join(parts, ",")
-}
-
-// ParseCaseIDs is the inverse of JoinCaseIDs. An empty column is an empty group, never nil, so
-// JSON serializes []. A non-integer token is a data error, not a zero.
-func ParseCaseIDs(s string) ([]int, error) {
-	ids := []int{}
-	if strings.TrimSpace(s) == "" {
-		return ids, nil
-	}
-	for _, token := range strings.Split(s, ",") {
-		id, err := strconv.Atoi(strings.TrimSpace(token))
-		if err != nil {
-			return nil, fmt.Errorf("invalid case id %q in case_ids: %w", token, err)
+// NormalizeCaseIDs deduplicates, keeping the client's order (first occurrence wins). Never nil: an
+// empty group serializes as [].
+func NormalizeCaseIDs(ids []int) []int {
+	out := make([]int, 0, len(ids))
+	seen := make(map[int]bool, len(ids))
+	for _, id := range ids {
+		if !seen[id] {
+			seen[id] = true
+			out = append(out, id)
 		}
-		ids = append(ids, id)
 	}
-	slices.Sort(ids)
-	return slices.Compact(ids), nil
+	return out
 }
 
 // @Description Payload to create a case group, or overwrite the case list of an existing one
@@ -98,10 +93,6 @@ type CaseGroupResponse struct {
 	CaseIDs    []int  `json:"case_ids" validate:"required"`
 } // @name CaseGroupResponse
 
-func (g CaseGroup) ToResponse() (*CaseGroupResponse, error) {
-	ids, err := ParseCaseIDs(g.CaseIDs)
-	if err != nil {
-		return nil, fmt.Errorf("case group %q: %w", g.Name, err)
-	}
-	return &CaseGroupResponse{Name: g.Name, TenantCode: g.TenantCode, CaseIDs: ids}, nil
+func NewCaseGroupResponse(group CaseGroup, caseIDs []int) CaseGroupResponse {
+	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs)}
 }

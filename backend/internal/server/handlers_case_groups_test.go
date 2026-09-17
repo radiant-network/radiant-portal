@@ -17,21 +17,22 @@ type mockCaseGroupStore struct {
 	upsertErr error
 	getErr    error
 	stored    *types.CaseGroup
+	storedIDs []int
 
 	gotTenant, gotName, gotCreatedBy string
 	gotCaseIDs                       []int
 }
 
-func (m *mockCaseGroupStore) UpsertCaseGroup(_ context.Context, tenantCode, name string, caseIDs []int, createdBy string) (*types.CaseGroup, error) {
+func (m *mockCaseGroupStore) UpsertCaseGroup(_ context.Context, tenantCode, name string, caseIDs []int, createdBy string) (*types.CaseGroup, []int, error) {
 	m.gotTenant, m.gotName, m.gotCaseIDs, m.gotCreatedBy = tenantCode, name, caseIDs, createdBy
 	if m.upsertErr != nil {
-		return nil, m.upsertErr
+		return nil, nil, m.upsertErr
 	}
-	return &types.CaseGroup{TenantCode: tenantCode, Name: name, CaseIDs: types.JoinCaseIDs(caseIDs), CreatedBy: createdBy}, nil
+	return &types.CaseGroup{ID: 7, TenantCode: tenantCode, Name: name, CreatedBy: createdBy}, types.NormalizeCaseIDs(caseIDs), nil
 }
 
-func (m *mockCaseGroupStore) GetCaseGroupByName(_ context.Context, _, _ string) (*types.CaseGroup, error) {
-	return m.stored, m.getErr
+func (m *mockCaseGroupStore) GetCaseGroupByName(_ context.Context, _, _ string) (*types.CaseGroup, []int, error) {
+	return m.stored, m.storedIDs, m.getErr
 }
 
 func serveCaseGroups(store caseGroupStore, method, path, body string) *httptest.ResponseRecorder {
@@ -50,7 +51,7 @@ func Test_PostCaseGroupHandler_Success(t *testing.T) {
 	w := serveCaseGroups(store, "POST", "/radiant/case_groups", `{"name":"run_1","case_ids":[3,1,3]}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[1,3]}`, w.Body.String())
+	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[3,1]}`, w.Body.String())
 	assert.Equal(t, "radiant", store.gotTenant)
 	assert.Equal(t, "run_1", store.gotName)
 	assert.Equal(t, []int{3, 1, 3}, store.gotCaseIDs)
@@ -94,7 +95,7 @@ func Test_PostCaseGroupHandler_StoreError_500Generic(t *testing.T) {
 }
 
 func Test_GetCaseGroupHandler_Success(t *testing.T) {
-	store := &mockCaseGroupStore{stored: &types.CaseGroup{TenantCode: "radiant", Name: "run_1", CaseIDs: "1,3"}}
+	store := &mockCaseGroupStore{stored: &types.CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1"}, storedIDs: []int{1, 3}}
 	w := serveCaseGroups(store, "GET", "/radiant/case_groups/run_1", "")
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -118,11 +119,4 @@ func Test_GetCaseGroupHandler_StoreError_500Generic(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
-}
-
-func Test_GetCaseGroupHandler_CorruptCaseIds_500(t *testing.T) {
-	store := &mockCaseGroupStore{stored: &types.CaseGroup{TenantCode: "radiant", Name: "run_1", CaseIDs: "1,x"}}
-	w := serveCaseGroups(store, "GET", "/radiant/case_groups/run_1", "")
-
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

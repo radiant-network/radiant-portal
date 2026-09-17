@@ -47,7 +47,7 @@ func trackCaseGroup(t *testing.T, env *testutils.Env, name string) {
 
 // Seeded cases 1 and 2 exist in tenant radiant (test/data/clinical/03_cases.sql).
 
-func Test_PostCaseGroup_DataManager_CreatesAndReturnsSortedIds(t *testing.T) {
+func Test_PostCaseGroup_DataManager_CreatesAndReturnsIds(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		trackCaseGroup(t, env, "it_cg_create")
 		router := caseGroupsRouter(env, gabeID)

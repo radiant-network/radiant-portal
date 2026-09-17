@@ -11,8 +11,8 @@ import (
 )
 
 type caseGroupStore interface {
-	UpsertCaseGroup(ctx context.Context, tenantCode, name string, caseIDs []int, createdBy string) (*types.CaseGroup, error)
-	GetCaseGroupByName(ctx context.Context, tenantCode, name string) (*types.CaseGroup, error)
+	UpsertCaseGroup(ctx context.Context, tenantCode, name string, caseIDs []int, createdBy string) (*types.CaseGroup, []int, error)
+	GetCaseGroupByName(ctx context.Context, tenantCode, name string) (*types.CaseGroup, []int, error)
 }
 
 // PostCaseGroupHandler
@@ -56,7 +56,7 @@ func PostCaseGroupHandler(store caseGroupStore, auth utils.Auth) gin.HandlerFunc
 			return
 		}
 
-		group, err := store.UpsertCaseGroup(c.Request.Context(), *tenant, req.Name, req.CaseIDs, *userID)
+		group, caseIDs, err := store.UpsertCaseGroup(c.Request.Context(), *tenant, req.Name, req.CaseIDs, *userID)
 		var unknown *types.UnknownCaseIDsError
 		switch {
 		case errors.As(err, &unknown):
@@ -66,7 +66,7 @@ func PostCaseGroupHandler(store caseGroupStore, auth utils.Auth) gin.HandlerFunc
 			HandleError(c, err)
 			return
 		}
-		respondCaseGroup(c, group)
+		c.JSON(http.StatusOK, types.NewCaseGroupResponse(*group, caseIDs))
 	}
 }
 
@@ -101,7 +101,7 @@ func GetCaseGroupHandler(store caseGroupStore) gin.HandlerFunc {
 			return
 		}
 
-		group, err := store.GetCaseGroupByName(c.Request.Context(), *tenant, name)
+		group, caseIDs, err := store.GetCaseGroupByName(c.Request.Context(), *tenant, name)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -110,15 +110,6 @@ func GetCaseGroupHandler(store caseGroupStore) gin.HandlerFunc {
 			HandleNotFoundError(c, "case group")
 			return
 		}
-		respondCaseGroup(c, group)
+		c.JSON(http.StatusOK, types.NewCaseGroupResponse(*group, caseIDs))
 	}
-}
-
-func respondCaseGroup(c *gin.Context, group *types.CaseGroup) {
-	resp, err := group.ToResponse()
-	if err != nil {
-		HandleError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, resp)
 }
