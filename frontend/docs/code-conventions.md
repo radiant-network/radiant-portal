@@ -43,7 +43,7 @@ Source of truth is the [ferlab code conventions](https://github.com/Ferlab-Ste-J
 ```tsx
 // Import order
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 
 // Local imports
@@ -121,7 +121,7 @@ export const buttonStyles = 'px-4 py-2 bg-blue-500 text-white rounded-sm hover:b
 
 ```tsx
 // routes/index.tsx
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 
 export const router = createBrowserRouter([
   {

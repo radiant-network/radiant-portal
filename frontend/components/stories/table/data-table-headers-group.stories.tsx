@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';

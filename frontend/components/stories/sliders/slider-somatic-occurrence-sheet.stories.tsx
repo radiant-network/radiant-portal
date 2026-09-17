@@ -1,4 +1,4 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
 import { mocked } from 'storybook/test';
