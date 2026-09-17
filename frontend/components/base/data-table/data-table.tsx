@@ -144,7 +144,10 @@ export type {
 /**
  * Interface and types
  */
-export interface TableColumnDef<TData extends RowData, TValue> extends Omit<ColumnDef<AppFeatures, TData, TValue>, 'id'> {
+export interface TableColumnDef<TData extends RowData, TValue> extends Omit<
+  ColumnDef<AppFeatures, TData, TValue>,
+  'id'
+> {
   id: string;
   subComponent?: string;
 }
