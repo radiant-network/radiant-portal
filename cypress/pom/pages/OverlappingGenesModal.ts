@@ -189,7 +189,9 @@ export const OverlappingGenesModal = {
     shouldMatchDefaultColumnVisibility() {
       tableColumns.forEach(column => {
         const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
-        cy.get(`${CommonSelectors.tableHead(selectors.tableId)} ${selectors.tableHeadRow}`).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+        cy.get(`${CommonSelectors.tableHead(selectors.tableId)} ${selectors.tableHeadRow}`)
+          .contains(stringToRegExp(column.name, true /*exact*/))
+          .should(expectedExist);
       });
     },
     /**
@@ -244,7 +246,9 @@ export const OverlappingGenesModal = {
               if (column.tooltip) {
                 cy.get(selectors.leafHeadCell()).eq(position).find(CommonSelectors.underlineHeader).should('be.visible').realHover();
                 cy.get(CommonSelectors.tooltipPopper).contains(column.tooltip).first().should('exist');
-                cy.get(`${CommonSelectors.tableHead(selectors.tableId)} tr`).eq(0).click(); // Close the popper
+                cy.get(`${CommonSelectors.tableHead(selectors.tableId)} tr`)
+                  .eq(0)
+                  .click(); // Close the popper
                 cy.get(CommonSelectors.tooltipPopper).should('not.exist');
               } else {
                 cy.get(selectors.leafHeadCell()).eq(position).realHover();

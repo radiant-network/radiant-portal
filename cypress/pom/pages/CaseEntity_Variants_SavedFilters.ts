@@ -3,10 +3,7 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
 import { CaseEntity_Variants_Facets } from './CaseEntity_Variants_Facets';
 
-const generateSavedFiltersFunctions = (
-  facetsActions: typeof CaseEntity_Variants_Facets.snv.actions,
-  numericalFacet: { section: string; field: string },
-) => {
+const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants_Facets.snv.actions, numericalFacet: { section: string; field: string }) => {
   const actions = {
     /**
      * Clicks the delete filter button.
