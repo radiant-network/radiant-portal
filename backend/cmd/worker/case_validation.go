@@ -195,8 +195,9 @@ type CaseValidationRecord struct {
 
 	OutputDocuments map[string]struct{}
 
-	// TenantCode is the tenant of the batch being processed; patient lookups must be scoped to it
-	// (org_code + submitter_patient_id alone is not unique across tenants).
+	// TenantCode is the tenant of the batch being processed. Every natural-key lookup this record
+	// makes must be scoped to it — none of those keys (project code, analysis code, organization
+	// code, submitter patient/sample ids, aliquot, document URL) is unique across tenants.
 	TenantCode string
 
 	// Necessary to persist the case
@@ -424,7 +425,7 @@ func (r *CaseValidationRecord) fetchTaskTypeCodes(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchProject(ctx context.Context) error {
-	p, err := r.Cache.GetProjectByCode(ctx, r.Case.ProjectCode)
+	p, err := r.Cache.GetProjectByCode(ctx, r.Case.ProjectCode, r.TenantCode)
 	if err != nil {
 		return fmt.Errorf("get project by code %q: %w", r.Case.ProjectCode, err)
 	}
@@ -435,7 +436,7 @@ func (r *CaseValidationRecord) fetchProject(ctx context.Context) error {
 }
 
 func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx context.Context) error {
-	a, err := r.Cache.GetCaseAnalysisCatalogByCode(ctx, r.Case.AnalysisCode)
+	a, err := r.Cache.GetCaseAnalysisCatalogByCode(ctx, r.Case.AnalysisCode, r.TenantCode)
 	if err != nil {
 		return fmt.Errorf("get analysis catalog by code %q: %w", r.Case.AnalysisCode, err)
 	}
@@ -452,7 +453,7 @@ func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx context.Context) error {
 // would reject the insert.
 func (r *CaseValidationRecord) resolveOrganizations(ctx context.Context) error {
 	if r.Case.OrderingOrganizationCode != "" {
-		org, err := r.Cache.GetOrganizationByCode(ctx, r.Case.OrderingOrganizationCode)
+		org, err := r.Cache.GetOrganizationByCode(ctx, r.Case.OrderingOrganizationCode, r.TenantCode)
 		if err != nil {
 			return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
 		}
@@ -460,7 +461,7 @@ func (r *CaseValidationRecord) resolveOrganizations(ctx context.Context) error {
 	}
 
 	if r.Case.DiagnosticLabCode != "" {
-		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(ctx, r.Case.DiagnosticLabCode)
+		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(ctx, r.Case.DiagnosticLabCode, r.TenantCode)
 		if err != nil {
 			return fmt.Errorf("get organization by code %q: %w", r.Case.DiagnosticLabCode, err)
 		}
@@ -486,7 +487,7 @@ func (r *CaseValidationRecord) fetchPatients(ctx context.Context) error {
 
 func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx context.Context) error {
 	for _, se := range r.Case.SequencingExperiments {
-		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, r.TenantCode)
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment: %w", err)
 		}
@@ -502,7 +503,7 @@ func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx context.Contex
 
 func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(ctx context.Context, task *types.CaseTaskBatch) error {
 	for _, aliquot := range task.Aliquots {
-		seqs, err := cr.Cache.GetSequencingExperimentByAliquot(ctx, aliquot)
+		seqs, err := cr.Cache.GetSequencingExperimentByAliquot(ctx, aliquot, cr.TenantCode)
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", aliquot, err)
 		}
@@ -532,7 +533,7 @@ func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments(ctx co
 
 func (cr *CaseValidationRecord) fetchDocumentsFromURLs(ctx context.Context, urls []string) error {
 	for _, url := range urls {
-		d, err := cr.Cache.GetDocumentByUrl(ctx, url)
+		d, err := cr.Cache.GetDocumentByUrl(ctx, url, cr.TenantCode)
 		if err != nil {
 			return fmt.Errorf("failed to get document by url %q: %w", url, err)
 		}
@@ -541,7 +542,7 @@ func (cr *CaseValidationRecord) fetchDocumentsFromURLs(ctx context.Context, urls
 		}
 
 		cr.Documents[url] = d
-		docs, err := cr.Cache.GetTaskHasDocumentByDocumentId(ctx, d.ID)
+		docs, err := cr.Cache.GetTaskHasDocumentByDocumentId(ctx, d.ID, cr.TenantCode)
 		if err != nil {
 			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
 		}
@@ -857,7 +858,7 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 
 func (cr *CaseValidationRecord) validateSeqExpExists(ctx context.Context, seqExpIndex int) (error, bool) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, cr.TenantCode)
 	if err != nil {
 		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
 	}
@@ -876,7 +877,7 @@ func (cr *CaseValidationRecord) validateSeqExpExists(ctx context.Context, seqExp
 
 func (cr *CaseValidationRecord) validateSeqExpSample(ctx context.Context, seqExpIndex int) (*types.Sample, error) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, se.SampleOrganizationCode, se.SubmitterSampleId)
+	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, se.SampleOrganizationCode, se.SubmitterSampleId, cr.TenantCode)
 	if err != nil {
 		return nil, fmt.Errorf("error getting existing sample: %v", err)
 	}
@@ -973,7 +974,7 @@ func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
-		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, cr.Case.SubmitterCaseId, *cr.ProjectID)
+		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, cr.Case.SubmitterCaseId, *cr.ProjectID, cr.TenantCode)
 		if err != nil {
 			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
 		}

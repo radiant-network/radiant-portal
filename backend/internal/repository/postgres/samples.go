@@ -50,11 +50,11 @@ func (r *SamplesRepository) GetSampleById(ctx context.Context, id int) (*Sample,
 	return &sample, nil
 }
 
-func (r *SamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string) (*Sample, error) {
+func (r *SamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*Sample, error) {
 	var sample Sample
 	tx := r.db.WithContext(ctx).
 		Table(types.SampleTable.Name).
-		Where("submitter_sample_id = ? AND organization_code = ?", submitterSampleId, organizationCode)
+		Where("submitter_sample_id = ? AND organization_code = ? AND tenant_code = ?", submitterSampleId, organizationCode, tenantCode)
 	if err := tx.First(&sample).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieving sample by org code and submitter sample id: %w", err)
@@ -80,7 +80,7 @@ func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) er
 	// parent_sample_id).
 	tx := r.db.WithContext(ctx).
 		Table(types.SampleTable.Name).
-		Where("organization_code = ? AND submitter_sample_id = ?", sample.OrganizationCode, sample.SubmitterSampleId).
+		Where("organization_code = ? AND submitter_sample_id = ? AND tenant_code = ?", sample.OrganizationCode, sample.SubmitterSampleId, sample.TenantCode).
 		Updates(map[string]any{
 			"type_code":        sample.TypeCode,
 			"tissue_site":      sample.TissueSite,

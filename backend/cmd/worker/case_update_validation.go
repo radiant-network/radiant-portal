@@ -62,7 +62,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		Update:               update,
 	}
 
-	project, err := cache.GetProjectByCode(ctx, update.ProjectCode)
+	project, err := cache.GetProjectByCode(ctx, update.ProjectCode, tenantCode)
 	if err != nil {
 		return nil, fmt.Errorf("get project by code %q: %w", update.ProjectCode, err)
 	}
@@ -71,7 +71,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 		return r, nil
 	}
 
-	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, update.SubmitterCaseId, project.ID)
+	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, update.SubmitterCaseId, project.ID, tenantCode)
 	if err != nil {
 		return nil, fmt.Errorf("get case by submitter_case_id %q and project_id %d: %w", update.SubmitterCaseId, project.ID, err)
 	}
@@ -171,7 +171,7 @@ func validateUpdateCaseRecord(ctx context.Context, bv *batchval.BatchValidationC
 	// Merge-if-present: sequencing experiments + tasks are attached like the POST path only
 	// when the payload carries them; when omitted/empty the case's existing links and tasks
 	// are left untouched (never cleared). Reuses the PATCH attach validators.
-	seqExps, err := resolveSequencingExperimentsForAttach(ctx, cache, update.SequencingExperiments, &r.BaseValidationRecord, r.path())
+	seqExps, err := resolveSequencingExperimentsForAttach(ctx, cache, update.SequencingExperiments, &r.BaseValidationRecord, r.path(), tenantCode)
 	if err != nil {
 		return nil, err
 	}

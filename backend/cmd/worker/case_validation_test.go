@@ -86,11 +86,15 @@ func (m *CaseValidationMockRepo) GetById(id int) (*types.Document, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
+func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string, tenantCode string) (*types.AnalysisCatalog, error) {
+	if strings.Contains(code, "ERROR") {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if code == "WGA" {
 		return &types.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
-	} else if strings.Contains(code, "ERROR") {
-		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
@@ -103,7 +107,10 @@ func (m *CaseValidationMockRepo) GetCaseType(caseID int) (string, error) {
 	return "", nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
+func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int, tenantCode string) (*types.Case, error) {
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if m.GetCaseBySubmitterCaseIdAndProjectIdFunc != nil {
 		return m.GetCaseBySubmitterCaseIdAndProjectIdFunc(submitterCaseId, projectId)
 	}
@@ -114,11 +121,15 @@ func (m *CaseValidationMockRepo) GetCasesFilters() (*types.CaseFilters, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetDocumentByUrl(_ context.Context, url string) (*types.Document, error) {
+func (m *CaseValidationMockRepo) GetDocumentByUrl(_ context.Context, url string, tenantCode string) (*types.Document, error) {
+	if url == "file://bucket/error.bam" {
+		return nil, fmt.Errorf("document service unavailable")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if url == "file://bucket/file.bam" {
 		return &types.Document{ID: 500, Url: url, Name: "file.bam"}, nil
-	} else if url == "file://bucket/error.bam" {
-		return nil, fmt.Errorf("document service unavailable")
 	} else if url == "file://bucket/task-error.bam" {
 		return &types.Document{ID: 999, Url: url, Name: "task-error.bam"}, nil
 	}
@@ -129,13 +140,17 @@ func (m *CaseValidationMockRepo) GetDocumentsFilters(withProjectAndLab bool) (*t
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetOrganizationByCode(_ context.Context, organizationCode string) (*types.Organization, error) {
+func (m *CaseValidationMockRepo) GetOrganizationByCode(_ context.Context, organizationCode string, tenantCode string) (*types.Organization, error) {
+	if strings.Contains(organizationCode, "ERROR") {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if organizationCode == "LAB-1" {
 		return &types.Organization{Code: organizationCode, TenantCode: types.DefaultTenantCode, Name: "Organization 1"}, nil
 	} else if organizationCode == "LAB-2" {
 		return &types.Organization{Code: organizationCode, TenantCode: types.DefaultTenantCode, Name: "Organization 2"}, nil
-	} else if strings.Contains(organizationCode, "ERROR") {
-		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
@@ -154,11 +169,15 @@ func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ cont
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetProjectByCode(_ context.Context, code string) (*types.Project, error) {
+func (m *CaseValidationMockRepo) GetProjectByCode(_ context.Context, code string, tenantCode string) (*types.Project, error) {
+	if strings.Contains(code, "ERROR") {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if code == "PROJ-1" {
 		return &types.Project{ID: 42, Code: code, Name: "PROJ-1", Description: "Project #1"}, nil
-	} else if strings.Contains(code, "ERROR") {
-		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
@@ -167,19 +186,28 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(_ context.Cont
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
+	if strings.Contains(aliquot, "ERROR") {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if aliquot == "ALIQUOT-1" {
 		return []types.SequencingExperiment{
 			{ID: 200, Aliquot: "ALIQUOT-1"},
 		}, nil
 	}
-	if strings.Contains(aliquot, "ERROR") {
-		return nil, fmt.Errorf("database connection failed")
-	}
 	return nil, nil // Not found
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string, tenantCode string) (*types.SequencingExperiment, error) {
+	if strings.Contains(aliquot, "ERROR") || strings.Contains(submitterSampleId, "ERROR") {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if aliquot == "ALIQUOT-1" && submitterSampleId == "SAMPLE-1" && sampleOrganizationCode == "LAB-1" {
 		return &types.SequencingExperiment{
 			ID:      200,
@@ -191,9 +219,6 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSam
 			ID:      201,
 			Aliquot: aliquot,
 		}, nil
-	}
-	if strings.Contains(aliquot, "ERROR") || strings.Contains(submitterSampleId, "ERROR") {
-		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
@@ -214,13 +239,17 @@ func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]
 	return nil, nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(_ context.Context, docId int) ([]*types.TaskHasDocument, error) {
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(_ context.Context, docId int, tenantCode string) ([]*types.TaskHasDocument, error) {
+	if docId == 999 {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	if tenantCode != types.DefaultTenantCode {
+		return nil, nil
+	}
 	if docId == 500 {
 		return []*types.TaskHasDocument{
 			{TaskID: 300, DocumentID: docId, Type: "output"},
 		}, nil
-	} else if docId == 999 {
-		return nil, fmt.Errorf("database connection failed")
 	}
 	return nil, nil
 }
@@ -303,16 +332,16 @@ func (m *CodesMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetTyp
 }
 
 type SamplesMockRepo struct {
-	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error)
 }
 
 func (m *SamplesMockRepo) GetSampleById(_ context.Context, id int) (*postgres.Sample, error) {
 	return nil, nil
 }
 
-func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
-		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
+		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId, tenantCode)
 	}
 	return nil, nil
 }
@@ -417,6 +446,7 @@ func Test_getProbandFromPatients_OK(t *testing.T) {
 
 func Test_getProbandFromPatients_Empty(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{},
 		},
@@ -429,6 +459,7 @@ func Test_getProbandFromPatients_Empty(t *testing.T) {
 
 func Test_getProbandFromPatients_Error(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-1",
 			Patients: []*types.CasePatientBatch{
@@ -441,12 +472,13 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"\"} for case 0")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\" \"radiant\"} for case 0")
 	assert.Nil(t, proband)
 }
 
 func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -465,6 +497,7 @@ func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 
 func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -486,6 +519,7 @@ func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 
 func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -506,6 +540,7 @@ func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 
 func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -540,6 +575,7 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 
 func Test_validateTextLength_ValidLength(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -558,6 +594,7 @@ func Test_validateTextLength_ValidLength(t *testing.T) {
 
 func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -580,6 +617,7 @@ func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
 
 func Test_validateTextLength_EmptyString(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -598,6 +636,7 @@ func Test_validateTextLength_EmptyString(t *testing.T) {
 
 func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -618,6 +657,7 @@ func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 // The cap counts bytes, so accented French text hits it at roughly half the characters.
 func Test_validateTextLength_FreeTextMaxLengthCountsBytes(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -638,6 +678,7 @@ func Test_validateTextLength_FreeTextMaxLengthCountsBytes(t *testing.T) {
 
 func Test_validateTextLength_FreeTextMaxLength(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -760,6 +801,7 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 
 func Test_fetchCodeInfos_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: &CodesMockRepo{},
@@ -787,6 +829,7 @@ func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
@@ -809,6 +852,7 @@ func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
@@ -831,6 +875,7 @@ func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &batchval.BatchValidationContext{
 				ValueSetsRepo: mockRepo,
@@ -874,6 +919,7 @@ func Test_fetchProject_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -896,6 +942,7 @@ func Test_fetchProject_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -917,6 +964,7 @@ func Test_fetchProject_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -938,6 +986,7 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -960,6 +1009,7 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -981,6 +1031,7 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1002,6 +1053,7 @@ func Test_ResolveOrganizations_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1025,6 +1077,7 @@ func Test_ResolveOrganizations_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1048,6 +1101,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1064,6 +1118,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 	assert.False(t, record.DiagnosisLabExists)
 
 	record = CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1120,6 +1175,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1159,6 +1215,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1194,6 +1251,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -1280,6 +1338,7 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 
 func Test_formatFieldPath_WithEntityAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 2},
 	}
 
@@ -1290,6 +1349,7 @@ func Test_formatFieldPath_WithEntityAndIndex(t *testing.T) {
 
 func Test_formatFieldPath_WithoutEntity(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1299,6 +1359,7 @@ func Test_formatFieldPath_WithoutEntity(t *testing.T) {
 
 func Test_formatFieldPath_WithoutIndex(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1308,6 +1369,7 @@ func Test_formatFieldPath_WithoutIndex(t *testing.T) {
 
 func Test_formatFieldPath_WithCollection(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1318,6 +1380,7 @@ func Test_formatFieldPath_WithCollection(t *testing.T) {
 
 func Test_formatFieldPath_WithCollectionAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 5},
 	}
 
@@ -1504,6 +1567,7 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 
 func Test_validateCaseField_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1514,6 +1578,7 @@ func Test_validateCaseField_Valid(t *testing.T) {
 
 func Test_validateCaseField_EmptyOptional(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1524,6 +1589,7 @@ func Test_validateCaseField_EmptyOptional(t *testing.T) {
 
 func Test_validateCaseField_EmptyRequired(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1537,6 +1603,7 @@ func Test_validateCaseField_EmptyRequired(t *testing.T) {
 
 func Test_validateCaseField_InvalidRegex(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1551,6 +1618,7 @@ func Test_validateCaseField_InvalidRegex(t *testing.T) {
 
 func Test_validateCaseField_TooLong(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1566,6 +1634,7 @@ func Test_validateCaseField_TooLong(t *testing.T) {
 
 func Test_validateCaseField_MultipleErrors(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 	}
 
@@ -1583,6 +1652,7 @@ func Test_validateCaseField_MultipleErrors(t *testing.T) {
 
 func Test_validateStatusCode_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			StatusCode:   "in_progress",
@@ -1602,6 +1672,7 @@ func Test_validateStatusCode_Valid(t *testing.T) {
 
 func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr := &CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			StatusCode:   "unknown_status",
@@ -1636,6 +1707,7 @@ func Test_validateCase_Valid(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1679,6 +1751,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1722,6 +1795,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1763,6 +1837,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1804,6 +1879,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1846,6 +1922,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1886,6 +1963,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1935,6 +2013,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -1971,6 +2050,7 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -2018,6 +2098,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: ctx,
 			Cache:   batchval.NewBatchValidationCache(ctx),
@@ -2068,7 +2149,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		},
 	}
 	mockSamples := SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
 					ID:        1,
@@ -2136,7 +2217,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 	mockSamples := SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
 					ID:        1,
@@ -2203,6 +2284,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 
 func Test_validateFamilyMemberCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2228,6 +2310,7 @@ func Test_validateFamilyMemberCode_Valid(t *testing.T) {
 
 func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2256,6 +2339,7 @@ func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 
 func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2285,6 +2369,7 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 
 func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2310,6 +2395,7 @@ func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
 
 func Test_validateCondition_Valid(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2335,6 +2421,7 @@ func Test_validateCondition_Valid(t *testing.T) {
 
 func Test_validateCondition_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2360,6 +2447,7 @@ func Test_validateCondition_AcceptsAnyCharacter(t *testing.T) {
 
 func Test_validateCondition_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2388,6 +2476,7 @@ func Test_validateCondition_TooLong(t *testing.T) {
 
 func Test_validateFamilyHistory_NoHistory(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2408,6 +2497,7 @@ func Test_validateFamilyHistory_NoHistory(t *testing.T) {
 
 func Test_validateFamilyHistory_MultipleEntries(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2437,6 +2527,7 @@ func Test_validateFamilyHistory_MultipleEntries(t *testing.T) {
 
 func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2467,6 +2558,7 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 
 func Test_validateObservationsCategorical_Valid(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		ObservationCodes:     []string{"phenotype", "condition"},
 		OnsetCodes:           []string{"childhood", "juvenile"},
@@ -2508,6 +2600,7 @@ func Test_validateObservationsCategorical_Valid(t *testing.T) {
 
 func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		InterpretationCodes:  []string{"positive", "negative"},
 		Case: types.CaseBatch{
@@ -2539,6 +2632,7 @@ func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 
 func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2560,6 +2654,7 @@ func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 
 func Test_validateObsTextValue_Valid(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2585,6 +2680,7 @@ func Test_validateObsTextValue_Valid(t *testing.T) {
 
 func Test_validateObsTextValue_AcceptsAnyCharacter(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2610,6 +2706,7 @@ func Test_validateObsTextValue_AcceptsAnyCharacter(t *testing.T) {
 
 func Test_validateObsTextValue_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2638,6 +2735,7 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 
 func Test_validateObservationsText_Valid(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		ObservationCodes:     []string{"phenotype", "note"},
 		Case: types.CaseBatch{
@@ -2669,6 +2767,7 @@ func Test_validateObservationsText_Valid(t *testing.T) {
 
 func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2695,6 +2794,7 @@ func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 
 func Test_validateObservationsText_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2720,6 +2820,7 @@ func Test_validateObservationsText_NoObservations(t *testing.T) {
 
 func Test_validatePatient_PatientExists(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2732,7 +2833,7 @@ func Test_validatePatient_PatientExists(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -2745,6 +2846,7 @@ func Test_validatePatient_PatientExists(t *testing.T) {
 
 func Test_validatePatient_PatientNotFound(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2768,6 +2870,7 @@ func Test_validatePatient_PatientNotFound(t *testing.T) {
 
 func Test_validatePatient_MultiplePatients(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -2784,7 +2887,7 @@ func Test_validatePatient_MultiplePatients(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -2813,6 +2916,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -2831,7 +2935,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -2854,6 +2958,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -2878,11 +2983,11 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-2"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-2", TenantCode: types.DefaultTenantCode}: {
 				ID:                 2,
 				SubmitterPatientId: "PAT-2",
 			},
@@ -2905,6 +3010,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -2929,7 +3035,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -2996,6 +3102,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		OnsetCodes:           []string{"unknown"},
 		ObservationCodes:     []string{"phenotype", "condition"},
@@ -3006,11 +3113,11 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 			Patients:        patientsBatch,
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
 			},
-			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-2"}: {
+			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-2", TenantCode: types.DefaultTenantCode}: {
 				ID:                 2,
 				SubmitterPatientId: "PAT-2",
 			},
@@ -3030,6 +3137,7 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -3101,6 +3209,7 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -3131,6 +3240,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -3160,7 +3270,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 
 func Test_validateSeqExpSample_Valid(t *testing.T) {
 	samplesMockRepo := &SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
 					ID:                1,
@@ -3178,6 +3288,7 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 		SampleRepo: samplesMockRepo,
 	}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -3207,7 +3318,7 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 
 func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
 	samplesMockRepo := &SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			return nil, nil
 		},
 	}
@@ -3215,6 +3326,7 @@ func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
 		SampleRepo: samplesMockRepo,
 	}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: mockContext,
 			Cache:   batchval.NewBatchValidationCache(mockContext),
@@ -3244,6 +3356,7 @@ func Test_validateCaseSequencingExperiments_NoSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -3268,6 +3381,7 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -3298,7 +3412,7 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 
 func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	mockSamples := SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
 					ID:        1,
@@ -3314,6 +3428,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -3341,7 +3456,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -3364,6 +3479,7 @@ func Test_validateSeqExpPatientInCase_Valid(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -3377,7 +3493,7 @@ func Test_validateSeqExpPatientInCase_Valid(t *testing.T) {
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -3396,6 +3512,7 @@ func Test_validateSeqExpPatientInCase_PatientNotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -3425,6 +3542,7 @@ func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -3447,6 +3565,7 @@ func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
 
 func Test_validateSeqExpCaseType_GermlineWithGermlineSample(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "germline",
@@ -3475,6 +3594,7 @@ func Test_validateSeqExpCaseType_GermlineWithGermlineSample(t *testing.T) {
 
 func Test_validateSeqExpCaseType_GermlineWithTumoralSample(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "germline",
@@ -3507,6 +3627,7 @@ func Test_validateSeqExpCaseType_GermlineWithTumoralSample(t *testing.T) {
 
 func Test_validateSeqExpCaseType_SomaticWithTumoralSample(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode:           types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel, Index: 0},
 		Case: types.CaseBatch{
 			Type:            "somatic",
@@ -3535,7 +3656,7 @@ func Test_validateSeqExpCaseType_SomaticWithTumoralSample(t *testing.T) {
 
 func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T) {
 	mockSamples := SamplesMockRepo{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
 					ID:            1,
@@ -3559,6 +3680,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	}
 
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -3582,7 +3704,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 			},
 		},
 		Patients: map[batchval.PatientKey]*types.Patient{
-			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
+			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1", TenantCode: types.DefaultTenantCode}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
 			},
@@ -3691,6 +3813,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 
 func Test_validateTaskAliquot_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{
@@ -3712,6 +3835,7 @@ func Test_validateTaskAliquot_OK(t *testing.T) {
 
 func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{
@@ -3740,6 +3864,7 @@ func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 
 func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{
@@ -3772,6 +3897,7 @@ func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 
 func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Aliquot(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{
@@ -3804,6 +3930,7 @@ func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Ali
 
 func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliquot(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{Aliquot: "ALIQUOT-1"},
@@ -3832,6 +3959,7 @@ func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliq
 
 func Test_validateTaskDocuments_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {},
 		},
@@ -3864,6 +3992,7 @@ func Test_validateTaskDocuments_OK(t *testing.T) {
 
 func Test_validateTaskDocuments_MissingInputDocuments_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {},
 		},
@@ -3892,6 +4021,7 @@ func Test_validateTaskDocuments_MissingInputDocuments_OK(t *testing.T) {
 
 func Test_validateTaskDocuments_MissingInputDocumentsError(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {},
 		},
@@ -3927,6 +4057,7 @@ func Test_validateTaskDocuments_MissingInputDocumentsError(t *testing.T) {
 
 func Test_validateTaskDocuments_MissingOutputDocumentsError(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {},
 		},
@@ -3962,6 +4093,7 @@ func Test_validateTaskDocuments_MissingOutputDocumentsError(t *testing.T) {
 
 func Test_validateTaskDocuments_InputDocumentDoesNotExistsError(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {},
 		},
@@ -4002,6 +4134,7 @@ func Test_validateTaskDocuments_InputDocumentDoesNotExistsError(t *testing.T) {
 
 func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		Documents: map[string]*types.Document{
 			"s3://input/foo/bar.txt": {Url: "s3://input/foo/bar.txt"},
 		},
@@ -4045,6 +4178,7 @@ func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 
 func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		DocumentsInTasks: map[string][]*DocumentRelation{
 			"s3://output/foo/bar.txt": {{TaskID: 0, Type: "output"}},
 		},
@@ -4079,6 +4213,7 @@ func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4121,6 +4256,7 @@ func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4163,6 +4299,7 @@ func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 func Test_validateDocumentTextField_OK(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4186,6 +4323,7 @@ func Test_validateDocumentTextField_OK(t *testing.T) {
 func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4214,6 +4352,7 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4245,6 +4384,7 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4262,6 +4402,7 @@ func Test_validateDocumentTextField_HashRegex_RejectsAccentedText(t *testing.T) 
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4300,6 +4441,7 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 			Context: &mockContext,
 			Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4435,6 +4577,7 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4479,6 +4622,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4529,6 +4673,7 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4579,6 +4724,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4629,6 +4775,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),
@@ -4679,6 +4826,7 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
+			TenantCode: types.DefaultTenantCode,
 			BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: caseResourceLabel,
 				Context: &mockContext,
 				Cache:   batchval.NewBatchValidationCache(&mockContext),

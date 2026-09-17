@@ -12,6 +12,8 @@ import (
 // row belonging to another tenant is invisible to reads/updates/deletes — handlers surface that
 // as 404. When no tenant is bound it is a no-op: the worker (which processes every tenant's
 // batches) and any path running before tenant isolation is enabled keep their current behavior.
+// Because of that no-op, the worker's own isolation cannot come from here — its natural-key
+// lookups take an explicit tenantCode and spell out `tenant_code = ?` themselves.
 //
 // Use it only on single tenant-scoped tables, where the unqualified `tenant_code` is unambiguous.
 func WithTenant(ctx context.Context) func(*gorm.DB) *gorm.DB {

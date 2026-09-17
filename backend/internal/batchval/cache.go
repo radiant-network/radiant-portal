@@ -18,16 +18,44 @@ type SequencingExperimentKey struct {
 	SampleOrganizationCode string
 	SubmitterSampleId      string
 	Aliquot                string
+	TenantCode             string
 }
 
 type CaseKey struct {
 	ProjectId       int
 	SubmitterCaseId string
+	TenantCode      string
 }
 
 type SampleKey struct {
 	OrganizationCode  string
 	SubmitterSampleId string
+	TenantCode        string
+}
+
+type OrganizationKey struct {
+	Code       string
+	TenantCode string
+}
+
+type ProjectKey struct {
+	Code       string
+	TenantCode string
+}
+
+type DocumentKey struct {
+	Url        string
+	TenantCode string
+}
+
+type AnalysisCatalogKey struct {
+	Code       string
+	TenantCode string
+}
+
+type AliquotKey struct {
+	Aliquot    string
+	TenantCode string
 }
 
 type BatchValidationCache struct {
@@ -38,20 +66,23 @@ type BatchValidationCache struct {
 	// ExamCodes is keyed by tenant: exam is the only value set scoped by (code, tenant_code).
 	ExamCodes map[string][]string
 
-	// Referenced Entities (Indexed by their natural keys)
-	OrganizationsByCode            map[string]*types.Organization                          // Key: code
-	Projects                       map[string]*types.Project                               // Key: code
-	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id
+	// Referenced Entities (Indexed by their natural keys). Every natural key includes the
+	// tenant: none of these keys is unique across tenants, and the tenant is what the lookups
+	// themselves are scoped by. Maps keyed by an internal id (SamplesById, FetusesById,
+	// TaskContext, TaskHasDocuments) need no tenant — the id was resolved within one.
+	OrganizationsByCode            map[OrganizationKey]*types.Organization                 // Key: code + tenant
+	Projects                       map[ProjectKey]*types.Project                           // Key: code + tenant
+	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id + tenant
 	SamplesById                    map[int]*types.Sample                                   // Key: ID
-	SamplesByKey                   map[SampleKey]*types.Sample                             // Key: org_code + submitter_sample_id
+	SamplesByKey                   map[SampleKey]*types.Sample                             // Key: org_code + submitter_sample_id + tenant
 	FetusesById                    map[int]*types.Fetus                                    // Key: ID
-	SequencingExperimentsByAliquot map[string][]types.SequencingExperiment                 // Key: aliquot
-	SequencingExperimentsByKey     map[SequencingExperimentKey]*types.SequencingExperiment // Key: org_code + submitter_sample_id + aliquot
+	SequencingExperimentsByAliquot map[AliquotKey][]types.SequencingExperiment             // Key: aliquot + tenant
+	SequencingExperimentsByKey     map[SequencingExperimentKey]*types.SequencingExperiment // Key: org_code + submitter_sample_id + aliquot + tenant
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
-	Documents                      map[string]*types.Document                              // Key: URL
+	Documents                      map[DocumentKey]*types.Document                         // Key: URL + tenant
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
-	AnalysisCatalogs               map[string]*types.AnalysisCatalog                       // Key: code
-	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id
+	AnalysisCatalogs               map[AnalysisCatalogKey]*types.AnalysisCatalog           // Key: code + tenant
+	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id + tenant
 }
 
 func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCache {
@@ -59,18 +90,18 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		Context:                        context,
 		ValueSets:                      make(map[postgres.ValueSetType][]string),
 		ExamCodes:                      make(map[string][]string),
-		OrganizationsByCode:            make(map[string]*types.Organization),
-		Projects:                       make(map[string]*types.Project),
+		OrganizationsByCode:            make(map[OrganizationKey]*types.Organization),
+		Projects:                       make(map[ProjectKey]*types.Project),
 		Patients:                       make(map[PatientKey]*types.Patient),
 		SamplesById:                    make(map[int]*types.Sample),
 		SamplesByKey:                   make(map[SampleKey]*types.Sample),
 		FetusesById:                    make(map[int]*types.Fetus),
-		SequencingExperimentsByAliquot: make(map[string][]types.SequencingExperiment),
+		SequencingExperimentsByAliquot: make(map[AliquotKey][]types.SequencingExperiment),
 		SequencingExperimentsByKey:     make(map[SequencingExperimentKey]*types.SequencingExperiment),
 		TaskContext:                    make(map[int][]*types.TaskContext),
-		Documents:                      make(map[string]*types.Document),
+		Documents:                      make(map[DocumentKey]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
-		AnalysisCatalogs:               make(map[string]*types.AnalysisCatalog),
+		AnalysisCatalogs:               make(map[AnalysisCatalogKey]*types.AnalysisCatalog),
 		Cases:                          make(map[CaseKey]*types.Case),
 	}
 }
@@ -81,27 +112,28 @@ func getCopy[T any](input []T) []T {
 	return out
 }
 
-func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(ctx context.Context, code string) (*types.AnalysisCatalog, error) {
-	if ac, ok := c.AnalysisCatalogs[code]; ok {
+func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(ctx context.Context, code string, tenantCode string) (*types.AnalysisCatalog, error) {
+	key := AnalysisCatalogKey{Code: code, TenantCode: tenantCode}
+	if ac, ok := c.AnalysisCatalogs[key]; ok {
 		return ac, nil
 	}
 
-	ac, err := c.Context.CasesRepo.GetCaseAnalysisCatalogIdByCode(ctx, code)
+	ac, err := c.Context.CasesRepo.GetCaseAnalysisCatalogIdByCode(ctx, code, tenantCode)
 	if err != nil {
 		return nil, err
 	}
 
-	c.AnalysisCatalogs[code] = ac
+	c.AnalysisCatalogs[key] = ac
 	return ac, nil
 }
 
-func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
-	key := CaseKey{projectId, submitterCaseId}
+func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int, tenantCode string) (*types.Case, error) {
+	key := CaseKey{ProjectId: projectId, SubmitterCaseId: submitterCaseId, TenantCode: tenantCode}
 	if cs, ok := c.Cases[key]; ok {
 		return cs, nil
 	}
 
-	cs, err := c.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(ctx, submitterCaseId, projectId)
+	cs, err := c.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(ctx, submitterCaseId, projectId, tenantCode)
 	if err != nil {
 		return nil, err
 	}
@@ -113,35 +145,37 @@ func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(ctx context.
 	return cs, nil
 }
 
-func (c *BatchValidationCache) GetDocumentByUrl(ctx context.Context, url string) (*types.Document, error) {
-	if doc, ok := c.Documents[url]; ok {
+func (c *BatchValidationCache) GetDocumentByUrl(ctx context.Context, url string, tenantCode string) (*types.Document, error) {
+	key := DocumentKey{Url: url, TenantCode: tenantCode}
+	if doc, ok := c.Documents[key]; ok {
 		return doc, nil
 	}
 
-	doc, err := c.Context.DocRepo.GetDocumentByUrl(ctx, url)
+	doc, err := c.Context.DocRepo.GetDocumentByUrl(ctx, url, tenantCode)
 	if err != nil {
 		return nil, err
 	}
 
 	if doc != nil {
-		c.Documents[url] = doc
+		c.Documents[key] = doc
 	}
 
 	return doc, nil
 }
 
-func (c *BatchValidationCache) GetOrganizationByCode(ctx context.Context, code string) (*types.Organization, error) {
-	if org, ok := c.OrganizationsByCode[code]; ok {
+func (c *BatchValidationCache) GetOrganizationByCode(ctx context.Context, code string, tenantCode string) (*types.Organization, error) {
+	key := OrganizationKey{Code: code, TenantCode: tenantCode}
+	if org, ok := c.OrganizationsByCode[key]; ok {
 		return org, nil
 	}
 
-	org, err := c.Context.OrgRepo.GetOrganizationByCode(ctx, code)
+	org, err := c.Context.OrgRepo.GetOrganizationByCode(ctx, code, tenantCode)
 	if err != nil {
 		return nil, err
 	}
 
 	if org != nil {
-		c.OrganizationsByCode[code] = org
+		c.OrganizationsByCode[key] = org
 	}
 
 	return org, nil
@@ -165,18 +199,19 @@ func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(ctx cont
 	return patient, nil
 }
 
-func (c *BatchValidationCache) GetProjectByCode(ctx context.Context, code string) (*types.Project, error) {
-	if project, ok := c.Projects[code]; ok {
+func (c *BatchValidationCache) GetProjectByCode(ctx context.Context, code string, tenantCode string) (*types.Project, error) {
+	key := ProjectKey{Code: code, TenantCode: tenantCode}
+	if project, ok := c.Projects[key]; ok {
 		return project, nil
 	}
 
-	project, err := c.Context.ProjectRepo.GetProjectByCode(ctx, code)
+	project, err := c.Context.ProjectRepo.GetProjectByCode(ctx, code, tenantCode)
 	if err != nil {
 		return nil, err
 	}
 
 	if project != nil {
-		c.Projects[code] = project
+		c.Projects[key] = project
 	}
 
 	return project, nil
@@ -199,13 +234,13 @@ func (c *BatchValidationCache) GetSampleById(ctx context.Context, id int) (*type
 	return sample, nil
 }
 
-func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, orgCode string, submitterSampleId string) (*types.Sample, error) {
-	key := SampleKey{orgCode, submitterSampleId}
+func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, orgCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
+	key := SampleKey{OrganizationCode: orgCode, SubmitterSampleId: submitterSampleId, TenantCode: tenantCode}
 	if sample, ok := c.SamplesByKey[key]; ok {
 		return sample, nil
 	}
 
-	sample, err := c.Context.SampleRepo.GetSampleByOrgCodeAndSubmitterSampleId(ctx, orgCode, submitterSampleId)
+	sample, err := c.Context.SampleRepo.GetSampleByOrgCodeAndSubmitterSampleId(ctx, orgCode, submitterSampleId, tenantCode)
 	if err != nil {
 		return nil, err
 	}
@@ -256,27 +291,28 @@ func (c *BatchValidationCache) GetFetusById(ctx context.Context, id int) (*types
 	return fetus, nil
 }
 
-func (c *BatchValidationCache) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]types.SequencingExperiment, error) {
-	if seqExps, ok := c.SequencingExperimentsByAliquot[aliquot]; ok {
+func (c *BatchValidationCache) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
+	key := AliquotKey{Aliquot: aliquot, TenantCode: tenantCode}
+	if seqExps, ok := c.SequencingExperimentsByAliquot[key]; ok {
 		return getCopy(seqExps), nil
 	}
 
-	seqExps, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquot(ctx, aliquot)
+	seqExps, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquot(ctx, aliquot, tenantCode)
 	if err != nil {
 		return nil, err
 	}
 
-	c.SequencingExperimentsByAliquot[aliquot] = seqExps
+	c.SequencingExperimentsByAliquot[key] = seqExps
 	return getCopy(seqExps), nil
 }
 
-func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
-	key := SequencingExperimentKey{organizationCode, submitterSampleId, aliquot}
+func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, organizationCode string, tenantCode string) (*types.SequencingExperiment, error) {
+	key := SequencingExperimentKey{SampleOrganizationCode: organizationCode, SubmitterSampleId: submitterSampleId, Aliquot: aliquot, TenantCode: tenantCode}
 	if seqExp, ok := c.SequencingExperimentsByKey[key]; ok {
 		return seqExp, nil
 	}
 
-	seqExp, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, aliquot, submitterSampleId, organizationCode)
+	seqExp, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, aliquot, submitterSampleId, organizationCode, tenantCode)
 	if err != nil {
 		return nil, err
 	}
@@ -302,12 +338,12 @@ func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(ctx contex
 	return getCopy(tc), nil
 }
 
-func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int) ([]*types.TaskHasDocument, error) {
+func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error) {
 	if thd, ok := c.TaskHasDocuments[documentId]; ok {
 		return getCopy(thd), nil
 	}
 
-	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByDocumentId(ctx, documentId)
+	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByDocumentId(ctx, documentId, tenantCode)
 	if err != nil {
 		return nil, err
 	}

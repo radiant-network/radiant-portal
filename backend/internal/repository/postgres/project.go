@@ -19,9 +19,9 @@ func NewProjectRepository(db database.PostgresDB) *ProjectRepository {
 	return &ProjectRepository{db: db.DB}
 }
 
-func (r *ProjectRepository) GetProjectByCode(ctx context.Context, code string) (*Project, error) {
+func (r *ProjectRepository) GetProjectByCode(ctx context.Context, code string, tenantCode string) (*Project, error) {
 	var project Project
-	tx := r.db.WithContext(ctx).Table(types.ProjectTable.Name).Where("code = ?", code)
+	tx := r.db.WithContext(ctx).Table(types.ProjectTable.Name).Where("code = ? AND tenant_code = ?", code, tenantCode)
 	if err := tx.First(&project).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

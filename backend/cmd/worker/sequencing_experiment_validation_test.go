@@ -18,8 +18,8 @@ import (
 
 type mockOrgDAO struct{ mock.Mock }
 
-func (m *mockOrgDAO) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
-	args := m.Called(code)
+func (m *mockOrgDAO) GetOrganizationByCode(_ context.Context, code string, tenantCode string) (*types.Organization, error) {
+	args := m.Called(code, tenantCode)
 	if org, ok := args.Get(0).(*types.Organization); ok {
 		return org, args.Error(1)
 	}
@@ -48,8 +48,8 @@ func (m *mockSampleDAO) GetSampleById(_ context.Context, id int) (*types.Sample,
 	return nil, args.Error(1)
 }
 
-func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
-	args := m.Called(organizationCode, submitterSampleId)
+func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
+	args := m.Called(organizationCode, submitterSampleId, tenantCode)
 	if s, ok := args.Get(0).(*types.Sample); ok {
 		return s, args.Error(1)
 	}
@@ -74,16 +74,16 @@ func (m *mockSeqExpDAO) GetSequencingExperimentsByCaseId(_ context.Context, case
 	return nil, nil
 }
 
-func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
-	args := m.Called(aliquot)
+func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(_ context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
+	args := m.Called(aliquot, tenantCode)
 	if se, ok := args.Get(0).([]types.SequencingExperiment); ok {
 		return se, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
-	args := m.Called(aliquot, submitterSampleId, organizationCode)
+func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, organizationCode string, tenantCode string) (*types.SequencingExperiment, error) {
+	args := m.Called(aliquot, submitterSampleId, organizationCode, tenantCode)
 	if se, ok := args.Get(0).(*types.SequencingExperiment); ok {
 		return se, args.Error(1)
 	}
@@ -123,6 +123,7 @@ func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType postgres.ValueSetT
 func newBaseRecord() *SequencingExperimentValidationRecord {
 	return &SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sequencingExperimentResourceLabel, Index: 0},
+		TenantCode:           types.DefaultTenantCode,
 		SequencingExperiment: types.SequencingExperimentBatch{},
 	}
 }
@@ -302,7 +303,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 
 	seqDAO := &mockSeqExpDAO{}
-	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
+	seqDAO.On("GetSequencingExperimentByAliquot", "A1", types.DefaultTenantCode).
 		Return([]types.SequencingExperiment{
 			{
 				ID:                70,
@@ -340,7 +341,7 @@ func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
 	r.SequencingExperiment.SequencingLabCode = "LABX"
 	orgDAO := &mockOrgDAO{}
 
-	orgDAO.On("GetOrganizationByCode", "LABX").Return((*types.Organization)(nil), nil)
+	orgDAO.On("GetOrganizationByCode", "LABX", types.DefaultTenantCode).Return((*types.Organization)(nil), nil)
 
 	err := r.validateSequencingLabCode()
 
@@ -371,7 +372,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	r.SampleID = &sampleId
 
 	seqDAO := &mockSeqExpDAO{}
-	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
+	seqDAO.On("GetSequencingExperimentByAliquot", "A1", types.DefaultTenantCode).
 		Return([]types.SequencingExperiment{
 			{
 				SequencingLabCode:            "LAB",
@@ -443,23 +444,23 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 		PlatformCode:                 "illumina",
 	}
 
-	orgDAO.On("GetOrganizationByCode", "LAB1").
+	orgDAO.On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "LAB1"}, nil)
-	orgDAO.On("GetOrganizationByCode", "ORG").
+	orgDAO.On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.On("GetOrganizationById", 1).
 		Return(&types.Organization{Code: "ORG"}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	seqDAO.On("GetSequencingExperimentBySampleID", 10).
 		Return([]types.SequencingExperiment{}, nil)
-	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
+	seqDAO.On("GetSequencingExperimentByAliquot", "A1", types.DefaultTenantCode).
 		Return([]types.SequencingExperiment{}, nil)
-	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
+	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG", types.DefaultTenantCode).
 		Return([]types.SequencingExperiment{}, nil)
 
 	mockContext := &batchval.BatchValidationContext{
@@ -470,7 +471,7 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0)
+	record, err := validateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0, types.DefaultTenantCode)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0, record.Index)
@@ -497,21 +498,21 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	}
 	seq2 := seq1
 
-	orgDAO.On("GetOrganizationByCode", "LAB1").
+	orgDAO.On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "LAB1"}, nil).Twice()
-	orgDAO.On("GetOrganizationByCode", "ORG").
+	orgDAO.On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "ORG"}, nil).Twice()
 	orgDAO.On("GetOrganizationById", 1).
 		Return(&types.Organization{Code: "ORG"}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return(&types.Sample{ID: 10}, nil).Twice()
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	seqDAO.On("GetSequencingExperimentBySampleID", 10).
 		Return([]types.SequencingExperiment{}, nil).Twice()
-	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
+	seqDAO.On("GetSequencingExperimentByAliquot", "A1", types.DefaultTenantCode).
 		Return([]types.SequencingExperiment{}, nil).Twice()
 
 	mockContext := &batchval.BatchValidationContext{
@@ -521,7 +522,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 
-	records, err := validateSequencingExperimentBatch(t.Context(), mockContext, []types.SequencingExperimentBatch{seq1, seq2})
+	records, err := validateSequencingExperimentBatch(t.Context(), mockContext, []types.SequencingExperimentBatch{seq1, seq2}, types.DefaultTenantCode)
 
 	assert.NoError(t, err)
 	assert.Len(t, records, 2)
@@ -547,6 +548,7 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sequencingExperimentResourceLabel, Context: mockContext, Cache: cache, Index: 0},
+		TenantCode:           types.DefaultTenantCode,
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -556,13 +558,13 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 
 	// Mocked orgs and sample
 	orgDAO.
-		On("GetOrganizationByCode", "ORG").
+		On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.
-		On("GetOrganizationByCode", "LAB1").
+		On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "LAB1"}, nil)
 
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	err := r.preFetchValidationInfo(t.Context())
@@ -594,6 +596,7 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sequencingExperimentResourceLabel, Context: mockContext, Cache: cache, Index: 0},
+		TenantCode:           types.DefaultTenantCode,
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -603,10 +606,10 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 
 	// Mocked orgs and sample
 	orgDAO.
-		On("GetOrganizationByCode", "ORG").
+		On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(nil, nil)
 	orgDAO.
-		On("GetOrganizationByCode", "LAB1").
+		On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "LAB1"}, nil)
 
 	err := r.preFetchValidationInfo(t.Context())
@@ -634,6 +637,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: sequencingExperimentResourceLabel, Context: mockContext, Cache: cache, Index: 0},
+		TenantCode:           types.DefaultTenantCode,
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -643,13 +647,13 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 
 	// Mocked orgs and sample
 	orgDAO.
-		On("GetOrganizationByCode", "ORG").
+		On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.
-		On("GetOrganizationByCode", "LAB1").
+		On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(nil, nil)
 
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	err := r.preFetchValidationInfo(t.Context())
@@ -671,6 +675,7 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	valueSetDAO := &mockValueSetsDAO{}
 
 	r := &SequencingExperimentValidationRecord{
+		TenantCode: types.DefaultTenantCode,
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -679,12 +684,12 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	}
 
 	orgDAO.
-		On("GetOrganizationByCode", "LAB1").
+		On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "LAB1"}, nil)
 	orgDAO.
-		On("GetOrganizationByCode", "ORG").
+		On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).
 		Return(&types.Organization{Code: "ORG"}, nil)
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(nil, errors.New("sample not found"))
 
 	r.Context = &batchval.BatchValidationContext{
@@ -741,11 +746,11 @@ func Test_ValidateUpdateSequencingExperimentRecord_MissingReportsError(t *testin
 		PlatformCode:                 "illumina",
 	}
 
-	orgDAO.On("GetOrganizationByCode", "LAB1").Return(&types.Organization{Code: "LAB1"}, nil)
-	orgDAO.On("GetOrganizationByCode", "ORG").Return(&types.Organization{Code: "ORG"}, nil)
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	orgDAO.On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).Return(&types.Organization{Code: "LAB1"}, nil)
+	orgDAO.On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).Return(&types.Organization{Code: "ORG"}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
-	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
+	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG", types.DefaultTenantCode).
 		Return(nil, nil)
 
 	mockContext := &batchval.BatchValidationContext{
@@ -756,7 +761,7 @@ func Test_ValidateUpdateSequencingExperimentRecord_MissingReportsError(t *testin
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateUpdateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0)
+	record, err := validateUpdateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0, types.DefaultTenantCode)
 
 	assert.NoError(t, err)
 	assert.True(t, record.Skipped)
@@ -780,11 +785,11 @@ func Test_ValidateUpdateSequencingExperimentRecord_ExistingNotSkipped(t *testing
 		PlatformCode:                 "illumina",
 	}
 
-	orgDAO.On("GetOrganizationByCode", "LAB1").Return(&types.Organization{Code: "LAB1"}, nil)
-	orgDAO.On("GetOrganizationByCode", "ORG").Return(&types.Organization{Code: "ORG"}, nil)
-	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+	orgDAO.On("GetOrganizationByCode", "LAB1", types.DefaultTenantCode).Return(&types.Organization{Code: "LAB1"}, nil)
+	orgDAO.On("GetOrganizationByCode", "ORG", types.DefaultTenantCode).Return(&types.Organization{Code: "ORG"}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1", types.DefaultTenantCode).
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
-	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
+	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG", types.DefaultTenantCode).
 		Return(&types.SequencingExperiment{ID: 5, SampleID: 10, Aliquot: "A1"}, nil)
 
 	mockContext := &batchval.BatchValidationContext{
@@ -795,7 +800,7 @@ func Test_ValidateUpdateSequencingExperimentRecord_ExistingNotSkipped(t *testing
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateUpdateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0)
+	record, err := validateUpdateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0, types.DefaultTenantCode)
 
 	assert.NoError(t, err)
 	assert.False(t, record.Skipped)
@@ -840,14 +845,16 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 		`, "{}", types.UpdateSequencingExperimentBatchType).Scan(&id).Error)
 
 		batch := types.Batch{
-			ID:        id,
-			BatchType: types.UpdateSequencingExperimentBatchType,
-			Payload:   "[]",
-			Status:    types.BatchStatusSuccess,
-			DryRun:    false,
+			ID:         id,
+			TenantCode: types.DefaultTenantCode,
+			BatchType:  types.UpdateSequencingExperimentBatchType,
+			Payload:    "[]",
+			Status:     types.BatchStatusSuccess,
+			DryRun:     false,
 		}
 		sampleID := 1001
 		records := []*SequencingExperimentValidationRecord{{
+			TenantCode: types.DefaultTenantCode,
 			SequencingExperiment: types.SequencingExperimentBatch{
 				Aliquot:                      "ALIQUOT-WORKER-UPDATE-1",
 				StatusCode:                   "completed",
@@ -863,7 +870,7 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 		require.NoError(t, err)
 
 		repo := postgres.NewSequencingExperimentRepository(database.PostgresDB{DB: db})
-		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALIQUOT-WORKER-UPDATE-1", "S-SEQ-WORKER-UPDATE-1", "CQGC")
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALIQUOT-WORKER-UPDATE-1", "S-SEQ-WORKER-UPDATE-1", "CQGC", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, seqExp)
 		assert.Equal(t, "completed", seqExp.StatusCode)

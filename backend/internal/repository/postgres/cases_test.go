@@ -120,7 +120,7 @@ func Test_UpdateCase_OK(t *testing.T) {
 func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA")
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, analysisCatalog.ID)
 		assert.Equal(t, "WGA", analysisCatalog.Code)
@@ -130,7 +130,7 @@ func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE")
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, analysisCatalog)
 	})
@@ -340,5 +340,95 @@ func Test_CaseStatusDictionary_MatchesStatusTable(t *testing.T) {
 		slices.Sort(codes)
 		slices.Sort(declared)
 		assert.Equal(t, declared, codes, "internal/types case status codes have drifted from the `status` table")
+	})
+}
+
+func Test_GetCaseAnalysisCatalogIdByCode_OtherTenantRow_NotReturned(t *testing.T) {
+	// analysis_catalog is unique per (code, tenant_code) since migration 000013, so 'WGA' exists
+	// once per tenant and the code alone cannot pick the right row.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9020, 'WGA', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9020`)
+
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA", "tenant_b")
+		assert.NoError(t, err)
+		require.NotNil(t, analysisCatalog)
+		assert.Equal(t, 9020, analysisCatalog.ID, "each tenant must resolve its own analysis catalog row")
+	})
+}
+
+func Test_GetCaseBySubmitterCaseIdAndProjectId_OtherTenantRow_NotReturned(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO project (id, code, name, description, tenant_code)
+			VALUES (9021, 'PROJ-CASE-TENANT-ISO', 'Tenant Isolation Project', '', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM project WHERE id = 9021`)
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9021, 'WGA-ISO', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9021`)
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1050, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-CASE-TENANT-ISO', 'MR')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1050, 1050, 9021, 9021, 'in_progress', 'TENANT_B_ORG', 'tenant_b', now(), now(), 'routine', 'germline', 'postnatal', 'TENANT_B_ORG', 'CASE-TENANT-ISO')
+		`).Error)
+
+		c, err := repo.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE-TENANT-ISO", 9021, types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Nil(t, c, "a case that exists only in tenant_b must not resolve for radiant")
+
+		c, err = repo.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE-TENANT-ISO", 9021, "tenant_b")
+		assert.NoError(t, err)
+		require.NotNil(t, c)
+		assert.Equal(t, 1050, c.ID)
+	})
+}
+
+func Test_CreateCase_CrossTenantProject_Rejected(t *testing.T) {
+	// Migration 000036 makes (project_id, tenant_code) a compound FK, so a case can no longer be
+	// attached to another tenant's project even if a lookup ever hands one over.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1070, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-CROSS-TENANT', 'mrn')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9030, 'WGA-CROSS', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9030`)
+
+		orgCode := "TENANT_B_ORG"
+		// project id 1 belongs to radiant (test/data/clinical fixtures).
+		err := repo.CreateCase(t.Context(), &types.Case{
+			ID:                       1070,
+			ProbandID:                1070,
+			ProjectID:                1,
+			AnalysisCatalogID:        9030,
+			TenantCode:               "tenant_b",
+			StatusCode:               "in_progress",
+			DiagnosisLabCode:         &orgCode,
+			OrderingOrganizationCode: &orgCode,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			SubmitterCaseID:          "CASE-CROSS-TENANT",
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "cases_project_tenant_fkey")
 	})
 }

@@ -12,7 +12,7 @@ import (
 func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
-		org, err := repo.GetOrganizationByCode(t.Context(), "CHOP")
+		org, err := repo.GetOrganizationByCode(t.Context(), "CHOP", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.NotNil(t, org)
 		assert.Equal(t, "CHOP", org.Code)
@@ -23,7 +23,7 @@ func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 func Test_GetOrganizationByCode_Null(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
-		org, err := repo.GetOrganizationByCode(t.Context(), "Unknown")
+		org, err := repo.GetOrganizationByCode(t.Context(), "Unknown", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, org)
 	})
@@ -39,7 +39,7 @@ func Test_CreateOrganization(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		created, err := repo.GetOrganizationByCode(t.Context(), "org_test_create")
+		created, err := repo.GetOrganizationByCode(t.Context(), "org_test_create", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.NotNil(t, created)
 		assert.Equal(t, "Test Org", created.Name)
@@ -60,7 +60,7 @@ func Test_UpdateOrganization(t *testing.T) {
 		err = repo.UpdateOrganization(t.Context(), "radiant", "org_test_update", "New Name")
 		assert.NoError(t, err)
 
-		updated, err := repo.GetOrganizationByCode(t.Context(), "org_test_update")
+		updated, err := repo.GetOrganizationByCode(t.Context(), "org_test_update", types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Equal(t, "New Name", updated.Name)
 		assert.Equal(t, "healthcare_provider", updated.CategoryCode) // category untouched
@@ -124,5 +124,19 @@ func Test_ExistingOrgCodes_NoCodesRequestedIsEmpty(t *testing.T) {
 		existing, err := repo.ExistingOrgCodes(t.Context(), types.DefaultTenantCode, nil)
 		assert.NoError(t, err)
 		assert.Empty(t, existing)
+	})
+}
+
+func Test_GetOrganizationByCode_OtherTenantRow_NotReturned(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		org, err := repo.GetOrganizationByCode(t.Context(), "TENANT_B_ORG", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Nil(t, org, "an organization that exists only in tenant_b must not resolve for radiant")
+
+		org, err = repo.GetOrganizationByCode(t.Context(), "TENANT_B_ORG", "tenant_b")
+		assert.NoError(t, err)
+		assert.NotNil(t, org)
 	})
 }

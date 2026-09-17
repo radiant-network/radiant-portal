@@ -12,23 +12,23 @@ import (
 
 // Mock repositories
 type mockOrgRepo struct {
-	GetByCodeFunc func(code string) (*types.Organization, error)
+	GetByCodeFunc func(code string, tenantCode string) (*types.Organization, error)
 }
 
-func (m *mockOrgRepo) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
-	return m.GetByCodeFunc(code)
+func (m *mockOrgRepo) GetOrganizationByCode(_ context.Context, code string, tenantCode string) (*types.Organization, error) {
+	return m.GetByCodeFunc(code, tenantCode)
 }
 
 type mockSampleRepo struct {
 	GetByIdFunc                                func(id int) (*types.Sample, error)
-	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(orgCode string, submitterSampleId string) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(orgCode string, submitterSampleId string, tenantCode string) (*types.Sample, error)
 }
 
 func (m *mockSampleRepo) GetSampleById(_ context.Context, id int) (*types.Sample, error) {
 	return m.GetByIdFunc(id)
 }
-func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, orgCode string, submitterSampleId string) (*types.Sample, error) {
-	return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(orgCode, submitterSampleId)
+func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, orgCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
+	return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(orgCode, submitterSampleId, tenantCode)
 }
 func (m *mockSampleRepo) GetFetusIDsWithSamples(_ context.Context, _ []int) ([]int, error) {
 	return nil, nil
@@ -48,23 +48,23 @@ func (m *mockValueSetsRepo) GetExamCodes(_ context.Context, tenantCode string) (
 }
 
 type mockProjectRepo struct {
-	GetByCodeFunc func(code string) (*types.Project, error)
+	GetByCodeFunc func(code string, tenantCode string) (*types.Project, error)
 }
 
-func (m *mockProjectRepo) GetProjectByCode(_ context.Context, code string) (*types.Project, error) {
-	return m.GetByCodeFunc(code)
+func (m *mockProjectRepo) GetProjectByCode(_ context.Context, code string, tenantCode string) (*types.Project, error) {
+	return m.GetByCodeFunc(code, tenantCode)
 }
 
 type mockCasesRepo struct {
-	GetAnalysisCatalogFunc func(code string) (*types.AnalysisCatalog, error)
-	GetCaseBySubmitterFunc func(submitterCaseId string, projectId int) (*types.Case, error)
+	GetAnalysisCatalogFunc func(code string, tenantCode string) (*types.AnalysisCatalog, error)
+	GetCaseBySubmitterFunc func(submitterCaseId string, projectId int, tenantCode string) (*types.Case, error)
 }
 
-func (m *mockCasesRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
-	return m.GetAnalysisCatalogFunc(code)
+func (m *mockCasesRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string, tenantCode string) (*types.AnalysisCatalog, error) {
+	return m.GetAnalysisCatalogFunc(code, tenantCode)
 }
-func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
-	return m.GetCaseBySubmitterFunc(submitterCaseId, projectId)
+func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int, tenantCode string) (*types.Case, error) {
+	return m.GetCaseBySubmitterFunc(submitterCaseId, projectId, tenantCode)
 }
 
 type mockPatientRepo struct {
@@ -76,16 +76,16 @@ func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Con
 }
 
 type mockSeqExpRepo struct {
-	GetByAliquotFunc          func(aliquot string) ([]types.SequencingExperiment, error)
-	GetByAliquotAndSampleFunc func(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error)
+	GetByAliquotFunc          func(aliquot string, tenantCode string) ([]types.SequencingExperiment, error)
+	GetByAliquotAndSampleFunc func(aliquot string, submitterSampleId string, organizationCode string, tenantCode string) (*types.SequencingExperiment, error)
 	GetByCaseIdFunc           func(caseID int) ([]types.SequencingExperiment, error)
 }
 
-func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
-	return m.GetByAliquotFunc(aliquot)
+func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
+	return m.GetByAliquotFunc(aliquot, tenantCode)
 }
-func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
-	return m.GetByAliquotAndSampleFunc(aliquot, submitterSampleId, organizationCode)
+func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, organizationCode string, tenantCode string) (*types.SequencingExperiment, error) {
+	return m.GetByAliquotAndSampleFunc(aliquot, submitterSampleId, organizationCode, tenantCode)
 }
 func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]types.SequencingExperiment, error) {
 	return m.GetByCaseIdFunc(caseID)
@@ -93,22 +93,22 @@ func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(_ context.Context, cas
 
 type mockTaskRepo struct {
 	GetContextBySeqExpFunc func(seqExpId int) ([]*types.TaskContext, error)
-	GetHasDocByDocFunc     func(documentId int) ([]*types.TaskHasDocument, error)
+	GetHasDocByDocFunc     func(documentId int, tenantCode string) ([]*types.TaskHasDocument, error)
 }
 
 func (m *mockTaskRepo) GetTaskContextBySequencingExperimentId(_ context.Context, seqExpId int) ([]*types.TaskContext, error) {
 	return m.GetContextBySeqExpFunc(seqExpId)
 }
-func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(_ context.Context, documentId int) ([]*types.TaskHasDocument, error) {
-	return m.GetHasDocByDocFunc(documentId)
+func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(_ context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error) {
+	return m.GetHasDocByDocFunc(documentId, tenantCode)
 }
 
 type mockDocRepo struct {
-	GetByUrlFunc func(url string) (*types.Document, error)
+	GetByUrlFunc func(url string, tenantCode string) (*types.Document, error)
 }
 
-func (m *mockDocRepo) GetDocumentByUrl(_ context.Context, url string) (*types.Document, error) {
-	return m.GetByUrlFunc(url)
+func (m *mockDocRepo) GetDocumentByUrl(_ context.Context, url string, tenantCode string) (*types.Document, error) {
+	return m.GetByUrlFunc(url, tenantCode)
 }
 
 func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
@@ -119,21 +119,22 @@ func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
 	org := &types.Organization{Code: "ORG1", TenantCode: types.DefaultTenantCode}
 
 	// Test cache miss
-	mockRepo.GetByCodeFunc = func(code string) (*types.Organization, error) {
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Organization, error) {
 		assert.Equal(t, "ORG1", code)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return org, nil
 	}
-	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1")
+	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
-	assert.Equal(t, org, cache.OrganizationsByCode["ORG1"])
+	assert.Equal(t, org, cache.OrganizationsByCode[OrganizationKey{Code: "ORG1", TenantCode: types.DefaultTenantCode}])
 
 	// Test cache hit (Repo should not be called again)
-	mockRepo.GetByCodeFunc = func(code string) (*types.Organization, error) {
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Organization, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetOrganizationByCode(t.Context(), "ORG1")
+	result, err = cache.GetOrganizationByCode(t.Context(), "ORG1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
 }
@@ -200,21 +201,22 @@ func TestBatchValidationCache_GetProjectByCode(t *testing.T) {
 	project := &types.Project{ID: 42, Code: "PROJ1"}
 
 	// Test cache miss
-	mockRepo.GetByCodeFunc = func(code string) (*types.Project, error) {
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Project, error) {
 		assert.Equal(t, "PROJ1", code)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return project, nil
 	}
-	result, err := cache.GetProjectByCode(t.Context(), "PROJ1")
+	result, err := cache.GetProjectByCode(t.Context(), "PROJ1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, project, result)
-	assert.Equal(t, project, cache.Projects["PROJ1"])
+	assert.Equal(t, project, cache.Projects[ProjectKey{Code: "PROJ1", TenantCode: types.DefaultTenantCode}])
 
 	// Test cache hit
-	mockRepo.GetByCodeFunc = func(code string) (*types.Project, error) {
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Project, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetProjectByCode(t.Context(), "PROJ1")
+	result, err = cache.GetProjectByCode(t.Context(), "PROJ1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, project, result)
 }
@@ -282,21 +284,22 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquot(t *testing.T) {
 	seqExps := []types.SequencingExperiment{{ID: 200, Aliquot: "ALQ1"}}
 
 	// Test cache miss
-	mockRepo.GetByAliquotFunc = func(aliquot string) ([]types.SequencingExperiment, error) {
+	mockRepo.GetByAliquotFunc = func(aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
 		assert.Equal(t, "ALQ1", aliquot)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return seqExps, nil
 	}
-	result, err := cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1")
+	result, err := cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, seqExps, result)
-	assert.Equal(t, seqExps, cache.SequencingExperimentsByAliquot["ALQ1"])
+	assert.Equal(t, seqExps, cache.SequencingExperimentsByAliquot[AliquotKey{Aliquot: "ALQ1", TenantCode: types.DefaultTenantCode}])
 
 	// Test cache hit
-	mockRepo.GetByAliquotFunc = func(aliquot string) ([]types.SequencingExperiment, error) {
+	mockRepo.GetByAliquotFunc = func(aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1")
+	result, err = cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, seqExps, result)
 }
@@ -309,21 +312,22 @@ func TestBatchValidationCache_GetDocumentByUrl(t *testing.T) {
 	doc := &types.Document{ID: 500, Url: "s3://bucket/file.bam"}
 
 	// Test cache miss
-	mockRepo.GetByUrlFunc = func(url string) (*types.Document, error) {
+	mockRepo.GetByUrlFunc = func(url string, tenantCode string) (*types.Document, error) {
 		assert.Equal(t, "s3://bucket/file.bam", url)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return doc, nil
 	}
-	result, err := cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam")
+	result, err := cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, doc, result)
-	assert.Equal(t, doc, cache.Documents["s3://bucket/file.bam"])
+	assert.Equal(t, doc, cache.Documents[DocumentKey{Url: "s3://bucket/file.bam", TenantCode: types.DefaultTenantCode}])
 
 	// Test cache hit
-	mockRepo.GetByUrlFunc = func(url string) (*types.Document, error) {
+	mockRepo.GetByUrlFunc = func(url string, tenantCode string) (*types.Document, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam")
+	result, err = cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, doc, result)
 }
@@ -336,21 +340,22 @@ func TestBatchValidationCache_GetCaseAnalysisCatalogByCode(t *testing.T) {
 	ac := &types.AnalysisCatalog{ID: 1, Code: "WGS"}
 
 	// Test cache miss
-	mockRepo.GetAnalysisCatalogFunc = func(code string) (*types.AnalysisCatalog, error) {
+	mockRepo.GetAnalysisCatalogFunc = func(code string, tenantCode string) (*types.AnalysisCatalog, error) {
 		assert.Equal(t, "WGS", code)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return ac, nil
 	}
-	result, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
+	result, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
-	assert.Equal(t, ac, cache.AnalysisCatalogs["WGS"])
+	assert.Equal(t, ac, cache.AnalysisCatalogs[AnalysisCatalogKey{Code: "WGS", TenantCode: types.DefaultTenantCode}])
 
 	// Test cache hit
-	mockRepo.GetAnalysisCatalogFunc = func(code string) (*types.AnalysisCatalog, error) {
+	mockRepo.GetAnalysisCatalogFunc = func(code string, tenantCode string) (*types.AnalysisCatalog, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
+	result, err = cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
 }
@@ -361,25 +366,26 @@ func TestBatchValidationCache_GetCaseBySubmitterCaseIdAndProjectId(t *testing.T)
 	cache := NewBatchValidationCache(ctx)
 
 	cs := &types.Case{ID: 1, SubmitterCaseID: "CASE1", ProjectID: 42}
-	key := CaseKey{42, "CASE1"}
+	key := CaseKey{ProjectId: 42, SubmitterCaseId: "CASE1", TenantCode: types.DefaultTenantCode}
 
 	// Test cache miss
-	mockRepo.GetCaseBySubmitterFunc = func(id string, pid int) (*types.Case, error) {
+	mockRepo.GetCaseBySubmitterFunc = func(id string, pid int, tenantCode string) (*types.Case, error) {
 		assert.Equal(t, "CASE1", id)
 		assert.Equal(t, 42, pid)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return cs, nil
 	}
-	result, err := cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42)
+	result, err := cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, cs, result)
 	assert.Equal(t, cs, cache.Cases[key])
 
 	// Test cache hit
-	mockRepo.GetCaseBySubmitterFunc = func(id string, pid int) (*types.Case, error) {
+	mockRepo.GetCaseBySubmitterFunc = func(id string, pid int, tenantCode string) (*types.Case, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42)
+	result, err = cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, cs, result)
 }
@@ -390,26 +396,27 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquotAndSubmitterSample
 	cache := NewBatchValidationCache(ctx)
 
 	seqExp := &types.SequencingExperiment{ID: 1, Aliquot: "ALQ1"}
-	key := SequencingExperimentKey{"ORG1", "SMP1", "ALQ1"}
+	key := SequencingExperimentKey{SampleOrganizationCode: "ORG1", SubmitterSampleId: "SMP1", Aliquot: "ALQ1", TenantCode: types.DefaultTenantCode}
 
 	// Test cache miss
-	mockRepo.GetByAliquotAndSampleFunc = func(aliquot, sample, org string) (*types.SequencingExperiment, error) {
+	mockRepo.GetByAliquotAndSampleFunc = func(aliquot, sample, org, tenantCode string) (*types.SequencingExperiment, error) {
 		assert.Equal(t, "ALQ1", aliquot)
 		assert.Equal(t, "SMP1", sample)
 		assert.Equal(t, "ORG1", org)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return seqExp, nil
 	}
-	result, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1")
+	result, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, seqExp, result)
 	assert.Equal(t, seqExp, cache.SequencingExperimentsByKey[key])
 
 	// Test cache hit
-	mockRepo.GetByAliquotAndSampleFunc = func(aliquot, sample, org string) (*types.SequencingExperiment, error) {
+	mockRepo.GetByAliquotAndSampleFunc = func(aliquot, sample, org, tenantCode string) (*types.SequencingExperiment, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1")
+	result, err = cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, seqExp, result)
 }
@@ -449,21 +456,22 @@ func TestBatchValidationCache_GetTaskHasDocumentByDocumentId(t *testing.T) {
 	thd := []*types.TaskHasDocument{{TaskID: 1, DocumentID: 500}}
 
 	// Test cache miss
-	mockRepo.GetHasDocByDocFunc = func(id int) ([]*types.TaskHasDocument, error) {
+	mockRepo.GetHasDocByDocFunc = func(id int, tenantCode string) ([]*types.TaskHasDocument, error) {
 		assert.Equal(t, 500, id)
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return thd, nil
 	}
-	result, err := cache.GetTaskHasDocumentByDocumentId(t.Context(), 500)
+	result, err := cache.GetTaskHasDocumentByDocumentId(t.Context(), 500, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, thd, result)
 	assert.Equal(t, thd, cache.TaskHasDocuments[500])
 
 	// Test cache hit
-	mockRepo.GetHasDocByDocFunc = func(id int) ([]*types.TaskHasDocument, error) {
+	mockRepo.GetHasDocByDocFunc = func(id int, tenantCode string) ([]*types.TaskHasDocument, error) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetTaskHasDocumentByDocumentId(t.Context(), 500)
+	result, err = cache.GetTaskHasDocumentByDocumentId(t.Context(), 500, types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, thd, result)
 }
@@ -475,20 +483,21 @@ func TestBatchValidationCache_GetSampleByOrgCodeAndSubmitterSampleId(t *testing.
 	sample := &types.Sample{ID: 10, OrganizationCode: "ORG1", TenantCode: types.DefaultTenantCode, SubmitterSampleId: "S1"}
 
 	// Test miss for both org and sample
-	mockSample.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string) (*types.Sample, error) {
+	mockSample.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string, tenantCode string) (*types.Sample, error) {
+		assert.Equal(t, types.DefaultTenantCode, tenantCode)
 		return sample, nil
 	}
 
-	result, err := cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1")
+	result, err := cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 
 	// Test hit for both
-	mockSample.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string) (*types.Sample, error) {
+	mockSample.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string, tenantCode string) (*types.Sample, error) {
 		t.Fatal("Sample Repo should not be called")
 		return nil, nil
 	}
-	result, err = cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1")
+	result, err = cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1", types.DefaultTenantCode)
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 }
@@ -500,11 +509,11 @@ func TestBatchValidationCache_Errors(t *testing.T) {
 
 	expectedErr := errors.New("db error")
 
-	mockRepo.GetByCodeFunc = func(code string) (*types.Organization, error) {
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Organization, error) {
 		return nil, expectedErr
 	}
 
-	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1")
+	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1", types.DefaultTenantCode)
 	assert.Error(t, err)
 	assert.Nil(t, result)
 	assert.Equal(t, expectedErr, err)
@@ -535,4 +544,144 @@ func TestBatchValidationCache_GetExamCodes_IsScopedByTenant(t *testing.T) {
 	again, err := cache.GetExamCodes(t.Context(), "qlin")
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"qlin-exam"}, again)
+}
+
+func TestBatchValidationCache_GetOrganizationByCode_TenantScoped(t *testing.T) {
+	mockRepo := &mockOrgRepo{}
+	ctx := &BatchValidationContext{OrgRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Organization, error) {
+		return &types.Organization{Code: code, TenantCode: tenantCode}, nil
+	}
+
+	radiant, err := cache.GetOrganizationByCode(t.Context(), "CQGC", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetOrganizationByCode(t.Context(), "CQGC", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant.TenantCode)
+	assert.Equal(t, "cypress", cypress.TenantCode)
+}
+
+func TestBatchValidationCache_GetProjectByCode_TenantScoped(t *testing.T) {
+	mockRepo := &mockProjectRepo{}
+	ctx := &BatchValidationContext{ProjectRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	// types.Project carries no tenant_code column, so the tenant's row is identified by its id.
+	ids := map[string]int{"radiant": 1, "cypress": 2}
+	mockRepo.GetByCodeFunc = func(code string, tenantCode string) (*types.Project, error) {
+		return &types.Project{ID: ids[tenantCode], Code: code}, nil
+	}
+
+	radiant, err := cache.GetProjectByCode(t.Context(), "PROJ1", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetProjectByCode(t.Context(), "PROJ1", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, radiant.ID)
+	assert.Equal(t, 2, cypress.ID)
+}
+
+func TestBatchValidationCache_GetSampleByOrgCodeAndSubmitterSampleId_TenantScoped(t *testing.T) {
+	mockRepo := &mockSampleRepo{}
+	ctx := &BatchValidationContext{SampleRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string, tenantCode string) (*types.Sample, error) {
+		return &types.Sample{OrganizationCode: orgCode, SubmitterSampleId: id, TenantCode: tenantCode}, nil
+	}
+
+	radiant, err := cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant.TenantCode)
+	assert.Equal(t, "cypress", cypress.TenantCode)
+}
+
+func TestBatchValidationCache_GetDocumentByUrl_TenantScoped(t *testing.T) {
+	mockRepo := &mockDocRepo{}
+	ctx := &BatchValidationContext{DocRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetByUrlFunc = func(url string, tenantCode string) (*types.Document, error) {
+		return &types.Document{Url: url, TenantCode: tenantCode}, nil
+	}
+
+	radiant, err := cache.GetDocumentByUrl(t.Context(), "s3://bucket/v.vcf.gz", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetDocumentByUrl(t.Context(), "s3://bucket/v.vcf.gz", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant.TenantCode)
+	assert.Equal(t, "cypress", cypress.TenantCode)
+}
+
+func TestBatchValidationCache_GetCaseBySubmitterCaseIdAndProjectId_TenantScoped(t *testing.T) {
+	mockRepo := &mockCasesRepo{}
+	ctx := &BatchValidationContext{CasesRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetCaseBySubmitterFunc = func(id string, pid int, tenantCode string) (*types.Case, error) {
+		return &types.Case{SubmitterCaseID: id, ProjectID: pid, TenantCode: tenantCode}, nil
+	}
+
+	radiant, err := cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42, "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42, "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant.TenantCode)
+	assert.Equal(t, "cypress", cypress.TenantCode)
+}
+
+func TestBatchValidationCache_GetCaseAnalysisCatalogByCode_TenantScoped(t *testing.T) {
+	mockRepo := &mockCasesRepo{}
+	ctx := &BatchValidationContext{CasesRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	// types.AnalysisCatalog carries no tenant_code column; the tenant's row is its id.
+	ids := map[string]int{"radiant": 1, "cypress": 2}
+	mockRepo.GetAnalysisCatalogFunc = func(code string, tenantCode string) (*types.AnalysisCatalog, error) {
+		return &types.AnalysisCatalog{ID: ids[tenantCode], Code: code}, nil
+	}
+
+	radiant, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, radiant.ID)
+	assert.Equal(t, 2, cypress.ID)
+}
+
+func TestBatchValidationCache_GetSequencingExperimentByAliquot_TenantScoped(t *testing.T) {
+	mockRepo := &mockSeqExpRepo{}
+	ctx := &BatchValidationContext{SeqExpRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetByAliquotFunc = func(aliquot string, tenantCode string) ([]types.SequencingExperiment, error) {
+		return []types.SequencingExperiment{{Aliquot: aliquot, TenantCode: tenantCode}}, nil
+	}
+
+	radiant, err := cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant[0].TenantCode)
+	assert.Equal(t, "cypress", cypress[0].TenantCode)
+}
+
+func TestBatchValidationCache_GetSequencingExperimentByAliquotAndSubmitterSample_TenantScoped(t *testing.T) {
+	mockRepo := &mockSeqExpRepo{}
+	ctx := &BatchValidationContext{SeqExpRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	mockRepo.GetByAliquotAndSampleFunc = func(aliquot, sample, org, tenantCode string) (*types.SequencingExperiment, error) {
+		return &types.SequencingExperiment{Aliquot: aliquot, TenantCode: tenantCode}, nil
+	}
+
+	radiant, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1", "radiant")
+	assert.NoError(t, err)
+	cypress, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1", "cypress")
+	assert.NoError(t, err)
+	assert.Equal(t, "radiant", radiant.TenantCode)
+	assert.Equal(t, "cypress", cypress.TenantCode)
 }

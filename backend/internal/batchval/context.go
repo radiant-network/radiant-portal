@@ -17,23 +17,23 @@ type batchProcessor interface {
 }
 
 type casesReader interface {
-	GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string) (*types.AnalysisCatalog, error)
-	GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error)
+	GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string, tenantCode string) (*types.AnalysisCatalog, error)
+	GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int, tenantCode string) (*types.Case, error)
 }
 
 type documentsReader interface {
-	GetDocumentByUrl(ctx context.Context, url string) (*types.Document, error)
+	GetDocumentByUrl(ctx context.Context, url string, tenantCode string) (*types.Document, error)
 }
 
 type sequencingExperimentReader interface {
-	GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]types.SequencingExperiment, error)
-	GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error)
+	GetSequencingExperimentByAliquot(ctx context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error)
+	GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string, tenantCode string) (*types.SequencingExperiment, error)
 	GetSequencingExperimentsByCaseId(ctx context.Context, caseID int) ([]types.SequencingExperiment, error)
 }
 
 type taskReader interface {
 	GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*types.TaskContext, error)
-	GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int) ([]*types.TaskHasDocument, error)
+	GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error)
 }
 
 type familyStore interface {
@@ -48,7 +48,7 @@ type fetusReader interface {
 }
 
 type organizationReader interface {
-	GetOrganizationByCode(ctx context.Context, organizationCode string) (*types.Organization, error)
+	GetOrganizationByCode(ctx context.Context, organizationCode string, tenantCode string) (*types.Organization, error)
 }
 
 type patientReader interface {
@@ -56,12 +56,12 @@ type patientReader interface {
 }
 
 type projectReader interface {
-	GetProjectByCode(ctx context.Context, code string) (*types.Project, error)
+	GetProjectByCode(ctx context.Context, code string, tenantCode string) (*types.Project, error)
 }
 
 type sampleReader interface {
 	GetSampleById(ctx context.Context, id int) (*types.Sample, error)
-	GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error)
 	GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error)
 }
 

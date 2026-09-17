@@ -41,7 +41,7 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 	}
 
-	project, err := cache.GetProjectByCode(ctx, patch.ProjectCode)
+	project, err := cache.GetProjectByCode(ctx, patch.ProjectCode, tenantCode)
 	if err != nil {
 		return nil, fmt.Errorf("get project by code %q: %w", patch.ProjectCode, err)
 	}
@@ -50,7 +50,7 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 		return r, nil
 	}
 
-	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, patch.SubmitterCaseId, project.ID)
+	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, patch.SubmitterCaseId, project.ID, tenantCode)
 	if err != nil {
 		return nil, fmt.Errorf("get case by submitter_case_id %q and project_id %d: %w", patch.SubmitterCaseId, project.ID, err)
 	}
@@ -61,7 +61,7 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 	r.CaseID = &c.ID
 
 	if patch.DiagnosticLabCode != "" {
-		lab, err := cache.GetOrganizationByCode(ctx, patch.DiagnosticLabCode)
+		lab, err := cache.GetOrganizationByCode(ctx, patch.DiagnosticLabCode, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("get organization by code %q: %w", patch.DiagnosticLabCode, err)
 		}
@@ -76,7 +76,7 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 		}
 	}
 
-	seqExps, err := resolveSequencingExperimentsForAttach(ctx, cache, patch.SequencingExperiments, &r.BaseValidationRecord, r.path())
+	seqExps, err := resolveSequencingExperimentsForAttach(ctx, cache, patch.SequencingExperiments, &r.BaseValidationRecord, r.path(), tenantCode)
 	if err != nil {
 		return nil, err
 	}
@@ -97,13 +97,13 @@ func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationCo
 // "<pathPrefix>.sequencing_experiments[j]" and skipped. Null array entries are skipped
 // (binding is omitempty,dive — no element-level required). Shared by the PATCH and PUT
 // (merge-if-present) case flows.
-func resolveSequencingExperimentsForAttach(ctx context.Context, cache *batchval.BatchValidationCache, seqExps []*types.CaseSequencingExperimentBatch, base *batchval.BaseValidationRecord, pathPrefix string) (map[int]*types.SequencingExperiment, error) {
+func resolveSequencingExperimentsForAttach(ctx context.Context, cache *batchval.BatchValidationCache, seqExps []*types.CaseSequencingExperimentBatch, base *batchval.BaseValidationRecord, pathPrefix string, tenantCode string) (map[int]*types.SequencingExperiment, error) {
 	resolved := make(map[int]*types.SequencingExperiment)
 	for j, se := range seqExps {
 		if se == nil {
 			continue
 		}
-		seqExp, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+		seqExp, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, tenantCode)
 		if err != nil {
 			return nil, fmt.Errorf("get sequencing experiment (%s / %s / %s): %w", se.SampleOrganizationCode, se.SubmitterSampleId, se.Aliquot, err)
 		}

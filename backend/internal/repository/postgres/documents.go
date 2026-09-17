@@ -24,9 +24,13 @@ func (r *DocumentsRepository) CreateDocument(ctx context.Context, document *Docu
 	return r.db.WithContext(ctx).Create(&document).Error
 }
 
-func (r *DocumentsRepository) GetDocumentByUrl(ctx context.Context, url string) (*Document, error) {
+// GetDocumentByUrl resolves a document by its URL within the tenant. document.url carries no
+// UNIQUE constraint, so two tenants may legitimately register the same S3 URL; without the
+// tenant_code predicate the other tenant's row would surface here and the caller would reject
+// the batch as DOCUMENT-005.
+func (r *DocumentsRepository) GetDocumentByUrl(ctx context.Context, url string, tenantCode string) (*Document, error) {
 	var document Document
-	txUrl := r.db.WithContext(ctx).Table(types.DocumentTable.Name).Where("url = ?", url)
+	txUrl := r.db.WithContext(ctx).Table(types.DocumentTable.Name).Where("url = ? AND tenant_code = ?", url, tenantCode)
 	if err := txUrl.First(&document).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

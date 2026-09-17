@@ -157,7 +157,7 @@ func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
-		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 1)
+		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 1, types.DefaultTenantCode)
 
 		expected := []*types.TaskHasDocument{
 			{
@@ -176,7 +176,7 @@ func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
-		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 999999)
+		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 999999, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -607,5 +607,34 @@ func Test_ListTasksByCaseAndSequencing_CaseAgnosticTaskReturnedForBothCasesShari
 		assert.Len(t, fromCase70, 2)
 		assert.Equal(t, 91011, fromCase70[0].ID) // 2025 > 2024
 		assert.Equal(t, 91010, fromCase70[1].ID)
+	})
+}
+
+func Test_GetTaskHasDocumentByDocumentId_OtherTenantTask_NotReturned(t *testing.T) {
+	// task_has_document is an instance table with no tenant_code of its own — the scope comes
+	// from the joined task.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewTaskRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO document (id, name, data_category_code, data_type_code, format_code, size, url, tenant_code)
+			VALUES (1030, 'iso.vcf.gz', 'genomic', 'snv', 'vcf', 10, 's3://bucket/tenant-iso-task/iso.vcf.gz', 'tenant_b')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO task (id, task_type_code, created_on, pipeline_version, tenant_code)
+			VALUES (1030, 'family_variant_calling', now(), '1.0', 'tenant_b')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO task_has_document (task_id, document_id, type) VALUES (1030, 1030, 'output')
+		`).Error)
+
+		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 1030, types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Nil(t, result, "attachments of a tenant_b task must not be visible to radiant")
+
+		result, err = repo.GetTaskHasDocumentByDocumentId(t.Context(), 1030, "tenant_b")
+		assert.NoError(t, err)
+		require.Len(t, result, 1)
+		assert.Equal(t, 1030, result[0].TaskID)
 	})
 }

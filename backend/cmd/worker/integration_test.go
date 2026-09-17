@@ -15,6 +15,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -1799,4 +1800,111 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	testutils.StopAllContainers()
 	os.Exit(code)
+}
+
+// Test_ProcessBatch_Sample_TenantIsolation_CreatesSeparateSamplePerTenant is the sample counterpart
+// of the patient case above: (organization_code, submitter_sample_id) repeats across tenants —
+// sample carries no unique constraint on it at all — so a create_sample batch for tenant_b must
+// create its own row instead of reporting the radiant row as already existing.
+func Test_ProcessBatch_Sample_TenantIsolation_CreatesSeparateSamplePerTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const orgCode = "SAMPLE-ISO-ORG"
+		const submitterPatientId = "MRN-SAMPLE-ISO"
+		const submitterSampleId = "S-SAMPLE-ISO"
+
+		for _, tenant := range []string{types.DefaultTenantCode, "tenant_b"} {
+			if err := env.Postgres.Exec(`
+				INSERT INTO organization (code, name, category_code, tenant_code)
+				VALUES (?, 'Sample Isolation Test Org', 'healthcare_provider', ?)
+				ON CONFLICT (code, tenant_code) DO NOTHING
+			`, orgCode, tenant).Error; err != nil {
+				t.Fatal("failed to insert organization:", err)
+			}
+		}
+		defer env.Postgres.Exec(`DELETE FROM sample WHERE submitter_sample_id = ?`, submitterSampleId)
+		defer env.Postgres.Exec(`DELETE FROM patient WHERE organization_code = ?`, orgCode)
+		defer env.Postgres.Exec(`DELETE FROM organization WHERE code = ?`, orgCode)
+
+		patientPayload := fmt.Sprintf(`[
+			{
+				"submitter_patient_id": %q,
+				"submitter_patient_id_type": "mrn",
+				"patient_organization_code": %q,
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"
+			}
+		]`, submitterPatientId, orgCode)
+		samplePayload := fmt.Sprintf(`[
+			{
+				"submitter_sample_id": %q,
+				"sample_organization_code": %q,
+				"patient_organization_code": %q,
+				"submitter_patient_id": %q,
+				"type_code": "dna",
+				"tissue_site": "blood",
+				"histology_code": "normal"
+			}
+		]`, submitterSampleId, orgCode, orgCode, submitterPatientId)
+
+		sampleIDs := map[string]int{}
+		for _, tenant := range []string{types.DefaultTenantCode, "tenant_b"} {
+			insertPayloadAndProcessBatchForTenant(env.Postgres, patientPayload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", tenant)
+
+			id := insertPayloadAndProcessBatchForTenant(env.Postgres, samplePayload, types.BatchStatusPending, types.CreateSampleBatchType, false, "user999", "2025-10-09", tenant)
+			batch := postgres.Batch{}
+			env.Postgres.Table("batch").Where("id = ?", id).Scan(&batch)
+			assert.Equal(t, types.BatchStatusSuccess, batch.Status, "tenant %s", tenant)
+			assert.Len(t, batch.Report.Errors, 0, "tenant %s", tenant)
+			assert.Len(t, batch.Report.Infos, 0, "tenant %s must not be told the sample already exists", tenant)
+
+			var sample postgres.Sample
+			if err := env.Postgres.Table("sample").
+				Where("submitter_sample_id = ? AND organization_code = ? AND tenant_code = ?", submitterSampleId, orgCode, tenant).
+				First(&sample).Error; err != nil {
+				t.Fatalf("failed to find sample created for tenant %s: %v", tenant, err)
+			}
+			sampleIDs[tenant] = sample.ID
+		}
+		assert.NotEqual(t, sampleIDs[types.DefaultTenantCode], sampleIDs["tenant_b"], "each tenant must get its own sample row")
+	})
+}
+
+// Test_ProcessBatch_UpdateSample_TenantIsolation_DoesNotModifyAnotherTenantsSample covers the
+// write side: PUT /{tenant}/samples/batch matches on (organization_code, submitter_sample_id), a
+// key another tenant can hold, so the update must leave that tenant's row untouched.
+func Test_ProcessBatch_UpdateSample_TenantIsolation_DoesNotModifyAnotherTenantsSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const submitterSampleId = "S-UPDATE-TENANT-ISO"
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1060, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-UPDATE-TENANT-ISO', 'mrn')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1060, 'blood', NULL, 'normal', ?, 1060, 'TENANT_B_ORG', 'tenant_b')
+		`, submitterSampleId).Error)
+
+		payload := fmt.Sprintf(`[
+			{
+				"submitter_sample_id": %q,
+				"sample_organization_code": "TENANT_B_ORG",
+				"patient_organization_code": "TENANT_B_ORG",
+				"submitter_patient_id": "P-UPDATE-TENANT-ISO",
+				"type_code": "dna",
+				"tissue_site": "blood",
+				"histology_code": "tumoral"
+			}
+		]`, submitterSampleId)
+
+		id := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.UpdateSampleBatchType, false, "user999", "2025-10-09", types.DefaultTenantCode)
+		batch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&batch)
+		assert.Equal(t, types.BatchStatusError, batch.Status, "radiant holds no such sample — the batch must fail, not reach across tenants")
+
+		var sample postgres.Sample
+		require.NoError(t, env.Postgres.Table("sample").Where("id = 1060").First(&sample).Error)
+		assert.Equal(t, "blood", sample.TypeCode, "tenant_b's row must not be modified by a radiant batch")
+		assert.Equal(t, "normal", sample.HistologyCode, "tenant_b's row must not be modified by a radiant batch")
+	})
 }
