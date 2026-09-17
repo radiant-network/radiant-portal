@@ -65,17 +65,12 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 	return nil
 }
 
-// PatchCase applies the fields a patch carries to one case and reports whether such a case
-// exists. Unlike UpdateCase, which replaces every scalar field for the batch path, it touches
-// only the columns the patch.
-//
-// It is constrained to the active tenant, so another tenant's case matches nothing and comes
-// back as missing rather than updated. The caller validates first (types.CasePatch.Validate):
-// an empty patch would build an UPDATE with no assignments.
-func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, patch types.CasePatch) (bool, error) {
+// PatchCase writes only the fields the given case actually carries and reports whether such a
+// case exists.
+func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, c *Case) (bool, error) {
 	updates := map[string]any{}
-	if patch.StatusCode != nil {
-		updates["status_code"] = *patch.StatusCode
+	if c.StatusCode != "" {
+		updates["status_code"] = c.StatusCode
 	}
 	if len(updates) == 0 {
 		return false, fmt.Errorf("no field to update on case %d", caseID)

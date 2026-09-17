@@ -527,11 +527,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **patch_case**
-> PatchCaseResponse patch_case(tenant, case_id, case_patch)
+> patch_case(tenant, case_id, patch_case)
 
 Update a case
 
-Apply a partial update to a case. Only the fields present in the body are changed. `status_code` may be any user-applied code, in any order; the system-applied codes `submitted` and `processing` are rejected, as is any code outside the case status dictionary.
+Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
 
 ### Example
 
@@ -539,8 +539,7 @@ Apply a partial update to a case. Only the fields present in the body are change
 
 ```python
 import radiant_python
-from radiant_python.models.case_patch import CasePatch
-from radiant_python.models.patch_case_response import PatchCaseResponse
+from radiant_python.models.patch_case import PatchCase
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -566,13 +565,11 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.CasesApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
-    case_patch = radiant_python.CasePatch() # CasePatch | Fields to change
+    patch_case = radiant_python.PatchCase() # PatchCase | Fields to change
 
     try:
         # Update a case
-        api_response = api_instance.patch_case(tenant, case_id, case_patch)
-        print("The response of CasesApi->patch_case:\n")
-        pprint(api_response)
+        api_instance.patch_case(tenant, case_id, patch_case)
     except Exception as e:
         print("Exception when calling CasesApi->patch_case: %s\n" % e)
 ```
@@ -586,11 +583,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
- **case_patch** | [**CasePatch**](CasePatch.md)| Fields to change | 
+ **patch_case** | [**PatchCase**](PatchCase.md)| Fields to change | 
 
 ### Return type
 
-[**PatchCaseResponse**](PatchCaseResponse.md)
+void (empty response body)
 
 ### Authorization
 

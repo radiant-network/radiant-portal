@@ -21,7 +21,6 @@ docs/CaseExam.md
 docs/CaseFamilyHistory.md
 docs/CaseFetusBatch.md
 docs/CaseFilters.md
-docs/CasePatch.md
 docs/CasePatientBatch.md
 docs/CasePatientClinicalInformation.md
 docs/CaseResult.md
@@ -93,8 +92,8 @@ docs/OmimGenePanel.md
 docs/OrganizationResponse.md
 docs/OrganizationsApi.md
 docs/OutputDocumentBatch.md
+docs/PatchCase.md
 docs/PatchCaseBatchBody.md
-docs/PatchCaseResponse.md
 docs/PatientBatch.md
 docs/PatientsApi.md
 docs/PubmedCitation.md
@@ -205,7 +204,6 @@ radiant_python/models/case_exam.py
 radiant_python/models/case_family_history.py
 radiant_python/models/case_fetus_batch.py
 radiant_python/models/case_filters.py
-radiant_python/models/case_patch.py
 radiant_python/models/case_patient_batch.py
 radiant_python/models/case_patient_clinical_information.py
 radiant_python/models/case_result.py
@@ -266,8 +264,8 @@ radiant_python/models/occurrence_note.py
 radiant_python/models/omim_gene_panel.py
 radiant_python/models/organization_response.py
 radiant_python/models/output_document_batch.py
+radiant_python/models/patch_case.py
 radiant_python/models/patch_case_batch_body.py
-radiant_python/models/patch_case_response.py
 radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py

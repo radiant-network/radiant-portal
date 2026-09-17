@@ -468,13 +468,6 @@ components:
       - project_code
       - status_code
       type: object
-    CasePatch:
-      description: Case fields to change. Omitted fields are left untouched.
-      properties:
-        status_code:
-          example: in_review
-          type: string
-      type: object
     CasePatientBatch:
       properties:
         affected_status_code:
@@ -2138,6 +2131,13 @@ components:
       - size
       - url
       type: object
+    PatchCase:
+      description: Case fields to change. Omitted fields are left untouched.
+      properties:
+        status_code:
+          example: in_review
+          type: string
+      type: object
     PatchCaseBatchBody:
       properties:
         cases:
@@ -2148,14 +2148,6 @@ components:
           uniqueItems: false
       required:
       - cases
-      type: object
-    PatchCaseResponse:
-      description: A case after a successful patch, echoing the fields that were applied.
-      properties:
-        case_id:
-          type: integer
-        status_code:
-          type: string
       type: object
     PatientBatch:
       properties:
@@ -3632,9 +3624,8 @@ paths:
       - cases
     patch:
       description: Apply a partial update to a case. Only the fields present in the
-        body are changed. `status_code` may be any user-applied code, in any order;
-        the system-applied codes `submitted` and `processing` are rejected, as is
-        any code outside the case status dictionary.
+        body are changed; status_code is the only one applied today. Returns 200 with
+        no body on success.
       operationId: patchCase
       parameters:
       - description: Tenant code
@@ -3653,15 +3644,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CasePatch'
+              $ref: '#/components/schemas/PatchCase'
         description: Fields to change
         required: true
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PatchCaseResponse'
           description: OK
         "400":
           content:

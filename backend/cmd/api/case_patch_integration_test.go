@@ -84,7 +84,7 @@ func Test_PatchCase_LegalTransitionIsPersisted(t *testing.T) {
 		w := servePatchCase(env.Postgres, wendyID, "radiant", caseID, `{"status_code":"in_review"}`)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, fmt.Sprintf(`{"case_id":%d,"status_code":"in_review"}`, caseID), w.Body.String())
+		assert.Empty(t, w.Body.String(), "a successful patch answers 200 with no body")
 		assert.Equal(t, types.CaseStatusInReview, caseStatus(t, env.Postgres, caseID))
 	})
 }

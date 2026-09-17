@@ -32,7 +32,6 @@ from radiant_python.models.case_exam import CaseExam
 from radiant_python.models.case_family_history import CaseFamilyHistory
 from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_filters import CaseFilters
-from radiant_python.models.case_patch import CasePatch
 from radiant_python.models.case_patient_batch import CasePatientBatch
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_result import CaseResult
@@ -92,8 +91,8 @@ from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.organization_response import OrganizationResponse
 from radiant_python.models.output_document_batch import OutputDocumentBatch
+from radiant_python.models.patch_case import PatchCase
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
-from radiant_python.models.patch_case_response import PatchCaseResponse
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails

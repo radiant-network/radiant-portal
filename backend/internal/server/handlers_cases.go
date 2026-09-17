@@ -26,7 +26,7 @@ type caseTasksReader interface {
 }
 
 type casePatcher interface {
-	PatchCase(ctx context.Context, caseId int, patch types.CasePatch) (bool, error)
+	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
 }
 
 // SearchCasesHandler handles search of cases
@@ -180,15 +180,14 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 // The only field so far is status_code
 // @Summary Update a case
 // @Id patchCase
-// @Description Apply a partial update to a case. Only the fields present in the body are changed.
+// @Description Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
-// @Param message body types.CasePatch true "Fields to change"
+// @Param message body types.PatchCase true "Fields to change"
 // @Accept json
-// @Produce json
-// @Success 200 {object} types.PatchCaseResponse
+// @Success 200
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
@@ -204,17 +203,17 @@ func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
 			return
 		}
 
-		var patch types.CasePatch
+		var patch types.PatchCase
 		if err := c.ShouldBindJSON(&patch); err != nil {
 			HandleValidationError(c, err)
 			return
 		}
-		if err := patch.Validate(); err != nil {
+		if err := types.ValidateUserAppliedCaseStatus(patch.StatusCode); err != nil {
 			HandleValidationError(c, err)
 			return
 		}
 
-		found, err := repo.PatchCase(c.Request.Context(), caseId, patch)
+		found, err := repo.PatchCase(c.Request.Context(), caseId, &types.Case{StatusCode: patch.StatusCode})
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -224,11 +223,7 @@ func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
 			return
 		}
 
-		response := types.PatchCaseResponse{CaseID: caseId}
-		if patch.StatusCode != nil {
-			response.StatusCode = *patch.StatusCode
-		}
-		c.JSON(http.StatusOK, response)
+		c.Status(http.StatusOK)
 	}
 }
 

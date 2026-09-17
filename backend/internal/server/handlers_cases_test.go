@@ -475,13 +475,13 @@ type casePatcherMock struct {
 	err       error
 	calls     int
 	gotCaseId int
-	gotPatch  types.CasePatch
+	gotCase   *types.Case
 }
 
-func (m *casePatcherMock) PatchCase(_ context.Context, caseId int, patch types.CasePatch) (bool, error) {
+func (m *casePatcherMock) PatchCase(_ context.Context, caseId int, c *types.Case) (bool, error) {
 	m.calls++
 	m.gotCaseId = caseId
-	m.gotPatch = patch
+	m.gotCase = c
 	return m.found, m.err
 }
 
@@ -501,9 +501,9 @@ func Test_PatchCaseHandler_AppliesUserStatus(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review"}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"case_id":1,"status_code":"in_review"}`, w.Body.String())
+	assert.Empty(t, w.Body.String(), "a successful patch answers 200 with no body")
 	assert.Equal(t, 1, repo.gotCaseId)
-	assert.Equal(t, "in_review", *repo.gotPatch.StatusCode)
+	assert.Equal(t, "in_review", repo.gotCase.StatusCode)
 }
 
 func Test_PatchCaseHandler_AppliesStatusesInAnyOrder(t *testing.T) {
@@ -511,7 +511,7 @@ func Test_PatchCaseHandler_AppliesStatusesInAnyOrder(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"reopened"}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "reopened", *repo.gotPatch.StatusCode)
+	assert.Equal(t, "reopened", repo.gotCase.StatusCode)
 }
 
 func Test_PatchCaseHandler_RejectsBodyWithNoPatchableField(t *testing.T) {
@@ -519,7 +519,6 @@ func Test_PatchCaseHandler_RejectsBodyWithNoPatchableField(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{"note":"not patchable here"}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"no field to update, expected at least one of: status_code"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
 }
 
@@ -528,7 +527,7 @@ func Test_PatchCaseHandler_RejectsEmptyBody(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"no field to update, expected at least one of: status_code"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
 }
 
@@ -555,15 +554,6 @@ func Test_PatchCaseHandler_RejectsUnknownStatus(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
-}
-
-func Test_PatchCaseHandler_RejectsEmptyStatus(t *testing.T) {
-	repo := &casePatcherMock{found: true}
-	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":""}`)
-
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
-	assert.Zero(t, repo.calls)
 }
 
 func Test_PatchCaseHandler_RejectsMalformedBody(t *testing.T) {

@@ -17,18 +17,17 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class PatchCaseResponse(BaseModel):
+class PatchCase(BaseModel):
     """
-    A case after a successful patch, echoing the fields that were applied.
+    Case fields to change. Omitted fields are left untouched.
     """ # noqa: E501
-    case_id: Optional[StrictInt] = None
     status_code: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["case_id", "status_code"]
+    __properties: ClassVar[List[str]] = ["status_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,7 +47,7 @@ class PatchCaseResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PatchCaseResponse from a JSON string"""
+        """Create an instance of PatchCase from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +72,7 @@ class PatchCaseResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PatchCaseResponse from a dict"""
+        """Create an instance of PatchCase from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +80,6 @@ class PatchCaseResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "case_id": obj.get("case_id"),
             "status_code": obj.get("status_code")
         })
         return _obj

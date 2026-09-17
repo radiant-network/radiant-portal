@@ -22,15 +22,14 @@ from typing_extensions import Annotated
 from radiant_python.models.autocomplete_result import AutocompleteResult
 from radiant_python.models.case_entity import CaseEntity
 from radiant_python.models.case_filters import CaseFilters
-from radiant_python.models.case_patch import CasePatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
 from radiant_python.models.create_batch_response import CreateBatchResponse
 from radiant_python.models.create_case_batch_body import CreateCaseBatchBody
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
+from radiant_python.models.patch_case import PatchCase
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
-from radiant_python.models.patch_case_response import PatchCaseResponse
 from radiant_python.models.task_occurrence_type import TaskOccurrenceType
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
 
@@ -1843,7 +1842,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        case_patch: Annotated[CasePatch, Field(description="Fields to change")],
+        patch_case: Annotated[PatchCase, Field(description="Fields to change")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1856,17 +1855,17 @@ class CasesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> PatchCaseResponse:
+    ) -> None:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed. `status_code` may be any user-applied code, in any order; the system-applied codes `submitted` and `processing` are rejected, as is any code outside the case status dictionary.
+        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
-        :param case_patch: Fields to change (required)
-        :type case_patch: CasePatch
+        :param patch_case: Fields to change (required)
+        :type patch_case: PatchCase
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1892,7 +1891,7 @@ class CasesApi:
         _param = self._patch_case_serialize(
             tenant=tenant,
             case_id=case_id,
-            case_patch=case_patch,
+            patch_case=patch_case,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1900,7 +1899,7 @@ class CasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PatchCaseResponse",
+            '200': None,
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -1923,7 +1922,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        case_patch: Annotated[CasePatch, Field(description="Fields to change")],
+        patch_case: Annotated[PatchCase, Field(description="Fields to change")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1936,17 +1935,17 @@ class CasesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[PatchCaseResponse]:
+    ) -> ApiResponse[None]:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed. `status_code` may be any user-applied code, in any order; the system-applied codes `submitted` and `processing` are rejected, as is any code outside the case status dictionary.
+        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
-        :param case_patch: Fields to change (required)
-        :type case_patch: CasePatch
+        :param patch_case: Fields to change (required)
+        :type patch_case: PatchCase
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1972,7 +1971,7 @@ class CasesApi:
         _param = self._patch_case_serialize(
             tenant=tenant,
             case_id=case_id,
-            case_patch=case_patch,
+            patch_case=patch_case,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1980,7 +1979,7 @@ class CasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PatchCaseResponse",
+            '200': None,
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2003,7 +2002,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        case_patch: Annotated[CasePatch, Field(description="Fields to change")],
+        patch_case: Annotated[PatchCase, Field(description="Fields to change")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2019,14 +2018,14 @@ class CasesApi:
     ) -> RESTResponseType:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed. `status_code` may be any user-applied code, in any order; the system-applied codes `submitted` and `processing` are rejected, as is any code outside the case status dictionary.
+        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
-        :param case_patch: Fields to change (required)
-        :type case_patch: CasePatch
+        :param patch_case: Fields to change (required)
+        :type patch_case: PatchCase
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2052,7 +2051,7 @@ class CasesApi:
         _param = self._patch_case_serialize(
             tenant=tenant,
             case_id=case_id,
-            case_patch=case_patch,
+            patch_case=patch_case,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2060,7 +2059,7 @@ class CasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PatchCaseResponse",
+            '200': None,
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2078,7 +2077,7 @@ class CasesApi:
         self,
         tenant,
         case_id,
-        case_patch,
+        patch_case,
         _request_auth,
         _content_type,
         _headers,
@@ -2108,8 +2107,8 @@ class CasesApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if case_patch is not None:
-            _body_params = case_patch
+        if patch_case is not None:
+            _body_params = patch_case
 
 
         # set the HTTP header `Accept`

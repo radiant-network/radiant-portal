@@ -228,8 +228,8 @@ func seedCaseForStatus(t *testing.T, repo *CasesRepository, db *gorm.DB, caseID 
 	return caseID
 }
 
-func statusPatch(code string) types.CasePatch {
-	return types.CasePatch{StatusCode: &code}
+func statusPatch(code string) *types.Case {
+	return &types.Case{StatusCode: code}
 }
 
 func statusOfCase(t *testing.T, db *gorm.DB, caseID int) string {
@@ -287,7 +287,7 @@ func Test_PatchCase_EmptyPatchIsRejected(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
 
-		found, err := repo.PatchCase(t.Context(), 1, types.CasePatch{})
+		found, err := repo.PatchCase(t.Context(), 1, &types.Case{})
 		assert.EqualError(t, err, "no field to update on case 1")
 		assert.False(t, found)
 	})
