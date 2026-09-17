@@ -1,4 +1,5 @@
 import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useCreateAtom, useSelector } from '@tanstack/react-store';
 import {
   type Column,
   type ColumnDef,
@@ -735,10 +736,11 @@ function DataTable<T extends RowData>({
   });
 
   // Default internal pagination state for locale and server pagination
-  const [internalPagination, setInternalPagination] = useState<PaginationState>({
+  const paginationAtom = useCreateAtom<PaginationState>({
     pageIndex: pagination.state?.pageIndex || 0,
     pageSize: pagination.state?.pageSize || 10,
   });
+  const internalPagination = useSelector(paginationAtom);
 
   // Key Input Map
   const handleEscEventListener = () => {
@@ -760,6 +762,8 @@ function DataTable<T extends RowData>({
 
   // Initialize tanstack table
   const table = useAppTable({
+    // 'hidden' keeps the slice on the table's initial state, as before
+    atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
     columns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
@@ -777,11 +781,8 @@ function DataTable<T extends RowData>({
     onExpandedChange: setExpanded,
     onColumnSizingChange: setColumnSizing,
     onGroupingChange: setGrouping,
-    onPaginationChange: (() => {
-      if (pagination.type === 'hidden') return undefined;
-      if (pagination.type === 'locale') return setInternalPagination;
-      return pagination.onPaginationChange;
-    })(),
+    // no key for 'locale': the table writes paginationAtom itself (an explicit undefined would freeze the slice)
+    ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
@@ -792,7 +793,6 @@ function DataTable<T extends RowData>({
       columnPinning,
       grouping,
       columnSizing,
-      pagination: (() => (pagination.type !== 'hidden' ? internalPagination : undefined))(),
       expanded,
       rowPinning,
       rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
@@ -840,7 +840,7 @@ function DataTable<T extends RowData>({
     setColumnVisibility,
     setColumnPinning,
     setColumnSizing,
-    setPagination: pagination.onPaginationChange ?? setInternalPagination,
+    setPagination: pagination.onPaginationChange ?? paginationAtom.set,
     setAdditionalFields: serverOptions?.setAdditionalFields,
   });
 
@@ -871,7 +871,7 @@ function DataTable<T extends RowData>({
    */
   useEffect(() => {
     if (pagination.type !== 'hidden' && pagination.state) {
-      setInternalPagination(pagination.state);
+      paginationAtom.set(pagination.state);
     }
   }, [pagination.state, pagination.type]);
 
