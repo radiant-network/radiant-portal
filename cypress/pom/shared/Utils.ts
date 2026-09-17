@@ -283,11 +283,7 @@ export const getStatusIcon = (status: string) => {
  * (germline/somatic × snv/cnv) and the Query Builder oracle count.
  * @returns A Cypress chain yielding the total (0 when no results are displayed).
  */
-export const getTableResultsCount = (): Cypress.Chainable<number> =>
-  cy
-    .get(CommonSelectors.tableIndexResult)
-    .invoke('text')
-    .then(parseResultsCount);
+export const getTableResultsCount = (): Cypress.Chainable<number> => cy.get(CommonSelectors.tableIndexResult).invoke('text').then(parseResultsCount);
 
 /**
  * Gets the text operateur associated with a symbol operator.
@@ -372,7 +368,7 @@ export const isEmpty = (value: unknown): boolean => {
  */
 export const isFerlease = (): boolean => {
   const url = process.env.CYPRESS_BASE_URL !== undefined ? process.env.CYPRESS_BASE_URL : '';
-  return (url.includes('sjra-') || url.includes('clin-'));
+  return url.includes('sjra-') || url.includes('clin-');
 };
 
 /**

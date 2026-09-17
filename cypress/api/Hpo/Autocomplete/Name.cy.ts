@@ -9,7 +9,7 @@ describe('HPO - Autocomplete - Name', () => {
   before(() => {
     const Auth = Cypress.expose('globalData').Authorization;
 
-    cy.apiCall('GET', `hpo/autocomplete?prefix=${encodeURIComponent(name.split(' ').slice(1).join(' ')/*substring*/)}&limit=10`, '', Auth.token).then(res => {
+    cy.apiCall('GET', `hpo/autocomplete?prefix=${encodeURIComponent(name.split(' ').slice(1).join(' ') /*substring*/)}&limit=10`, '', Auth.token).then(res => {
       response = res;
     });
   });

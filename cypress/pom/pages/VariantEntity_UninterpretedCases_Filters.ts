@@ -104,7 +104,7 @@ export const VariantEntity_UninterpretedCases_Filters = {
      * @param alias The alias of the intercepted GET cases/filters request (set before visiting the page).
      * @param filterKey The filter key whose options to check (e.g. 'diagnosis_lab_code').
      */
-    shouldRenderApiOptions(alias: string, filterKey: string) {
+    shouldRenderApiOptions(alias: `@${string}`, filterKey: string) {
       cy.wait(alias).then(({ response }) => {
         const buckets = response?.body?.[filterKey] || [];
         expect(buckets.length, `filter "${filterKey}" should return buckets`).to.be.greaterThan(0);
