@@ -23,6 +23,7 @@ import {
   FlexRender,
   type GroupingState,
   type Header,
+  metaHelper,
   type OnChangeFn,
   type PaginationState,
   type ReactTable,
@@ -93,6 +94,13 @@ export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
 
 /**
+ * Type of `columnDef.meta`, shared by every data table in the app.
+ */
+export type TableColumnMeta = {
+  footerColSpan?: number;
+};
+
+/**
  * Tanstack v9 feature registry shared by every data table in the app.
  * Kept here rather than in a separate module so callers only need to reach
  * into `@/components/base/data-table/data-table` for both the component and
@@ -117,6 +125,7 @@ export const features = tableFeatures({
   expandedRowModel: createExpandedRowModel(),
   groupedRowModel: createGroupedRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
+  columnMeta: metaHelper<TableColumnMeta>(),
 });
 
 export type AppFeatures = typeof features;
@@ -602,7 +611,7 @@ function getRowFlexRender<T extends RowData>({
  * @EXAMPLE:
  *  [{
  *   id: "rowSelection",
- *   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+ *   header: (header: HeaderContext<AppFeatures, Occurrence, unknown>) => <RowSelectionHeader table={header.table} />,
  *   cell: info => <RowSelectionCell row={info.row} />,
  *   size: 48,
  *   maxSize: 48,

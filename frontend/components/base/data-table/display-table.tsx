@@ -94,8 +94,7 @@ function DisplayTable({
           {table.getFooterGroups().map(footerGroup => (
             <TableRow key={footerGroup.id} variant={variant}>
               {footerGroup.headers.map(header => {
-                const footerColSpan = (header.column.columnDef.meta as { footerColSpan?: number } | undefined)
-                  ?.footerColSpan;
+                const footerColSpan = header.column.columnDef.meta?.footerColSpan;
                 if (footerColSpan === 0) return null;
                 return (
                   <TableCell

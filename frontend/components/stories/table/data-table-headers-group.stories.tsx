@@ -5,8 +5,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SortBodyOrderEnum } from '@/api/api';
 import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
-import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import DataTable, {
+  type AppFeatures,
+  createAppColumnHelper,
+  createColumnSettings,
+  type HeaderContext,
+  type TableColumnDef,
+} from '@/components/base/data-table/data-table';
 import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
@@ -300,7 +305,9 @@ export const Default: Story = {
             id: 'rowSelection',
             size: 48,
             maxSize: 48,
-            header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+            header: (header: HeaderContext<AppFeatures, TableMockData, unknown>) => (
+              <RowSelectionHeader table={header.table} />
+            ),
             cell: info => <RowSelectionCell row={info.row} />,
             enableResizing: false,
             enablePinning: false,
@@ -369,7 +376,9 @@ export const WithSubgroups: Story = {
               },
               {
                 id: 'rowSelection',
-                header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+                header: (header: HeaderContext<AppFeatures, TableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
                 cell: info => <RowSelectionCell row={info.row} />,
                 size: 48,
                 maxSize: 48,
@@ -450,7 +459,9 @@ export const Advanced: Story = {
               },
               {
                 id: 'rowSelection',
-                header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+                header: (header: HeaderContext<AppFeatures, AdvancedTableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
                 cell: info => <RowSelectionCell row={info.row} />,
                 size: 48,
                 maxSize: 48,
@@ -622,7 +633,9 @@ export const AdvancedWith50users: Story = {
               },
               {
                 id: 'rowSelection',
-                header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+                header: (header: HeaderContext<AppFeatures, AdvancedTableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
                 cell: info => <RowSelectionCell row={info.row} />,
                 size: 48,
                 maxSize: 48,
