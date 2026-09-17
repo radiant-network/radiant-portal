@@ -87,6 +87,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoAuth := postgres.NewAuthRepository(postgresDB)
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
+	repoBeaconVariants := starrocks.NewBeaconVariantsRepository(starrocksDB)
+	repoProjects := postgres.NewProjectsRepository(postgresDB)
+	beaconCfg := server.BeaconConfigFromEnv()
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
@@ -104,6 +107,20 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// Initialize public routes explicitly
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
 	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
+
+	// GA4GH Beacon v2 framework endpoints are anonymous by specification, so they are registered
+	// on r rather than privateRoutes: only the tenant's existence is checked. They serve static
+	// metadata and never touch StarRocks; every data-bearing beacon route lives under tenantRoutes
+	// below. Test_PublicBeaconRoutesAreAnonymous pins this list.
+	beaconPublic := r.Group("/:tenant/beacon")
+	beaconPublic.Use(server.WithBeaconConfig(beaconCfg), server.RequireTenantExists(repoAuth))
+	beaconPublic.GET("", server.BeaconInfoHandler(beaconCfg))
+	beaconPublic.GET("/info", server.BeaconInfoHandler(beaconCfg))
+	beaconPublic.GET("/service-info", server.BeaconServiceInfoHandler(beaconCfg))
+	beaconPublic.GET("/configuration", server.BeaconConfigurationHandler(beaconCfg))
+	beaconPublic.GET("/entry_types", server.BeaconEntryTypesHandler(beaconCfg))
+	beaconPublic.GET("/map", server.BeaconMapHandler(beaconCfg))
+	beaconPublic.GET("/filtering_terms", server.BeaconFilteringTermsHandler(beaconCfg))
 
 	// Private routes, alphabetically ordered
 	// Use privateRoutes instead of `r` for all private routes to automatically apply the auth middleware
@@ -284,6 +301,18 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGermlineGroup.GET("/:locus_id/external_frequencies", requireAction(types.ActionSearchCase), server.GetGermlineVariantExternalFrequenciesHandler(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/internal_frequencies", requireAction(types.ActionSearchCase), server.GetGermlineVariantInternalFrequenciesHandler(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/internal_frequencies/global", requireAction(types.ActionSearchCase), server.GetGermlineVariantGlobalInternalFrequenciesHandler(repoVariants))
+
+	// Beacon queries: any tenant member holding can_view_kb or can_search_case may ask; the
+	// handler then clamps the granularity (can_search_case → record, otherwise count).
+	beaconGroup := tenantRoutes.Group("/beacon")
+	beaconGroup.Use(server.WithBeaconConfig(beaconCfg))
+	beaconQuery := requireAnyAction(types.ActionViewKb, types.ActionSearchCase)
+	beaconGroup.GET("/g_variants", beaconQuery, server.BeaconGenomicVariationsHandler(beaconCfg, repoBeaconVariants, auth, repoAuth))
+	beaconGroup.POST("/g_variants", beaconQuery, server.BeaconGenomicVariationsPostHandler(beaconCfg, repoBeaconVariants, auth, repoAuth))
+	beaconGroup.GET("/g_variants/:id", beaconQuery, server.BeaconGenomicVariationByIDHandler(beaconCfg, repoBeaconVariants, auth, repoAuth))
+	beaconGroup.GET("/datasets", beaconQuery, server.BeaconDatasetsHandler(beaconCfg, repoProjects))
+	beaconGroup.POST("/datasets", beaconQuery, server.BeaconDatasetsPostHandler(beaconCfg, repoProjects))
+	beaconGroup.GET("/datasets/:id", beaconQuery, server.BeaconDatasetByIDHandler(beaconCfg, repoProjects))
 
 	documentsGroup := tenantRoutes.Group("/documents")
 	documentsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchDocumentsHandler(repoDocuments))

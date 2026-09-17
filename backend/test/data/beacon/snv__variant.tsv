@@ -1,0 +1,7 @@
+locus_id	chromosome	start	end	reference	alternate	variant_class	symbol	hgvsg	rsnumber	aa_change	clinvar_name	consequences	germline_pc_wgs	germline_pn_wgs	germline_pf_wgs	germline_pc_wxs	germline_pn_wxs	germline_pf_wxs	somatic_pc_tn_wgs	somatic_pn_tn_wgs	somatic_pf_tn_wgs	somatic_pc_to_wgs	somatic_pn_to_wgs	somatic_pf_to_wgs	gnomad_v3_af
+1001	17	7674220	7674220	C	T	SNV	TP53	chr17:g.7674220C>T	rs28934578	p.Arg175His	VCV000012374	["missense_variant"]	3	412	0.0073	0	0	0.0	1	20	0.05	0	0	0.0	0.00001
+1002	17	7675088	7675088	C	T	SNV	TP53	chr17:g.7675088C>T	rs11540652	p.Arg248Gln	NULL	["missense_variant"]	1	412	0.0024	0	0	0.0	0	20	0.0	0	0	0.0	NULL
+1003	7	140753336	140753336	A	T	SNV	BRAF	chr7:g.140753336A>T	rs113488022	p.Val600Glu	NULL	["missense_variant"]	0	412	0.0	0	0	0.0	4	20	0.2	0	0	0.0	0.000004
+1004	17	7673800	7673805	GAAGGA	G	deletion	TP53	chr17:g.7673801_7673805del	NULL	NULL	NULL	["frameshift_variant"]	2	412	0.0049	0	0	0.0	0	20	0.0	0	0	0.0	NULL
+1005	X	154360000	154360000	G	A	SNV	MECP2	chrX:g.154360000G>A	NULL	p.Arg106Trp	NULL	["missense_variant"]	1	412	0.0024	0	0	0.0	0	20	0.0	0	0	0.0	NULL
+1006	1	1000	1000	A	C	SNV	NOCOHORT	chr1:g.1000A>C	NULL	NULL	NULL	NULL	0	0	0.0	0	0	0.0	0	0	0.0	0	0	0.0	NULL

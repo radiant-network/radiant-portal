@@ -41,6 +41,16 @@ func Test_SecureRoutes(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 200, resp.StatusCode)
 
+		// The Beacon framework's informational endpoints are anonymous by specification.
+		for _, route := range []string{"radiant/beacon", "radiant/beacon/info", "radiant/beacon/service-info", "radiant/beacon/configuration", "radiant/beacon/entry_types", "radiant/beacon/map", "radiant/beacon/filtering_terms"} {
+			resp, err = http.Get(fmt.Sprintf("http://localhost:%d/%s", randomPort, route))
+			assert.NoError(t, err)
+			assert.Equal(t, 200, resp.StatusCode, route)
+		}
+		resp, err = http.Get(fmt.Sprintf("http://localhost:%d/no_such_tenant/beacon/info", randomPort))
+		assert.NoError(t, err)
+		assert.Equal(t, 404, resp.StatusCode)
+
 		// Validate all the other routes are private
 
 		// GET requests. Tenant-scoped routes now live under /{tenant}/; a missing token is
@@ -79,6 +89,10 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/variants/germline/1/conditions/clinvar",
 			"radiant/variants/germline/1/external_frequencies",
 			"radiant/variants/germline/1/internal_frequencies",
+			"radiant/beacon/g_variants?geneId=TP53",
+			"radiant/beacon/g_variants/1",
+			"radiant/beacon/datasets",
+			"radiant/beacon/datasets/N1",
 			"radiant/notes/1/1/1/10000",
 			"radiant/cases/1/1/tasks_with_occurrences?data_type=germline_snv",
 		} {
@@ -110,6 +124,8 @@ func Test_SecureRoutes(t *testing.T) {
 			"users/preferences/table_1",
 			"radiant/variants/germline/1/cases/interpreted",
 			"radiant/variants/germline/1/cases/uninterpreted",
+			"radiant/beacon/g_variants",
+			"radiant/beacon/datasets",
 			"radiant/notes",
 		} {
 			resp, err = http.Post(fmt.Sprintf("http://localhost:%d/%s", randomPort, route), "application/json", nil)

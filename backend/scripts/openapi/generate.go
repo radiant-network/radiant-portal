@@ -4,8 +4,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
+
+var beaconSchemaRef = regexp.MustCompile(`\bbeacon\.([A-Z]\w*)`)
 
 func main() {
 	// Run the swag init command
@@ -39,6 +42,11 @@ func cleanupFile(filePath string) {
 
 	// Remove all occurrences of "types."
 	modifiedContent := strings.ReplaceAll(string(content), "types.", "")
+
+	// Schemas from internal/beacon keep their package prefix as a "Beacon" name prefix
+	// (beacon.ErrorResponse → BeaconErrorResponse) so generated clients get one flat namespace.
+	// The uppercase-letter guard keeps prose such as "this beacon." untouched.
+	modifiedContent = beaconSchemaRef.ReplaceAllString(modifiedContent, "Beacon$1")
 
 	// Write the modified content back to the file
 	err = os.WriteFile(filePath, []byte(modifiedContent), 0644)

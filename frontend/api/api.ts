@@ -274,6 +274,840 @@ export interface BatchSummary {
     'updated'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface BeaconConfiguration
+ */
+export interface BeaconConfiguration {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconConfiguration
+     */
+    '$schema'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: BeaconEntryType; }}
+     * @memberof BeaconConfiguration
+     */
+    'entryTypes'?: { [key: string]: BeaconEntryType; };
+    /**
+     * 
+     * @type {BeaconMaturityAttributes}
+     * @memberof BeaconConfiguration
+     */
+    'maturityAttributes'?: BeaconMaturityAttributes;
+    /**
+     * 
+     * @type {BeaconSecurityAttributes}
+     * @memberof BeaconConfiguration
+     */
+    'securityAttributes'?: BeaconSecurityAttributes;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconConfigurationResponse
+ */
+export interface BeaconConfigurationResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconConfigurationResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconConfiguration}
+     * @memberof BeaconConfigurationResponse
+     */
+    'response'?: BeaconConfiguration;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconEndpointMap
+ */
+export interface BeaconEndpointMap {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEndpointMap
+     */
+    '$schema'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: BeaconEndpointSet; }}
+     * @memberof BeaconEndpointMap
+     */
+    'endpointSets'?: { [key: string]: BeaconEndpointSet; };
+}
+/**
+ * 
+ * @export
+ * @interface BeaconEndpointSet
+ */
+export interface BeaconEndpointSet {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEndpointSet
+     */
+    'entryType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEndpointSet
+     */
+    'rootUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEndpointSet
+     */
+    'singleEntryUrl'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconEntryType
+ */
+export interface BeaconEntryType {
+    /**
+     * 
+     * @type {BeaconSchemaDef}
+     * @memberof BeaconEntryType
+     */
+    'defaultSchema'?: BeaconSchemaDef;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEntryType
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEntryType
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEntryType
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BeaconEntryType
+     */
+    'nonFilteredQueriesAllowed'?: boolean;
+    /**
+     * 
+     * @type {BeaconOntologyTerm}
+     * @memberof BeaconEntryType
+     */
+    'ontologyTermForThisType'?: BeaconOntologyTerm;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEntryType
+     */
+    'partOfSpecification'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconEntryTypes
+ */
+export interface BeaconEntryTypes {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconEntryTypes
+     */
+    '$schema'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: BeaconEntryType; }}
+     * @memberof BeaconEntryTypes
+     */
+    'entryTypes'?: { [key: string]: BeaconEntryType; };
+}
+/**
+ * 
+ * @export
+ * @interface BeaconEntryTypesResponse
+ */
+export interface BeaconEntryTypesResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconEntryTypesResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconEntryTypes}
+     * @memberof BeaconEntryTypesResponse
+     */
+    'response'?: BeaconEntryTypes;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconError
+ */
+export interface BeaconError {
+    /**
+     * 
+     * @type {number}
+     * @memberof BeaconError
+     */
+    'errorCode'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconError
+     */
+    'errorMessage'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconErrorResponse
+ */
+export interface BeaconErrorResponse {
+    /**
+     * 
+     * @type {BeaconError}
+     * @memberof BeaconErrorResponse
+     */
+    'error'?: BeaconError;
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconErrorResponse
+     */
+    'meta'?: BeaconMeta;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconFilteringTerms
+ */
+export interface BeaconFilteringTerms {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconFilteringTerms
+     */
+    '$schema'?: string;
+    /**
+     * 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof BeaconFilteringTerms
+     */
+    'filteringTerms'?: Array<{ [key: string]: any; }>;
+    /**
+     * 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof BeaconFilteringTerms
+     */
+    'resources'?: Array<{ [key: string]: any; }>;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconFilteringTermsResponse
+ */
+export interface BeaconFilteringTermsResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconFilteringTermsResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconFilteringTerms}
+     * @memberof BeaconFilteringTermsResponse
+     */
+    'response'?: BeaconFilteringTerms;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconInfo
+ */
+export interface BeaconInfo {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'alternativeUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'environment'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof BeaconInfo
+     */
+    'info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {BeaconOrganization}
+     * @memberof BeaconInfo
+     */
+    'organization'?: BeaconOrganization;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'version'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconInfo
+     */
+    'welcomeUrl'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconInfoResponse
+ */
+export interface BeaconInfoResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconInfoResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconInfo}
+     * @memberof BeaconInfoResponse
+     */
+    'response'?: BeaconInfo;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconMapResponse
+ */
+export interface BeaconMapResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconMapResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconEndpointMap}
+     * @memberof BeaconMapResponse
+     */
+    'response'?: BeaconEndpointMap;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconMaturityAttributes
+ */
+export interface BeaconMaturityAttributes {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconMaturityAttributes
+     */
+    'productionStatus'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconMeta
+ */
+export interface BeaconMeta {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconMeta
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconMeta
+     */
+    'beaconId'?: string;
+    /**
+     * 
+     * @type {BeaconReceivedRequestSummary}
+     * @memberof BeaconMeta
+     */
+    'receivedRequestSummary'?: BeaconReceivedRequestSummary;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconMeta
+     */
+    'returnedGranularity'?: string;
+    /**
+     * 
+     * @type {Array<BeaconSchemaReference>}
+     * @memberof BeaconMeta
+     */
+    'returnedSchemas'?: Array<BeaconSchemaReference>;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconOntologyTerm
+ */
+export interface BeaconOntologyTerm {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOntologyTerm
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOntologyTerm
+     */
+    'label'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconOrganization
+ */
+export interface BeaconOrganization {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'address'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'contactUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'logoUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconOrganization
+     */
+    'welcomeUrl'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconPagination
+ */
+export interface BeaconPagination {
+    /**
+     * 
+     * @type {number}
+     * @memberof BeaconPagination
+     */
+    'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof BeaconPagination
+     */
+    'skip'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconReceivedRequestSummary
+ */
+export interface BeaconReceivedRequestSummary {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'filters'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'includeResultsetResponses'?: string;
+    /**
+     * 
+     * @type {BeaconPagination}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'pagination'?: BeaconPagination;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'requestParameters'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'requestedGranularity'?: string;
+    /**
+     * 
+     * @type {Array<BeaconSchemaReference>}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'requestedSchemas'?: Array<BeaconSchemaReference>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BeaconReceivedRequestSummary
+     */
+    'testMode'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconResponseSummary
+ */
+export interface BeaconResponseSummary {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BeaconResponseSummary
+     */
+    'exists'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof BeaconResponseSummary
+     */
+    'numTotalResults'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconResultSet
+ */
+export interface BeaconResultSet {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BeaconResultSet
+     */
+    'exists'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconResultSet
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {Array<any>}
+     * @memberof BeaconResultSet
+     */
+    'results'?: Array<any>;
+    /**
+     * 
+     * @type {number}
+     * @memberof BeaconResultSet
+     */
+    'resultsCount'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconResultSet
+     */
+    'setType'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconResultsets
+ */
+export interface BeaconResultsets {
+    /**
+     * 
+     * @type {Array<BeaconResultSet>}
+     * @memberof BeaconResultsets
+     */
+    'resultSets'?: Array<BeaconResultSet>;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconResultsetsResponse
+ */
+export interface BeaconResultsetsResponse {
+    /**
+     * 
+     * @type {BeaconMeta}
+     * @memberof BeaconResultsetsResponse
+     */
+    'meta'?: BeaconMeta;
+    /**
+     * 
+     * @type {BeaconResultsets}
+     * @memberof BeaconResultsetsResponse
+     */
+    'response'?: BeaconResultsets;
+    /**
+     * 
+     * @type {BeaconResponseSummary}
+     * @memberof BeaconResultsetsResponse
+     */
+    'responseSummary'?: BeaconResponseSummary;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconSchemaDef
+ */
+export interface BeaconSchemaDef {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaDef
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaDef
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaDef
+     */
+    'referenceToSchemaDefinition'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaDef
+     */
+    'schemaVersion'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconSchemaReference
+ */
+export interface BeaconSchemaReference {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaReference
+     */
+    'entityType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSchemaReference
+     */
+    'schema'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconSecurityAttributes
+ */
+export interface BeaconSecurityAttributes {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSecurityAttributes
+     */
+    'defaultGranularity'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconSecurityAttributes
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof BeaconSecurityAttributes
+     */
+    'securityLevels'?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconServiceInfo
+ */
+export interface BeaconServiceInfo {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'contactUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'documentationUrl'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'environment'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {BeaconServiceOrganization}
+     * @memberof BeaconServiceInfo
+     */
+    'organization'?: BeaconServiceOrganization;
+    /**
+     * 
+     * @type {BeaconServiceType}
+     * @memberof BeaconServiceInfo
+     */
+    'type'?: BeaconServiceType;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceInfo
+     */
+    'version'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconServiceOrganization
+ */
+export interface BeaconServiceOrganization {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceOrganization
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceOrganization
+     */
+    'url'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BeaconServiceType
+ */
+export interface BeaconServiceType {
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceType
+     */
+    'artifact'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceType
+     */
+    'group'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BeaconServiceType
+     */
+    'version'?: string;
+}
+/**
  * CNVGeneOverlap represents a gene overlap with a CNV
  * @export
  * @interface CNVGeneOverlap
@@ -7289,6 +8123,1079 @@ export class BatchesApi extends BaseAPI {
      */
     public getBatch(tenant: string, batchId: string, options?: RawAxiosRequestConfig) {
         return BatchesApiFp(this.configuration).getBatch(tenant, batchId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * BeaconApi - axios parameter creator
+ * @export
+ */
+export const BeaconApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Maturity, security attributes and the entry types this beacon implements. Public, no token required.
+         * @summary Beacon: configuration
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconConfiguration: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconConfiguration', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/configuration`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The Beacon dataset document for one project code.
+         * @summary Beacon: get a dataset by id
+         * @param {string} tenant Tenant code
+         * @param {string} id Dataset id (project code)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasetById: async (tenant: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconDatasetById', 'tenant', tenant)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('beaconDatasetById', 'id', id)
+            const localVarPath = `/{tenant}/beacon/datasets/{id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The datasets (Radiant projects) of the tenant, as Beacon dataset documents. Records are returned to every tenant member: dataset names are the catalog a client needs before querying. Accepts requestedGranularity, skip and limit; the same request can be sent as a POST.
+         * @summary Beacon: list datasets
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedGranularity] boolean, count or record (default record)
+         * @param {number} [skip] Records to skip
+         * @param {number} [limit] Page size, 1-100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasets: async (tenant: string, requestedGranularity?: string, skip?: number, limit?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconDatasets', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/datasets`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (requestedGranularity !== undefined) {
+                localVarQueryParameter['requestedGranularity'] = requestedGranularity;
+            }
+
+            if (skip !== undefined) {
+                localVarQueryParameter['skip'] = skip;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The tenant\'s datasets, requested with a Beacon request body (query.requestedGranularity, query.pagination). Same semantics as the GET form.
+         * @summary Beacon: list datasets (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} [body] Beacon request body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasetsPost: async (tenant: string, body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconDatasetsPost', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/datasets`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The entry types this beacon implements (genomicVariation, dataset). Public, no token required.
+         * @summary Beacon: entry types
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconEntryTypes: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconEntryTypes', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/entry_types`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Ontology filters this beacon accepts. Empty in this release: queries with filters are rejected. Public, no token required.
+         * @summary Beacon: filtering terms
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconFilteringTerms: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconFilteringTerms', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/filtering_terms`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The Beacon genomicVariation document for one variantInternalId (Radiant locus id). Requires can_search_case; other callers receive a count-level answer.
+         * @summary Beacon: get a genomic variant by id
+         * @param {string} tenant Tenant code
+         * @param {number} id variantInternalId (locus id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariationById: async (tenant: string, id: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconGenomicVariationById', 'tenant', tenant)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('beaconGenomicVariationById', 'id', id)
+            const localVarPath = `/{tenant}/beacon/g_variants/{id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query over the tenant\'s variant catalog. Supports sequence (referenceName, start, referenceBases, alternateBases), range (referenceName, start, end), gene (geneId) and aminoacidChange queries. Coordinates are 0-based interbase, GRCh38. Granularity is clamped to the caller\'s entitlement: can_search_case → record, can_view_kb → count. The same query can be sent as a POST with a Beacon request body.
+         * @summary Beacon: query genomic variants
+         * @param {string} tenant Tenant code
+         * @param {string} [referenceName] Chromosome: 17, chr17 or NC_000017.11
+         * @param {string} [start] 0-based start (one value; two values &#x3D; bracket query, not supported)
+         * @param {string} [end] 0-based exclusive end (range query)
+         * @param {string} [referenceBases] Reference allele (sequence query)
+         * @param {string} [alternateBases] Alternate allele
+         * @param {string} [variantType] SNP, INS, DEL, INDEL or MNP
+         * @param {string} [geneId] HGNC gene symbol
+         * @param {string} [aminoacidChange] One-letter (V600E) or HGVS (p.Val600Glu) amino acid change
+         * @param {number} [variantMinLength] Minimum allele length
+         * @param {number} [variantMaxLength] Maximum allele length
+         * @param {string} [assemblyId] GRCh38 (default and only supported assembly)
+         * @param {string} [requestedGranularity] boolean (default), count or record
+         * @param {string} [includeResultsetResponses] HIT (default), ALL, NONE or MISS
+         * @param {number} [skip] Records to skip (record granularity)
+         * @param {number} [limit] Page size, 1-100 (record granularity)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariations: async (tenant: string, referenceName?: string, start?: string, end?: string, referenceBases?: string, alternateBases?: string, variantType?: string, geneId?: string, aminoacidChange?: string, variantMinLength?: number, variantMaxLength?: number, assemblyId?: string, requestedGranularity?: string, includeResultsetResponses?: string, skip?: number, limit?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconGenomicVariations', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/g_variants`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (referenceName !== undefined) {
+                localVarQueryParameter['referenceName'] = referenceName;
+            }
+
+            if (start !== undefined) {
+                localVarQueryParameter['start'] = start;
+            }
+
+            if (end !== undefined) {
+                localVarQueryParameter['end'] = end;
+            }
+
+            if (referenceBases !== undefined) {
+                localVarQueryParameter['referenceBases'] = referenceBases;
+            }
+
+            if (alternateBases !== undefined) {
+                localVarQueryParameter['alternateBases'] = alternateBases;
+            }
+
+            if (variantType !== undefined) {
+                localVarQueryParameter['variantType'] = variantType;
+            }
+
+            if (geneId !== undefined) {
+                localVarQueryParameter['geneId'] = geneId;
+            }
+
+            if (aminoacidChange !== undefined) {
+                localVarQueryParameter['aminoacidChange'] = aminoacidChange;
+            }
+
+            if (variantMinLength !== undefined) {
+                localVarQueryParameter['variantMinLength'] = variantMinLength;
+            }
+
+            if (variantMaxLength !== undefined) {
+                localVarQueryParameter['variantMaxLength'] = variantMaxLength;
+            }
+
+            if (assemblyId !== undefined) {
+                localVarQueryParameter['assemblyId'] = assemblyId;
+            }
+
+            if (requestedGranularity !== undefined) {
+                localVarQueryParameter['requestedGranularity'] = requestedGranularity;
+            }
+
+            if (includeResultsetResponses !== undefined) {
+                localVarQueryParameter['includeResultsetResponses'] = includeResultsetResponses;
+            }
+
+            if (skip !== undefined) {
+                localVarQueryParameter['skip'] = skip;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query with a Beacon request body: {\"meta\":{\"apiVersion\":\"v2.0.0\"},\"query\":{\"requestParameters\":{...},\"requestedGranularity\":\"count\",\"pagination\":{\"skip\":0,\"limit\":10}}}. Same parameters and semantics as the GET form.
+         * @summary Beacon: query genomic variants (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} body Beacon request body (meta, query.requestParameters, query.requestedGranularity, query.pagination)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariationsPost: async (tenant: string, body: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconGenomicVariationsPost', 'tenant', tenant)
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('beaconGenomicVariationsPost', 'body', body)
+            const localVarPath = `/{tenant}/beacon/g_variants`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * GA4GH Beacon v2 informational endpoint. Public, no token required. With requestedSchema=ga4gh-service-info-v1.0 the response is the GA4GH service-info document instead.
+         * @summary Beacon: describe this beacon
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedSchema] ga4gh-service-info-v1.0 to get the service-info format
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconInfo: async (tenant: string, requestedSchema?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconInfo', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/info`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (requestedSchema !== undefined) {
+                localVarQueryParameter['requestedSchema'] = requestedSchema;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * The query endpoints this beacon exposes, as absolute URLs. Public, no token required.
+         * @summary Beacon: endpoint map
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconMap: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconMap', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/map`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * GA4GH service-info (v1.0) for this beacon. Public, no token required.
+         * @summary Beacon: GA4GH service-info
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconServiceInfo: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('beaconServiceInfo', 'tenant', tenant)
+            const localVarPath = `/{tenant}/beacon/service-info`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * BeaconApi - functional programming interface
+ * @export
+ */
+export const BeaconApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = BeaconApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Maturity, security attributes and the entry types this beacon implements. Public, no token required.
+         * @summary Beacon: configuration
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconConfiguration(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconConfigurationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconConfiguration(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconConfiguration']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The Beacon dataset document for one project code.
+         * @summary Beacon: get a dataset by id
+         * @param {string} tenant Tenant code
+         * @param {string} id Dataset id (project code)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconDatasetById(tenant: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconDatasetById(tenant, id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconDatasetById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The datasets (Radiant projects) of the tenant, as Beacon dataset documents. Records are returned to every tenant member: dataset names are the catalog a client needs before querying. Accepts requestedGranularity, skip and limit; the same request can be sent as a POST.
+         * @summary Beacon: list datasets
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedGranularity] boolean, count or record (default record)
+         * @param {number} [skip] Records to skip
+         * @param {number} [limit] Page size, 1-100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconDatasets(tenant: string, requestedGranularity?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconDatasets(tenant, requestedGranularity, skip, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconDatasets']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The tenant\'s datasets, requested with a Beacon request body (query.requestedGranularity, query.pagination). Same semantics as the GET form.
+         * @summary Beacon: list datasets (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} [body] Beacon request body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconDatasetsPost(tenant: string, body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconDatasetsPost(tenant, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconDatasetsPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The entry types this beacon implements (genomicVariation, dataset). Public, no token required.
+         * @summary Beacon: entry types
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconEntryTypes(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconEntryTypesResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconEntryTypes(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconEntryTypes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Ontology filters this beacon accepts. Empty in this release: queries with filters are rejected. Public, no token required.
+         * @summary Beacon: filtering terms
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconFilteringTerms(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconFilteringTermsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconFilteringTerms(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconFilteringTerms']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The Beacon genomicVariation document for one variantInternalId (Radiant locus id). Requires can_search_case; other callers receive a count-level answer.
+         * @summary Beacon: get a genomic variant by id
+         * @param {string} tenant Tenant code
+         * @param {number} id variantInternalId (locus id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconGenomicVariationById(tenant: string, id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconGenomicVariationById(tenant, id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconGenomicVariationById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query over the tenant\'s variant catalog. Supports sequence (referenceName, start, referenceBases, alternateBases), range (referenceName, start, end), gene (geneId) and aminoacidChange queries. Coordinates are 0-based interbase, GRCh38. Granularity is clamped to the caller\'s entitlement: can_search_case → record, can_view_kb → count. The same query can be sent as a POST with a Beacon request body.
+         * @summary Beacon: query genomic variants
+         * @param {string} tenant Tenant code
+         * @param {string} [referenceName] Chromosome: 17, chr17 or NC_000017.11
+         * @param {string} [start] 0-based start (one value; two values &#x3D; bracket query, not supported)
+         * @param {string} [end] 0-based exclusive end (range query)
+         * @param {string} [referenceBases] Reference allele (sequence query)
+         * @param {string} [alternateBases] Alternate allele
+         * @param {string} [variantType] SNP, INS, DEL, INDEL or MNP
+         * @param {string} [geneId] HGNC gene symbol
+         * @param {string} [aminoacidChange] One-letter (V600E) or HGVS (p.Val600Glu) amino acid change
+         * @param {number} [variantMinLength] Minimum allele length
+         * @param {number} [variantMaxLength] Maximum allele length
+         * @param {string} [assemblyId] GRCh38 (default and only supported assembly)
+         * @param {string} [requestedGranularity] boolean (default), count or record
+         * @param {string} [includeResultsetResponses] HIT (default), ALL, NONE or MISS
+         * @param {number} [skip] Records to skip (record granularity)
+         * @param {number} [limit] Page size, 1-100 (record granularity)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconGenomicVariations(tenant: string, referenceName?: string, start?: string, end?: string, referenceBases?: string, alternateBases?: string, variantType?: string, geneId?: string, aminoacidChange?: string, variantMinLength?: number, variantMaxLength?: number, assemblyId?: string, requestedGranularity?: string, includeResultsetResponses?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconGenomicVariations(tenant, referenceName, start, end, referenceBases, alternateBases, variantType, geneId, aminoacidChange, variantMinLength, variantMaxLength, assemblyId, requestedGranularity, includeResultsetResponses, skip, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconGenomicVariations']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query with a Beacon request body: {\"meta\":{\"apiVersion\":\"v2.0.0\"},\"query\":{\"requestParameters\":{...},\"requestedGranularity\":\"count\",\"pagination\":{\"skip\":0,\"limit\":10}}}. Same parameters and semantics as the GET form.
+         * @summary Beacon: query genomic variants (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} body Beacon request body (meta, query.requestParameters, query.requestedGranularity, query.pagination)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconGenomicVariationsPost(tenant: string, body: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconResultsetsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconGenomicVariationsPost(tenant, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconGenomicVariationsPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * GA4GH Beacon v2 informational endpoint. Public, no token required. With requestedSchema=ga4gh-service-info-v1.0 the response is the GA4GH service-info document instead.
+         * @summary Beacon: describe this beacon
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedSchema] ga4gh-service-info-v1.0 to get the service-info format
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconInfo(tenant: string, requestedSchema?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconInfoResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconInfo(tenant, requestedSchema, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconInfo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * The query endpoints this beacon exposes, as absolute URLs. Public, no token required.
+         * @summary Beacon: endpoint map
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconMap(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconMapResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconMap(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconMap']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * GA4GH service-info (v1.0) for this beacon. Public, no token required.
+         * @summary Beacon: GA4GH service-info
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async beaconServiceInfo(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BeaconServiceInfo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.beaconServiceInfo(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BeaconApi.beaconServiceInfo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * BeaconApi - factory interface
+ * @export
+ */
+export const BeaconApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = BeaconApiFp(configuration)
+    return {
+        /**
+         * Maturity, security attributes and the entry types this beacon implements. Public, no token required.
+         * @summary Beacon: configuration
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconConfiguration(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconConfigurationResponse> {
+            return localVarFp.beaconConfiguration(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The Beacon dataset document for one project code.
+         * @summary Beacon: get a dataset by id
+         * @param {string} tenant Tenant code
+         * @param {string} id Dataset id (project code)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasetById(tenant: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconDatasetById(tenant, id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The datasets (Radiant projects) of the tenant, as Beacon dataset documents. Records are returned to every tenant member: dataset names are the catalog a client needs before querying. Accepts requestedGranularity, skip and limit; the same request can be sent as a POST.
+         * @summary Beacon: list datasets
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedGranularity] boolean, count or record (default record)
+         * @param {number} [skip] Records to skip
+         * @param {number} [limit] Page size, 1-100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasets(tenant: string, requestedGranularity?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconDatasets(tenant, requestedGranularity, skip, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The tenant\'s datasets, requested with a Beacon request body (query.requestedGranularity, query.pagination). Same semantics as the GET form.
+         * @summary Beacon: list datasets (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} [body] Beacon request body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconDatasetsPost(tenant: string, body?: object, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconDatasetsPost(tenant, body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The entry types this beacon implements (genomicVariation, dataset). Public, no token required.
+         * @summary Beacon: entry types
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconEntryTypes(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconEntryTypesResponse> {
+            return localVarFp.beaconEntryTypes(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Ontology filters this beacon accepts. Empty in this release: queries with filters are rejected. Public, no token required.
+         * @summary Beacon: filtering terms
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconFilteringTerms(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconFilteringTermsResponse> {
+            return localVarFp.beaconFilteringTerms(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The Beacon genomicVariation document for one variantInternalId (Radiant locus id). Requires can_search_case; other callers receive a count-level answer.
+         * @summary Beacon: get a genomic variant by id
+         * @param {string} tenant Tenant code
+         * @param {number} id variantInternalId (locus id)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariationById(tenant: string, id: number, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconGenomicVariationById(tenant, id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query over the tenant\'s variant catalog. Supports sequence (referenceName, start, referenceBases, alternateBases), range (referenceName, start, end), gene (geneId) and aminoacidChange queries. Coordinates are 0-based interbase, GRCh38. Granularity is clamped to the caller\'s entitlement: can_search_case → record, can_view_kb → count. The same query can be sent as a POST with a Beacon request body.
+         * @summary Beacon: query genomic variants
+         * @param {string} tenant Tenant code
+         * @param {string} [referenceName] Chromosome: 17, chr17 or NC_000017.11
+         * @param {string} [start] 0-based start (one value; two values &#x3D; bracket query, not supported)
+         * @param {string} [end] 0-based exclusive end (range query)
+         * @param {string} [referenceBases] Reference allele (sequence query)
+         * @param {string} [alternateBases] Alternate allele
+         * @param {string} [variantType] SNP, INS, DEL, INDEL or MNP
+         * @param {string} [geneId] HGNC gene symbol
+         * @param {string} [aminoacidChange] One-letter (V600E) or HGVS (p.Val600Glu) amino acid change
+         * @param {number} [variantMinLength] Minimum allele length
+         * @param {number} [variantMaxLength] Maximum allele length
+         * @param {string} [assemblyId] GRCh38 (default and only supported assembly)
+         * @param {string} [requestedGranularity] boolean (default), count or record
+         * @param {string} [includeResultsetResponses] HIT (default), ALL, NONE or MISS
+         * @param {number} [skip] Records to skip (record granularity)
+         * @param {number} [limit] Page size, 1-100 (record granularity)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariations(tenant: string, referenceName?: string, start?: string, end?: string, referenceBases?: string, alternateBases?: string, variantType?: string, geneId?: string, aminoacidChange?: string, variantMinLength?: number, variantMaxLength?: number, assemblyId?: string, requestedGranularity?: string, includeResultsetResponses?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconGenomicVariations(tenant, referenceName, start, end, referenceBases, alternateBases, variantType, geneId, aminoacidChange, variantMinLength, variantMaxLength, assemblyId, requestedGranularity, includeResultsetResponses, skip, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * GA4GH Beacon v2 genomicVariation query with a Beacon request body: {\"meta\":{\"apiVersion\":\"v2.0.0\"},\"query\":{\"requestParameters\":{...},\"requestedGranularity\":\"count\",\"pagination\":{\"skip\":0,\"limit\":10}}}. Same parameters and semantics as the GET form.
+         * @summary Beacon: query genomic variants (POST)
+         * @param {string} tenant Tenant code
+         * @param {object} body Beacon request body (meta, query.requestParameters, query.requestedGranularity, query.pagination)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconGenomicVariationsPost(tenant: string, body: object, options?: RawAxiosRequestConfig): AxiosPromise<BeaconResultsetsResponse> {
+            return localVarFp.beaconGenomicVariationsPost(tenant, body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * GA4GH Beacon v2 informational endpoint. Public, no token required. With requestedSchema=ga4gh-service-info-v1.0 the response is the GA4GH service-info document instead.
+         * @summary Beacon: describe this beacon
+         * @param {string} tenant Tenant code
+         * @param {string} [requestedSchema] ga4gh-service-info-v1.0 to get the service-info format
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconInfo(tenant: string, requestedSchema?: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconInfoResponse> {
+            return localVarFp.beaconInfo(tenant, requestedSchema, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * The query endpoints this beacon exposes, as absolute URLs. Public, no token required.
+         * @summary Beacon: endpoint map
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconMap(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconMapResponse> {
+            return localVarFp.beaconMap(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * GA4GH service-info (v1.0) for this beacon. Public, no token required.
+         * @summary Beacon: GA4GH service-info
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        beaconServiceInfo(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<BeaconServiceInfo> {
+            return localVarFp.beaconServiceInfo(tenant, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * BeaconApi - object-oriented interface
+ * @export
+ * @class BeaconApi
+ * @extends {BaseAPI}
+ */
+export class BeaconApi extends BaseAPI {
+    /**
+     * Maturity, security attributes and the entry types this beacon implements. Public, no token required.
+     * @summary Beacon: configuration
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconConfiguration(tenant: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconConfiguration(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The Beacon dataset document for one project code.
+     * @summary Beacon: get a dataset by id
+     * @param {string} tenant Tenant code
+     * @param {string} id Dataset id (project code)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconDatasetById(tenant: string, id: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconDatasetById(tenant, id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The datasets (Radiant projects) of the tenant, as Beacon dataset documents. Records are returned to every tenant member: dataset names are the catalog a client needs before querying. Accepts requestedGranularity, skip and limit; the same request can be sent as a POST.
+     * @summary Beacon: list datasets
+     * @param {string} tenant Tenant code
+     * @param {string} [requestedGranularity] boolean, count or record (default record)
+     * @param {number} [skip] Records to skip
+     * @param {number} [limit] Page size, 1-100
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconDatasets(tenant: string, requestedGranularity?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconDatasets(tenant, requestedGranularity, skip, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The tenant\'s datasets, requested with a Beacon request body (query.requestedGranularity, query.pagination). Same semantics as the GET form.
+     * @summary Beacon: list datasets (POST)
+     * @param {string} tenant Tenant code
+     * @param {object} [body] Beacon request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconDatasetsPost(tenant: string, body?: object, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconDatasetsPost(tenant, body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The entry types this beacon implements (genomicVariation, dataset). Public, no token required.
+     * @summary Beacon: entry types
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconEntryTypes(tenant: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconEntryTypes(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Ontology filters this beacon accepts. Empty in this release: queries with filters are rejected. Public, no token required.
+     * @summary Beacon: filtering terms
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconFilteringTerms(tenant: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconFilteringTerms(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The Beacon genomicVariation document for one variantInternalId (Radiant locus id). Requires can_search_case; other callers receive a count-level answer.
+     * @summary Beacon: get a genomic variant by id
+     * @param {string} tenant Tenant code
+     * @param {number} id variantInternalId (locus id)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconGenomicVariationById(tenant: string, id: number, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconGenomicVariationById(tenant, id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * GA4GH Beacon v2 genomicVariation query over the tenant\'s variant catalog. Supports sequence (referenceName, start, referenceBases, alternateBases), range (referenceName, start, end), gene (geneId) and aminoacidChange queries. Coordinates are 0-based interbase, GRCh38. Granularity is clamped to the caller\'s entitlement: can_search_case → record, can_view_kb → count. The same query can be sent as a POST with a Beacon request body.
+     * @summary Beacon: query genomic variants
+     * @param {string} tenant Tenant code
+     * @param {string} [referenceName] Chromosome: 17, chr17 or NC_000017.11
+     * @param {string} [start] 0-based start (one value; two values &#x3D; bracket query, not supported)
+     * @param {string} [end] 0-based exclusive end (range query)
+     * @param {string} [referenceBases] Reference allele (sequence query)
+     * @param {string} [alternateBases] Alternate allele
+     * @param {string} [variantType] SNP, INS, DEL, INDEL or MNP
+     * @param {string} [geneId] HGNC gene symbol
+     * @param {string} [aminoacidChange] One-letter (V600E) or HGVS (p.Val600Glu) amino acid change
+     * @param {number} [variantMinLength] Minimum allele length
+     * @param {number} [variantMaxLength] Maximum allele length
+     * @param {string} [assemblyId] GRCh38 (default and only supported assembly)
+     * @param {string} [requestedGranularity] boolean (default), count or record
+     * @param {string} [includeResultsetResponses] HIT (default), ALL, NONE or MISS
+     * @param {number} [skip] Records to skip (record granularity)
+     * @param {number} [limit] Page size, 1-100 (record granularity)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconGenomicVariations(tenant: string, referenceName?: string, start?: string, end?: string, referenceBases?: string, alternateBases?: string, variantType?: string, geneId?: string, aminoacidChange?: string, variantMinLength?: number, variantMaxLength?: number, assemblyId?: string, requestedGranularity?: string, includeResultsetResponses?: string, skip?: number, limit?: number, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconGenomicVariations(tenant, referenceName, start, end, referenceBases, alternateBases, variantType, geneId, aminoacidChange, variantMinLength, variantMaxLength, assemblyId, requestedGranularity, includeResultsetResponses, skip, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * GA4GH Beacon v2 genomicVariation query with a Beacon request body: {\"meta\":{\"apiVersion\":\"v2.0.0\"},\"query\":{\"requestParameters\":{...},\"requestedGranularity\":\"count\",\"pagination\":{\"skip\":0,\"limit\":10}}}. Same parameters and semantics as the GET form.
+     * @summary Beacon: query genomic variants (POST)
+     * @param {string} tenant Tenant code
+     * @param {object} body Beacon request body (meta, query.requestParameters, query.requestedGranularity, query.pagination)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconGenomicVariationsPost(tenant: string, body: object, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconGenomicVariationsPost(tenant, body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * GA4GH Beacon v2 informational endpoint. Public, no token required. With requestedSchema=ga4gh-service-info-v1.0 the response is the GA4GH service-info document instead.
+     * @summary Beacon: describe this beacon
+     * @param {string} tenant Tenant code
+     * @param {string} [requestedSchema] ga4gh-service-info-v1.0 to get the service-info format
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconInfo(tenant: string, requestedSchema?: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconInfo(tenant, requestedSchema, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * The query endpoints this beacon exposes, as absolute URLs. Public, no token required.
+     * @summary Beacon: endpoint map
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconMap(tenant: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconMap(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * GA4GH service-info (v1.0) for this beacon. Public, no token required.
+     * @summary Beacon: GA4GH service-info
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BeaconApi
+     */
+    public beaconServiceInfo(tenant: string, options?: RawAxiosRequestConfig) {
+        return BeaconApiFp(this.configuration).beaconServiceInfo(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -155,6 +155,9 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 				continue
 			}
 			key := route.Method + " " + route.Path
+			if publicBeaconRoutes[key] {
+				continue
+			}
 			actual[key] = true
 			_, mapped := expectedTenantActions[key]
 			_, mappedToAny := expectedTenantAnyActions[key]
@@ -184,6 +187,65 @@ var membershipOnlyTenantRoutes = map[string]bool{
 var expectedTenantAnyActions = map[string][]string{
 	"GET /:tenant/roles":       {types.ActionManageRole, types.ActionManageUser},
 	"GET /:tenant/roles/:code": {types.ActionManageRole, types.ActionManageUser},
+	// Beacon queries: the handler clamps granularity by action, the route only needs one of them.
+	"GET /:tenant/beacon/g_variants":     {types.ActionViewKb, types.ActionSearchCase},
+	"POST /:tenant/beacon/g_variants":    {types.ActionViewKb, types.ActionSearchCase},
+	"GET /:tenant/beacon/g_variants/:id": {types.ActionViewKb, types.ActionSearchCase},
+	"GET /:tenant/beacon/datasets":       {types.ActionViewKb, types.ActionSearchCase},
+	"POST /:tenant/beacon/datasets":      {types.ActionViewKb, types.ActionSearchCase},
+	"GET /:tenant/beacon/datasets/:id":   {types.ActionViewKb, types.ActionSearchCase},
+}
+
+// The GA4GH Beacon framework requires its informational endpoints to be anonymous. These are the
+// only /:tenant routes registered outside the auth middleware; they serve static metadata and read
+// no data. Test_PublicBeaconRoutesAreAnonymous checks both directions: each answers 200 with no
+// token, and nothing else under /:tenant does.
+var publicBeaconRoutes = map[string]bool{
+	"GET /:tenant/beacon":                 true,
+	"GET /:tenant/beacon/info":            true,
+	"GET /:tenant/beacon/service-info":    true,
+	"GET /:tenant/beacon/configuration":   true,
+	"GET /:tenant/beacon/entry_types":     true,
+	"GET /:tenant/beacon/map":             true,
+	"GET /:tenant/beacon/filtering_terms": true,
+}
+
+func Test_PublicBeaconRoutesAreAnonymous(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
+		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
+
+		router := setupRouter(env.Starrocks, env.Postgres)
+
+		registered := map[string]bool{}
+		for _, route := range router.Routes() {
+			registered[route.Method+" "+route.Path] = true
+		}
+		for key := range publicBeaconRoutes {
+			assert.Truef(t, registered[key], "public beacon route %q is no longer registered — remove it from publicBeaconRoutes", key)
+
+			path := strings.Replace(strings.TrimPrefix(key, "GET "), ":tenant", "radiant", 1)
+			req, _ := http.NewRequest(http.MethodGet, path, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+			assert.Equalf(t, http.StatusOK, w.Code, "public beacon route %q must answer without a token", key)
+		}
+
+		// Every other /:tenant route must refuse an anonymous call.
+		for _, route := range router.Routes() {
+			key := route.Method + " " + route.Path
+			if !strings.HasPrefix(route.Path, "/:tenant") || publicBeaconRoutes[key] {
+				continue
+			}
+			path := strings.NewReplacer(":tenant", "radiant", ":case_id", "1", ":seq_id", "1", ":task_id", "1", ":locus_id", "1", ":id", "1",
+				":code", "x", ":user_id", "x", ":document_id", "1", ":occurrence_id", "1", ":cnv_id", "1", ":panel_type", "omim",
+				":sequencing_id", "1", ":transcript_id", "1", ":batch_id", "1", ":citation_id", "1").Replace(route.Path)
+			req, _ := http.NewRequest(route.Method, path, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+			assert.Equalf(t, http.StatusUnauthorized, w.Code, "route %q answered an anonymous call with %d", key, w.Code)
+		}
+	})
 }
 
 // Checked against the resource's own organization: a resolver walks the resource back to its

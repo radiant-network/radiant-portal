@@ -25,6 +25,14 @@ func HandleNotFoundError(c *gin.Context, field string) {
 // The correlation id is the request id assigned by the RequestID middleware; if none is
 // present on the context (e.g. a direct unit-test call), a fresh UUID is minted.
 func HandleError(c *gin.Context, err error) {
+	logInternalError(c, err)
+	c.JSON(http.StatusInternalServerError, types.ApiError{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
+}
+
+// logInternalError is the shared half of HandleError: log the real error under the request's
+// correlation id and set the X-Correlation-ID header. Callers that answer in a different body
+// shape (the Beacon error envelope) reuse it so every 500 stays redacted and correlated.
+func logInternalError(c *gin.Context, err error) {
 	correlationID, ok := observability.RequestIDFromContext(c.Request.Context())
 	if !ok {
 		correlationID = uuid.NewString()
@@ -35,7 +43,6 @@ func HandleError(c *gin.Context, err error) {
 		slog.Any("error", err),
 	)
 	c.Header("X-Correlation-ID", correlationID)
-	c.JSON(http.StatusInternalServerError, types.ApiError{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
 }
 
 func HandleUnauthorizedError(c *gin.Context) {

@@ -136,7 +136,15 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest lint fmt
+# Validate a running beacon against the GA4GH Beacon v2 schemas with the reference verifier
+# (cargo install beacon-verifier). Only the anonymous framework endpoints validate without a
+# token; pass the tenant's beacon root, e.g. make beacon-verify BEACON_URL=http://localhost:8090/radiant/beacon/
+BEACON_URL ?= http://localhost:8090/radiant/beacon/
+beacon-verify:
+	@command -v beacon-verifier >/dev/null 2>&1 || { echo "beacon-verifier not installed: cargo install beacon-verifier"; exit 1; }
+	@beacon-verifier $(BEACON_URL)
+
+.PHONY: all build run test clean watch docker-run docker-down itest lint fmt doc beacon-verify
 
 migrate:
 	@echo "Create database migration..."

@@ -1,5 +1,353 @@
 components:
   schemas:
+    BeaconConfiguration:
+      properties:
+        $schema:
+          type: string
+        entryTypes:
+          additionalProperties:
+            $ref: '#/components/schemas/BeaconEntryType'
+          type: object
+        maturityAttributes:
+          $ref: '#/components/schemas/BeaconMaturityAttributes'
+        securityAttributes:
+          $ref: '#/components/schemas/BeaconSecurityAttributes'
+      type: object
+    BeaconConfigurationResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconConfiguration'
+      type: object
+    BeaconEndpointMap:
+      properties:
+        $schema:
+          type: string
+        endpointSets:
+          additionalProperties:
+            $ref: '#/components/schemas/BeaconEndpointSet'
+          type: object
+      type: object
+    BeaconEndpointSet:
+      properties:
+        entryType:
+          type: string
+        rootUrl:
+          type: string
+        singleEntryUrl:
+          type: string
+      type: object
+    BeaconEntryType:
+      properties:
+        defaultSchema:
+          $ref: '#/components/schemas/BeaconSchemaDef'
+        description:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        nonFilteredQueriesAllowed:
+          type: boolean
+        ontologyTermForThisType:
+          $ref: '#/components/schemas/BeaconOntologyTerm'
+        partOfSpecification:
+          type: string
+      type: object
+    BeaconEntryTypes:
+      properties:
+        $schema:
+          type: string
+        entryTypes:
+          additionalProperties:
+            $ref: '#/components/schemas/BeaconEntryType'
+          type: object
+      type: object
+    BeaconEntryTypesResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconEntryTypes'
+      type: object
+    BeaconError:
+      properties:
+        errorCode:
+          type: integer
+        errorMessage:
+          type: string
+      type: object
+    BeaconErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/BeaconError'
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+      type: object
+    BeaconFilteringTerms:
+      properties:
+        $schema:
+          type: string
+        filteringTerms:
+          items:
+            additionalProperties: {}
+            type: object
+          type: array
+          uniqueItems: false
+        resources:
+          items:
+            additionalProperties: {}
+            type: object
+          type: array
+          uniqueItems: false
+      type: object
+    BeaconFilteringTermsResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconFilteringTerms'
+      type: object
+    BeaconGranularity:
+      type: string
+      x-enum-varnames:
+      - GranularityBoolean
+      - GranularityCount
+      - GranularityRecord
+      - DefaultGranularity
+    BeaconInfo:
+      properties:
+        alternativeUrl:
+          type: string
+        apiVersion:
+          type: string
+        description:
+          type: string
+        environment:
+          type: string
+        id:
+          type: string
+        info:
+          additionalProperties: {}
+          type: object
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/BeaconOrganization'
+        version:
+          type: string
+        welcomeUrl:
+          type: string
+      type: object
+    BeaconInfoResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconInfo'
+      type: object
+    BeaconMapResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconEndpointMap'
+      type: object
+    BeaconMaturityAttributes:
+      properties:
+        productionStatus:
+          type: string
+      type: object
+    BeaconMeta:
+      properties:
+        apiVersion:
+          type: string
+        beaconId:
+          type: string
+        receivedRequestSummary:
+          $ref: '#/components/schemas/BeaconReceivedRequestSummary'
+        returnedGranularity:
+          $ref: '#/components/schemas/BeaconGranularity'
+        returnedSchemas:
+          items:
+            $ref: '#/components/schemas/BeaconSchemaReference'
+          type: array
+          uniqueItems: false
+      type: object
+    BeaconOntologyTerm:
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      type: object
+    BeaconOrganization:
+      properties:
+        address:
+          type: string
+        contactUrl:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        logoUrl:
+          type: string
+        name:
+          type: string
+        welcomeUrl:
+          type: string
+      type: object
+    BeaconPagination:
+      properties:
+        limit:
+          type: integer
+        skip:
+          type: integer
+      type: object
+    BeaconReceivedRequestSummary:
+      properties:
+        apiVersion:
+          type: string
+        filters:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        includeResultsetResponses:
+          type: string
+        pagination:
+          $ref: '#/components/schemas/BeaconPagination'
+        requestParameters:
+          additionalProperties: {}
+          type: object
+        requestedGranularity:
+          type: string
+          x-enum-varnames:
+          - GranularityBoolean
+          - GranularityCount
+          - GranularityRecord
+          - DefaultGranularity
+        requestedSchemas:
+          items:
+            $ref: '#/components/schemas/BeaconSchemaReference'
+          type: array
+          uniqueItems: false
+        testMode:
+          type: boolean
+      type: object
+    BeaconResponseSummary:
+      properties:
+        exists:
+          type: boolean
+        numTotalResults:
+          type: integer
+      type: object
+    BeaconResultSet:
+      properties:
+        exists:
+          type: boolean
+        id:
+          type: string
+        results:
+          items: {}
+          type: array
+          uniqueItems: false
+        resultsCount:
+          type: integer
+        setType:
+          type: string
+      type: object
+    BeaconResultsets:
+      properties:
+        resultSets:
+          items:
+            $ref: '#/components/schemas/BeaconResultSet'
+          type: array
+          uniqueItems: false
+      type: object
+    BeaconResultsetsResponse:
+      properties:
+        meta:
+          $ref: '#/components/schemas/BeaconMeta'
+        response:
+          $ref: '#/components/schemas/BeaconResultsets'
+        responseSummary:
+          $ref: '#/components/schemas/BeaconResponseSummary'
+      type: object
+    BeaconSchemaDef:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        referenceToSchemaDefinition:
+          type: string
+        schemaVersion:
+          type: string
+      type: object
+    BeaconSchemaReference:
+      properties:
+        entityType:
+          type: string
+        schema:
+          type: string
+      type: object
+    BeaconSecurityAttributes:
+      properties:
+        defaultGranularity:
+          type: string
+          x-enum-varnames:
+          - GranularityBoolean
+          - GranularityCount
+          - GranularityRecord
+          - DefaultGranularity
+        description:
+          type: string
+        securityLevels:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    BeaconServiceInfo:
+      properties:
+        contactUrl:
+          type: string
+        description:
+          type: string
+        documentationUrl:
+          type: string
+        environment:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/BeaconServiceOrganization'
+        type:
+          $ref: '#/components/schemas/BeaconServiceType'
+        version:
+          type: string
+      type: object
+    BeaconServiceOrganization:
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+      type: object
+    BeaconServiceType:
+      properties:
+        artifact:
+          type: string
+        group:
+          type: string
+        version:
+          type: string
+      type: object
     ActionResponse:
       description: Action from the authorization catalog.
       properties:
@@ -3538,6 +3886,720 @@ paths:
       summary: Retrieve a batch by ID
       tags:
       - batches
+  /{tenant}/beacon/configuration:
+    get:
+      description: Maturity, security attributes and the entry types this beacon implements.
+        Public, no token required.
+      operationId: beaconConfiguration
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconConfigurationResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: configuration'
+      tags:
+      - beacon
+  /{tenant}/beacon/datasets:
+    get:
+      description: 'The datasets (Radiant projects) of the tenant, as Beacon dataset
+        documents. Records are returned to every tenant member: dataset names are
+        the catalog a client needs before querying. Accepts requestedGranularity,
+        skip and limit; the same request can be sent as a POST.'
+      operationId: beaconDatasets
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: boolean, count or record (default record)
+        in: query
+        name: requestedGranularity
+        schema:
+          type: string
+      - description: Records to skip
+        in: query
+        name: skip
+        schema:
+          type: integer
+      - description: Page size, 1-100
+        in: query
+        name: limit
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: 'Beacon: list datasets'
+      tags:
+      - beacon
+    post:
+      description: The tenant's datasets, requested with a Beacon request body (query.requestedGranularity,
+        query.pagination). Same semantics as the GET form.
+      operationId: beaconDatasetsPost
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+          text/plain:
+            schema:
+              type: object
+        description: Beacon request body
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: 'Beacon: list datasets (POST)'
+      tags:
+      - beacon
+  /{tenant}/beacon/datasets/{id}:
+    get:
+      description: The Beacon dataset document for one project code.
+      operationId: beaconDatasetById
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dataset id (project code)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: 'Beacon: get a dataset by id'
+      tags:
+      - beacon
+  /{tenant}/beacon/entry_types:
+    get:
+      description: The entry types this beacon implements (genomicVariation, dataset).
+        Public, no token required.
+      operationId: beaconEntryTypes
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconEntryTypesResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: entry types'
+      tags:
+      - beacon
+  /{tenant}/beacon/filtering_terms:
+    get:
+      description: 'Ontology filters this beacon accepts. Empty in this release: queries
+        with filters are rejected. Public, no token required.'
+      operationId: beaconFilteringTerms
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconFilteringTermsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: filtering terms'
+      tags:
+      - beacon
+  /{tenant}/beacon/g_variants:
+    get:
+      description: 'GA4GH Beacon v2 genomicVariation query over the tenant''s variant
+        catalog. Supports sequence (referenceName, start, referenceBases, alternateBases),
+        range (referenceName, start, end), gene (geneId) and aminoacidChange queries.
+        Coordinates are 0-based interbase, GRCh38. Granularity is clamped to the caller''s
+        entitlement: can_search_case → record, can_view_kb → count. The same query
+        can be sent as a POST with a Beacon request body.'
+      operationId: beaconGenomicVariations
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: 'Chromosome: 17, chr17 or NC_000017.11'
+        in: query
+        name: referenceName
+        schema:
+          type: string
+      - description: 0-based start (one value; two values = bracket query, not supported)
+        in: query
+        name: start
+        schema:
+          type: string
+      - description: 0-based exclusive end (range query)
+        in: query
+        name: end
+        schema:
+          type: string
+      - description: Reference allele (sequence query)
+        in: query
+        name: referenceBases
+        schema:
+          type: string
+      - description: Alternate allele
+        in: query
+        name: alternateBases
+        schema:
+          type: string
+      - description: SNP, INS, DEL, INDEL or MNP
+        in: query
+        name: variantType
+        schema:
+          type: string
+      - description: HGNC gene symbol
+        in: query
+        name: geneId
+        schema:
+          type: string
+      - description: One-letter (V600E) or HGVS (p.Val600Glu) amino acid change
+        in: query
+        name: aminoacidChange
+        schema:
+          type: string
+      - description: Minimum allele length
+        in: query
+        name: variantMinLength
+        schema:
+          type: integer
+      - description: Maximum allele length
+        in: query
+        name: variantMaxLength
+        schema:
+          type: integer
+      - description: GRCh38 (default and only supported assembly)
+        in: query
+        name: assemblyId
+        schema:
+          type: string
+      - description: boolean (default), count or record
+        in: query
+        name: requestedGranularity
+        schema:
+          type: string
+      - description: HIT (default), ALL, NONE or MISS
+        in: query
+        name: includeResultsetResponses
+        schema:
+          type: string
+      - description: Records to skip (record granularity)
+        in: query
+        name: skip
+        schema:
+          type: integer
+      - description: Page size, 1-100 (record granularity)
+        in: query
+        name: limit
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Implemented
+      security:
+      - bearerauth: []
+      summary: 'Beacon: query genomic variants'
+      tags:
+      - beacon
+    post:
+      description: 'GA4GH Beacon v2 genomicVariation query with a Beacon request body:
+        {"meta":{"apiVersion":"v2.0.0"},"query":{"requestParameters":{...},"requestedGranularity":"count","pagination":{"skip":0,"limit":10}}}.
+        Same parameters and semantics as the GET form.'
+      operationId: beaconGenomicVariationsPost
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+          text/plain:
+            schema:
+              type: object
+        description: Beacon request body (meta, query.requestParameters, query.requestedGranularity,
+          query.pagination)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Implemented
+      security:
+      - bearerauth: []
+      summary: 'Beacon: query genomic variants (POST)'
+      tags:
+      - beacon
+  /{tenant}/beacon/g_variants/{id}:
+    get:
+      description: The Beacon genomicVariation document for one variantInternalId
+        (Radiant locus id). Requires can_search_case; other callers receive a count-level
+        answer.
+      operationId: beaconGenomicVariationById
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: variantInternalId (locus id)
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconResultsetsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: 'Beacon: get a genomic variant by id'
+      tags:
+      - beacon
+  /{tenant}/beacon/info:
+    get:
+      description: GA4GH Beacon v2 informational endpoint. Public, no token required.
+        With requestedSchema=ga4gh-service-info-v1.0 the response is the GA4GH service-info
+        document instead.
+      operationId: beaconInfo
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: ga4gh-service-info-v1.0 to get the service-info format
+        in: query
+        name: requestedSchema
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconInfoResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: describe this beacon'
+      tags:
+      - beacon
+  /{tenant}/beacon/map:
+    get:
+      description: The query endpoints this beacon exposes, as absolute URLs. Public,
+        no token required.
+      operationId: beaconMap
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconMapResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: endpoint map'
+      tags:
+      - beacon
+  /{tenant}/beacon/service-info:
+    get:
+      description: GA4GH service-info (v1.0) for this beacon. Public, no token required.
+      operationId: beaconServiceInfo
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconServiceInfo'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeaconErrorResponse'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      summary: 'Beacon: GA4GH service-info'
+      tags:
+      - beacon
   /{tenant}/cases/{case_id}:
     get:
       description: Retrieve CaseEntity by its ID

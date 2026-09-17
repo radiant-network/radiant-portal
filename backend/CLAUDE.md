@@ -28,6 +28,9 @@ internal/
                  The /config JSON shape is duplicated in cli/config and pinned by
                  Test_ClientConfig_MatchesCLIContract
   authorization/ - Keycloak authorization (RBAC middleware)
+  beacon/      - GA4GH Beacon v2: framework envelope, request parsing (0-based → 1-based),
+                 genomicVariation/dataset document mapping. Pure: imports internal/types only;
+                 handlers are in server/handlers_beacon.go, queries in repository/{starrocks,postgres}
   mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
                  cmd/mysql-gateway; the Authenticator seam is the only difference
   batchval/    - Batch validation context, caching, record validation
@@ -99,6 +102,23 @@ Route groups:
 - `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
+- `/{tenant}/beacon/*` — GA4GH Beacon v2 (see below)
+
+### Beacon v2 (`/{tenant}/beacon`)
+
+One beacon per tenant, REGISTERED tier. Two route groups in `setupRouter`:
+
+- **Anonymous framework endpoints** (`/`, `/info`, `/service-info`, `/configuration`, `/entry_types`, `/map`, `/filtering_terms`) are registered on the bare engine, gated only by `server.RequireTenantExists` (unknown tenant → 404 in the Beacon error envelope). They serve static metadata from `server.BeaconConfigFromEnv()` and never read StarRocks. `Test_PublicBeaconRoutesAreAnonymous` (`cmd/api`) pins the list both ways: each answers 200 without a token, and every other `/:tenant` route answers 401. Add to `publicBeaconRoutes` only a route that reads no data.
+- **Query endpoints** (`GET|POST /g_variants`, `/g_variants/{id}`, `GET|POST /datasets`, `/datasets/{id}`) live under `tenantRoutes`, gated by `RequireAnyAction(can_view_kb, can_search_case)`. The handler then **clamps** `requestedGranularity` to the caller's ceiling: `can_search_case` → `record`, otherwise `count` (never a 403 for asking too much; `meta.returnedGranularity` says what was served). Phase 1 serves variant-level documents only (no `caseLevelData`), from `snv__variant` alone — boolean/count answers never touch occurrences.
+
+Conventions that are easy to get wrong:
+
+- **Coordinates.** Beacon is 0-based interbase; `snv__variant.start`/`end` are treated as 1-based inclusive (VCF). The conversion is the four one-line functions in `internal/beacon/request.go` (`beaconToInternalStart` & co.) — nowhere else. If the pipeline convention turns out to differ, that is the only place to change. `referenceName` accepts `17`, `chr17`, `NC_000017.11`; responses always emit the RefSeq CURIE (`internal/beacon/refseq.go`).
+- **Frequencies.** `germline_pc_*/pn_*/pf_*` count participants, not alleles. The document emits `frequencyInPopulations[].frequencies[].alleleFrequency = pf` (schema-required) and the participant counts under that object's `info` (`frequency_basis: participant`); `alleleCount`/`alleleNumber` are deliberately left unset.
+- **Refuse, don't ignore.** `filters`, `datasetIds`, bracket queries (two `start`/`end` values) and `mateName` return a Beacon error (400 / 501) rather than a silently broader answer.
+- **Errors** use the Beacon envelope (`beacon.NewErrorResponse`); 500s go through `logInternalError` (shared with `HandleError`) so they stay redacted and carry `X-Correlation-ID`.
+- Datasets are the tenant's `project` rows (Postgres, `postgres.ProjectsRepository`, explicit `tenant_code` filter — not `WithTenant`, which is a no-op while the flag is off).
+- Fixture: `test/data/beacon/snv__variant.tsv` (real-looking GRCh38 loci, includes `end`). `make beacon-verify BEACON_URL=…` runs the GA4GH `beacon-verifier` against a live instance.
 
 Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → Keycloak authentication → recovery.
 
@@ -205,6 +225,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `TENANT_VIEWS_READ_ENABLED` | When on, `RequireTenantAccess` binds the active tenant to the request context so the read path resolves the tenant's view database (`<code>_tenant`) via `types.TenantSchema` instead of the `radiant_jdbc` federation. Off by default: with no tenant bound, reads stay on `radiant_jdbc.public` (unchanged). Flip on only after every tenant's views exist and are populated (`cmd/create-tenant` / `cmd/refresh-tenants`). | false |
 | `STARROCKS_PROXY_READ_ENABLED` | When on, `/:tenant` routes run their StarRocks reads **as the calling user** through `mysql-proxy` (`server.BindStarrocksUserPool`): a per-request pool opens via `STARROCKS_PROXY_ADDR` with the user's JWT and default DB `<code>_tenant`, bound to the request context; the shared handle's `routingConnPool` routes those queries to it, so Ranger enforces per-user masking / row-filter / access. Off by default → the routing pool falls back to the root (`root`) connection (today's behavior). Enable **together with** `TENANT_VIEWS_READ_ENABLED` (the per-user connection targets the tenant view DB) and only once the StarRocks FE has `access_control = ranger`, the proxy is deployed (sidecar), and every tenant's Ranger policies/role memberships exist. | false |
 | `STARROCKS_PROXY_ADDR` | Address of `mysql-proxy` (`host:port`) the per-user StarRocks pool dials when `STARROCKS_PROXY_READ_ENABLED` is on. Required in that mode. | — |
+| `BEACON_ID`, `BEACON_NAME`, `BEACON_DESCRIPTION`, `BEACON_ENVIRONMENT`, `BEACON_PRODUCTION_STATUS`, `BEACON_PUBLIC_URL`, `BEACON_WELCOME_URL`, `BEACON_ORG_ID/NAME/DESCRIPTION/ADDRESS/WELCOME_URL/CONTACT_URL/LOGO_URL` | Identity advertised by the Beacon v2 `/info`, `/service-info`, `/configuration` and `/map` endpoints (`server.BeaconConfigFromEnv`). Per tenant the beacon id is `<BEACON_ID>.<tenant>` and the base URL `<BEACON_PUBLIC_URL>/<tenant>/beacon`. `BEACON_PUBLIC_URL` is the one to set per deployment: `/map` advertises absolute URLs built from it. `BEACON_ENVIRONMENT` ∈ prod/test/dev/staging, `BEACON_PRODUCTION_STATUS` ∈ DEV/TEST/PROD. | org.radiant-network.beacon, Radiant Beacon, …, dev, DEV, http://localhost:8090 |
 | `SHARED_DATABASE` | StarRocks base database holding cross-tenant reference/annotation tables (`snv__consequence`, `snv__consequence_filter_partitioned`, gene panels, population frequencies, ensembl/cytoband, hpo/mondo terms, sequencing staging). `types.SharedDatabase` resolves it once at load; when a tenant is bound, shared tables qualify as `<SHARED_DATABASE>.<table>` (bare otherwise). Rename the base DB without code changes. Note `snv__variant` is **not** here — it is per-tenant (see Read-path tenant isolation). | radiant |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |

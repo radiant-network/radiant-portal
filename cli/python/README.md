@@ -96,6 +96,18 @@ Class | Method | HTTP request | Description
 *ActionsApi* | [**list_actions**](docs/ActionsApi.md#list_actions) | **GET** /actions | List the authorization action catalog
 *AuthApi* | [**get_me**](docs/AuthApi.md#get_me) | **GET** /auth/me | Get the caller&#39;s effective authorization
 *BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /{tenant}/batches/{batchId} | Retrieve a batch by ID
+*BeaconApi* | [**beacon_configuration**](docs/BeaconApi.md#beacon_configuration) | **GET** /{tenant}/beacon/configuration | Beacon: configuration
+*BeaconApi* | [**beacon_dataset_by_id**](docs/BeaconApi.md#beacon_dataset_by_id) | **GET** /{tenant}/beacon/datasets/{id} | Beacon: get a dataset by id
+*BeaconApi* | [**beacon_datasets**](docs/BeaconApi.md#beacon_datasets) | **GET** /{tenant}/beacon/datasets | Beacon: list datasets
+*BeaconApi* | [**beacon_datasets_post**](docs/BeaconApi.md#beacon_datasets_post) | **POST** /{tenant}/beacon/datasets | Beacon: list datasets (POST)
+*BeaconApi* | [**beacon_entry_types**](docs/BeaconApi.md#beacon_entry_types) | **GET** /{tenant}/beacon/entry_types | Beacon: entry types
+*BeaconApi* | [**beacon_filtering_terms**](docs/BeaconApi.md#beacon_filtering_terms) | **GET** /{tenant}/beacon/filtering_terms | Beacon: filtering terms
+*BeaconApi* | [**beacon_genomic_variation_by_id**](docs/BeaconApi.md#beacon_genomic_variation_by_id) | **GET** /{tenant}/beacon/g_variants/{id} | Beacon: get a genomic variant by id
+*BeaconApi* | [**beacon_genomic_variations**](docs/BeaconApi.md#beacon_genomic_variations) | **GET** /{tenant}/beacon/g_variants | Beacon: query genomic variants
+*BeaconApi* | [**beacon_genomic_variations_post**](docs/BeaconApi.md#beacon_genomic_variations_post) | **POST** /{tenant}/beacon/g_variants | Beacon: query genomic variants (POST)
+*BeaconApi* | [**beacon_info**](docs/BeaconApi.md#beacon_info) | **GET** /{tenant}/beacon/info | Beacon: describe this beacon
+*BeaconApi* | [**beacon_map**](docs/BeaconApi.md#beacon_map) | **GET** /{tenant}/beacon/map | Beacon: endpoint map
+*BeaconApi* | [**beacon_service_info**](docs/BeaconApi.md#beacon_service_info) | **GET** /{tenant}/beacon/service-info | Beacon: GA4GH service-info
 *CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /{tenant}/cases/autocomplete | Get AutocompleteResult list of matching prefix
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /{tenant}/cases/{case_id} | Get CaseEntity case entity
 *CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /{tenant}/cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
@@ -206,6 +218,36 @@ Class | Method | HTTP request | Description
  - [BatchMessage](docs/BatchMessage.md)
  - [BatchReport](docs/BatchReport.md)
  - [BatchSummary](docs/BatchSummary.md)
+ - [BeaconConfiguration](docs/BeaconConfiguration.md)
+ - [BeaconConfigurationResponse](docs/BeaconConfigurationResponse.md)
+ - [BeaconEndpointMap](docs/BeaconEndpointMap.md)
+ - [BeaconEndpointSet](docs/BeaconEndpointSet.md)
+ - [BeaconEntryType](docs/BeaconEntryType.md)
+ - [BeaconEntryTypes](docs/BeaconEntryTypes.md)
+ - [BeaconEntryTypesResponse](docs/BeaconEntryTypesResponse.md)
+ - [BeaconError](docs/BeaconError.md)
+ - [BeaconErrorResponse](docs/BeaconErrorResponse.md)
+ - [BeaconFilteringTerms](docs/BeaconFilteringTerms.md)
+ - [BeaconFilteringTermsResponse](docs/BeaconFilteringTermsResponse.md)
+ - [BeaconInfo](docs/BeaconInfo.md)
+ - [BeaconInfoResponse](docs/BeaconInfoResponse.md)
+ - [BeaconMapResponse](docs/BeaconMapResponse.md)
+ - [BeaconMaturityAttributes](docs/BeaconMaturityAttributes.md)
+ - [BeaconMeta](docs/BeaconMeta.md)
+ - [BeaconOntologyTerm](docs/BeaconOntologyTerm.md)
+ - [BeaconOrganization](docs/BeaconOrganization.md)
+ - [BeaconPagination](docs/BeaconPagination.md)
+ - [BeaconReceivedRequestSummary](docs/BeaconReceivedRequestSummary.md)
+ - [BeaconResponseSummary](docs/BeaconResponseSummary.md)
+ - [BeaconResultSet](docs/BeaconResultSet.md)
+ - [BeaconResultsets](docs/BeaconResultsets.md)
+ - [BeaconResultsetsResponse](docs/BeaconResultsetsResponse.md)
+ - [BeaconSchemaDef](docs/BeaconSchemaDef.md)
+ - [BeaconSchemaReference](docs/BeaconSchemaReference.md)
+ - [BeaconSecurityAttributes](docs/BeaconSecurityAttributes.md)
+ - [BeaconServiceInfo](docs/BeaconServiceInfo.md)
+ - [BeaconServiceOrganization](docs/BeaconServiceOrganization.md)
+ - [BeaconServiceType](docs/BeaconServiceType.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
  - [CaseBatch](docs/CaseBatch.md)
  - [CaseBatchPatch](docs/CaseBatchPatch.md)
