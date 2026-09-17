@@ -324,6 +324,3 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_case_group_request.py
-test/test_case_group_response.py
-test/test_case_groups_api.py

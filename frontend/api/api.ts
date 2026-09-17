@@ -7468,7 +7468,7 @@ export const CaseGroupsApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
          * @summary Get a case group
          * @param {string} tenant Tenant code
          * @param {string} name Case group name
@@ -7534,7 +7534,7 @@ export const CaseGroupsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
          * @summary Get a case group
          * @param {string} tenant Tenant code
          * @param {string} name Case group name
@@ -7569,7 +7569,7 @@ export const CaseGroupsApiFactory = function (configuration?: Configuration, bas
             return localVarFp.createCaseGroup(tenant, caseGroupRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
          * @summary Get a case group
          * @param {string} tenant Tenant code
          * @param {string} name Case group name
@@ -7603,7 +7603,7 @@ export class CaseGroupsApi extends BaseAPI {
     }
 
     /**
-     * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+     * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
      * @summary Get a case group
      * @param {string} tenant Tenant code
      * @param {string} name Case group name

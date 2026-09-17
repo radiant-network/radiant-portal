@@ -360,7 +360,7 @@ class CaseGroupsApi:
     ) -> CaseGroupResponse:
         """Get a case group
 
-        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -436,7 +436,7 @@ class CaseGroupsApi:
     ) -> ApiResponse[CaseGroupResponse]:
         """Get a case group
 
-        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -512,7 +512,7 @@ class CaseGroupsApi:
     ) -> RESTResponseType:
         """Get a case group
 
-        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_ingest_data` action.
+        Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
 
         :param tenant: Tenant code (required)
         :type tenant: str

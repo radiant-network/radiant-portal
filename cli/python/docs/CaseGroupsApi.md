@@ -101,7 +101,7 @@ Name | Type | Description  | Notes
 Get a case group
 
 Returns the case group with this name in the tenant in the path, with its case ids.
-Requires the `can_ingest_data` action.
+Requires the `can_search_case` action, so the portal can turn a group into a case filter.
 
 ### Example
 
