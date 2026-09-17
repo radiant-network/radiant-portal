@@ -451,7 +451,7 @@ func Test_ValidateExistingPatientForUpdate_Found(t *testing.T) {
 func Test_ValidateUpdatePatientsBatch_MissingPatientReportsError(t *testing.T) {
 	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			return org, nil
 		},
 	}
@@ -488,7 +488,7 @@ func Test_ValidateUpdatePatientsBatch_ExistingPatientNotSkipped(t *testing.T) {
 	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
 	existing := &types.Patient{ID: 1, SubmitterPatientId: "id-existing"}
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			return org, nil
 		},
 	}

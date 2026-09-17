@@ -424,7 +424,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		}
 
 		// 4. Validate organization
-		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
+		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
 		if orgErr != nil {
 			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
 		}
@@ -432,7 +432,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 
 		// 5. Validate if sample exists in DB
 		if organization != nil {
-			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String())
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			}
@@ -441,7 +441,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 
 			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
-				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String())
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
 				if parentSampleErr != nil {
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}
@@ -606,21 +606,21 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 			record.validateFetus(fetus)
 		}
 
-		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
+		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
 		if orgErr != nil {
 			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
 		}
 		record.validateOrganization(organization)
 
 		if organization != nil {
-			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String())
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			}
 			record.validateExistingSampleForUpdate(existingSample)
 
 			if sample.SubmitterParentSampleId != "" {
-				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String())
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
 				if parentSampleErr != nil {
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}

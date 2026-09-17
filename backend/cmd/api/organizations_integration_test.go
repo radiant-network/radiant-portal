@@ -134,7 +134,7 @@ func Test_UpdateOrganization_TenantAdmin_Updated(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		updated, err := orgRepo.GetOrganizationByCode(t.Context(), "int_org_upd")
+		updated, err := orgRepo.GetOrganizationByCode(t.Context(), "int_org_upd", types.DefaultTenantCode)
 		require.NoError(t, err)
 		assert.Equal(t, "After", updated.Name)
 	})

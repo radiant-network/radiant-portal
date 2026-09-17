@@ -18,9 +18,13 @@ func NewOrganizationRepository(db database.PostgresDB) *OrganizationRepository {
 	return &OrganizationRepository{db: db.DB}
 }
 
-func (r *OrganizationRepository) GetOrganizationByCode(ctx context.Context, organizationCode string) (*types.Organization, error) {
+// GetOrganizationByCode resolves an organization code within the tenant. organization is keyed by
+// (code, tenant_code) — the target of the compound FKs added by migration 000009 — so an
+// unscoped lookup would report an organization as existing that the subsequent INSERT then
+// rejects on the FK, instead of the caller's own "unknown organization" error.
+func (r *OrganizationRepository) GetOrganizationByCode(ctx context.Context, organizationCode string, tenantCode string) (*types.Organization, error) {
 	var organization types.Organization
-	tx := r.db.WithContext(ctx).Table(types.OrganizationTable.Name).Where("code = ?", organizationCode)
+	tx := r.db.WithContext(ctx).Table(types.OrganizationTable.Name).Where("code = ? AND tenant_code = ?", organizationCode, tenantCode)
 	if err := tx.First(&organization).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieving organization by code: %w", err)

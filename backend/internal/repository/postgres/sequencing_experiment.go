@@ -25,11 +25,13 @@ func (r *SequencingExperimentRepository) CreateSequencingExperiment(ctx context.
 }
 
 // UpdateSequencingExperiment matches on (sample_id, aliquot) — the natural key, since sample_id is
-// already resolved from (sample_organization_code, submitter_sample_id) by the caller.
+// already resolved from (sample_organization_code, submitter_sample_id) by the caller. tenant_code
+// is part of the predicate even though sample_id is tenant-resolved: it is the last guard against
+// a cross-tenant write should the caller ever hand over a sample_id from another tenant.
 func (r *SequencingExperimentRepository) UpdateSequencingExperiment(ctx context.Context, seqExp *SequencingExperiment) error {
 	tx := r.db.WithContext(ctx).
 		Table(types.SequencingExperimentTable.Name).
-		Where("sample_id = ? AND aliquot = ?", seqExp.SampleID, seqExp.Aliquot).
+		Where("sample_id = ? AND aliquot = ? AND tenant_code = ?", seqExp.SampleID, seqExp.Aliquot, seqExp.TenantCode).
 		Updates(map[string]any{
 			"status_code":                     seqExp.StatusCode,
 			"sequencing_lab_code":             seqExp.SequencingLabCode,
@@ -77,9 +79,9 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentsByCaseId(ctx co
 	return seqExps, nil
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string, tenantCode string) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
+	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("aliquot = ? AND tenant_code = ?", aliquot, tenantCode).Order("id").Find(&seqExps)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -89,11 +91,11 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(ctx co
 	return seqExps, nil
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleID string, sampleOrganizationCode string) (*SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleID string, sampleOrganizationCode string, tenantCode string) (*SequencingExperiment, error) {
 	var seqExp SequencingExperiment
 	txSeqExp := r.db.WithContext(ctx).Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
 	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id = se.sample_id", types.SampleTable.Name))
-	txSeqExp.Where("se.aliquot = ? AND sa.submitter_sample_id = ? AND sa.organization_code = ?", aliquot, submitterSampleID, sampleOrganizationCode)
+	txSeqExp.Where("se.aliquot = ? AND sa.submitter_sample_id = ? AND sa.organization_code = ? AND se.tenant_code = ?", aliquot, submitterSampleID, sampleOrganizationCode, tenantCode)
 	result := txSeqExp.First(&seqExp)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

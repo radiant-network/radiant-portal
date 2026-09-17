@@ -95,9 +95,11 @@ func (r *CasesRepository) CreateCaseHasSequencingExperiment(ctx context.Context,
 		Create(caseHasSeqExp).Error
 }
 
-func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string) (*AnalysisCatalog, error) {
+// GetCaseAnalysisCatalogIdByCode resolves an analysis code within the tenant — analysis_catalog
+// is unique per (code, tenant_code) since migration 000013.
+func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string, tenantCode string) (*AnalysisCatalog, error) {
 	var analysisCatalog AnalysisCatalog
-	tx := r.db.WithContext(ctx).Table(types.AnalysisCatalogTable.Name).Where("code = ?", code)
+	tx := r.db.WithContext(ctx).Table(types.AnalysisCatalogTable.Name).Where("code = ? AND tenant_code = ?", code, tenantCode)
 	if err := tx.First(&analysisCatalog).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -107,10 +109,10 @@ func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(ctx context.Context, co
 	return &analysisCatalog, nil
 }
 
-func (r *CasesRepository) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*Case, error) {
+func (r *CasesRepository) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int, tenantCode string) (*Case, error) {
 	var c Case
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
-	tx = tx.Where("c.submitter_case_id = ? AND c.project_id = ?", submitterCaseId, projectId)
+	tx = tx.Where("c.submitter_case_id = ? AND c.project_id = ? AND c.tenant_code = ?", submitterCaseId, projectId, tenantCode)
 	if err := tx.First(&c).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

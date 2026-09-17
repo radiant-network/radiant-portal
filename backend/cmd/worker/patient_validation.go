@@ -322,7 +322,7 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
 	)
 
-	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode)
+	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode, tenantCode)
 	if orgErr != nil {
 		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
 	} else {
@@ -472,7 +472,7 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
 	)
 
-	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode)
+	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode, tenantCode)
 	if orgErr != nil {
 		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
 	} else {

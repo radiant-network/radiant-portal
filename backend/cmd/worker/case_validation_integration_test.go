@@ -241,6 +241,18 @@ func Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient(
 		}
 		defer env.Postgres.Exec(`DELETE FROM project WHERE id = ?`, projectID)
 
+		// The analysis catalog is tenant-scoped too, so tenant_b needs its own 'WGA' row —
+		// otherwise the batch also fails on CASE-005 and the patient check never runs.
+		const analysisCatalogID = 9000
+		if err := env.Postgres.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (?, 'WGA', 'Whole Genome Analysis', 'tenant_b')
+			ON CONFLICT (id) DO NOTHING;
+		`, analysisCatalogID).Error; err != nil {
+			t.Fatal("failed to insert tenant_b analysis catalog:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM analysis_catalog WHERE id = ?`, analysisCatalogID)
+
 		payload := []types.CaseBatch{{
 			Type:                     "germline",
 			StatusCode:               "in_progress",

@@ -14,12 +14,12 @@ import (
 )
 
 type MockOrganizationRepository struct {
-	GetOrganizationByCodeFunc func(code string) (*types.Organization, error)
+	GetOrganizationByCodeFunc func(code string, tenantCode string) (*types.Organization, error)
 }
 
-func (m *MockOrganizationRepository) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
+func (m *MockOrganizationRepository) GetOrganizationByCode(_ context.Context, code string, tenantCode string) (*types.Organization, error) {
 	if m.GetOrganizationByCodeFunc != nil {
-		return m.GetOrganizationByCodeFunc(code)
+		return m.GetOrganizationByCodeFunc(code, tenantCode)
 	}
 	return nil, nil
 }
@@ -50,7 +50,7 @@ func (m *MockPatientsRepository) UpdatePatient(_ context.Context, patient *types
 }
 
 type MockSamplesRepository struct {
-	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error)
 	CreateSampleFunc                           func(newSample *types.Sample) (*types.Sample, error)
 	UpdateSampleFunc                           func(sample *types.Sample) error
 	GetTypeCodesFunc                           func() ([]string, error)
@@ -65,9 +65,9 @@ func (m *MockSamplesRepository) GetFetusIDsWithSamples(_ context.Context, _ []in
 	return nil, nil
 }
 
-func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
-		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
+		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId, tenantCode)
 	}
 	return nil, nil
 }
@@ -336,7 +336,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	parentInDb := &types.Sample{SubmitterSampleId: "P-DB", PatientID: 10}
 
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			if code == "CHUSJ" {
 				return org, nil
 			}
@@ -352,7 +352,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		},
 	}
 	mockSampleRepo := &MockSamplesRepository{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId, tenantCode string) (*types.Sample, error) {
 			if orgCode == "CHUSJ" {
 				switch sampleId {
 				case "S2":
@@ -600,7 +600,7 @@ func Test_ValidateUpdateSamplesBatch_MissingSampleReportsError(t *testing.T) {
 	org := &types.Organization{Code: "CHUSJ", TenantCode: types.DefaultTenantCode}
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			return org, nil
 		},
 	}
@@ -610,7 +610,7 @@ func Test_ValidateUpdateSamplesBatch_MissingSampleReportsError(t *testing.T) {
 		},
 	}
 	mockSampleRepo := &MockSamplesRepository{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId, tenantCode string) (*types.Sample, error) {
 			return nil, nil
 		},
 	}
@@ -639,7 +639,7 @@ func Test_ValidateUpdateSamplesBatch_ExistingSampleNotSkipped(t *testing.T) {
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
 	existingSample := &types.Sample{ID: 5, SubmitterSampleId: "S-EXISTING", TypeCode: "blood", PatientID: 10, HistologyCode: "normal"}
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			return org, nil
 		},
 	}
@@ -649,7 +649,7 @@ func Test_ValidateUpdateSamplesBatch_ExistingSampleNotSkipped(t *testing.T) {
 		},
 	}
 	mockSampleRepo := &MockSamplesRepository{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId, tenantCode string) (*types.Sample, error) {
 			if sampleId == "S-EXISTING" {
 				return existingSample, nil
 			}
@@ -680,7 +680,7 @@ func Test_ValidateUpdateSamplesBatch_MissingParentSampleReportsError(t *testing.
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
 	existingSample := &types.Sample{ID: 5, SubmitterSampleId: "S-EXISTING", TypeCode: "dna", PatientID: 10, HistologyCode: "normal"}
 	mockOrgRepo := &MockOrganizationRepository{
-		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
 			return org, nil
 		},
 	}
@@ -690,7 +690,7 @@ func Test_ValidateUpdateSamplesBatch_MissingParentSampleReportsError(t *testing.
 		},
 	}
 	mockSampleRepo := &MockSamplesRepository{
-		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId, tenantCode string) (*types.Sample, error) {
 			if sampleId == "S-EXISTING" {
 				return existingSample, nil
 			}
@@ -748,11 +748,12 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		`, "{}", types.UpdateSampleBatchType).Scan(&id).Error)
 
 		batch := types.Batch{
-			ID:        id,
-			BatchType: types.UpdateSampleBatchType,
-			Payload:   "[]",
-			Status:    types.BatchStatusSuccess,
-			DryRun:    false,
+			ID:         id,
+			TenantCode: types.DefaultTenantCode,
+			BatchType:  types.UpdateSampleBatchType,
+			Payload:    "[]",
+			Status:     types.BatchStatusSuccess,
+			DryRun:     false,
 		}
 		records := []*SampleValidationRecord{{
 			Sample: types.SampleBatch{
@@ -768,7 +769,7 @@ func Test_Persist_Batch_And_Update_Sample_Records(t *testing.T) {
 		require.NoError(t, err)
 
 		repo := postgres.NewSamplesRepository(database.PostgresDB{DB: db})
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-WORKER-UPDATE-1")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S-WORKER-UPDATE-1", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, sample)
 		assert.Equal(t, "dna", sample.TypeCode)
@@ -795,11 +796,12 @@ func Test_Persist_Batch_And_Update_Sample_Records_SetsFetusId(t *testing.T) {
 		`, "{}", types.UpdateSampleBatchType).Scan(&id).Error)
 
 		batch := types.Batch{
-			ID:        id,
-			BatchType: types.UpdateSampleBatchType,
-			Payload:   "[]",
-			Status:    types.BatchStatusSuccess,
-			DryRun:    false,
+			ID:         id,
+			TenantCode: types.DefaultTenantCode,
+			BatchType:  types.UpdateSampleBatchType,
+			Payload:    "[]",
+			Status:     types.BatchStatusSuccess,
+			DryRun:     false,
 		}
 		fetusId := 1
 		records := []*SampleValidationRecord{{
@@ -817,7 +819,7 @@ func Test_Persist_Batch_And_Update_Sample_Records_SetsFetusId(t *testing.T) {
 		require.NoError(t, err)
 
 		repo := postgres.NewSamplesRepository(database.PostgresDB{DB: db})
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CHUSJ", "S-WORKER-UPDATE-FETUS-1")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CHUSJ", "S-WORKER-UPDATE-FETUS-1", types.DefaultTenantCode)
 		require.NoError(t, err)
 		require.NotNil(t, sample)
 		require.NotNil(t, sample.FetusID)

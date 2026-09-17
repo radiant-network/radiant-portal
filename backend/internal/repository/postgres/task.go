@@ -87,9 +87,21 @@ func (r *TaskRepository) GetTaskContextBySequencingExperimentId(ctx context.Cont
 	return tc, nil
 }
 
-func (r *TaskRepository) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int) ([]*TaskHasDocument, error) {
+// GetTaskHasDocumentByDocumentId lists a document's task attachments within the tenant.
+// task_has_document is an instance table (no tenant_code, by the 000013 classification), so the
+// scope comes from the joined task — the same treatment ListTasksByCaseAndSequencing gives
+// task_context.
+func (r *TaskRepository) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int, tenantCode string) ([]*TaskHasDocument, error) {
 	var thd []*TaskHasDocument
-	if err := r.db.WithContext(ctx).Table(types.TaskHasDocumentTable.Name).Where("document_id = ?", documentId).Find(&thd).Error; err != nil {
+	tx := r.db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", types.TaskHasDocumentTable.Name, types.TaskHasDocumentTable.Alias)).
+		Joins(fmt.Sprintf("JOIN %s %s ON %s.id = %s.task_id",
+			types.TaskTable.Name, types.TaskTable.Alias,
+			types.TaskTable.Alias, types.TaskHasDocumentTable.Alias)).
+		Select(fmt.Sprintf("%s.*", types.TaskHasDocumentTable.Alias)).
+		Where(fmt.Sprintf("%s.document_id = ? AND %s.tenant_code = ?", types.TaskHasDocumentTable.Alias, types.TaskTable.Alias),
+			documentId, tenantCode)
+	if err := tx.Find(&thd).Error; err != nil {
 		return nil, err
 	}
 	if len(thd) == 0 {
