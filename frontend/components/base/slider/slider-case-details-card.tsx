@@ -8,7 +8,7 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
-import { getMemberKey } from '@/components/lib/case-entity';
+import { getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
 import { formatDate } from '@/components/lib/date';
 
 import EmptyField from '../information/empty-field';
@@ -57,7 +57,10 @@ function FamilyMemberCard({ member, caseEntity }: FamilyMemberCardProps) {
     <div className="rounded-md border border-border">
       <div className="flex flex-col gap-4 p-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">{t(`common.relationships.${member.relationship_to_proband}`)}</h3>
+          <h3 className="font-semibold">
+            {t(`common.relationships.${member.relationship_to_proband}`)}
+            {isPrenatalMother(member, caseEntity.members) && ` (${t('common.relationships.mother')})`}
+          </h3>
           {member.affected_status_code && (
             <AffectedStatusBadge status={member.affected_status_code as AffectedStatusProps} />
           )}
