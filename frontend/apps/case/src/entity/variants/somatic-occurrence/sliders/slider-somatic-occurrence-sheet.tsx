@@ -179,6 +179,9 @@ export function SomaticOccurrenceSheetContent({
   );
 
   const patient = getPatientClinicalInformation(caseEntity.data, patientSelected);
+  // The sequencing knows whose genome it is; the member resolved from its patient_id is the
+  // mother on a prenatal case, where the sample is drawn from her.
+  const relationshipToProband = patientSelected?.relationship_to_proband ?? patient?.relationship_to_proband;
 
   const handleInterpretationSaveCallback = useCallback(() => {
     list?.mutate();
@@ -195,7 +198,7 @@ export function SomaticOccurrenceSheetContent({
       <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
         <SliderPatientRow
           patientId={patient?.patient_id}
-          relationshipToProband={patient?.relationship_to_proband}
+          relationshipToProband={relationshipToProband}
           seqId={occurrence.seq_id}
         />
       </SliderHeader>
@@ -282,7 +285,7 @@ export function SomaticOccurrenceSheetContent({
           start={expandResult.data.start}
           chromosome={expandResult.data.chromosome}
           quality_depth={expandResult.data.qd}
-          relationshipToProband={patient?.relationship_to_proband}
+          relationshipToProband={relationshipToProband}
           filter={expandResult.data.filter}
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
