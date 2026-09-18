@@ -122,9 +122,7 @@ func Test_PatchCase_UnknownStatusRejected(t *testing.T) {
 		const caseID = 100033
 		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
 
-		// "draft" was retired by migration 000030, "archived" never existed, "" names the field
-		// but carries nothing: all three are 400s rather than a 500 from the status_code FK.
-		for _, status := range []string{"archived", "draft", ""} {
+		for _, status := range []string{"archived", ""} {
 			w := servePatchCase(env.Postgres, wendyID, "radiant", caseID, fmt.Sprintf(`{"status_code":%q}`, status))
 			assert.Equalf(t, http.StatusBadRequest, w.Code, "status %q was accepted", status)
 			assert.Equal(t, types.CaseStatusInProgress, caseStatus(t, env.Postgres, caseID))

@@ -24,12 +24,12 @@ func Test_ValidateUserAppliedCaseStatus_RejectsProcessing(t *testing.T) {
 
 func Test_ValidateUserAppliedCaseStatus_RejectsUnknownCode(t *testing.T) {
 	err := ValidateUserAppliedCaseStatus("archived")
-	assert.EqualError(t, err, `unknown status_code "archived", expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked`)
+	assert.EqualError(t, err, `unknown status_code "archived", expected one of: draft, in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked`)
 }
 
 func Test_ValidateUserAppliedCaseStatus_RejectsEmptyCode(t *testing.T) {
 	err := ValidateUserAppliedCaseStatus("")
-	assert.EqualError(t, err, "status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked")
+	assert.EqualError(t, err, "status_code is required, expected one of: draft, in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked")
 }
 
 func Test_CaseStatuses_UserAndSystemSetsAreDisjoint(t *testing.T) {

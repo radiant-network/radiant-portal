@@ -73,6 +73,7 @@ export const Default: Story = {
     <StorySection title="Default">
       <div className="flex gap-2">
         {[
+          'draft',
           'submitted',
           'processing',
           'in_progress',
