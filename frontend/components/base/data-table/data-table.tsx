@@ -751,6 +751,12 @@ function DataTable<T extends RowData>({
   });
   const internalPagination = useSelector(paginationAtom);
 
+  // 'hidden' renders every row: freeze the slice on a single page as large as the data
+  const hiddenPagination = useMemo<PaginationState>(
+    () => ({ pageIndex: 0, pageSize: Math.max(data.length, 1) }),
+    [data.length],
+  );
+
   // Key Input Map
   const handleEscEventListener = () => {
     setIsFullscreen(false);
@@ -771,7 +777,7 @@ function DataTable<T extends RowData>({
 
   // Initialize tanstack table
   const table = useAppTable({
-    // 'hidden' keeps the slice on the table's initial state, as before
+    // 'hidden' drives the slice through state instead, so no atom owns it
     atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
     columns,
     columnResizeMode: 'onChange',
@@ -806,6 +812,7 @@ function DataTable<T extends RowData>({
       rowPinning,
       rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
       sorting,
+      ...(pagination.type === 'hidden' ? { pagination: hiddenPagination } : {}),
     },
   });
 
