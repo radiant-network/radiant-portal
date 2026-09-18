@@ -205,7 +205,7 @@ func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 		"panel_code":"EPILEP",
 		"panel_name":"Epilepsy",
 		"sequencing_experiments":[
-			{"seq_id":77, "patient_id":65, "relationship_to_proband":"fetus", "sample_id":129, "sample_submitter_id":"S-PRENAT-74", "sample_type_code":"dna", "affected_status_code":"unknown", "histology_code":"normal", "experimental_strategy_code":"wxs", "status_code":"completed", "updated_on":"2026-04-03T13:08:00Z", "has_variants":false}
+			{"seq_id":77, "patient_id":65, "fetus_id":4, "relationship_to_proband":"fetus", "sample_id":129, "sample_submitter_id":"S-PRENAT-74", "sample_type_code":"dna", "affected_status_code":"unknown", "histology_code":"normal", "experimental_strategy_code":"wxs", "status_code":"completed", "updated_on":"2026-04-03T13:08:00Z", "has_variants":false}
 		],
 		"members":[
 			{

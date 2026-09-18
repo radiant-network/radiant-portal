@@ -12,7 +12,7 @@ type SequencingExperimentInformationsCardProps = ComponentProps<'div'> & {
 };
 function SequencingExperimentInformationsCard({ data, ...props }: SequencingExperimentInformationsCardProps) {
   const { t } = useI18n();
-  const columns = useMemo(() => getColumns(t), [t]);
+  const columns = useMemo(() => getColumns(t, data.sequencing_experiments), [t, data.sequencing_experiments]);
 
   return (
     <Card data-cy="sequencing-experiments-card" {...props}>
