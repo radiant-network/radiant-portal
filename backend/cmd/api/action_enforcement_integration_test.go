@@ -198,6 +198,7 @@ var orgResolvedTenantRoutes = map[string]bool{
 	"DELETE /:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id": true,
 	"GET /:tenant/documents/:document_id/download_url":                           true,
 	"PATCH /:tenant/cases/:case_id":                                              true,
+	"GET /:tenant/cases/:case_id/assignment_candidates":                          true,
 	// One lab per record, and the action is required at every one of them.
 	"POST /:tenant/cases/batch":  true,
 	"PATCH /:tenant/cases/batch": true,
@@ -273,6 +274,7 @@ var expectedTenantActions = map[string]string{
 	"POST /:tenant/cases/search":                                 types.ActionSearchCase,
 	"GET /:tenant/cases/autocomplete":                            types.ActionSearchCase,
 	"GET /:tenant/cases/filters":                                 types.ActionSearchCase,
+	"GET /:tenant/cases/:case_id/assignment_candidates":          types.ActionEditCase,
 	"GET /:tenant/cases/:case_id":                                types.ActionSearchCase,
 	"POST /:tenant/cases/:case_id/documents/search":              types.ActionSearchCase,
 	"GET /:tenant/cases/:case_id/documents/filters":              types.ActionSearchCase,

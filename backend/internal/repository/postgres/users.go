@@ -145,20 +145,26 @@ func (r *UsersRepository) tenantUsers(ctx context.Context, tenantCode string, qu
 		Table("users u").
 		Where(personalAccount).
 		Where("EXISTS ("+grant+")", args...)
-	if query.Search != "" {
-		prefix := likePrefix(query.Search)
-		// Folded on both sides so accents are ignored in the term as well as in the stored value:
-		// "fre" and "fré" both reach Frédéric, and either reaches an unaccented Frederic.
-		clauses := make([]string, 0, 3)
-		args := make([]any, 0, 3)
-		for _, column := range []string{"u.first_name", "u.last_name", "u.email"} {
-			clauses = append(clauses, unaccented(column)+" ILIKE "+unaccented("?"))
-			args = append(args, prefix)
-		}
-		// Parenthesized explicitly so the OR cannot absorb another filter's predicate.
-		tx = tx.Where("("+strings.Join(clauses, " OR ")+")", args...)
+	return withNameOrEmailSearch(tx, query.Search)
+}
+
+// withNameOrEmailSearch narrows a query over `users u` to the rows whose first name, last name
+// or email starts with the term. An empty term is no filter at all.
+func withNameOrEmailSearch(tx *gorm.DB, search string) *gorm.DB {
+	if search == "" {
+		return tx
 	}
-	return tx
+	prefix := likePrefix(search)
+	// Folded on both sides so accents are ignored in the term as well as in the stored value:
+	// "fre" and "fré" both reach Frédéric, and either reaches an unaccented Frederic.
+	clauses := make([]string, 0, 3)
+	args := make([]any, 0, 3)
+	for _, column := range []string{"u.first_name", "u.last_name", "u.email"} {
+		clauses = append(clauses, unaccented(column)+" ILIKE "+unaccented("?"))
+		args = append(args, prefix)
+	}
+	// Parenthesized explicitly so the OR cannot absorb another filter's predicate.
+	return tx.Where("("+strings.Join(clauses, " OR ")+")", args...)
 }
 
 // likeEscaper neutralizes the ILIKE wildcards so the term matches literally — an email or a name

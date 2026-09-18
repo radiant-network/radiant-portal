@@ -6,6 +6,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -53,4 +54,39 @@ func (r *CaseAssignmentsRepository) ListForCases(ctx context.Context, caseIDs []
 		byCase[row.CaseID] = append(byCase[row.CaseID], row.CaseAssignee)
 	}
 	return byCase, nil
+}
+
+// EligibleAssignees returns the users who may be assigned a case at orgCode: those holding
+// can_interpret_variant there, either by a grant at that organization or by the '*' wildcard.
+// A tenant-wide grant (org_code NULL) does not qualify — it carries no organization, which is
+// also why GetMemberships drops org-scoped actions on such a grant.
+//
+// Being assigned a case means being expected to interpret it, so the permission to do that is
+// the rule; it is deliberately not the same action as the one gating who may *make* the
+// assignment (can_edit_case).
+//
+// EXISTS rather than a join, so one line per user is structural instead of something DISTINCT
+// has to repair afterwards.
+func (r *CaseAssignmentsRepository) EligibleAssignees(ctx context.Context, tenantCode, orgCode string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
+	candidates := []types.CaseAssignee{}
+	tx := r.db.WithContext(ctx).
+		Table("users u").
+		Where(personalAccount).
+		Where(`EXISTS (
+			SELECT 1
+			FROM user_role ur
+			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+			WHERE ur.user_id = u.user_id AND ur.tenant_code = ?
+			  AND (ur.org_code = ? OR ur.org_code = ?) AND ra.action_code = ?
+		)`, tenantCode, orgCode, types.WildcardOrg, types.ActionInterpretVariant).
+		Select("u.user_id, u.first_name, u.last_name, u.email").
+		// user_id breaks ties so a page stays stable across limit/offset calls.
+		Order("u.last_name, u.first_name, u.user_id")
+	tx = withNameOrEmailSearch(tx, query.Search)
+	utils.AddPagination(tx, query.Pagination)
+
+	if err := tx.Scan(&candidates).Error; err != nil {
+		return nil, fmt.Errorf("error listing assignment candidates at %q: %w", orgCode, err)
+	}
+	return candidates, nil
 }

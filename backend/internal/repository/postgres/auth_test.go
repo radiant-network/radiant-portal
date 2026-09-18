@@ -20,6 +20,7 @@ const (
 	carolID = "b6e6d0dd-7aa5-4018-ae03-1f5076801360"
 	patID   = "6c330322-c746-4436-bb76-efd2cd943686"
 	twID    = "4a330f72-24a1-4d37-8ad7-ff9989245fd3"
+	gabeID  = "0a1b2c3d-4e5f-4061-8273-849506a7b8c9"
 	ghostID = "29cef9cb-e954-473b-b672-60b682a06afd"
 )
 
