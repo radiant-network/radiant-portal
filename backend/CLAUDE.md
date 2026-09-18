@@ -37,6 +37,7 @@ internal/
   repository/  - Data access layer, split by DB target into postgres/ and starrocks/ subpackages
   server/      - HTTP handlers grouped by resource; middlewares
   service/     - Cross-system orchestration (user provisioning, tenant setup, Ranger policies)
+  notification/- Lab manifest emails: per-tenant templates (manifest_<tenant>.tmpl, subject + HTML body)
   types/       - Domain models, filters, facets, OpenAPI annotations
   utils/       - Auth, S3, mappers, env helpers, collection utilities
 scripts/
@@ -95,7 +96,7 @@ make migrate       # Create new migration file
 **Entry point:** `cmd/api/main.go`
 
 Route groups:
-- `GET /status` — health check (public, no auth)
+- `GET /status` — health check (public, no auth): DB connections plus `notification_templates` (`ok` / `warning` / `error`, the template load outcome; always HTTP 200)
 - `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
@@ -211,6 +212,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |
 | `POLL_INTERVAL_MS` | Worker poll interval | 1000 |
+| `NOTIFICATION_TEMPLATE_DIR` | Directory of lab notification templates, one `manifest_<tenant>.tmpl` per tenant with `{{define "subject"}}` (text, one line) and `{{define "body"}}` (HTML: markup written in the template passes as-is, only `{{.Var}}` values are escaped). Parsed once at boot by `notification.LoadTemplates`: unset dir, unreadable dir, a file missing a define or failing to parse all **warn and skip**, never fatal; an `info` line lists the tenants loaded and `GET /status` reports `notification_templates` as `ok` (all files loaded), `warning` (at least one file skipped or ignored) or `error` (nothing loaded). No embedded default: a tenant without a template can't be notified (`ErrTemplateMissing`). `TemplateData` is the template contract, new variables are API-only changes and templates branch with `{{if}}` (`HasStat`, `HasAnalysis "CODE"`). Deployed as a volume (ConfigMap); a ConfigMap edit alone does not restart pods. | — (disabled) |
 
 ## Testing
 
