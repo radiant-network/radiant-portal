@@ -23,10 +23,11 @@ type StarrocksUserPoolFactory func(sub, jwt, defaultDB string) (*sql.DB, error)
 
 // BindStarrocksUserPool routes this request's StarRocks reads through mysql-proxy as the calling
 // user, so Ranger enforces per-user masking / row-filter / access — no masking logic in the API.
-// It opens a per-request pool whose default database is the tenant's view schema (which makes
-// StarRocks enforce tenant access at login, the real gate since Ranger access is inert on the
-// views themselves), binds it to the request context for the routing ConnPool, and closes it when
-// the request completes. Must run after RequireTenantAccess (it reads the resolved tenant).
+// It opens a per-request pool whose default database is the tenant's view schema (so StarRocks
+// enforces tenant access at login, on top of the per-object Ranger policies — which since #72910
+// was fixed cover the views too), binds it to the request context for the routing ConnPool, and
+// closes it when the request completes. Must run after RequireTenantAccess (it reads the resolved
+// tenant).
 func BindStarrocksUserPool(auth utils.Auth, newPool StarrocksUserPoolFactory) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant, err := GetTenant(c)

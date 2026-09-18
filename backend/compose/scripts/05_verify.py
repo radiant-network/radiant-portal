@@ -12,12 +12,14 @@ Two groups of checks:
      only where they hold can_read_pii for that patient's org; admin_role/root
      see everything; everyone else gets '***'.
 
-  2. KNOWN BUG #72910 (StarRocks Ranger view-auth bypass) — access control is
-     enforced on base TABLES but NOT on VIEWS. We assert bob is DENIED on the
-     base table radiant_jdbc.public.patient yet can still READ tenant_a.patient
-     (a view he holds no grant for). When StarRocks fixes #72910 this check
-     starts FAILING (bob gets denied on the view) — that is the signal to turn
-     the access policies back on and re-verify tenant isolation.
+  2. TENANT ISOLATION — a user must be DENIED on a tenant whose role he does not
+     hold, on the views as well as on the base tables. This became enforceable
+     when StarRocks fixed #72910 (Ranger authorization was previously bypassed
+     for views); it requires the `view`-resource access policies that
+     03_ranger_policies.py creates alongside the table ones.
+     The view half SKIPS itself on a server that does not apply Ranger to views
+     (see views_are_enforced) rather than reporting a failure — the local
+     StarRocks image is such a server.
 
 Exit code 0 = all checks passed, 1 = at least one failed.
 """
@@ -140,7 +142,8 @@ def check(name, ok, detail=""):
 # ---------------------------------------------------------------------------
 # 1. Masking matrix.  True = PII clear, False = masked ('***').
 #    Patients: tenant_a 1001/1002=ORG_A1, 1003=ORG_A2 ; tenant_b 2001=ORG_B1, 2002=ORG_B2
-#    (Users can READ other tenants' views due to #72910 — rows come back masked.)
+#    Only (user, tenant) pairs the user can READ at all appear here — a user has no
+#    access to a tenant whose role he doesn't hold, which DENIED below asserts.
 # ---------------------------------------------------------------------------
 MATRIX = {
     ("root",          "tenant_a"): {1001: True, 1002: True, 1003: True},
@@ -148,12 +151,12 @@ MATRIX = {
     ("svc_admin_api", "tenant_a"): {1001: True, 1002: True, 1003: True},  # admin_role bypass
     ("svc_admin_api", "tenant_b"): {2001: True, 2002: True},
     ("wendy", "tenant_a"): {1001: True,  1002: True,  1003: True},   # can_read_pii @ '*'
-    ("wendy", "tenant_b"): {2001: False, 2002: False},               # no grant in tenant_b
     ("alice", "tenant_a"): {1001: True,  1002: True,  1003: False},  # can_read_pii @ ORG_A1
-    ("alice", "tenant_b"): {2001: False, 2002: False},
-    ("bob",   "tenant_a"): {1001: False, 1002: False, 1003: False},  # no grant in tenant_a
     ("bob",   "tenant_b"): {2001: True,  2002: False},               # can_read_pii @ ORG_B1
 }
+
+# (user, tenant) pairs the user holds no role for -> every read must be denied.
+DENIED = [("alice", "tenant_b"), ("wendy", "tenant_b"), ("bob", "tenant_a")]
 
 
 def test_masking_matrix():
@@ -180,38 +183,72 @@ def test_flag_matches_masking():
     # (Admins/root read the flag as 0 while seeing clear data — bypass, not action
     # — so they're skipped.)
     print("\n== 2. can_read_pii flag agrees with masking (regular users) ==")
-    for user in ("alice", "bob", "wendy"):
-        for db in ("tenant_a", "tenant_b"):
-            res = run_sql(user, f"SELECT id, submitter_patient_id, can_read_pii FROM {db}.patient ORDER BY id")
-            if res["denied"] or not res["rows"]:
-                check(f"{user} @ {db}", False, f"denied/empty (rc={res['rc']})")
+    for user, db in (("alice", "tenant_a"), ("wendy", "tenant_a"), ("bob", "tenant_b")):
+        res = run_sql(user, f"SELECT id, submitter_patient_id, can_read_pii FROM {db}.patient ORDER BY id")
+        if res["denied"] or not res["rows"]:
+            check(f"{user} @ {db}", False, f"denied/empty (rc={res['rc']})")
+            continue
+        bad = []
+        for r in res["rows"]:
+            if len(r) != 3:
                 continue
-            bad = []
-            for r in res["rows"]:
-                if len(r) != 3:
-                    continue
-                pid, spid, flag = r[0], r[1], r[2]
-                clear = spid != "***"
-                if (flag == "1") != clear:
-                    bad.append(f"id={pid} flag={flag} submitter_patient_id={spid!r}")
-            check(f"{user} @ {db}", not bad, "; ".join(bad))
+            pid, spid, flag = r[0], r[1], r[2]
+            clear = spid != "***"
+            if (flag == "1") != clear:
+                bad.append(f"id={pid} flag={flag} submitter_patient_id={spid!r}")
+        check(f"{user} @ {db}", not bad, "; ".join(bad))
 
 
-def test_72910_view_auth_bypass():
-    print("\n== 3. StarRocks #72910 — Ranger view-auth bypass (documented) ==")
-    # (a) access control IS enforced on the base table
+# Deliberately does NOT match `tenant_*`, so no access policy covers it.
+PROBE_DB = "verify_probe"
+
+
+def views_are_enforced():
+    """True if this StarRocks applies Ranger to views (i.e. #72910 is fixed on it).
+
+    Probes with a throwaway view in a database no policy grants, selecting a constant so
+    the only thing that can deny the read is the view object itself. A regular user who
+    CAN read it is on a server that bypasses authorization for views (pre-#72910), where
+    the isolation assertions cannot hold. Returns None if the probe can't be set up.
+    """
+    setup = run_sql("root", f"CREATE DATABASE IF NOT EXISTS {PROBE_DB}; "
+                            f"CREATE OR REPLACE VIEW {PROBE_DB}.v AS SELECT 1 AS x")
+    if setup["rc"] != 0:
+        return None
+    try:
+        return run_sql("bob", f"SELECT x FROM {PROBE_DB}.v")["denied"]
+    finally:
+        run_sql("root", f"DROP VIEW IF EXISTS {PROBE_DB}.v; "
+                        f"DROP DATABASE IF EXISTS {PROBE_DB}")
+
+
+def test_tenant_isolation():
+    print("\n== 3. Tenant isolation (views and base tables) ==")
+    # Enforced on every StarRocks version, so this half never skips.
     base = run_sql("bob", "SELECT count(*) FROM radiant_jdbc.public.patient")
     check("bob DENIED on base table radiant_jdbc.public.patient",
           base["denied"], "" if base["denied"] else f"rc={base['rc']} rows={base['rows']}")
 
-    # (b) ...but NOT on the view (bob has no tenant_a grant) — this is the bug
-    view = run_sql("bob", "SELECT count(*) FROM tenant_a.patient")
-    bug_present = (not view["denied"]) and view["rows"] and view["rows"][0][0].isdigit()
-    check("bob CAN read view tenant_a.patient despite no grant (#72910 present)",
-          bool(bug_present),
-          "" if bug_present else
-          "bob was DENIED on the view -> #72910 MAY BE FIXED. Re-enable access "
-          "policies and re-verify tenant isolation.")
+    enforced = views_are_enforced()
+    if enforced is None:
+        print(f"  [SKIP] view isolation — could not create the {PROBE_DB} probe as root")
+        return
+    if not enforced:
+        print("  [SKIP] view isolation — this StarRocks does not apply Ranger to views:")
+        print(f"         a regular user read {PROBE_DB}.v, which no policy grants")
+        print("         (pre-#72910 behaviour). Run against a server that enforces")
+        print("         views to assert tenant isolation.")
+        return
+
+    # Views are an access boundary ONLY because 03_ranger_policies.py grants the `view`
+    # resource: a table-resource policy does not reach a view, so a MISSING view policy
+    # shows up here as a spurious PASS on denial while the portal can read nothing at
+    # all. Check 1 is what catches that.
+    for user, db in DENIED:
+        res = run_sql(user, f"SELECT count(*) FROM {db}.patient")
+        check(f"{user} DENIED on view {db}.patient (holds no {db} role)",
+              res["denied"],
+              "" if res["denied"] else f"rc={res['rc']} rows={res['rows']}")
 
 
 def main():
@@ -222,7 +259,7 @@ def main():
         sys.exit(2)
     test_masking_matrix()
     test_flag_matches_masking()
-    test_72910_view_auth_bypass()
+    test_tenant_isolation()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"\n{passed}/{total} checks passed.")
     sys.exit(0 if passed == total else 1)

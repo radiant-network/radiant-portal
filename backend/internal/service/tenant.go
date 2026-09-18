@@ -43,6 +43,10 @@ func TenantAccessPolicy(tenantCode string) string {
 	return "sr_access_" + tenantCode
 }
 
+func TenantViewAccessPolicy(tenantCode string) string {
+	return "sr_access_" + tenantCode + "_views"
+}
+
 // CreateTenant onboards a tenant, idempotently. Order is load-bearing: Ranger's
 // access policy references the database created in the StarRocks phase, which in turn
 // follows the Postgres source of truth.

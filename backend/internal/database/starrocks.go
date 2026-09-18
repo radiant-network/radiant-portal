@@ -109,9 +109,11 @@ func NewStarrocksDB() (*gorm.DB, error) {
 // client↔proxy hop is plaintext by design (the proxy runs on a trusted host), so no TLS param.
 //
 // defaultDB is the connection's default schema (e.g. "<tenant>_tenant"), forwarded via
-// CLIENT_CONNECT_WITH_DB — StarRocks checks database access at login, which is the real tenant
-// gate (Ranger access is inert on the views themselves, #72910). The returned pool is bound to
-// the request context (ContextWithUserPool) and closed when the request completes.
+// CLIENT_CONNECT_WITH_DB — StarRocks checks database access at login. Since #72910 was fixed
+// the views themselves are also a Ranger access boundary, so the tenant gate is the login
+// check AND the per-object policies (a view needs the `view`-resource policy; a table policy
+// does not reach it). The returned pool is bound to the request context
+// (ContextWithUserPool) and closed when the request completes.
 func NewStarrocksUserPool(sub, jwt, defaultDB string) (*sql.DB, error) {
 	if dbProxyAddr == "" {
 		return nil, fmt.Errorf("STARROCKS_PROXY_ADDR is not set")

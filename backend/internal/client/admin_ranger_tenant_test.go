@@ -208,3 +208,23 @@ func Test_RangerAdminClient_EnsureMaskPolicy_UpdatesInPlaceWhenExists(t *testing
 	assert.Nil(t, fake.createdPolicy)
 	assert.EqualValues(t, 9, fake.updatedPolicy["id"])
 }
+
+func Test_RangerAdminClient_EnsureViewAccessPolicy_TargetsTheViewResourceNotTable(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureViewAccessPolicy(context.Background(),
+		"sr_access_demo_views", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy)
+	assert.EqualValues(t, 0, fake.createdPolicy["policyType"], "a view grant is still an access policy")
+	resources := fake.createdPolicy["resources"].(map[string]any)
+	assert.Equal(t, []any{"*"}, resources["view"].(map[string]any)["values"])
+	assert.NotContains(t, resources, "table", "table and view are sibling hierarchies; one policy cannot span both")
+	assert.NotContains(t, resources, "column", "the view hierarchy has no column level")
+	items := fake.createdPolicy["policyItems"].([]any)
+	access := items[0].(map[string]any)["accesses"].([]any)[0].(map[string]any)
+	assert.Equal(t, "select", access["type"])
+}
