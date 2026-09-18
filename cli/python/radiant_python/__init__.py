@@ -128,7 +128,6 @@ from radiant_python.models.interpretation_metadata import InterpretationMetadata
 from radiant_python.models.interpretation_pubmed import InterpretationPubmed
 from radiant_python.models.interpretation_somatic import InterpretationSomatic
 from radiant_python.models.leaf_content import LeafContent
-from radiant_python.models.list_assignment_candidates_body import ListAssignmentCandidatesBody
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch

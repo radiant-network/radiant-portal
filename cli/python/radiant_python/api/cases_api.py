@@ -28,7 +28,6 @@ from radiant_python.models.create_batch_response import CreateBatchResponse
 from radiant_python.models.create_case_batch_body import CreateCaseBatchBody
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
-from radiant_python.models.list_assignment_candidates_body import ListAssignmentCandidatesBody
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.patch_case import PatchCase
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
@@ -1843,7 +1842,11 @@ class CasesApi:
     def list_case_assignment_candidates(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        list_assignment_candidates_body: Annotated[ListAssignmentCandidatesBody, Field(description="Candidates request")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        search: Annotated[Optional[StrictStr], Field(description="Filter on first name, last name or email")] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Page size")] = None,
+        offset: Annotated[Optional[StrictInt], Field(description="Page offset")] = None,
+        page_index: Annotated[Optional[StrictInt], Field(description="Page index, an alternative to offset")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1857,14 +1860,22 @@ class CasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[CaseAssignee]:
-        """List the users who may be assigned the given cases
+        """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param list_assignment_candidates_body: Candidates request (required)
-        :type list_assignment_candidates_body: ListAssignmentCandidatesBody
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param search: Filter on first name, last name or email
+        :type search: str
+        :param limit: Page size
+        :type limit: int
+        :param offset: Page offset
+        :type offset: int
+        :param page_index: Page index, an alternative to offset
+        :type page_index: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1889,7 +1900,11 @@ class CasesApi:
 
         _param = self._list_case_assignment_candidates_serialize(
             tenant=tenant,
-            list_assignment_candidates_body=list_assignment_candidates_body,
+            case_id=case_id,
+            search=search,
+            limit=limit,
+            offset=offset,
+            page_index=page_index,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1901,6 +1916,7 @@ class CasesApi:
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
+            '404': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1918,7 +1934,11 @@ class CasesApi:
     def list_case_assignment_candidates_with_http_info(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        list_assignment_candidates_body: Annotated[ListAssignmentCandidatesBody, Field(description="Candidates request")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        search: Annotated[Optional[StrictStr], Field(description="Filter on first name, last name or email")] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Page size")] = None,
+        offset: Annotated[Optional[StrictInt], Field(description="Page offset")] = None,
+        page_index: Annotated[Optional[StrictInt], Field(description="Page index, an alternative to offset")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1932,14 +1952,22 @@ class CasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[CaseAssignee]]:
-        """List the users who may be assigned the given cases
+        """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param list_assignment_candidates_body: Candidates request (required)
-        :type list_assignment_candidates_body: ListAssignmentCandidatesBody
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param search: Filter on first name, last name or email
+        :type search: str
+        :param limit: Page size
+        :type limit: int
+        :param offset: Page offset
+        :type offset: int
+        :param page_index: Page index, an alternative to offset
+        :type page_index: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1964,7 +1992,11 @@ class CasesApi:
 
         _param = self._list_case_assignment_candidates_serialize(
             tenant=tenant,
-            list_assignment_candidates_body=list_assignment_candidates_body,
+            case_id=case_id,
+            search=search,
+            limit=limit,
+            offset=offset,
+            page_index=page_index,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1976,6 +2008,7 @@ class CasesApi:
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
+            '404': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1993,7 +2026,11 @@ class CasesApi:
     def list_case_assignment_candidates_without_preload_content(
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
-        list_assignment_candidates_body: Annotated[ListAssignmentCandidatesBody, Field(description="Candidates request")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        search: Annotated[Optional[StrictStr], Field(description="Filter on first name, last name or email")] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Page size")] = None,
+        offset: Annotated[Optional[StrictInt], Field(description="Page offset")] = None,
+        page_index: Annotated[Optional[StrictInt], Field(description="Page index, an alternative to offset")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2007,14 +2044,22 @@ class CasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List the users who may be assigned the given cases
+        """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the cases named by case_ids: those holding at least one organization-scoped permission at the cases' diagnosis lab. Every case named must belong to the same diagnosis lab, since eligibility is decided there; a selection spanning several is rejected rather than merged. Requires permission to edit every case named: the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
 
         :param tenant: Tenant code (required)
         :type tenant: str
-        :param list_assignment_candidates_body: Candidates request (required)
-        :type list_assignment_candidates_body: ListAssignmentCandidatesBody
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param search: Filter on first name, last name or email
+        :type search: str
+        :param limit: Page size
+        :type limit: int
+        :param offset: Page offset
+        :type offset: int
+        :param page_index: Page index, an alternative to offset
+        :type page_index: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2039,7 +2084,11 @@ class CasesApi:
 
         _param = self._list_case_assignment_candidates_serialize(
             tenant=tenant,
-            list_assignment_candidates_body=list_assignment_candidates_body,
+            case_id=case_id,
+            search=search,
+            limit=limit,
+            offset=offset,
+            page_index=page_index,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2051,6 +2100,7 @@ class CasesApi:
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
+            '404': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2063,7 +2113,11 @@ class CasesApi:
     def _list_case_assignment_candidates_serialize(
         self,
         tenant,
-        list_assignment_candidates_body,
+        case_id,
+        search,
+        limit,
+        offset,
+        page_index,
         _request_auth,
         _content_type,
         _headers,
@@ -2087,12 +2141,28 @@ class CasesApi:
         # process the path parameters
         if tenant is not None:
             _path_params['tenant'] = tenant
+        if case_id is not None:
+            _path_params['case_id'] = case_id
         # process the query parameters
+        if search is not None:
+            
+            _query_params.append(('search', search))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if offset is not None:
+            
+            _query_params.append(('offset', offset))
+            
+        if page_index is not None:
+            
+            _query_params.append(('page_index', page_index))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if list_assignment_candidates_body is not None:
-            _body_params = list_assignment_candidates_body
 
 
         # set the HTTP header `Accept`
@@ -2103,19 +2173,6 @@ class CasesApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [
@@ -2123,8 +2180,8 @@ class CasesApi:
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/{tenant}/cases/assignment_candidates',
+            method='GET',
+            resource_path='/{tenant}/cases/{case_id}/assignment_candidates',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

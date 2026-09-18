@@ -1860,26 +1860,24 @@
                 }
               ]
             },
-            "method": "POST",
+            "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"case_ids\": [\n        1\n    ],\n    \"search\": \"\",\n    \"limit\": 25\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/cases/assignment_candidates",
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/1/assignment_candidates?limit=25",
               "host": [
                 "{{radiant-api-url}}"
               ],
               "path": [
                 "{{tenant}}",
                 "cases",
+                "1",
                 "assignment_candidates"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
               ]
             }
           },

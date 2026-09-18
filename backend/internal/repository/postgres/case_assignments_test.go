@@ -102,7 +102,7 @@ func candidateIDs(candidates []types.CaseAssignee) []string {
 	return ids
 }
 
-func Test_EligibleAssignees_IncludesOrgScopedGrantsAtThatOrg(t *testing.T) {
+func Test_EligibleAssignees_IncludesInterpretGrantsAtThatOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
@@ -116,17 +116,16 @@ func Test_EligibleAssignees_IncludesOrgScopedGrantsAtThatOrg(t *testing.T) {
 	})
 }
 
-// can_ingest_data is org-scoped, so the data_manager role qualifies even though it is an
-// operations role rather than a clinical one. Pinned deliberately: narrowing the rule to the
-// clinical actions is a product decision, not an oversight to fix silently.
-func Test_EligibleAssignees_IncludesDataManager(t *testing.T) {
+// An org-scoped grant is not enough on its own: data_manager carries can_ingest_data at every
+// org and still cannot be assigned a case, because it cannot interpret one.
+func Test_EligibleAssignees_ExcludesRoleWithoutInterpret(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
 		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
 
 		assert.NoError(t, err)
-		assert.Contains(t, candidateIDs(candidates), gabeID)
+		assert.NotContains(t, candidateIDs(candidates), gabeID, "data_manager holds can_ingest_data, not can_interpret_variant")
 	})
 }
 
@@ -143,8 +142,7 @@ func Test_EligibleAssignees_ExcludesGrantsAtAnotherOrg(t *testing.T) {
 	})
 }
 
-// A role whose actions are all tenant-scoped carries no organization, so holding it is not
-// being part of a lab.
+// Roles that carry no can_interpret_variant at all.
 func Test_EligibleAssignees_ExcludesTenantScopedOnlyRoles(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
@@ -153,12 +151,12 @@ func Test_EligibleAssignees_ExcludesTenantScopedOnlyRoles(t *testing.T) {
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
-		assert.NotContains(t, ids, mikeID, "member holds can_search_case and can_view_kb, both tenant-scoped")
-		assert.NotContains(t, ids, taraID, "tenant_admin holds only the tenant-scoped manage actions")
+		assert.NotContains(t, ids, mikeID, "member holds can_search_case and can_view_kb only")
+		assert.NotContains(t, ids, taraID, "tenant_admin holds only the manage actions")
 	})
 }
 
-// tw holds practitioner — which does map org-scoped actions — but granted tenant-wide
+// tw holds practitioner — which does map can_interpret_variant — but granted tenant-wide
 // (org_code NULL), which names no organization. Same rule GetMemberships applies.
 func Test_EligibleAssignees_ExcludesTenantWideGrantOfAnOrgScopedRole(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
@@ -180,7 +178,7 @@ func Test_EligibleAssignees_ExcludesSystemAccounts(t *testing.T) {
 		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
 
 		assert.NoError(t, err)
-		// The batch client holds data_manager at '*' but has no email, so it is not a person.
+		// The batch client has no email, so it is not a person.
 		assert.NotContains(t, candidateIDs(candidates), "c0ffee00-1111-4222-8333-444455556666")
 	})
 }
@@ -207,10 +205,9 @@ func Test_EligibleAssignees_OrderedByName(t *testing.T) {
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
-		// Adams, Cohen, Green, Walsh — other users may sort between them, only the order matters.
+		// Adams, Cohen, Walsh — other users may sort between them, only the order matters.
 		assert.Less(t, slices.Index(ids, aliceID), slices.Index(ids, carolID))
-		assert.Less(t, slices.Index(ids, carolID), slices.Index(ids, gabeID))
-		assert.Less(t, slices.Index(ids, gabeID), slices.Index(ids, wendyID))
+		assert.Less(t, slices.Index(ids, carolID), slices.Index(ids, wendyID))
 	})
 }
 

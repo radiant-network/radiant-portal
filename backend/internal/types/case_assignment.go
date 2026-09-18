@@ -30,49 +30,28 @@ type CaseAssignee struct {
 	Email     string `json:"email,omitempty"`
 }
 
-// ListAssignmentCandidatesBody is the assignment candidates request. CaseIDs names the cases an
-// assignment is being made on. Eligibility is decided at the case's diagnosis lab, so every case
-// named must belong to the same one — the batch picker offers a single list, not one per
-// organization.
-type ListAssignmentCandidatesBody struct {
-	CaseIDs   []int  `json:"case_ids"`
-	Search    string `json:"search"`
-	Limit     int    `json:"limit"`
-	Offset    int    `json:"offset"`
-	PageIndex int    `json:"page_index"`
-} // @name ListAssignmentCandidatesBody
+// ListAssignmentCandidatesParams is the query string of the assignment candidates list. The
+// case itself is named by the route, not here.
+type ListAssignmentCandidatesParams struct {
+	Search    string `form:"search"`
+	Limit     int    `form:"limit"`
+	Offset    int    `form:"offset"`
+	PageIndex int    `form:"page_index"`
+}
 
 // ListAssignmentCandidatesQuery is the resolved candidates request handed to the repository.
 type ListAssignmentCandidatesQuery struct {
-	CaseIDs    []int
 	Search     string
 	Pagination *Pagination
 }
 
-func (b ListAssignmentCandidatesBody) Resolve() (*ListAssignmentCandidatesQuery, error) {
+func (p ListAssignmentCandidatesParams) Resolve() (*ListAssignmentCandidatesQuery, error) {
 	// A negative limit would cancel the LIMIT clause in GORM and return every eligible user.
-	if b.Limit < 0 || b.Offset < 0 || b.PageIndex < 0 {
+	if p.Limit < 0 || p.Offset < 0 || p.PageIndex < 0 {
 		return nil, fmt.Errorf("limit, offset and page_index must not be negative")
 	}
-
-	caseIDs := []int{}
-	seen := map[int]bool{}
-	for _, id := range b.CaseIDs {
-		if id <= 0 {
-			return nil, fmt.Errorf("case_ids must name positive case ids, got %d", id)
-		}
-		if !seen[id] {
-			seen[id] = true
-			caseIDs = append(caseIDs, id)
-		}
-	}
-	if len(caseIDs) == 0 {
-		return nil, fmt.Errorf("case_ids is required")
-	}
-
 	return &ListAssignmentCandidatesQuery{
-		CaseIDs:    caseIDs,
-		Search:     b.Search,
-		Pagination: ResolvePagination(b.Limit, b.Offset, b.PageIndex),
+		Search:     p.Search,
+		Pagination: ResolvePagination(p.Limit, p.Offset, p.PageIndex),
 	}, nil
 }

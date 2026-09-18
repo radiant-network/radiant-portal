@@ -104,7 +104,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /{tenant}/cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 *CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
-*CasesApi* | [**list_case_assignment_candidates**](docs/CasesApi.md#list_case_assignment_candidates) | **POST** /{tenant}/cases/assignment_candidates | List the users who may be assigned the given cases
+*CasesApi* | [**list_case_assignment_candidates**](docs/CasesApi.md#list_case_assignment_candidates) | **GET** /{tenant}/cases/{case_id}/assignment_candidates | List the users who may be assigned a case
 *CasesApi* | [**patch_case**](docs/CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
@@ -271,7 +271,6 @@ Class | Method | HTTP request | Description
  - [InterpretationPubmed](docs/InterpretationPubmed.md)
  - [InterpretationSomatic](docs/InterpretationSomatic.md)
  - [LeafContent](docs/LeafContent.md)
- - [ListAssignmentCandidatesBody](docs/ListAssignmentCandidatesBody.md)
  - [ListBodyWithCriteria](docs/ListBodyWithCriteria.md)
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
  - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
