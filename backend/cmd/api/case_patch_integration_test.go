@@ -159,6 +159,34 @@ func Test_PatchCase_WithoutEditActionForbidden(t *testing.T) {
 	})
 }
 
+// A tenant-wide grant stores org_code NULL, which HasAction matches for neither the case's lab
+// nor '*' — so it confers no org-scoped action on a specific case. Only a '*' grant does. This is
+// the sole guard for that decision: widening the match to NULL passes the whole repository and
+// server suites, and would silently hand every tenant-wide grantee can_edit_case on every case.
+func Test_PatchCase_TenantWideGrantForbidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100039
+		const tenantWideID = "d0d0d0d0-1111-4222-8333-555566667777"
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		require.NoError(t, env.Postgres.Exec(
+			`INSERT INTO users (user_id, email) VALUES (?, 'tenantwide@test.authz')`, tenantWideID).Error)
+		require.NoError(t, env.Postgres.Exec(
+			`INSERT INTO user_role (user_id, tenant_code, org_code, role_code) VALUES (?, ?, NULL, 'geneticist')`,
+			tenantWideID, types.DefaultTenantCode).Error)
+		t.Cleanup(func() {
+			env.Postgres.Exec(`DELETE FROM user_role WHERE user_id = ?`, tenantWideID)
+			env.Postgres.Exec(`DELETE FROM users WHERE user_id = ?`, tenantWideID)
+		})
+
+		w := servePatchCase(env.Postgres, tenantWideID, "radiant", caseID, `{"status_code":"in_review"}`)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+		assert.JSONEq(t, `{"status":403,"message":"Forbidden"}`, w.Body.String())
+		assert.Equal(t, types.CaseStatusInProgress, caseStatus(t, env.Postgres, caseID))
+	})
+}
+
 func Test_PatchCase_GranteeAtAnotherLabForbidden(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		const caseID = 100035
