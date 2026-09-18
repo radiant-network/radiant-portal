@@ -1,13 +1,17 @@
 package postgres
 
 import (
+	"fmt"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func Test_CreateCases(t *testing.T) {
@@ -194,5 +198,147 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)
 		env.Postgres.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
+	})
+}
+
+const (
+	seedDiagnosisLab = "LDM-CHUSJ"
+	seedOrderingOrg  = "UCSF"
+)
+
+func seedCaseForStatus(t *testing.T, repo *CasesRepository, db *gorm.DB, caseID int, status string) int {
+	t.Helper()
+	diagLab := seedDiagnosisLab
+	orgCode := seedOrderingOrg
+	require.NoError(t, repo.CreateCase(t.Context(), &types.Case{
+		ID:                       caseID,
+		ProbandID:                1,
+		ProjectID:                1,
+		StatusCode:               status,
+		DiagnosisLabCode:         &diagLab,
+		OrderingOrganizationCode: &orgCode,
+		AnalysisCatalogID:        1,
+		PriorityCode:             "routine",
+		CaseTypeCode:             "germline",
+		CaseCategoryCode:         "postnatal",
+		SubmitterCaseID:          fmt.Sprintf("status-switcher-%d", caseID),
+		TenantCode:               types.DefaultTenantCode,
+	}))
+	t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = ?", caseID) })
+	return caseID
+}
+
+func statusPatch(code string) *types.Case {
+	return &types.Case{StatusCode: code}
+}
+
+func statusOfCase(t *testing.T, db *gorm.DB, caseID int) string {
+	t.Helper()
+	var status string
+	require.NoError(t, db.Table("cases").Select("status_code").Where("id = ?", caseID).Scan(&status).Error)
+	return status
+}
+
+func Test_PatchCase_PersistsTheNewStatus(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100020, types.CaseStatusInProgress)
+
+		var before time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&before).Error)
+
+		found, err := repo.PatchCase(t.Context(), caseID, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CaseStatusInReview, statusOfCase(t, env.Postgres, caseID))
+
+		var after time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&after).Error)
+		assert.True(t, after.After(before), "updated_on did not advance: before %s, after %s", before, after)
+	})
+}
+
+func Test_PatchCase_AppliesStatusesInAnyOrder(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100021, types.CaseStatusInProgress)
+
+		for _, status := range []string{types.CaseStatusCompleted, types.CaseStatusReopened, types.CaseStatusInProgress, types.CaseStatusRevoked} {
+			found, err := repo.PatchCase(t.Context(), caseID, statusPatch(status))
+			assert.NoError(t, err)
+			assert.Truef(t, found, "PatchCase(%q) reported the case missing", status)
+			assert.Equal(t, status, statusOfCase(t, env.Postgres, caseID))
+		}
+	})
+}
+
+func Test_PatchCase_ReapplyingTheSameStatusIsFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100022, types.CaseStatusInReview)
+
+		found, err := repo.PatchCase(t.Context(), caseID, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.True(t, found)
+	})
+}
+
+func Test_PatchCase_EmptyPatchIsRejected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		found, err := repo.PatchCase(t.Context(), 1, &types.Case{})
+		assert.EqualError(t, err, "no field to update on case 1")
+		assert.False(t, found)
+	})
+}
+
+func Test_PatchCase_UnknownCaseIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		found, err := repo.PatchCase(t.Context(), 999999, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.False(t, found)
+	})
+}
+
+func Test_PatchCase_CrossTenantCaseIsNotFoundAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100023, types.CaseStatusInProgress)
+
+		ctx := types.ContextWithTenant(t.Context(), "tenant_b")
+		found, err := repo.PatchCase(ctx, caseID, statusPatch(types.CaseStatusRevoked))
+		assert.NoError(t, err)
+		assert.False(t, found, "radiant's case must not be writable from tenant_b")
+		assert.Equal(t, types.CaseStatusInProgress, statusOfCase(t, env.Postgres, caseID), "the status must be left untouched")
+	})
+}
+
+func Test_PatchCase_OwnTenantCaseIsWritable(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100024, types.CaseStatusInProgress)
+
+		ctx := types.ContextWithTenant(t.Context(), types.DefaultTenantCode)
+		found, err := repo.PatchCase(ctx, caseID, statusPatch(types.CaseStatusResolved))
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CaseStatusResolved, statusOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_CaseStatusDictionary_MatchesStatusTable(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewValueSetsRepository(database.PostgresDB{DB: env.Postgres})
+
+		codes, err := repo.GetCodes(t.Context(), ValueSetStatus)
+		assert.NoError(t, err)
+
+		declared := append(append([]string{}, types.UserAppliedCaseStatuses...), types.SystemAppliedCaseStatuses...)
+		slices.Sort(codes)
+		slices.Sort(declared)
+		assert.Equal(t, declared, codes, "internal/types case status codes have drifted from the `status` table")
 	})
 }

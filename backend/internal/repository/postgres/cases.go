@@ -65,6 +65,27 @@ func (r *CasesRepository) UpdateCase(ctx context.Context, caseID int, c *Case) e
 	return nil
 }
 
+// PatchCase writes only the fields the given case actually carries and reports whether such a
+// case exists.
+func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, c *Case) (bool, error) {
+	updates := map[string]any{}
+	if c.StatusCode != "" {
+		updates["status_code"] = c.StatusCode
+	}
+	if len(updates) == 0 {
+		return false, fmt.Errorf("no field to update on case %d", caseID)
+	}
+
+	tx := r.db.WithContext(ctx).Model(&types.Case{}).
+		Scopes(WithTenant(ctx)).
+		Where("id = ?", caseID).
+		Updates(updates)
+	if tx.Error != nil {
+		return false, fmt.Errorf("error patching case %d: %w", caseID, tx.Error)
+	}
+	return tx.RowsAffected > 0, nil
+}
+
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(ctx context.Context, caseHasSeqExp *types.CaseHasSequencingExperiment) error {
 	return r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{

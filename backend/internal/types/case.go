@@ -1,6 +1,11 @@
 package types
 
-import "time"
+import (
+	"fmt"
+	"slices"
+	"strings"
+	"time"
+)
 
 type Case struct {
 	ID                       int `gorm:"unique;primaryKey;autoIncrement"`
@@ -31,6 +36,54 @@ type Case struct {
 	Note                     string
 	CreatedOn                time.Time `gorm:"autoCreateTime"`
 	UpdatedOn                time.Time `gorm:"autoUpdateTime:milli"`
+}
+
+// PatchCase is the body of PATCH /{tenant}/cases/{case_id}.
+// @Description Case fields to change. Omitted fields are left untouched.
+type PatchCase struct {
+	StatusCode string `json:"status_code,omitempty" example:"in_review"`
+} // @name PatchCase
+
+// Case status codes, mirroring the `status` dictionary.
+const (
+	CaseStatusSubmitted    = "submitted"
+	CaseStatusProcessing   = "processing"
+	CaseStatusInProgress   = "in_progress"
+	CaseStatusInReview     = "in_review"
+	CaseStatusCompleted    = "completed"
+	CaseStatusResolved     = "resolved"
+	CaseStatusUnresolved   = "unresolved"
+	CaseStatusInconclusive = "inconclusive"
+	CaseStatusReopened     = "reopened"
+	CaseStatusRevoked      = "revoked"
+)
+
+var SystemAppliedCaseStatuses = []string{
+	CaseStatusSubmitted,
+	CaseStatusProcessing,
+}
+
+var UserAppliedCaseStatuses = []string{
+	CaseStatusInProgress,
+	CaseStatusInReview,
+	CaseStatusCompleted,
+	CaseStatusResolved,
+	CaseStatusUnresolved,
+	CaseStatusInconclusive,
+	CaseStatusReopened,
+	CaseStatusRevoked,
+}
+
+func ValidateUserAppliedCaseStatus(code string) error {
+	switch {
+	case code == "":
+		return fmt.Errorf("status_code is required, expected one of: %s", strings.Join(UserAppliedCaseStatuses, ", "))
+	case slices.Contains(SystemAppliedCaseStatuses, code):
+		return fmt.Errorf("status_code %q is system-applied and cannot be set by a user", code)
+	case !slices.Contains(UserAppliedCaseStatuses, code):
+		return fmt.Errorf("unknown status_code %q, expected one of: %s", code, strings.Join(UserAppliedCaseStatuses, ", "))
+	}
+	return nil
 }
 
 // CaseResult - Search cases result

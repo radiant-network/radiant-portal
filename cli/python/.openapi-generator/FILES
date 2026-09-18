@@ -96,6 +96,7 @@ docs/OmimGenePanel.md
 docs/OrganizationResponse.md
 docs/OrganizationsApi.md
 docs/OutputDocumentBatch.md
+docs/PatchCase.md
 docs/PatchCaseBatchBody.md
 docs/PatientBatch.md
 docs/PatientsApi.md
@@ -271,6 +272,7 @@ radiant_python/models/occurrence_note.py
 radiant_python/models/omim_gene_panel.py
 radiant_python/models/organization_response.py
 radiant_python/models/output_document_batch.py
+radiant_python/models/patch_case.py
 radiant_python/models/patch_case_batch_body.py
 radiant_python/models/patient_batch.py
 radiant_python/models/pubmed_citation.py

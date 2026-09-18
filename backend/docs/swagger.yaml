@@ -2192,6 +2192,13 @@ components:
       - size
       - url
       type: object
+    PatchCase:
+      description: Case fields to change. Omitted fields are left untouched.
+      properties:
+        status_code:
+          example: in_review
+          type: string
+      type: object
     PatchCaseBatchBody:
       properties:
         cases:
@@ -3804,6 +3811,75 @@ paths:
       security:
       - bearerauth: []
       summary: Get CaseEntity case entity
+      tags:
+      - cases
+    patch:
+      description: Apply a partial update to a case. Only the fields present in the
+        body are changed; status_code is the only one applied today. Returns 200 with
+        no body on success.
+      operationId: patchCase
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCase'
+        description: Fields to change
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Update a case
       tags:
       - cases
   /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences:

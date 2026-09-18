@@ -41,6 +41,10 @@ type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
+type casePatcher interface {
+	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
+}
+
 // SearchCasesHandler handles search of cases
 // @Summary Search cases
 // @Id searchCases
@@ -205,6 +209,59 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader, assignmentsRepo case
 		caseEntity.Assignees = assigneesOf(assigneesByCase, caseId)
 
 		c.JSON(http.StatusOK, caseEntity)
+	}
+}
+
+// PatchCaseHandler applies a partial update to a case. Only the fields the body carries are
+// written, so the endpoint takes another patchable field without a new route.
+//
+// The only field so far is status_code
+// @Summary Update a case
+// @Id patchCase
+// @Description Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param message body types.PatchCase true "Fields to change"
+// @Accept json
+// @Success 200
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id} [patch]
+func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+
+		var patch types.PatchCase
+		if err := c.ShouldBindJSON(&patch); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := types.ValidateUserAppliedCaseStatus(patch.StatusCode); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		found, err := repo.PatchCase(c.Request.Context(), caseId, &types.Case{StatusCode: patch.StatusCode})
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !found {
+			HandleNotFoundError(c, "case")
+			return
+		}
+
+		c.Status(http.StatusOK)
 	}
 }
 

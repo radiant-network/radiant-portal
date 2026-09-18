@@ -148,6 +148,18 @@ func Test_SecureRoutes(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, 401, resp.StatusCode)
 		}
+
+		// PATCH requests
+		for _, route := range []string{
+			"radiant/cases/batch",
+			"radiant/cases/1",
+		} {
+			req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)
+			assert.NoError(t, err)
+			resp, err = http.DefaultClient.Do(req)
+			assert.NoError(t, err)
+			assert.Equal(t, 401, resp.StatusCode)
+		}
 	})
 }
 

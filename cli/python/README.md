@@ -104,6 +104,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /{tenant}/cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 *CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
+*CasesApi* | [**patch_case**](docs/CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
@@ -278,6 +279,7 @@ Class | Method | HTTP request | Description
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OrganizationResponse](docs/OrganizationResponse.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
+ - [PatchCase](docs/PatchCase.md)
  - [PatchCaseBatchBody](docs/PatchCaseBatchBody.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)

@@ -4420,6 +4420,19 @@ export interface OutputDocumentBatch {
     'url': string;
 }
 /**
+ * Case fields to change. Omitted fields are left untouched.
+ * @export
+ * @interface PatchCase
+ */
+export interface PatchCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatchCase
+     */
+    'status_code'?: string;
+}
+/**
  * 
  * @export
  * @interface PatchCaseBatchBody
@@ -7898,6 +7911,54 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * @summary Update a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {PatchCase} patchCase Fields to change
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCase: async (tenant: string, caseId: number, patchCase: PatchCase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patchCase', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('patchCase', 'caseId', caseId)
+            // verify required parameter 'patchCase' is not null or undefined
+            assertParamExists('patchCase', 'patchCase', patchCase)
+            const localVarPath = `/{tenant}/cases/{case_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(patchCase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -8186,6 +8247,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * @summary Update a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {PatchCase} patchCase Fields to change
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patchCase(tenant: string, caseId: number, patchCase: PatchCase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCase(tenant, caseId, patchCase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCase']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -8324,6 +8400,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
+         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * @summary Update a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {PatchCase} patchCase Fields to change
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCase(tenant: string, caseId: number, patchCase: PatchCase, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.patchCase(tenant, caseId, patchCase, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -8459,6 +8547,20 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(tenant: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+     * @summary Update a case
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {PatchCase} patchCase Fields to change
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public patchCase(tenant: string, caseId: number, patchCase: PatchCase, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCase(tenant, caseId, patchCase, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
