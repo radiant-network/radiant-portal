@@ -1,4 +1,4 @@
-import { flexRender, type OnChangeFn, type RowData, type RowSelectionState } from '@tanstack/react-table';
+import { FlexRender, type OnChangeFn, type RowData, type RowSelectionState } from '@tanstack/react-table';
 import { SearchIcon } from 'lucide-react';
 
 import {
@@ -65,7 +65,7 @@ function DisplayTable({
                   style={{ width: `${header.getSize()}px` }}
                   colSpan={header.colSpan}
                 >
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  {header.isPlaceholder ? null : <FlexRender header={header} />}
                 </TableHead>
               ))}
             </TableRow>
@@ -77,7 +77,7 @@ function DisplayTable({
               <TableRow key={row.id} variant={variant} data-state={row.getIsSelected() && 'selected'}>
                 {row.getVisibleCells().map(cell => (
                   <TableCell key={cell.id} className="h-[41px]">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <FlexRender cell={cell} />
                   </TableCell>
                 ))}
               </TableRow>
@@ -94,8 +94,7 @@ function DisplayTable({
           {table.getFooterGroups().map(footerGroup => (
             <TableRow key={footerGroup.id} variant={variant}>
               {footerGroup.headers.map(header => {
-                const footerColSpan = (header.column.columnDef.meta as { footerColSpan?: number } | undefined)
-                  ?.footerColSpan;
+                const footerColSpan = header.column.columnDef.meta?.footerColSpan;
                 if (footerColSpan === 0) return null;
                 return (
                   <TableCell
@@ -103,7 +102,7 @@ function DisplayTable({
                     style={{ width: `${header.getSize()}px` }}
                     colSpan={footerColSpan ?? header.colSpan}
                   >
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                    {header.isPlaceholder ? null : <FlexRender footer={header} />}
                   </TableCell>
                 );
               })}

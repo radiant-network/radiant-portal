@@ -1,4 +1,5 @@
 import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useCreateAtom, useSelector } from '@tanstack/react-store';
 import {
   type Column,
   type ColumnDef,
@@ -19,9 +20,10 @@ import {
   createSortedRowModel,
   createTableHook,
   type ExpandedState,
-  flexRender,
+  FlexRender,
   type GroupingState,
   type Header,
+  metaHelper,
   type OnChangeFn,
   type PaginationState,
   type ReactTable,
@@ -92,6 +94,13 @@ export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
 
 /**
+ * Type of `columnDef.meta`, shared by every data table in the app.
+ */
+export type TableColumnMeta = {
+  footerColSpan?: number;
+};
+
+/**
  * Tanstack v9 feature registry shared by every data table in the app.
  * Kept here rather than in a separate module so callers only need to reach
  * into `@/components/base/data-table/data-table` for both the component and
@@ -116,6 +125,7 @@ export const features = tableFeatures({
   expandedRowModel: createExpandedRowModel(),
   groupedRowModel: createGroupedRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
+  columnMeta: metaHelper<TableColumnMeta>(),
 });
 
 export type AppFeatures = typeof features;
@@ -144,7 +154,10 @@ export type {
 /**
  * Interface and types
  */
-export interface TableColumnDef<TData extends RowData, TValue> extends Omit<ColumnDef<AppFeatures, TData, TValue>, 'id'> {
+export interface TableColumnDef<TData extends RowData, TValue> extends Omit<
+  ColumnDef<AppFeatures, TData, TValue>,
+  'id'
+> {
   id: string;
   subComponent?: string;
 }
@@ -458,7 +471,7 @@ function getHeaderFlexRender<TData extends RowData>(
       <div className="flex items-center justify-between gap-1">
         {/* Header rendering */}
         <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-          {flexRender(header.column.columnDef.header, header.getContext())}
+          <FlexRender header={header} />
         </div>
 
         {/* Table Header Actions, only display on hover */}
@@ -529,14 +542,8 @@ function getRowFlexRender<T extends RowData>({
                 </Button>
               )}
 
-              {/* Group By: Aggregated */}
-              {cell.getIsAggregated() &&
-                flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())}
-
-              {/* Placeholder OR normal rendering */}
-              {!cell.getIsAggregated() &&
-                !cell.getIsPlaceholder() &&
-                flexRender(cell.column.columnDef.cell, cell.getContext())}
+              {/* Aggregated, placeholder and normal rendering are all handled by FlexRender */}
+              <FlexRender cell={cell} />
             </>
           </TableCell>
         ))}
@@ -604,7 +611,7 @@ function getRowFlexRender<T extends RowData>({
  * @EXAMPLE:
  *  [{
  *   id: "rowSelection",
- *   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+ *   header: (header: HeaderContext<AppFeatures, Occurrence, unknown>) => <RowSelectionHeader table={header.table} />,
  *   cell: info => <RowSelectionCell row={info.row} />,
  *   size: 48,
  *   maxSize: 48,
@@ -738,10 +745,11 @@ function DataTable<T extends RowData>({
   });
 
   // Default internal pagination state for locale and server pagination
-  const [internalPagination, setInternalPagination] = useState<PaginationState>({
+  const paginationAtom = useCreateAtom<PaginationState>({
     pageIndex: pagination.state?.pageIndex || 0,
     pageSize: pagination.state?.pageSize || 10,
   });
+  const internalPagination = useSelector(paginationAtom);
 
   // Key Input Map
   const handleEscEventListener = () => {
@@ -763,6 +771,8 @@ function DataTable<T extends RowData>({
 
   // Initialize tanstack table
   const table = useAppTable({
+    // 'hidden' keeps the slice on the table's initial state, as before
+    atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
     columns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
@@ -780,11 +790,8 @@ function DataTable<T extends RowData>({
     onExpandedChange: setExpanded,
     onColumnSizingChange: setColumnSizing,
     onGroupingChange: setGrouping,
-    onPaginationChange: (() => {
-      if (pagination.type === 'hidden') return undefined;
-      if (pagination.type === 'locale') return setInternalPagination;
-      return pagination.onPaginationChange;
-    })(),
+    // no key for 'locale': the table writes paginationAtom itself (an explicit undefined would freeze the slice)
+    ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
@@ -795,7 +802,6 @@ function DataTable<T extends RowData>({
       columnPinning,
       grouping,
       columnSizing,
-      pagination: (() => (pagination.type !== 'hidden' ? internalPagination : undefined))(),
       expanded,
       rowPinning,
       rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
@@ -843,7 +849,7 @@ function DataTable<T extends RowData>({
     setColumnVisibility,
     setColumnPinning,
     setColumnSizing,
-    setPagination: pagination.onPaginationChange ?? setInternalPagination,
+    setPagination: pagination.onPaginationChange ?? paginationAtom.set,
     setAdditionalFields: serverOptions?.setAdditionalFields,
   });
 
@@ -874,7 +880,7 @@ function DataTable<T extends RowData>({
    */
   useEffect(() => {
     if (pagination.type !== 'hidden' && pagination.state) {
-      setInternalPagination(pagination.state);
+      paginationAtom.set(pagination.state);
     }
   }, [pagination.state, pagination.type]);
 
@@ -1124,7 +1130,7 @@ function DataTable<T extends RowData>({
                   <TableRow key={footerGroup.id}>
                     {footerGroup.headers.map(header => (
                       <TableCell key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                        {header.isPlaceholder ? null : <FlexRender footer={header} />}
                       </TableCell>
                     ))}
                   </TableRow>

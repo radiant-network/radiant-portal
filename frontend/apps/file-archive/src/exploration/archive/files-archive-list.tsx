@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import type { PaginationState } from '@/components/base/data-table/data-table';
 import useSWR from 'swr';
 
 import type { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';

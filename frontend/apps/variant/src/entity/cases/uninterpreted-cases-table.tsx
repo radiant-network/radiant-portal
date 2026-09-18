@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
-import type { PaginationState } from '@/components/base/data-table/data-table';
 import useSWR from 'swr';
 
 import type {
@@ -10,6 +9,7 @@ import type {
   SortBody,
   VariantUninterpretedCasesSearchResponse,
 } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';

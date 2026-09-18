@@ -196,7 +196,7 @@ export function useTableUpdatePreferenceEffect({
  * Effect to serialize column size into a savable object
  * @example
  *  useTableSizingEffect({
- *    state: table.getState(),
+ *    state: table.state,
  *    columns,
  *    setColumnSizing,
  *  });

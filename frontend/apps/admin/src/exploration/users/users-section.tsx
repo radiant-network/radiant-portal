@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { PaginationState } from '@/components/base/data-table/data-table';
 import { Plus } from 'lucide-react';
 import useSWR from 'swr';
 
 import type { ApiError, UserResult, UsersSearchResponse } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';

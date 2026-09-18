@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import type { PaginationState } from '@/components/base/data-table/data-table';
 import useSWR from 'swr';
 
 import type { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable from '@/components/base/data-table/data-table';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
