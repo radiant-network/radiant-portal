@@ -914,6 +914,50 @@ export interface CaseFilters {
     'status_code': Array<FiltersValue>;
 }
 /**
+ * Payload to create a case group, or overwrite the case list of an existing one (same name in the tenant). An empty case_ids list is accepted and empties the group.
+ * @export
+ * @interface CaseGroupRequest
+ */
+export interface CaseGroupRequest {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof CaseGroupRequest
+     */
+    'case_ids': Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupRequest
+     */
+    'name': string;
+}
+/**
+ * A named set of cases within a tenant.
+ * @export
+ * @interface CaseGroupResponse
+ */
+export interface CaseGroupResponse {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof CaseGroupResponse
+     */
+    'case_ids': Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupResponse
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupResponse
+     */
+    'tenant_code': string;
+}
+/**
  * 
  * @export
  * @interface CasePatientBatch
@@ -7381,6 +7425,207 @@ export class BatchesApi extends BaseAPI {
      */
     public getBatch(tenant: string, batchId: string, options?: RawAxiosRequestConfig) {
         return BatchesApiFp(this.configuration).getBatch(tenant, batchId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * CaseGroupsApi - axios parameter creator
+ * @export
+ */
+export const CaseGroupsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Creates a named set of cases in the tenant in the path. The name is the key: posting an existing name overwrites its case list, so a pipeline retry is idempotent. Every case id must exist in the tenant. Requires the `can_ingest_data` action.
+         * @summary Create or overwrite a case group
+         * @param {string} tenant Tenant code
+         * @param {CaseGroupRequest} caseGroupRequest Case group to create or overwrite
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createCaseGroup: async (tenant: string, caseGroupRequest: CaseGroupRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('createCaseGroup', 'tenant', tenant)
+            // verify required parameter 'caseGroupRequest' is not null or undefined
+            assertParamExists('createCaseGroup', 'caseGroupRequest', caseGroupRequest)
+            const localVarPath = `/{tenant}/case_groups`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(caseGroupRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
+         * @summary Get a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCaseGroup: async (tenant: string, name: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getCaseGroup', 'tenant', tenant)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('getCaseGroup', 'name', name)
+            const localVarPath = `/{tenant}/case_groups/{name}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * CaseGroupsApi - functional programming interface
+ * @export
+ */
+export const CaseGroupsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = CaseGroupsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Creates a named set of cases in the tenant in the path. The name is the key: posting an existing name overwrites its case list, so a pipeline retry is idempotent. Every case id must exist in the tenant. Requires the `can_ingest_data` action.
+         * @summary Create or overwrite a case group
+         * @param {string} tenant Tenant code
+         * @param {CaseGroupRequest} caseGroupRequest Case group to create or overwrite
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createCaseGroup(tenant: string, caseGroupRequest: CaseGroupRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseGroupResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createCaseGroup(tenant, caseGroupRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CaseGroupsApi.createCaseGroup']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
+         * @summary Get a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseGroupResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCaseGroup(tenant, name, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CaseGroupsApi.getCaseGroup']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * CaseGroupsApi - factory interface
+ * @export
+ */
+export const CaseGroupsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = CaseGroupsApiFp(configuration)
+    return {
+        /**
+         * Creates a named set of cases in the tenant in the path. The name is the key: posting an existing name overwrites its case list, so a pipeline retry is idempotent. Every case id must exist in the tenant. Requires the `can_ingest_data` action.
+         * @summary Create or overwrite a case group
+         * @param {string} tenant Tenant code
+         * @param {CaseGroupRequest} caseGroupRequest Case group to create or overwrite
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createCaseGroup(tenant: string, caseGroupRequest: CaseGroupRequest, options?: RawAxiosRequestConfig): AxiosPromise<CaseGroupResponse> {
+            return localVarFp.createCaseGroup(tenant, caseGroupRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
+         * @summary Get a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseGroupResponse> {
+            return localVarFp.getCaseGroup(tenant, name, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * CaseGroupsApi - object-oriented interface
+ * @export
+ * @class CaseGroupsApi
+ * @extends {BaseAPI}
+ */
+export class CaseGroupsApi extends BaseAPI {
+    /**
+     * Creates a named set of cases in the tenant in the path. The name is the key: posting an existing name overwrites its case list, so a pipeline retry is idempotent. Every case id must exist in the tenant. Requires the `can_ingest_data` action.
+     * @summary Create or overwrite a case group
+     * @param {string} tenant Tenant code
+     * @param {CaseGroupRequest} caseGroupRequest Case group to create or overwrite
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CaseGroupsApi
+     */
+    public createCaseGroup(tenant: string, caseGroupRequest: CaseGroupRequest, options?: RawAxiosRequestConfig) {
+        return CaseGroupsApiFp(this.configuration).createCaseGroup(tenant, caseGroupRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns the case group with this name in the tenant in the path, with its case ids. Requires the `can_search_case` action, so the portal can turn a group into a case filter.
+     * @summary Get a case group
+     * @param {string} tenant Tenant code
+     * @param {string} name Case group name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CaseGroupsApi
+     */
+    public getCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig) {
+        return CaseGroupsApiFp(this.configuration).getCaseGroup(tenant, name, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

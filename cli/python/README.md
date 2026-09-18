@@ -96,6 +96,8 @@ Class | Method | HTTP request | Description
 *ActionsApi* | [**list_actions**](docs/ActionsApi.md#list_actions) | **GET** /actions | List the authorization action catalog
 *AuthApi* | [**get_me**](docs/AuthApi.md#get_me) | **GET** /auth/me | Get the caller&#39;s effective authorization
 *BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /{tenant}/batches/{batchId} | Retrieve a batch by ID
+*CaseGroupsApi* | [**create_case_group**](docs/CaseGroupsApi.md#create_case_group) | **POST** /{tenant}/case_groups | Create or overwrite a case group
+*CaseGroupsApi* | [**get_case_group**](docs/CaseGroupsApi.md#get_case_group) | **GET** /{tenant}/case_groups/{name} | Get a case group
 *CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /{tenant}/cases/autocomplete | Get AutocompleteResult list of matching prefix
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /{tenant}/cases/{case_id} | Get CaseEntity case entity
 *CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /{tenant}/cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
@@ -216,6 +218,8 @@ Class | Method | HTTP request | Description
  - [CaseFamilyHistory](docs/CaseFamilyHistory.md)
  - [CaseFetusBatch](docs/CaseFetusBatch.md)
  - [CaseFilters](docs/CaseFilters.md)
+ - [CaseGroupRequest](docs/CaseGroupRequest.md)
+ - [CaseGroupResponse](docs/CaseGroupResponse.md)
  - [CasePatientBatch](docs/CasePatientBatch.md)
  - [CasePatientClinicalInformation](docs/CasePatientClinicalInformation.md)
  - [CaseResult](docs/CaseResult.md)
