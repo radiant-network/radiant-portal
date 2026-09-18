@@ -1,0 +1,11 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import{n,t as r}from"./button-Cn480Lud.js";import{m as i,w as a}from"./api-BJIZDprh.js";import{i as o,n as s}from"./story-section-DVTm6cGm.js";import{r as c,t as l}from"./lib-CZRp1gG1.js";import{i as u,n as d,t as f}from"./applications-config-D877dlRU.js";import{i as p,n as m,r as h,t as g}from"./collapsible-tqr7Fql6.js";var _,v,y,b,x;function S(){return(S=e((()=>{c(),a(),n(),p(),u(),o(),_=t(),v={variant_entity:{app_id:f.variant_entity},germline_snv_occurrence:{app_id:f.germline_snv_occurrence,aggregations:[],saved_filter_type:i.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:f.germline_cnv_occurrence,aggregations:[],saved_filter_type:i.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:f.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:f.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:f.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:`admin`,app_id:f.admin},portal:{name:``,navigation:{}}},y={title:`Components/Collapsibles/Collapsible`,component:g,args:{},decorators:[e=>(0,_.jsx)(l,{children:(0,_.jsx)(d,{config:v,children:(0,_.jsx)(e,{})})})]},b={args:{},render:e=>(0,_.jsx)(s,{title:`Default`,children:(0,_.jsxs)(g,{...e,children:[(0,_.jsx)(h,{asChild:!0,children:(0,_.jsx)(r,{variant:`outline`,children:`Trigger`})}),(0,_.jsx)(m,{className:`flex flex-col gap-2`,children:`Content`})]})})},b.parameters={...b.parameters,docs:{...b.parameters?.docs,source:{originalSource:`{
+  args: {},
+  render: args => <StorySection title="Default">
+      <Collapsible {...args}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline">Trigger</Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="flex flex-col gap-2">Content</CollapsibleContent>
+      </Collapsible>
+    </StorySection>
+}`,...b.parameters?.docs?.source}}},x=[`Default`]})))()}S();export{b as Default,x as __namedExportsOrder,y as default};

@@ -1,0 +1,10 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import{n,t as r}from"./analysis-type-code-badge-BIvBROSX.js";import{m as i,w as a}from"./api-BJIZDprh.js";import{i as o,n as s}from"./story-section-DVTm6cGm.js";import{r as c,t as l}from"./lib-CZRp1gG1.js";import{i as u,n as d,t as f}from"./applications-config-D877dlRU.js";var p,m,h,g,_;function v(){return(v=e((()=>{c(),a(),n(),u(),o(),p=t(),m={variant_entity:{app_id:f.variant_entity},germline_snv_occurrence:{app_id:f.germline_snv_occurrence,aggregations:[],saved_filter_type:i.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:f.germline_cnv_occurrence,aggregations:[],saved_filter_type:i.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:f.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:f.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:f.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:i.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:`admin`,app_id:f.admin},portal:{name:``,navigation:{}}},h={title:`Components/Badges/Analysis Type Code Badge`,component:r,args:{},decorators:[e=>(0,p.jsx)(l,{children:(0,p.jsx)(d,{config:m,children:(0,p.jsx)(e,{})})})]},g={args:{code:`somatic`},render:e=>(0,p.jsx)(s,{title:`Default`,children:(0,p.jsx)(`div`,{className:`flex gap-2`,children:[`somatic`,`germline`,`germline_family`].map((e,t)=>(0,p.jsx)(r,{code:e},t))})})},g.parameters={...g.parameters,docs:{...g.parameters?.docs,source:{originalSource:`{
+  args: {
+    code: 'somatic' as AnalysisTypeCode
+  },
+  render: _args => <StorySection title="Default">
+      <div className="flex gap-2">
+        {['somatic', 'germline', 'germline_family'].map((code, index) => <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />)}
+      </div>
+    </StorySection>
+}`,...g.parameters?.docs?.source}}},_=[`Default`]})))()}v();export{g as Default,_ as __namedExportsOrder,h as default};
