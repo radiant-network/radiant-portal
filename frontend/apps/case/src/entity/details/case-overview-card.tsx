@@ -113,7 +113,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
         {/* Case note */}
         <div className="flex flex-col p-4 gap-1.5 border rounded-md">
           <div className="text-foreground text-base font-semibold">{t('case_entity.details.case_note')}</div>
-          <div className="text-foreground text-sm font-normal">{data.note}</div>
+          <div className="text-foreground text-sm font-normal whitespace-pre-line">{data.note}</div>
         </div>
       </CardContent>
     </Card>
