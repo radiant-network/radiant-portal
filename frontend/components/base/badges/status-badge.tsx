@@ -8,6 +8,7 @@ import {
   Hourglass,
   LoaderCircle,
   type LucideIcon,
+  Pen,
   RefreshCcwIcon,
   RotateCcw,
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
 export type Status =
+  | 'draft'
   | 'submitted'
   | 'processing'
   | 'in_progress'
@@ -33,6 +35,7 @@ type StatusBadgeProps = {
 };
 
 const colors: Record<string, BadgeProps['variant']> = {
+  draft: 'neutral',
   submitted: 'outline',
   processing: 'yellow',
   in_progress: 'blue',
@@ -48,6 +51,7 @@ const colors: Record<string, BadgeProps['variant']> = {
 export const statusFallbackIcon = FileQuestion;
 
 export const statusIcons: Record<string, LucideIcon> = {
+  draft: Pen,
   submitted: Hourglass,
   processing: LoaderCircle,
   in_progress: RefreshCcwIcon,

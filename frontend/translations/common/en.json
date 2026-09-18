@@ -1098,6 +1098,7 @@
     },
     "status": {
       "completed": "Closed",
+      "draft": "Draft",
       "in_progress": "In Progress",
       "in_review": "In Review",
       "inconclusive": "Inconclusive",
