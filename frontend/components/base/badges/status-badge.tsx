@@ -32,6 +32,7 @@ export type Status =
 type StatusBadgeProps = {
   status: Status;
   size?: BadgeProps['size'];
+  withIcon?: boolean;
   className?: string;
 };
 
@@ -65,7 +66,7 @@ export const statusIcons: Record<string, LucideIcon> = {
   revoked: CircleX,
 };
 
-function StatusBadge({ status, size, className }: StatusBadgeProps) {
+function StatusBadge({ status, size, withIcon = true, className }: StatusBadgeProps) {
   const { t } = useI18n();
 
   const color = statusColors[status] ?? 'neutral';
@@ -73,7 +74,7 @@ function StatusBadge({ status, size, className }: StatusBadgeProps) {
 
   return (
     <Badge variant={color} size={size} className={className}>
-      <Icon />
+      {withIcon && <Icon />}
       {t(`case_exploration.status.${status}`, status)}
     </Badge>
   );
