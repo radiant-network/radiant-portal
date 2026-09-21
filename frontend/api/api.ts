@@ -4426,12 +4426,27 @@ export interface OutputDocumentBatch {
  */
 export interface PatchCase {
     /**
-     * 
+     * Target status. Only user-applied codes are accepted — `submitted` and `processing` are system-applied and rejected here.
      * @type {string}
      * @memberof PatchCase
      */
-    'status_code'?: string;
+    'status_code'?: PatchCaseStatusCodeEnum;
 }
+
+export const PatchCaseStatusCodeEnum = {
+    Draft: 'draft',
+    InProgress: 'in_progress',
+    InReview: 'in_review',
+    Completed: 'completed',
+    Resolved: 'resolved',
+    Unresolved: 'unresolved',
+    Inconclusive: 'inconclusive',
+    Reopened: 'reopened',
+    Revoked: 'revoked'
+} as const;
+
+export type PatchCaseStatusCodeEnum = typeof PatchCaseStatusCodeEnum[keyof typeof PatchCaseStatusCodeEnum];
+
 /**
  * 
  * @export

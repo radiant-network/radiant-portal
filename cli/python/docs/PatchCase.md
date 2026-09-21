@@ -6,7 +6,7 @@ Case fields to change. Omitted fields are left untouched.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status_code** | **str** |  | [optional] 
+**status_code** | **str** | Target status. Only user-applied codes are accepted — &#x60;submitted&#x60; and &#x60;processing&#x60; are system-applied and rejected here. | [optional] 
 
 ## Example
 

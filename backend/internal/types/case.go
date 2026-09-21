@@ -41,7 +41,7 @@ type Case struct {
 // PatchCase is the body of PATCH /{tenant}/cases/{case_id}.
 // @Description Case fields to change. Omitted fields are left untouched.
 type PatchCase struct {
-	StatusCode string `json:"status_code,omitempty" example:"in_review"`
+	StatusCode string `json:"status_code,omitempty" example:"in_review" enums:"draft,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 } // @name PatchCase
 
 // Case status codes, mirroring the `status` dictionary.
@@ -64,6 +64,8 @@ var SystemAppliedCaseStatuses = []string{
 	CaseStatusProcessing,
 }
 
+// Mirrored as a literal in the `enums` tag of PatchCase.StatusCode (a struct tag cannot reference
+// a slice); Test_PatchCase_StatusCodeEnumMatchesUserApplied keeps the two in step.
 var UserAppliedCaseStatuses = []string{
 	CaseStatusDraft,
 	CaseStatusInProgress,
