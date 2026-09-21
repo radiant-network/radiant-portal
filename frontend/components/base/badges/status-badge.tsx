@@ -4,11 +4,11 @@ import {
   CircleDashed,
   CircleX,
   Eye,
-  FilePen,
   FileQuestion,
   Hourglass,
   LoaderCircle,
   type LucideIcon,
+  Pen,
   RefreshCcwIcon,
   RotateCcw,
 } from 'lucide-react';
@@ -31,10 +31,11 @@ export type Status =
 
 type StatusBadgeProps = {
   status: Status;
+  size?: BadgeProps['size'];
   className?: string;
 };
 
-const colors: Record<string, BadgeProps['variant']> = {
+export const statusColors: Record<string, BadgeProps['variant']> = {
   draft: 'neutral',
   submitted: 'outline',
   processing: 'yellow',
@@ -51,7 +52,7 @@ const colors: Record<string, BadgeProps['variant']> = {
 export const statusFallbackIcon = FileQuestion;
 
 export const statusIcons: Record<string, LucideIcon> = {
-  draft: FilePen,
+  draft: Pen,
   submitted: Hourglass,
   processing: LoaderCircle,
   in_progress: RefreshCcwIcon,
@@ -64,14 +65,14 @@ export const statusIcons: Record<string, LucideIcon> = {
   revoked: CircleX,
 };
 
-function StatusBadge({ status, className }: StatusBadgeProps) {
+function StatusBadge({ status, size, className }: StatusBadgeProps) {
   const { t } = useI18n();
 
-  const color = colors[status] ?? 'neutral';
+  const color = statusColors[status] ?? 'neutral';
   const Icon = statusIcons[status] ?? statusFallbackIcon;
 
   return (
-    <Badge variant={color} className={className}>
+    <Badge variant={color} size={size} className={className}>
       <Icon />
       {t(`case_exploration.status.${status}`, status)}
     </Badge>
