@@ -103,6 +103,22 @@ func Test_LoadTemplates_UnexpectedFile_Ignored(t *testing.T) {
 	assert.Equal(t, []string{"qlin"}, templates.Tenants())
 }
 
+// Kubernetes ConfigMap volume layout: real files under ..<timestamp>/, a ..data symlink to it,
+// and one symlink per key at the root.
+func Test_LoadTemplates_KubernetesConfigMapLayout_NoSkip(t *testing.T) {
+	dir := t.TempDir()
+	tsDir := filepath.Join(dir, "..2026_09_21_15_27_15.123456789")
+	require.NoError(t, os.Mkdir(tsDir, 0o750))
+	writeTemplate(t, tsDir, "manifest_qlin.tmpl", validTemplate)
+	require.NoError(t, os.Symlink(tsDir, filepath.Join(dir, "..data")))
+	require.NoError(t, os.Symlink(filepath.Join("..data", "manifest_qlin.tmpl"), filepath.Join(dir, "manifest_qlin.tmpl")))
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, []string{"qlin"}, templates.Tenants())
+	assert.Equal(t, StatusOK, templates.Status())
+}
+
 func Test_Render_TenantWithoutTemplate_ErrTemplateMissing(t *testing.T) {
 	dir := t.TempDir()
 	writeTemplate(t, dir, "manifest_radiant.tmpl", validTemplate)
