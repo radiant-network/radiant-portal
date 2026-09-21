@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 var CaseAssignmentTable = Table{
 	Name:  "case_assignment",
 	Alias: "assignment",
@@ -26,4 +28,30 @@ type CaseAssignee struct {
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
 	Email     string `json:"email,omitempty"`
+}
+
+// ListAssignmentCandidatesParams is the query string of the assignment candidates list. The
+// case itself is named by the route, not here.
+type ListAssignmentCandidatesParams struct {
+	Search    string `form:"search"`
+	Limit     int    `form:"limit"`
+	Offset    int    `form:"offset"`
+	PageIndex int    `form:"page_index"`
+}
+
+// ListAssignmentCandidatesQuery is the resolved candidates request handed to the repository.
+type ListAssignmentCandidatesQuery struct {
+	Search     string
+	Pagination *Pagination
+}
+
+func (p ListAssignmentCandidatesParams) Resolve() (*ListAssignmentCandidatesQuery, error) {
+	// A negative limit would cancel the LIMIT clause in GORM and return every eligible user.
+	if p.Limit < 0 || p.Offset < 0 || p.PageIndex < 0 {
+		return nil, fmt.Errorf("limit, offset and page_index must not be negative")
+	}
+	return &ListAssignmentCandidatesQuery{
+		Search:     p.Search,
+		Pagination: ResolvePagination(p.Limit, p.Offset, p.PageIndex),
+	}, nil
 }
