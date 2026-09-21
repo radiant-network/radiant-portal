@@ -13,6 +13,10 @@ type dbHealthChecker interface {
 	CheckDatabaseConnection() string
 }
 
+type templateStatusReporter interface {
+	Status() string
+}
+
 // StatusHandler handles the status endpoint
 // @Summary Get API status
 // @Description Returns the current status of the API
@@ -20,12 +24,13 @@ type dbHealthChecker interface {
 // @Produce json
 // @Success 200 {object} map[string]string
 // @Router /status [get]
-func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker) gin.HandlerFunc {
+func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker, templates templateStatusReporter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": gin.H{
-				"starrocks": repoStarrocks.CheckDatabaseConnection(),
-				"postgres":  repoPostgres.CheckDatabaseConnection(),
+				"starrocks":              repoStarrocks.CheckDatabaseConnection(),
+				"postgres":               repoPostgres.CheckDatabaseConnection(),
+				"notification_templates": templates.Status(),
 			},
 		})
 	}
