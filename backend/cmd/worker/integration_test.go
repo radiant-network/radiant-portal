@@ -1403,7 +1403,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_UnknownStatusCode(t *testing.
 		errors := []types.BatchMessage{
 			{
 				Code:    "SEQ-002",
-				Message: `Invalid field status_code for sequencing_experiment (CQGC / S13224 / ALIQUOT-12345). Reason: "in_slow_progress" is not a valid status code. Valid values [completed, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].`,
+				Message: `Invalid field status_code for sequencing_experiment (CQGC / S13224 / ALIQUOT-12345). Reason: "in_slow_progress" is not a valid status code. Valid values [completed, draft, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].`,
 				Path:    "sequencing_experiment[0].status_code",
 			},
 		}
@@ -1629,7 +1629,7 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 			ValueSetsRepo: repo,
 		}
 		cache := batchval.NewBatchValidationCache(&bv)
-		expected := []string{"completed", "inconclusive", "in_progress", "in_review", "processing", "reopened", "resolved", "revoked", "submitted", "unresolved"}
+		expected := []string{"completed", "draft", "inconclusive", "in_progress", "in_review", "processing", "reopened", "resolved", "revoked", "submitted", "unresolved"}
 
 		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
 		assert.NoError(t, err)

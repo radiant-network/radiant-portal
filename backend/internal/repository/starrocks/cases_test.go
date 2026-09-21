@@ -417,7 +417,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		filters, err := repo.GetCasesFilters(t.Context())
 		assert.NoError(t, err)
-		assert.Equal(t, len((*filters).Status), 10)
+		assert.Equal(t, 11, len((*filters).Status))
 		assert.Equal(t, len((*filters).Priority), 4)
 		assert.Equal(t, len((*filters).AnalysisCatalog), 4)
 		assert.Equal(t, len((*filters).Project), 2)
