@@ -3,12 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import StatusBadge, {
-  type Status,
-  statusColors,
-  statusFallbackIcon,
-  statusIcons,
-} from '@/components/base/badges/status-badge';
+import StatusBadge, { type Status, statusColors } from '@/components/base/badges/status-badge';
 import { type BadgeProps, badgeVariants } from '@/components/base/shadcn/badge';
 import {
   DropdownMenu,
@@ -94,7 +89,7 @@ function CaseStatusDropdown({
   }
 
   if (!canEdit || SYSTEM_APPLIED_STATUSES.includes(currentStatus)) {
-    const badge = <StatusBadge status={currentStatus} size={size} className={className} />;
+    const badge = <StatusBadge status={currentStatus} size={size} withIcon={false} className={className} />;
     if (!readOnlyTooltip) return badge;
 
     return (
@@ -104,8 +99,6 @@ function CaseStatusDropdown({
       </Tooltip>
     );
   }
-
-  const Icon = statusIcons[currentStatus] ?? statusFallbackIcon;
 
   return (
     <DropdownMenu>
@@ -117,7 +110,6 @@ function CaseStatusDropdown({
             className,
           )}
         >
-          <Icon />
           {label(currentStatus)}
           <ChevronDown />
         </button>
