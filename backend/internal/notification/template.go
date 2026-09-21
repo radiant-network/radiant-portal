@@ -90,7 +90,8 @@ func LoadTemplates(dir string) *Templates {
 		return t
 	}
 	for _, e := range entries {
-		if e.IsDir() {
+		// Hidden entries are mount plumbing (Kubernetes ConfigMap volumes expose a ..data symlink), not a stray file.
+		if e.IsDir() || strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
 		tenant, ok := tenantFromFilename(e.Name())
