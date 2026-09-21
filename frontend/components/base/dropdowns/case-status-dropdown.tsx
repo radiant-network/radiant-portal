@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
@@ -67,6 +67,7 @@ function CaseStatusDropdown({
     patchCaseStatus(key, opts, tenant),
   );
   const [currentStatus, setCurrentStatus] = useState<Status>(status);
+  const closedWithPointerRef = useRef(false);
 
   // Table cells are recycled across rows: resync when the row underneath changes.
   useEffect(() => {
@@ -115,7 +116,17 @@ function CaseStatusDropdown({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent
+        align="start"
+        onPointerUp={() => {
+          closedWithPointerRef.current = true;
+        }}
+        onCloseAutoFocus={event => {
+          // Radix hands focus back to the trigger, which the browser then paints as keyboard focus.
+          if (closedWithPointerRef.current) event.preventDefault();
+          closedWithPointerRef.current = false;
+        }}
+      >
         {MENU_ENTRIES.map(entry =>
           entry.submenu ? (
             <DropdownMenuSub key={entry.status}>

@@ -1,14 +1,21 @@
 import { Biohazard, Users } from 'lucide-react';
 
 import type { CaseEntity } from '@/api/api';
+import type { Status } from '@/components/base/badges/status-badge';
+import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import StatusBadge, { type Status } from 'components/base/badges/status-badge';
 
-export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
+type HeaderProps = {
+  data?: CaseEntity | null;
+  isLoading: boolean;
+  onStatusChange?: () => void;
+};
+
+export default function Header({ data, isLoading, onStatusChange }: HeaderProps) {
   const { t } = useI18n();
 
   return (
@@ -44,12 +51,14 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
         </Tooltip>,
         ...(data?.status_code
           ? [
-              <Tooltip key="status">
-                <TooltipTrigger>
-                  <StatusBadge className="px-3 py-2" status={data.status_code as Status} />
-                </TooltipTrigger>
-                <TooltipContent>{t(`case_entity.header.status_tooltip`)}</TooltipContent>
-              </Tooltip>,
+              <CaseStatusDropdown
+                key="status"
+                caseId={data.case_id}
+                status={data.status_code as Status}
+                className="px-3 py-2"
+                readOnlyTooltip={t('case_entity.header.status_tooltip')}
+                onSaved={onStatusChange}
+              />,
             ]
           : []),
       ]}

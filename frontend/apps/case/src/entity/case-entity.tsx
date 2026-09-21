@@ -42,7 +42,7 @@ export default function App() {
     (searchParams.get('tab') as CaseEntityTabs) ?? CaseEntityTabs.Details,
   );
 
-  const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
+  const { data, error, isLoading, mutate } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
       key: 'case-entity',
       caseId,
@@ -120,7 +120,7 @@ export default function App() {
   return (
     <CaseEntityContext value={data}>
       <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-        <Header data={data} isLoading={isLoading} />
+        <Header data={data} isLoading={isLoading} onStatusChange={() => mutate()} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
             <TabsListItem data-cy="details-tab" value={CaseEntityTabs.Details}>
