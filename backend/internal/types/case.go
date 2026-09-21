@@ -46,6 +46,7 @@ type PatchCase struct {
 
 // Case status codes, mirroring the `status` dictionary.
 const (
+	CaseStatusDraft        = "draft"
 	CaseStatusSubmitted    = "submitted"
 	CaseStatusProcessing   = "processing"
 	CaseStatusInProgress   = "in_progress"
@@ -64,6 +65,7 @@ var SystemAppliedCaseStatuses = []string{
 }
 
 var UserAppliedCaseStatuses = []string{
+	CaseStatusDraft,
 	CaseStatusInProgress,
 	CaseStatusInReview,
 	CaseStatusCompleted,
