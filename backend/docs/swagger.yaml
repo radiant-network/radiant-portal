@@ -2196,11 +2196,7 @@ components:
       description: Case fields to change. Omitted fields are left untouched.
       properties:
         status_code:
-          description: |-
-            Target status. Only user-applied codes are accepted — `submitted` and `processing` are
-            system-applied and rejected here.
           enum:
-          - draft
           - in_progress
           - in_review
           - completed

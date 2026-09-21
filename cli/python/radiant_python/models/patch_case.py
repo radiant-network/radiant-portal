@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -26,7 +26,7 @@ class PatchCase(BaseModel):
     """
     Case fields to change. Omitted fields are left untouched.
     """ # noqa: E501
-    status_code: Optional[StrictStr] = Field(default=None, description="Target status. Only user-applied codes are accepted — `submitted` and `processing` are system-applied and rejected here.")
+    status_code: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["status_code"]
 
     @field_validator('status_code')
@@ -35,8 +35,8 @@ class PatchCase(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['draft', 'in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked']):
-            raise ValueError("must be one of enum values ('draft', 'in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked')")
+        if value not in set(['in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked']):
+            raise ValueError("must be one of enum values ('in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked')")
         return value
 
     model_config = ConfigDict(

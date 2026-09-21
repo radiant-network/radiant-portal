@@ -542,7 +542,7 @@ func Test_PatchCaseHandler_RejectsEmptyBody(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: draft, in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
 }
 
