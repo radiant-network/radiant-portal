@@ -1162,6 +1162,9 @@
       "title": "Sequencing"
     }
   },
+  "case_status": {
+    "error": "Status update failed. Please try again."
+  },
   "files": {
     "filters": {
       "data_type_code": "Type",
