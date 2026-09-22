@@ -59,6 +59,7 @@ export const ORG_ACTIONS = {
   interpretVariant: 'can_interpret_variant',
   commentVariant: 'can_comment_variant',
   flagVariant: 'can_flag_variant',
+  editCase: 'can_edit_case',
 } as const;
 
 /** Org codes where the caller holds each org-scoped action, in the currently selected tenant. */
