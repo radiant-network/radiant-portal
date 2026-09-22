@@ -37,9 +37,7 @@ func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *g
 // types.ListQuery or types.CountQuery does not qualify.
 type occurrenceQuery interface {
 	types.Query
-	WithNote() bool
-	WithFlag() []types.OccurrenceFlagType
-	WithInterpretation() bool
+	annotationQuery
 }
 
 func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, taskId int, userQuery occurrenceQuery, db *gorm.DB) (*gorm.DB, int, error) {
@@ -51,17 +49,7 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, tas
 	if userQuery != nil {
 		tx = JoinSNVOccurrencesWithVariants(snvTable, tx)
 
-		if userQuery.WithNote() {
-			tx = keepOccurrencesWithNote(snvTable, "locus_id", caseId, seqId, tx)
-		}
-
-		if len(userQuery.WithFlag()) > 0 {
-			tx = keepOccurrencesWithFlag(snvTable, "locus_id", userQuery.WithFlag(), caseId, seqId, tx)
-		}
-
-		if userQuery.WithInterpretation() {
-			tx = keepOccurrencesWithInterpretation(snvTable, caseId, seqId, tx)
-		}
+		tx = keepOccurrencesWithAnyAnnotation(snvTable, "locus_id", caseId, seqId, userQuery, tx)
 
 		if userQuery.HasFieldFromTables(types.TopmedTable) {
 			tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)

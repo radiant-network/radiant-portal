@@ -533,3 +533,95 @@ func Test_GermlineCNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_
 		assert.EqualValues(t, 2, count.Count)
 	})
 }
+
+func Test_GermlineCNV_GetOccurrences_NoteAndFlagFilters_Are_Ored(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		_, err = flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "2",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		// No occurrence carries both, so an AND would keep none.
+		notedOrStarred, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithNoteFilter(true), types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, notedOrStarred)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 2)
+
+		count, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields, types.WithNoteFilter(true), types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		counted, err := repo.CountOccurrences(t.Context(), 2, 1, 1, count)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, counted.FilteredCount)
+		assert.EqualValues(t, 2, counted.Count)
+	})
+}
+
+// A CNV occurrence can never carry an interpretation, so the filter must exclude every row rather
+// than drop out of the disjunction and widen it.
+func Test_GermlineCNV_GetOccurrences_WithInterpretation_Keeps_No_Occurrence(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, query)
+		assert.NoError(t, err)
+		assert.Empty(t, occurrences)
+
+		count, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineCNVOccurrencesFields, types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		counted, err := repo.CountOccurrences(t.Context(), 2, 1, 1, count)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, counted.FilteredCount)
+		assert.EqualValues(t, 2, counted.Count)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_WithInterpretation_Still_Keeps_Noted_Occurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil, types.WithNoteFilter(true), types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
