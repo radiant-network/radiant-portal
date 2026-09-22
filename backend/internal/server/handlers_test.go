@@ -91,14 +91,29 @@ func Test_StatusHandler(t *testing.T) {
 	repoStarrocks := &MockRepository{}
 	repoPostgres := &MockRepository{}
 	router := gin.Default()
-	router.GET("/status", StatusHandler(repoStarrocks, repoPostgres))
+	router.GET("/status", StatusHandler(repoStarrocks, repoPostgres, stubTemplateStatus("ok")))
 
 	req, _ := http.NewRequest("GET", "/status", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up"}}`, w.Body.String())
+	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up", "notification_templates": "ok"}}`, w.Body.String())
+}
+
+type stubTemplateStatus string
+
+func (s stubTemplateStatus) Status() string { return string(s) }
+
+func Test_StatusHandler_TemplateWarning_Still200(t *testing.T) {
+	router := gin.Default()
+	router.GET("/status", StatusHandler(&MockRepository{}, &MockRepository{}, stubTemplateStatus("warning")))
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest("GET", "/status", nil))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up", "notification_templates": "warning"}}`, w.Body.String())
 }
 
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {

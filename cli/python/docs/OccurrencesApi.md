@@ -404,7 +404,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_germline_cnv_occurrences**
-> Count count_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+> OccurrenceCount count_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
 
 Count germline CNV occurrences
 
@@ -416,8 +416,8 @@ Counts germline CNV occurrences for a given sequence ID
 
 ```python
 import radiant_python
-from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -471,7 +471,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Count**](Count.md)
+[**OccurrenceCount**](OccurrenceCount.md)
 
 ### Authorization
 
@@ -496,7 +496,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_germline_snv_occurrences**
-> Count count_germline_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+> OccurrenceCount count_germline_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
 
 Count germline SNV occurrences
 
@@ -508,8 +508,8 @@ Counts germline SNV occurrences for a given sequence ID
 
 ```python
 import radiant_python
-from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -563,7 +563,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Count**](Count.md)
+[**OccurrenceCount**](OccurrenceCount.md)
 
 ### Authorization
 
@@ -588,7 +588,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_somatic_cnv_occurrences**
-> Count count_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+> OccurrenceCount count_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
 
 Count somatic CNV occurrences
 
@@ -600,8 +600,8 @@ Counts somatic CNV occurrences for a given tumor sequence ID
 
 ```python
 import radiant_python
-from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -655,7 +655,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Count**](Count.md)
+[**OccurrenceCount**](OccurrenceCount.md)
 
 ### Authorization
 
@@ -680,7 +680,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_somatic_snv_occurrences**
-> Count count_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+> OccurrenceCount count_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
 
 Count somatic SNV occurrences
 
@@ -692,8 +692,8 @@ Counts somatic SNV occurrences for a given sequence ID
 
 ```python
 import radiant_python
-from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -747,7 +747,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Count**](Count.md)
+[**OccurrenceCount**](OccurrenceCount.md)
 
 ### Authorization
 

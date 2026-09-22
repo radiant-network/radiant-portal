@@ -11,7 +11,7 @@ import (
 
 type somaticCNVOccurrencesReader interface {
 	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.SomaticCNVOccurrence, error)
-	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceCountQuery) (int64, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceCountQuery) (types.OccurrenceCount, error)
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
 	GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
@@ -99,7 +99,7 @@ func OccurrencesSomaticCNVListHandler(repo somaticCNVOccurrencesReader) gin.Hand
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
-// @Success 200 {object} types.Count
+// @Success 200 {object} types.OccurrenceCount
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
@@ -144,13 +144,12 @@ func OccurrencesSomaticCNVCountHandler(repo somaticCNVOccurrencesReader) gin.Han
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		counts, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		countResponse := types.Count{Count: count}
-		c.JSON(http.StatusOK, countResponse)
+		c.JSON(http.StatusOK, counts)
 	}
 }
 

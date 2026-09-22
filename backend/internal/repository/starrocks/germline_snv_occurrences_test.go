@@ -110,7 +110,8 @@ func Test_Germline_SNV_CountOccurrences(t *testing.T) {
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 5, nil)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.Count)
+		assert.EqualValues(t, 1, count.FilteredCount)
 	})
 }
 
@@ -157,7 +158,8 @@ func Test_Germline_SNV_CountOccurrences_Return_Count_That_Match_Filters(t *testi
 		c, err2 := repo.CountOccurrences(t.Context(), 1, 1, 5, query)
 
 		if assert.NoError(t, err2) {
-			assert.EqualValues(t, 1, c)
+			assert.EqualValues(t, 1, c.Count)
+			assert.EqualValues(t, 1, c.FilteredCount)
 		}
 	})
 }
@@ -642,7 +644,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Multi
 		assert.NoError(t, err)
 		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, c)
+		assert.EqualValues(t, 1, c.Count)
 	})
 }
 
@@ -794,13 +796,15 @@ func Test_Germline_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 2, count)
+		assert.EqualValues(t, 2, count.Count)
+		assert.EqualValues(t, 2, count.FilteredCount)
 
 		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithNoteFilter(true))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 1, 1, 5, queryWithNote)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 	})
 }
 
@@ -812,7 +816,7 @@ func Test_Germline_SNV_CountOccurrences_WithNote_Ignores_Notes_Of_Another_Case(t
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 999, 1, 5, queryWithNote)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 0, count)
+		assert.EqualValues(t, 0, count.FilteredCount)
 	})
 }
 
@@ -845,7 +849,8 @@ func Test_Germline_SNV_CountOccurrences_WithInterpretation_Counts_Only_Interpret
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 	})
 }
 
@@ -857,7 +862,7 @@ func Test_Germline_SNV_CountOccurrences_WithInterpretation_Ignores_Interpretatio
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 999, 1, 5, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 0, count)
+		assert.EqualValues(t, 0, count.FilteredCount)
 	})
 }
 
@@ -918,18 +923,21 @@ func Test_Germline_SNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 2, 1, 5, baseline)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 2, count)
+		assert.EqualValues(t, 2, count.Count)
+		assert.EqualValues(t, 2, count.FilteredCount)
 
 		pinned, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypePin}))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 1, 5, pinned)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 
 		starred, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 1, 5, starred)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 0, count)
+		assert.EqualValues(t, 0, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 	})
 }

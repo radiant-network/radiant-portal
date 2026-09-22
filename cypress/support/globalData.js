@@ -367,7 +367,7 @@ const globalData = {
           field: 'nb_snv',
           value: '10000',
           op: '<',
-          count: 521,
+          count: 500,
         },
       ],
       Gene: [

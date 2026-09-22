@@ -24,6 +24,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/notification"
 	"github.com/radiant-network/radiant-api/internal/provisioning"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
@@ -48,6 +49,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	// S3 URL Presigner for IGV returned URLs
 	s3Presigner := utils.NewS3PreSigner()
+
+	// One lab notification template per tenant. A bad file warns and is skipped, never fatal:
+	// only that tenant's notify fails. The load outcome is exposed by GET /status.
+	notificationTemplates := notification.LoadTemplates(utils.GetEnvOrDefault(notification.TemplateDirEnv, ""))
 
 	// Create repository. The named wrappers make each repo's target database part of its
 	// constructor signature; the dual-purpose repos (cases, sequencing experiment, documents)
@@ -105,7 +110,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	}
 
 	// Initialize public routes explicitly
-	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
+	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates))
 	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
 
 	// Private routes, alphabetically ordered
@@ -162,6 +167,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.CaseEntityHandler(repoCases, repoIGV, repoCaseAssignments))
+	casesGroup.GET("/:case_id/assignment_candidates", requireActionAt(types.ActionEditCase, orgFromCase), server.ListCaseAssignmentCandidatesHandler(repoCaseAssignments, repoAuth))
 	casesGroup.POST("/:case_id/documents/search", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))

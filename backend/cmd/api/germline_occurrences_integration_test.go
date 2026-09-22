@@ -30,7 +30,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
-func testCount(t *testing.T, data string, body string, expected int) {
+func testCount(t *testing.T, data string, body string, expected int, expectedFiltered int) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
@@ -41,7 +41,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, fmt.Sprintf(`{"count":%d}`, expected), w.Body.String())
+		assert.JSONEq(t, fmt.Sprintf(`{"count":%d, "filtered_count":%d}`, expected, expectedFiltered), w.Body.String())
 	})
 }
 func testAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
@@ -175,24 +175,24 @@ func Test_SNVOccurrences_List_Return_Only_Occurrences_Having_A_Note_When_With_No
 	testList(t, "multiple", body, expected)
 }
 
-func Test_SNVOccurrences_Count_Return_Only_Interpreted_Occurrences_When_With_Interpretation_Is_True(t *testing.T) {
-	testCount(t, "multiple", `{"with_interpretation":true}`, 1)
+func Test_SNVOccurrences_Count_Narrows_Only_Filtered_Count_When_With_Interpretation_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_interpretation":true}`, 2, 1)
 }
 
 func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Interpretation_Is_False(t *testing.T) {
-	testCount(t, "multiple", `{"with_interpretation":false}`, 2)
+	testCount(t, "multiple", `{"with_interpretation":false}`, 2, 2)
 }
 
-func Test_SNVOccurrences_Count_Return_Only_Occurrences_Having_A_Note_When_With_Note_Is_True(t *testing.T) {
-	testCount(t, "multiple", `{"with_note":true}`, 1)
+func Test_SNVOccurrences_Count_Narrows_Only_Filtered_Count_When_With_Note_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_note":true}`, 2, 1)
 }
 
 func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Note_Is_False(t *testing.T) {
-	testCount(t, "multiple", `{"with_note":false}`, 2)
+	testCount(t, "multiple", `{"with_note":false}`, 2, 2)
 }
 
 func Test_SNVOccurrences_Count(t *testing.T) {
-	testCount(t, "simple", "{}", 1)
+	testCount(t, "simple", "{}", 1, 1)
 }
 
 func Test_SNVOccurrences_Count_Return_Expected_Count_When_Sqon_Specified(t *testing.T) {
@@ -205,7 +205,7 @@ func Test_SNVOccurrences_Count_Return_Expected_Count_When_Sqon_Specified(t *test
 				}
 		    }
 		}`
-	testCount(t, "multiple", body, 1)
+	testCount(t, "multiple", body, 1, 1)
 }
 
 func Test_SNVOccurrence_Aggregation(t *testing.T) {
@@ -408,7 +408,7 @@ func Test_CNVOccurrence_Count(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `{"count":2}`
+		expected := `{"count":2, "filtered_count":2}`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
@@ -439,7 +439,7 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expected := `{"count":1}`
+		expected := `{"count":1, "filtered_count":1}`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }

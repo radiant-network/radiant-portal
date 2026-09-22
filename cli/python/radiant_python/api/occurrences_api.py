@@ -22,7 +22,6 @@ from typing_extensions import Annotated
 from radiant_python.models.aggregation import Aggregation
 from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
-from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
 from radiant_python.models.expanded_somatic_snv_occurrence import ExpandedSomaticSNVOccurrence
@@ -30,6 +29,7 @@ from radiant_python.models.facet import Facet
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.models.somatic_cnv_occurrence import SomaticCNVOccurrence
 from radiant_python.models.somatic_snv_occurrence import SomaticSNVOccurrence
 from radiant_python.models.statistics import Statistics
@@ -1537,7 +1537,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Count:
+    ) -> OccurrenceCount:
         """Count germline CNV occurrences
 
         Counts germline CNV occurrences for a given sequence ID
@@ -1587,7 +1587,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -1625,7 +1625,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Count]:
+    ) -> ApiResponse[OccurrenceCount]:
         """Count germline CNV occurrences
 
         Counts germline CNV occurrences for a given sequence ID
@@ -1675,7 +1675,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -1763,7 +1763,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -1886,7 +1886,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Count:
+    ) -> OccurrenceCount:
         """Count germline SNV occurrences
 
         Counts germline SNV occurrences for a given sequence ID
@@ -1936,7 +1936,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -1974,7 +1974,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Count]:
+    ) -> ApiResponse[OccurrenceCount]:
         """Count germline SNV occurrences
 
         Counts germline SNV occurrences for a given sequence ID
@@ -2024,7 +2024,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2112,7 +2112,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2235,7 +2235,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Count:
+    ) -> OccurrenceCount:
         """Count somatic CNV occurrences
 
         Counts somatic CNV occurrences for a given tumor sequence ID
@@ -2285,7 +2285,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2323,7 +2323,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Count]:
+    ) -> ApiResponse[OccurrenceCount]:
         """Count somatic CNV occurrences
 
         Counts somatic CNV occurrences for a given tumor sequence ID
@@ -2373,7 +2373,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2461,7 +2461,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2584,7 +2584,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Count:
+    ) -> OccurrenceCount:
         """Count somatic SNV occurrences
 
         Counts somatic SNV occurrences for a given sequence ID
@@ -2634,7 +2634,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2672,7 +2672,7 @@ class OccurrencesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Count]:
+    ) -> ApiResponse[OccurrenceCount]:
         """Count somatic SNV occurrences
 
         Counts somatic SNV occurrences for a given sequence ID
@@ -2722,7 +2722,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
@@ -2810,7 +2810,7 @@ class OccurrencesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Count",
+            '200': "OccurrenceCount",
             '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",

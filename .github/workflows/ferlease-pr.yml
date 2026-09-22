@@ -203,6 +203,9 @@ jobs:
           NEW_FAILS=${NEW_FAILS:-0}
           TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d " ")
           TOTAL_FAILS=${TOTAL_FAILS:-0}
+          # Only keep new failure screenshots in the combined zip
+          find /tmp/all_screenshots -type f \( ! -name "*(attempt 3)*" -o -name "*SJRA-*" \) -delete 2>/dev/null || true
+          find /tmp/all_screenshots -mindepth 1 -type d -empty -delete 2>/dev/null || true
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then
             cd /tmp && zip -rq combined_screenshots.zip all_screenshots/
@@ -210,7 +213,13 @@ jobs:
             COMBINED_ZURL="${PROXY_BASE}/?key=$RELEASE/combined_screenshots.zip"
           fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
-          $ALL_PASSED && COLOR="good" || COLOR="danger"
+          if $ALL_PASSED; then
+            COLOR="good"
+          elif [ "$NEW_FAILS" -eq 0 ] && [ "$TOTAL_FAILS" -gt 0 ]; then
+            COLOR="good"
+          else
+            COLOR="danger"
+          fi
           TITLE="Ferlease - $RELEASE - Cypress Test Results: $STATUS"
           BODY_PARTS=()
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")

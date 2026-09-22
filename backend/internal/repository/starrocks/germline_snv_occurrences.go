@@ -71,7 +71,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	return occurrences, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	return CountSNV(types.GermlineSNVOccurrenceTable, caseId, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 

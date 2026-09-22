@@ -302,13 +302,15 @@ func Test_Somatic_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 71, 74, 74, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 3, count)
+		assert.EqualValues(t, 3, count.Count)
+		assert.EqualValues(t, 3, count.FilteredCount)
 
 		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithNoteFilter(true))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 71, 74, 74, queryWithNote)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
 	})
 }
 
@@ -331,13 +333,14 @@ func Test_Somatic_SNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 3, count)
+		assert.EqualValues(t, 3, count.Count)
 
 		starred, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, starred)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
 	})
 }
 
@@ -354,12 +357,13 @@ func Test_Somatic_SNV_CountOccurrences_WithInterpretation_Counts_Only_Interprete
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 3, count)
+		assert.EqualValues(t, 3, count.Count)
 
 		interpreted, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithInterpretationFilter(true))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, interpreted)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
 	})
 }

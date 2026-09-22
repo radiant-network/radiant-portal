@@ -161,16 +161,18 @@ func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, taskId int,
 	return tx, part, nil
 }
 
-func CountSNV(snvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery, db *gorm.DB) (int64, error) {
-	tx, _, err := PrepareSNVListOrCountQuery(snvTable, caseId, seqId, taskId, userQuery, db)
-	if err != nil {
-		return 0, fmt.Errorf("error during query preparation %w", err)
-	}
-	var count int64
-	if err = tx.Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error counting occurrences: %w", err)
-	}
-	return count, nil
+func CountSNV(snvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery, db *gorm.DB) (types.OccurrenceCount, error) {
+	return countWithAndWithoutAnnotations(userQuery, func(query types.OccurrenceCountQuery) (int64, error) {
+		tx, _, err := PrepareSNVListOrCountQuery(snvTable, caseId, seqId, taskId, query, db)
+		if err != nil {
+			return 0, fmt.Errorf("error during query preparation %w", err)
+		}
+		var count int64
+		if err = tx.Count(&count).Error; err != nil {
+			return 0, fmt.Errorf("error counting occurrences: %w", err)
+		}
+		return count, nil
+	})
 }
 
 func AggregateSNV(snvTable types.Table, seqId int, taskId int, userQuery types.AggQuery, db *gorm.DB) ([]Aggregation, error) {

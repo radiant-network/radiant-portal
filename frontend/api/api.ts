@@ -4260,6 +4260,25 @@ export const ObservationTextBatchInterpretationCodeEnum = {
 export type ObservationTextBatchInterpretationCodeEnum = typeof ObservationTextBatchInterpretationCodeEnum[keyof typeof ObservationTextBatchInterpretationCodeEnum];
 
 /**
+ * OccurrenceCount holds both totals of an occurrence count: the query builder total and the one left by the annotation filters
+ * @export
+ * @interface OccurrenceCount
+ */
+export interface OccurrenceCount {
+    /**
+     * Number of results matching the sqon, ignoring the annotation filters
+     * @type {number}
+     * @memberof OccurrenceCount
+     */
+    'count'?: number;
+    /**
+     * Number of results also matching with_note / with_flag / with_interpretation; equal to count when none is set
+     * @type {number}
+     * @memberof OccurrenceCount
+     */
+    'filtered_count'?: number;
+}
+/**
  * 
  * @export
  * @enum {string}
@@ -7952,6 +7971,68 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {string} [search] Filter on first name, last name or email
+         * @param {number} [limit] Page size
+         * @param {number} [offset] Page offset
+         * @param {number} [pageIndex] Page index, an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listCaseAssignmentCandidates: async (tenant: string, caseId: number, search?: string, limit?: number, offset?: number, pageIndex?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listCaseAssignmentCandidates', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('listCaseAssignmentCandidates', 'caseId', caseId)
+            const localVarPath = `/{tenant}/cases/{case_id}/assignment_candidates`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (pageIndex !== undefined) {
+                localVarQueryParameter['page_index'] = pageIndex;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8288,6 +8369,24 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {string} [search] Filter on first name, last name or email
+         * @param {number} [limit] Page size
+         * @param {number} [offset] Page offset
+         * @param {number} [pageIndex] Page index, an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listCaseAssignmentCandidates(tenant: string, caseId: number, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CaseAssignee>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listCaseAssignmentCandidates(tenant, caseId, search, limit, offset, pageIndex, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.listCaseAssignmentCandidates']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8441,6 +8540,21 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * @summary List the users who may be assigned a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {string} [search] Filter on first name, last name or email
+         * @param {number} [limit] Page size
+         * @param {number} [offset] Page offset
+         * @param {number} [pageIndex] Page index, an alternative to offset
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listCaseAssignmentCandidates(tenant: string, caseId: number, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<CaseAssignee>> {
+            return localVarFp.listCaseAssignmentCandidates(tenant, caseId, search, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
@@ -8588,6 +8702,23 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(tenant: string, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+     * @summary List the users who may be assigned a case
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {string} [search] Filter on first name, last name or email
+     * @param {number} [limit] Page size
+     * @param {number} [offset] Page offset
+     * @param {number} [pageIndex] Page index, an alternative to offset
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public listCaseAssignmentCandidates(tenant: string, caseId: number, search?: string, limit?: number, offset?: number, pageIndex?: number, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).listCaseAssignmentCandidates(tenant, caseId, search, limit, offset, pageIndex, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -12435,7 +12566,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -12452,7 +12583,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -12469,7 +12600,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countSomaticCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countSomaticCNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -12486,7 +12617,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+        async countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceCount>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
@@ -12791,7 +12922,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceCount> {
             return localVarFp.countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
@@ -12805,7 +12936,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceCount> {
             return localVarFp.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
@@ -12819,7 +12950,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countSomaticCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceCount> {
             return localVarFp.countSomaticCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
@@ -12833,7 +12964,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+        countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceCount> {
             return localVarFp.countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**

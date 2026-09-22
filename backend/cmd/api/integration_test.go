@@ -56,6 +56,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/cases/1",
 			"radiant/cases/filters",
 			"radiant/cases/autocomplete",
+			"radiant/cases/1/assignment_candidates",
 			"radiant/genes/autocomplete",
 			"radiant/hpo/autocomplete",
 			"radiant/igv/1",
