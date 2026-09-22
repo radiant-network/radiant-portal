@@ -9,6 +9,8 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { useCanEditCase } from '../../permissions/use-case-permissions';
+
 type HeaderProps = {
   data?: CaseEntity | null;
   isLoading: boolean;
@@ -17,6 +19,7 @@ type HeaderProps = {
 
 export default function Header({ data, isLoading, onStatusChange }: HeaderProps) {
   const { t } = useI18n();
+  const canEditCase = useCanEditCase(data?.diagnosis_lab_code);
 
   return (
     <HeaderNavigation
@@ -55,6 +58,7 @@ export default function Header({ data, isLoading, onStatusChange }: HeaderProps)
                 key="status"
                 caseId={data.case_id}
                 status={data.status_code as Status}
+                canEdit={canEditCase}
                 className="px-3 py-2"
                 readOnlyTooltip={t('case_entity.header.status_tooltip')}
                 onSaved={onStatusChange}
