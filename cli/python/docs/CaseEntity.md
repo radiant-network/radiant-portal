@@ -31,7 +31,7 @@ Name | Type | Description | Notes
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperiment]**](CaseSequencingExperiment.md) |  | 
-**status_code** | **str** |  | 
+**status_code** | [**CaseStatus**](CaseStatus.md) |  | 
 **tasks** | [**List[CaseTask]**](CaseTask.md) |  | 
 **updated_on** | **str** |  | 
 

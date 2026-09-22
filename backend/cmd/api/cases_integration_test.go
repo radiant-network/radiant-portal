@@ -135,6 +135,7 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"key":"UCSF", "label":"University of California San-Francisco"}], 
 		"status_code":[
 			{"key":"completed", "label":"Closed"},
+			{"key":"draft", "label":"Draft"},
 			{"key":"in_progress", "label":"In Progress"},
 			{"key":"in_review", "label":"In Review"},
 			{"key":"inconclusive", "label":"Inconclusive"},

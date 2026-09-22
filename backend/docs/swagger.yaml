@@ -325,7 +325,7 @@ components:
           type: array
           uniqueItems: false
         status_code:
-          type: string
+          $ref: '#/components/schemas/CaseStatus'
         tasks:
           items:
             $ref: '#/components/schemas/CaseTask'
@@ -697,7 +697,7 @@ components:
         project_name:
           type: string
         status_code:
-          type: string
+          $ref: '#/components/schemas/CaseStatus'
         submitter_proband_id:
           type: string
         updated_on:
@@ -761,6 +761,32 @@ components:
       - sample_organization_code
       - submitter_sample_id
       type: object
+    CaseStatus:
+      enum:
+      - draft
+      - submitted
+      - processing
+      - in_progress
+      - in_review
+      - completed
+      - resolved
+      - unresolved
+      - inconclusive
+      - reopened
+      - revoked
+      type: string
+      x-enum-varnames:
+      - CaseStatusDraft
+      - CaseStatusSubmitted
+      - CaseStatusProcessing
+      - CaseStatusInProgress
+      - CaseStatusInReview
+      - CaseStatusCompleted
+      - CaseStatusResolved
+      - CaseStatusUnresolved
+      - CaseStatusInconclusive
+      - CaseStatusReopened
+      - CaseStatusRevoked
     CaseTask:
       properties:
         created_on:
@@ -2209,6 +2235,15 @@ components:
       description: Case fields to change. Omitted fields are left untouched.
       properties:
         status_code:
+          enum:
+          - in_progress
+          - in_review
+          - completed
+          - resolved
+          - unresolved
+          - inconclusive
+          - reopened
+          - revoked
           example: in_review
           type: string
       type: object

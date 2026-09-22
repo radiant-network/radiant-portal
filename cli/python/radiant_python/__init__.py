@@ -83,6 +83,7 @@ from radiant_python.models.case_patient_clinical_information import CasePatientC
 from radiant_python.models.case_result import CaseResult
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
+from radiant_python.models.case_status import CaseStatus
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
@@ -132,6 +133,7 @@ from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
 from radiant_python.models.observation_text_batch import ObservationTextBatch
+from radiant_python.models.occurrence_count import OccurrenceCount
 from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel

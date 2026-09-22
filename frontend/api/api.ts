@@ -689,10 +689,10 @@ export interface CaseEntity {
     'sequencing_experiments': Array<CaseSequencingExperiment>;
     /**
      * 
-     * @type {string}
+     * @type {CaseStatus}
      * @memberof CaseEntity
      */
-    'status_code': string;
+    'status_code': CaseStatus;
     /**
      * 
      * @type {Array<CaseTask>}
@@ -706,6 +706,8 @@ export interface CaseEntity {
      */
     'updated_on': string;
 }
+
+
 /**
  * Paraclinical exam observation to display in Case Entity
  * @export
@@ -1334,10 +1336,10 @@ export interface CaseResult {
     'project_name'?: string;
     /**
      * 
-     * @type {string}
+     * @type {CaseStatus}
      * @memberof CaseResult
      */
-    'status_code': string;
+    'status_code': CaseStatus;
     /**
      * 
      * @type {string}
@@ -1351,6 +1353,8 @@ export interface CaseResult {
      */
     'updated_on': string;
 }
+
+
 /**
  * Sequencing experiment to display in a Case
  * @export
@@ -1455,6 +1459,29 @@ export interface CaseSequencingExperimentBatch {
      */
     'submitter_sample_id': string;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const CaseStatus = {
+    CaseStatusDraft: 'draft',
+    CaseStatusSubmitted: 'submitted',
+    CaseStatusProcessing: 'processing',
+    CaseStatusInProgress: 'in_progress',
+    CaseStatusInReview: 'in_review',
+    CaseStatusCompleted: 'completed',
+    CaseStatusResolved: 'resolved',
+    CaseStatusUnresolved: 'unresolved',
+    CaseStatusInconclusive: 'inconclusive',
+    CaseStatusReopened: 'reopened',
+    CaseStatusRevoked: 'revoked'
+} as const;
+
+export type CaseStatus = typeof CaseStatus[keyof typeof CaseStatus];
+
+
 /**
  * 
  * @export
@@ -4449,8 +4476,22 @@ export interface PatchCase {
      * @type {string}
      * @memberof PatchCase
      */
-    'status_code'?: string;
+    'status_code'?: PatchCaseStatusCodeEnum;
 }
+
+export const PatchCaseStatusCodeEnum = {
+    InProgress: 'in_progress',
+    InReview: 'in_review',
+    Completed: 'completed',
+    Resolved: 'resolved',
+    Unresolved: 'unresolved',
+    Inconclusive: 'inconclusive',
+    Reopened: 'reopened',
+    Revoked: 'revoked'
+} as const;
+
+export type PatchCaseStatusCodeEnum = typeof PatchCaseStatusCodeEnum[keyof typeof PatchCaseStatusCodeEnum];
+
 /**
  * 
  * @export

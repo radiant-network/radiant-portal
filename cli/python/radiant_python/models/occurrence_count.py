@@ -17,27 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class PatchCase(BaseModel):
+class OccurrenceCount(BaseModel):
     """
-    Case fields to change. Omitted fields are left untouched.
+    OccurrenceCount holds both totals of an occurrence count: the query builder total and the one left by the annotation filters
     """ # noqa: E501
-    status_code: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["status_code"]
-
-    @field_validator('status_code')
-    def status_code_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked']):
-            raise ValueError("must be one of enum values ('in_progress', 'in_review', 'completed', 'resolved', 'unresolved', 'inconclusive', 'reopened', 'revoked')")
-        return value
+    count: Optional[StrictInt] = Field(default=None, description="Number of results matching the sqon, ignoring the annotation filters")
+    filtered_count: Optional[StrictInt] = Field(default=None, description="Number of results also matching with_note / with_flag / with_interpretation; equal to count when none is set")
+    __properties: ClassVar[List[str]] = ["count", "filtered_count"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,7 +48,7 @@ class PatchCase(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PatchCase from a JSON string"""
+        """Create an instance of OccurrenceCount from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -82,7 +73,7 @@ class PatchCase(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PatchCase from a dict"""
+        """Create an instance of OccurrenceCount from a dict"""
         if obj is None:
             return None
 
@@ -90,7 +81,8 @@ class PatchCase(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "status_code": obj.get("status_code")
+            "count": obj.get("count"),
+            "filtered_count": obj.get("filtered_count")
         })
         return _obj
 
