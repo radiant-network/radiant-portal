@@ -108,6 +108,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**patch_case**](docs/CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+*CasesApi* | [**put_case_assignments**](docs/CasesApi.md#put_case_assignments) | **PUT** /{tenant}/cases/{case_id}/assignments | Set the users a case is assigned to
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
 *ConfigApi* | [**get_client_config**](docs/ConfigApi.md#get_client_config) | **GET** /config | Get public client configuration
@@ -308,6 +309,7 @@ Class | Method | HTTP request | Description
  - [TenantMembership](docs/TenantMembership.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
+ - [UpdateCaseAssignmentsRequest](docs/UpdateCaseAssignmentsRequest.md)
  - [UpdateCaseBatch](docs/UpdateCaseBatch.md)
  - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)

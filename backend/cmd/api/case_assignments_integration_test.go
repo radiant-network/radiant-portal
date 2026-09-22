@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // candidatesRouter mirrors the production wiring: RequireTenantAccess, then the can_edit_case
@@ -86,6 +88,153 @@ func Test_ListCaseAssignmentCandidates_WithoutEditRightsAtTheLab(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/radiant/cases/1/assignment_candidates", nil)
 		w := httptest.NewRecorder()
 		candidatesRouter(env, aliceID).ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+}
+
+// assignmentsRouter mirrors the production wiring for the write path: RequireTenantAccess, then
+// the can_edit_case gate resolving the case's lab, then the handler.
+func assignmentsRouter(env *testutils.Env, userID string) *gin.Engine {
+	repo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+	authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+	auth := &testutils.MockAuth{Id: userID}
+
+	router := gin.New()
+	tenantRoutes := router.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+	tenantRoutes.PUT("/cases/:case_id/assignments",
+		server.RequireActionAt(auth, authRepo, types.ActionEditCase, server.OrgFromCaseParam(authRepo)),
+		server.PutCaseAssignmentsHandler(repo))
+	return router
+}
+
+func putAssignments(t *testing.T, env *testutils.Env, userID, path, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	req, _ := http.NewRequest("PUT", "/radiant/cases/"+path+"/assignments", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	assignmentsRouter(env, userID).ServeHTTP(w, req)
+	return w
+}
+
+// assigneesOfCase1 reads the stored set back. The endpoint answers 200 with no body, like the
+// other PUTs, so what was actually written is asserted here rather than on the response.
+func assigneesOfCase(t *testing.T, env *testutils.Env, caseID int) []string {
+	t.Helper()
+	repo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+	byCase, err := repo.ListForCases(t.Context(), []int{caseID})
+	require.NoError(t, err)
+	ids := make([]string, len(byCase[caseID]))
+	for i, assignee := range byCase[caseID] {
+		ids[i] = assignee.UserID
+	}
+	return ids
+}
+
+// carol and wendy are the wildcard geneticists, so they are the ones assignable at CQGC.
+func Test_PutCaseAssignments_Assigns(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		w := putAssignments(t, env, wendyID, "1", `{"user_ids":["`+carolID+`"]}`)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Empty(t, w.Body.String())
+		assert.Equal(t, []string{carolID}, assigneesOfCase(t, env, 1))
+	})
+}
+
+func Test_PutCaseAssignments_EmptyListUnassigns(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.Equal(t, http.StatusOK, putAssignments(t, env, wendyID, "1", `{"user_ids":["`+carolID+`"]}`).Code)
+
+		w := putAssignments(t, env, wendyID, "1", `{"user_ids":[]}`)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Empty(t, assigneesOfCase(t, env, 1))
+	})
+}
+
+func Test_PutCaseAssignments_IsIdempotent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		body := `{"user_ids":["` + carolID + `","` + wendyID + `"]}`
+		require.Equal(t, http.StatusOK, putAssignments(t, env, wendyID, "1", body).Code)
+
+		w := putAssignments(t, env, wendyID, "1", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.ElementsMatch(t, []string{carolID, wendyID}, assigneesOfCase(t, env, 1))
+	})
+}
+
+// alice is a geneticist at CHOP; case 1's lab is CQGC, so she cannot be assigned to it.
+func Test_PutCaseAssignments_RejectsAssigneeFromAnotherLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		w := putAssignments(t, env, wendyID, "1", `{"user_ids":["`+aliceID+`"]}`)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+		assert.Contains(t, w.Body.String(), aliceID)
+	})
+}
+
+// Losing the permission does not unassign anyone on its own: the assignment stays readable.
+// The next write is what prunes it. Both halves are asserted here because they are the same
+// rule seen from the read and the write side.
+func Test_PutCaseAssignments_StaleAssigneeIsReadableThenPrunedByTheNextWrite(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		body := `{"user_ids":["` + carolID + `"]}`
+		require.Equal(t, http.StatusOK, putAssignments(t, env, wendyID, "1", body).Code)
+
+		require.NoError(t, env.Postgres.Exec(
+			`DELETE FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`, carolID).Error)
+		t.Cleanup(func() {
+			env.Postgres.Exec(`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				VALUES (?, 'radiant', '*', 'geneticist') ON CONFLICT DO NOTHING`, carolID)
+		})
+
+		// Read side: she is still assigned.
+		assert.Equal(t, []string{carolID}, assigneesOfCase(t, env, 1), "losing a grant does not unassign")
+
+		// Write side: resubmitting the same set prunes her.
+		w := putAssignments(t, env, wendyID, "1", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Empty(t, assigneesOfCase(t, env, 1), "the next write cleared her")
+	})
+}
+
+// A stale assignee the caller does not mention goes too, by the replace semantics rather than
+// the eligibility filter: whoever is absent from the submitted set is removed, eligible or not.
+func Test_PutCaseAssignments_StaleAssigneeIsPrunedByAWriteThatOmitsThem(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.Equal(t, http.StatusOK,
+			putAssignments(t, env, wendyID, "1", `{"user_ids":["`+carolID+`"]}`).Code)
+
+		require.NoError(t, env.Postgres.Exec(
+			`DELETE FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`, carolID).Error)
+		t.Cleanup(func() {
+			env.Postgres.Exec(`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				VALUES (?, 'radiant', '*', 'geneticist') ON CONFLICT DO NOTHING`, carolID)
+		})
+
+		// carol is not named at all; wendy replaces her.
+		w := putAssignments(t, env, wendyID, "1", `{"user_ids":["`+wendyID+`"]}`)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, []string{wendyID}, assigneesOfCase(t, env, 1))
+	})
+}
+
+func Test_PutCaseAssignments_UnknownCaseDeniedByTheGate(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := putAssignments(t, env, wendyID, "999999", `{"user_ids":[]}`)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+}
+
+func Test_PutCaseAssignments_WithoutEditRightsAtTheLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := putAssignments(t, env, aliceID, "1", `{"user_ids":[]}`)
 
 		assert.Equal(t, http.StatusForbidden, w.Code)
 	})

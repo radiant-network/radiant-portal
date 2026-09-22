@@ -168,6 +168,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.CaseEntityHandler(repoCases, repoIGV, repoCaseAssignments))
 	casesGroup.GET("/:case_id/assignment_candidates", requireActionAt(types.ActionEditCase, orgFromCase), server.ListCaseAssignmentCandidatesHandler(repoCaseAssignments, repoAuth))
+	casesGroup.PUT("/:case_id/assignments", requireActionAt(types.ActionEditCase, orgFromCase), server.PutCaseAssignmentsHandler(repoCaseAssignments))
 	casesGroup.POST("/:case_id/documents/search", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))

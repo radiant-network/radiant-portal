@@ -142,6 +142,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/samples/batch",
 			"radiant/sequencing/batch",
 			"radiant/cases/batch",
+			"radiant/cases/1/assignments",
 		} {
 			req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)
 			assert.NoError(t, err)

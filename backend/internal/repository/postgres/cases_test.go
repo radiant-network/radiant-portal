@@ -432,3 +432,32 @@ func Test_CreateCase_CrossTenantProject_Rejected(t *testing.T) {
 		assert.Contains(t, err.Error(), "cases_project_tenant_fkey")
 	})
 }
+
+// diagnosisLabOf is unexported and composed into the assignment write's transaction, so its
+// contract is pinned here rather than only through that caller's tests.
+func Test_diagnosisLabOf_ReturnsTheLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		lab, err := diagnosisLabOf(env.Postgres, types.DefaultTenantCode, 1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "CQGC", lab)
+	})
+}
+
+func Test_diagnosisLabOf_UnknownCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		_, err := diagnosisLabOf(env.Postgres, types.DefaultTenantCode, 999999)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}
+
+// A case of another tenant is as good as absent: the lab must not leak across tenants, since it
+// is what the assignment write decides eligibility against.
+func Test_diagnosisLabOf_CaseOfAnotherTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		_, err := diagnosisLabOf(env.Postgres, "tenant_b", 1)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}

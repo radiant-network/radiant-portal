@@ -22,6 +22,25 @@ func NewCasesRepository(db database.PostgresDB) *CasesRepository {
 	return &CasesRepository{db: db.DB}
 }
 
+// diagnosisLabOf returns the lab a case belongs to, or types.ErrCaseNotFound when the tenant
+// holds no such case. It takes the handle rather than hanging off CasesRepository so a caller
+// can run it inside its own transaction — the assignment write does, so its eligibility decision
+// cannot be made against a lab the case has since left. AuthRepository.OrgsForCase answers the
+// same question for the authorization middleware, in the shape a resolver needs.
+func diagnosisLabOf(tx *gorm.DB, tenantCode string, caseID int) (string, error) {
+	labs := []string{}
+	err := tx.Table(types.CaseTable.Name).
+		Where("id = ? AND tenant_code = ?", caseID, tenantCode).
+		Pluck("diagnosis_lab_code", &labs).Error
+	if err != nil {
+		return "", fmt.Errorf("error resolving lab of case %d: %w", caseID, err)
+	}
+	if len(labs) == 0 {
+		return "", types.ErrCaseNotFound
+	}
+	return labs[0], nil
+}
+
 func (r *CasesRepository) CreateCase(ctx context.Context, c *Case) error {
 	return r.db.WithContext(ctx).Create(c).Error
 }

@@ -6012,6 +6012,19 @@ export interface Transcript {
 /**
  * 
  * @export
+ * @interface UpdateCaseAssignmentsRequest
+ */
+export interface UpdateCaseAssignmentsRequest {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UpdateCaseAssignmentsRequest
+     */
+    'user_ids'?: Array<string>;
+}
+/**
+ * 
+ * @export
  * @interface UpdateCaseBatch
  */
 export interface UpdateCaseBatch {
@@ -8179,6 +8192,54 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Replace the case\'s assignees with the given set. An empty list unassigns the case, which is a valid state. An assignee who has since lost the permission to interpret at the case\'s lab is dropped by this call — losing it does not unassign anyone on its own, but the next update prunes them. Naming a user who is not assigned and not eligible is refused. Because of that pruning the stored set is not always the one submitted; read the case back to display it.
+         * @summary Set the users a case is assigned to
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseAssignmentsRequest} updateCaseAssignmentsRequest Assignees to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCaseAssignments: async (tenant: string, caseId: number, updateCaseAssignmentsRequest: UpdateCaseAssignmentsRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putCaseAssignments', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('putCaseAssignments', 'caseId', caseId)
+            // verify required parameter 'updateCaseAssignmentsRequest' is not null or undefined
+            assertParamExists('putCaseAssignments', 'updateCaseAssignmentsRequest', updateCaseAssignmentsRequest)
+            const localVarPath = `/{tenant}/cases/{case_id}/assignments`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateCaseAssignmentsRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
          * @summary Update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -8432,6 +8493,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Replace the case\'s assignees with the given set. An empty list unassigns the case, which is a valid state. An assignee who has since lost the permission to interpret at the case\'s lab is dropped by this call — losing it does not unassign anyone on its own, but the next update prunes them. Naming a user who is not assigned and not eligible is refused. Because of that pruning the stored set is not always the one submitted; read the case back to display it.
+         * @summary Set the users a case is assigned to
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseAssignmentsRequest} updateCaseAssignmentsRequest Assignees to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putCaseAssignments(tenant: string, caseId: number, updateCaseAssignmentsRequest: UpdateCaseAssignmentsRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putCaseAssignments(tenant, caseId, updateCaseAssignmentsRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.putCaseAssignments']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
          * @summary Update existing cases (batch)
          * @param {string} tenant Tenant code
@@ -8589,6 +8665,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Replace the case\'s assignees with the given set. An empty list unassigns the case, which is a valid state. An assignee who has since lost the permission to interpret at the case\'s lab is dropped by this call — losing it does not unassign anyone on its own, but the next update prunes them. Naming a user who is not assigned and not eligible is refused. Because of that pruning the stored set is not always the one submitted; read the case back to display it.
+         * @summary Set the users a case is assigned to
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {UpdateCaseAssignmentsRequest} updateCaseAssignmentsRequest Assignees to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCaseAssignments(tenant: string, caseId: number, updateCaseAssignmentsRequest: UpdateCaseAssignmentsRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.putCaseAssignments(tenant, caseId, updateCaseAssignmentsRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiments and tasks are merge-if-present: attached when the body carries them, left untouched when omitted.
@@ -8761,6 +8849,20 @@ export class CasesApi extends BaseAPI {
      */
     public postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Replace the case\'s assignees with the given set. An empty list unassigns the case, which is a valid state. An assignee who has since lost the permission to interpret at the case\'s lab is dropped by this call — losing it does not unassign anyone on its own, but the next update prunes them. Naming a user who is not assigned and not eligible is refused. Because of that pruning the stored set is not always the one submitted; read the case back to display it.
+     * @summary Set the users a case is assigned to
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {UpdateCaseAssignmentsRequest} updateCaseAssignmentsRequest Assignees to set
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public putCaseAssignments(tenant: string, caseId: number, updateCaseAssignmentsRequest: UpdateCaseAssignmentsRequest, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).putCaseAssignments(tenant, caseId, updateCaseAssignmentsRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

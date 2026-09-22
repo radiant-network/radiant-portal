@@ -2985,6 +2985,14 @@ components:
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
       type: object
+    UpdateCaseAssignmentsRequest:
+      properties:
+        user_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
     UpdateCaseBatch:
       properties:
         analysis_code:
@@ -4111,6 +4119,86 @@ paths:
       security:
       - bearerauth: []
       summary: List the users who may be assigned a case
+      tags:
+      - cases
+  /{tenant}/cases/{case_id}/assignments:
+    put:
+      description: |-
+        Replace the case's assignees with the given set. An empty list unassigns the
+        case, which is a valid state. An assignee who has since lost the permission to
+        interpret at the case's lab is dropped by this call — losing it does not
+        unassign anyone on its own, but the next update prunes them. Naming a user who
+        is not assigned and not eligible is refused. Because of that pruning the stored
+        set is not always the one submitted; read the case back to display it.
+      operationId: putCaseAssignments
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseAssignmentsRequest'
+        description: Assignees to set
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Set the users a case is assigned to
       tags:
       - cases
   /{tenant}/cases/{case_id}/documents/filters:
