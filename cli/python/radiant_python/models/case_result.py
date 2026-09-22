@@ -20,6 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_assignee import CaseAssignee
+from radiant_python.models.case_status import CaseStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -54,7 +55,7 @@ class CaseResult(BaseModel):
     proband_life_status_code: Optional[StrictStr] = None
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
-    status_code: StrictStr
+    status_code: CaseStatus
     submitter_proband_id: Optional[StrictStr] = None
     updated_on: StrictStr
     __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assignees", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "project_code", "project_name", "status_code", "submitter_proband_id", "updated_on"]

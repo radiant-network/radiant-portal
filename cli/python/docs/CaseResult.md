@@ -33,7 +33,7 @@ Name | Type | Description | Notes
 **proband_life_status_code** | **str** |  | [optional] 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
-**status_code** | **str** |  | 
+**status_code** | [**CaseStatus**](CaseStatus.md) |  | 
 **submitter_proband_id** | **str** |  | [optional] 
 **updated_on** | **str** |  | 
 

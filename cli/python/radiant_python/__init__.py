@@ -83,6 +83,7 @@ from radiant_python.models.case_patient_clinical_information import CasePatientC
 from radiant_python.models.case_result import CaseResult
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
+from radiant_python.models.case_status import CaseStatus
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse

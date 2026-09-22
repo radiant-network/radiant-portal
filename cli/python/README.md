@@ -225,6 +225,7 @@ Class | Method | HTTP request | Description
  - [CaseResult](docs/CaseResult.md)
  - [CaseSequencingExperiment](docs/CaseSequencingExperiment.md)
  - [CaseSequencingExperimentBatch](docs/CaseSequencingExperimentBatch.md)
+ - [CaseStatus](docs/CaseStatus.md)
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)

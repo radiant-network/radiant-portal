@@ -22,6 +22,7 @@ from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
+from radiant_python.models.case_status import CaseStatus
 from radiant_python.models.case_task import CaseTask
 from typing import Optional, Set
 from typing_extensions import Self
@@ -55,7 +56,7 @@ class CaseEntity(BaseModel):
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
     sequencing_experiments: List[CaseSequencingExperiment]
-    status_code: StrictStr
+    status_code: CaseStatus
     tasks: List[CaseTask]
     updated_on: StrictStr
     __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assignees", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_hypothesis", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]

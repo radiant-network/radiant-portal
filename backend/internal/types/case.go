@@ -44,19 +44,20 @@ type PatchCase struct {
 	StatusCode string `json:"status_code,omitempty" example:"in_review" enums:"in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 } // @name PatchCase
 
-// Case status codes, mirroring the `status` dictionary.
+type CaseStatus = string
+
 const (
-	CaseStatusDraft        = "draft"
-	CaseStatusSubmitted    = "submitted"
-	CaseStatusProcessing   = "processing"
-	CaseStatusInProgress   = "in_progress"
-	CaseStatusInReview     = "in_review"
-	CaseStatusCompleted    = "completed"
-	CaseStatusResolved     = "resolved"
-	CaseStatusUnresolved   = "unresolved"
-	CaseStatusInconclusive = "inconclusive"
-	CaseStatusReopened     = "reopened"
-	CaseStatusRevoked      = "revoked"
+	CaseStatusDraft        CaseStatus = "draft"
+	CaseStatusSubmitted    CaseStatus = "submitted"
+	CaseStatusProcessing   CaseStatus = "processing"
+	CaseStatusInProgress   CaseStatus = "in_progress"
+	CaseStatusInReview     CaseStatus = "in_review"
+	CaseStatusCompleted    CaseStatus = "completed"
+	CaseStatusResolved     CaseStatus = "resolved"
+	CaseStatusUnresolved   CaseStatus = "unresolved"
+	CaseStatusInconclusive CaseStatus = "inconclusive"
+	CaseStatusReopened     CaseStatus = "reopened"
+	CaseStatusRevoked      CaseStatus = "revoked"
 )
 
 var SystemAppliedCaseStatuses = []string{
@@ -96,7 +97,7 @@ type CaseResult struct {
 	ProbandID                int                     `json:"proband_id,omitempty"`
 	SubmitterProbandId       string                  `json:"submitter_proband_id,omitempty"`
 	PriorityCode             string                  `json:"priority_code,omitempty"`
-	StatusCode               string                  `json:"status_code" validate:"required"`
+	StatusCode               CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	CaseTypeCode             string                  `json:"-"`
 	AnalysisCatalogCode      string                  `json:"analysis_catalog_code,omitempty"`
 	AnalysisCatalogName      string                  `json:"analysis_catalog_name,omitempty"`
@@ -145,7 +146,7 @@ type CaseEntity struct {
 	DiagnosisLabCode         string                                    `json:"diagnosis_lab_code,omitempty"`
 	DiagnosisLabName         string                                    `json:"diagnosis_lab_name,omitempty"`
 	PriorityCode             string                                    `json:"priority_code,omitempty"`
-	StatusCode               string                                    `json:"status_code" validate:"required"`
+	StatusCode               CaseStatus                                `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	PrimaryConditionID       string                                    `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName     string                                    `json:"primary_condition_name,omitempty"`
 	Note                     string                                    `json:"note,omitempty"`
