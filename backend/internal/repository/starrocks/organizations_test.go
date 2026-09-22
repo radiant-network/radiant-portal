@@ -36,6 +36,8 @@ func Test_ListOrganizations(t *testing.T) {
 		assert.Equal(t, "diagnostic_laboratory", byCode["LDM-CHUSJ"].CategoryCode)
 		assert.Equal(t, "Diagnostic Laboratory", byCode["LDM-CHUSJ"].CategoryName)
 		assert.Equal(t, "sequencing_center", byCode["CQGC"].CategoryCode)
+		assert.Equal(t, "ldm-chusj@example.invalid,ldm-chusj-bis@example.invalid", byCode["LDM-CHUSJ"].NotificationEmails)
+		assert.Equal(t, "", byCode["CHOP"].NotificationEmails, "NULL column reads as blank")
 
 		assert.True(t, sort.StringsAreSorted(names), "organizations must be returned ordered by name, got %v", names)
 	})

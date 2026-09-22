@@ -1884,6 +1884,12 @@ export interface CreateOrganizationRequest {
      * @memberof CreateOrganizationRequest
      */
     'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOrganizationRequest
+     */
+    'notification_emails'?: string;
 }
 /**
  * CreatePatientBatchBody represents the body required to create a patient batch
@@ -4415,6 +4421,12 @@ export interface OrganizationResponse {
      * @memberof OrganizationResponse
      */
     'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrganizationResponse
+     */
+    'notification_emails'?: string;
 }
 /**
  * 
@@ -6178,7 +6190,7 @@ export interface UpdateOccurrenceNoteInput {
     'content': string;
 }
 /**
- * Payload to update an organization. Only the name is editable; code and category are immutable after creation.
+ * Payload to update an organization. Code and category are immutable after creation. notification_emails is comma-separated and replaced as a whole; blank clears it.
  * @export
  * @interface UpdateOrganizationRequest
  */
@@ -6189,6 +6201,12 @@ export interface UpdateOrganizationRequest {
      * @memberof UpdateOrganizationRequest
      */
     'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateOrganizationRequest
+     */
+    'notification_emails'?: string;
 }
 /**
  * Payload to edit a custom role of a tenant
@@ -13687,7 +13705,7 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * Replaces an organization\'s name and notification emails (comma-separated) in the tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank `notification_emails` clears the list.
          * @summary Update an organization
          * @param {string} tenant Tenant code
          * @param {string} code Organization code
@@ -13772,7 +13790,7 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * Replaces an organization\'s name and notification emails (comma-separated) in the tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank `notification_emails` clears the list.
          * @summary Update an organization
          * @param {string} tenant Tenant code
          * @param {string} code Organization code
@@ -13818,7 +13836,7 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
             return localVarFp.listOrganizations(tenant, options).then((request) => request(axios, basePath));
         },
         /**
-         * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+         * Replaces an organization\'s name and notification emails (comma-separated) in the tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank `notification_emails` clears the list.
          * @summary Update an organization
          * @param {string} tenant Tenant code
          * @param {string} code Organization code
@@ -13865,7 +13883,7 @@ export class OrganizationsApi extends BaseAPI {
     }
 
     /**
-     * Updates an organization\'s name in the tenant. Requires the `can_manage_org` action. Code and category are immutable, so only the name can change.
+     * Replaces an organization\'s name and notification emails (comma-separated) in the tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank `notification_emails` clears the list.
      * @summary Update an organization
      * @param {string} tenant Tenant code
      * @param {string} code Organization code

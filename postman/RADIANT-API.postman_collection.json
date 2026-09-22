@@ -308,7 +308,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"chop\",\n  \"name\": \"Children's Hospital of Philadelphia\",\n  \"category_code\": \"healthcare_provider\"\n}",
+              "raw": "{\n  \"code\": \"chop\",\n  \"name\": \"Children's Hospital of Philadelphia\",\n  \"category_code\": \"healthcare_provider\",\n  \"notification_emails\": \"lab@example.invalid\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -345,7 +345,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Children's Hospital of Philadelphia\"\n}",
+              "raw": "{\n  \"name\": \"Children's Hospital of Philadelphia\",\n  \"notification_emails\": \"lab@example.invalid,lab-2@example.invalid\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

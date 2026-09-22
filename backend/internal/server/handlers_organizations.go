@@ -18,7 +18,7 @@ type organizationCreator interface {
 }
 
 type organizationUpdater interface {
-	UpdateOrganization(ctx context.Context, tenantCode, code, name string) error
+	UpdateOrganization(ctx context.Context, tenantCode, code string, req types.UpdateOrganizationRequest) error
 }
 
 // ListOrganizationsHandler
@@ -85,10 +85,11 @@ func PostOrganizationHandler(repo organizationCreator) gin.HandlerFunc {
 		}
 
 		org := types.Organization{
-			Code:         req.Code,
-			Name:         req.Name,
-			CategoryCode: req.CategoryCode,
-			TenantCode:   *tenant,
+			Code:               req.Code,
+			Name:               req.Name,
+			CategoryCode:       req.CategoryCode,
+			NotificationEmails: types.NotificationEmailsColumn(req.NotificationEmails),
+			TenantCode:         *tenant,
 		}
 		switch err := repo.CreateOrganization(c.Request.Context(), org); {
 		case err == nil:
@@ -106,8 +107,9 @@ func PostOrganizationHandler(repo organizationCreator) gin.HandlerFunc {
 // PutOrganizationHandler
 // @Summary Update an organization
 // @Id updateOrganization
-// @Description Updates an organization's name in the tenant. Requires the `can_manage_org` action.
-// @Description Code and category are immutable, so only the name can change.
+// @Description Replaces an organization's name and notification emails (comma-separated) in the
+// @Description tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank
+// @Description `notification_emails` clears the list.
 // @Tags organizations
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -130,13 +132,17 @@ func PutOrganizationHandler(repo organizationUpdater) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
+		if err := req.Validate(); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
 		tenant, err := GetTenant(c)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 
-		switch err := repo.UpdateOrganization(c.Request.Context(), *tenant, c.Param("code"), req.Name); {
+		switch err := repo.UpdateOrganization(c.Request.Context(), *tenant, c.Param("code"), req); {
 		case err == nil:
 			c.Status(http.StatusOK)
 		case errors.Is(err, types.ErrOrganizationNotFound):

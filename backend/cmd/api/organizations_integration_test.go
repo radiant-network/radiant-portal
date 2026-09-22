@@ -48,6 +48,15 @@ func Test_ListOrganizations_Member_ReturnsTenantOrganizations(t *testing.T) {
 	assert.Contains(t, w.Body.String(), `"category_name":"Healthcare Provider"`)
 }
 
+func Test_ListOrganizations_Member_ReturnsNotificationEmails(t *testing.T) {
+	w := listOrganizations(t, aliceID, "radiant")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	// seeded in test/data/clinical/01_organization.sql; CHOP has none and must still show []
+	assert.Contains(t, w.Body.String(), `"notification_emails":"ldm-chusj@example.invalid,ldm-chusj-bis@example.invalid"`)
+	assert.Contains(t, w.Body.String(), `"code":"CHOP","name":"Children Hospital of Philadelphia","category_code":"healthcare_provider","category_name":"Healthcare Provider","notification_emails":""`)
+}
+
 func Test_ListOrganizations_CrossTenant_Forbidden(t *testing.T) {
 	// alice has no grant in tenant_b → RequireTenantAccess rejects before the handler runs.
 	w := listOrganizations(t, aliceID, "tenant_b")
@@ -137,6 +146,46 @@ func Test_UpdateOrganization_TenantAdmin_Updated(t *testing.T) {
 		updated, err := orgRepo.GetOrganizationByCode(t.Context(), "int_org_upd", types.DefaultTenantCode)
 		require.NoError(t, err)
 		assert.Equal(t, "After", updated.Name)
+	})
+}
+
+func Test_UpdateOrganization_NotificationEmails_SetThenClear(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		authRepo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+		orgRepo := postgres.NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: taraID}
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = 'int_org_mails' AND tenant_code = 'radiant'")
+
+		require.NoError(t, orgRepo.CreateOrganization(t.Context(), types.Organization{
+			Code: "int_org_mails", Name: "Lab", CategoryCode: "diagnostic_laboratory", TenantCode: "radiant",
+		}))
+
+		router := gin.Default()
+		tenantRoutes := router.Group("/:tenant")
+		tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
+		tenantRoutes.PUT("/organizations/:code", server.RequireAction(auth, authRepo, types.ActionManageOrg), server.PutOrganizationHandler(orgRepo))
+		put := func(body string) int {
+			req, _ := http.NewRequest("PUT", "/radiant/organizations/int_org_mails", strings.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+			return w.Code
+		}
+		emails := func() *string {
+			org, err := orgRepo.GetOrganizationByCode(t.Context(), "int_org_mails", types.DefaultTenantCode)
+			require.NoError(t, err)
+			return org.NotificationEmails
+		}
+		two := "a@lab.invalid,b@lab.invalid"
+
+		assert.Equal(t, http.StatusOK, put(`{"name":"Lab","notification_emails":"a@lab.invalid,b@lab.invalid"}`))
+		assert.Equal(t, &two, emails())
+
+		assert.Equal(t, http.StatusBadRequest, put(`{"name":"Lab","notification_emails":"a@lab.invalid,nope"}`))
+		assert.Equal(t, &two, emails(), "rejected payload changes nothing")
+
+		assert.Equal(t, http.StatusOK, put(`{"name":"Lab","notification_emails":""}`))
+		assert.Nil(t, emails())
 	})
 }
 

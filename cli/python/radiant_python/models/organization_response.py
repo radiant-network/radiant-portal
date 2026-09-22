@@ -30,7 +30,8 @@ class OrganizationResponse(BaseModel):
     category_name: Optional[StrictStr] = None
     code: Optional[StrictStr] = None
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["category_code", "category_name", "code", "name"]
+    notification_emails: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["category_code", "category_name", "code", "name", "notification_emails"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,7 +87,8 @@ class OrganizationResponse(BaseModel):
             "category_code": obj.get("category_code"),
             "category_name": obj.get("category_name"),
             "code": obj.get("code"),
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "notification_emails": obj.get("notification_emails")
         })
         return _obj
 

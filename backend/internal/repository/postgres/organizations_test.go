@@ -57,7 +57,7 @@ func Test_UpdateOrganization(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		err = repo.UpdateOrganization(t.Context(), "radiant", "org_test_update", "New Name")
+		err = repo.UpdateOrganization(t.Context(), "radiant", "org_test_update", types.UpdateOrganizationRequest{Name: "New Name"})
 		assert.NoError(t, err)
 
 		updated, err := repo.GetOrganizationByCode(t.Context(), "org_test_update", types.DefaultTenantCode)
@@ -67,11 +67,81 @@ func Test_UpdateOrganization(t *testing.T) {
 	})
 }
 
+func Test_CreateOrganization_WithNotificationEmails(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = 'org_test_emails' AND tenant_code = 'radiant'")
+
+		err := repo.CreateOrganization(t.Context(), types.Organization{
+			Code: "org_test_emails", Name: "Lab", CategoryCode: "diagnostic_laboratory", TenantCode: "radiant",
+			NotificationEmails: types.NotificationEmailsColumn("a@lab.invalid,b@lab.invalid"),
+		})
+		assert.NoError(t, err)
+
+		created, err := repo.GetOrganizationByCode(t.Context(), "org_test_emails", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Equal(t, "a@lab.invalid,b@lab.invalid", *created.NotificationEmails)
+	})
+}
+
+func Test_UpdateOrganization_NotificationEmails_SetThenBlankClears(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+		defer env.Postgres.Exec("DELETE FROM organization WHERE code = 'org_test_upd_emails' AND tenant_code = 'radiant'")
+
+		assert.NoError(t, repo.CreateOrganization(t.Context(), types.Organization{
+			Code: "org_test_upd_emails", Name: "Lab", CategoryCode: "diagnostic_laboratory", TenantCode: "radiant",
+		}))
+
+		assert.NoError(t, repo.UpdateOrganization(t.Context(), "radiant", "org_test_upd_emails",
+			types.UpdateOrganizationRequest{Name: "Lab", NotificationEmails: "a@lab.invalid"}))
+		org, err := repo.GetOrganizationByCode(t.Context(), "org_test_upd_emails", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Equal(t, "a@lab.invalid", *org.NotificationEmails)
+
+		// blank clears to NULL
+		assert.NoError(t, repo.UpdateOrganization(t.Context(), "radiant", "org_test_upd_emails",
+			types.UpdateOrganizationRequest{Name: "Lab renamed", NotificationEmails: ""}))
+		org, err = repo.GetOrganizationByCode(t.Context(), "org_test_upd_emails", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Equal(t, "Lab renamed", org.Name)
+		assert.Nil(t, org.NotificationEmails)
+	})
+}
+
+func Test_NotificationEmailsByOrg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		// LDM-CHUSJ and LDM-CHOP carry a seeded list, CHOP has none, no_such_org does not exist.
+		byOrg, err := repo.NotificationEmailsByOrg(t.Context(), types.DefaultTenantCode, []string{"LDM-CHUSJ", "LDM-CHOP", "CHOP", "no_such_org"})
+		assert.NoError(t, err)
+		assert.Equal(t, map[string][]string{
+			"LDM-CHUSJ": {"ldm-chusj@example.invalid", "ldm-chusj-bis@example.invalid"},
+			"LDM-CHOP":  {"ldm-chop@example.invalid"},
+		}, byOrg)
+	})
+}
+
+func Test_NotificationEmailsByOrg_OtherTenant_Empty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
+
+		byOrg, err := repo.NotificationEmailsByOrg(t.Context(), "tenant_b", []string{"LDM-CHUSJ"})
+		assert.NoError(t, err)
+		assert.Empty(t, byOrg)
+
+		byOrg, err = repo.NotificationEmailsByOrg(t.Context(), types.DefaultTenantCode, nil)
+		assert.NoError(t, err)
+		assert.Empty(t, byOrg)
+	})
+}
+
 func Test_UpdateOrganization_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewOrganizationRepository(database.PostgresDB{DB: env.Postgres})
 
-		err := repo.UpdateOrganization(t.Context(), "radiant", "does_not_exist", "X")
+		err := repo.UpdateOrganization(t.Context(), "radiant", "does_not_exist", types.UpdateOrganizationRequest{Name: "X"})
 		assert.ErrorIs(t, err, types.ErrOrganizationNotFound)
 	})
 }
