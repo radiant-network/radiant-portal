@@ -41,7 +41,7 @@ func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, fmt.Sprintf(`{"count":%d}`, expected), w.Body.String())
+		assert.JSONEq(t, fmt.Sprintf(`{"count":%d, "filtered_count":%d}`, expected, expected), w.Body.String())
 	})
 }
 func testSomaticSNVAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {

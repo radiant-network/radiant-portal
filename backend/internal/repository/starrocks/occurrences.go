@@ -37,6 +37,43 @@ func keepOccurrencesWithInterpretation(snvTable types.Table, caseId int, seqId i
 		interpretationTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId))
 }
 
+// unannotatedQuery hides the annotation filters of a count query so only the query builder sqon is
+// applied.
+type unannotatedQuery struct {
+	types.OccurrenceCountQuery
+}
+
+func (unannotatedQuery) WithNote() bool                       { return false }
+func (unannotatedQuery) WithFlag() []types.OccurrenceFlagType { return nil }
+func (unannotatedQuery) WithInterpretation() bool             { return false }
+
+func hasAnnotationFilters(userQuery types.OccurrenceCountQuery) bool {
+	return userQuery != nil && (userQuery.WithNote() || len(userQuery.WithFlag()) > 0 || userQuery.WithInterpretation())
+}
+
+// countWithAndWithoutAnnotations reports the count of the query builder sqon alone next to the count
+// the annotation filters leave: those filters are an extra layer on top of the query builder and must
+// not move its total. The unfiltered count is the one the sqon alone yields, so it is always run; the
+// second pass is skipped when no annotation filter is set.
+func countWithAndWithoutAnnotations(userQuery types.OccurrenceCountQuery, count func(types.OccurrenceCountQuery) (int64, error)) (types.OccurrenceCount, error) {
+	unfilteredQuery := userQuery
+	if userQuery != nil {
+		unfilteredQuery = unannotatedQuery{userQuery}
+	}
+	unfiltered, err := count(unfilteredQuery)
+	if err != nil {
+		return types.OccurrenceCount{}, err
+	}
+	if !hasAnnotationFilters(userQuery) {
+		return types.OccurrenceCount{Count: unfiltered, FilteredCount: unfiltered}, nil
+	}
+	filtered, err := count(userQuery)
+	if err != nil {
+		return types.OccurrenceCount{}, err
+	}
+	return types.OccurrenceCount{Count: unfiltered, FilteredCount: filtered}, nil
+}
+
 func interpretationTableFor(snvTable types.Table) (types.Table, bool) {
 	switch snvTable {
 	case types.GermlineSNVOccurrenceTable:

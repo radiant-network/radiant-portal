@@ -44,8 +44,8 @@ func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.Oc
 	}, nil
 }
 
-func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
-	return 15, nil
+func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	return types.OccurrenceCount{Count: 15, FilteredCount: 4}, nil
 }
 
 func (m *MockRepository) AggregateOccurrences(context.Context, int, int, int, types.AggQuery) ([]types.Aggregation, error) {
@@ -156,7 +156,7 @@ func Test_OccurrencesCountHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":15}`, w.Body.String())
+	assert.JSONEq(t, `{"count":15, "filtered_count":4}`, w.Body.String())
 }
 
 func Test_OccurrencesAggregateHandler(t *testing.T) {
@@ -457,9 +457,9 @@ func (m *occurrenceFiltersRecorder) GetOccurrences(_ context.Context, _ int, _ i
 	return nil, nil
 }
 
-func (m *occurrenceFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
+func (m *occurrenceFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	m.countQuery = query
-	return 0, nil
+	return types.OccurrenceCount{}, nil
 }
 
 func Test_OccurrencesListHandler_Forwards_WithNote(t *testing.T) {

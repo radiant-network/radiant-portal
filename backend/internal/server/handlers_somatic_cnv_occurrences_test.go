@@ -102,8 +102,8 @@ func (m *MockSomaticCNVRepository) GetOccurrences(context.Context, int, int, int
 	}, nil
 }
 
-func (m *MockSomaticCNVRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (int64, error) {
-	return 15, nil
+func (m *MockSomaticCNVRepository) CountOccurrences(context.Context, int, int, int, types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	return types.OccurrenceCount{Count: 15, FilteredCount: 4}, nil
 }
 
 func (m *MockSomaticCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
@@ -204,7 +204,7 @@ func Test_SomaticCNVOccurrencesCountHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":15}`, w.Body.String())
+	assert.JSONEq(t, `{"count":15, "filtered_count":4}`, w.Body.String())
 }
 
 func Test_SomaticCNVOccurrencesAggregateHandler(t *testing.T) {

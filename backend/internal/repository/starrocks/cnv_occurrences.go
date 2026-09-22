@@ -100,28 +100,30 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	return occurrences, nil
 }
 
-func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
-	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
-	if err != nil {
-		return 0, fmt.Errorf("error during query preparation %w", err)
-	}
+func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	return countWithAndWithoutAnnotations(userQuery, func(query types.OccurrenceCountQuery) (int64, error) {
+		tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, query)
+		if err != nil {
+			return 0, fmt.Errorf("error during query preparation %w", err)
+		}
 
-	if userQuery != nil && userQuery.WithNote() {
-		tx = keepOccurrencesWithNote(cnvTable, "cnv_id", caseId, seqId, tx)
-	}
+		if query != nil && query.WithNote() {
+			tx = keepOccurrencesWithNote(cnvTable, "cnv_id", caseId, seqId, tx)
+		}
 
-	if userQuery != nil && len(userQuery.WithFlag()) > 0 {
-		tx = keepOccurrencesWithFlag(cnvTable, "cnv_id", userQuery.WithFlag(), caseId, seqId, tx)
-	}
+		if query != nil && len(query.WithFlag()) > 0 {
+			tx = keepOccurrencesWithFlag(cnvTable, "cnv_id", query.WithFlag(), caseId, seqId, tx)
+		}
 
-	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-		tx = tx.Distinct(fmt.Sprintf("%s.cnv_id", cnvTable.Alias))
-	}
-	var count int64
-	if err = tx.Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error fetching occurrences: %w", err)
-	}
-	return count, nil
+		if query != nil && query.Filters() != nil && query.HasFieldFromTables(types.GenePanelsTables...) {
+			tx = tx.Distinct(fmt.Sprintf("%s.cnv_id", cnvTable.Alias))
+		}
+		var count int64
+		if err = tx.Count(&count).Error; err != nil {
+			return 0, fmt.Errorf("error fetching occurrences: %w", err)
+		}
+		return count, nil
+	})
 }
 
 func aggregateCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {

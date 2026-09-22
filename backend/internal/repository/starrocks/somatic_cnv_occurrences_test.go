@@ -274,7 +274,8 @@ func Test_SomaticCNV_CountOccurrences(t *testing.T) {
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), count)
+		assert.Equal(t, int64(3), count.Count)
+		assert.Equal(t, int64(3), count.FilteredCount)
 	})
 }
 
@@ -293,7 +294,7 @@ func Test_SomaticCNV_CountOccurrences_With_Filtering(t *testing.T) {
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 71, 74, 85, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), count)
+		assert.Equal(t, int64(2), count.Count)
 	})
 }
 
@@ -394,7 +395,7 @@ func Test_SomaticCNV_CountOccurrences_PanelFilter(t *testing.T) {
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(1), count)
+		assert.Equal(t, int64(1), count.Count)
 	})
 }
 
@@ -530,13 +531,14 @@ func Test_SomaticCNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, query)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 2, count)
+		assert.EqualValues(t, 2, count.Count)
 
 		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticCNVOccurrencesFields, types.WithNoteFilter(true))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, queryWithNote)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 	})
 }
 
@@ -559,12 +561,13 @@ func Test_SomaticCNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_W
 		assert.NoError(t, err)
 		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 2, count)
+		assert.EqualValues(t, 2, count.Count)
 
 		flagged, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticCNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeFlag}))
 		assert.NoError(t, err)
 		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, flagged)
 		assert.NoError(t, err)
-		assert.EqualValues(t, 1, count)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
 	})
 }
