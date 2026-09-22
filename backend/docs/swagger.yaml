@@ -2099,6 +2099,19 @@ components:
       - code
       - value
       type: object
+    OccurrenceCount:
+      description: 'OccurrenceCount holds both totals of an occurrence count: the
+        query builder total and the one left by the annotation filters'
+      properties:
+        count:
+          description: Number of results matching the sqon, ignoring the annotation
+            filters
+          type: integer
+        filtered_count:
+          description: Number of results also matching with_note / with_flag / with_interpretation;
+            equal to count when none is set
+          type: integer
+      type: object
     OccurrenceFlagType:
       enum:
       - flag
@@ -6287,7 +6300,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Count'
+                $ref: '#/components/schemas/OccurrenceCount'
           description: OK
         "400":
           content:
@@ -6710,7 +6723,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Count'
+                $ref: '#/components/schemas/OccurrenceCount'
           description: OK
         "400":
           content:
@@ -7203,7 +7216,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Count'
+                $ref: '#/components/schemas/OccurrenceCount'
           description: OK
         "400":
           content:
@@ -7626,7 +7639,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Count'
+                $ref: '#/components/schemas/OccurrenceCount'
           description: OK
         "400":
           content:

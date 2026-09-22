@@ -22,7 +22,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	return listCNVOccurrences[GermlineCNVOccurrence](ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 
-func (r *GermlineCNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+func (r *GermlineCNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	return countCNVOccurrences(ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, caseId, seqId, taskId, userQuery)
 }
 

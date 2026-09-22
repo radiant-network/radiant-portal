@@ -15,8 +15,8 @@ import (
 
 type MockSomaticSNVOccurrencesRepository struct{}
 
-func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
-	return 1111, nil
+func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	return types.OccurrenceCount{Count: 1111, FilteredCount: 11}, nil
 }
 
 func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]starrocks.Aggregation, error) {
@@ -158,7 +158,7 @@ func Test_SomaticSNVCountHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"count":1111}`, w.Body.String())
+	assert.JSONEq(t, `{"count":1111, "filtered_count":11}`, w.Body.String())
 }
 
 func Test_SomaticSNVAggregateHandler(t *testing.T) {
@@ -333,9 +333,9 @@ func (m *somaticSNVFiltersRecorder) GetOccurrences(_ context.Context, _ int, _ i
 	return nil, nil
 }
 
-func (m *somaticSNVFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (int64, error) {
+func (m *somaticSNVFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	m.countQuery = query
-	return 0, nil
+	return types.OccurrenceCount{}, nil
 }
 
 func Test_SomaticSNVOccurrencesListHandler_Forwards_Annotation_Filters(t *testing.T) {

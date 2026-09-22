@@ -66,7 +66,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	return occurrences, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error) {
+func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	return CountSNV(types.SomaticSNVOccurrenceTable, caseId, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 

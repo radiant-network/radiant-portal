@@ -15,7 +15,7 @@ type somaticInterpretationCountsReader interface {
 
 type somaticSNVOccurrencesReader interface {
 	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error)
-	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (int64, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error)
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
 	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
@@ -104,7 +104,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
-// @Success 200 {object} types.Count
+// @Success 200 {object} types.OccurrenceCount
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
@@ -149,13 +149,12 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
+		counts, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		countResponse := types.Count{Count: count}
-		c.JSON(http.StatusOK, countResponse)
+		c.JSON(http.StatusOK, counts)
 	}
 }
 
