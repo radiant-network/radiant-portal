@@ -154,6 +154,22 @@ func Test_PutCaseAssignments_EmptyListUnassigns(t *testing.T) {
 	})
 }
 
+// A PUT replaces the whole set rather than adding to it. Both users are eligible at the case's
+// lab, so nothing here is explained by the pruning rule: wendy goes because the second request
+// does not name her, full stop.
+func Test_PutCaseAssignments_ReplacesRatherThanMerges(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.Equal(t, http.StatusOK,
+			putAssignments(t, env, wendyID, "1", `{"user_ids":["`+wendyID+`"]}`).Code)
+		require.Equal(t, []string{wendyID}, assigneesOfCase(t, env, 1))
+
+		w := putAssignments(t, env, wendyID, "1", `{"user_ids":["`+carolID+`"]}`)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, []string{carolID}, assigneesOfCase(t, env, 1), "wendy is replaced, not joined by carol")
+	})
+}
+
 func Test_PutCaseAssignments_IsIdempotent(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		body := `{"user_ids":["` + carolID + `","` + wendyID + `"]}`
