@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**user_ids** | **List[str]** |  | [optional] 
+**user_ids** | **List[str]** |  | 
 
 ## Example
 

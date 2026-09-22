@@ -65,8 +65,13 @@ func (p ListAssignmentCandidatesParams) Resolve() (*ListAssignmentCandidatesQuer
 // UserIDs is a pointer so an omitted field is told apart from an explicit empty list: clearing
 // a case has to be asked for (`{"user_ids": []}`), never inferred from a body that forgot to
 // mention it.
+//
+// The `validate` tag is what marks the field required in the OpenAPI spec, so a generated client
+// cannot type-check a call the server answers with a 400. Enforcement stays in Resolve rather
+// than moving to a `binding` tag: gin's would reject the field on its own terms, losing the
+// message that tells the caller how to unassign instead.
 type UpdateCaseAssignmentsRequest struct {
-	UserIDs *[]string `json:"user_ids"`
+	UserIDs *[]string `json:"user_ids" validate:"required"`
 } // @name UpdateCaseAssignmentsRequest
 
 // Resolve validates the payload and returns the assignees to write, deduplicated and in the

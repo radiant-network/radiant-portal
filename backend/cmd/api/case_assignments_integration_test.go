@@ -176,6 +176,39 @@ func Test_PutCaseAssignments_RejectsAssigneeFromAnotherLab(t *testing.T) {
 	})
 }
 
+// revokeGrantsDuringTest strips a user's grants in the radiant tenant for the rest of the test
+// and puts back exactly the rows it found, whatever they were — the seed is free to change
+// without this helper quietly narrowing someone's access to one hardcoded row.
+//
+// The restore matters beyond this file: testutils' cleanUp truncates case_assignment but never
+// touches user_role, so nothing else will repair the seed. It is asserted rather than left
+// best-effort because a silent failure leaves the user unprivileged for every later test in the
+// run, and the ones that break then point anywhere but here. assert, not require: a require
+// would abort the loop and skip the rows it had not restored yet.
+func revokeGrantsDuringTest(t *testing.T, env *testutils.Env, userID string) {
+	t.Helper()
+	type grant struct {
+		OrgCode  *string
+		RoleCode string
+	}
+	var granted []grant
+	require.NoError(t, env.Postgres.Raw(
+		`SELECT org_code, role_code FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`,
+		userID).Scan(&granted).Error)
+	require.NotEmpty(t, granted, "nothing to revoke — the auth seed no longer grants this user anything")
+
+	require.NoError(t, env.Postgres.Exec(
+		`DELETE FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`, userID).Error)
+	t.Cleanup(func() {
+		for _, g := range granted {
+			assert.NoError(t, env.Postgres.Exec(
+				`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+				 VALUES (?, 'radiant', ?, ?) ON CONFLICT DO NOTHING`,
+				userID, g.OrgCode, g.RoleCode).Error, "restoring the auth seed")
+		}
+	})
+}
+
 // Losing the permission does not unassign anyone on its own: the assignment stays readable.
 // The next write is what prunes it. Both halves are asserted here because they are the same
 // rule seen from the read and the write side.
@@ -184,12 +217,7 @@ func Test_PutCaseAssignments_StaleAssigneeIsReadableThenPrunedByTheNextWrite(t *
 		body := `{"user_ids":["` + carolID + `"]}`
 		require.Equal(t, http.StatusOK, putAssignments(t, env, wendyID, "1", body).Code)
 
-		require.NoError(t, env.Postgres.Exec(
-			`DELETE FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`, carolID).Error)
-		t.Cleanup(func() {
-			env.Postgres.Exec(`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
-				VALUES (?, 'radiant', '*', 'geneticist') ON CONFLICT DO NOTHING`, carolID)
-		})
+		revokeGrantsDuringTest(t, env, carolID)
 
 		// Read side: she is still assigned.
 		assert.Equal(t, []string{carolID}, assigneesOfCase(t, env, 1), "losing a grant does not unassign")
@@ -209,12 +237,7 @@ func Test_PutCaseAssignments_StaleAssigneeIsPrunedByAWriteThatOmitsThem(t *testi
 		require.Equal(t, http.StatusOK,
 			putAssignments(t, env, wendyID, "1", `{"user_ids":["`+carolID+`"]}`).Code)
 
-		require.NoError(t, env.Postgres.Exec(
-			`DELETE FROM user_role WHERE user_id = ? AND tenant_code = 'radiant'`, carolID).Error)
-		t.Cleanup(func() {
-			env.Postgres.Exec(`INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
-				VALUES (?, 'radiant', '*', 'geneticist') ON CONFLICT DO NOTHING`, carolID)
-		})
+		revokeGrantsDuringTest(t, env, carolID)
 
 		// carol is not named at all; wendy replaces her.
 		w := putAssignments(t, env, wendyID, "1", `{"user_ids":["`+wendyID+`"]}`)

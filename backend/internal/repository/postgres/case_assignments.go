@@ -19,20 +19,6 @@ func NewCaseAssignmentsRepository(db database.PostgresDB) *CaseAssignmentsReposi
 	return &CaseAssignmentsRepository{db: db.DB}
 }
 
-// assigneeColumns and assigneesQuery are the single definition of an assignee row — the join to
-// the identity registry, the columns, and the order an avatar stack renders in — shared by the
-// case-list read and the read-back after a write so the two cannot drift.
-const assigneeColumns = "u.user_id, u.first_name, u.last_name, u.email"
-
-func assigneesQuery(tx *gorm.DB) *gorm.DB {
-	alias := types.CaseAssignmentTable.Alias
-	return tx.
-		Table(fmt.Sprintf("%s %s", types.CaseAssignmentTable.Name, alias)).
-		Joins(fmt.Sprintf("JOIN users u ON u.user_id = %s.user_id", alias)).
-		// user_id breaks ties so an avatar stack keeps the same order between two reads.
-		Order("u.last_name, u.first_name, u.user_id")
-}
-
 // caseAssignee carries one row of the join: the assignee, plus the case it attaches them to so
 // the caller can bucket a whole page in a single query.
 type caseAssignee struct {
@@ -53,10 +39,14 @@ func (r *CaseAssignmentsRepository) ListForCases(ctx context.Context, caseIDs []
 
 	alias := types.CaseAssignmentTable.Alias
 	var rows []caseAssignee
-	tx := assigneesQuery(r.db.WithContext(ctx)).
+	tx := r.db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", types.CaseAssignmentTable.Name, alias)).
+		Joins(fmt.Sprintf("JOIN users u ON u.user_id = %s.user_id", alias)).
 		Scopes(WithTenantOn(ctx, alias)).
 		Where(fmt.Sprintf("%s.case_id IN ?", alias), caseIDs).
-		Select(fmt.Sprintf("%s.case_id, %s", alias, assigneeColumns))
+		Select(fmt.Sprintf("%s.case_id, u.user_id, u.first_name, u.last_name, u.email", alias)).
+		// user_id breaks ties so an avatar stack keeps the same order between two reads.
+		Order("u.last_name, u.first_name, u.user_id")
 	if err := tx.Scan(&rows).Error; err != nil {
 		return nil, fmt.Errorf("error listing case assignments: %w", err)
 	}
@@ -127,9 +117,10 @@ func eligibleAssigneeIDs(tx *gorm.DB, tenantCode, orgCode string, userIDs []stri
 }
 
 // ReplaceAssignees sets the case's assignees to the eligible members of userIDs. It is the whole
-// operation — read, decide, write — in one transaction, so two concurrent callers cannot each
-// decide against a set the other has already replaced, and a reader never sees the case
-// half-reassigned.
+// operation — read, decide, write — in one transaction that opens by locking the case, so two
+// concurrent callers cannot each decide against a set the other has already replaced, and a
+// reader never sees the case half-reassigned. The transaction alone would not be enough: see
+// lockCaseDiagnosisLab for why the lock is what serializes them.
 //
 // It returns types.ErrCaseNotFound when the tenant holds no such case, and
 // *types.IneligibleAssigneesError when the request names someone who is neither eligible nor
@@ -138,7 +129,7 @@ func eligibleAssigneeIDs(tx *gorm.DB, tenantCode, orgCode string, userIDs []stri
 // reads it back through ListForCases.
 func (r *CaseAssignmentsRepository) ReplaceAssignees(ctx context.Context, tenantCode string, caseID int, userIDs []string) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		orgCode, err := diagnosisLabOf(tx, tenantCode, caseID)
+		orgCode, err := lockCaseDiagnosisLab(tx, tenantCode, caseID)
 		if err != nil {
 			return err
 		}

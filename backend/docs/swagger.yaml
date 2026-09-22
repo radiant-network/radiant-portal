@@ -2992,6 +2992,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+      required:
+      - user_ids
       type: object
     UpdateCaseBatch:
       properties:

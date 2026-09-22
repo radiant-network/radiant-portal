@@ -6020,7 +6020,7 @@ export interface UpdateCaseAssignmentsRequest {
      * @type {Array<string>}
      * @memberof UpdateCaseAssignmentsRequest
      */
-    'user_ids'?: Array<string>;
+    'user_ids': Array<string>;
 }
 /**
  * 

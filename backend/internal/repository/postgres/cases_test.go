@@ -433,20 +433,49 @@ func Test_CreateCase_CrossTenantProject_Rejected(t *testing.T) {
 	})
 }
 
-// diagnosisLabOf is unexported and composed into the assignment write's transaction, so its
+// lockCaseDiagnosisLab is unexported and composed into the assignment write's transaction, so its
 // contract is pinned here rather than only through that caller's tests.
-func Test_diagnosisLabOf_ReturnsTheLab(t *testing.T) {
+func Test_lockCaseDiagnosisLab_ReturnsTheLab(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		lab, err := diagnosisLabOf(env.Postgres, types.DefaultTenantCode, 1)
+		lab, err := lockCaseDiagnosisLab(env.Postgres, types.DefaultTenantCode, 1)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "CQGC", lab)
 	})
 }
 
-func Test_diagnosisLabOf_UnknownCase(t *testing.T) {
+// The lock is the whole reason this is not a plain read, and no assertion on what the function
+// returns would notice its absence. Nor would a concurrency test: case_assignment's foreign key
+// makes a competing write take its own lock on the case row while inserting, so it blocks either
+// way. What the lock actually buys is that the read happens under it too, which is a property of
+// the statement rather than of any result — hence the assertion on the lock Postgres reports.
+func Test_lockCaseDiagnosisLab_TakesARowLockOnTheCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		_, err := diagnosisLabOf(env.Postgres, types.DefaultTenantCode, 999999)
+		tx := env.Postgres.Begin()
+		require.NoError(t, tx.Error)
+		defer tx.Rollback()
+
+		lab, err := lockCaseDiagnosisLab(tx, types.DefaultTenantCode, 1)
+		require.NoError(t, err)
+		require.Equal(t, "CQGC", lab)
+
+		var pid int
+		require.NoError(t, tx.Raw("SELECT pg_backend_pid()").Scan(&pid).Error)
+
+		modes := []string{}
+		require.NoError(t, env.Postgres.Raw(`
+			SELECT mode FROM pg_locks
+			WHERE pid = ? AND locktype = 'relation' AND relation = 'cases'::regclass`, pid).
+			Scan(&modes).Error)
+
+		// A plain SELECT holds AccessShareLock and nothing more; RowShareLock is what FOR UPDATE adds.
+		assert.Contains(t, modes, "RowShareLock", "the case is read without being locked for update")
+	})
+}
+
+func Test_lockCaseDiagnosisLab_UnknownCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		_, err := lockCaseDiagnosisLab(env.Postgres, types.DefaultTenantCode, 999999)
 
 		assert.ErrorIs(t, err, types.ErrCaseNotFound)
 	})
@@ -454,9 +483,9 @@ func Test_diagnosisLabOf_UnknownCase(t *testing.T) {
 
 // A case of another tenant is as good as absent: the lab must not leak across tenants, since it
 // is what the assignment write decides eligibility against.
-func Test_diagnosisLabOf_CaseOfAnotherTenant(t *testing.T) {
+func Test_lockCaseDiagnosisLab_CaseOfAnotherTenant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		_, err := diagnosisLabOf(env.Postgres, "tenant_b", 1)
+		_, err := lockCaseDiagnosisLab(env.Postgres, "tenant_b", 1)
 
 		assert.ErrorIs(t, err, types.ErrCaseNotFound)
 	})
