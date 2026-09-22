@@ -23,8 +23,8 @@ local `backend/compose` stack (StarRocks + Postgres + Ranger).
   variant.
 - **Requires a service definition with `select` on the `view` resource.** The shipped
   definition restricted it to `["drop","alter"]`, so a SELECT-on-view policy could not be
-  created at all; fixed in `ranger-starrocks` and pinned via `RANGER_IMAGE` in
-  `../ranger-compose.yml`. **An older image silently reproduces the old behaviour** —
+  created at all; fixed in `ranger-starrocks` **v0.9.0** (the minimum this stack requires),
+  pinned via `RANGER_IMAGE` in `../ranger-compose.yml`. **An older image silently reproduces the old behaviour** —
   the local StarRocks image also does not enforce Ranger on views, so isolation cannot be
   reproduced locally regardless. `05_verify.py` probes for this and **skips** its view-isolation
   half rather than failing, so a local run stays green; only checks 1 and 2 are meaningful
