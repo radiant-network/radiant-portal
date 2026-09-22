@@ -200,7 +200,13 @@ jobs:
             fi
           fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐛 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🆗 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
-          $ALL_PASSED && COLOR="good" || COLOR="danger"
+          if $ALL_PASSED; then
+            COLOR="good"
+          elif [ "$NEW_FAILS" -eq 0 ] && [ "$TOTAL_FAILS" -gt 0 ]; then
+            COLOR="good"
+          else
+            COLOR="danger"
+          fi
           TITLE="Radiant - Cypress Test Results: $STATUS"
           BODY_PARTS=()
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|Download>")
