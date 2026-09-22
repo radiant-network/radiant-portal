@@ -1,15 +1,18 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from './Selectors';
 
-const CASE_VALUE = '1';
-const DIAGLAB_VALUE = 'CQGC';
-const PATIENT_VALUE = '3';
-const REL_VALUE = 'proband';
+const CASE_GERMLINE_VALUE = '1';
+const DIAGLAB_GERMLINE_VALUE = 'CQGC';
+const PATIENT_GERMLINE_VALUE = '3';
+const CASE_SOMATIC_VALUE = '1008';
+const REL_PROBAND_VALUE = 'proband';
+const CASE_OTHER_LAB_VALUE = CASE_SOMATIC_VALUE;
+const ETL_DATE_VALUE = '2026-09-21';
 
 export const data = {
   case: {
-    case: CASE_VALUE,
-    patient: PATIENT_VALUE,
+    case: CASE_GERMLINE_VALUE,
+    patient: PATIENT_GERMLINE_VALUE,
     mrn: 'MRN-283775',
     priority: 'Routine',
     status: 'In Progress',
@@ -20,16 +23,16 @@ export const data = {
     req_by: 'CHUSJ',
     project: 'N1',
     created_on: '2021-09-12',
-    updated_on: '2026-09-21',
+    updated_on: ETL_DATE_VALUE,
     prescriber: 'Felix Laflamme',
-    diagnostic_lab: DIAGLAB_VALUE,
+    diagnostic_lab: DIAGLAB_GERMLINE_VALUE,
     managing_org: 'CHUSJ',
     has_variants: true,
-    search_criteria: `[{"field": "case_id","value": ["${CASE_VALUE}"]}]`,
+    search_criteria: `[{"field": "case_id","value": ["${CASE_GERMLINE_VALUE}"]}]`,
     seq: {
       seq_id: '1',
       sample_id: 'S13224',
-      relationship: REL_VALUE,
+      relationship: REL_PROBAND_VALUE,
       sample_type: 'dna',
       histology: 'normal',
       exp_strat: 'wgs',
@@ -39,26 +42,50 @@ export const data = {
     task: {
       task_id: /^1$/,
       type: 'Genome Alignment and Germline Variant Calling',
-      patient: REL_VALUE,
+      patient: REL_PROBAND_VALUE,
       created_on: '2021-10-12',
     },
+  },
+  assignmentCandidates: {
+    case: CASE_GERMLINE_VALUE,
+    diagnostic_lab: DIAGLAB_GERMLINE_VALUE,
+    case_other_lab: CASE_OTHER_LAB_VALUE,
+    diagnostic_lab_other: 'LDM-CHUSJ',
+    self: {
+      first_name: 'Cypress',
+      last_name: 'Cypress',
+      email: 'cypress@email.me',
+    },
+    other_lab_only: {
+      first_name: 'Allison',
+      last_name: 'Heath',
+      email: 'allison@chop.edu',
+    },
+    accented: {
+      first_name: 'Jérémy',
+      last_name: 'Costanza',
+      email: 'jecos@email.me',
+      search_unaccented: 'jer',
+      search_accented: 'Jér',
+    },
+    no_result: 'zzz',
   },
   file: {
     name: 'variants.CEPH-1463.snv.vep.vcf.gz',
     format: 'vcf',
     type: 'snv',
     size: '289.79 MB',
-    case: CASE_VALUE,
-    diag_lab: DIAGLAB_VALUE,
-    relationship: REL_VALUE,
-    patient: PATIENT_VALUE,
+    case: CASE_GERMLINE_VALUE,
+    diag_lab: DIAGLAB_GERMLINE_VALUE,
+    relationship: REL_PROBAND_VALUE,
+    patient: PATIENT_GERMLINE_VALUE,
     sample: 'S13224',
     task: '63',
     created_on: '2026-',
     sequencing: '1',
     hash: '5d41402abc4b2a76b9719d911017c726',
     run: 'A00516_0169',
-    search_criteria: `[{"field":"format_code","value":["vcf"]},{"field":"data_type_code","value":["snv"]},{"field":"relationship_to_proband_code","value":["${REL_VALUE}"]}]`,
+    search_criteria: `[{"field":"format_code","value":["vcf"]},{"field":"data_type_code","value":["snv"]},{"field":"relationship_to_proband_code","value":["${REL_PROBAND_VALUE}"]}]`,
   },
   variantGermline: {
     locus_id: '-6314429946999603200',
@@ -144,20 +171,20 @@ export const data = {
       homo_non_affected: '-',
     },
     interpreted: {
-      case: '1',
-      relationship: 'proband',
+      case: CASE_GERMLINE_VALUE,
+      relationship: REL_PROBAND_VALUE,
       date: '2026-01-09',
       primary_condition_name: 'adrenocortical insufficiency',
       primary_condition_id: 'MONDO:0000004',
       classification: 'Likely_pathogenic',
       zygosity: 'HET',
       inheritance: '-',
-      diag_lab: 'CQGC',
+      diag_lab: DIAGLAB_GERMLINE_VALUE,
       analysis: 'WGA',
       status: 'In Progress',
     },
     uninterpreted: {
-      case: '1',
+      case: CASE_GERMLINE_VALUE,
       relationship: 'mother',
       sequencing: '2',
       patient: '1',
@@ -165,9 +192,9 @@ export const data = {
       aff_status: 'Affected',
       hpo: '-',
       zygosity: 'HET',
-      diag_lab: 'CQGC',
+      diag_lab: DIAGLAB_GERMLINE_VALUE,
       analysis: 'WGA',
-      date: '2026-09-21',
+      date: ETL_DATE_VALUE,
       status: 'In Progress',
     },
     igv: {
@@ -178,7 +205,7 @@ export const data = {
     sqon: '{"content":[{"content":{"field":"hgvsg","value":["chr10:g.99235506G>A"]},"op":"in"}],"op":"and"}',
   },
   caseSomatic: {
-    case: '1008',
+    case: CASE_SOMATIC_VALUE,
     patient: '1010',
     mrn: 'MRN-283834',
     priority: 'Routine',
@@ -192,7 +219,7 @@ export const data = {
     seq: {
       seq_id: '1011',
       sample_id: 'SRX1091647',
-      relationship: 'proband',
+      relationship: REL_PROBAND_VALUE,
       sample_type: 'dna',
       histology: 'tumoral',
       exp_strat: 'wgs',
