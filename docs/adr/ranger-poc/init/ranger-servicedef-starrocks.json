@@ -43,7 +43,7 @@
       "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
       "matcherOptions": { "wildCard": true, "ignoreCase": true },
       "label": "StarRocks View", "description": "StarRocks View",
-      "accessTypeRestrictions": ["drop", "alter"]
+      "accessTypeRestrictions": ["select", "drop", "alter"]
     },
     {
       "itemId": 6, "name": "materialized_view", "type": "string", "level": 30, "parent": "database",
@@ -51,7 +51,7 @@
       "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
       "matcherOptions": { "wildCard": true, "ignoreCase": true },
       "label": "StarRocks Materialized View", "description": "StarRocks Materialized View",
-      "accessTypeRestrictions": ["refresh", "drop", "alter"]
+      "accessTypeRestrictions": ["select", "refresh", "drop", "alter"]
     },
     {
       "itemId": 7, "name": "function", "type": "string", "level": 30, "parent": "database",

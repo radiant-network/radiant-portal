@@ -150,6 +150,24 @@ def access_policy(name, databases, tables, roles):
     }
 
 
+def view_access_policy(name, databases, views, roles):
+    # `view` is a sibling of `table` under `database`, and one Ranger policy cannot span
+    # two resource hierarchies -- so every database whose objects are views needs this
+    # policy in addition to access_policy(). StarRocks enforces Ranger on views since
+    # #72910 was fixed; before that a table policy was the whole story.
+    return {
+        "policyType": 0, "name": name, "isEnabled": True, "isAuditEnabled": False,
+        "service": SERVICE,
+        "resources": {
+            "catalog": {"values": ["default_catalog"]},
+            "database": {"values": databases},
+            "view": {"values": views},
+        },
+        "policyItems": [{"roles": roles,
+                         "accesses": [{"type": "select", "isAllowed": True}]}],
+    }
+
+
 def auth_rowfilter_policy(name, table):
     return {
         "policyType": 2, "name": name, "isEnabled": True,
@@ -216,10 +234,15 @@ def main():
         access_policy("mtm_access_admin", ["tenant_*"], ["*"], ["admin_role"]),
         access_policy("mtm_access_tenant_a", ["tenant_a"], ["*"], ["tenant_a_user"]),
         access_policy("mtm_access_tenant_b", ["tenant_b"], ["*"], ["tenant_b_user"]),
+        # The patient objects are VIEWS, so the table policies above do not grant them.
+        view_access_policy("mtm_access_admin_views", ["tenant_*"], ["*"], ["admin_role"]),
+        view_access_policy("mtm_access_tenant_a_views", ["tenant_a"], ["*"], ["tenant_a_user"]),
+        view_access_policy("mtm_access_tenant_b_views", ["tenant_b"], ["*"], ["tenant_b_user"]),
         # The whole auth database, not a table list: the patient view's can_read_pii column
         # reads every auth view, and one left out of the policy fails the whole patient read
         # with access-denied. admin_role too, or admins selecting it would hit the same.
         access_policy("mtm_access_auth_grant", ["auth"], ["*"], ["user_role", "admin_role"]),
+        view_access_policy("mtm_access_auth_grant_views", ["auth"], ["*"], ["user_role", "admin_role"]),
         # Each auth view filtered to the caller's own rows. pii_lab_patient is filtered
         # explicitly rather than assuming the filter propagates through pii_grant, its source.
         auth_rowfilter_policy("mtm_rowfilter_auth_grant", "pii_grant"),

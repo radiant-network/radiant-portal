@@ -9,15 +9,26 @@ local `backend/compose` stack (StarRocks + Postgres + Ranger).
 
 - **Masking — works and is the deliverable.** PII (`submitter_patient_id`,
   `first_name`, `last_name`, `jhn`, `date_of_birth`→year) is masked per `can_read_pii`.
-- **Tenant *access* isolation — NOT enforced yet.** StarRocks bug
-  [#72910](https://github.com/StarRocks/starrocks/issues/72910): Ranger
-  authorization is bypassed for **views and materialized views**. The patient
-  objects here are views, so the access policies (`mtm_access_*`) are inert —
-  any connected user can *read* any tenant's view (masked, but readable). Access
-  control is enforced only on **base tables**.
-  **Do not ship this to a real multi-tenant environment until #72910 is fixed**
-  (then re-verify; the secured object would need to be a native/base table).
-  `05_verify.py` includes a tripwire that fails when the bug is fixed.
+- **Tenant *access* isolation — enforced.** StarRocks
+  [#72910](https://github.com/StarRocks/starrocks/issues/72910) (Ranger authorization
+  bypassed for views and materialized views) is **fixed**, so a view is now a real
+  access boundary. It only works because a view is a *separate Ranger resource* from a
+  table: `view` is a sibling of `table` under `database`, and one policy cannot span
+  both hierarchies — so every database whose objects are views needs a
+  `view_access_policy()` alongside `access_policy()`. Without it a user reads nothing
+  at all. `05_verify.py` check 3 asserts the denials, check 1 that reads still work.
+- **Masks and row-filters still resolve through the `table` resource**, even though the
+  service definition's `dataMaskDef` / `rowFilterDef` contain no `view` entry. Only the
+  *access* check uses `view`. Verified against QA — the mask policies needed no view
+  variant.
+- **Requires a service definition with `select` on the `view` resource.** The shipped
+  definition restricted it to `["drop","alter"]`, so a SELECT-on-view policy could not be
+  created at all; fixed in `ranger-starrocks` **v0.9.0** (the minimum this stack requires),
+  pinned via `RANGER_IMAGE` in `../ranger-compose.yml`. **An older image silently reproduces the old behaviour** —
+  the local StarRocks image also does not enforce Ranger on views, so isolation cannot be
+  reproduced locally regardless. `05_verify.py` probes for this and **skips** its view-isolation
+  half rather than failing, so a local run stays green; only checks 1 and 2 are meaningful
+  locally.
 
 ## Prerequisites
 
@@ -60,7 +71,7 @@ python3 03_ranger_policies.py
 ./04_seed_users.sh
 
 # wait ~10s for StarRocks to poll Ranger, then:
-# 5. Verify masking matrix + can_read_pii flag + #72910 tripwire.
+# 5. Verify masking matrix + can_read_pii flag + tenant isolation.
 python3 compose/scripts/05_verify.py
 ```
 All steps are idempotent; re-running converges to the same state. To provision a

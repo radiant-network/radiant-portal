@@ -26,7 +26,7 @@ const RangerMaskingRole = "user_role"
 // filter propagating through pii_grant, its only source.
 const (
 	authGrantDatabase   = "auth"
-	authAllTables       = "*"
+	authAllObjects      = "*"
 	authGrantTable      = "pii_grant"
 	authLabPatientTable = "pii_lab_patient"
 
@@ -39,6 +39,7 @@ const (
 // Global masking policy names (static, independent of tenant count).
 const (
 	authAccessPolicy           = "sr_access_auth"
+	authViewAccessPolicy       = "sr_access_auth_views"
 	sharedAccessPolicy         = "sr_access_shared"
 	authRowFilterPolicy        = "sr_rowfilter_auth"
 	authLabPatientRowFilterPol = "sr_rowfilter_auth_lab_patient"
@@ -67,6 +68,7 @@ var maskRedactColumns = []string{"submitter_patient_id", "first_name", "last_nam
 type RangerMaskingProvisioner interface {
 	EnsureRole(ctx context.Context, name string) error
 	EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error
+	EnsureViewAccessPolicy(ctx context.Context, name string, databases, views, roles []string) error
 	EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error
 	EnsureMaskPolicy(ctx context.Context, name string, databases []string, table string, columns []string, maskExpr string, roles []string) error
 }
@@ -83,8 +85,12 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 
 	// Grant SELECT on the auth database, then row-filter each view in it to the caller's own
 	// rows (else they could enumerate everyone's grants — see the const block above).
-	if err := ranger.EnsureAccessPolicy(ctx, authAccessPolicy, []string{authGrantDatabase}, []string{authAllTables}, roles); err != nil {
+	if err := ranger.EnsureAccessPolicy(ctx, authAccessPolicy, []string{authGrantDatabase}, []string{authAllObjects}, roles); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", authAccessPolicy, err)
+	}
+	// pii_grant and pii_lab_patient are views, which the table policy above does not reach.
+	if err := ranger.EnsureViewAccessPolicy(ctx, authViewAccessPolicy, []string{authGrantDatabase}, []string{authAllObjects}, roles); err != nil {
+		return fmt.Errorf("ranger: ensure view access policy %q: %w", authViewAccessPolicy, err)
 	}
 	for _, filtered := range []struct{ policy, table string }{
 		{authRowFilterPolicy, authGrantTable},
@@ -97,10 +103,10 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 
 	// Cross-tenant reference/annotation data (snv__consequence, genes, HPO/MONDO, external
 	// frequencies, staging_sequencing_experiment, …) lives in the shared base database, which
-	// per-tenant reads join (types.SharedDatabase). These are base tables (Ranger-enforced,
-	// unlike the tenant views), non-PII, and readable by every tenant user, so grant the marker
-	// role SELECT. snv__variant is *not* here — it is per-tenant, covered by the tenant DB
-	// grant in EnsureTenantRangerConfig.
+	// per-tenant reads join (types.SharedDatabase). These are base tables, non-PII, and readable
+	// by every tenant user, so grant the marker role SELECT — a table policy is enough here, no
+	// view companion needed. snv__variant is *not* here — it is per-tenant, covered by the
+	// tenant DB grant in EnsureTenantRangerConfig.
 	if err := ranger.EnsureAccessPolicy(ctx, sharedAccessPolicy, []string{types.SharedDatabase}, []string{"*"}, roles); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", sharedAccessPolicy, err)
 	}
@@ -126,9 +132,16 @@ func EnsureTenantRangerConfig(ctx context.Context, ranger RangerTenantProvisione
 	if err := ranger.EnsureRole(ctx, role); err != nil {
 		return fmt.Errorf("ranger: ensure role %q: %w", role, err)
 	}
+	db := types.TenantDatabase(code)
 	policy := TenantAccessPolicy(code)
-	if err := ranger.EnsureAccessPolicy(ctx, policy, []string{types.TenantDatabase(code)}, []string{"*"}, []string{role}); err != nil {
+	if err := ranger.EnsureAccessPolicy(ctx, policy, []string{db}, []string{"*"}, []string{role}); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", policy, err)
+	}
+	// The table policy covers the tenant's base tables (snv__variant, …); every object in
+	// types.ViewTables is a view and needs this second policy to be readable at all.
+	viewPolicy := TenantViewAccessPolicy(code)
+	if err := ranger.EnsureViewAccessPolicy(ctx, viewPolicy, []string{db}, []string{"*"}, []string{role}); err != nil {
+		return fmt.Errorf("ranger: ensure view access policy %q: %w", viewPolicy, err)
 	}
 	if err := ranger.AddRoleToRole(ctx, RangerMaskingRole, role); err != nil {
 		return fmt.Errorf("ranger: nest role %q under %q: %w", role, RangerMaskingRole, err)

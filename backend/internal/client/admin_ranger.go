@@ -129,24 +129,39 @@ func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
 // EnsureAccessPolicy upserts a StarRocks access policy (policyType 0) granting roles
 // SELECT on the databases/tables.
 func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
-	policy := map[string]any{
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":  map[string]any{"values": []string{"default_catalog"}},
+		"database": map[string]any{"values": databases},
+		"table":    map[string]any{"values": tables},
+		"column":   map[string]any{"values": []string{"*"}},
+	}, roles))
+}
+
+// EnsureViewAccessPolicy grants the same SELECT against the `view` resource, which a
+// table policy does NOT cover: `view` is a sibling of `table` under `database`, and one
+// Ranger policy cannot span two resource hierarchies. Required since StarRocks fixed
+// #72910 — until then Ranger was inert on views and a table policy was the whole story.
+func (c *RangerAdminClient) EnsureViewAccessPolicy(ctx context.Context, name string, databases, views, roles []string) error {
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":  map[string]any{"values": []string{"default_catalog"}},
+		"database": map[string]any{"values": databases},
+		"view":     map[string]any{"values": views},
+	}, roles))
+}
+
+func selectPolicy(name string, resources map[string]any, roles []string) map[string]any {
+	return map[string]any{
 		"policyType":     0,
 		"name":           name,
 		"isEnabled":      true,
 		"isAuditEnabled": false,
 		"service":        rangerStarrocksService,
-		"resources": map[string]any{
-			"catalog":  map[string]any{"values": []string{"default_catalog"}},
-			"database": map[string]any{"values": databases},
-			"table":    map[string]any{"values": tables},
-			"column":   map[string]any{"values": []string{"*"}},
-		},
+		"resources":      resources,
 		"policyItems": []map[string]any{{
 			"roles":    roles,
 			"accesses": []map[string]any{{"type": "select", "isAllowed": true}},
 		}},
 	}
-	return c.upsertPolicy(ctx, name, policy)
 }
 
 // EnsureRowFilterPolicy upserts a StarRocks row-filter policy (policyType 2) restricting

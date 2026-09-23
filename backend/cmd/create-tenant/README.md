@@ -52,9 +52,10 @@ How the views are built:
   are tenant-scoped but **not** federated (`batch`, `user_set`) are intentionally
   excluded — the API never reads them via StarRocks.
 
-> **Note:** a StarRocks view is not a Ranger access boundary. The views provide
-> per-tenant ergonomics and column masking; tenant *isolation* comes from the
-> database-level access policy plus per-tenant base data.
+> **Note:** a StarRocks view IS a Ranger access boundary (since #72910 was fixed), but
+> only against a policy on the `view` resource — a `table` policy does not reach it. Tenant
+> isolation therefore comes from the database-level login check plus both per-tenant access
+> policies (`sr_access_<code>` and `sr_access_<code>_views`).
 
 ### 3. Ranger — the access gate + PII masking
 - Ensures the Ranger role `<code>_user`.
@@ -110,7 +111,9 @@ curl -s -u admin:<pw> "$RANGER_URL/service/public/v2/api/service/starrocks/polic
 - **The API does not yet read these views.** It still queries `radiant_jdbc.public.*`
   directly; switching it to `<code>_tenant.*` is a separate refactor. Until then the
   views and Ranger policies are infrastructure ahead of their consumer.
-- **Ranger access policies are inert against views** (StarRocks issue
-  [#72910](https://github.com/StarRocks/starrocks/issues/72910): authorization is
-  bypassed for views). The policy is created correctly, but real access isolation
-  requires base/native tables.
+- **Views need their own Ranger policy.** StarRocks issue
+  [#72910](https://github.com/StarRocks/starrocks/issues/72910) (authorization bypassed
+  for views) is fixed, so views are a real access boundary — but `view` is a separate
+  Ranger resource from `table`, so each tenant gets both `sr_access_<code>` (base tables)
+  and `sr_access_<code>_views`. Masks and row-filters still resolve through the `table`
+  resource and need no view variant.
