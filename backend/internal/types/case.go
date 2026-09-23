@@ -111,7 +111,7 @@ type CaseResult struct {
 	CreatedOn                time.Time               `json:"created_on" validate:"required"`
 	UpdatedOn                time.Time               `json:"updated_on" validate:"required"`
 	Prescriber               string                  `json:"prescriber,omitempty"`
-	DiagnosisLabCode         string                  `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabCode         string                  `json:"diagnosis_lab_code" validate:"required"`
 	DiagnosisLabName         string                  `json:"diagnosis_lab_name,omitempty"`
 	OrganizationCode         string                  `json:"organization_code,omitempty"`
 	OrganizationName         string                  `json:"organization_name,omitempty"`
@@ -143,7 +143,7 @@ type CaseEntity struct {
 	Prescriber               string                                    `json:"prescriber,omitempty"`
 	OrderingOrganizationCode string                                    `json:"ordering_organization_code,omitempty"`
 	OrderingOrganizationName string                                    `json:"ordering_organization_name,omitempty"`
-	DiagnosisLabCode         string                                    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabCode         string                                    `json:"diagnosis_lab_code" validate:"required"`
 	DiagnosisLabName         string                                    `json:"diagnosis_lab_name,omitempty"`
 	PriorityCode             string                                    `json:"priority_code,omitempty"`
 	StatusCode               CaseStatus                                `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
@@ -298,6 +298,7 @@ var CasesDefaultFields = []Field{
 	AnalysisCatalogNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
+	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
 	CaseCreatedOnField,

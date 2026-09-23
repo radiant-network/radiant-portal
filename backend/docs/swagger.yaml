@@ -339,6 +339,7 @@ components:
       - case_category_name
       - case_id
       - created_on
+      - diagnosis_lab_code
       - has_igv_files
       - members
       - sequencing_experiments
@@ -706,6 +707,7 @@ components:
       - assignees
       - case_id
       - created_on
+      - diagnosis_lab_code
       - has_variants
       - status_code
       - updated_on
