@@ -1099,6 +1099,7 @@
     },
     "status": {
       "completed": "Complété",
+      "draft": "En brouillon",
       "in_progress": "En cours",
       "in_review": "En révision",
       "inconclusive": "Non concluant",
