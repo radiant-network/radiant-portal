@@ -1,15 +1,15 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { DocumentResult } from '@/api/api';
-import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
+import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import DownloadFileCell from '@/components/base/data-table/cells/download-file-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
@@ -63,9 +63,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
     // Case ID
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
-      cell: info => (
-        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
-      ),
+      cell: info => <CaseLinkCell caseId={info.row.original.case_id}>{info.getValue()}</CaseLinkCell>,
       header: t('file_entity.case_id'),
       size: 124,
       minSize: 40,

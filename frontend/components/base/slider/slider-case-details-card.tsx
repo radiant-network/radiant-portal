@@ -8,6 +8,7 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 import { getMemberKey } from '@/components/lib/case-entity';
 
 import EmptyField from '../information/empty-field';
@@ -18,6 +19,7 @@ const PHENOTYPES_VISIBLE_COUNT = 6;
 
 const SliderCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
   const { t } = useI18n();
+  const tenantPath = useTenantPath();
 
   return (
     <SliderCard
@@ -25,7 +27,7 @@ const SliderCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
       title={t('preview_sheet.case.title', { id: caseEntity.case_id })}
       actions={
         <Button variant="outline" size="sm" asChild>
-          <a href={`/case/entity/${caseEntity.case_id}`} target="_blank" rel="noreferrer">
+          <a href={tenantPath(`/case/entity/${caseEntity.case_id}`)} target="_blank" rel="noreferrer">
             {t('preview_sheet.case.actions.open_case')}
             <ArrowUpRight />
           </a>

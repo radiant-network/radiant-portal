@@ -1,4 +1,5 @@
-import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo } from 'react';
+import { useParams } from 'react-router';
 import useSWR from 'swr';
 
 import type { TenantMembership, UserPreference } from '../../api/api';
@@ -22,6 +23,12 @@ export const TenantContext = createContext<TenantContextValue>({
 
 export function useTenant() {
   return useContext(TenantContext);
+}
+
+/** Prefixes an app path with the active tenant: tenantPath('/case') -> '/radiant/case'. */
+export function useTenantPath() {
+  const { tenant } = useTenant();
+  return useCallback((path: string) => `/${tenant}${path === '/' ? '' : path}`, [tenant]);
 }
 
 /**
@@ -86,7 +93,8 @@ async function fetchTenantPreference(): Promise<UserPreference> {
   return response.data;
 }
 
-export function TenantProvider({ children }: { children: ReactNode }) {
+/** The tenant to fall back on when the URL does not name one: saved preference, else the first membership. */
+export function usePreferredTenant() {
   const { data: tenants, isLoading: tenantsLoading } = useSWR('auth-me-tenants', fetchTenants, {
     revalidateOnFocus: false,
     shouldRetryOnError: false,
@@ -108,17 +116,27 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     return tenants[0].code;
   }, [tenants, preference]);
 
+  return { tenant, tenants: tenants ?? [], isLoading: tenantsLoading || preferenceLoading };
+}
+
+export function TenantProvider({ children }: { children: ReactNode }) {
+  const { tenant: tenantParam } = useParams<{ tenant: string }>();
+  const { tenants, isLoading } = usePreferredTenant();
+
+  // The URL owns the tenant. Following someone else's link never changes the saved preference:
+  // only an explicit pick in the navbar switcher does.
+  const tenant = tenantParam && tenants.some(m => m.code === tenantParam) ? tenantParam : undefined;
+
   const setTenant = async (code: string) => {
     await userPreferenceApi.postUserPreferences(TENANT_PREFERENCE_KEY, {
       key: TENANT_PREFERENCE_KEY,
       content: { tenant: code },
     });
-    // Hard navigation to /case: the provider re-reads the preference and every
-    // request picks up the new tenant.
-    window.location.assign('/case');
+    // Hard navigation: entity ids do not carry across tenants, so land on the case list.
+    window.location.assign(`/${code}/case`);
   };
 
-  if (tenantsLoading || preferenceLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <Spinner size={32} className="text-primary" />
@@ -130,7 +148,5 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     return <Error403 />;
   }
 
-  return (
-    <TenantContext.Provider value={{ tenant, tenants: tenants ?? [], setTenant }}>{children}</TenantContext.Provider>
-  );
+  return <TenantContext.Provider value={{ tenant, tenants, setTenant }}>{children}</TenantContext.Provider>;
 }

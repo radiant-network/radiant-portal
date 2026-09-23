@@ -12,10 +12,12 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 
 function UninterpretedCaseActionsCell({ row }: CellContext<AppFeatures, VariantUninterpretedCase, any>) {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const tenantPath = useTenantPath();
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>
@@ -28,7 +30,7 @@ function UninterpretedCaseActionsCell({ row }: CellContext<AppFeatures, VariantU
           <DropdownMenuItem
             data-cy="menu-item-case"
             onClick={() => {
-              navigate(`/case/entity/${row.original.case_id}`);
+              navigate(tenantPath(`/case/entity/${row.original.case_id}`));
             }}
           >
             <ExternalLink />
@@ -38,7 +40,9 @@ function UninterpretedCaseActionsCell({ row }: CellContext<AppFeatures, VariantU
             data-cy="menu-item-variants"
             onClick={() => {
               navigate(
-                `/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${row.original.seq_id}`,
+                tenantPath(
+                  `/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${row.original.seq_id}`,
+                ),
               );
             }}
           >

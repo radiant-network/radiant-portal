@@ -2,6 +2,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 
 type InterpretationVariantHeaderProps = {
   case_type?: string;
@@ -21,6 +22,7 @@ function InterpretationVariantHeader({
   seqId,
 }: InterpretationVariantHeaderProps) {
   const { t } = useI18n();
+  const tenantPath = useTenantPath();
 
   return (
     <div className="flex flex-col gap-2">
@@ -28,7 +30,12 @@ function InterpretationVariantHeader({
         {t('variant.interpretation_form.title')}
         <Tooltip>
           <TooltipTrigger asChild>
-            <AnchorLink href={`/variants/entity/${locus_id}`} size="lg" mono className="min-w-28 max-w-56 truncate">
+            <AnchorLink
+              href={tenantPath(`/variants/entity/${locus_id}`)}
+              size="lg"
+              mono
+              className="min-w-28 max-w-56 truncate"
+            >
               {hgvsg}
             </AnchorLink>
           </TooltipTrigger>

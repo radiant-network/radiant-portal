@@ -1,6 +1,7 @@
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 
 type SliderOccurrenceSubHeader = {
   hgvsg: string;
@@ -11,11 +12,12 @@ type SliderOccurrenceSubHeader = {
 
 function SliderOccurrenceSubHeader({ hgvsg, locusId, actions, type = 'germline' }: SliderOccurrenceSubHeader) {
   const { t } = useI18n();
+  const tenantPath = useTenantPath();
   return (
     <div className="flex flex-wrap gap-4 items-center justify-between w-full">
       <div className="flex gap-3">
         <AnchorLink
-          href={`/variants/entity/${locusId}`}
+          href={tenantPath(`/variants/entity/${locusId}`)}
           size="default"
           mono
           target="_blank"

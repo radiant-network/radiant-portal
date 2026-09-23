@@ -11,6 +11,7 @@ import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { variantsApi } from '@/utils/api';
 
@@ -34,6 +35,7 @@ async function fetchVariantHeader(input: VariantHeaderInput, tenant: string) {
 
 export default function App() {
   const { t } = useI18n();
+  const tenantPath = useTenantPath();
   const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -73,7 +75,7 @@ export default function App() {
       <Error404
         message={t('variant_entity.not_found')}
         extra={
-          <Link to="/">
+          <Link to={tenantPath('/')}>
             <Button>{t('variant_entity.not_found.button')}</Button>
           </Link>
         }

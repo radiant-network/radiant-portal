@@ -5,6 +5,7 @@ import type { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenantPath } from '@/components/hooks/use-tenant';
 
 import ClassificationSection from './classification-section';
 
@@ -14,6 +15,7 @@ type InterpretationCardProps = CardProps & {
 
 function InterpretationCard({ data, ...props }: InterpretationCardProps) {
   const { t } = useI18n();
+  const tenantPath = useTenantPath();
   const params = useParams<{ locusId: string }>();
 
   return (
@@ -27,14 +29,14 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
       <CardContent className="space-y-6">
         <ClassificationSection
           dataCy="my-network"
-          href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
+          href={tenantPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`)}
           title={t('variant_entity.overview.my_network')}
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variant_entity.overview.no_interpretation_network')}
         />
         {/*
         <ClassificationSection
-          href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
+          href={tenantPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`)}
           title={t('variant_entity.overview.clin_var')}
           counts={data.interpretation_classification_counts ?? {}}
           emptyText={t('variant_entity.overview.no_clin_var_interpretation')}
