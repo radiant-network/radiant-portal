@@ -596,7 +596,7 @@ export interface CaseEntity {
      * @type {string}
      * @memberof CaseEntity
      */
-    'diagnosis_lab_code'?: string;
+    'diagnosis_lab_code': string;
     /**
      * 
      * @type {string}
@@ -1219,7 +1219,7 @@ export interface CaseResult {
      * @type {string}
      * @memberof CaseResult
      */
-    'diagnosis_lab_code'?: string;
+    'diagnosis_lab_code': string;
     /**
      * 
      * @type {string}

@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **case_id** | **int** |  | 
 **case_type** | **str** |  | [optional] 
 **created_on** | **str** |  | 
-**diagnosis_lab_code** | **str** |  | [optional] 
+**diagnosis_lab_code** | **str** |  | 
 **diagnosis_lab_name** | **str** |  | [optional] 
 **has_variants** | **bool** |  | 
 **ordering_organization_code** | **str** |  | [optional] 

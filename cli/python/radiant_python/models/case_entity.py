@@ -40,7 +40,7 @@ class CaseEntity(BaseModel):
     case_type: Optional[StrictStr] = None
     created_on: StrictStr
     diagnosis_hypothesis: Optional[StrictStr] = None
-    diagnosis_lab_code: Optional[StrictStr] = None
+    diagnosis_lab_code: StrictStr
     diagnosis_lab_name: Optional[StrictStr] = None
     has_igv_files: StrictBool
     members: List[CasePatientClinicalInformation]

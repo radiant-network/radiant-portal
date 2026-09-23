@@ -35,7 +35,7 @@ class CaseResult(BaseModel):
     case_id: StrictInt
     case_type: Optional[StrictStr] = None
     created_on: StrictStr
-    diagnosis_lab_code: Optional[StrictStr] = None
+    diagnosis_lab_code: StrictStr
     diagnosis_lab_name: Optional[StrictStr] = None
     has_variants: StrictBool
     ordering_organization_code: Optional[StrictStr] = None
