@@ -7,9 +7,11 @@ import (
 // Task type codes (values found in the task_type table).
 const (
 	RadiantGermlineAnnotationTask               = "radiant_germline_annotation"
+	RadiantGermlineCNVAnnotationTask            = "radiant_germline_cnv_annotation"
 	RadiantSomaticAnnotationTask                = "radiant_somatic_annotation"
 	ClinicalReportTaskTypeCode                  = "clinical_report"
 	ExomiserTaskTypeCode                        = "exomiser"
+	ExomiserCNVTaskTypeCode                     = "exomiser_cnv"
 	AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
 	AlignmentSomaticVariantCallingTaskTypeCode  = "alignment_somatic_variant_calling"
 	TumorOnlyVariantCallingTaskTypeCode         = "tumor_only_variant_calling"

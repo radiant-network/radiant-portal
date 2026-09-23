@@ -98,21 +98,25 @@ const (
 const RelationshipProbandCode = "proband"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
-	"family_variant_calling":            {},
-	"tumor_only_variant_calling":        {},
-	types.RadiantGermlineAnnotationTask: {},
-	types.RadiantSomaticAnnotationTask:  {},
-	types.ClinicalReportTaskTypeCode:    {},
-	types.ExomiserTaskTypeCode:          {},
+	"family_variant_calling":               {},
+	"tumor_only_variant_calling":           {},
+	types.RadiantGermlineAnnotationTask:    {},
+	types.RadiantGermlineCNVAnnotationTask: {},
+	types.RadiantSomaticAnnotationTask:     {},
+	types.ClinicalReportTaskTypeCode:       {},
+	types.ExomiserTaskTypeCode:             {},
+	types.ExomiserCNVTaskTypeCode:          {},
 }
 
 var RequiresInputDocumentsTaskTypes = map[string]struct{}{
-	"family_variant_calling":            {},
-	"somatic_variant_calling":           {},
-	"tumor_only_variant_calling":        {},
-	types.RadiantGermlineAnnotationTask: {},
-	types.RadiantSomaticAnnotationTask:  {},
-	types.ExomiserTaskTypeCode:          {},
+	"family_variant_calling":               {},
+	"somatic_variant_calling":              {},
+	"tumor_only_variant_calling":           {},
+	types.RadiantGermlineAnnotationTask:    {},
+	types.RadiantGermlineCNVAnnotationTask: {},
+	types.RadiantSomaticAnnotationTask:     {},
+	types.ExomiserTaskTypeCode:             {},
+	types.ExomiserCNVTaskTypeCode:          {},
 }
 
 const VCFFormatCode = "vcf"
@@ -125,6 +129,7 @@ var VariantVCFDataTypeCodes = map[string]struct{}{
 
 var SingleAliquotTaskTypes = map[string]struct{}{
 	types.ExomiserTaskTypeCode:                        {},
+	types.ExomiserCNVTaskTypeCode:                     {},
 	types.AlignmentGermlineVariantCallingTaskTypeCode: {},
 	types.AlignmentSomaticVariantCallingTaskTypeCode:  {},
 }
