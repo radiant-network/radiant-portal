@@ -298,6 +298,7 @@ var CasesDefaultFields = []Field{
 	AnalysisCatalogNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
+	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
 	CaseCreatedOnField,
