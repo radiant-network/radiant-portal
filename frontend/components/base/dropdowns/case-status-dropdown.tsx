@@ -3,7 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import StatusBadge, { type Status, statusColors } from '@/components/base/badges/status-badge';
+import { type CaseStatus, PatchCaseStatusCodeEnum } from '@/api/api';
+import StatusBadge, { statusColors } from '@/components/base/badges/status-badge';
 import { type BadgeProps, badgeVariants } from '@/components/base/shadcn/badge';
 import {
   DropdownMenu,
@@ -21,9 +22,14 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
 import { caseApi } from '@/utils/api';
 
-export const SYSTEM_APPLIED_STATUSES: Status[] = ['draft', 'submitted', 'processing'];
+const USER_APPLIED_STATUSES: readonly CaseStatus[] = Object.values(PatchCaseStatusCodeEnum);
 
-const MENU_ENTRIES: { status: Status; submenu?: Status[] }[] = [
+// System-applied statuses are whatever CaseStatus holds beyond the patchable enum.
+function isUserAppliedStatus(status: CaseStatus): status is PatchCaseStatusCodeEnum {
+  return USER_APPLIED_STATUSES.includes(status);
+}
+
+const MENU_ENTRIES: { status: PatchCaseStatusCodeEnum; submenu?: PatchCaseStatusCodeEnum[] }[] = [
   { status: 'in_progress' },
   { status: 'in_review' },
   { status: 'completed', submenu: ['completed', 'resolved', 'unresolved', 'inconclusive'] },
@@ -33,7 +39,7 @@ const MENU_ENTRIES: { status: Status; submenu?: Status[] }[] = [
 
 type PatchStatusInput = {
   caseId: number;
-  status: Status;
+  status: PatchCaseStatusCodeEnum;
 };
 
 async function patchCaseStatus(_url: string, { arg }: { arg: PatchStatusInput }, tenant: string) {
@@ -43,7 +49,7 @@ async function patchCaseStatus(_url: string, { arg }: { arg: PatchStatusInput },
 
 export type CaseStatusDropdownProps = {
   caseId: number;
-  status: Status;
+  status: CaseStatus;
   /** False renders the read-only badge. Wired to `can_edit_case` in SJRA-1917. */
   canEdit?: boolean;
   readOnlyTooltip?: ReactNode;
@@ -66,7 +72,7 @@ function CaseStatusDropdown({
   const { trigger } = useSWRMutation(`patch-case-status-${caseId}`, (key: string, opts: { arg: PatchStatusInput }) =>
     patchCaseStatus(key, opts, tenant),
   );
-  const [currentStatus, setCurrentStatus] = useState<Status>(status);
+  const [currentStatus, setCurrentStatus] = useState<CaseStatus>(status);
   const closedWithPointerRef = useRef(false);
 
   // Table cells are recycled across rows: resync when the row underneath changes.
@@ -74,9 +80,9 @@ function CaseStatusDropdown({
     setCurrentStatus(status);
   }, [status, caseId]);
 
-  const label = (code: Status) => t(`case_exploration.status.${code}`, code);
+  const label = (code: CaseStatus) => t(`case_exploration.status.${code}`, code);
 
-  function selectStatus(next: Status) {
+  function selectStatus(next: PatchCaseStatusCodeEnum) {
     if (next === currentStatus) return;
 
     const previous = currentStatus;
@@ -89,7 +95,7 @@ function CaseStatusDropdown({
       });
   }
 
-  if (!canEdit || SYSTEM_APPLIED_STATUSES.includes(currentStatus)) {
+  if (!canEdit || !isUserAppliedStatus(currentStatus)) {
     const badge = <StatusBadge status={currentStatus} size={size} withIcon={false} className={className} />;
     if (!readOnlyTooltip) return badge;
 

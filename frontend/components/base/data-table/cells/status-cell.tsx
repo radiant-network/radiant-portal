@@ -1,9 +1,11 @@
-import StatusBadge, { type Status } from '../../badges/status-badge';
+import type { CaseStatus } from '@/api/api';
+
+import StatusBadge from '../../badges/status-badge';
 
 import EmptyCell from './empty-cell';
 
 type StatusCellProps = {
-  status: Status | undefined;
+  status: CaseStatus | undefined;
 };
 
 function StatusCell({ status }: StatusCellProps) {

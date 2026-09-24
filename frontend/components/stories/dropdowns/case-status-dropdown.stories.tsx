@@ -1,25 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 
-import type { Status } from '@/components/base/badges/status-badge';
+import { type CaseStatus, PatchCaseStatusCodeEnum } from '@/api/api';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import { Toaster } from '@/components/base/shadcn/sonner';
 
 import { caseEntityApi } from '../api/api-case';
 import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
 
-const USER_APPLIED: Status[] = [
-  'in_progress',
-  'in_review',
-  'completed',
-  'resolved',
-  'unresolved',
-  'inconclusive',
-  'reopened',
-  'revoked',
-];
+const USER_APPLIED = Object.values(PatchCaseStatusCodeEnum);
 
-const SYSTEM_APPLIED: Status[] = ['draft', 'submitted', 'processing'];
+const SYSTEM_APPLIED: CaseStatus[] = ['draft', 'submitted', 'processing'];
 
 const okHandler = http.patch(caseEntityApi, () => new HttpResponse(null, { status: 200 }));
 
