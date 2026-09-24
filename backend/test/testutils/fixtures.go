@@ -34,23 +34,23 @@ const (
 type Need struct {
 	Starrocks        string       // fixture folder name under test/data/; "" = no StarRocks
 	Postgres         PostgresMode // see PostgresMode constants
-	MinIO            bool         // spin up a per-test MinIO container
+	ObjectStore      bool         // spin up a per-test S3-compatible object store container
 	Tenants          []string     // When non-empty, provisions multi-tenant databases
 	TenantKeyColumns []string     // The specific columns to increment between tenants (defaults to empty)
 }
 
-// MinIOEnv groups the MinIO connection details exposed to a test.
-type MinIOEnv struct {
+// ObjectStoreEnv groups the object store connection details exposed to a test.
+type ObjectStoreEnv struct {
 	Client   *minio.Client
 	Endpoint string
 }
 
 // Env holds the resources requested via Need. Unrequested fields are nil.
 type Env struct {
-	Ctx       context.Context
-	Starrocks *gorm.DB
-	Postgres  *gorm.DB
-	MinIO     *MinIOEnv
+	Ctx         context.Context
+	Starrocks   *gorm.DB
+	Postgres    *gorm.DB
+	ObjectStore *ObjectStoreEnv
 }
 
 // TenantCtx returns Ctx with the tenant
@@ -63,10 +63,10 @@ func (e *Env) TenantCtx(code string) context.Context {
 // The test runs in parallel UNLESS one of the following makes that unsafe:
 //   - ExclusivePostgres: the test touches shared rows (seed data, count
 //     assertions on shared keys) and needs the database to itself.
-//   - MinIO: the helper sets AWS_* env vars via t.Setenv, which is mutually
+//   - ObjectStore: the helper sets AWS_* env vars via t.Setenv, which is mutually
 //     exclusive with t.Parallel.
 func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
-	serial := need.Postgres == ExclusivePostgres || need.MinIO
+	serial := need.Postgres == ExclusivePostgres || need.ObjectStore
 	if !serial {
 		t.Parallel()
 	}
@@ -104,11 +104,11 @@ func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
 		}
 	}
 
-	// MinIO (per-test container; AWS_* env vars are exported via t.Setenv).
-	if need.MinIO {
-		minioC, err := initMinioContainer(env.Ctx)
+	// Object store (per-test container; AWS_* env vars are exported via t.Setenv).
+	if need.ObjectStore {
+		minioC, err := initObjectStoreContainer(env.Ctx)
 		if err != nil {
-			log.Fatalf("Failed to start MinIO container: %v", err)
+			log.Fatalf("Failed to start object store container: %v", err)
 		}
 		client, err := initS3Client(minioC.Endpoint)
 		if err != nil {
@@ -118,7 +118,7 @@ func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
-		env.MinIO = &MinIOEnv{Client: client, Endpoint: minioC.Endpoint}
+		env.ObjectStore = &ObjectStoreEnv{Client: client, Endpoint: minioC.Endpoint}
 	}
 
 	fn(t, env)

@@ -4697,14 +4697,14 @@ func Test_validateDocumentDataTypeForTaskType_AnnotationTaskWithClinicalReportVC
 }
 
 func Test_validateFileMetadata_OK(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 
 		bucketName := "foo"
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4738,8 +4738,8 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 }
 
 func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4748,8 +4748,8 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4789,8 +4789,8 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 }
 
 func Test_validateFileMetadata_NameMismatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4799,8 +4799,8 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4840,8 +4840,8 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4850,8 +4850,8 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4891,8 +4891,8 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_HashMismatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4901,8 +4901,8 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{
@@ -4942,8 +4942,8 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 }
 
 func Test_validateFileMetadata_OptionalHash(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		t.Setenv("AWS_ENDPOINT_URL", env.MinIO.Endpoint)
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
 		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
 		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
 		t.Setenv("AWS_USE_SSL", "false")
@@ -4952,8 +4952,8 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		_ = env.MinIO.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
-		_, _ = env.MinIO.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+		_ = env.ObjectStore.Client.MakeBucket(env.Ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = env.ObjectStore.Client.PutObject(env.Ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := batchval.BatchValidationContext{

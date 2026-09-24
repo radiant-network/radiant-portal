@@ -19,7 +19,7 @@ import (
 const (
 	StarrocksContainerName   = "starrocks_radiant"
 	PostgresContainerName    = "postgres_radiant"
-	ObjectStoreContainerName = "minio_radiant"
+	ObjectStoreContainerName = "object_store_radiant"
 )
 
 // TestResources is the absolute path to backend/test/data. It is resolved from the module root
@@ -84,7 +84,7 @@ func StartObjectStoreContainer() {
 		Network = createNetwork()
 	}
 	if ObjectStoreContainerSetup == nil {
-		ObjectStoreContainerSetup = newContainerSetup(ObjectStoreContainerName, startMinioContainer)
+		ObjectStoreContainerSetup = newContainerSetup(ObjectStoreContainerName, startObjectStoreContainer)
 		ObjectStoreContainerSetup.setupContainer()
 	}
 }
@@ -205,19 +205,22 @@ func startPostgresContainer() (testcontainers.Container, error) {
 	return container, nil
 }
 
-func startMinioContainer() (testcontainers.Container, error) {
+func startObjectStoreContainer() (testcontainers.Container, error) {
 	ctx := context.Background()
 	networkName := Network.Name
 	aliases := []string{ObjectStoreContainerName}
 
+	// RustFS rather than MinIO: MinIO's images stopped being anonymously pullable from every
+	// public registry, so a clean CI runner cannot start them. RustFS is S3-compatible, serves
+	// the same port, and its image is public (Apache-2.0). The entrypoint defaults to the
+	// RUSTFS_VOLUMES baked into the image, so no command is needed.
 	req := testcontainers.ContainerRequest{
-		Image:        "quay.io/minio/minio:latest",
+		Image:        "rustfs/rustfs:latest",
 		ExposedPorts: []string{"9000/tcp"},
 		Env: map[string]string{
-			"MINIO_ROOT_USER":     "admin",
-			"MINIO_ROOT_PASSWORD": "password",
+			"RUSTFS_ACCESS_KEY": objectStoreAccessKey,
+			"RUSTFS_SECRET_KEY": objectStoreSecretKey,
 		},
-		Cmd:      []string{"server", "/data"},
 		Networks: []string{networkName},
 		NetworkAliases: map[string][]string{
 			networkName: aliases,

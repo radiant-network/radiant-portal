@@ -69,9 +69,9 @@ func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {
 }
 
 func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("Dry_Run")
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, true, "user123", "2025-12-04")
@@ -84,9 +84,9 @@ func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("Not_Dry_Run")
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -186,7 +186,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpretation(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Ancestry_Obs")
 		// CLIN-6022: an ancestry observation has no onset_code / interpretation_code.
@@ -198,7 +198,7 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 				Value:  "BLK",
 			},
 		)
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -289,7 +289,7 @@ func Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient(
 }
 
 func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Fetus_Twins")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
@@ -313,7 +313,7 @@ func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testin
 				},
 			},
 		}
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -356,13 +356,13 @@ func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testin
 }
 
 func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Fetus_Invalid_Sex")
 		payload[0].Fetuses = []*types.CaseFetusBatch{
 			{SubmitterFetusId: "F-BAD-SEX", SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1)},
 		}
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -382,7 +382,7 @@ func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndInterpretation(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		payload := createBaseCasePayload("Exam_Obs_Cat")
 		payload[0].Patients[0].ObservationsCategorical = append(
@@ -395,7 +395,7 @@ func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndIn
 				InterpretationCode: "abnormal",
 			},
 		)
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -417,7 +417,7 @@ func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndIn
 }
 
 func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("")
 		payload[0].SubmitterCaseId = ""
 		payload[0].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
@@ -431,7 +431,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
 		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
 
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -449,7 +449,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("")
 		payload[0].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
@@ -461,7 +461,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
 		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
 
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -477,7 +477,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 }
 
 func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		for _, tableName := range []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"} {
 			var maxID int
 			if err := env.Postgres.Raw(fmt.Sprintf("SELECT COALESCE(MAX(id), 0) FROM %s;", tableName)).Scan(&maxID).Error; err != nil || maxID == 0 {
@@ -489,7 +489,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			before := getTableCounts(env.Postgres, []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"})
 
 			payload := createBaseCasePayload("Persist_Failure_ID_Collision_" + tableName)
-			createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+			createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 			payloadBytes, _ := json.Marshal(payload)
 			id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
@@ -533,10 +533,10 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_TaskField")
 		payload[0].Tasks[0].PipelineVersion = "!@#$%^&*()_+"
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 
@@ -552,10 +552,10 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_InvalidTaskTypeCode")
 		payload[0].Tasks[0].TypeCode = "invalid_task_type"
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -572,10 +572,10 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_InvalidTaskAliquot")
 		payload[0].Tasks[0].Aliquots = []string{"UNKNOWN_ALIQUOT"}
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -592,10 +592,10 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_MissingInputDocuments")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -612,10 +612,10 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_MissingOutputDocuments")
 		payload[0].Tasks[0].OutputDocuments = []*types.OutputDocumentBatch{}
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -632,7 +632,7 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing
 }
 
 func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateTask_Error_ExternalSequencingExperiment")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
 		payload[0].Tasks[0].Aliquots = []string{"NA12891", "ABC123"} // One Aliquot not-matching
@@ -641,7 +641,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
 			},
 		}
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -663,11 +663,11 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 }
 
 func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_IdenticalDocumentAlreadyExists_1")
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
 		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -695,10 +695,10 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 }
 
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_DocumentField")
 		payload[0].Tasks[0].OutputDocuments[0].Name = "!@#$%^&*()_+"
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -719,7 +719,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_DocumentNotFoundAtUrl")
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -735,7 +735,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *test
 }
 
 func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentExists(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Warning_PartiallyDifferentDocumentExists")
 		url := "s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai"
 		doc := payload[0].Tasks[0].OutputDocuments[0]
@@ -770,10 +770,10 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 }
 
 func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_DuplicateDocumentInBatch")
 		payload[0].Tasks[0].OutputDocuments = append(payload[0].Tasks[0].OutputDocuments, payload[0].Tasks[0].OutputDocuments[0])
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
@@ -788,9 +788,9 @@ func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *t
 }
 
 func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_SizeNotMatch")
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		size := int64(42)
 		payload[0].Tasks[0].OutputDocuments[0].Size = &size
@@ -809,9 +809,9 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_HashNotMatch")
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payload[0].Tasks[0].OutputDocuments[0].Hash = "not-the-right-hash"
 
@@ -829,7 +829,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_case_codes")
 		payload, _ := json.Marshal(scenario.Cases)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
@@ -923,12 +923,12 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_inner_codes_patients_and_observations")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
@@ -969,12 +969,12 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Inner_Codes_SequencingExperiments(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_inner_codes_sequencing_experiments")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
@@ -990,12 +990,12 @@ func Test_ProcessBatch_Case_Inner_Codes_SequencingExperiments(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_inner_codes_tasks")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
@@ -1106,12 +1106,12 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_inner_codes_documents")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 
@@ -1206,12 +1206,12 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_optional_values")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		// Get count of cases existing in DB
 		var before int64
@@ -1227,12 +1227,12 @@ func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("cases_aliquots_permutations")
 		payload, _ := json.Marshal(scenario.Cases)
 
 		// Create document to validate size and hash checks
-		_ = createDocument(env.Ctx, env.MinIO.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
 		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
@@ -1240,7 +1240,7 @@ func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("Not_Dry_Run_No_Tasks")
 		payload[0].Tasks = []*types.CaseTaskBatch{}
 
@@ -1288,7 +1288,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
 			},
 		}
 
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -1322,9 +1322,9 @@ func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("fix_sjra_1218")
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, scenario.Cases)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, scenario.Cases)
 		payloadBytes, _ := json.Marshal(scenario.Cases)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
@@ -1356,7 +1356,7 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("Clinical_Report")
 		size := int64(13)
 		reportUrl := "s3://test-bucket/Clinical_Report.nexus.vcf"
@@ -1378,7 +1378,7 @@ func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
 			},
 		})
 
-		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")

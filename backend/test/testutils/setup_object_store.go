@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	minioAccessKey = "admin"
-	minioSecretKey = "password"
+	objectStoreAccessKey = "admin"
+	objectStoreSecretKey = "password"
 )
 
-type MinioContainer struct {
+type ObjectStoreContainer struct {
 	Container tc.Container
 	Endpoint  string
 }
 
-func initMinioContainer(ctx context.Context) (*MinioContainer, error) {
+func initObjectStoreContainer(ctx context.Context) (*ObjectStoreContainer, error) {
 	host, err := ObjectStoreContainerSetup.Container.Host(ctx)
 	if err != nil {
 		log.Fatal("failed to get container host: ", err)
@@ -34,15 +34,15 @@ func initMinioContainer(ctx context.Context) (*MinioContainer, error) {
 
 	endpoint := fmt.Sprintf("%s:%s", host, port.Port())
 
-	// Wait a bit to allow MinIO to fully start up
+	// Wait a bit to allow the object store to fully start up
 	time.Sleep(2 * time.Second)
 
-	return &MinioContainer{Container: ObjectStoreContainerSetup.Container, Endpoint: endpoint}, nil
+	return &ObjectStoreContainer{Container: ObjectStoreContainerSetup.Container, Endpoint: endpoint}, nil
 }
 
 func initS3Client(endpoint string) (*minio.Client, error) {
 	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(minioAccessKey, minioSecretKey, ""),
+		Creds:  credentials.NewStaticV4(objectStoreAccessKey, objectStoreSecretKey, ""),
 		Secure: false,
 	})
 	if err != nil {
