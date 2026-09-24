@@ -33,6 +33,6 @@ describe('Cases - Search - Sequencing experiment', () => {
   });
 
   it('Return content', () => {
-    expect(response.body.count).to.eq(2);
+    expect(response.body.count).to.eq(1);
   });
 });

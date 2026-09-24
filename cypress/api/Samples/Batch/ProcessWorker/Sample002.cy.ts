@@ -10,7 +10,7 @@ describe('Samples - Batch - Process worker - Sample002', () => {
     const body: string = `{
       "samples": [
         {
-          "submitter_patient_id": "MRN-283775",
+          "submitter_patient_id": "MRN-283773",
           "patient_organization_code": "CHUSJ",
           "type_code": "rna",
           "submitter_parent_sample_id": "S13224",

@@ -3,16 +3,16 @@ const globalData = {
     token: null, // Will be set by initializeGlobalData
   },
   BatchesId: {
-    patientSuccess: '2c9ccf0e-cbc9-45b1-9eab-87d023bffd00',
+    patientSuccess: 'b9280187-564c-4349-b48a-705e76cf3296',
     patientNotFound: '00000000-0000-0000-0000-000000000000',
   },
   Count: {
     //occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count
     //TODO: Waiting for stable data to restore the counts
-    case_id: 1,
-    seq_id: 1,
+    case_id: 1225,
+    seq_id: 1044,
     snv: {
-      task_id: 63,
+      task_id: 1187,
       Variant: [
         {
           field: 'variant_class',
@@ -343,31 +343,31 @@ const globalData = {
       },
     },
     cnv: {
-      task_id: 1,
+      task_id: 1175,
       Variant: [
         {
           field: 'type',
           value: 'LOSS',
           op: 'in',
-          count: 546,
+          count: 611,
         },
         {
           field: 'cn',
           value: '100',
           op: '<',
-          count: 648,
+          count: 726,
         },
         {
           field: 'length',
           value: '100000',
           op: '<',
-          count: 617,
+          count: 703,
         },
         {
           field: 'chromosome',
           value: '2',
           op: 'in',
-          count: 56,
+          count: 70,
         },
         {
           field: 'start',
@@ -385,7 +385,7 @@ const globalData = {
           field: 'nb_snv',
           value: '10000',
           op: '<',
-          count: 477,
+          count: 521,
         },
       ],
       Gene: [
@@ -393,13 +393,13 @@ const globalData = {
           field: 'cytoband',
           value: 'p11.2',
           op: 'in',
-          count: 33,
+          count: 54,
         },
         {
           field: 'hpo_gene_panel',
           value: 'Autosomal recessive inheritance(HP:0000007)',
           op: 'in',
-          count: 36,
+          count: 39,
         },
         {
           field: 'orphanet_gene_panel',
@@ -411,7 +411,7 @@ const globalData = {
           field: 'omim_gene_panel',
           value: 'Albinism, oculocutaneous, type VII',
           op: 'in',
-          count: 2,
+          count: 1,
         },
         {
           field: 'ddd_gene_panel',
@@ -431,13 +431,13 @@ const globalData = {
           field: 'gnomad_sf',
           value: '0.5',
           op: '<',
-          count: 153,
+          count: 151,
         },
         {
           field: 'gnomad_sc',
           value: '10000',
           op: '<',
-          count: 66,
+          count: 69,
         },
       ],
       'Metric QC': [
@@ -445,25 +445,25 @@ const globalData = {
           field: 'filter',
           value: 'PASS',
           op: 'in',
-          count: 138,
+          count: 151,
         },
         {
           field: 'quality',
           value: '50',
           op: '<',
-          count: 432,
+          count: 499,
         },
         {
           field: 'pe',
           value: '10000',
           op: '<',
-          count: 648,
+          count: 726,
         },
         {
           field: 'sm',
           value: '50',
           op: '<',
-          count: 648,
+          count: 726,
         },
       ],
       Complex: {
@@ -474,7 +474,7 @@ const globalData = {
           field2: 'type',
           value2: 'LOSS',
           op2: 'in',
-          count: 49,
+          count: 61,
         },
         twoPillsOr: {
           field1: 'chromosome',
@@ -483,13 +483,13 @@ const globalData = {
           field2: 'type',
           value2: 'LOSS',
           op2: 'in',
-          count: 553,
+          count: 620,
         },
         notIn: {
           field1: 'chromosome',
           value1: '2',
           op1: 'not-in',
-          count: 593,
+          count: 656,
         },
         combined: {
           field1: 'chromosome',
@@ -498,16 +498,16 @@ const globalData = {
           field2: 'type',
           value2: 'LOSS',
           op2: 'in',
-          countOr: 553,
-          countAnd: 49,
+          countOr: 620,
+          countAnd: 61,
         },
       },
     },
     somatic: {
       //TODO: Waiting for stable data to restore the counts
-      case_id: 1008,
-      seq_id: 1011,
-      task_id: 1018,
+      case_id: 1226,
+      seq_id: 1047,
+      task_id: 1185,
       Variant: [
         {
           field: 'variant_class',

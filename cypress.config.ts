@@ -35,7 +35,7 @@ export default defineConfig({
     // portal then logs in through its own client from the Keycloak SSO session.
     keycloak_redirect_uri: "http://localhost:3000/auth/callback",
     api_client: "radiant-local",
-    api_tenant: "radiant",
+    api_tenant: "cypress",
     api_base_url: "https://api.dev.qlin.aws.sante.quebec/",
   },
   env: {

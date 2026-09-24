@@ -12,6 +12,6 @@ describe('VariantEntity - EvidCond - CondPhen - Orphanet - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldSortColumn('condition', true /*hasUniqueValues*/, true /*isReverseSorting*/);
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldSortColumn('condition', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 });

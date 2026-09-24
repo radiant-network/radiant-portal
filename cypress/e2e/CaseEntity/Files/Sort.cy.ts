@@ -26,7 +26,7 @@ describe('CaseEntity - Files - Sort', () => {
 
   it('Date', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('created_on', true /*hasUniqueValues*/, false /*isReverseSorting*/);
+    CaseEntity_Files.validations.shouldSortColumn('created_on', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Size', () => {
@@ -38,8 +38,7 @@ describe('CaseEntity - Files - Sort', () => {
   it('Multiple', () => {
     setupTest();
     CaseEntity_Files.actions.sortColumn('name');
-    CaseEntity_Files.actions.sortColumn('patient');
-    CaseEntity_Files.actions.sortColumn('patient');
-    CaseEntity_Files.validations.shouldHaveFirstRowValue('3', 'patient');
+    CaseEntity_Files.actions.sortColumn('sample');
+    CaseEntity_Files.validations.shouldHaveFirstRowValue(data.case.seq.sample_id, 'sample');
   });
 });

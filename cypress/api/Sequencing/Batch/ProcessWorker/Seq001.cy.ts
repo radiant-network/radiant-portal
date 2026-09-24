@@ -10,7 +10,7 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
     const body: string = `{
       "sequencing_experiments": [
         {
-          "aliquot": "NA12878_NA12878",
+          "aliquot": "NA12878",
           "sample_organization_code": "CQGC",
           "submitter_sample_id": "S13224",
           "experimental_strategy_code": "wgs",
@@ -48,6 +48,6 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
   });
 
   it('Validate report sequencing_experiment[0]', () => {
-    cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0]');
+    cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0]');
   });
 });

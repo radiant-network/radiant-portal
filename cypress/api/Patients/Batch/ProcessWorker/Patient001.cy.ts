@@ -13,12 +13,12 @@ describe('Patients - Batch - Process worker - Patient001', () => {
           "submitter_patient_id": "MRN-283775  ",
           "submitter_patient_id_type": "MR",
           "patient_organization_code": "CHUSJ",
-          "first_name": "Marie",
-          "last_name": "Lambert",
-          "jhn": "LAM7303233380",
+          "first_name": "Antoine",
+          "last_name": "Lefebvre",
+          "jhn": "LEFA85061203",
           "life_status_code": "alive",
           "sex_code": "male",
-          "date_of_birth": "1973-03-23"
+          "date_of_birth": "1985-06-12"
         }
       ]
     }`;

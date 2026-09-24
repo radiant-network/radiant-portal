@@ -6,19 +6,16 @@ const getExpose = (key: string): string => {
 };
 
 /**
- * Makes an authenticated API call with automatic retry logic for 500 errors.
- * Retries up to the specified number of times if a 500 status code is received.
+ * Makes an authenticated request to a tenant-scoped endpoint, retrying on 500 errors.
+ * @param tenant The tenant segment prepended to the path.
  * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
- * @param query The tenant-scoped API endpoint path, without the tenant prefix
- *              (e.g., 'patients/batch', 'cases/search'). The tenant segment is
- *              prepended automatically from the `api_tenant` exposed config.
+ * @param query The tenant-scoped API endpoint path, without the tenant prefix.
  * @param body The request body as a JSON string.
  * @param token The Bearer authentication token.
- * @param retries The number of retry attempts on 500 errors (default: 3).
+ * @param retries The number of retry attempts on 500 errors.
  */
-Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
+const requestInTenant = (tenant: string, method: string, query: string, body: string, token: string, retries: number): Cypress.Chainable => {
   const apiUrl = Cypress.expose('api_base_url');
-  const tenant = Cypress.expose('api_tenant');
 
   if (Cypress.expose('debug')) {
     cy.log('with body: ' + body);
@@ -45,6 +42,36 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
   };
 
   return makeRequest(retries);
+};
+
+/**
+ * Makes an authenticated API call with automatic retry logic for 500 errors.
+ * Retries up to the specified number of times if a 500 status code is received.
+ * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
+ * @param query The tenant-scoped API endpoint path, without the tenant prefix
+ *              (e.g., 'patients/batch', 'cases/search'). The tenant segment is
+ *              prepended automatically from the `api_tenant` exposed config.
+ * @param body The request body as a JSON string.
+ * @param token The Bearer authentication token.
+ * @param retries The number of retry attempts on 500 errors (default: 3).
+ */
+Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
+  return requestInTenant(Cypress.expose('api_tenant'), method, query, body, token, retries);
+});
+
+/**
+ * Same as `apiCall`, but against an explicit tenant instead of `api_tenant`.
+ * For specs whose data only exists in another tenant (e.g. assignment candidates, which need
+ * cases in two diagnostic labs).
+ * @param tenant The tenant segment prepended to the path (e.g., 'radiant').
+ * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
+ * @param query The tenant-scoped API endpoint path, without the tenant prefix.
+ * @param body The request body as a JSON string.
+ * @param token The Bearer authentication token.
+ * @param retries The number of retry attempts on 500 errors (default: 3).
+ */
+Cypress.Commands.add('apiCallInTenant', (tenant: string, method: string, query: string, body: string, token: string, retries: number = 3) => {
+  return requestInTenant(tenant, method, query, body, token, retries);
 });
 
 /**
