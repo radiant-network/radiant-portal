@@ -916,6 +916,102 @@ export interface CaseFilters {
     'status_code': Array<FiltersValue>;
 }
 /**
+ * Values the tenant template was rendered with, echoed so a pipeline log explains the email.
+ * @export
+ * @interface CaseGroupEmailContext
+ */
+export interface CaseGroupEmailContext {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseGroupEmailContext
+     */
+    'analysis_codes': Array<string>;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof CaseGroupEmailContext
+     */
+    'case_ids': Array<number>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CaseGroupEmailContext
+     */
+    'has_stat'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupEmailContext
+     */
+    'manifest_filename'?: string;
+}
+/**
+ * Outcome of the notification for one diagnosis laboratory of the group.
+ * @export
+ * @interface CaseGroupEmailReport
+ */
+export interface CaseGroupEmailReport {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseGroupEmailReport
+     */
+    'case_count'?: number;
+    /**
+     * 
+     * @type {CaseGroupEmailContext}
+     * @memberof CaseGroupEmailReport
+     */
+    'context'?: CaseGroupEmailContext;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseGroupEmailReport
+     */
+    'document_count'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupEmailReport
+     */
+    'error'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupEmailReport
+     */
+    'organization_code': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseGroupEmailReport
+     */
+    'recipients': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupEmailReport
+     */
+    'status': CaseGroupEmailReportStatusEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupEmailReport
+     */
+    'template'?: string;
+}
+
+export const CaseGroupEmailReportStatusEnum = {
+    Sent: 'sent',
+    SkippedNoContact: 'skipped_no_contact',
+    SkippedNoDocuments: 'skipped_no_documents',
+    Failed: 'failed'
+} as const;
+
+export type CaseGroupEmailReportStatusEnum = typeof CaseGroupEmailReportStatusEnum[keyof typeof CaseGroupEmailReportStatusEnum];
+
+/**
  * Payload to create a case group, or overwrite the case list of an existing one (same name in the tenant). An empty case_ids list is accepted and empties the group.
  * @export
  * @interface CaseGroupRequest
@@ -4164,6 +4260,25 @@ export interface ListBodyWithSqon {
      * @memberof ListBodyWithSqon
      */
     'with_note'?: boolean;
+}
+/**
+ * Report of a case group notification: the group and one entry per diagnosis laboratory.
+ * @export
+ * @interface NotifyCaseGroupResponse
+ */
+export interface NotifyCaseGroupResponse {
+    /**
+     * 
+     * @type {Array<CaseGroupEmailReport>}
+     * @memberof NotifyCaseGroupResponse
+     */
+    'emails': Array<CaseGroupEmailReport>;
+    /**
+     * 
+     * @type {CaseGroupResponse}
+     * @memberof NotifyCaseGroupResponse
+     */
+    'group': CaseGroupResponse;
 }
 /**
  * 
@@ -7613,6 +7728,48 @@ export const CaseGroupsApiAxiosParamCreator = function (configuration?: Configur
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Sends one email per diagnosis laboratory of the group\'s cases, with the TSV manifest of that laboratory\'s output documents attached (index files included), ready for `radiant-client download -m`. Recipients come from `organization.notification_emails`, subject and body from the tenant\'s template. Stateless: calling it again sends again. Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has no template or the SMTP / notification settings are invalid; a laboratory whose send fails is reported as `failed` and the others are still served.
+         * @summary Email the diagnosis laboratories of a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        notifyCaseGroup: async (tenant: string, name: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('notifyCaseGroup', 'tenant', tenant)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('notifyCaseGroup', 'name', name)
+            const localVarPath = `/{tenant}/case_groups/{name}/notify`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -7651,6 +7808,20 @@ export const CaseGroupsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['CaseGroupsApi.getCaseGroup']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Sends one email per diagnosis laboratory of the group\'s cases, with the TSV manifest of that laboratory\'s output documents attached (index files included), ready for `radiant-client download -m`. Recipients come from `organization.notification_emails`, subject and body from the tenant\'s template. Stateless: calling it again sends again. Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has no template or the SMTP / notification settings are invalid; a laboratory whose send fails is reported as `failed` and the others are still served.
+         * @summary Email the diagnosis laboratories of a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async notifyCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<NotifyCaseGroupResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.notifyCaseGroup(tenant, name, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CaseGroupsApi.notifyCaseGroup']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -7682,6 +7853,17 @@ export const CaseGroupsApiFactory = function (configuration?: Configuration, bas
          */
         getCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseGroupResponse> {
             return localVarFp.getCaseGroup(tenant, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Sends one email per diagnosis laboratory of the group\'s cases, with the TSV manifest of that laboratory\'s output documents attached (index files included), ready for `radiant-client download -m`. Recipients come from `organization.notification_emails`, subject and body from the tenant\'s template. Stateless: calling it again sends again. Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has no template or the SMTP / notification settings are invalid; a laboratory whose send fails is reported as `failed` and the others are still served.
+         * @summary Email the diagnosis laboratories of a case group
+         * @param {string} tenant Tenant code
+         * @param {string} name Case group name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        notifyCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig): AxiosPromise<NotifyCaseGroupResponse> {
+            return localVarFp.notifyCaseGroup(tenant, name, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7717,6 +7899,19 @@ export class CaseGroupsApi extends BaseAPI {
      */
     public getCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig) {
         return CaseGroupsApiFp(this.configuration).getCaseGroup(tenant, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Sends one email per diagnosis laboratory of the group\'s cases, with the TSV manifest of that laboratory\'s output documents attached (index files included), ready for `radiant-client download -m`. Recipients come from `organization.notification_emails`, subject and body from the tenant\'s template. Stateless: calling it again sends again. Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has no template or the SMTP / notification settings are invalid; a laboratory whose send fails is reported as `failed` and the others are still served.
+     * @summary Email the diagnosis laboratories of a case group
+     * @param {string} tenant Tenant code
+     * @param {string} name Case group name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CaseGroupsApi
+     */
+    public notifyCaseGroup(tenant: string, name: string, options?: RawAxiosRequestConfig) {
+        return CaseGroupsApiFp(this.configuration).notifyCaseGroup(tenant, name, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

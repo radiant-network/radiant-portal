@@ -15,6 +15,10 @@ type caseGroupStore interface {
 	GetCaseGroupByName(ctx context.Context, tenantCode, name string) (*types.CaseGroup, []int, error)
 }
 
+type caseGroupNotifier interface {
+	Notify(ctx context.Context, tenantCode, groupName string) (*types.NotifyCaseGroupResponse, error)
+}
+
 // PostCaseGroupHandler
 // @Summary Create or overwrite a case group
 // @Id createCaseGroup
@@ -111,5 +115,53 @@ func GetCaseGroupHandler(store caseGroupStore) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, types.NewCaseGroupResponse(*group, caseIDs))
+	}
+}
+
+// PostCaseGroupNotifyHandler
+// @Summary Email the diagnosis laboratories of a case group
+// @Id notifyCaseGroup
+// @Description Sends one email per diagnosis laboratory of the group's cases, with the TSV manifest
+// @Description of that laboratory's output documents attached (index files included), ready for
+// @Description `radiant-client download -m`. Recipients come from `organization.notification_emails`,
+// @Description subject and body from the tenant's template. Stateless: calling it again sends again.
+// @Description Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has
+// @Description no template or the SMTP / notification settings are invalid; a laboratory whose send
+// @Description fails is reported as `failed` and the others are still served.
+// @Tags case_groups
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param name path string true "Case group name"
+// @Produce json
+// @Success 200 {object} types.NotifyCaseGroupResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/case_groups/{name}/notify [post]
+func PostCaseGroupNotifyHandler(svc caseGroupNotifier) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		name := c.Param("name")
+		if err := types.ValidateCaseGroupName(name); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		report, err := svc.Notify(c.Request.Context(), *tenant, name)
+		switch {
+		case errors.Is(err, types.ErrCaseGroupNotFound):
+			HandleNotFoundError(c, "case group")
+		case err != nil:
+			HandleError(c, err)
+		default:
+			c.JSON(http.StatusOK, report)
+		}
 	}
 }
