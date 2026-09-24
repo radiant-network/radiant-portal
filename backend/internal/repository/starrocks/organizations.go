@@ -24,27 +24,13 @@ func NewOrganizationsRepository(db database.StarrocksDB) *OrganizationsRepositor
 // is bound, else the radiant_jdbc federation), so isolation follows the same model as the other
 // federated reads — no explicit tenant_code filter.
 func (r *OrganizationsRepository) ListOrganizations(ctx context.Context) ([]types.OrganizationResponse, error) {
-	var rows []struct {
-		Code               string
-		Name               string
-		CategoryCode       string
-		CategoryName       string
-		NotificationEmails *string
-	}
+	organizations := []types.OrganizationResponse{}
 	tx := r.db.WithContext(ctx).
 		Table(fmt.Sprintf("%s %s", types.OrganizationTable.TenantQualifiedName(ctx), types.OrganizationTable.Alias)).
-		Select("org.code, org.name, org.category_code, org.notification_emails, org_cat.name_en AS category_name")
+		Select("org.code, org.name, org.category_code, COALESCE(org.notification_emails, '') AS notification_emails, org_cat.name_en AS category_name")
 	tx = r.joiner.OrganizationWithCategory(tx)
-	if err := tx.Order("lower(org.name)").Scan(&rows).Error; err != nil {
+	if err := tx.Order("lower(org.name)").Scan(&organizations).Error; err != nil {
 		return nil, fmt.Errorf("error listing organizations: %w", err)
-	}
-	organizations := make([]types.OrganizationResponse, 0, len(rows))
-	for _, row := range rows {
-		org := types.OrganizationResponse{Code: row.Code, Name: row.Name, CategoryCode: row.CategoryCode, CategoryName: row.CategoryName}
-		if row.NotificationEmails != nil {
-			org.NotificationEmails = *row.NotificationEmails
-		}
-		organizations = append(organizations, org)
 	}
 	return organizations, nil
 }
