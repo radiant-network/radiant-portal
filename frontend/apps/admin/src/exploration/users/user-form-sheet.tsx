@@ -19,8 +19,9 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/com
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useLoginContext } from '@/components/hooks/use-login';
-import { TENANT_ACTIONS, useLocalPath, useTenant } from '@/components/hooks/use-tenant';
+import { TENANT_ACTIONS, useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
 
 import RolePermissionsDialog from '../roles/role-permissions-dialog';

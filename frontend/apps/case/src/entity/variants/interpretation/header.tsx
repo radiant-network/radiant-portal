@@ -2,7 +2,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 
 type InterpretationVariantHeaderProps = {
   case_type?: string;

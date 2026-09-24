@@ -2,7 +2,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 
 import EmptyField from '../information/empty-field';
 

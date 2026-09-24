@@ -5,7 +5,8 @@ import { ArchiveIcon, FolderIcon, SettingsIcon } from 'lucide-react';
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import type { MainNavbarEntry } from '@/components/base/navbar/main-navbar-types';
 import { useI18n } from '@/components/hooks/i18n';
-import { useCanAdministerTenant, useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { useCanAdministerTenant } from '@/components/hooks/use-tenant';
 
 type ProtectedNavbarProps = {
   placement: 'left' | 'right' | 'top';

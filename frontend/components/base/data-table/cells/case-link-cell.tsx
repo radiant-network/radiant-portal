@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 
 import AnchorLinkCell from './anchor-link-cell';
 

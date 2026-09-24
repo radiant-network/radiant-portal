@@ -11,7 +11,7 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalNavigation } from '@/components/hooks/use-tenant';
+import { useLocalNavigation } from '@/components/hooks/use-local-path';
 
 function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>) {
   const { t } = useI18n();

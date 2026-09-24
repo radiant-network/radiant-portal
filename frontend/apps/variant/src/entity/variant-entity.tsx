@@ -11,7 +11,7 @@ import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { variantsApi } from '@/utils/api';
 

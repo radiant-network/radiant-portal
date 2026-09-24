@@ -5,7 +5,7 @@ import type { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 
 import ClassificationSection from './classification-section';
 
