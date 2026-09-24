@@ -213,14 +213,15 @@ var orgResolvedTenantRoutes = map[string]bool{
 // RequireAction would be wrong here — it matches an org-scoped action only against '*' grants,
 // refusing every specific-org grantee.
 var inTenantOrgActionRoutes = map[string]bool{
-	"GET /:tenant/batches/:batch_id": true,
-	"POST /:tenant/case_groups":      true,
-	"POST /:tenant/patients/batch":   true,
-	"PUT /:tenant/patients/batch":    true,
-	"POST /:tenant/samples/batch":    true,
-	"PUT /:tenant/samples/batch":     true,
-	"POST /:tenant/sequencing/batch": true,
-	"PUT /:tenant/sequencing/batch":  true,
+	"GET /:tenant/batches/:batch_id":         true,
+	"POST /:tenant/case_groups":              true,
+	"POST /:tenant/case_groups/:name/notify": true,
+	"POST /:tenant/patients/batch":           true,
+	"PUT /:tenant/patients/batch":            true,
+	"POST /:tenant/samples/batch":            true,
+	"PUT /:tenant/samples/batch":             true,
+	"POST /:tenant/sequencing/batch":         true,
+	"PUT /:tenant/sequencing/batch":          true,
 }
 
 // Test_OrgScopedRoutesResolveTheirOrg reads each action's scope from the catalog and fails if a
@@ -272,6 +273,7 @@ var expectedTenantActions = map[string]string{
 	"PUT /:tenant/organizations/:code":                           types.ActionManageOrg,
 	"POST /:tenant/case_groups":                                  types.ActionIngestData,
 	"GET /:tenant/case_groups/:name":                             types.ActionSearchCase,
+	"POST /:tenant/case_groups/:name/notify":                     types.ActionIngestData,
 	"POST /:tenant/cases/search":                                 types.ActionSearchCase,
 	"GET /:tenant/cases/autocomplete":                            types.ActionSearchCase,
 	"GET /:tenant/cases/filters":                                 types.ActionSearchCase,

@@ -33,6 +33,8 @@ from radiant_python.models.case_exam import CaseExam
 from radiant_python.models.case_family_history import CaseFamilyHistory
 from radiant_python.models.case_fetus_batch import CaseFetusBatch
 from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.case_group_email_context import CaseGroupEmailContext
+from radiant_python.models.case_group_email_report import CaseGroupEmailReport
 from radiant_python.models.case_group_request import CaseGroupRequest
 from radiant_python.models.case_group_response import CaseGroupResponse
 from radiant_python.models.case_patient_batch import CasePatientBatch
@@ -88,6 +90,7 @@ from radiant_python.models.interpretation_somatic import InterpretationSomatic
 from radiant_python.models.leaf_content import LeafContent
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.notify_case_group_response import NotifyCaseGroupResponse
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
 from radiant_python.models.observation_text_batch import ObservationTextBatch
 from radiant_python.models.occurrence_count import OccurrenceCount
