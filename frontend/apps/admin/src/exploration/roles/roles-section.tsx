@@ -122,7 +122,6 @@ export default function RolesSection() {
         description_en: values.description?.trim() || undefined,
         actions: values.permissions,
       });
-      // The caller may hold this role: reload their own permissions.
       refreshPermissions();
       onSaved('admin.roles.edit.notifications.success');
     } catch (error: any) {

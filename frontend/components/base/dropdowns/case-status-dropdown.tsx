@@ -30,11 +30,19 @@ function isUserAppliedStatus(status: CaseStatus): status is PatchCaseStatusCodeE
 }
 
 const MENU_ENTRIES: { status: PatchCaseStatusCodeEnum; submenu?: PatchCaseStatusCodeEnum[] }[] = [
-  { status: 'in_progress' },
-  { status: 'in_review' },
-  { status: 'completed', submenu: ['completed', 'resolved', 'unresolved', 'inconclusive'] },
-  { status: 'revoked' },
-  { status: 'reopened' },
+  { status: PatchCaseStatusCodeEnum.InProgress },
+  { status: PatchCaseStatusCodeEnum.InReview },
+  {
+    status: PatchCaseStatusCodeEnum.Completed,
+    submenu: [
+      PatchCaseStatusCodeEnum.Completed,
+      PatchCaseStatusCodeEnum.Resolved,
+      PatchCaseStatusCodeEnum.Unresolved,
+      PatchCaseStatusCodeEnum.Inconclusive,
+    ],
+  },
+  { status: PatchCaseStatusCodeEnum.Revoked },
+  { status: PatchCaseStatusCodeEnum.Reopened },
 ];
 
 type PatchStatusInput = {
@@ -50,7 +58,6 @@ async function patchCaseStatus(_url: string, { arg }: { arg: PatchStatusInput },
 export type CaseStatusDropdownProps = {
   caseId: number;
   status: CaseStatus;
-  /** False renders the read-only badge. Wired to `can_edit_case` in SJRA-1917. */
   canEdit?: boolean;
   readOnlyTooltip?: ReactNode;
   size?: BadgeProps['size'];
@@ -128,7 +135,6 @@ function CaseStatusDropdown({
           closedWithPointerRef.current = true;
         }}
         onCloseAutoFocus={event => {
-          // Radix hands focus back to the trigger, which the browser then paints as keyboard focus.
           if (closedWithPointerRef.current) event.preventDefault();
           closedWithPointerRef.current = false;
         }}
