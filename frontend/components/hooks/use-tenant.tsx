@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo } from 'react';
-import { useParams } from 'react-router';
+import { type NavigateOptions, useNavigate, useParams } from 'react-router';
 import useSWR from 'swr';
 
 import type { TenantMembership, UserPreference } from '../../api/api';
@@ -25,10 +25,20 @@ export function useTenant() {
   return useContext(TenantContext);
 }
 
-/** Prefixes an app path with the global route segments (today the tenant): localPath('/case') -> '/radiant/case'. */
+/** Prefixes an app path with the global route segments (tenant): localPath('/case') -> '/radiant/case'. */
 export function useLocalPath() {
   const { tenant } = useTenant();
   return useCallback((path: string) => `/${tenant}${path === '/' ? '' : path}`, [tenant]);
+}
+
+/** useNavigate for app paths, prefixed with localPath. Use useNavigate directly for history moves (-1). */
+export function useLocalNavigation() {
+  const navigate = useNavigate();
+  const localPath = useLocalPath();
+  return useCallback(
+    (path: string, options?: NavigateOptions) => navigate(localPath(path), options),
+    [navigate, localPath],
+  );
 }
 
 /**

@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
 import type { CaseResult } from '@/api/api';
@@ -12,12 +11,11 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalNavigation } from '@/components/hooks/use-tenant';
 
 function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>) {
   const { t } = useI18n();
-  const navigate = useNavigate();
-  const localPath = useLocalPath();
+  const navigate = useLocalNavigation();
 
   return (
     <div className="flex items-center justify-center">
@@ -31,7 +29,7 @@ function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>)
           <DropdownMenuItem
             data-cy="menu-item-case"
             onClick={() => {
-              navigate(localPath(`/case/entity/${row.original.case_id}`));
+              navigate(`/case/entity/${row.original.case_id}`);
             }}
           >
             <ExternalLink />
@@ -41,7 +39,7 @@ function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>)
             data-cy="menu-item-variants"
             disabled={!row.original.has_variants}
             onClick={() => {
-              navigate(localPath(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`));
+              navigate(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`);
             }}
           >
             <ExternalLink />

@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { BarChart3 } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';
@@ -6,17 +5,16 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-tenant';
+import { useLocalNavigation } from '@/components/hooks/use-tenant';
 
 import logo from './assets/newsletter-widget-1.svg';
 
 function SetOperationsCard() {
   const { t } = useI18n();
-  const navigate = useNavigate();
-  const localPath = useLocalPath();
+  const navigate = useLocalNavigation();
 
   const handleLaunch = () => {
-    navigate(localPath(`/analysis/set-operations`));
+    navigate(`/analysis/set-operations`);
   };
 
   return (
