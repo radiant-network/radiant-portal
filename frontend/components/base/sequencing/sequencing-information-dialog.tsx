@@ -2,8 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { formatDate } from 'date-fns';
 import useSWR from 'swr';
 
-import type { SequencingExperimentDetail } from '@/api/api';
-import type { Status } from '@/components/base/badges/status-badge';
+import type { CaseStatus, SequencingExperimentDetail } from '@/api/api';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import InformationField from '@/components/base/information/information-field';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -71,7 +70,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
             <h2 className="text-sm font-semibold">{t('case_entity.details.sequencing', { seqId: data?.seq_id })}</h2>
 
             <InformationField label={t('case_entity.details.status')}>
-              <StatusCell status={data?.status_code as Status} />
+              <StatusCell status={data?.status_code as CaseStatus} />
             </InformationField>
 
             {/* Created On */}

@@ -13,30 +13,18 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
+import type { CaseStatus } from '@/api/api';
 import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-export type Status =
-  | 'draft'
-  | 'submitted'
-  | 'processing'
-  | 'in_progress'
-  | 'in_review'
-  | 'completed'
-  | 'resolved'
-  | 'unresolved'
-  | 'inconclusive'
-  | 'reopened'
-  | 'revoked';
-
 type StatusBadgeProps = {
-  status: Status;
+  status: CaseStatus;
   size?: BadgeProps['size'];
   withIcon?: boolean;
   className?: string;
 };
 
-export const statusColors: Record<string, BadgeProps['variant']> = {
+export const statusColors: Record<CaseStatus, BadgeProps['variant']> = {
   draft: 'neutral',
   submitted: 'outline',
   processing: 'yellow',
@@ -52,7 +40,7 @@ export const statusColors: Record<string, BadgeProps['variant']> = {
 
 export const statusFallbackIcon = FileQuestion;
 
-export const statusIcons: Record<string, LucideIcon> = {
+export const statusIcons: Record<CaseStatus, LucideIcon> = {
   draft: Pen,
   submitted: Hourglass,
   processing: LoaderCircle,
