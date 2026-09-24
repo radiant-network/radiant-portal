@@ -18,10 +18,24 @@ const (
 	ColumnDocumentID = "document_id"
 	ColumnName       = "name"
 	ColumnSize       = "size"
+
+	ColumnDataType          = "data_type"
+	ColumnFormat            = "format"
+	ColumnSubmitterSampleID = "submitter_sample_id"
+	ColumnPatientID         = "patient_id"
+	ColumnCaseID            = "case_id"
 )
 
 var RequiredColumns = []string{ColumnTenant, ColumnDocumentID}
 var OptionalColumns = []string{ColumnName, ColumnSize}
+var InformationalColumns = []string{ColumnDataType, ColumnFormat, ColumnSubmitterSampleID, ColumnPatientID, ColumnCaseID}
+
+func KnownColumns() []string {
+	known := make([]string, 0, len(RequiredColumns)+len(OptionalColumns)+len(InformationalColumns))
+	known = append(known, RequiredColumns...)
+	known = append(known, OptionalColumns...)
+	return append(known, InformationalColumns...)
+}
 
 type Entry struct {
 	Tenant     string
@@ -49,7 +63,7 @@ func Parse(r io.Reader) (entries []Entry, warnings []string, err error) {
 		return nil, nil, fmt.Errorf("read manifest header: %w", err)
 	}
 	known := map[string]bool{}
-	for _, c := range append(append([]string{}, RequiredColumns...), OptionalColumns...) {
+	for _, c := range KnownColumns() {
 		known[c] = true
 	}
 	cols := map[string]int{}
@@ -59,7 +73,7 @@ func Parse(r io.Reader) (entries []Entry, warnings []string, err error) {
 			continue
 		}
 		if !known[name] {
-			warnings = append(warnings, fmt.Sprintf("column %q is ignored (known columns: %s)", strings.TrimSpace(h), strings.Join(append(append([]string{}, RequiredColumns...), OptionalColumns...), ", ")))
+			warnings = append(warnings, fmt.Sprintf("column %q is ignored (known columns: %s)", strings.TrimSpace(h), strings.Join(KnownColumns(), ", ")))
 			continue
 		}
 		if _, dup := cols[name]; dup {

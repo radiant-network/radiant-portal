@@ -83,7 +83,28 @@ func Test_Parse_UnknownColumnWarns(t *testing.T) {
 	entries, warnings, err := Parse(strings.NewReader("tenant\tdocument_id\tmd5\nqlin\t273\tabc\n"))
 	require.NoError(t, err)
 	assert.Len(t, entries, 1)
-	assert.Equal(t, []string{`column "md5" is ignored (known columns: tenant, document_id, name, size)`}, warnings)
+	assert.Equal(t, []string{`column "md5" is ignored (known columns: tenant, document_id, name, size, data_type, format, submitter_sample_id, patient_id, case_id)`}, warnings)
+}
+
+func Test_Parse_InformationalColumnsAcceptedSilently(t *testing.T) {
+	header := "tenant\tdocument_id\tname\tsize\tdata_type\tformat\tsubmitter_sample_id\tpatient_id\tcase_id\n"
+	row := "qlin\t273\t420010.cram\t31 GB\talignment\tCRAM\tSP0001234\t42\t7\n"
+	entries, warnings, err := Parse(strings.NewReader(header + row))
+	require.NoError(t, err)
+	assert.Empty(t, warnings)
+	assert.Equal(t, []Entry{{Tenant: "qlin", DocumentID: 273, Name: "420010.cram", Size: 31_000_000_000}}, entries)
+}
+
+func Test_Parse_InformationalColumnsDoNotHideAnUnknownOne(t *testing.T) {
+	header := "tenant\tdocument_id\tcase_id\tfoo\n"
+	_, warnings, err := Parse(strings.NewReader(header + "qlin\t273\t7\tbar\n"))
+	require.NoError(t, err)
+	require.Len(t, warnings, 1)
+	assert.Contains(t, warnings[0], `column "foo" is ignored`)
+}
+
+func Test_KnownColumns_RequiredThenOptionalThenInformational(t *testing.T) {
+	assert.Equal(t, []string{"tenant", "document_id", "name", "size", "data_type", "format", "submitter_sample_id", "patient_id", "case_id"}, KnownColumns())
 }
 
 func Test_Parse_DuplicateColumnWarns(t *testing.T) {
