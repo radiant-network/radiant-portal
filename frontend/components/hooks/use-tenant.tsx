@@ -13,12 +13,14 @@ export type TenantContextValue = {
   tenant: string;
   tenants: TenantMembership[];
   setTenant: (code: string) => Promise<void>;
+  refreshPermissions: () => Promise<unknown>;
 };
 
 export const TenantContext = createContext<TenantContextValue>({
   tenant: '',
   tenants: [],
   setTenant: async () => {},
+  refreshPermissions: async () => {},
 });
 
 export function useTenant() {
@@ -90,7 +92,11 @@ async function fetchTenantPreference(): Promise<UserPreference> {
 
 /** The tenant to fall back on when the URL does not name one: saved preference, else the first membership. */
 export function usePreferredTenant() {
-  const { data: tenants, isLoading: tenantsLoading } = useSWR('auth-me-tenants', fetchTenants, {
+  const {
+    data: tenants,
+    isLoading: tenantsLoading,
+    mutate: refreshPermissions,
+  } = useSWR('auth-me-tenants', fetchTenants, {
     revalidateOnFocus: false,
     shouldRetryOnError: false,
   });
@@ -111,12 +117,12 @@ export function usePreferredTenant() {
     return tenants[0].code;
   }, [tenants, preference]);
 
-  return { tenant, tenants: tenants ?? [], isLoading: tenantsLoading || preferenceLoading };
+  return { tenant, tenants: tenants ?? [], isLoading: tenantsLoading || preferenceLoading, refreshPermissions };
 }
 
 export function TenantProvider({ children }: { children: ReactNode }) {
   const { tenant: tenantParam } = useParams<{ tenant: string }>();
-  const { tenants, isLoading } = usePreferredTenant();
+  const { tenants, isLoading, refreshPermissions } = usePreferredTenant();
 
   // The URL owns the tenant. Following someone else's link never changes the saved preference:
   // only an explicit pick in the navbar switcher does.
@@ -143,5 +149,9 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     return <Error403 />;
   }
 
-  return <TenantContext.Provider value={{ tenant, tenants, setTenant }}>{children}</TenantContext.Provider>;
+  return (
+    <TenantContext.Provider value={{ tenant, tenants, setTenant, refreshPermissions }}>
+      {children}
+    </TenantContext.Provider>
+  );
 }
