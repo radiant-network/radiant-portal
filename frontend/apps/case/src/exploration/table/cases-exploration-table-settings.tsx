@@ -357,7 +357,7 @@ const defaultSettings = createColumnSettings([
     id: 'diagnosis_lab_code',
     visible: false,
     label: 'case_exploration.case.headers.diagnostic_lab',
-    additionalFields: ['diagnosis_lab_code', 'diagnosis_lab_name'],
+    additionalFields: ['diagnosis_lab_name'],
   },
   {
     id: 'organization_code',
