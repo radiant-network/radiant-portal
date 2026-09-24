@@ -13,11 +13,11 @@ import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
   const params = useParams<{ locusId: string }>();
 
   const pickedConsequence = data?.picked_consequences?.[0];
@@ -70,7 +70,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                     <Link
                       key={clinvar}
                       data-cy={clinvar.replace(/_/g, '-')}
-                      to={tenantPath(
+                      to={localPath(
                         `/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`,
                       )}
                     >
@@ -95,7 +95,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               <ConditionalField condition={!!data?.germline_pc_wgs}>
                 <Link
                   data-cy="patients"
-                  to={tenantPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`)}
+                  to={localPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`)}
                   className="hover:underline"
                 >
                   {`${data.germline_pc_wgs} (${data.germline_pf_wgs.toExponential(2)})`}

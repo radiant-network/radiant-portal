@@ -2,7 +2,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 
 import EmptyField from '../information/empty-field';
 
@@ -27,7 +27,7 @@ export default function SomaticFrequencySection({
   locusId,
 }: SomaticFrequencySectionProps) {
   const { t } = useI18n();
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
 
   return (
     <DetailSection title={t('occurrence_expand.frequencies.title')}>
@@ -41,7 +41,7 @@ export default function SomaticFrequencySection({
           somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
             <AnchorLink
               size="sm"
-              href={tenantPath(
+              href={localPath(
                 `/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`,
               )}
               target="_blank"

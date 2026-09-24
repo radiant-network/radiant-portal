@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 
 import AnchorLinkCell from './anchor-link-cell';
 
 /** Links to a case entity in the active tenant. */
 function CaseLinkCell({ caseId, children }: { caseId: number; children: ReactNode }) {
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
 
-  return <AnchorLinkCell href={tenantPath(`/case/entity/${caseId}`)}>{children}</AnchorLinkCell>;
+  return <AnchorLinkCell href={localPath(`/case/entity/${caseId}`)}>{children}</AnchorLinkCell>;
 }
 
 export default CaseLinkCell;

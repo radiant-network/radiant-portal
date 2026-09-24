@@ -25,8 +25,8 @@ export function useTenant() {
   return useContext(TenantContext);
 }
 
-/** Prefixes an app path with the active tenant: tenantPath('/case') -> '/radiant/case'. */
-export function useTenantPath() {
+/** Prefixes an app path with the global route segments (today the tenant): localPath('/case') -> '/radiant/case'. */
+export function useLocalPath() {
   const { tenant } = useTenant();
   return useCallback((path: string) => `/${tenant}${path === '/' ? '' : path}`, [tenant]);
 }

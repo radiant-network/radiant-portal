@@ -6,17 +6,17 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 
 import logo from './assets/newsletter-widget-1.svg';
 
 function SetOperationsCard() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
 
   const handleLaunch = () => {
-    navigate(tenantPath(`/analysis/set-operations`));
+    navigate(localPath(`/analysis/set-operations`));
   };
 
   return (

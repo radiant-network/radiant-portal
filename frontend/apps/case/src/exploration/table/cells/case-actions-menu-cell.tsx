@@ -12,12 +12,13 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 
 function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>) {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
+
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>
@@ -30,7 +31,7 @@ function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>)
           <DropdownMenuItem
             data-cy="menu-item-case"
             onClick={() => {
-              navigate(tenantPath(`/case/entity/${row.original.case_id}`));
+              navigate(localPath(`/case/entity/${row.original.case_id}`));
             }}
           >
             <ExternalLink />
@@ -40,7 +41,7 @@ function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>)
             data-cy="menu-item-variants"
             disabled={!row.original.has_variants}
             onClick={() => {
-              navigate(tenantPath(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`));
+              navigate(localPath(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`));
             }}
           >
             <ExternalLink />

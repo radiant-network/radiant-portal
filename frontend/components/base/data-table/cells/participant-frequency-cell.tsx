@@ -1,7 +1,7 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
-import { useTenantPath } from '@/components/hooks/use-tenant';
+import { useLocalPath } from '@/components/hooks/use-tenant';
 import { toExponentialNotation } from '@/components/lib/number-format';
 
 type NumberCellProps = {
@@ -14,7 +14,7 @@ type NumberCellProps = {
  *       add the participant’s IDs to the query using studies.participant_ids.
  */
 function ParticipantFrequencyCell({ value, locusId }: NumberCellProps) {
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
 
   if (value === undefined || locusId === undefined) return <EmptyCell />;
   const scientificNotation = toExponentialNotation(value);
@@ -22,7 +22,7 @@ function ParticipantFrequencyCell({ value, locusId }: NumberCellProps) {
   return (
     <AnchorLink
       size="sm"
-      href={tenantPath(`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}`)}
+      href={localPath(`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}`)}
       target="_blank"
     >
       {scientificNotation ? scientificNotation : value}

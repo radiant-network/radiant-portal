@@ -1,13 +1,13 @@
 import { Navigate } from 'react-router';
 import AdminExploration from 'admin/exploration/admin-exploration';
 
-import { useCanAdministerTenant, useTenantPath } from '@/components/hooks/use-tenant';
+import { useCanAdministerTenant, useLocalPath } from '@/components/hooks/use-tenant';
 
 const AdminExplorationRoute = () => {
   const canAdministerTenant = useCanAdministerTenant();
-  const tenantPath = useTenantPath();
+  const localPath = useLocalPath();
 
-  return canAdministerTenant ? <AdminExploration /> : <Navigate to={tenantPath('/case')} replace />;
+  return canAdministerTenant ? <AdminExploration /> : <Navigate to={localPath('/case')} replace />;
 };
 
 export default AdminExplorationRoute;
