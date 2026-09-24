@@ -48,8 +48,8 @@ func updateCaseForBase(submitterCaseId string) []types.UpdateCaseBatch {
 // swaps out family/obs_categorical/obs_string/family_history, while leaving the
 // sequencing experiment attachment and task untouched.
 func Test_ProcessBatch_UpdateCase_ReplacesClinicalData_LeavesSeqExpAndTasks(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-UPDATE-A"
 
 		seedBaseCase(t, ctx, client, db, submitterCaseId)
@@ -134,7 +134,7 @@ func updateCaseWithSeqAndTask(submitterCaseId, outURL, outName string, outSize i
 	return u
 }
 
-// uploadUpdateTaskDocuments stages each task's output document in MinIO and back-fills the
+// uploadUpdateTaskDocuments stages each task's output document in the object store and back-fills the
 // worker-computed hash — the UpdateCaseBatch counterpart of uploadPatchTaskDocuments.
 func uploadUpdateTaskDocuments(ctx context.Context, client *minio.Client, updates []types.UpdateCaseBatch) {
 	store, _ := utils.NewS3Store()
@@ -157,8 +157,8 @@ func uploadUpdateTaskDocuments(ctx context.Context, client *minio.Client, update
 // Merge-if-present: a PUT that carries sequencing_experiments + a new task attaches the task
 // (and its output document) to the existing case, on top of the scalar + clinical replace.
 func Test_ProcessBatch_UpdateCase_AttachesSeqAndTasks_WhenPresent(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-UPDATE-B"
 		const outURL = "s3://test-bucket/CASE-UPDATE-B.update.recal.cram"
 		const outName = "CASE-UPDATE-B.update.recal.cram"
@@ -222,8 +222,8 @@ func Test_ProcessBatch_UpdateCase_MissingCase_NoPersistence(t *testing.T) {
 }
 
 func Test_ProcessBatch_UpdateCase_UpdatesDiagnosisHypothesis(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-UPDATE-HYPOTHESIS"
 
 		seedBaseCase(t, ctx, client, db, submitterCaseId)
@@ -248,8 +248,8 @@ func Test_ProcessBatch_UpdateCase_UpdatesDiagnosisHypothesis(t *testing.T) {
 // A 'condition' observation is no longer diverted to cases.diagnosis_hypothesis: it is stored like
 // any other text observation, and the column takes only what the payload's own field carries.
 func Test_ProcessBatch_UpdateCase_StoresConditionObservation(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-UPDATE-CONDITION"
 
 		seedBaseCase(t, ctx, client, db, submitterCaseId)

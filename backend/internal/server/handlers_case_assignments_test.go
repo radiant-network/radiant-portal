@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -122,6 +123,123 @@ func Test_ListCaseAssignmentCandidatesHandler_RepositoryError(t *testing.T) {
 	repo := &mockCandidatesRepository{err: errors.New("boom")}
 
 	w := candidatesRequest(repo, "12/assignment_candidates")
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type mockAssignmentsStore struct {
+	err    error
+	gotIDs *[]string
+}
+
+func (m *mockAssignmentsStore) ReplaceAssignees(_ context.Context, _ string, _ int, userIDs []string) error {
+	m.gotIDs = &userIDs
+	return m.err
+}
+
+func putAssignments(repo *mockAssignmentsStore, caseID, body string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
+	router.PUT("/:tenant/cases/:case_id/assignments", PutCaseAssignmentsHandler(repo))
+
+	req, _ := http.NewRequest("PUT", "/radiant/cases/"+caseID+"/assignments", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+// Like the other PUT endpoints, success is a bare 200: the stored set can differ from the
+// submitted one (see the pruning rule), so a caller that needs to display it reads the case back.
+func Test_PutCaseAssignmentsHandler_AssignsAndAnswersWithoutABody(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{"user_ids":["u1"]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String())
+	assert.Equal(t, []string{"u1"}, *repo.gotIDs)
+}
+
+func Test_PutCaseAssignmentsHandler_EmptyListUnassigns(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{"user_ids":[]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, []string{}, *repo.gotIDs, "the empty set still reaches the repository")
+}
+
+func Test_PutCaseAssignmentsHandler_DeduplicatesUserIDs(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{"user_ids":["u1","u1"]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, []string{"u1"}, *repo.gotIDs)
+}
+
+func Test_PutCaseAssignmentsHandler_IneligibleAssigneeIs422(t *testing.T) {
+	repo := &mockAssignmentsStore{err: &types.IneligibleAssigneesError{OrgCode: "CQGC", UserIDs: []string{"outsider"}}}
+
+	w := putAssignments(repo, "12", `{"user_ids":["outsider"]}`)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Contains(t, w.Body.String(), "outsider")
+	assert.Contains(t, w.Body.String(), "CQGC")
+}
+
+func Test_PutCaseAssignmentsHandler_UnknownCaseIs404(t *testing.T) {
+	repo := &mockAssignmentsStore{err: types.ErrCaseNotFound}
+
+	w := putAssignments(repo, "999", `{"user_ids":[]}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+// Clearing a case has to be asked for, never inferred from a body that forgot the field.
+func Test_PutCaseAssignmentsHandler_MissingUserIDsRejected(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "user_ids is required")
+	assert.Nil(t, repo.gotIDs, "nothing reaches the repository")
+}
+
+func Test_PutCaseAssignmentsHandler_BlankUserIDRejected(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{"user_ids":["u1","  "]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Nil(t, repo.gotIDs)
+}
+
+func Test_PutCaseAssignmentsHandler_MalformedBodyRejected(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "12", `{"user_ids":"nope"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Nil(t, repo.gotIDs)
+}
+
+func Test_PutCaseAssignmentsHandler_MalformedCaseId(t *testing.T) {
+	repo := &mockAssignmentsStore{}
+
+	w := putAssignments(repo, "abc", `{"user_ids":[]}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Nil(t, repo.gotIDs)
+}
+
+func Test_PutCaseAssignmentsHandler_RepositoryError(t *testing.T) {
+	repo := &mockAssignmentsStore{err: errors.New("boom")}
+
+	w := putAssignments(repo, "12", `{"user_ids":[]}`)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())

@@ -241,7 +241,19 @@ PostgresMode controls both cleanup and isolation:
 - `WritePostgres` — writes with unique keys, cleanup after test, parallel.
 - `ExclusivePostgres` — writes to shared state (seed data, count assertions on shared keys), cleanup after test, forces serial. Use only when the test can't use unique keys.
 
-Serial is also forced when `MinIO: true` (t.Setenv incompatibility).
+Serial is also forced when `ObjectStore: true` (t.Setenv incompatibility).
+
+`ObjectStore: true` starts an **S3-compatible object store container — RustFS**
+(`rustfs/rustfs:latest`, Apache-2.0, S3 API on port 9000). It was MinIO until MinIO's images
+stopped being anonymously pullable from every public registry (Docker Hub returns 401, quay.io
+requires authentication, no public mirror), which a clean CI runner cannot work around; a locally
+cached image is the only reason the old setup still worked on a developer machine. The flag, the
+`ObjectStoreEnv` type and the container helpers are named for the role rather than the product so
+the next swap touches one file. The `minio-go` client stays — it is a plain S3 client and talks to
+RustFS fine. Presigned URLs, which the IGV and document download paths depend on, are exercised
+by `Test_GetDocumentsDownloadUrl` and `Test_GetIGVByCaseIdHandler`. **The production S3
+configuration is unrelated**: the `AWS_ENDPOINT_URL` settings and the storage a deployment points
+at are not this container.
 
 `RunTest` is the only entry point — the legacy `ParallelTestWith*` / `SequentialTestWith*` shims have been removed. Every test declares its resources via `Need`.
 

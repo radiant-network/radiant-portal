@@ -31,7 +31,7 @@ type caseAssignmentsReader interface {
 // assigneesOf reads one case out of the map, as a list that is empty rather than null so the
 // unassigned state serializes the same way as the assigned one.
 func assigneesOf(byCase map[int][]types.CaseAssignee, caseID int) types.JsonArray[types.CaseAssignee] {
-	if assignees, found := byCase[caseID]; found {
+	if assignees := byCase[caseID]; len(assignees) > 0 {
 		return assignees
 	}
 	return types.JsonArray[types.CaseAssignee]{}

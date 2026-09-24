@@ -10,6 +10,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -261,5 +262,152 @@ func Test_EligibleAssignees_ReturnsIdentityAttributes(t *testing.T) {
 		assert.Equal(t, []types.CaseAssignee{
 			{UserID: wendyID, FirstName: "Wendy", LastName: "Walsh", Email: "wendy@test.authz"},
 		}, candidates)
+	})
+}
+
+func assignedIDsIn(t *testing.T, db *gorm.DB, caseID int) []string {
+	t.Helper()
+	ids := []string{}
+	err := db.Table("case_assignment").Where("case_id = ?", caseID).Order("user_id").Pluck("user_id", &ids).Error
+	assert.NoError(t, err)
+	return ids
+}
+
+func Test_ReplaceAssignees_AssignsFromEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		// Case 1's lab is CQGC, where carol and wendy hold wildcard grants.
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{wendyID, carolID})
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{wendyID, carolID}, assignedIDsIn(t, env.Postgres, 1))
+	})
+}
+
+func Test_ReplaceAssignees_RemovesAndAddsInOneStep(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		assign(t, env.Postgres, types.DefaultTenantCode, 1, wendyID)
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{carolID})
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{carolID}, assignedIDsIn(t, env.Postgres, 1))
+	})
+}
+
+func Test_ReplaceAssignees_EmptySetUnassigns(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		assign(t, env.Postgres, types.DefaultTenantCode, 1, wendyID)
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, nil)
+
+		assert.NoError(t, err)
+		assert.Empty(t, assignedIDsIn(t, env.Postgres, 1))
+	})
+}
+
+func Test_ReplaceAssignees_IsIdempotent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		assert.NoError(t, repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{wendyID}))
+		assert.NoError(t, repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{wendyID}))
+
+		assert.Equal(t, []string{wendyID}, assignedIDsIn(t, env.Postgres, 1))
+	})
+}
+
+func Test_ReplaceAssignees_LeavesOtherCasesAlone(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		assign(t, env.Postgres, types.DefaultTenantCode, 2, wendyID)
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{carolID})
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{wendyID}, assignedIDsIn(t, env.Postgres, 2))
+	})
+}
+
+// alice is a geneticist at CHOP; case 1's lab is CQGC, and she is not already assigned.
+func Test_ReplaceAssignees_RejectsIneligibleNewcomer(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{aliceID})
+
+		var ineligible *types.IneligibleAssigneesError
+		require.ErrorAs(t, err, &ineligible)
+		assert.Equal(t, "CQGC", ineligible.OrgCode)
+		assert.Equal(t, []string{aliceID}, ineligible.UserIDs)
+		assert.Empty(t, assignedIDsIn(t, env.Postgres, 1), "a refused request writes nothing")
+	})
+}
+
+// An already-assigned user who is not eligible at the lab is pruned rather than refused.
+func Test_ReplaceAssignees_PrunesIneligibleExistingAssignee(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		// alice cannot interpret at CQGC, but is on the case already.
+		assign(t, env.Postgres, types.DefaultTenantCode, 1, aliceID)
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 1, []string{aliceID})
+
+		assert.NoError(t, err)
+		assert.Empty(t, assignedIDsIn(t, env.Postgres, 1))
+	})
+}
+
+func Test_ReplaceAssignees_UnknownCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.ReplaceAssignees(t.Context(), types.DefaultTenantCode, 999999, nil)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}
+
+// A case of another tenant is as good as absent, so the write cannot reach across tenants.
+func Test_ReplaceAssignees_CaseOfAnotherTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := repo.ReplaceAssignees(t.Context(), "tenant_b", 1, nil)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}
+
+func Test_EligibleAssigneeIDs_KeepsOnlyTheEligible(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// At CHOP: alice is granted there, wendy by wildcard; dan is a geneticist at CHUSJ only.
+		eligible, err := eligibleAssigneeIDs(env.Postgres, types.DefaultTenantCode, "CHOP", []string{aliceID, wendyID, danID})
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{aliceID, wendyID}, eligible)
+	})
+}
+
+// An id the registry does not know simply does not come back, which is the same answer as "not
+// eligible" — the caller rejects the request either way.
+func Test_EligibleAssigneeIDs_DropsUnknownUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		eligible, err := eligibleAssigneeIDs(env.Postgres, types.DefaultTenantCode, "CHOP", []string{ghostID})
+
+		assert.NoError(t, err)
+		assert.Empty(t, eligible)
+	})
+}
+
+func Test_EligibleAssigneeIDs_NoUsers(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		eligible, err := eligibleAssigneeIDs(env.Postgres, types.DefaultTenantCode, "CHOP", nil)
+
+		assert.NoError(t, err)
+		assert.Empty(t, eligible)
 	})
 }

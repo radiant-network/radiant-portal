@@ -106,7 +106,7 @@ Tests in `cypress/` run against a live QA environment:
 
 ```bash
 cd backend
-make docker-run    # Start StarRocks, PostgreSQL, Keycloak, MinIO
+make docker-run    # Start StarRocks, PostgreSQL, Keycloak
 make run           # Run API server on port 8090
 ```
 

@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CaseAssignmentsRepository struct {
@@ -69,16 +70,7 @@ func (r *CaseAssignmentsRepository) ListForCases(ctx context.Context, caseIDs []
 // has to repair afterwards.
 func (r *CaseAssignmentsRepository) EligibleAssignees(ctx context.Context, tenantCode, orgCode string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
 	candidates := []types.CaseAssignee{}
-	tx := r.db.WithContext(ctx).
-		Table("users u").
-		Where(personalAccount).
-		Where(`EXISTS (
-			SELECT 1
-			FROM user_role ur
-			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
-			WHERE ur.user_id = u.user_id AND ur.tenant_code = ?
-			  AND (ur.org_code = ? OR ur.org_code = ?) AND ra.action_code = ?
-		)`, tenantCode, orgCode, types.WildcardOrg, types.ActionInterpretVariant).
+	tx := eligibleAt(r.db.WithContext(ctx), tenantCode, orgCode).
 		Select("u.user_id, u.first_name, u.last_name, u.email").
 		// user_id breaks ties so a page stays stable across limit/offset calls.
 		Order("u.last_name, u.first_name, u.user_id")
@@ -89,4 +81,110 @@ func (r *CaseAssignmentsRepository) EligibleAssignees(ctx context.Context, tenan
 		return nil, fmt.Errorf("error listing assignment candidates at %q: %w", orgCode, err)
 	}
 	return candidates, nil
+}
+
+// eligibleAt narrows `users u` to the accounts that may be assigned a case at orgCode. It backs
+// both the picker and the check run when an assignment is written, so the two can never
+// disagree about who is eligible.
+func eligibleAt(tx *gorm.DB, tenantCode, orgCode string) *gorm.DB {
+	return tx.
+		Table("users u").
+		Where(personalAccount).
+		Where(`EXISTS (
+			SELECT 1
+			FROM user_role ur
+			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+			WHERE ur.user_id = u.user_id AND ur.tenant_code = ?
+			  AND (ur.org_code = ? OR ur.org_code = ?) AND ra.action_code = ?
+		)`, tenantCode, orgCode, types.WildcardOrg, types.ActionInterpretVariant)
+}
+
+// eligibleAssigneeIDs returns which of the given users may be assigned a case at orgCode. The
+// caller compares it against what it asked for: whoever is missing is either unknown to the
+// registry or not eligible there, and the distinction does not change the answer.
+func eligibleAssigneeIDs(tx *gorm.DB, tenantCode, orgCode string, userIDs []string) ([]string, error) {
+	eligible := []string{}
+	if len(userIDs) == 0 {
+		return eligible, nil
+	}
+	query := eligibleAt(tx, tenantCode, orgCode).
+		Where("u.user_id IN ?", userIDs).
+		Select("u.user_id")
+	if err := query.Scan(&eligible).Error; err != nil {
+		return nil, fmt.Errorf("error checking assignment eligibility at %q: %w", orgCode, err)
+	}
+	return eligible, nil
+}
+
+// ReplaceAssignees sets the case's assignees to the eligible members of userIDs. It is the whole
+// operation — read, decide, write — in one transaction that opens by locking the case, so two
+// concurrent callers cannot each decide against a set the other has already replaced, and a
+// reader never sees the case half-reassigned. The transaction alone would not be enough: see
+// lockCaseDiagnosisLab for why the lock is what serializes them.
+//
+// It returns types.ErrCaseNotFound when the tenant holds no such case, and
+// *types.IneligibleAssigneesError when the request names someone who is neither eligible nor
+// already assigned. See types.ClassifyAssignees for what happens to each requested user. The
+// stored set is therefore not always the requested one, so a caller that needs to display it
+// reads it back through ListForCases.
+func (r *CaseAssignmentsRepository) ReplaceAssignees(ctx context.Context, tenantCode string, caseID int, userIDs []string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		orgCode, err := lockCaseDiagnosisLab(tx, tenantCode, caseID)
+		if err != nil {
+			return err
+		}
+
+		current, err := assignedIDs(tx, tenantCode, caseID)
+		if err != nil {
+			return err
+		}
+		eligible, err := eligibleAssigneeIDs(tx, tenantCode, orgCode, userIDs)
+		if err != nil {
+			return err
+		}
+
+		keep, rejected := types.ClassifyAssignees(userIDs, eligible, current)
+		if len(rejected) > 0 {
+			return &types.IneligibleAssigneesError{OrgCode: orgCode, UserIDs: rejected}
+		}
+		return writeAssignees(tx, tenantCode, caseID, keep)
+	})
+}
+
+func assignedIDs(tx *gorm.DB, tenantCode string, caseID int) ([]string, error) {
+	userIDs := []string{}
+	err := tx.Table(types.CaseAssignmentTable.Name).
+		Where("case_id = ? AND tenant_code = ?", caseID, tenantCode).
+		Pluck("user_id", &userIDs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error reading assignees of case %d: %w", caseID, err)
+	}
+	return userIDs, nil
+}
+
+// writeAssignees persists an already-decided set: it makes userIDs the case's complete list of
+// assignees. Eligibility is settled by the time it is called — that is ReplaceAssignees' job —
+// so this one asks no questions about who is in the set.
+func writeAssignees(tx *gorm.DB, tenantCode string, caseID int, userIDs []string) error {
+	remove := tx.Where("case_id = ? AND tenant_code = ?", caseID, tenantCode)
+	if len(userIDs) > 0 {
+		remove = remove.Where("user_id NOT IN ?", userIDs)
+	}
+	if err := remove.Delete(&types.CaseAssignment{}).Error; err != nil {
+		return fmt.Errorf("error clearing assignees of case %d: %w", caseID, err)
+	}
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	assignments := make([]types.CaseAssignment, len(userIDs))
+	for i, userID := range userIDs {
+		assignments[i] = types.CaseAssignment{CaseID: caseID, UserID: userID, TenantCode: tenantCode}
+	}
+	// The rows already there are exactly the ones the delete above kept, so re-inserting them is
+	// a no-op rather than a conflict to resolve.
+	if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&assignments).Error; err != nil {
+		return fmt.Errorf("error assigning case %d: %w", caseID, err)
+	}
+	return nil
 }

@@ -1884,6 +1884,45 @@
           "response": []
         },
         {
+          "name": "Set Assignments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_ids\": [\n        \"79a8855e-3782-4dc8-be2a-8afdb34d6359\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/1/assignments",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "1",
+                "assignments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Documents - Filters",
           "request": {
             "auth": {

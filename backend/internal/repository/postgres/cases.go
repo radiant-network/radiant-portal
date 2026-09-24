@@ -22,6 +22,33 @@ func NewCasesRepository(db database.PostgresDB) *CasesRepository {
 	return &CasesRepository{db: db.DB}
 }
 
+// lockCaseDiagnosisLab returns the lab a case belongs to and holds the case row until the
+// transaction ends, or returns types.ErrCaseNotFound when the tenant holds no such case. It
+// takes the handle rather than hanging off CasesRepository so a caller can run it inside its own
+// transaction. AuthRepository.OrgsForCase answers the same question for the authorization
+// middleware, unlocked, in the shape a resolver needs.
+//
+// The lock is what makes a read-decide-write on a case serial. Without it two concurrent writers
+// read the same state, and Postgres' READ COMMITTED lets each one miss what the other is about
+// to commit: two replacements of the assignee set would end up merged rather than one winning.
+// Taking it on the case row rather than on what is being written also pins the lab itself, so a
+// decision cannot be made against a lab the case has since left. Every writer takes this lock
+// first, so they queue in one order and cannot deadlock against each other.
+func lockCaseDiagnosisLab(tx *gorm.DB, tenantCode string, caseID int) (string, error) {
+	labs := []string{}
+	err := tx.Table(types.CaseTable.Name).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ? AND tenant_code = ?", caseID, tenantCode).
+		Pluck("diagnosis_lab_code", &labs).Error
+	if err != nil {
+		return "", fmt.Errorf("error resolving lab of case %d: %w", caseID, err)
+	}
+	if len(labs) == 0 {
+		return "", types.ErrCaseNotFound
+	}
+	return labs[0], nil
+}
+
 func (r *CasesRepository) CreateCase(ctx context.Context, c *Case) error {
 	return r.db.WithContext(ctx).Create(c).Error
 }

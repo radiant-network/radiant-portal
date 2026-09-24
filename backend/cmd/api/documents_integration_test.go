@@ -255,9 +255,9 @@ func Test_GetDocumentsFilters(t *testing.T) {
 }
 
 func Test_GetDocumentsDownloadUrl(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
-		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
@@ -278,15 +278,15 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 		assert.NotEmpty(t, actual.URL)
 		assert.Greater(t, actual.URLExpireAt, int64(0))
 
-		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", env.MinIO.Endpoint)
+		expectedURLPrefix := fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/", env.ObjectStore.Endpoint)
 		assert.True(t, strings.HasPrefix(actual.URL, expectedURLPrefix))
 	})
 }
 
 func Test_GetDocumentsDownloadUrl_IndexFile(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
-		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")

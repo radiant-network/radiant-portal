@@ -52,7 +52,7 @@ func patchCaseWithTask(submitterCaseId, projectCode, outURL, outName string, out
 	}
 }
 
-// uploadPatchTaskDocuments stages each task's output document in MinIO (with the
+// uploadPatchTaskDocuments stages each task's output document in the object store (with the
 // declared size) and back-fills the hash the worker will compute on HeadObject —
 // mirrors createDocumentsForBatch for the PATCH payload shape.
 func uploadPatchTaskDocuments(ctx context.Context, client *minio.Client, patches []types.CaseBatchPatch) {
@@ -87,8 +87,8 @@ func seedBaseCase(t *testing.T, ctx context.Context, client *minio.Client, db *g
 // Happy path: a PATCH that carries a sequencing experiment + a new task persists
 // the task, its output document and the task_has_document link.
 func Test_ProcessBatch_PatchCase_AttachTask_Success(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-A"
 		const outURL = "s3://test-bucket/CASE-PATCH-A.patch.recal.cram"
 		const outName = "CASE-PATCH-A.patch.recal.cram"
@@ -143,8 +143,8 @@ func Test_ProcessBatch_PatchCase_AttachTask_Success(t *testing.T) {
 // re-PATCHing the same tasks on a retry/re-import (Phase 2d idempotency) — Radiant will not
 // dedup for it.
 func Test_ProcessBatch_PatchCase_AppendsDuplicateTask_ExperimentAttachIdempotent(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-B"
 		const outURL = "s3://test-bucket/CASE-PATCH-B.patch.recal.cram"
 		const outName = "CASE-PATCH-B.patch.recal.cram"
@@ -196,8 +196,8 @@ func Test_ProcessBatch_PatchCase_AppendsDuplicateTask_ExperimentAttachIdempotent
 // the experiment ALREADY attached to the case (case_has_sequencing_experiment), not only against
 // the in-payload sequencing_experiments. Before this check the second PATCH failed TASK-002.
 func Test_ProcessBatch_PatchCase_TasksOnly_AliquotFromAlreadyAttachedExperiment(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
-		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-D"
 		const outURL = "s3://test-bucket/CASE-PATCH-D.tasksonly.recal.cram"
 		const outName = "CASE-PATCH-D.tasksonly.recal.cram"

@@ -199,7 +199,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 }
 
 func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("patient_all_codes")
 		payload, _ := json.Marshal(scenario.Patients)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreatePatientBatchType, false, "user123", "2025-10-10")
@@ -966,7 +966,7 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("sample_all_codes")
 		payload, _ := json.Marshal(scenario.Samples)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateSampleBatchType, false, "user123", "2025-10-10")
@@ -1547,7 +1547,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		scenario, _ := testutils.LoadScenario("sequencing_experiment_all_codes")
 		payload, _ := json.Marshal(scenario.SequencingExperiments)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateSequencingExperimentBatchType, false, "user123", "2025-10-10")

@@ -40,7 +40,7 @@ func seedPrenatalCase(t *testing.T, env *testutils.Env, submitterCaseId string) 
 			},
 		},
 	}
-	createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+	createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 	payloadBytes, _ := json.Marshal(payload)
 
 	id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-07")
@@ -78,7 +78,7 @@ func processUpdateExpectingSuccess(t *testing.T, db *gorm.DB, updates []types.Up
 // PUT semantics: the body is the new state, so omitting `fetuses` means "this case has none" and is
 // equivalent to sending an empty list — same as observations_text and family_history already behave.
 func Test_ProcessBatch_UpdateCase_OmittedFetuses_RemovesThemLikeAnEmptyList(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		const submitterCaseId = "CASE-UPDATE-FETUS-OMITTED"
 
@@ -103,7 +103,7 @@ func Test_ProcessBatch_UpdateCase_OmittedFetuses_RemovesThemLikeAnEmptyList(t *t
 }
 
 func Test_ProcessBatch_UpdateCase_Fetuses_ReplacesThem(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		const submitterCaseId = "CASE-UPDATE-FETUS-REPLACE"
 
@@ -154,7 +154,7 @@ func Test_ProcessBatch_UpdateCase_Fetuses_ReplacesThem(t *testing.T) {
 }
 
 func Test_ProcessBatch_UpdateCase_EmptyFetuses_RemovesThem(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		const submitterCaseId = "CASE-UPDATE-FETUS-CLEAR"
 
@@ -193,7 +193,7 @@ func attachSampleToFetus(t *testing.T, db *gorm.DB, sampleID, probandID, fetusID
 // What matching by submitter id buys: a fetus whose sample is already sequenced stays correctable,
 // because the row is updated in place rather than deleted and recreated.
 func Test_ProcessBatch_UpdateCase_FetusWithSample_StillUpdatableUnderSameKey(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		const submitterCaseId = "CASE-UPDATE-FETUS-SEQUENCED"
 
@@ -223,7 +223,7 @@ func Test_ProcessBatch_UpdateCase_FetusWithSample_StillUpdatableUnderSameKey(t *
 // Dropping the key is the destructive half: sample.fetus_id has no ON DELETE CASCADE, so the worker
 // must report it instead of dying on a raw FK violation.
 func Test_ProcessBatch_UpdateCase_FetusWithSample_RefusedWhenKeyDropped(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		const submitterCaseId = "CASE-UPDATE-FETUS-BLOCKED"
 

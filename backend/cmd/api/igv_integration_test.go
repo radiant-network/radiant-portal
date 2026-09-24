@@ -49,9 +49,9 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 }
 
 func Test_GetIGVByCaseIdHandler(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
-		_ = os.Setenv("AWS_ENDPOINT_URL", env.MinIO.Client.EndpointURL().String())
+		_ = os.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
@@ -69,8 +69,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "male",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", env.MinIO.Endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", env.MinIO.Endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", env.ObjectStore.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", env.ObjectStore.Endpoint),
 					Name:       "Reads: S13224 proband",
 				},
 				{
@@ -79,8 +79,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.cram", env.MinIO.Endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.crai", env.MinIO.Endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.cram", env.ObjectStore.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12891/NA12891.recal.crai", env.ObjectStore.Endpoint),
 					Name:       "Reads: S13225 mother",
 				},
 				{
@@ -89,8 +89,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "male",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", env.MinIO.Endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", env.MinIO.Endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.cram", env.ObjectStore.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", env.ObjectStore.Endpoint),
 					Name:       "Reads: S13226 father",
 				},
 			})
@@ -104,8 +104,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", env.MinIO.Endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", env.MinIO.Endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", env.ObjectStore.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", env.ObjectStore.Endpoint),
 					Name:       "Reads: SRX1091647 tumoral",
 				},
 				{
@@ -114,8 +114,8 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", env.MinIO.Endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", env.MinIO.Endpoint),
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", env.ObjectStore.Endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", env.ObjectStore.Endpoint),
 					Name:       "Reads: SRX1091646 normal",
 				},
 			})

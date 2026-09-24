@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**patch_case**](CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 [**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+[**put_case_assignments**](CasesApi.md#put_case_assignments) | **PUT** /{tenant}/cases/{case_id}/assignments | Set the users a case is assigned to
 [**put_case_batch**](CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 [**search_cases**](CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
 
@@ -880,6 +881,97 @@ Name | Type | Description  | Notes
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **put_case_assignments**
+> put_case_assignments(tenant, case_id, update_case_assignments_request)
+
+Set the users a case is assigned to
+
+Replace the case's assignees with the given set. An empty list unassigns the
+case, which is a valid state. An assignee who has since lost the permission to
+interpret at the case's lab is dropped by this call — losing it does not
+unassign anyone on its own, but the next update prunes them. Naming a user who
+is not assigned and not eligible is refused. Because of that pruning the stored
+set is not always the one submitted; read the case back to display it.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.update_case_assignments_request import UpdateCaseAssignmentsRequest
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    update_case_assignments_request = radiant_python.UpdateCaseAssignmentsRequest() # UpdateCaseAssignmentsRequest | Assignees to set
+
+    try:
+        # Set the users a case is assigned to
+        api_instance.put_case_assignments(tenant, case_id, update_case_assignments_request)
+    except Exception as e:
+        print("Exception when calling CasesApi->put_case_assignments: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **update_case_assignments_request** | [**UpdateCaseAssignmentsRequest**](UpdateCaseAssignmentsRequest.md)| Assignees to set | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**422** | Unprocessable Entity |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
