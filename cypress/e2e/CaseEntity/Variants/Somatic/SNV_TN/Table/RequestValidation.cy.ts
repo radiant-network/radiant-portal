@@ -17,7 +17,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Request Validati
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnSort('variant');
   });
 
-  it('Paging [SJRA-1684]', () => {
+  it('Paging', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnPageChange(data.caseSomatic, 'TN');
   });

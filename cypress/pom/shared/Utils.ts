@@ -436,6 +436,17 @@ export const shouldHaveTableResultsCount = (count: number | Cypress.Chainable<nu
 };
 
 /**
+ * Converts a displayed file size (e.g. '54.08 KB', '1.4 GB') to bytes, so sizes in different units can be compared.
+ * @param size The displayed size.
+ * @returns The size in bytes, or NaN if the format is not recognized.
+ */
+export const sizeToBytes = (size: string): number => {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const match = size.trim().match(/^([\d.,]+)\s*([KMGT]?B)$/i);
+  return match ? parseFloat(match[1].replace(',', '')) * 1024 ** units.indexOf(match[2].toUpperCase()) : NaN;
+};
+
+/**
  * Converts a string to a RegExp.
  * Optionally adds ^ and $ to match the whole string.
  * @param str The string to convert.

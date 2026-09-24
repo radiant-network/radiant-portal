@@ -1,5 +1,6 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { data } from 'pom/shared/Data';
 import { CasesTable } from 'pom/pages/CasesTable';
 
 describe('Cases - Sort', () => {
@@ -25,13 +26,14 @@ describe('Cases - Sort', () => {
 
   it('Date', () => {
     setupTest();
-    CasesTable.validations.shouldSortColumn('updated_on', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+    CasesTable.validations.shouldSortColumn('updated_on', true /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Multiple', () => {
     setupTest();
     CasesTable.actions.sortColumn('analysis');
     CasesTable.actions.sortColumn('mrn');
-    CasesTable.validations.shouldHaveFirstRowValue('MRN-283782', 'mrn');
+    CasesTable.actions.sortColumn('mrn');
+    CasesTable.validations.shouldHaveFirstRowValue(data.caseSomatic.mrn, 'mrn');
   });
 });

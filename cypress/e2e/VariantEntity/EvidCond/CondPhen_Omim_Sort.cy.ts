@@ -11,6 +11,6 @@ describe('VariantEntity - EvidCond - CondPhen - Omim - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldSortColumn('condition', true /*hasUniqueValues*/, true /*isReverseSorting*/);
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldSortColumn('condition', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 });

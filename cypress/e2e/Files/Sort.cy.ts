@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import 'support/commands';
 import { FilesTable } from 'pom/pages/FilesTable';
-
+import { data } from 'pom/shared/Data';
 describe('Files - Sort', () => {
   const setupTest = () => {
     cy.login();
@@ -36,8 +36,7 @@ describe('Files - Sort', () => {
   it('Multiple', () => {
     setupTest();
     FilesTable.actions.sortColumn('name');
-    FilesTable.actions.sortColumn('patient');
-    FilesTable.actions.sortColumn('patient');
-    FilesTable.validations.shouldHaveFirstRowValue('3', 'patient');
+    FilesTable.actions.sortColumn('sample');
+    FilesTable.validations.shouldHaveFirstRowValue(data.case.seq.sample_id, 'sample');
   });
 });

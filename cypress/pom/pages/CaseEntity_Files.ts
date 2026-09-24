@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
-import { getUrlLink, stringToRegExp } from 'pom/shared/Utils';
+import { getUrlLink, sizeToBytes, stringToRegExp } from 'pom/shared/Utils';
 import { getColumnName, getColumnPosition } from 'pom/shared/Utils';
 
 const selectors = {
@@ -488,13 +488,14 @@ export const CaseEntity_Files = {
                   .invoke('text')
                   .then(smallestValue => {
                     const smallest = smallestValue.trim();
+                    const comparison = columnID === 'size' ? sizeToBytes(biggest) - sizeToBytes(smallest) : biggest.localeCompare(smallest);
                     if (hasUniqueValues) {
-                      if (biggest.localeCompare(smallest) !== 0) {
+                      if (comparison !== 0) {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
-                    } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
+                    } else if (!isReverseSorting && comparison <= 0) {
                       throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
-                    } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
+                    } else if (isReverseSorting && comparison >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }
                   });

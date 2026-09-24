@@ -572,14 +572,14 @@ const germlineContentHandlers: Record<string, ContentHandler> = {
     cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
   },
   clinvar: ({ position, dataVariant }) => {
-    cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
-    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
+    cy.validateTableFirstRowContent(getClass(dataVariant.clinvar_evidence.classification).abbrev, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(dataVariant.clinvar_evidence.classification).color), position);
   },
   acmg_exomiser: ({ position, dataVariant }) => {
     dataVariant.acmg_exomiser.forEach((value: string) => {
       cy.validateTableFirstRowContent(getClass(value).abbrev, position);
+      cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(value).color), position);
     });
-    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
   },
 };
 
