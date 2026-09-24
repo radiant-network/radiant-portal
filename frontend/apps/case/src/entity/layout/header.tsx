@@ -1,7 +1,6 @@
 import { Biohazard, Users } from 'lucide-react';
 
 import type { CaseEntity } from '@/api/api';
-import type { Status } from '@/components/base/badges/status-badge';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
@@ -57,7 +56,7 @@ export default function Header({ data, isLoading, onStatusChange }: HeaderProps)
               <CaseStatusDropdown
                 key="status"
                 caseId={data.case_id}
-                status={data.status_code as Status}
+                status={data.status_code}
                 canEdit={canEditCase}
                 className="px-3 py-2"
                 readOnlyTooltip={t('case_entity.header.status_tooltip')}
