@@ -877,6 +877,7 @@ function WithInterpretPermission({ granted, children }: { granted: boolean; chil
           },
         ],
         setTenant: async () => {},
+        refreshPermissions: async () => {},
       }}
     >
       <CaseEntityContext.Provider value={{ diagnosis_lab_code: STORYBOOK_DIAGNOSIS_LAB } as CaseEntity}>

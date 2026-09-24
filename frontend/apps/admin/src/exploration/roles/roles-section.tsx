@@ -43,7 +43,7 @@ function reportFieldConflict(error: any, setDuplicateError: (field: 'name' | 'co
 
 export default function RolesSection() {
   const { t } = useI18n();
-  const { tenant } = useTenant();
+  const { tenant, refreshPermissions } = useTenant();
   const [, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [customOnly, setCustomOnly] = useState(false);
@@ -122,6 +122,8 @@ export default function RolesSection() {
         description_en: values.description?.trim() || undefined,
         actions: values.permissions,
       });
+      // The caller may hold this role: reload their own permissions.
+      refreshPermissions();
       onSaved('admin.roles.edit.notifications.success');
     } catch (error: any) {
       if (reportFieldConflict(error, setDuplicateError)) return;
@@ -202,6 +204,7 @@ export default function RolesSection() {
         onClick: async () => {
           try {
             await rolesApi.deleteRole(tenant, role.code);
+            refreshPermissions();
             onSaved('admin.roles.delete.notifications.success');
           } catch {
             toast.error(t('admin.roles.delete.notifications.errors.default'));
