@@ -3,11 +3,13 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/notification"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -117,6 +119,87 @@ func Test_GetCaseGroupHandler_InvalidName_400(t *testing.T) {
 func Test_GetCaseGroupHandler_StoreError_500Generic(t *testing.T) {
 	w := serveCaseGroups(&mockCaseGroupStore{getErr: errors.New("boom")}, "GET", "/radiant/case_groups/run_1", "")
 
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type mockCaseGroupNotifier struct {
+	report             *types.NotifyCaseGroupResponse
+	err                error
+	gotTenant, gotName string
+}
+
+func (m *mockCaseGroupNotifier) Notify(_ context.Context, tenantCode, groupName string) (*types.NotifyCaseGroupResponse, error) {
+	m.gotTenant, m.gotName = tenantCode, groupName
+	return m.report, m.err
+}
+
+func serveNotify(svc caseGroupNotifier, name string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.POST("/:tenant/case_groups/:name/notify", PostCaseGroupNotifyHandler(svc))
+	req, _ := http.NewRequest("POST", "/radiant/case_groups/"+name+"/notify", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PostCaseGroupNotifyHandler_Report(t *testing.T) {
+	svc := &mockCaseGroupNotifier{report: &types.NotifyCaseGroupResponse{
+		Group: types.CaseGroupResponse{Name: "run-a", TenantCode: "radiant", CaseIDs: []int{1, 2}},
+		Emails: []types.CaseGroupEmailReport{
+			{OrganizationCode: "LDM-CHUSJ", Status: types.CaseGroupEmailSent, Recipients: []string{"a@lab.invalid"}, CaseCount: 1, DocumentCount: 3, Template: "manifest_radiant.tmpl",
+				Context: types.CaseGroupEmailContext{HasStat: true, AnalysisCodes: []string{"WGS"}, CaseIDs: []int{1}, ManifestFilename: "run-a_20260924_manifest.tsv"}},
+			{OrganizationCode: "CQGC", Status: types.CaseGroupEmailSkippedNoContact, Recipients: []string{}, CaseCount: 1, DocumentCount: 2, Template: "manifest_radiant.tmpl",
+				Context: types.CaseGroupEmailContext{AnalysisCodes: []string{}, CaseIDs: []int{2}, ManifestFilename: "run-a_20260924_manifest.tsv"}},
+		},
+	}}
+	w := serveNotify(svc, "run-a")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "radiant", svc.gotTenant)
+	assert.Equal(t, "run-a", svc.gotName)
+	assert.JSONEq(t, `{
+		"group": {"name":"run-a","tenant_code":"radiant","case_ids":[1,2]},
+		"emails": [
+			{"organization_code":"LDM-CHUSJ","status":"sent","recipients":["a@lab.invalid"],"case_count":1,"document_count":3,"template":"manifest_radiant.tmpl",
+			 "context":{"has_stat":true,"analysis_codes":["WGS"],"case_ids":[1],"manifest_filename":"run-a_20260924_manifest.tsv"}},
+			{"organization_code":"CQGC","status":"skipped_no_contact","recipients":[],"case_count":1,"document_count":2,"template":"manifest_radiant.tmpl",
+			 "context":{"has_stat":false,"analysis_codes":[],"case_ids":[2],"manifest_filename":"run-a_20260924_manifest.tsv"}}
+		]
+	}`, w.Body.String())
+}
+
+func Test_PostCaseGroupNotifyHandler_FailedLabCarriesError(t *testing.T) {
+	svc := &mockCaseGroupNotifier{report: &types.NotifyCaseGroupResponse{
+		Group:  types.CaseGroupResponse{Name: "run-a", TenantCode: "radiant", CaseIDs: []int{}},
+		Emails: []types.CaseGroupEmailReport{{OrganizationCode: "LDM-CHUSJ", Status: types.CaseGroupEmailFailed, Error: "relay refused", Recipients: []string{"a@lab.invalid"}, Context: types.CaseGroupEmailContext{AnalysisCodes: []string{}, CaseIDs: []int{}}}},
+	}}
+	w := serveNotify(svc, "run-a")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `"status":"failed","error":"relay refused"`)
+}
+
+func Test_PostCaseGroupNotifyHandler_InvalidName(t *testing.T) {
+	svc := &mockCaseGroupNotifier{}
+	w := serveNotify(svc, "bad%20name")
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Empty(t, svc.gotName, "invalid name must not reach the service")
+}
+
+func Test_PostCaseGroupNotifyHandler_NotFound(t *testing.T) {
+	w := serveNotify(&mockCaseGroupNotifier{err: types.ErrCaseGroupNotFound}, "nope")
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_PostCaseGroupNotifyHandler_TemplateMissing_500Generic(t *testing.T) {
+	w := serveNotify(&mockCaseGroupNotifier{err: fmt.Errorf("%w %q", notification.ErrTemplateMissing, "radiant")}, "run-a")
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+func Test_PostCaseGroupNotifyHandler_ServiceError_500(t *testing.T) {
+	w := serveNotify(&mockCaseGroupNotifier{err: errors.New("boom")}, "run-a")
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }

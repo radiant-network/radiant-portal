@@ -3387,6 +3387,36 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Notify case group labs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/case_groups/run_1/notify",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "case_groups",
+                "run_1",
+                "notify"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

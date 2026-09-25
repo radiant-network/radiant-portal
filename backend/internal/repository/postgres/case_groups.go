@@ -8,6 +8,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -106,4 +107,51 @@ func (r *CaseGroupsRepository) GetCaseGroupByName(ctx context.Context, tenantCod
 		return nil, nil, fmt.Errorf("error retrieving cases of case group %q: %w", name, err)
 	}
 	return &group, caseIDs, nil
+}
+
+// ListCases returns the priority, analysis code and diagnosis lab of each case, in case id order.
+// Cases of another tenant are ignored, so an id list taken from a group is safe to pass as is.
+func (r *CaseGroupsRepository) ListCases(ctx context.Context, tenantCode string, caseIDs []int) ([]types.CaseGroupCaseRow, error) {
+	rows := []types.CaseGroupCaseRow{}
+	if len(caseIDs) == 0 {
+		return rows, nil
+	}
+	joiner := joins.Postgres()
+	tx := r.db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias)).
+		Select("c.id AS case_id, c.priority_code, ca.code AS analysis_catalog_code, COALESCE(c.diagnosis_lab_code, '') AS diagnosis_lab_code, COALESCE(lab.name, '') AS diagnosis_lab_name").
+		Where("c.id IN ? AND c.tenant_code = ?", caseIDs, tenantCode)
+	tx = joiner.CaseWithAnalysisCatalog(tx)
+	tx = joiner.CaseWithDiagnosisLab(tx)
+	if err := tx.Order("c.id").Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error listing cases %v of tenant %q: %w", caseIDs, tenantCode, err)
+	}
+	return rows, nil
+}
+
+// ListDocuments returns the output documents of the cases, index files (crai, tbi) included, with
+// the sample and patient they were produced from. It follows the same join path as the StarRocks
+// document search: task_has_document (output) → task_context → case_has_sequencing_experiment →
+// cases / sequencing_experiment → sample. A document reached through several samples comes back
+// once per sample; the manifest writer folds them.
+func (r *CaseGroupsRepository) ListDocuments(ctx context.Context, tenantCode string, caseIDs []int) ([]types.CaseGroupDocumentRow, error) {
+	rows := []types.CaseGroupDocumentRow{}
+	if len(caseIDs) == 0 {
+		return rows, nil
+	}
+	joiner := joins.Postgres()
+	tx := r.db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias)).
+		Select("doc.id AS document_id, doc.name, doc.size, doc.data_type_code, doc.format_code, COALESCE(spl.submitter_sample_id, '') AS submitter_sample_id, COALESCE(spl.patient_id, 0) AS patient_id, c.id AS case_id, COALESCE(c.diagnosis_lab_code, '') AS diagnosis_lab_code").
+		Where("c.id IN ? AND c.tenant_code = ? AND doc.tenant_code = ?", caseIDs, tenantCode, tenantCode)
+	tx = joiner.DocumentWithTaskHasDocument(tx)
+	tx = joiner.TaskHasDocWithTaskContext(tx)
+	tx = joiner.TaskContextWithCaseHasSeqExp(tx)
+	tx = joiner.CaseHasSeqExpWithSequencingExperiment(tx)
+	tx = joiner.CaseHasSeqExpWithCase(tx)
+	tx = joiner.SeqExpWithSample(tx)
+	if err := tx.Order("c.id, doc.id, spl.id").Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error listing documents of cases %v in tenant %q: %w", caseIDs, tenantCode, err)
+	}
+	return rows, nil
 }

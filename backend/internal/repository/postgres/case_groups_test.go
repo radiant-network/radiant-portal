@@ -157,3 +157,77 @@ func Test_DeleteCaseGroup_CascadesMembership(t *testing.T) {
 		assert.Zero(t, rows)
 	})
 }
+
+func Test_ListCases_ReturnsPriorityAnalysisAndLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
+
+		rows, err := repo.ListCases(t.Context(), "radiant", []int{2, 1})
+		require.NoError(t, err)
+		require.Len(t, rows, 2)
+		assert.Equal(t, 1, rows[0].CaseID, "rows come back in case id order")
+		assert.Equal(t, "routine", rows[0].PriorityCode)
+		assert.NotEmpty(t, rows[0].AnalysisCatalogCode)
+		assert.Equal(t, "CQGC", rows[0].DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", rows[0].DiagnosisLabName)
+	})
+}
+
+func Test_ListCases_OtherTenantOrUnknown_Empty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
+
+		rows, err := repo.ListCases(t.Context(), "tenant_b", []int{1})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
+
+		rows, err = repo.ListCases(t.Context(), "radiant", []int{999999})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
+
+		rows, err = repo.ListCases(t.Context(), "radiant", nil)
+		require.NoError(t, err)
+		assert.Equal(t, []types.CaseGroupCaseRow{}, rows)
+	})
+}
+
+func Test_ListDocuments_OutputDocumentsOfCase_IndexFilesIncluded(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
+
+		rows, err := repo.ListDocuments(t.Context(), "radiant", []int{1})
+		require.NoError(t, err)
+		require.NotEmpty(t, rows)
+
+		formats := map[string]bool{}
+		for _, row := range rows {
+			assert.Equal(t, 1, row.CaseID)
+			assert.Equal(t, "CQGC", row.DiagnosisLabCode)
+			assert.NotEmpty(t, row.Name)
+			assert.NotEmpty(t, row.SubmitterSampleID, "document %d must reach its sample", row.DocumentID)
+			assert.NotZero(t, row.PatientID)
+			formats[row.FormatCode] = true
+		}
+		assert.True(t, formats["crai"], "index files stay in the manifest, got formats %v", formats)
+	})
+}
+
+func Test_ListDocuments_OnlyGivenCases_OtherTenantEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
+
+		rows, err := repo.ListDocuments(t.Context(), "radiant", []int{1, 2})
+		require.NoError(t, err)
+		for _, row := range rows {
+			assert.Contains(t, []int{1, 2}, row.CaseID)
+		}
+
+		rows, err = repo.ListDocuments(t.Context(), "tenant_b", []int{1})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
+
+		rows, err = repo.ListDocuments(t.Context(), "radiant", nil)
+		require.NoError(t, err)
+		assert.Equal(t, []types.CaseGroupDocumentRow{}, rows)
+	})
+}

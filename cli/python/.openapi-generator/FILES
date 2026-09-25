@@ -22,6 +22,8 @@ docs/CaseExam.md
 docs/CaseFamilyHistory.md
 docs/CaseFetusBatch.md
 docs/CaseFilters.md
+docs/CaseGroupEmailContext.md
+docs/CaseGroupEmailReport.md
 docs/CaseGroupRequest.md
 docs/CaseGroupResponse.md
 docs/CaseGroupsApi.md
@@ -86,6 +88,7 @@ docs/LeafContent.md
 docs/ListBodyWithCriteria.md
 docs/ListBodyWithSqon.md
 docs/MondoApi.md
+docs/NotifyCaseGroupResponse.md
 docs/ObservationCategoricalBatch.md
 docs/ObservationTextBatch.md
 docs/OccurrenceCount.md
@@ -213,6 +216,8 @@ radiant_python/models/case_exam.py
 radiant_python/models/case_family_history.py
 radiant_python/models/case_fetus_batch.py
 radiant_python/models/case_filters.py
+radiant_python/models/case_group_email_context.py
+radiant_python/models/case_group_email_report.py
 radiant_python/models/case_group_request.py
 radiant_python/models/case_group_response.py
 radiant_python/models/case_patient_batch.py
@@ -269,6 +274,7 @@ radiant_python/models/interpretation_somatic.py
 radiant_python/models/leaf_content.py
 radiant_python/models/list_body_with_criteria.py
 radiant_python/models/list_body_with_sqon.py
+radiant_python/models/notify_case_group_response.py
 radiant_python/models/observation_categorical_batch.py
 radiant_python/models/observation_text_batch.py
 radiant_python/models/occurrence_count.py
@@ -332,3 +338,6 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_case_group_email_context.py
+test/test_case_group_email_report.py
+test/test_notify_case_group_response.py

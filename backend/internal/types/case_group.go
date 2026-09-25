@@ -96,3 +96,59 @@ type CaseGroupResponse struct {
 func NewCaseGroupResponse(group CaseGroup, caseIDs []int) CaseGroupResponse {
 	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs)}
 }
+
+const (
+	CaseGroupEmailSent               = "sent"
+	CaseGroupEmailSkippedNoContact   = "skipped_no_contact"
+	CaseGroupEmailSkippedNoDocuments = "skipped_no_documents"
+	CaseGroupEmailFailed             = "failed"
+)
+
+// CaseGroupCaseRow is what the notification needs to know about one case of a group.
+type CaseGroupCaseRow struct {
+	CaseID              int
+	PriorityCode        string
+	AnalysisCatalogCode string
+	DiagnosisLabCode    string
+	DiagnosisLabName    string
+}
+
+// CaseGroupDocumentRow is one output document of a case, as it reaches the manifest. The same
+// document comes back once per (sequencing experiment, sample) it was produced from.
+type CaseGroupDocumentRow struct {
+	DocumentID        int
+	Name              string
+	Size              int64
+	DataTypeCode      string
+	FormatCode        string
+	SubmitterSampleID string
+	PatientID         int
+	CaseID            int
+	DiagnosisLabCode  string
+}
+
+// @Description Values the tenant template was rendered with, echoed so a pipeline log explains the email.
+type CaseGroupEmailContext struct {
+	HasStat          bool     `json:"has_stat"`
+	AnalysisCodes    []string `json:"analysis_codes" validate:"required"`
+	CaseIDs          []int    `json:"case_ids" validate:"required"`
+	ManifestFilename string   `json:"manifest_filename"`
+} // @name CaseGroupEmailContext
+
+// @Description Outcome of the notification for one diagnosis laboratory of the group.
+type CaseGroupEmailReport struct {
+	OrganizationCode string                `json:"organization_code" validate:"required"`
+	Status           string                `json:"status" validate:"required" enums:"sent,skipped_no_contact,skipped_no_documents,failed"`
+	Error            string                `json:"error,omitempty"`
+	Recipients       []string              `json:"recipients" validate:"required"`
+	CaseCount        int                   `json:"case_count"`
+	DocumentCount    int                   `json:"document_count"`
+	Template         string                `json:"template"`
+	Context          CaseGroupEmailContext `json:"context"`
+} // @name CaseGroupEmailReport
+
+// @Description Report of a case group notification: the group and one entry per diagnosis laboratory.
+type NotifyCaseGroupResponse struct {
+	Group  CaseGroupResponse      `json:"group" validate:"required"`
+	Emails []CaseGroupEmailReport `json:"emails" validate:"required"`
+} // @name NotifyCaseGroupResponse

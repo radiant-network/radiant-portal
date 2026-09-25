@@ -95,6 +95,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
 	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
+	// SMTP and notification settings are read per request, no restart on a relay change.
+	caseGroupNotifier := notification.NewService(repoCaseGroups, repoOrganizationsWrite, notificationTemplates, notification.NewSMTPMailer())
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
@@ -305,6 +307,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	caseGroupsGroup := tenantRoutes.Group("/case_groups")
 	caseGroupsGroup.POST("", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupHandler(repoCaseGroups, auth))
 	caseGroupsGroup.GET("/:name", requireAction(types.ActionSearchCase), server.GetCaseGroupHandler(repoCaseGroups))
+	caseGroupsGroup.POST("/:name/notify", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupNotifyHandler(caseGroupNotifier))
 
 	batchesGroup := tenantRoutes.Group("/batches")
 	batchesGroup.GET("/:batch_id", requireActionInTenant(types.ActionIngestData), server.GetBatchHandler(repoBatches))
