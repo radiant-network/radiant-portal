@@ -15,6 +15,7 @@ import {
   defaultGermlineCNVSettings,
   getGermlineCNVOccurrenceColumns,
 } from './table/germline-cnv-occurrence-table-settings';
+import AnnotationsTableFilters from '../filters/annotations-table-filters';
 
 type CNVTabProps = {
   seqId: number;
@@ -61,6 +62,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
         defaultPageSize={30}
         enableColumnOrdering
         enableFullscreen
+        TableFilters={<AnnotationsTableFilters disabled={['interpretation']} />}
       />
     </QueryBuilder>
   );

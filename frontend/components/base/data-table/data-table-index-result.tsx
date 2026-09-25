@@ -8,15 +8,13 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
  */
 type TableIndexResultProp = {
   total: number;
+  filteredTotal: number;
   loading?: boolean;
   pageIndex: number;
   pageSize: number;
 };
 
-function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexResultProp) {
-  const { t } = useI18n();
-  if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
-
+function getPaginationRange(pageSize: number, pageIndex: number, total: number) {
   let to = pageSize * pageIndex;
   const from = to - pageSize + 1;
 
@@ -24,9 +22,37 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
     to = total;
   }
 
+  return {
+    to,
+    from,
+  };
+}
+
+function TableIndexResult({ loading, pageIndex, pageSize, total, filteredTotal }: TableIndexResultProp) {
+  const { t } = useI18n();
+  if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
+  if (total === 0) {
+    return (
+      <span className="text-xs text-muted-foreground" data-cy="table-index-result">
+        {t('common.table.no_result')}
+      </span>
+    );
+  }
+
+  const targetTotal = total != filteredTotal ? filteredTotal : total;
+
+  const { to, from } = getPaginationRange(pageSize, pageIndex, targetTotal);
+
   return (
     <span className="text-xs text-muted-foreground" data-cy="table-index-result">
-      {total > 0 ? (
+      {total != filteredTotal ? (
+        <>
+          {t('common.table.results_filtered', {
+            shown: thousandNumberFormat(filteredTotal),
+            total: thousandNumberFormat(total),
+          })}
+        </>
+      ) : (
         <>
           {t('common.table.results', {
             from: thousandNumberFormat(from),
@@ -34,8 +60,6 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
             total: thousandNumberFormat(total),
           })}
         </>
-      ) : (
-        t('common.table.no_result')
       )}
     </span>
   );

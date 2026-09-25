@@ -32,6 +32,7 @@ export enum QBActionType {
   REMOVE_COMBINED_PILL = 'remove-combined-pill',
   CHANGE_COMBINER_OPERATOR = 'change-combiner-operator',
   SET_LABELS_ENABLED = 'set-labels-enabled',
+  SET_EXTRA_BODY_PARAMS = 'set-extra-body-params',
   REMOVE_ALL_QUERIES = 'remove-all-queries-all',
   COMBINE_QUERIES = 'combine-queries',
   LOAD_QUERIES = 'load-queries',
@@ -91,6 +92,7 @@ export interface IQBContext {
   history: IHistory;
   settings: ISettings;
   cache: ICache;
+  extraBodyParams: Record<string, any>;
 }
 
 type QBDispatch = Dispatch<ActionType>;
@@ -132,6 +134,7 @@ export function getDefaultQBContext() {
     cache: {
       selectedQueries: [],
     },
+    extraBodyParams: {},
   };
 }
 export const QBContext = createContext<IQBContext>(getDefaultQBContext());
@@ -738,6 +741,19 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         },
       };
     }
+
+    /**
+     * Manage extra query params
+     */
+    case QBActionType.SET_EXTRA_BODY_PARAMS: {
+      return {
+        ...context,
+        extraBodyParams: {
+          ...action.payload,
+        },
+      };
+    }
+
     /**
      * Something when wrong
      */
@@ -782,6 +798,15 @@ export function useQBDispatch() {
 export function useQBActiveQuery(): ISyntheticSqon {
   const { activeQueryId, sqons } = useQBContext();
   return sqons.find(sqon => sqon.id === activeQueryId) ?? createEmptyQuery();
+}
+
+/**
+ * Retrieve extra body params
+ * e.g. {with_note: true, with_flag: ["flag", "pin"]}
+ */
+export function useQBExtraBodyParams(): Record<string, any> {
+  const { extraBodyParams } = useQBContext();
+  return extraBodyParams;
 }
 
 /**

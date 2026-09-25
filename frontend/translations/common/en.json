@@ -655,6 +655,7 @@
       },
       "reset": "Reset",
       "results": "Results {{from}} - {{to}} of {{total}}",
+      "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
@@ -2016,7 +2017,10 @@
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
         "snv_to": "SNV (TO)",
-        "snv_to_tooltip": "SNV (tumor-only)"
+        "snv_to_tooltip": "SNV (tumor-only)",
+        "show_only_interpreted": "Show only interpreted",
+        "show_only_commented": "Show only commented",
+        "filter_by_flag": "Filter by flag"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

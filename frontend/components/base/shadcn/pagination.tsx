@@ -126,7 +126,7 @@ type PaginationPageSizeProps = {
 const PaginationPageSize = ({
   pageSize,
   onPageSizeChange,
-  pageSizeOptions = [10, 20, 30, 40, 50],
+  pageSizeOptions = [30, 40, 50],
   className,
 }: PaginationPageSizeProps) => {
   const { t } = useI18n();
