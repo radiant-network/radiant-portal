@@ -89,6 +89,12 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     label: 'Onboarding Wizard',
     description: "Enable onboarding wizard on case's variant tab page",
   },
+  patient: {
+    type: 'boolean',
+    defaultValue: false,
+    label: 'Patient View',
+    description: 'Show the Patients entry in the main navigation menu',
+  },
 };
 
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);

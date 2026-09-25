@@ -38,6 +38,21 @@ export function decodeHtmlEntities(html: string): string {
 }
 
 /**
+ * Retrieve patient id from params.
+ * @returns patient id (string — patient IDs are opaque identifiers, not numeric).
+ * @throws Error if patient id is not found.
+ */
+export function usePatientIdFromParam(): string {
+  const { patientId } = useParams<{ patientId: string }>();
+
+  if (!patientId) {
+    throw new Error('Required parameter patient_id was null or undefined.');
+  }
+
+  return patientId;
+}
+
+/**
  * Retrieve case id from params.
  * @returns case id.
  * @throws Error if case id is not found or not a number.

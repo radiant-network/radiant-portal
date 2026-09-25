@@ -1071,6 +1071,47 @@
       "note_flag": "Marquez le variant (épinglé, retenu, exclu), ajoutez une note ou démarrez une interprétation depuis ici — vos choix sont enregistrés sur le cas et reflétés dans le tableau."
     }
   },
+  "patient_entity": {
+    "header": {
+      "title": "Patient {{id}}"
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "timeline": "Chronologie",
+      "treatments": "Traitements",
+      "genomics": "Génomique",
+      "tumor_board": "Tumor Board",
+      "laboratory": "Laboratoire",
+      "imaging": "Imagerie",
+      "clinical_trials": "Essais cliniques"
+    }
+  },
+  "patient_exploration": {
+    "title": "Patients",
+    "description": "Cohorte ATRT · CHOP, UCSF et Seattle Children's",
+    "search_placeholder": "Rechercher par nom, ID de recherche ou dossier",
+    "actions": {
+      "visualize_survival": "Visualiser la survie de la cohorte"
+    },
+    "columns": {
+      "patient": "Patient",
+      "mrn": "Dossier",
+      "birth_year": "Année de naissance",
+      "sex": "Sexe",
+      "site": "Site",
+      "cns_diagnosis": "Diagnostic SNC intégré",
+      "vital_status": "Statut vital",
+      "survival": "Survie"
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "footer": {
+      "awaiting_data": "En attente du backend — lignes fictives",
+      "total": "{{count}} patients"
+    }
+  },
   "case_exploration": {
     "filters_group": {
       "analysis_catalog_code": "Analyse",
@@ -2348,6 +2389,7 @@
       "analysis": "Analyse",
       "cases": "Cas",
       "files": "Fichiers",
+      "patients": "Patients",
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
       "studies": "Études",
