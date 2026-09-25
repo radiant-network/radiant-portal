@@ -1,5 +1,4 @@
 import { type ComponentProps, useEffect, useState } from 'react';
-import { formatDate } from 'date-fns';
 
 import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
@@ -7,7 +6,8 @@ import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { getMemberKey } from '@/components/lib/case-entity';
+import { getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
+import { formatDate } from '@/components/lib/date';
 import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
@@ -50,7 +50,26 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
             label={t('case_entity.patient_information.dob')}
             labelTooltipText={t('case_entity.details.date_format_tooltip')}
           >
-            {formatDate(member.date_of_birth, t('common.date.year_month_day'))}
+            {formatDate(member.date_of_birth, t('common.date.year_month_day'), true)}
+          </InformationField>
+        )}
+
+        {/* A fetus carries one gestational date or the other, never both */}
+        {member.last_menstrual_period && (
+          <InformationField
+            label={t('case_entity.patient_information.last_menstrual_period')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.last_menstrual_period, t('common.date.year_month_day'), true)}
+          </InformationField>
+        )}
+
+        {member.estimated_due_date && (
+          <InformationField
+            label={t('case_entity.patient_information.estimated_due_date')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.estimated_due_date, t('common.date.year_month_day'), true)}
           </InformationField>
         )}
 
@@ -110,6 +129,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
               {members.map(member => (
                 <TabsTrigger key={getMemberKey(member)} value={getMemberKey(member)}>
                   {t(`common.relationships.${member.relationship_to_proband}`)}
+                  {isPrenatalMother(member, members) && ` (${t('common.relationships.mother')})`}
                 </TabsTrigger>
               ))}
             </TabsList>
