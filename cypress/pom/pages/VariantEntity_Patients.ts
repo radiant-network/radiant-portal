@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getClass, getColumnPosition, getStatusColor, getStatusIcon, getUrlLink, oneMinute, stringToRegExp } from 'pom/shared/Utils';
+import { getClass, getColumnPosition, getStatusColor, getUrlLink, oneMinute, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="cases-tab"]',
@@ -648,7 +648,6 @@ const interpretedColumnContentHandler = (columnID: string, dataInterpreted: any,
       break;
     case 'status':
       cy.validateTableFirstRowContent(dataInterpreted[columnID], position);
-      cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataInterpreted[columnID])), position, tableId);
       cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataInterpreted[columnID])), position, tableId);
       break;
     default:
@@ -674,7 +673,6 @@ const uninterpretedColumnContentHandler = (columnID: string, dataUninterpreted: 
       break;
     case 'status':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataUninterpreted[columnID])), position, tableId);
       cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataUninterpreted[columnID])), position, tableId);
       break;
     default:

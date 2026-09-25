@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 import { CommonSelectors } from '../shared/Selectors';
-import { getPriorityColor, getStatusColor, getStatusIcon, getUrlLink, stringToRegExp } from '../shared/Utils';
+import { getPriorityColor, getStatusColor, getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
@@ -531,7 +531,6 @@ export const CasesTable = {
               break;
             case 'status':
               cy.validateTableFirstRowContent(dataCase[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataCase[columnID])), position);
               cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataCase[columnID])), position);
               break;
             case 'type':

@@ -255,29 +255,6 @@ export const getStatusColor = (status: string) => {
 };
 
 /**
- * Gets the icon associated with a status.
- * @param priority The status (e.g., 'Completed', 'In Progress', etc.).
- * @returns The icon string.
- */
-export const getStatusIcon = (status: string) => {
-  const concatenatedStatus = status.replace(/\s+/g, '');
-  const mapping: Record<string, string> = {
-    Cancelled: 'circle-x',
-    Closed: 'check',
-    Inconclusive: 'file-question',
-    InProgress: 'refresh-ccw',
-    InReview: 'eye',
-    Pending: 'hourglass',
-    Processing: 'loader-circle',
-    Reopened: 'rotate-ccw',
-    Resolved: 'circle-check',
-    Unresolved: 'circle-dashed',
-  };
-
-  return mapping[concatenatedStatus];
-};
-
-/**
  * Reads the total results count displayed by the results table.
  * There is a single results table on the variants page, so this is shared by all zones
  * (germline/somatic × snv/cnv) and the Query Builder oracle count.
