@@ -251,6 +251,24 @@ func Test_PutCaseAssignmentsHandler_RepositoryError(t *testing.T) {
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
 
+// A token the caller cannot be read from is an authentication failure, not a missing resource:
+// the handler answers 401, the same as the middlewares in front of it.
+func Test_ListCaseAssignmentCandidatesHandler_UnreadableTokenIs401(t *testing.T) {
+	repo := &mockCandidatesRepository{labs: []string{"CQGC"}}
+
+	router := gin.Default()
+	router.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
+	router.GET("/:tenant/cases/:case_id/assignment_candidates",
+		ListCaseAssignmentCandidatesHandler(repo, repo, &testutils.MockAuth{Error: errors.New("no token")}))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/12/assignment_candidates", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Empty(t, repo.gotOrg, "nothing is looked up for a caller we cannot identify")
+}
+
 // The picker puts the caller first, so the handler has to tell the repository who is asking.
 func Test_ListCaseAssignmentCandidatesHandler_PassesTheCallerToTheRepository(t *testing.T) {
 	repo := &mockCandidatesRepository{labs: []string{"CQGC"}}

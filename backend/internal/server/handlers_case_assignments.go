@@ -58,7 +58,7 @@ func ListCaseAssignmentCandidatesHandler(repo assignmentCandidatesReader, labs c
 
 		callerID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 

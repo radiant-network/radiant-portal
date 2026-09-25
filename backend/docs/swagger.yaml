@@ -10184,6 +10184,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserPreference'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -10237,6 +10243,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -10331,6 +10343,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -10368,6 +10386,12 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -10408,6 +10432,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SavedFilter'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -10461,6 +10491,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "404":
           content:
             application/json:

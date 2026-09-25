@@ -83,6 +83,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **204** | No Content |  -  |
+**401** | Unauthorized |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
@@ -163,6 +164,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
@@ -326,6 +328,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Created |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
@@ -410,6 +413,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 

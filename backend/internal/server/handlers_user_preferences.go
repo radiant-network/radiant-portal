@@ -23,6 +23,7 @@ type userPreferencesStore interface {
 // @Param key path string true "Preference key"
 // @Produce json
 // @Success 200 {object} types.UserPreference
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -31,7 +32,7 @@ func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.H
 	return func(c *gin.Context) {
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 		key := c.Param("key")
@@ -60,6 +61,7 @@ func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.H
 // @Produce json
 // @Success 200 {object} types.UserPreference
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -78,7 +80,7 @@ func UpdateUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gi
 		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 		key := c.Param("key")
