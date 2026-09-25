@@ -118,12 +118,19 @@ func (r UpdateUserRequest) Validate() error {
 	return validateRoles(r.Roles)
 }
 
+// ValidateEmail accepts the bare address form only: the user email is sent to Keycloak as the
+// username verbatim, and ParseAddress alone would also let through `Grace Chen <grace@chop.edu>`.
+func ValidateEmail(email string) error {
+	parsed, err := mail.ParseAddress(email)
+	if err != nil || parsed.Address != email {
+		return fmt.Errorf("email %q is not a valid address", email)
+	}
+	return nil
+}
+
 func (r CreateUserRequest) Validate() error {
-	// The email is sent to Keycloak as the username verbatim, so only the bare address form is
-	// accepted — ParseAddress would otherwise also let through `Grace Chen <grace@chop.edu>`.
-	parsed, err := mail.ParseAddress(r.Email)
-	if err != nil || parsed.Address != r.Email {
-		return fmt.Errorf("email %q is not a valid address", r.Email)
+	if err := ValidateEmail(r.Email); err != nil {
+		return err
 	}
 	if strings.TrimSpace(r.FirstName) == "" || strings.TrimSpace(r.LastName) == "" {
 		return fmt.Errorf("first_name and last_name must not be blank")

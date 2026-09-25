@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,7 +29,8 @@ class CreateOrganizationRequest(BaseModel):
     category_code: StrictStr
     code: StrictStr
     name: StrictStr
-    __properties: ClassVar[List[str]] = ["category_code", "code", "name"]
+    notification_emails: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["category_code", "code", "name", "notification_emails"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,7 +85,8 @@ class CreateOrganizationRequest(BaseModel):
         _obj = cls.model_validate({
             "category_code": obj.get("category_code"),
             "code": obj.get("code"),
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "notification_emails": obj.get("notification_emails")
         })
         return _obj
 

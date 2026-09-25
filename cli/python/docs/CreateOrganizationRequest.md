@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **category_code** | **str** |  | 
 **code** | **str** |  | 
 **name** | **str** |  | 
+**notification_emails** | **str** |  | [optional] 
 
 ## Example
 

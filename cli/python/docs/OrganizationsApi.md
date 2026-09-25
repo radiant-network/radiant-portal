@@ -183,8 +183,9 @@ Name | Type | Description  | Notes
 
 Update an organization
 
-Updates an organization's name in the tenant. Requires the `can_manage_org` action.
-Code and category are immutable, so only the name can change.
+Replaces an organization's name and notification emails (comma-separated) in the
+tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank
+`notification_emails` clears the list.
 
 ### Example
 

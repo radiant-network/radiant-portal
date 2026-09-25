@@ -1018,6 +1018,8 @@ components:
           type: string
         name:
           type: string
+        notification_emails:
+          type: string
       required:
       - category_code
       - code
@@ -2207,6 +2209,8 @@ components:
           type: string
         name:
           type: string
+        notification_emails:
+          type: string
       type: object
     OutputDocumentBatch:
       properties:
@@ -3087,10 +3091,13 @@ components:
       - content
       type: object
     UpdateOrganizationRequest:
-      description: Payload to update an organization. Only the name is editable; code
-        and category are immutable after creation.
+      description: Payload to update an organization. Code and category are immutable
+        after creation. notification_emails is comma-separated and replaced as a whole;
+        blank clears it.
       properties:
         name:
+          type: string
+        notification_emails:
           type: string
       required:
       - name
@@ -8101,8 +8108,9 @@ paths:
   /{tenant}/organizations/{code}:
     put:
       description: |-
-        Updates an organization's name in the tenant. Requires the `can_manage_org` action.
-        Code and category are immutable, so only the name can change.
+        Replaces an organization's name and notification emails (comma-separated) in the
+        tenant. Requires the `can_manage_org` action. Code and category are immutable; a blank
+        `notification_emails` clears the list.
       operationId: updateOrganization
       parameters:
       - description: Tenant code

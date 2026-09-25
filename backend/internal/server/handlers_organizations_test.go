@@ -33,12 +33,13 @@ func (m *mockOrganizationCreator) CreateOrganization(_ context.Context, org type
 }
 
 type mockOrganizationUpdater struct {
-	err                         error
-	gotTenant, gotCode, gotName string
+	err                error
+	gotTenant, gotCode string
+	got                types.UpdateOrganizationRequest
 }
 
-func (m *mockOrganizationUpdater) UpdateOrganization(_ context.Context, tenantCode, code, name string) error {
-	m.gotTenant, m.gotCode, m.gotName = tenantCode, code, name
+func (m *mockOrganizationUpdater) UpdateOrganization(_ context.Context, tenantCode, code string, req types.UpdateOrganizationRequest) error {
+	m.gotTenant, m.gotCode, m.got = tenantCode, code, req
 	return m.err
 }
 
@@ -54,14 +55,14 @@ func serveListOrganizations(repo organizationsReader) *httptest.ResponseRecorder
 func Test_ListOrganizationsHandler(t *testing.T) {
 	repo := &mockOrganizationsReader{organizations: []types.OrganizationResponse{
 		{Code: "CHOP", Name: "Children Hospital of Philadelphia", CategoryCode: "healthcare_provider", CategoryName: "Healthcare Provider"},
-		{Code: "CQGC", Name: "Quebec Clinical Genomic Center", CategoryCode: "sequencing_center", CategoryName: "Sequencing Center"},
+		{Code: "CQGC", Name: "Quebec Clinical Genomic Center", CategoryCode: "sequencing_center", CategoryName: "Sequencing Center", NotificationEmails: "a@cqgc.invalid,b@cqgc.invalid"},
 	}}
 	w := serveListOrganizations(repo)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[
-		{"code":"CHOP","name":"Children Hospital of Philadelphia","category_code":"healthcare_provider","category_name":"Healthcare Provider"},
-		{"code":"CQGC","name":"Quebec Clinical Genomic Center","category_code":"sequencing_center","category_name":"Sequencing Center"}
+		{"code":"CHOP","name":"Children Hospital of Philadelphia","category_code":"healthcare_provider","category_name":"Healthcare Provider","notification_emails":""},
+		{"code":"CQGC","name":"Quebec Clinical Genomic Center","category_code":"sequencing_center","category_name":"Sequencing Center","notification_emails":"a@cqgc.invalid,b@cqgc.invalid"}
 	]`, w.Body.String())
 }
 
@@ -100,6 +101,22 @@ func Test_PostOrganizationHandler(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.Empty(t, w.Body.String())
 	assert.Equal(t, types.Organization{Code: "chop2", Name: "CHOP 2", CategoryCode: "healthcare_provider", TenantCode: "radiant"}, repo.got)
+}
+
+func Test_PostOrganizationHandler_WithNotificationEmails(t *testing.T) {
+	repo := &mockOrganizationCreator{}
+	w := servePostOrganization(repo, `{"code":"ldm2","name":"Lab 2","category_code":"diagnostic_laboratory","notification_emails":"a@lab.invalid, b@lab.invalid"}`)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, "a@lab.invalid, b@lab.invalid", *repo.got.NotificationEmails)
+}
+
+func Test_PostOrganizationHandler_InvalidNotificationEmail(t *testing.T) {
+	repo := &mockOrganizationCreator{}
+	w := servePostOrganization(repo, `{"code":"ldm2","name":"Lab 2","category_code":"diagnostic_laboratory","notification_emails":"not-an-email"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Empty(t, repo.got.Code, "invalid payload must not reach the repository")
 }
 
 func Test_PostOrganizationHandler_InvalidCode(t *testing.T) {
@@ -152,7 +169,24 @@ func Test_PutOrganizationHandler(t *testing.T) {
 	assert.Empty(t, w.Body.String())
 	assert.Equal(t, "radiant", repo.gotTenant)
 	assert.Equal(t, "CHOP", repo.gotCode)
-	assert.Equal(t, "New Name", repo.gotName)
+	assert.Equal(t, "New Name", repo.got.Name)
+	assert.Equal(t, "", repo.got.NotificationEmails)
+}
+
+func Test_PutOrganizationHandler_NotificationEmails(t *testing.T) {
+	repo := &mockOrganizationUpdater{}
+	w := servePutOrganization(repo, "LDM-CHUSJ", `{"name":"Lab","notification_emails":"a@lab.invalid,b@lab.invalid"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "a@lab.invalid,b@lab.invalid", repo.got.NotificationEmails)
+}
+
+func Test_PutOrganizationHandler_InvalidNotificationEmail(t *testing.T) {
+	repo := &mockOrganizationUpdater{}
+	w := servePutOrganization(repo, "LDM-CHUSJ", `{"name":"Lab","notification_emails":"Lab <a@lab.invalid>"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Empty(t, repo.gotCode, "invalid payload must not reach the repository")
 }
 
 func Test_PutOrganizationHandler_MissingName(t *testing.T) {

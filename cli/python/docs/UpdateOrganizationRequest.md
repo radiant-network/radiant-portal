@@ -1,12 +1,13 @@
 # UpdateOrganizationRequest
 
-Payload to update an organization. Only the name is editable; code and category are immutable after creation.
+Payload to update an organization. Code and category are immutable after creation. notification_emails is comma-separated and replaced as a whole; blank clears it.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** |  | 
+**notification_emails** | **str** |  | [optional] 
 
 ## Example
 

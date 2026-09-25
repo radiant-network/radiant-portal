@@ -69,14 +69,17 @@ func (r *OrganizationRepository) ExistingOrgCodes(ctx context.Context, tenantCod
 	return existing, nil
 }
 
-// UpdateOrganization updates an organization's name within the tenant. Code and category are
-// immutable, so only name is written. A code that does not exist in the tenant (or belongs to
-// another tenant) affects no rows and maps to types.ErrOrganizationNotFound → 404.
-func (r *OrganizationRepository) UpdateOrganization(ctx context.Context, tenantCode, code, name string) error {
+// UpdateOrganization replaces the editable fields of an organization within the tenant (code and
+// category are immutable). A code that does not exist in the tenant (or belongs to another tenant)
+// affects no rows and maps to types.ErrOrganizationNotFound → 404.
+func (r *OrganizationRepository) UpdateOrganization(ctx context.Context, tenantCode, code string, req types.UpdateOrganizationRequest) error {
 	tx := r.db.WithContext(ctx).
 		Table(types.OrganizationTable.Name).
 		Where("code = ? AND tenant_code = ?", code, tenantCode).
-		Update("name", name)
+		Updates(map[string]any{
+			"name":                req.Name,
+			"notification_emails": types.NotificationEmailsColumn(req.NotificationEmails),
+		})
 	if tx.Error != nil {
 		return fmt.Errorf("error updating organization %q: %w", code, tx.Error)
 	}
@@ -84,4 +87,31 @@ func (r *OrganizationRepository) UpdateOrganization(ctx context.Context, tenantC
 		return types.ErrOrganizationNotFound
 	}
 	return nil
+}
+
+// NotificationEmailsByOrg returns the notification list of each requested organization, keyed by
+// code. Organizations without a list (or unknown in the tenant) are absent from the map.
+func (r *OrganizationRepository) NotificationEmailsByOrg(ctx context.Context, tenantCode string, codes []string) (map[string][]string, error) {
+	byOrg := map[string][]string{}
+	if len(codes) == 0 {
+		return byOrg, nil
+	}
+	var rows []struct {
+		Code               string
+		NotificationEmails *string
+	}
+	err := r.db.WithContext(ctx).
+		Table(types.OrganizationTable.Name).
+		Select("code, notification_emails").
+		Where("tenant_code = ? AND code IN ? AND notification_emails IS NOT NULL", tenantCode, codes).
+		Scan(&rows).Error
+	if err != nil {
+		return nil, fmt.Errorf("error reading notification emails of organizations %v in tenant %q: %w", codes, tenantCode, err)
+	}
+	for _, row := range rows {
+		if emails := types.SplitNotificationEmails(row.NotificationEmails); len(emails) > 0 {
+			byOrg[row.Code] = emails
+		}
+	}
+	return byOrg, nil
 }

@@ -18,16 +18,17 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
 class UpdateOrganizationRequest(BaseModel):
     """
-    Payload to update an organization. Only the name is editable; code and category are immutable after creation.
+    Payload to update an organization. Code and category are immutable after creation. notification_emails is comma-separated and replaced as a whole; blank clears it.
     """ # noqa: E501
     name: StrictStr
-    __properties: ClassVar[List[str]] = ["name"]
+    notification_emails: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["name", "notification_emails"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -80,7 +81,8 @@ class UpdateOrganizationRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "notification_emails": obj.get("notification_emails")
         })
         return _obj
 
