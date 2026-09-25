@@ -7,7 +7,7 @@ const PATIENT_GERMLINE_VALUE = '3';
 const CASE_SOMATIC_VALUE = '1008';
 const REL_PROBAND_VALUE = 'proband';
 const CASE_OTHER_LAB_VALUE = CASE_SOMATIC_VALUE;
-const ETL_DATE_VALUE = '2026-09-21';
+const ETL_DATE_VALUE = '2026-09-24';
 
 export const data = {
   case: {
