@@ -33,7 +33,9 @@ const withTenants =
   Story => {
     const [tenant, setTenant] = useState(initialTenant);
     return (
-      <TenantContext.Provider value={{ tenant, tenants, setTenant: async code => setTenant(code) }}>
+      <TenantContext.Provider
+        value={{ tenant, tenants, setTenant: async code => setTenant(code), refreshPermissions: async () => {} }}
+      >
         <Story />
       </TenantContext.Provider>
     );

@@ -1,8 +1,8 @@
 import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { SavedFilterType } from '@/api/api';
-import StatusBadge, { type Status } from '@/components/base/badges/status-badge';
+import { CaseStatus, SavedFilterType } from '@/api/api';
+import StatusBadge from '@/components/base/badges/status-badge';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
@@ -72,20 +72,8 @@ export const Default: Story = {
   render: _args => (
     <StorySection title="Default">
       <div className="flex gap-2">
-        {[
-          'draft',
-          'submitted',
-          'processing',
-          'in_progress',
-          'in_review',
-          'completed',
-          'resolved',
-          'unresolved',
-          'inconclusive',
-          'reopened',
-          'revoked',
-        ].map((status, index) => (
-          <StatusBadge key={index} status={status as Status} />
+        {Object.values(CaseStatus).map(status => (
+          <StatusBadge key={status} status={status} />
         ))}
       </div>
     </StorySection>

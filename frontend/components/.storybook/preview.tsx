@@ -112,7 +112,14 @@ const preview: Preview = {
         <ThemeProvider>
           <TooltipProvider>
             <AlertDialogProvider>
-              <TenantContext.Provider value={{ tenant: STORYBOOK_TENANT, tenants: [], setTenant: async () => {} }}>
+              <TenantContext.Provider
+                value={{
+                  tenant: STORYBOOK_TENANT,
+                  tenants: [],
+                  setTenant: async () => {},
+                  refreshPermissions: async () => {},
+                }}
+              >
                 <BetaFeatureProvider>
                   <Story />
                 </BetaFeatureProvider>

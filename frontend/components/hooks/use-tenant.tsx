@@ -12,12 +12,14 @@ export type TenantContextValue = {
   tenant: string;
   tenants: TenantMembership[];
   setTenant: (code: string) => Promise<void>;
+  refreshPermissions: () => Promise<unknown>;
 };
 
 export const TenantContext = createContext<TenantContextValue>({
   tenant: '',
   tenants: [],
   setTenant: async () => {},
+  refreshPermissions: async () => {},
 });
 
 export function useTenant() {
@@ -59,6 +61,7 @@ export const ORG_ACTIONS = {
   interpretVariant: 'can_interpret_variant',
   commentVariant: 'can_comment_variant',
   flagVariant: 'can_flag_variant',
+  editCase: 'can_edit_case',
 } as const;
 
 /** Org codes where the caller holds each org-scoped action, in the currently selected tenant. */
@@ -87,7 +90,11 @@ async function fetchTenantPreference(): Promise<UserPreference> {
 }
 
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const { data: tenants, isLoading: tenantsLoading } = useSWR('auth-me-tenants', fetchTenants, {
+  const {
+    data: tenants,
+    isLoading: tenantsLoading,
+    mutate: refreshPermissions,
+  } = useSWR('auth-me-tenants', fetchTenants, {
     revalidateOnFocus: false,
     shouldRetryOnError: false,
   });
@@ -131,6 +138,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <TenantContext.Provider value={{ tenant, tenants: tenants ?? [], setTenant }}>{children}</TenantContext.Provider>
+    <TenantContext.Provider value={{ tenant, tenants: tenants ?? [], setTenant, refreshPermissions }}>
+      {children}
+    </TenantContext.Provider>
   );
 }

@@ -15,7 +15,7 @@ const badgeVariants = tv({
   variants: {
     clickable: {
       true: {
-        base: 'hover:cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-ring',
+        base: 'hover:cursor-pointer focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
       },
     },
     showCount: {

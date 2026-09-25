@@ -1,0 +1,167 @@
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
+import useSWRMutation from 'swr/mutation';
+
+import { type CaseStatus, PatchCaseStatusCodeEnum } from '@/api/api';
+import StatusBadge, { statusColors } from '@/components/base/badges/status-badge';
+import { type BadgeProps, badgeVariants } from '@/components/base/shadcn/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/base/shadcn/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
+import { caseApi } from '@/utils/api';
+
+const USER_APPLIED_STATUSES: readonly CaseStatus[] = Object.values(PatchCaseStatusCodeEnum);
+
+// System-applied statuses are whatever CaseStatus holds beyond the patchable enum.
+function isUserAppliedStatus(status: CaseStatus): status is PatchCaseStatusCodeEnum {
+  return USER_APPLIED_STATUSES.includes(status);
+}
+
+const MENU_ENTRIES: { status: PatchCaseStatusCodeEnum; submenu?: PatchCaseStatusCodeEnum[] }[] = [
+  { status: PatchCaseStatusCodeEnum.InProgress },
+  { status: PatchCaseStatusCodeEnum.InReview },
+  {
+    status: PatchCaseStatusCodeEnum.Completed,
+    submenu: [
+      PatchCaseStatusCodeEnum.Completed,
+      PatchCaseStatusCodeEnum.Resolved,
+      PatchCaseStatusCodeEnum.Unresolved,
+      PatchCaseStatusCodeEnum.Inconclusive,
+    ],
+  },
+  { status: PatchCaseStatusCodeEnum.Revoked },
+  { status: PatchCaseStatusCodeEnum.Reopened },
+];
+
+type PatchStatusInput = {
+  caseId: number;
+  status: PatchCaseStatusCodeEnum;
+};
+
+async function patchCaseStatus(_url: string, { arg }: { arg: PatchStatusInput }, tenant: string) {
+  const response = await caseApi.patchCase(tenant, arg.caseId, { status_code: arg.status });
+  return response.data;
+}
+
+export type CaseStatusDropdownProps = {
+  caseId: number;
+  status: CaseStatus;
+  canEdit?: boolean;
+  readOnlyTooltip?: ReactNode;
+  size?: BadgeProps['size'];
+  className?: string;
+  onSaved?: () => void;
+};
+
+function CaseStatusDropdown({
+  caseId,
+  status,
+  canEdit = true,
+  readOnlyTooltip,
+  size,
+  className,
+  onSaved,
+}: CaseStatusDropdownProps) {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const { trigger } = useSWRMutation(`patch-case-status-${caseId}`, (key: string, opts: { arg: PatchStatusInput }) =>
+    patchCaseStatus(key, opts, tenant),
+  );
+  const [currentStatus, setCurrentStatus] = useState<CaseStatus>(status);
+  const closedWithPointerRef = useRef(false);
+
+  // Table cells are recycled across rows: resync when the row underneath changes.
+  useEffect(() => {
+    setCurrentStatus(status);
+  }, [status, caseId]);
+
+  const label = (code: CaseStatus) => t(`case_exploration.status.${code}`, code);
+
+  function selectStatus(next: PatchCaseStatusCodeEnum) {
+    if (next === currentStatus) return;
+
+    const previous = currentStatus;
+    setCurrentStatus(next);
+    trigger({ caseId, status: next })
+      .then(() => onSaved?.())
+      .catch(() => {
+        setCurrentStatus(previous);
+        toast.error(t('case_status.error'));
+      });
+  }
+
+  if (!canEdit || !isUserAppliedStatus(currentStatus)) {
+    const badge = <StatusBadge status={currentStatus} size={size} withIcon={false} className={className} />;
+    if (!readOnlyTooltip) return badge;
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badge}</TooltipTrigger>
+        <TooltipContent>{readOnlyTooltip}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            badgeVariants({ variant: statusColors[currentStatus] ?? 'neutral', clickable: true, size }).base(),
+            className,
+          )}
+        >
+          {label(currentStatus)}
+          <ChevronDown />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align="start"
+        onPointerUp={() => {
+          closedWithPointerRef.current = true;
+        }}
+        onCloseAutoFocus={event => {
+          if (closedWithPointerRef.current) event.preventDefault();
+          closedWithPointerRef.current = false;
+        }}
+      >
+        {MENU_ENTRIES.map(entry =>
+          entry.submenu ? (
+            <DropdownMenuSub key={entry.status}>
+              <DropdownMenuSubTrigger>{label(entry.status)}</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {entry.submenu.map(code => (
+                    <DropdownMenuItem key={code} onSelect={() => selectStatus(code)}>
+                      {label(code)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          ) : (
+            <DropdownMenuItem key={entry.status} onSelect={() => selectStatus(entry.status)}>
+              {label(entry.status)}
+            </DropdownMenuItem>
+          ),
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export default CaseStatusDropdown;

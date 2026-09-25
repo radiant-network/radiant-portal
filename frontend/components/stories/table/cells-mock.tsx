@@ -1,4 +1,4 @@
-import type { CaseEntity, Term, VepImpact } from '@/api/api';
+import type { CaseEntity, CaseStatus, Term, VepImpact } from '@/api/api';
 import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
@@ -10,7 +10,6 @@ import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
 import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/table/cells/occurrence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
-import type { Status } from '@/components/base/badges/status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
@@ -121,7 +120,7 @@ export const defaultColumnSettings = createColumnSettings([]);
 export type BaseCellMockData = {
   baseText?: string;
   link?: string;
-  status_code?: Status;
+  status_code?: CaseStatus;
   badge?: string;
   badge_list?: string[];
   date?: string;
@@ -878,6 +877,7 @@ function WithInterpretPermission({ granted, children }: { granted: boolean; chil
           },
         ],
         setTenant: async () => {},
+        refreshPermissions: async () => {},
       }}
     >
       <CaseEntityContext.Provider value={{ diagnosis_lab_code: STORYBOOK_DIAGNOSIS_LAB } as CaseEntity}>
