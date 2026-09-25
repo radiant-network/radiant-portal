@@ -8002,7 +8002,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
          * @summary List the users who may be assigned a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -8448,7 +8448,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
          * @summary List the users who may be assigned a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -8634,7 +8634,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+         * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
          * @summary List the users who may be assigned a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -8811,7 +8811,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+     * Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case\'s diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
      * @summary List the users who may be assigned a case
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID

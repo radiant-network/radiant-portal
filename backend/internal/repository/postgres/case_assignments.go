@@ -68,12 +68,19 @@ func (r *CaseAssignmentsRepository) ListForCases(ctx context.Context, caseIDs []
 //
 // EXISTS rather than a join, so one line per user is structural instead of something DISTINCT
 // has to repair afterwards.
-func (r *CaseAssignmentsRepository) EligibleAssignees(ctx context.Context, tenantCode, orgCode string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
+func (r *CaseAssignmentsRepository) EligibleAssignees(ctx context.Context, tenantCode, orgCode, callerID string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
 	candidates := []types.CaseAssignee{}
+	// The caller sorts first when they are eligible, so "assign it to me" is the top row. Done
+	// in SQL rather than by reordering the result: the list is paginated, and a caller whose
+	// name falls past the page limit would otherwise be missing from the first page entirely
+	// instead of leading it. user_id breaks the remaining ties so a page stays stable across
+	// limit/offset calls.
 	tx := eligibleAt(r.db.WithContext(ctx), tenantCode, orgCode).
 		Select("u.user_id, u.first_name, u.last_name, u.email").
-		// user_id breaks ties so a page stays stable across limit/offset calls.
-		Order("u.last_name, u.first_name, u.user_id")
+		Order(clause.OrderBy{Expression: clause.Expr{
+			SQL:  "CASE WHEN u.user_id = ? THEN 0 ELSE 1 END, u.last_name, u.first_name, u.user_id",
+			Vars: []any{callerID},
+		}})
 	tx = withNameOrEmailSearch(tx, query.Search)
 	utils.AddPagination(tx, query.Pagination)
 

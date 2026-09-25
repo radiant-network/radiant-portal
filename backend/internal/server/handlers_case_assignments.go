@@ -8,10 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 type assignmentCandidatesReader interface {
-	EligibleAssignees(ctx context.Context, tenantCode, orgCode string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error)
+	EligibleAssignees(ctx context.Context, tenantCode, orgCode, callerID string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error)
 }
 
 type caseLabReader interface {
@@ -28,7 +29,8 @@ type caseAssignmentsStore interface {
 // @Description Retrieve the users eligible to be assigned the case: those holding the
 // @Description permission to interpret variants at the case's diagnosis lab. Requires
 // @Description permission to edit the case, since the picker is only of use to a caller who
-// @Description can then act on the assignment.
+// @Description can then act on the assignment. The caller comes first in the list when they are
+// @Description themselves eligible, so assigning a case to oneself is the top row.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -46,11 +48,17 @@ type caseAssignmentsStore interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/assignment_candidates [get]
-func ListCaseAssignmentCandidatesHandler(repo assignmentCandidatesReader, labs caseLabReader) gin.HandlerFunc {
+func ListCaseAssignmentCandidatesHandler(repo assignmentCandidatesReader, labs caseLabReader, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant, err := GetTenant(c)
 		if err != nil {
 			HandleError(c, err)
+			return
+		}
+
+		callerID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -81,7 +89,7 @@ func ListCaseAssignmentCandidatesHandler(repo assignmentCandidatesReader, labs c
 			return
 		}
 
-		candidates, err := repo.EligibleAssignees(c.Request.Context(), *tenant, labsForCase[0], *query)
+		candidates, err := repo.EligibleAssignees(c.Request.Context(), *tenant, labsForCase[0], *callerID, *query)
 		if err != nil {
 			HandleError(c, err)
 			return

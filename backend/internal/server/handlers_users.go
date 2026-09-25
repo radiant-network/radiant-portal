@@ -120,7 +120,7 @@ func PostUserHandler(svc userCreator, auth utils.Auth) gin.HandlerFunc {
 		}
 		actor, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleError(c, err)
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -183,7 +183,7 @@ func PutUserHandler(svc userUpdater, auth utils.Auth) gin.HandlerFunc {
 		}
 		actor, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleError(c, err)
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -235,7 +235,7 @@ func DeleteUserHandler(svc userRemover, auth utils.Auth) gin.HandlerFunc {
 		}
 		actor, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleError(c, err)
+			HandleUnauthorizedError(c)
 			return
 		}
 

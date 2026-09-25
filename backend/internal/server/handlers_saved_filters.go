@@ -26,6 +26,7 @@ type savedFiltersStore interface {
 // @Param saved_filter_id path string true "Saved Filter ID"
 // @Produce json
 // @Success 200 {object} types.SavedFilter
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -65,7 +66,7 @@ func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 		savedFilterType := c.Query("type")
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -90,6 +91,7 @@ func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 // @Produce json
 // @Success 201 {object} types.SavedFilter
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -108,7 +110,7 @@ func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 		savedFilter, err := repo.CreateSavedFilter(c.Request.Context(), body, *userId)
@@ -132,6 +134,7 @@ func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 // @Produce json
 // @Success 200 {object} types.SavedFilter
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -150,7 +153,7 @@ func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerF
 		}
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 		savedFilterId := c.Param("saved_filter_id")
@@ -181,6 +184,7 @@ func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerF
 // @Param saved_filter_id path string true "Saved Filter ID"
 // @Produce json
 // @Success 204
+// @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -189,7 +193,7 @@ func DeleteSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handl
 	return func(c *gin.Context) {
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 		savedFilterId := c.Param("saved_filter_id")

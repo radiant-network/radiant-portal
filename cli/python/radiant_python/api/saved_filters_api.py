@@ -96,6 +96,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -165,6 +166,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -234,6 +236,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -363,6 +366,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -432,6 +436,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -501,6 +506,7 @@ class SavedFiltersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -903,6 +909,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -973,6 +980,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1043,6 +1051,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1190,6 +1199,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1264,6 +1274,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1338,6 +1349,7 @@ class SavedFiltersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SavedFilter",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }

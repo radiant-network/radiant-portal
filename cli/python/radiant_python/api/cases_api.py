@@ -1863,7 +1863,7 @@ class CasesApi:
     ) -> List[CaseAssignee]:
         """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -1955,7 +1955,7 @@ class CasesApi:
     ) -> ApiResponse[List[CaseAssignee]]:
         """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -2047,7 +2047,7 @@ class CasesApi:
     ) -> RESTResponseType:
         """List the users who may be assigned a case
 
-        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment.
+        Retrieve the users eligible to be assigned the case: those holding the permission to interpret variants at the case's diagnosis lab. Requires permission to edit the case, since the picker is only of use to a caller who can then act on the assignment. The caller comes first in the list when they are themselves eligible, so assigning a case to oneself is the top row.
 
         :param tenant: Tenant code (required)
         :type tenant: str

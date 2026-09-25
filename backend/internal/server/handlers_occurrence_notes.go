@@ -59,7 +59,7 @@ func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.H
 		}
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -125,7 +125,7 @@ func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.Ha
 		}
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 
@@ -174,7 +174,7 @@ func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin
 
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
-			HandleNotFoundError(c, "user id")
+			HandleUnauthorizedError(c)
 			return
 		}
 

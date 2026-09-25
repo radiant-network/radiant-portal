@@ -93,6 +93,7 @@ class UserPreferencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -162,6 +163,7 @@ class UserPreferencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -231,6 +233,7 @@ class UserPreferencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -365,6 +368,7 @@ class UserPreferencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -439,6 +443,7 @@ class UserPreferencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -513,6 +518,7 @@ class UserPreferencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserPreference",
             '400': "ApiError",
+            '401': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
