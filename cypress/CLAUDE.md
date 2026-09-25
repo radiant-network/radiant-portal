@@ -83,7 +83,7 @@ Shared POM utilities in `pom/shared/`:
 | `cy.login()` | OAuth login via Keycloak (with session caching) |
 | `cy.logout()` | Logout |
 | `cy.visitCasesPage()`, `cy.visitFilesPage()`, etc. | Navigate to specific pages |
-| `cy.visitAndIntercept(url, method, routeAlias)` | Navigate and set up API intercept |
+| `cy.visitAndIntercept(url, method, routeAlias)` | Navigate and set up API intercept. `url` is an app path without the tenant prefix (e.g. `/case`); the `api_tenant` segment is prepended automatically |
 | `cy.clickAndWait(selector)` | Click then wait for load spinner to disappear |
 | `cy.waitWhileLoad(ms)` | Poll for `.animate-pulse` disappearance |
 | `cy.sortTableAndIntercept(column, routeAlias)` | Click column header + wait for API |
@@ -238,7 +238,7 @@ shouldShowField(fieldId: string, dataVariant: any) {
 
 - Build hrefs via `getUrlLink(fieldId, data)` in `pom/shared/Utils.ts` rather than hardcoding URLs in the POM. Add a new `case` to `getUrlLink` for any new link source — keep all variant-URL construction in one switch.
 - Same `fieldId` convention as `shouldShowField`: snake_case key that matches the data field.
-- Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place.
+- Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place. Prefix them with `/${Cypress.expose('api_tenant')}`: every protected route carries a tenant segment, so the rendered `href` is `/radiant/variants/entity/…`.
 
 ### Source code instrumentation
 
