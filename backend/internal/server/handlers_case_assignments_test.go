@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,11 +19,13 @@ type mockCandidatesRepository struct {
 	labs       []string
 	err        error
 	gotOrg     string
+	gotCaller  string
 	gotQuery   types.ListAssignmentCandidatesQuery
 }
 
-func (m *mockCandidatesRepository) EligibleAssignees(_ context.Context, _, orgCode string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
+func (m *mockCandidatesRepository) EligibleAssignees(_ context.Context, _, orgCode, callerID string, query types.ListAssignmentCandidatesQuery) ([]types.CaseAssignee, error) {
 	m.gotOrg = orgCode
+	m.gotCaller = callerID
 	m.gotQuery = query
 	if m.err != nil {
 		return nil, m.err
@@ -37,10 +40,13 @@ func (m *mockCandidatesRepository) OrgsForCase(_ context.Context, _ string, _ in
 	return m.labs, nil
 }
 
+// callerUserID stands in for the authenticated user the handler must hand to the repository.
+const callerUserID = "caller-1"
+
 func candidatesRequest(repo *mockCandidatesRepository, path string) *httptest.ResponseRecorder {
 	router := gin.Default()
 	router.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
-	router.GET("/:tenant/cases/:case_id/assignment_candidates", ListCaseAssignmentCandidatesHandler(repo, repo))
+	router.GET("/:tenant/cases/:case_id/assignment_candidates", ListCaseAssignmentCandidatesHandler(repo, repo, &testutils.MockAuth{Id: callerUserID}))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/"+path, nil)
 	w := httptest.NewRecorder()
@@ -243,4 +249,14 @@ func Test_PutCaseAssignmentsHandler_RepositoryError(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+// The picker puts the caller first, so the handler has to tell the repository who is asking.
+func Test_ListCaseAssignmentCandidatesHandler_PassesTheCallerToTheRepository(t *testing.T) {
+	repo := &mockCandidatesRepository{labs: []string{"CQGC"}}
+
+	w := candidatesRequest(repo, "12/assignment_candidates")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, callerUserID, repo.gotCaller)
 }

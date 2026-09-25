@@ -29,7 +29,7 @@ func candidatesRouter(env *testutils.Env, userID string) *gin.Engine {
 	tenantRoutes.Use(server.RequireTenantAccess(auth, authRepo))
 	tenantRoutes.GET("/cases/:case_id/assignment_candidates",
 		server.RequireActionAt(auth, authRepo, types.ActionEditCase, server.OrgFromCaseParam(authRepo)),
-		server.ListCaseAssignmentCandidatesHandler(repo, authRepo))
+		server.ListCaseAssignmentCandidatesHandler(repo, authRepo, auth))
 	return router
 }
 
@@ -50,9 +50,10 @@ func assertAssignmentCandidates(t *testing.T, path string, expectedStatus int, a
 // is not a person.
 func Test_ListCaseAssignmentCandidates_AtTheCaseLab(t *testing.T) {
 	assertAssignmentCandidates(t, "1/assignment_candidates", http.StatusOK, func(t *testing.T, body string) {
+		// The requests run as wendy, so she leads despite Walsh sorting after Cohen.
 		assert.JSONEq(t, `[
-			{"user_id":"b6e6d0dd-7aa5-4018-ae03-1f5076801360","first_name":"Carol","last_name":"Cohen","email":"carol@test.authz"},
-			{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"}
+			{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"},
+			{"user_id":"b6e6d0dd-7aa5-4018-ae03-1f5076801360","first_name":"Carol","last_name":"Cohen","email":"carol@test.authz"}
 		]`, body)
 	})
 }

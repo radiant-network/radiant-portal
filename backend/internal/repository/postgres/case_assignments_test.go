@@ -107,7 +107,7 @@ func Test_EligibleAssignees_IncludesInterpretGrantsAtThatOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -123,7 +123,7 @@ func Test_EligibleAssignees_ExcludesRoleWithoutInterpret(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		assert.NotContains(t, candidateIDs(candidates), gabeID, "data_manager holds can_ingest_data, not can_interpret_variant")
@@ -134,7 +134,7 @@ func Test_EligibleAssignees_ExcludesGrantsAtAnotherOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -148,7 +148,7 @@ func Test_EligibleAssignees_ExcludesTenantScopedOnlyRoles(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -163,7 +163,7 @@ func Test_EligibleAssignees_ExcludesTenantWideGrantOfAnOrgScopedRole(t *testing.
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHUSJ", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHUSJ", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -176,7 +176,7 @@ func Test_EligibleAssignees_ExcludesSystemAccounts(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		// The batch client has no email, so it is not a person.
@@ -189,7 +189,7 @@ func Test_EligibleAssignees_ScopedToTenant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), "tenant_b", "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), "tenant_b", "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -202,7 +202,7 @@ func Test_EligibleAssignees_OrderedByName(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -216,7 +216,7 @@ func Test_EligibleAssignees_SearchMatchesEmail(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates("wendy@"))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates("wendy@"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{wendyID}, candidateIDs(candidates))
@@ -227,7 +227,7 @@ func Test_EligibleAssignees_SearchMatchesLastName(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates("Wal"))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates("Wal"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{wendyID}, candidateIDs(candidates))
@@ -243,7 +243,7 @@ func Test_EligibleAssignees_UnknownOrgStillMatchesWildcardGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "NOPE", allCandidates(""))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "NOPE", ghostID, allCandidates(""))
 
 		assert.NoError(t, err)
 		ids := candidateIDs(candidates)
@@ -256,7 +256,7 @@ func Test_EligibleAssignees_ReturnsIdentityAttributes(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
-		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", allCandidates("wendy@"))
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", ghostID, allCandidates("wendy@"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, []types.CaseAssignee{
@@ -409,5 +409,65 @@ func Test_EligibleAssigneeIDs_NoUsers(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Empty(t, eligible)
+	})
+}
+
+// At CHOP the eligible users sort Adams, Cohen, Walsh. The caller jumps the queue so that
+// assigning a case to oneself is the first row of the picker.
+func Test_EligibleAssignees_CallerComesFirst(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", wendyID, allCandidates(""))
+
+		assert.NoError(t, err)
+		ids := candidateIDs(candidates)
+		require.NotEmpty(t, ids)
+		assert.Equal(t, wendyID, ids[0], "the caller leads even though Walsh sorts last")
+		assert.Less(t, slices.Index(ids, aliceID), slices.Index(ids, carolID), "the rest keep their order")
+	})
+}
+
+// A caller who cannot be assigned the case is not inserted into the list by being the caller.
+func Test_EligibleAssignees_IneligibleCallerIsNotListed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		// dan is a geneticist at CHUSJ only, so he is no candidate at CHOP.
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", danID, allCandidates(""))
+
+		assert.NoError(t, err)
+		ids := candidateIDs(candidates)
+		assert.NotContains(t, ids, danID)
+		assert.Equal(t, aliceID, ids[0], "ordering falls back to name")
+	})
+}
+
+// The reason the caller is ordered in SQL rather than moved to the front of the result: with a
+// page smaller than the candidate list, reordering after the fact would leave a caller who sorts
+// late out of the first page altogether instead of leading it.
+func Test_EligibleAssignees_CallerLeadsTheFirstPage(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		onePerPage := types.ListAssignmentCandidatesQuery{Pagination: &types.Pagination{Limit: 1}}
+
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", wendyID, onePerPage)
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{wendyID}, candidateIDs(candidates), "Walsh sorts last by name yet fills the single-row page")
+	})
+}
+
+// Ordering the caller first must not exempt them from the search: a caller who does not match
+// the term stays out of the results rather than being surfaced at the top of them.
+func Test_EligibleAssignees_CallerNotSurfacedPastTheSearch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+
+		// "Coh" matches Cohen only; wendy is the caller and matches nothing.
+		candidates, err := repo.EligibleAssignees(t.Context(), types.DefaultTenantCode, "CHOP", wendyID, allCandidates("Coh"))
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{carolID}, candidateIDs(candidates))
 	})
 }

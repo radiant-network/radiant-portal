@@ -4045,7 +4045,8 @@ paths:
         Retrieve the users eligible to be assigned the case: those holding the
         permission to interpret variants at the case's diagnosis lab. Requires
         permission to edit the case, since the picker is only of use to a caller who
-        can then act on the assignment.
+        can then act on the assignment. The caller comes first in the list when they are
+        themselves eligible, so assigning a case to oneself is the top row.
       operationId: listCaseAssignmentCandidates
       parameters:
       - description: Tenant code
