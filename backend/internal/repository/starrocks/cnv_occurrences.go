@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -49,11 +50,24 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
 	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
 	// row per occurrence, so filtering on them beats a second scan of the federated tables.
-	if userQuery != nil && userQuery.WithNote() {
-		tx = tx.Where("note.occurrence_id IS NOT NULL")
-	}
-	if userQuery != nil && len(userQuery.WithFlag()) > 0 {
-		tx = tx.Where("flag.flag_type IN (?)", userQuery.WithFlag())
+	if userQuery != nil {
+		var conditions []string
+		var args []any
+		if userQuery.WithNote() {
+			conditions = append(conditions, "note.occurrence_id IS NOT NULL")
+		}
+		if flagTypes := userQuery.WithFlag(); len(flagTypes) > 0 {
+			conditions = append(conditions, "flag.flag_type IN (?)")
+			args = append(args, flagTypes)
+		}
+		if userQuery.WithInterpretation() {
+			// A CNV occurrence cannot carry an interpretation — same false-rather-than-absent
+			// reasoning as in keepOccurrencesWithAnyAnnotation.
+			conditions = append(conditions, "false")
+		}
+		if len(conditions) > 0 {
+			tx = tx.Where("("+strings.Join(conditions, " OR ")+")", args...)
+		}
 	}
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by cnv_id to avoid duplicates when joining with gene panels tables
@@ -107,13 +121,7 @@ func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table,
 			return 0, fmt.Errorf("error during query preparation %w", err)
 		}
 
-		if query != nil && query.WithNote() {
-			tx = keepOccurrencesWithNote(cnvTable, "cnv_id", caseId, seqId, tx)
-		}
-
-		if query != nil && len(query.WithFlag()) > 0 {
-			tx = keepOccurrencesWithFlag(cnvTable, "cnv_id", query.WithFlag(), caseId, seqId, tx)
-		}
+		tx = keepOccurrencesWithAnyAnnotation(cnvTable, "cnv_id", caseId, seqId, query, tx)
 
 		if query != nil && query.Filters() != nil && query.HasFieldFromTables(types.GenePanelsTables...) {
 			tx = tx.Distinct(fmt.Sprintf("%s.cnv_id", cnvTable.Alias))

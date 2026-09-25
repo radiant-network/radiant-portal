@@ -941,3 +941,129 @@ func Test_Germline_SNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged
 		assert.EqualValues(t, 2, count.Count)
 	})
 }
+
+func Test_Germline_SNV_GetOccurrences_NoteAndFlagFilters_Are_Ored(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       5,
+			OccurrenceID: "1000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		_, err = flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       5,
+			OccurrenceID: "2000",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		noted, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 5, noted)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+		}
+
+		starred, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 5, starred)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "2000", occurrences[0].LocusId)
+		}
+
+		// No occurrence carries both, so an AND would keep none.
+		notedOrStarred, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithNoteFilter(true), types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 5, notedOrStarred)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 2)
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_NoteAndFlagFilters_Are_Ored(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       5,
+			OccurrenceID: "1000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		_, err = flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       5,
+			OccurrenceID: "2000",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		notedOrStarred, err := types.NewOccurrenceCountQueryFromSqon(nil, types.GermlineSNVOccurrencesFields, types.WithNoteFilter(true), types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 1, 5, notedOrStarred)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 2, count.FilteredCount)
+		assert.EqualValues(t, 2, count.Count)
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_InterpretationAndFlagFilters_Are_Ored(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_germline (sequencing_id, case_id, locus_id, transcript_id, condition, classification, classification_criterias, transmission_modes, updated_at, tenant_code)
+			VALUES ('1', '2', '2000', 'T001', 'MONDO:0000001', 'LA6668-3', 'PM1', 'autosomal_dominant_de_novo', '2025-05-23 14:57:36.0', ?)`, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+
+		_, err = flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       5,
+			OccurrenceID: "1000",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		interpreted, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 5, interpreted)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "2000", occurrences[0].LocusId)
+		}
+
+		// No occurrence carries both, so an AND would keep none.
+		interpretedOrStarred, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil, types.WithInterpretationFilter(true), types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 5, interpretedOrStarred)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 2)
+	})
+}
