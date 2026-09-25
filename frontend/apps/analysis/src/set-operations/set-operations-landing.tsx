@@ -48,6 +48,7 @@ function SetOperationsLanding({
             <Trans
               i18nKey="analysis.set_operations.get_started_dashboard"
               components={{
+                // TODO: dead link, no /dashboard route exists; wrap with localPath once the page is known
                 dashboard: <AnchorLink size="sm" href="/dashboard" />,
               }}
             />

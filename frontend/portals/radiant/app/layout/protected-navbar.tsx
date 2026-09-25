@@ -5,6 +5,7 @@ import { ArchiveIcon, FolderIcon, SettingsIcon } from 'lucide-react';
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import type { MainNavbarEntry } from '@/components/base/navbar/main-navbar-types';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useCanAdministerTenant } from '@/components/hooks/use-tenant';
 
 type ProtectedNavbarProps = {
@@ -17,6 +18,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const canAdministerTenant = useCanAdministerTenant();
+  const localPath = useLocalPath();
 
   const adminLinks: MainNavbarEntry[] = canAdministerTenant
     ? [
@@ -24,9 +26,9 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
         {
           title: t('main_navbar.links.admin'),
           icon: <SettingsIcon />,
-          to: '/admin',
+          to: localPath('/admin'),
           as: Link,
-          active: pathname === '/admin',
+          active: pathname === localPath('/admin'),
         },
       ]
     : [];
@@ -45,16 +47,16 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
         {
           title: t('main_navbar.links.cases'),
           icon: <FolderIcon />,
-          to: '/case',
+          to: localPath('/case'),
           as: Link,
-          active: pathname === '/case',
+          active: pathname === localPath('/case'),
         },
         {
           title: t('main_navbar.links.files'),
           icon: <ArchiveIcon />,
-          to: '/file',
+          to: localPath('/file'),
           as: Link,
-          active: pathname === '/file',
+          active: pathname === localPath('/file'),
         },
         ...adminLinks,
       ]}

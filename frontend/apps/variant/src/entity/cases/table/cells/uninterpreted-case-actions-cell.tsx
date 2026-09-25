@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { EllipsisVertical, ExternalLink } from 'lucide-react';
 
 import type { VariantUninterpretedCase } from '@/api/api';
@@ -12,10 +11,12 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalNavigation } from '@/components/hooks/use-local-path';
 
 function UninterpretedCaseActionsCell({ row }: CellContext<AppFeatures, VariantUninterpretedCase, any>) {
   const { t } = useI18n();
-  const navigate = useNavigate();
+  const navigate = useLocalNavigation();
+
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>

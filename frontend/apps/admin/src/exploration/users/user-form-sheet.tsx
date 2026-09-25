@@ -19,6 +19,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/com
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useLoginContext } from '@/components/hooks/use-login';
 import { TENANT_ACTIONS, useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
@@ -116,6 +117,7 @@ type UserFormSheetProps = {
 function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps) {
   const { t } = useI18n();
   const { tenant, tenants } = useTenant();
+  const localPath = useLocalPath();
   const { sub } = useLoginContext();
 
   const isEdit = !!user;
@@ -339,7 +341,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
       }
       // Redirect if you remove your own admin role
       if (isSelf && tenantRoles && !keepsAdminAccess(values.roles, tenantRoles)) {
-        window.location.assign(CASES_PATH);
+        window.location.assign(localPath(CASES_PATH));
         return;
       }
 
