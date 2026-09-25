@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -50,17 +51,23 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
 	// row per occurrence, so filtering on them beats a second scan of the federated tables.
 	if userQuery != nil {
-		var disjunction annotationDisjunction
+		var conditions []string
+		var args []any
 		if userQuery.WithNote() {
-			disjunction.add("note.occurrence_id IS NOT NULL")
+			conditions = append(conditions, "note.occurrence_id IS NOT NULL")
 		}
 		if flagTypes := userQuery.WithFlag(); len(flagTypes) > 0 {
-			disjunction.add("flag.flag_type IN (?)", flagTypes)
+			conditions = append(conditions, "flag.flag_type IN (?)")
+			args = append(args, flagTypes)
 		}
 		if userQuery.WithInterpretation() {
-			disjunction.add(impossibleAnnotation)
+			// A CNV occurrence cannot carry an interpretation — same false-rather-than-absent
+			// reasoning as in keepOccurrencesWithAnyAnnotation.
+			conditions = append(conditions, "false")
 		}
-		tx = disjunction.apply(tx)
+		if len(conditions) > 0 {
+			tx = tx.Where("("+strings.Join(conditions, " OR ")+")", args...)
+		}
 	}
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by cnv_id to avoid duplicates when joining with gene panels tables
