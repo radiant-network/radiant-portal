@@ -11,7 +11,7 @@ describe('VariantEntity - EvidCond - ClinVar - Hyperlinks', () => {
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
   };
 
-  it('RCV Link', () => {
+  it('RCV Link [SJRA-1962]', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldHaveTableCellLink(data.variantGermline.clinvar_evidence, 'rcv_link');
   });
