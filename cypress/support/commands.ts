@@ -64,11 +64,13 @@ Cypress.Commands.add('login', () => {
           const html: HTMLElement = document.createElement('html');
           html.innerHTML = response.body;
 
-          // The Keycloak login <form>'s `action` attribute is `loginAction` and exists in every
-          // theme, so parse it directly instead of eval-ing a theme-specific kcContext script.
+          // Server-rendered themes expose `loginAction` as the login <form>'s `action` attribute.
+          // Keycloakify themes render the <form> client-side, so fall back to `loginAction` in the
+          // inline kcContext script (read with a regex, never eval-ed).
           const forms = Array.from(html.querySelectorAll('form'));
           const loginForm = forms.find(f => (f.getAttribute('action') ?? '').includes('login-actions/authenticate')) ?? html.querySelector<HTMLFormElement>('#kc-form-login') ?? forms[0];
-          const loginUrl: string = loginForm?.getAttribute('action') ?? '';
+          const kcLoginAction = /"loginAction"\s*:\s*("(?:[^"\\]|\\.)*")/.exec(response.body)?.[1];
+          const loginUrl: string = loginForm?.getAttribute('action') ?? (kcLoginAction ? JSON.parse(kcLoginAction) : '');
 
           return cy.request({
             form: true,
