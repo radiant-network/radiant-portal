@@ -1,40 +1,14 @@
-import {
-  Check,
-  CircleCheck,
-  CircleDashed,
-  CircleX,
-  Eye,
-  FilePen,
-  FileQuestion,
-  Hourglass,
-  LoaderCircle,
-  type LucideIcon,
-  RefreshCcwIcon,
-  RotateCcw,
-} from 'lucide-react';
-
+import type { CaseStatus } from '@/api/api';
 import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-export type Status =
-  | 'draft'
-  | 'submitted'
-  | 'processing'
-  | 'in_progress'
-  | 'in_review'
-  | 'completed'
-  | 'resolved'
-  | 'unresolved'
-  | 'inconclusive'
-  | 'reopened'
-  | 'revoked';
-
 type StatusBadgeProps = {
-  status: Status;
+  status: CaseStatus;
+  size?: BadgeProps['size'];
   className?: string;
 };
 
-const colors: Record<string, BadgeProps['variant']> = {
+export const statusColors: Record<CaseStatus, BadgeProps['variant']> = {
   draft: 'neutral',
   submitted: 'outline',
   processing: 'yellow',
@@ -48,31 +22,12 @@ const colors: Record<string, BadgeProps['variant']> = {
   revoked: 'neutral',
 };
 
-export const statusFallbackIcon = FileQuestion;
-
-export const statusIcons: Record<string, LucideIcon> = {
-  draft: FilePen,
-  submitted: Hourglass,
-  processing: LoaderCircle,
-  in_progress: RefreshCcwIcon,
-  in_review: Eye,
-  completed: Check,
-  resolved: CircleCheck,
-  unresolved: CircleDashed,
-  inconclusive: FileQuestion,
-  reopened: RotateCcw,
-  revoked: CircleX,
-};
-
-function StatusBadge({ status, className }: StatusBadgeProps) {
+function StatusBadge({ status, size, className }: StatusBadgeProps) {
   const { t } = useI18n();
-
-  const color = colors[status] ?? 'neutral';
-  const Icon = statusIcons[status] ?? statusFallbackIcon;
+  const color = statusColors[status] ?? 'neutral';
 
   return (
-    <Badge variant={color} className={className}>
-      <Icon />
+    <Badge variant={color} size={size} className={className}>
       {t(`case_exploration.status.${status}`, status)}
     </Badge>
   );

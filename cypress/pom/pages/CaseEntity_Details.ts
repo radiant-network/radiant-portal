@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
+import { getColumnPosition, getStatusColor, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="details-tab"]',
@@ -442,7 +442,6 @@ const sequencingColumnContentHandler = (columnID: string, data: any, position: n
       break;
     case 'seq_status':
       cy.validateTableFirstRowContent(data[columnID], position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(data[columnID])), position, tableId);
       cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(data[columnID])), position, tableId);
       break;
     case 'actions':

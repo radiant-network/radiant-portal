@@ -116,7 +116,7 @@ type UserFormSheetProps = {
 
 function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps) {
   const { t } = useI18n();
-  const { tenant, tenants } = useTenant();
+  const { tenant, tenants, refreshPermissions } = useTenant();
   const localPath = useLocalPath();
   const { sub } = useLoginContext();
 
@@ -344,6 +344,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
         window.location.assign(localPath(CASES_PATH));
         return;
       }
+      if (isSelf) refreshPermissions();
 
       toast.success(t(isEdit ? 'admin.users.edit.notifications.success' : 'admin.users.create.notifications.success'));
       onSaved();
