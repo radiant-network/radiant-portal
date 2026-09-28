@@ -40,8 +40,12 @@ describe('Cases - Assignment Candidates - Result', () => {
     expect(userIds).to.deep.equal([...new Set(userIds)]);
   });
 
-  it('Sorted by last name then first name', () => {
-    const names = response.body.map((candidate: { last_name: string; first_name: string }) => [candidate.last_name, candidate.first_name]);
+  it('Self first', () => {
+    expect(response.body[0].email).to.eq(dataCandidates.self.email);
+  });
+
+  it('Others sorted by last name then first name', () => {
+    const names = response.body.slice(1).map((candidate: { last_name: string; first_name: string }) => [candidate.last_name, candidate.first_name]);
 
     expect(names).to.deep.equal([...names].sort((a: string[], b: string[]) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1])));
   });

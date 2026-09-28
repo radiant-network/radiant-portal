@@ -381,7 +381,7 @@ const globalData = {
           field: 'hpo_gene_panel',
           value: 'Autosomal recessive inheritance(HP:0000007)',
           op: 'in',
-          count: 33,
+          count: 36,
         },
         {
           field: 'orphanet_gene_panel',
@@ -399,7 +399,7 @@ const globalData = {
           field: 'ddd_gene_panel',
           value: 'AUTOSOMAL RECESSIVE INTELLECTUAL DEVELOPMENTAL DISORDER',
           op: 'in',
-          count: 2,
+          count: 0,
         },
         {
           field: 'cosmic_gene_panel',

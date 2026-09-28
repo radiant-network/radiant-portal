@@ -7,7 +7,7 @@ const PATIENT_GERMLINE_VALUE = '3';
 const CASE_SOMATIC_VALUE = '1008';
 const REL_PROBAND_VALUE = 'proband';
 const CASE_OTHER_LAB_VALUE = CASE_SOMATIC_VALUE;
-const ETL_DATE_VALUE = '2026-09-24';
+const UPDATED_DATE_VALUE = '2026-';
 
 export const data = {
   case: {
@@ -23,7 +23,7 @@ export const data = {
     req_by: 'CHUSJ',
     project: 'N1',
     created_on: '2021-09-12',
-    updated_on: ETL_DATE_VALUE,
+    updated_on: UPDATED_DATE_VALUE,
     prescriber: 'Felix Laflamme',
     diagnostic_lab: DIAGLAB_GERMLINE_VALUE,
     managing_org: 'CHUSJ',
@@ -111,7 +111,7 @@ export const data = {
       omim_id: '236730',
     },
     orphanet: {
-      condition: 'Ochoa syndrome',
+      condition: 'Urofacial syndrome',
       inheritance: 'AR',
       orphanet_id: '2465',
     },
@@ -194,7 +194,7 @@ export const data = {
       zygosity: 'HET',
       diag_lab: DIAGLAB_GERMLINE_VALUE,
       analysis: 'WGA',
-      date: ETL_DATE_VALUE,
+      date: UPDATED_DATE_VALUE,
       status: 'In Progress',
     },
     igv: {
