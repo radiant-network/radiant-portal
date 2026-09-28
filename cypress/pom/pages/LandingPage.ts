@@ -2,8 +2,8 @@
 import { buildBilingualRegExp } from 'pom/shared/Utils';
 
 const selectors = {
-  title: 'header[id="kc-header"]',
-  loginContent: 'main[class="pf-v5-c-login__main"]',
+  title: 'main header h1',
+  loginContent: 'main',
 };
 
 export const LandingPage = {
