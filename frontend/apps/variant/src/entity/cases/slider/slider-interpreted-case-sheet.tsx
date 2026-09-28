@@ -17,6 +17,7 @@ import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton'
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 
 type CaseSliderSheetProps = {
   case?: VariantInterpretedCase;
@@ -68,6 +69,7 @@ type CaseSheetContentProps = {
 
 function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }: CaseSheetContentProps) {
   const { t } = useI18n();
+  const localPath = useLocalPath();
 
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
@@ -102,7 +104,9 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
             variant="outline"
             onClick={() => {
               window.open(
-                `/case/entity/${caseResult.data?.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${caseData.seq_id}`,
+                localPath(
+                  `/case/entity/${caseResult.data?.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${caseData.seq_id}`,
+                ),
                 '_blank',
               );
             }}

@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { AppFeatures, Row } from '@/components/base/data-table/data-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
+import type { AppFeatures, Row } from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
 
@@ -20,6 +21,7 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
   const { t } = useI18n();
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
+  const localPath = useLocalPath();
   const { locus_id, chromosome, start, end, rsnumber, seq_id, locus } = row.original;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -29,8 +31,8 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
   }, []);
 
   const onNavigateToVariantPage = useCallback(() => {
-    window.open(`/variants/entity/${locus_id}`, '_blank');
-  }, [locus_id]);
+    window.open(localPath(`/variants/entity/${locus_id}`), '_blank');
+  }, [locus_id, localPath]);
 
   const handleUcsclick = useCallback(() => {
     window.open(
