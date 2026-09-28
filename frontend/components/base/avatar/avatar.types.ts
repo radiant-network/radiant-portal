@@ -29,4 +29,5 @@ export interface UserAvatarProps {
   user: AvatarUser;
   size?: AvatarSize;
   className?: string;
+  popoverTitle?: string;
 }

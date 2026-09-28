@@ -25,7 +25,7 @@ export function AvatarUserItem({ user, size = 'xs', className }: AvatarUserItemP
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
-          <h4 className="text-sm font-semibold truncate">{user.name}</h4>
+          <h4 className="text-sm font-medium truncate">{user.name}</h4>
           {user.organization && <p className="text-xs text-muted-foreground truncate">{user.organization}</p>}
         </div>
 
@@ -35,13 +35,13 @@ export function AvatarUserItem({ user, size = 'xs', className }: AvatarUserItemP
               href={`mailto:${user.email}`}
               variant="secondary"
               size="xs"
-              className="truncate"
+              className="truncate text-muted-foreground"
               onClick={e => e.stopPropagation()}
             >
               {user.email}
             </AnchorLink>
             <div className="hidden group-hover:block shrink-0">
-              <CopyButton value={user.email} size="3xs" variant="ghost" />
+              <CopyButton value={user.email} size="3xs" variant="ghost" className="text-muted-foreground" />
             </div>
           </div>
         )}

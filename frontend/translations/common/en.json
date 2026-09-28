@@ -1032,6 +1032,7 @@
       "filter": "Filter",
       "reset": "Reset",
       "assignment": "Assignment",
+      "case_assignment": "Case assignment",
       "search": "Search"
     },
     "unassigned_avatar": {
