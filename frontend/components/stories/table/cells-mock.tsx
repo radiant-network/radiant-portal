@@ -19,6 +19,7 @@ import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell'
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import BooleanCell from '@/components/base/data-table/cells/boolean-cell';
+import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
@@ -190,6 +191,7 @@ const baseCellColumnHelper = createAppColumnHelper<BaseCellMockData>();
  *   - RowSelectionCell
  *   - TextCell
  *   - AnchorLinkCell
+ *   - CaseLinkCell
  *   - StatusCell
  *   - BadgeCel
  *   - BadgeListCell
@@ -233,6 +235,14 @@ export const firstSetCellColumns = [
     id: 'link',
     cell: info => <AnchorLinkCell>{info.getValue()}</AnchorLinkCell>,
     header: 'AnchorLinkCell',
+  }),
+  baseCellColumnHelper.accessor(row => row.case_id, {
+    id: 'CaseLinkCell',
+    cell: info => {
+      const caseId = info.getValue() ?? info.row.index + 1;
+      return <CaseLinkCell caseId={caseId}>{caseId}</CaseLinkCell>;
+    },
+    header: 'CaseLinkCell',
   }),
   baseCellColumnHelper.accessor(row => row.status_code, {
     id: 'status_code',

@@ -145,16 +145,6 @@ Cypress.Commands.add('setLang', (lang: string) => {
 });
 
 /**
- * Set the tenant of the application (from the env).
- */
-Cypress.Commands.add('setTenant', () => {
-  const tenant = Cypress.expose('api_tenant');
-
-  cy.get(CommonSelectors.tenantSwitcherButton).click();
-  cy.get(CommonSelectors.menuPopper).contains(tenant).clickAndWait();
-});
-
-/**
  * Asserts that the given tab is active.
  * @param subject The tab element.
  */
@@ -363,7 +353,7 @@ Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | Re
 
 /**
  * Visits a URL and intercepts API calls, waiting for a specified number of requests.
- * @param url The URL to visit.
+ * @param url The app URL to visit, tenant-prefixed by the command (e.g. '/case').
  * @param methodHTTP The HTTP method to intercept.
  * @param routeMatcher The route pattern to match for interception.
  * @param nbCalls The number of API calls to wait for.
@@ -371,7 +361,7 @@ Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | Re
 Cypress.Commands.add('visitAndIntercept', (url: string, methodHTTP: string, routeMatcher: string, nbCalls: number) => {
   cy.intercept(methodHTTP, routeMatcher).as('routeMatcher');
 
-  cy.visit(url, { failOnStatusCode: false });
+  cy.visit(`/${Cypress.expose('api_tenant')}${url}`, { failOnStatusCode: false });
 
   for (let i = 0; i < nbCalls; i++) {
     cy.wait('@routeMatcher', { timeout: oneMinute });
@@ -394,12 +384,11 @@ Cypress.Commands.add('visitCasesPage', (searchCriteria?: string) => {
       interception.alias = 'postSearch';
       interception.body = mockBody;
     });
-    cy.visit('/case', { failOnStatusCode: false });
+    cy.visit(`/${Cypress.expose('api_tenant')}/case`, { failOnStatusCode: false });
     cy.wait('@postSearch');
   }
 
   cy.setLang('EN');
-  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -417,12 +406,11 @@ Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
       interception.alias = 'postSearch';
       interception.body = mockBody;
     });
-    cy.visit('/file', { failOnStatusCode: false });
+    cy.visit(`/${Cypress.expose('api_tenant')}/file`, { failOnStatusCode: false });
     cy.wait('@postSearch');
   }
 
   cy.setLang('EN');
-  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -433,7 +421,6 @@ Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
 Cypress.Commands.add('visitCaseDetailsPage', (caseId: string) => {
   cy.visitAndIntercept(`/case/entity/${caseId}?tab=details`, 'GET', `**/cases/${caseId}`, 1);
   cy.setLang('EN');
-  cy.setTenant();
 });
 
 /**
@@ -451,12 +438,11 @@ Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: str
       interception.alias = 'postSearch';
       interception.body = mockBody;
     });
-    cy.visit(`/case/entity/${caseId}?tab=files`, { failOnStatusCode: false });
+    cy.visit(`/${Cypress.expose('api_tenant')}/case/entity/${caseId}?tab=files`, { failOnStatusCode: false });
     cy.wait('@postSearch');
   }
 
   cy.setLang('EN');
-  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -482,7 +468,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
         interception.alias = 'postListSNV';
         interception.body = mockBody;
       });
-      cy.visit(url, { failOnStatusCode: false });
+      cy.visit(`/${Cypress.expose('api_tenant')}${url}`, { failOnStatusCode: false });
       cy.wait('@postListSNV');
     }
   } else if (type === 'CNV') {
@@ -505,7 +491,6 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
   }
 
   cy.setLang('EN');
-  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -516,7 +501,6 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
 Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=evidenceAndConditions`, 'GET', `**/conditions/omim`, 1);
   cy.setLang('EN');
-  cy.setTenant();
 });
 
 /**
@@ -526,7 +510,6 @@ Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=frequency`, 'GET', `**/external_frequencies`, 1);
   cy.setLang('EN');
-  cy.setTenant();
 });
 
 /**
@@ -536,7 +519,6 @@ Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantOverviewPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=overview`, 'GET', `**/variants/germline/*/overview`, 1);
   cy.setLang('EN');
-  cy.setTenant();
 });
 
 /**
@@ -546,7 +528,6 @@ Cypress.Commands.add('visitVariantOverviewPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantPatientsPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=patients`, 'POST', `**/cases/interpreted`, 1);
   cy.setLang('EN');
-  cy.setTenant();
 });
 
 /**

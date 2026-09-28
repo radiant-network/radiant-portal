@@ -127,7 +127,6 @@ export const CommonSelectors = {
   tag: (color: string) => `[class*="bg-${color}/20 text-${color}-foreground"]`,
   tagBlank: '[class*="text-foreground"]',
   tagLevel: (level: string) => `[class*="bg-${level} text-${level}-foreground"]`,
-  tenantSwitcherButton: '[data-cy="tenant-switcher"]:visible',
   title: 'h1, h2',
   tooltipPopper: '[class*="radix-tooltip-content"]',
   underlineHeader: '[class*="decoration-dotted"]',

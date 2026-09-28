@@ -1052,9 +1052,9 @@ const somaticConfig: SNVTableConfig = {
     switch (columnID) {
       case 'freq_to':
       case 'freq_tn':
-        return `/variants/entity/${dataVariant.locus_id}?tab=patients&cases=OtherCases`;
+        return `/${Cypress.expose('api_tenant')}/variants/entity/${dataVariant.locus_id}?tab=patients&cases=OtherCases`;
       case 'freq_g':
-        return `/variants/entity/${dataVariant.locus_id}?tab=patients&cases=InterpretedCases`;
+        return `/${Cypress.expose('api_tenant')}/variants/entity/${dataVariant.locus_id}?tab=patients&cases=InterpretedCases`;
       default:
         return getUrlLink(columnID, dataVariant);
     }

@@ -24,7 +24,6 @@ declare namespace Cypress {
     pinColumn(position: number, tableId: string = '', headRowSelector?: string): cy & CyEventEmitter;
     resetColumns(): cy & CyEventEmitter;
     setLang(lang: string): cy & CyEventEmitter;
-    setTenant(): cy & CyEventEmitter;
     shouldBeActiveTab(): cy & CyEventEmitter;
     shouldBeDataState(state: string): Chainable<JQuery<HTMLElement>>;
     shouldBePinnable(isPinnable: boolean): Chainable<Element>;

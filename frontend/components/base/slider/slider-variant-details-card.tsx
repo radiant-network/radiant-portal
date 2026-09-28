@@ -20,6 +20,7 @@ import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/var
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
@@ -200,6 +201,7 @@ type ClinicalAssociationCardProps = {
 };
 export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalAssociationCardProps) => {
   const { t } = useI18n();
+  const localPath = useLocalPath();
 
   const clinicalAssociationTitle = t('common.no_data_available');
 
@@ -222,7 +224,7 @@ export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalA
         <AnchorLink
           key="see-more"
           component={Link}
-          to={`/variants/entity/${locus_id}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
+          to={localPath(`/variants/entity/${locus_id}?tab=${VariantEntityTabs.EvidenceAndConditions}`)}
           className="justify-start"
           size="sm"
         >
@@ -352,6 +354,7 @@ export const PredictionCard = ({
   hotspot,
 }: PredictionCardProps) => {
   const { t } = useI18n();
+  const localPath = useLocalPath();
 
   // Frequencies differ from somatic to germline
   const frequencies = [];
@@ -369,7 +372,9 @@ export const PredictionCard = ({
         {somatic_pc_to_wgs && somatic_pn_to_wgs && somatic_pf_to_wgs?.toExponential(2) ? (
           <AnchorLink
             size="sm"
-            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`}
+            href={localPath(
+              `/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`,
+            )}
             target="_blank"
             mono
           >
@@ -393,7 +398,9 @@ export const PredictionCard = ({
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
           <AnchorLink
             size="sm"
-            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`}
+            href={localPath(
+              `/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`,
+            )}
             target="_blank"
             mono
           >

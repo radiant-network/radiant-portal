@@ -11,6 +11,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { caseApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
@@ -34,6 +35,7 @@ async function fetchCaseEntity(input: CaseEntityInput, tenant: string) {
 
 export default function App() {
   const { t } = useI18n();
+  const localPath = useLocalPath();
   const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const mainRef = useRef<HTMLDivElement>(null);
@@ -105,7 +107,7 @@ export default function App() {
       <Error404
         message={t('case_entity.not_found')}
         extra={
-          <Link to="/">
+          <Link to={localPath('/')}>
             <Button>{t('case_entity.not_found.button')}</Button>
           </Link>
         }

@@ -1,8 +1,10 @@
-import { index, layout, prefix, route, type RouteConfig } from '@react-router/dev/routes';
+import { index, prefix, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   route('health-check', './routes/health-check.tsx'),
-  layout('./layout/protected-layout.tsx', [
+  // The tenant segment sits on the layout route itself, not on its children: useParams() in a
+  // layout only sees its own match, so prefixing the leaves would leave TenantProvider blind.
+  route(':tenant', './layout/protected-layout.tsx', [
     index('./routes/home.tsx'),
     route('variants/entity/:locusId', './routes/variants/entity.tsx'),
     route('case/', './routes/cases/list.tsx'),
@@ -15,6 +17,8 @@ export default [
     route('admin/', './routes/admin/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
+  // The bare domain and the post-login redirect both land here.
+  index('./routes/tenant-redirect.tsx'),
   // QA preview only: two explicit URLs let both landing variants be viewed in a single build.
   // In prod this should collapse to a single THEME-driven `/landing` (and remove these routes
   // plus the matching beta-feature links).
