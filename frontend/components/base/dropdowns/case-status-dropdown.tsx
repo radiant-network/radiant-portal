@@ -103,7 +103,7 @@ function CaseStatusDropdown({
   }
 
   if (!canEdit || !isUserAppliedStatus(currentStatus)) {
-    const badge = <StatusBadge status={currentStatus} size={size} withIcon={false} className={className} />;
+    const badge = <StatusBadge status={currentStatus} size={size} className={className} />;
     if (!readOnlyTooltip) return badge;
 
     return (
