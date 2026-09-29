@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router';
 import logo from '@assets/logo/header.svg';
-import { ArchiveIcon, FolderIcon, SettingsIcon } from 'lucide-react';
+import { ArchiveIcon, FolderIcon, SettingsIcon, UsersIcon } from 'lucide-react';
 
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import type { MainNavbarEntry } from '@/components/base/navbar/main-navbar-types';
+import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLocalPath } from '@/components/hooks/use-local-path';
 import { useCanAdministerTenant } from '@/components/hooks/use-tenant';
@@ -19,6 +20,19 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const navigate = useNavigate();
   const canAdministerTenant = useCanAdministerTenant();
   const localPath = useLocalPath();
+  const { features } = useBetaFeatures();
+
+  const patientLinks: MainNavbarEntry[] = features.patient
+    ? [
+        {
+          title: t('main_navbar.links.patients'),
+          icon: <UsersIcon />,
+          to: localPath('/patient'),
+          as: Link,
+          active: pathname === localPath('/patient'),
+        },
+      ]
+    : [];
 
   const adminLinks: MainNavbarEntry[] = canAdministerTenant
     ? [
@@ -44,6 +58,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
         //   icon: <LayoutDashboardIcon />,
         //   as: 'button',
         // },
+        ...patientLinks,
         {
           title: t('main_navbar.links.cases'),
           icon: <FolderIcon />,

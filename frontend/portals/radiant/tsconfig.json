@@ -24,6 +24,7 @@
       "community/*": ["../../apps/community/src/*"],
       "file-archive/*": ["../../apps/file-archive/src/*"],
       "landing/*": ["../../apps/landing/src/*"],
+      "patient/*": ["../../apps/patient/src/*"],
       "study/*": ["../../apps/study/src/*"],
       "variant/*": ["../../apps/variant/src/*"],
       "~/*": ["./app/*"],

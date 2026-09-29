@@ -9,6 +9,8 @@ export default [
     route('variants/entity/:locusId', './routes/variants/entity.tsx'),
     route('case/', './routes/cases/list.tsx'),
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
+    route('patient/', './routes/patients/list.tsx'),
+    route('patient/entity/:patientId', './routes/patients/entity.tsx'),
     route('file/', './routes/files/list.tsx'),
     route('study/', './routes/studies/list.tsx'),
     route('community/', './routes/community/list.tsx'),
