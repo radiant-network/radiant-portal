@@ -1033,6 +1033,7 @@
       "filter": "Filtrer",
       "reset": "Réinitialiser",
       "assignment": "Assignation",
+      "case_assignment": "Assignation du cas",
       "search": "Rechercher"
     },
     "unassigned_avatar": {

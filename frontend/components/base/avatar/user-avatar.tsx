@@ -9,7 +9,7 @@ import { AvatarPopover } from './avatar-popover';
  * popover when the user has an email or organization. The atomic building block
  * the assignment `Avatar` aggregator composes for each shown user.
  */
-export function UserAvatar({ user, size = 'sm', className }: UserAvatarProps) {
+export function UserAvatar({ user, size = 'sm', className, popoverTitle }: UserAvatarProps) {
   // Show popover if user has email or organization
   const shouldShowPopover = Boolean(user.email || user.organization);
 
@@ -21,7 +21,7 @@ export function UserAvatar({ user, size = 'sm', className }: UserAvatarProps) {
 
   if (shouldShowPopover) {
     return (
-      <AvatarPopover users={user} size={size}>
+      <AvatarPopover users={user} size={size} title={popoverTitle}>
         {avatarElement}
       </AvatarPopover>
     );

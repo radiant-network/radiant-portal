@@ -1,4 +1,5 @@
 import { Avatar as AvatarRoot, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/base/shadcn/avatar';
+import { useI18n } from '@/components/hooks/i18n';
 
 import type { AvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
@@ -25,6 +26,9 @@ export function Avatar({
   canAssign = true,
   onAssignClick,
 }: AvatarProps) {
+  const { t } = useI18n();
+  const popoverTitle = t('common.user_selection.case_assignment');
+
   // Filter out any falsy users and ensure we have valid user objects
   const validUsers = users.filter(user => user && user.id && user.name);
 
@@ -35,7 +39,7 @@ export function Avatar({
   }
 
   if (validUsers.length === 1) {
-    return <UserAvatar user={validUsers[0]} size={size} className={className} />;
+    return <UserAvatar user={validUsers[0]} size={size} className={className} popoverTitle={popoverTitle} />;
   }
 
   // When there are more users than we can show, keep room for the count chip.
@@ -59,7 +63,7 @@ export function Avatar({
 
   if (shouldShowPopover) {
     return (
-      <AvatarPopover users={validUsers} size={size}>
+      <AvatarPopover users={validUsers} size={size} title={popoverTitle}>
         {avatarElement}
       </AvatarPopover>
     );

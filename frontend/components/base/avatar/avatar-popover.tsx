@@ -7,11 +7,12 @@ import { AvatarUserItem } from './avatar-user-item';
 interface AvatarPopoverProps {
   users: AvatarUser | AvatarUser[];
   size?: AvatarSize;
+  title?: string;
   className?: string;
   children: React.ReactNode;
 }
 
-export function AvatarPopover({ users, children }: AvatarPopoverProps) {
+export function AvatarPopover({ users, title, children }: AvatarPopoverProps) {
   // Normalize users to always be an array
   const usersArray = Array.isArray(users) ? users : [users];
 
@@ -34,6 +35,7 @@ export function AvatarPopover({ users, children }: AvatarPopoverProps) {
     <HoverCard>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent className="w-80 max-h-96 overflow-y-auto" side="top">
+        {title && <h3 className="text-xs font-medium leading-none truncate mb-4">{title}</h3>}
         <div className={isSingleUser ? '' : 'space-y-3'}>
           {sortedUsers.map(user => (
             <AvatarUserItem key={user.id} user={user} size="sm" />
