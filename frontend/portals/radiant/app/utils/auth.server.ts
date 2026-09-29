@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, redirect } from 'react-router';
+import { createCookie, createCookieSessionStorage, redirect } from 'react-router';
 import { Authenticator } from 'remix-auth';
 import { OAuth2Strategy } from 'remix-auth-oauth2';
 
@@ -21,6 +21,34 @@ const userSessionStorage = createSessionStorage('session.user');
 const accessTokenSessionStorage = createSessionStorage('session.token');
 const refreshTokenSessionStorage = createSessionStorage('session.r.token');
 
+const RETURN_TO_MAX_AGE = 600;
+
+// Page to land back on after a re-authentication; short-lived so a stale one is never reused.
+const returnToCookie = createCookie('return_to', {
+  sameSite: 'lax',
+  path: '/',
+  httpOnly: true,
+  maxAge: RETURN_TO_MAX_AGE,
+  secrets: [process.env.SESSION_SECRET!],
+  secure: process.env.NODE_ENV === 'production',
+});
+
+// Same-origin relative path only, so a crafted returnTo can't send the user to another domain.
+const toSafeReturnTo = (path: string | null | undefined): string | null => {
+  if (!path || !path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) return null;
+  const url = new URL(path, 'http://localhost');
+  if (url.origin !== 'http://localhost' || url.pathname.startsWith('/auth/')) return null;
+  return `${url.pathname}${url.search}`;
+};
+
+// Client navigations reach loaders as `/x.data?_routes=…`: keep the page URL the user asked for.
+const getPageUrl = (request: Request) => {
+  const url = new URL(request.url);
+  url.pathname = url.pathname.replace(/\/_\.data$/, '/').replace(/\.data$/, '');
+  url.searchParams.delete('_routes');
+  return `${url.pathname}${url.search}`;
+};
+
 const getUserSessionStorage = async (request: Request) =>
   await userSessionStorage.getSession(request.headers.get('cookie'));
 
@@ -35,6 +63,22 @@ const getKeycloakOauth2Url = (endpoint: string) =>
 
 export const authenticateRequest = async (request: Request): Promise<IAuthUserWithToken> =>
   await authenticator.authenticate(AuthStrategyName, request);
+
+/** Starts the OAuth flow, remembering the requested page to come back to after login. */
+export const authenticateAndReturn = async (request: Request): Promise<never> => {
+  try {
+    await authenticateRequest(request);
+  } catch (error) {
+    const returnTo = toSafeReturnTo(getPageUrl(request));
+    if (error instanceof Response && returnTo) {
+      const headers = new Headers(error.headers);
+      headers.append('Set-Cookie', await returnToCookie.serialize(returnTo));
+      throw new Response(null, { status: error.status, headers });
+    }
+    throw error;
+  }
+  throw redirect('/');
+};
 
 export const getSessionUser = async (request: Request): Promise<IAuthUser> => {
   const userSession = await getUserSessionStorage(request);
@@ -52,22 +96,29 @@ export const getSessionRefreshToken = async (request: Request): Promise<string> 
   return refreshTokenSession.get('token');
 };
 
-export const refreshAccessToken = async (request: Request): Promise<{ cookie: string }> => {
+export const refreshAccessToken = async (request: Request): Promise<string[] | null> => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
   const refreshToken = refreshTokenSession.get('token');
+  if (!isTokenValid(refreshToken)) return null;
 
-  if (isTokenValid(refreshToken)) {
-    const tokens = await authStrategy.refreshToken(refreshToken);
-
-    const accessTokenSession = await getAccessTokenSessionStorage(request);
-    accessTokenSession.set('token', tokens.accessToken());
-
-    return {
-      cookie: await accessTokenSessionStorage.commitSession(accessTokenSession),
-    };
+  let tokens;
+  try {
+    tokens = await authStrategy.refreshToken(refreshToken);
+  } catch {
+    // Keycloak rejects it once the SSO session has ended
+    return null;
   }
 
-  throw logout(request);
+  const accessTokenSession = await getAccessTokenSessionStorage(request);
+  accessTokenSession.set('token', tokens.accessToken());
+  const cookies = [await accessTokenSessionStorage.commitSession(accessTokenSession)];
+
+  if (tokens.hasRefreshToken()) {
+    refreshTokenSession.set('token', tokens.refreshToken());
+    cookies.push(await refreshTokenSessionStorage.commitSession(refreshTokenSession));
+  }
+
+  return cookies;
 };
 
 export const login = async (request: Request): Promise<Response> => {
@@ -82,11 +133,14 @@ export const login = async (request: Request): Promise<Response> => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
   refreshTokenSession.set('token', refresh_token);
 
-  return redirect('/', {
+  const returnTo = toSafeReturnTo(await returnToCookie.parse(request.headers.get('cookie')));
+
+  return redirect(returnTo ?? '/', {
     headers: [
       ['Set-Cookie', await userSessionStorage.commitSession(userSession)],
       ['Set-Cookie', await accessTokenSessionStorage.commitSession(accessTokenSession)],
       ['Set-Cookie', await refreshTokenSessionStorage.commitSession(refreshTokenSession)],
+      ['Set-Cookie', await returnToCookie.serialize('', { maxAge: 0 })],
       ['Cache-Control', 'no-store'],
     ],
   });
@@ -135,6 +189,8 @@ export const requireAuth = async (request: Request): Promise<boolean> => {
 };
 
 export async function clearSession(request: Request): Promise<Response> {
+  // Only a forced logout passes a returnTo; a voluntary one also drops any stale one
+  const returnTo = toSafeReturnTo(new URL(request.url).searchParams.get('returnTo'));
   const userSession = await getUserSessionStorage(request);
   const accessTokenSession = await getAccessTokenSessionStorage(request);
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
@@ -144,6 +200,7 @@ export async function clearSession(request: Request): Promise<Response> {
       ['Set-Cookie', await userSessionStorage.destroySession(userSession)],
       ['Set-Cookie', await accessTokenSessionStorage.destroySession(accessTokenSession)],
       ['Set-Cookie', await refreshTokenSessionStorage.destroySession(refreshTokenSession)],
+      ['Set-Cookie', await returnToCookie.serialize(returnTo ?? '', { maxAge: returnTo ? RETURN_TO_MAX_AGE : 0 })],
     ],
   });
 }

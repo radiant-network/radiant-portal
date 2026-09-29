@@ -32,7 +32,8 @@ axiosClient.interceptors.response.use(
 
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        window.location.href = '/auth/logout';
+        const returnTo = `${window.location.pathname}${window.location.search}`;
+        window.location.href = `/auth/logout?returnTo=${encodeURIComponent(returnTo)}`;
         return Promise.reject(refreshError);
       }
     }
