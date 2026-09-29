@@ -19,13 +19,11 @@ export enum GermlineVariantInterface {
   CNV = 'CNV',
 }
 
-/** Value each sub-tab takes in the `variant_section` URL param. */
 const VARIANT_SECTIONS: Record<GermlineVariantInterface, string> = {
   [GermlineVariantInterface.SNV]: 'snv',
   [GermlineVariantInterface.CNV]: 'cnv',
 };
 
-// TODO: duplicated from somatic-variants-tab, make it generic and share it
 function getInterfaceFromVariantSection(section: string | null) {
   return (Object.keys(VARIANT_SECTIONS) as GermlineVariantInterface[]).find(key => VARIANT_SECTIONS[key] === section);
 }
