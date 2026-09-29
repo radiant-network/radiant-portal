@@ -84,11 +84,11 @@ export const VariantEntity_Overview = {
               });
               break;
             case 'consequence':
-              cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               cy.get(`${selectors.mostDeleterious.card} ${dataVariant.consequenceImpact}`).should('exist');
               break;
             default:
-              cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
         }
@@ -145,7 +145,7 @@ export const VariantEntity_Overview = {
               cy.get(`${selectors.interpretation.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', getClass(dataVariant.interpreted.classification).display);
               break;
             default:
-              cy.get(`${selectors.interpretation.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${selectors.interpretation.card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
         }
@@ -171,7 +171,7 @@ export const VariantEntity_Overview = {
               });
               break;
             default:
-              cy.get(`${selectors.classification.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${selectors.classification.card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
         }
@@ -225,11 +225,11 @@ export const VariantEntity_Overview = {
         } else {
           switch (fieldId) {
             case 'omim':
-              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(dataVariant.omim.omim_id)}`).should('contain', dataVariant.omim.condition);
-              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(dataVariant.omim.omim_id)}`).should('contain', dataVariant.omim.inheritance);
+              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(dataVariant.omim.omim_id)}`).contains(dataVariant.omim.condition);
+              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(dataVariant.omim.omim_id)}`).contains(dataVariant.omim.inheritance);
               break;
             default:
-              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
         }
@@ -273,7 +273,7 @@ export const VariantEntity_Overview = {
               cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).should('contain', getExternalRefDisplay(fieldId));
               break;
             default:
-              cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+              cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
         }

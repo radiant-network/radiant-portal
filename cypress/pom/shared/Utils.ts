@@ -334,6 +334,7 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
 export const isEmpty = (value: unknown): boolean => {
   if (value === null || value === undefined || value === '') return true;
   if (Array.isArray(value)) return value.length === 0;
+  if (value instanceof RegExp) return false;
   if (typeof value === 'object') return Object.keys(value as object).length === 0;
   return false;
 };

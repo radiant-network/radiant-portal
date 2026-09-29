@@ -10,6 +10,7 @@ describe('VariantEntity - Patients - Uninterpreted - Action Buttons', () => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
+    VariantEntity_Patients.uninterpreted.actions.showAllColumns();
   };
 
   it('View Case', () => {
