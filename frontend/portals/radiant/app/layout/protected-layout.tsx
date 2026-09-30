@@ -11,12 +11,12 @@ import type { Route } from '../+types/root';
 
 import ProtectedNavbar from './protected-navbar';
 
-import { authenticateRequest, getSessionUser, requireAuth } from '~/utils/auth.server';
+import { authenticateAndReturn, getSessionUser, requireAuth } from '~/utils/auth.server';
 import type { IAuthUser } from '~/utils/auth.types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {
-    await authenticateRequest(request);
+    await authenticateAndReturn(request);
   } else {
     return await getSessionUser(request);
   }

@@ -8,11 +8,24 @@ import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import CNVTab from './germline-occurrence/cnv-tab';
 import SNVTab from './germline-occurrence/snv-tab';
-import { getDefaultSeqId, useVariantSearchParamsEffect } from './hooks/use-variant-search-params';
+import {
+  getDefaultSeqId,
+  useVariantSearchParamsEffect,
+  VARIANT_SECTION_PARAM,
+} from './hooks/use-variant-search-params';
 
 export enum GermlineVariantInterface {
   SNV = 'SNV',
   CNV = 'CNV',
+}
+
+const VARIANT_SECTIONS: Record<GermlineVariantInterface, string> = {
+  [GermlineVariantInterface.SNV]: 'snv',
+  [GermlineVariantInterface.CNV]: 'cnv',
+};
+
+function getInterfaceFromVariantSection(section: string | null) {
+  return (Object.keys(VARIANT_SECTIONS) as GermlineVariantInterface[]).find(key => VARIANT_SECTIONS[key] === section);
 }
 
 type VariantTabProps = {
@@ -23,7 +36,9 @@ type VariantTabProps = {
 function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const caseId = useCaseIdFromParam();
-  const [activeInterface, setActiveInterface] = useState<GermlineVariantInterface>(GermlineVariantInterface.SNV);
+  const [activeInterface, setActiveInterface] = useState<GermlineVariantInterface>(
+    getInterfaceFromVariantSection(searchParams.get(VARIANT_SECTION_PARAM)) ?? GermlineVariantInterface.SNV,
+  );
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
@@ -52,7 +67,14 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [searchParams, setSearchParams],
   );
 
-  useVariantSearchParamsEffect({ seqId, setSeqId, caseEntity, tasks, isLoading: isTasksLoading });
+  useVariantSearchParamsEffect({
+    seqId,
+    setSeqId,
+    caseEntity,
+    tasks,
+    isLoading: isTasksLoading,
+    variantSection: VARIANT_SECTIONS[activeInterface],
+  });
 
   return (
     <div className="bg-background flex flex-col">
