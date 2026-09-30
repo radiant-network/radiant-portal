@@ -15,7 +15,6 @@ function Header({ patientId }: HeaderProps) {
       isLoading={false}
       title={t('patient_entity.header.title', { id: patientId })}
       previousPageUrl={localPath('/patient')}
-      variant="info"
     />
   );
 }
