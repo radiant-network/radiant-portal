@@ -53,21 +53,22 @@ func (s *Service) Notify(ctx context.Context, tenantCode, groupName string) (*ty
 	}
 	group, caseIDs, err := s.groups.GetCaseGroupByName(ctx, tenantCode, groupName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load case group %q: %w", groupName, err)
 	}
 	if group == nil {
 		return nil, types.ErrCaseGroupNotFound
 	}
-	if _, ok := s.templates.For(tenantCode); !ok {
+	tmpl, ok := s.templates.For(tenantCode)
+	if !ok {
 		return nil, fmt.Errorf("%w %q", ErrTemplateMissing, tenantCode)
 	}
 	cases, err := s.groups.ListCases(ctx, tenantCode, caseIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("list cases of group %q: %w", groupName, err)
 	}
 	docs, err := s.groups.ListDocuments(ctx, tenantCode, caseIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("list documents of group %q: %w", groupName, err)
 	}
 
 	byLab := map[string][]types.CaseGroupCaseRow{}
@@ -87,19 +88,19 @@ func (s *Service) Notify(ctx context.Context, tenantCode, groupName string) (*ty
 	sort.Strings(labs)
 	emails, err := s.orgs.NotificationEmailsByOrg(ctx, tenantCode, labs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read notification emails of labs %v: %w", labs, err)
 	}
 
 	generatedOn := s.now().In(settings.Location)
 	manifestFilename := fmt.Sprintf("%s_%s_manifest.tsv", group.Name, generatedOn.Format("20060102"))
 	reports := make([]types.CaseGroupEmailReport, 0, len(labs))
 	for _, lab := range labs {
-		reports = append(reports, s.notifyLab(ctx, tenantCode, group.Name, lab, labNames[lab], byLab[lab], docsByLab[lab], emails[lab], settings, generatedOn, manifestFilename))
+		reports = append(reports, s.notifyLab(ctx, tenantCode, group.Name, lab, labNames[lab], byLab[lab], docsByLab[lab], emails[lab], settings, generatedOn, manifestFilename, tmpl.File))
 	}
 	return &types.NotifyCaseGroupResponse{Group: types.NewCaseGroupResponse(*group, caseIDs), Emails: reports}, nil
 }
 
-func (s *Service) notifyLab(ctx context.Context, tenantCode, groupName, lab, labName string, cases []types.CaseGroupCaseRow, docs []types.CaseGroupDocumentRow, recipients []string, settings Settings, generatedOn time.Time, manifestFilename string) types.CaseGroupEmailReport {
+func (s *Service) notifyLab(ctx context.Context, tenantCode, groupName, lab, labName string, cases []types.CaseGroupCaseRow, docs []types.CaseGroupDocumentRow, recipients []string, settings Settings, generatedOn time.Time, manifestFilename, templateFile string) types.CaseGroupEmailReport {
 	rows := manifestRows(tenantCode, docs)
 	data := TemplateData{
 		Tenant:           tenantCode,
@@ -135,10 +136,8 @@ func (s *Service) notifyLab(ctx context.Context, tenantCode, groupName, lab, lab
 		Recipients:       recipients,
 		CaseCount:        len(cases),
 		DocumentCount:    len(rows),
+		Template:         templateFile,
 		Context:          types.CaseGroupEmailContext{HasStat: data.HasStat, AnalysisCodes: data.AnalysisCodes, CaseIDs: caseIDs, ManifestFilename: manifestFilename},
-	}
-	if tmpl, ok := s.templates.For(tenantCode); ok {
-		report.Template = tmpl.File
 	}
 	switch {
 	case len(rows) == 0:

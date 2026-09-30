@@ -182,8 +182,8 @@ func Test_Notify_NoDocuments_Skipped_BeforeContactCheck(t *testing.T) {
 }
 
 func Test_Notify_SendFailure_ReportedPerLab_OthersStillSent(t *testing.T) {
-	mailer := &fakeMailer{failFor: "a@lab.invalid"}
-	svc := newTestService(t, twoLabGroups(), &fakeOrgs{emails: map[string][]string{"LDM-A": {"a@lab.invalid"}, "LDM-B": {"b@lab.invalid"}}}, mailer)
+	mailer := &fakeMailer{failFor: "refused@lab.invalid"}
+	svc := newTestService(t, twoLabGroups(), &fakeOrgs{emails: map[string][]string{"LDM-A": {"refused@lab.invalid"}, "LDM-B": {"accepted@lab.invalid"}}}, mailer)
 	resp, err := svc.Notify(t.Context(), "qlin", "run-a")
 	require.NoError(t, err)
 	assert.Equal(t, types.CaseGroupEmailFailed, resp.Emails[0].Status)

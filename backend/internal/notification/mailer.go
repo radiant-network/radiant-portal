@@ -45,7 +45,7 @@ func (m *SMTPMailer) Send(ctx context.Context, msg Message) error {
 	}
 	message, err := buildMessage(cfg.From, msg)
 	if err != nil {
-		return err
+		return fmt.Errorf("build email: %w", err)
 	}
 	opts := []mail.Option{mail.WithPort(cfg.Port)}
 	switch cfg.TLS {

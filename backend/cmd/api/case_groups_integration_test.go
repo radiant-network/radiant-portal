@@ -193,7 +193,7 @@ func Test_GetCaseGroup_CrossTenant_Forbidden(t *testing.T) {
 }
 
 func Test_NotifyCaseGroup_DataManager_ReportsPerLab(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		trackCaseGroup(t, env, "it_cg_notify")
 		seedLabCase(t, env, 1226)
 		mailer := &captureMailer{}
