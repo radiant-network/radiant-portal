@@ -54,7 +54,9 @@
         "category_placeholder": "Select a category",
         "code": "Code",
         "code_hint": "Can't be changed after creation. Letters, numbers, underscores, and dashes.",
-        "name": "Name"
+        "name": "Name",
+        "notification_emails": "Notification emails",
+        "notification_emails_hint": "Comma-separated addresses that receive the data-availability email and its manifest for this laboratory. Leave empty for no notification."
       },
       "filters": {
         "category": "Category",

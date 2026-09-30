@@ -24,6 +24,7 @@ import { useLoginContext } from '@/components/hooks/use-login';
 import { TENANT_ACTIONS, useTenant } from '@/components/hooks/use-tenant';
 import { usersApi } from '@/utils/api';
 
+import { EMAIL_PATTERN } from '../emails';
 import RolePermissionsDialog from '../roles/role-permissions-dialog';
 import { ScopeBadges } from '../roles/role-scope-badges';
 import { ADMIN_ROLE_CODE, findRole, MEMBER_ROLE_CODE, needsOrganizations } from '../roles/roles-utils';
@@ -36,8 +37,6 @@ import { useTenantAdminCount } from './use-tenant-admin-count';
 function getAssignableRoles(roles: RoleResult[]) {
   return roles.filter(role => role.code !== ADMIN_ROLE_CODE);
 }
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function buildFormSchema(roles: RoleResult[], isEdit: boolean) {
   // Create and edit share one set of form values, so the identity keys must exist in both shapes.

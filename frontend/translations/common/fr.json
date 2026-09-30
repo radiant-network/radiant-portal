@@ -54,7 +54,9 @@
         "category_placeholder": "Sélectionnez une catégorie",
         "code": "Code",
         "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
-        "name": "Nom"
+        "name": "Nom",
+        "notification_emails": "Courriels de notification",
+        "notification_emails_hint": "Adresses séparées par des virgules qui reçoivent le courriel de disponibilité des données et son manifeste pour ce laboratoire. Laissez vide pour aucune notification."
       },
       "filters": {
         "category": "Catégorie",
