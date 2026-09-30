@@ -16,6 +16,8 @@ export interface AvatarProps {
   className?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
+  /** Show the assignees hovercard; off when the avatar triggers the assignment picker. */
+  showDetails?: boolean;
 }
 
 export interface BaseAvatarProps {
@@ -30,4 +32,5 @@ export interface UserAvatarProps {
   size?: AvatarSize;
   className?: string;
   popoverTitle?: string;
+  showDetails?: boolean;
 }

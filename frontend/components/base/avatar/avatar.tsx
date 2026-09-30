@@ -25,6 +25,7 @@ export function Avatar({
   className,
   canAssign = true,
   onAssignClick,
+  showDetails = true,
 }: AvatarProps) {
   const { t } = useI18n();
   const popoverTitle = t('common.user_selection.case_assignment');
@@ -39,7 +40,15 @@ export function Avatar({
   }
 
   if (validUsers.length === 1) {
-    return <UserAvatar user={validUsers[0]} size={size} className={className} popoverTitle={popoverTitle} />;
+    return (
+      <UserAvatar
+        user={validUsers[0]}
+        size={size}
+        className={className}
+        popoverTitle={popoverTitle}
+        showDetails={showDetails}
+      />
+    );
   }
 
   // When there are more users than we can show, keep room for the count chip.
@@ -48,7 +57,7 @@ export function Avatar({
   const remaining = validUsers.length - shownUsers.length;
   const countText = remaining > MAX_COUNT_DISPLAY ? `${MAX_COUNT_DISPLAY}+` : `+${remaining}`;
 
-  const shouldShowPopover = validUsers.some(user => user.email || user.organization);
+  const shouldShowPopover = showDetails && validUsers.some(user => user.email || user.organization);
 
   const avatarElement = (
     <AvatarGroup size={size} className={className}>

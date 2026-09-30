@@ -1,5 +1,9 @@
 {
   "a11y": {
+    "assignment_picker": {
+      "open": "Edit case assignment",
+      "remove_user": "Remove {{name}}"
+    },
     "breadcrumb": {
       "more": "More"
     },
@@ -1022,6 +1026,13 @@
       "popover_separators": "Separated by:",
       "popover_separators_values": "comma, space, new line",
       "popover_title": "Identifiers and File Formats"
+    },
+    "assignment_picker": {
+      "search_placeholder": "Search by name or email",
+      "remove_all": "Remove all",
+      "apply": "Apply",
+      "no_members_found": "No members found",
+      "you": "(you)"
     },
     "user_selection": {
       "search_placeholder": "Search",

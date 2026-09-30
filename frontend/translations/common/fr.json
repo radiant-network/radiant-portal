@@ -1,5 +1,9 @@
 {
   "a11y": {
+    "assignment_picker": {
+      "open": "Modifier l'assignation du cas",
+      "remove_user": "Retirer {{name}}"
+    },
     "breadcrumb": {
       "more": "Plus"
     },
@@ -1023,6 +1027,13 @@
       "popover_separators": "Séparateurs :",
       "popover_separators_values": "virgule, espace, retour de ligne",
       "popover_title": "Identifiants et formats de fichier"
+    },
+    "assignment_picker": {
+      "search_placeholder": "Rechercher par nom ou courriel",
+      "remove_all": "Tout supprimer",
+      "apply": "Appliquer",
+      "no_members_found": "Aucun membre trouvé",
+      "you": "(vous)"
     },
     "user_selection": {
       "search_placeholder": "Rechercher",
