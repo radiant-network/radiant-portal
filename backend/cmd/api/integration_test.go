@@ -93,6 +93,7 @@ func Test_SecureRoutes(t *testing.T) {
 		for _, route := range []string{
 			"radiant/organizations",
 			"radiant/case_groups",
+			"radiant/case_groups/run_1/notify",
 			"radiant/roles",
 			"radiant/users",
 			"radiant/cases/search",

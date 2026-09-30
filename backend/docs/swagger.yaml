@@ -491,6 +491,61 @@ components:
       - project_code
       - status_code
       type: object
+    CaseGroupEmailContext:
+      description: Values the tenant template was rendered with, echoed so a pipeline
+        log explains the email.
+      properties:
+        analysis_codes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        has_stat:
+          type: boolean
+        manifest_filename:
+          type: string
+      required:
+      - analysis_codes
+      - case_ids
+      type: object
+    CaseGroupEmailReport:
+      description: Outcome of the notification for one diagnosis laboratory of the
+        group.
+      properties:
+        case_count:
+          type: integer
+        context:
+          $ref: '#/components/schemas/CaseGroupEmailContext'
+        document_count:
+          type: integer
+        error:
+          type: string
+        organization_code:
+          type: string
+        recipients:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        status:
+          enum:
+          - sent
+          - skipped_no_contact
+          - skipped_no_documents
+          - failed
+          type: string
+        template:
+          type: string
+      required:
+      - organization_code
+      - recipients
+      - status
+      type: object
     CaseGroupRequest:
       description: Payload to create a case group, or overwrite the case list of an
         existing one (same name in the tenant). An empty case_ids list is accepted
@@ -2083,6 +2138,21 @@ components:
           type: boolean
         with_note:
           type: boolean
+      type: object
+    NotifyCaseGroupResponse:
+      description: 'Report of a case group notification: the group and one entry per
+        diagnosis laboratory.'
+      properties:
+        emails:
+          items:
+            $ref: '#/components/schemas/CaseGroupEmailReport'
+          type: array
+          uniqueItems: false
+        group:
+          $ref: '#/components/schemas/CaseGroupResponse'
+      required:
+      - emails
+      - group
       type: object
     ObservationCategoricalBatch:
       properties:
@@ -3819,6 +3889,78 @@ paths:
       security:
       - bearerauth: []
       summary: Get a case group
+      tags:
+      - case_groups
+  /{tenant}/case_groups/{name}/notify:
+    post:
+      description: |-
+        Sends one email per diagnosis laboratory of the group's cases, with the TSV manifest
+        of that laboratory's output documents attached (index files included), ready for
+        `radiant-client download -m`. Recipients come from `organization.notification_emails`,
+        subject and body from the tenant's template. Stateless: calling it again sends again.
+        Requires the `can_ingest_data` action. Returns 500 before any send when the tenant has
+        no template or the SMTP / notification settings are invalid; a laboratory whose send
+        fails is reported as `failed` and the others are still served.
+      operationId: notifyCaseGroup
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case group name
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotifyCaseGroupResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Email the diagnosis laboratories of a case group
       tags:
       - case_groups
   /{tenant}/cases/{case_id}:

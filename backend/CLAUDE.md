@@ -37,7 +37,9 @@ internal/
   repository/  - Data access layer, split by DB target into postgres/ and starrocks/ subpackages
   server/      - HTTP handlers grouped by resource; middlewares
   service/     - Cross-system orchestration (user provisioning, tenant setup, Ranger policies)
-  notification/- Lab manifest emails: per-tenant templates (manifest_<tenant>.tmpl, subject + HTML body)
+  notification/- Lab manifest emails: per-tenant templates (manifest_<tenant>.tmpl, subject + HTML body),
+                 TSV manifest writer (header = internal/cli/manifest columns, pinned by a contract
+                 test), SMTP mailer (go-mail) and the Notify service behind /case_groups/{name}/notify
   types/       - Domain models, filters, facets, OpenAPI annotations
   utils/       - Auth, S3, mappers, env helpers, collection utilities
 scripts/
@@ -100,7 +102,7 @@ Route groups:
 - `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
-- `/case_groups` — named sets of cases (one per pipeline run, the unit laboratories get notified about); `POST` creates or overwrites by name (`can_ingest_data`, checked in-tenant like the batches), `GET /{name}` reads (`can_search_case`, so the portal can turn a group into a case filter). Tables `case_group` (header, `UNIQUE (tenant_code, name)`, integer id only keys the membership) and `case_group_case` (junction, cascade on group or case delete), both Postgres-only (not federated).
+- `/case_groups` — named sets of cases (one per pipeline run, the unit laboratories get notified about); `POST` creates or overwrites by name (`can_ingest_data`, checked in-tenant like the batches), `GET /{name}` reads (`can_search_case`, so the portal can turn a group into a case filter), `POST /{name}/notify` (`can_ingest_data`, no body) emails each diagnosis laboratory of the group its TSV manifest of output documents (index files included): recipients from `organization.notification_emails`, subject/body from the tenant template, SMTP via `SMTP_*`. Stateless (a retry re-sends); 200 carries one report per lab (`sent` / `skipped_no_contact` / `skipped_no_documents` / `failed`) with the template context; 500 before any send when the tenant has no template or the settings are invalid. Documents are read Postgres-side along the same join path as the StarRocks document search (`CaseGroupsRepository.ListDocuments`); the API imports `internal/cli/manifest` for the column names, never the reverse. Tables `case_group` (header, `UNIQUE (tenant_code, name)`, integer id only keys the membership) and `case_group_case` (junction, cascade on group or case delete), both Postgres-only (not federated).
 
 Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → Keycloak authentication → recovery.
 
@@ -214,6 +216,10 @@ Copy `.env.template` → `.env`. Key variables:
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |
 | `POLL_INTERVAL_MS` | Worker poll interval | 1000 |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_TLS` / `SMTP_FROM` | Relay for the lab notification emails. Read at each send (no restart on a relay change); `SMTP_HOST` and `SMTP_FROM` required, port defaults to 587, `SMTP_TLS` ∈ `none` (plain, the prod relay on port 25) / `starttls` (default) / `tls` (implicit), auth only when `SMTP_USER` is set. | — |
+| `NOTIFICATION_CC` / `NOTIFICATION_BCC` | Comma-separated addresses copied on every lab notification. | — |
+| `NOTIFICATION_TIMEZONE` | Timezone of the manifest filename date and the `GeneratedOn` template value. | America/Montreal |
+| `PORTAL_URL` | Portal base URL exposed to templates as `.PortalURL`. | — |
 | `NOTIFICATION_TEMPLATE_DIR` | Directory of lab notification templates, one `manifest_<tenant>.tmpl` per tenant with `{{define "subject"}}` (text, one line) and `{{define "body"}}` (HTML: markup written in the template passes as-is, only `{{.Var}}` values are escaped). Parsed once at boot by `notification.LoadTemplates`: unset dir, unreadable dir, a file missing a define or failing to parse all **warn and skip**, never fatal; an `info` line lists the tenants loaded and `GET /status` reports `notification_templates` as `ok` (all files loaded), `warning` (at least one file skipped or ignored) or `error` (nothing loaded). No embedded default: a tenant without a template can't be notified (`ErrTemplateMissing`). `TemplateData` is the template contract, new variables are API-only changes and templates branch with `{{if}}` (`HasStat`, `HasAnalysis "CODE"`). Deployed as a volume (ConfigMap); a ConfigMap edit alone does not restart pods. | — (disabled) |
 
 ## Testing
