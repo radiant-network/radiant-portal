@@ -1084,6 +1084,26 @@
       "laboratory": "Laboratory",
       "imaging": "Imaging",
       "clinical_trials": "Clinical Trials"
+    },
+    "sidebar": {
+      "key_dates": {
+        "title": "Key Dates",
+        "initial_diagnosis": "Initial diagnosis",
+        "latest_encounter": "Latest encounter",
+        "day_age": "Day {{day}} · age {{age}}y",
+        "sources": {
+          "clinical": "Clinical",
+          "registry": "Registry"
+        }
+      },
+      "external_records": {
+        "title": "External Records",
+        "tefca_exchange": "TEFCA exchange",
+        "query_status": "Query status",
+        "query_status_description": "QHIN record locate & retrieve",
+        "linked": "Linked",
+        "connected": "Connected"
+      }
     }
   },
   "patient_exploration": {

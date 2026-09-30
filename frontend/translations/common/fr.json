@@ -1085,6 +1085,26 @@
       "laboratory": "Laboratoire",
       "imaging": "Imagerie",
       "clinical_trials": "Essais cliniques"
+    },
+    "sidebar": {
+      "key_dates": {
+        "title": "Dates clés",
+        "initial_diagnosis": "Diagnostic initial",
+        "latest_encounter": "Dernière rencontre",
+        "day_age": "Jour {{day}} · {{age}} ans",
+        "sources": {
+          "clinical": "Clinique",
+          "registry": "Registre"
+        }
+      },
+      "external_records": {
+        "title": "Dossiers externes",
+        "tefca_exchange": "Échange TEFCA",
+        "query_status": "Statut de la requête",
+        "query_status_description": "Localisation et récupération des dossiers QHIN",
+        "linked": "Lié",
+        "connected": "Connecté"
+      }
     }
   },
   "patient_exploration": {
