@@ -34,7 +34,10 @@ const createFormSchema = z.object({
   name: z.string().min(1, 'required'),
   code: z.string().min(1, 'required').max(MAX_CODE_LENGTH, 'max_50').regex(ORGANIZATION_CODE_PATTERN, 'invalid_code'),
   category_code: z.string().min(1, 'required'),
-  notification_emails: z.string().refine(isEmailList, 'invalid_email'),
+  notification_emails: z
+    .string()
+    .optional()
+    .refine(value => isEmailList(value ?? ''), 'invalid_email'),
 });
 
 const editFormSchema = createFormSchema.extend({
@@ -97,7 +100,7 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
   }, [name, isEdit, isCodeEdited, isSubmitted, form]);
 
   const onSubmit = async (values: FormValues) => {
-    const notificationEmails = normalizeEmailList(values.notification_emails);
+    const notificationEmails = normalizeEmailList(values.notification_emails ?? '');
     try {
       if (organization) {
         const updatedName = values.name.trim();
@@ -106,7 +109,6 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
           onOpenChange(false);
           return;
         }
-        // PUT replaces both fields; sending the name alone would clear the list.
         await organizationsApi.updateOrganization(tenant, organization.code!, {
           name: updatedName,
           notification_emails: notificationEmails,
