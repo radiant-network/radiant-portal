@@ -99,7 +99,7 @@ export const data = {
     aa_change: null,
     consequenceImpact: CommonSelectors.colorIndicator('emerald'),
     maneC: true,
-    maneM: true,
+    maneM: false,
     maneP: false,
     patients: '2 (1.43e-1)',
     transcript_id: 'ENST00000370552',
