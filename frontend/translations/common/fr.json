@@ -1026,15 +1026,12 @@
     },
     "user_selection": {
       "search_placeholder": "Rechercher",
-      "remove_assignment": "Retirer l'assignation",
       "no_users_found": "Aucun utilisateur trouvé",
       "start_typing_to_search": "Commencez à taper pour rechercher",
       "not_assigned": "Non assigné",
       "filter": "Filtrer",
       "reset": "Réinitialiser",
-      "assignment": "Assignation",
-      "case_assignment": "Assignation du cas",
-      "search": "Rechercher"
+      "case_assignment": "Assignation du cas"
     },
     "unassigned_avatar": {
       "can_assign": "Assigner ce cas",
