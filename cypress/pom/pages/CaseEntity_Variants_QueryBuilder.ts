@@ -170,6 +170,17 @@ const generateQueryBuilderFunctions = (
       cy.get(CommonSelectors.labelsSwitch).clickAndWait({ force: true });
     },
     /**
+     * Turns the field labels switch on if it is off.
+     */
+    forceCheckToggleLabels() {
+      cy.get(CommonSelectors.labelsSwitch).then($switch => {
+        if ($switch.attr('data-state') !== 'checked') {
+          cy.wrap($switch).clickAndWait({ force: true });
+        }
+      });
+      cy.get(CommonSelectors.labelsSwitch).should('have.attr', 'data-state', 'checked');
+    },
+    /**
      * Toggles the intra-query combiner operator (and ↔ or) of the active query.
      */
     toggleOperator() {
