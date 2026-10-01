@@ -9,6 +9,8 @@ const HoverCardArrow = HoverCardPrimitive.Arrow;
 
 const HoverCardTrigger = HoverCardPrimitive.Trigger;
 
+const HoverCardPortal = HoverCardPrimitive.Portal;
+
 function HoverCardContent({
   className,
   align = 'center',
@@ -29,4 +31,4 @@ function HoverCardContent({
 }
 HoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
 
-export { HoverCard, HoverCardArrow, HoverCardTrigger, HoverCardContent };
+export { HoverCard, HoverCardArrow, HoverCardTrigger, HoverCardContent, HoverCardPortal };

@@ -16,7 +16,7 @@ export interface AvatarProps {
   className?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
-  /** Show the assignees hovercard; off when the avatar triggers the assignment picker. */
+  /** Show the assignees hovercard; off while the assignment picker is open. */
   showDetails?: boolean;
 }
 
