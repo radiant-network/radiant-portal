@@ -11,6 +11,7 @@ import GenomicsTab from './genomics/genomics-tab';
 import ImagingTab from './imaging/imaging-tab';
 import LaboratoryTab from './laboratory/laboratory-tab';
 import Header from './layout/header';
+import Sidebar from './layout/sidebar';
 import OverviewTab from './overview/overview-tab';
 import TimelineTab from './timeline/timeline-tab';
 import TreatmentsTab from './treatments/treatments-tab';
@@ -80,30 +81,35 @@ export default function App() {
           ))}
         </TabsList>
         <Container>
-          <TabsContent value={PatientEntityTabs.Overview} className="p-0 md:p-3">
-            <OverviewTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.Timeline} className="p-0 md:p-3">
-            <TimelineTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.Treatments} className="p-0 md:p-3">
-            <TreatmentsTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.Genomics} className="p-0 md:p-3">
-            <GenomicsTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.TumorBoard} className="p-0 md:p-3">
-            <TumorBoardTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.Laboratory} className="p-0 md:p-3">
-            <LaboratoryTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.Imaging} className="p-0 md:p-3">
-            <ImagingTab />
-          </TabsContent>
-          <TabsContent value={PatientEntityTabs.ClinicalTrials} className="p-0 md:p-3">
-            <ClinicalTrialsTab />
-          </TabsContent>
+          <div className="grid gap-4 items-start max-w-8xl mx-auto w-full p-0 md:p-3 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)]">
+            <Sidebar patientId={patientId} />
+            <div className="min-w-0">
+              <TabsContent value={PatientEntityTabs.Overview}>
+                <OverviewTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.Timeline}>
+                <TimelineTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.Treatments}>
+                <TreatmentsTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.Genomics}>
+                <GenomicsTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.TumorBoard}>
+                <TumorBoardTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.Laboratory}>
+                <LaboratoryTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.Imaging}>
+                <ImagingTab />
+              </TabsContent>
+              <TabsContent value={PatientEntityTabs.ClinicalTrials}>
+                <ClinicalTrialsTab />
+              </TabsContent>
+            </div>
+          </div>
         </Container>
       </TabsNav>
     </main>
