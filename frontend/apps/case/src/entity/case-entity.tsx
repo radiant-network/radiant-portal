@@ -122,7 +122,7 @@ export default function App() {
   return (
     <CaseEntityContext value={data}>
       <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-        <Header data={data} isLoading={isLoading} onStatusChange={() => mutate()} />
+        <Header data={data} isLoading={isLoading} onStatusChange={() => mutate()} onAssignmentChange={() => mutate()} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
             <TabsListItem data-cy="details-tab" value={CaseEntityTabs.Details}>
