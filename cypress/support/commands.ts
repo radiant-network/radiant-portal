@@ -4,6 +4,7 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { getSettingsCheckbox, oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
+import { CaseEntity_Variants_QueryBuilder } from 'pom/pages/CaseEntity_Variants_QueryBuilder';
 
 // Public configuration getter (non-sensitive values)
 const getExpose = (key: string): string => {
@@ -494,6 +495,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
 
   cy.setLang('EN');
   cy.resetColumns();
+  CaseEntity_Variants_QueryBuilder[type === 'CNV' ? 'cnv' : 'snv'].actions.forceCheckToggleLabels();
 });
 
 /**
