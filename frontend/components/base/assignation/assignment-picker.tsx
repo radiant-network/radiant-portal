@@ -2,7 +2,7 @@ import { type ComponentProps, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 
 import { Avatar as AssigneesAvatar } from '@/components/base/avatar/avatar';
-import type { AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarButtonVariant, AvatarUser } from '@/components/base/avatar/avatar.types';
 import { getInitials, getUserColor } from '@/components/base/avatar/avatar.utils';
 import { Avatar, AvatarFallback, type AvatarSize } from '@/components/base/shadcn/avatar';
 import { Button } from '@/components/base/shadcn/button';
@@ -17,6 +17,7 @@ export type AssignmentPickerProps = {
   currentUserId?: string;
   isLoading?: boolean;
   size?: AvatarSize;
+  buttonVariant?: AvatarButtonVariant;
   align?: ComponentProps<typeof PopoverContent>['align'];
   onApply: (users: AvatarUser[]) => void;
   onOpenChange?: (open: boolean) => void;
@@ -39,6 +40,7 @@ function AssignmentPicker({
   currentUserId,
   isLoading = false,
   size = 'md',
+  buttonVariant,
   align = 'end',
   onApply,
   onOpenChange,
@@ -127,7 +129,7 @@ function AssignmentPicker({
   }
 
   if (!canEdit) {
-    return <AssigneesAvatar users={assignees} size={size} canAssign={false} />;
+    return <AssigneesAvatar users={assignees} size={size} canAssign={false} buttonVariant={buttonVariant} />;
   }
 
   return (
@@ -138,7 +140,7 @@ function AssignmentPicker({
           aria-label={t('a11y.assignment_picker.open')}
           className="rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <AssigneesAvatar users={assignees} size={size} showDetails={!open} />
+          <AssigneesAvatar users={assignees} size={size} showDetails={!open} buttonVariant={buttonVariant} />
         </button>
       </PopoverTrigger>
       <PopoverContent

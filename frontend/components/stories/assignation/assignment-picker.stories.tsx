@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
-import type { AvatarUser } from '@/components/base/avatar';
+import type { AvatarButtonVariant, AvatarUser } from '@/components/base/avatar';
 
 import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
 
@@ -42,6 +42,7 @@ type DemoProps = {
   canEdit?: boolean;
   currentUserId?: string;
   isLoading?: boolean;
+  buttonVariant?: AvatarButtonVariant;
 };
 
 function Demo({
@@ -51,6 +52,7 @@ function Demo({
   canEdit,
   currentUserId = CURRENT_USER_ID,
   isLoading,
+  buttonVariant,
 }: DemoProps) {
   const [assignees, setAssignees] = useState<AvatarUser[]>(initialAssignees);
 
@@ -63,6 +65,7 @@ function Demo({
         canEdit={canEdit}
         currentUserId={currentUserId}
         isLoading={isLoading}
+        buttonVariant={buttonVariant}
         align="start"
         onApply={setAssignees}
       />
@@ -79,6 +82,7 @@ export const Default: Story = {
       >
         <div className="flex gap-12">
           <Demo label="Unassigned" />
+          <Demo label="Unassigned (secondary)" buttonVariant="secondary" />
           <Demo label="One assignee" initialAssignees={[candidates[1]]} />
           <Demo label="Several assignees" initialAssignees={[candidates[1], candidates[3], candidates[4]]} />
         </div>
@@ -86,6 +90,7 @@ export const Default: Story = {
       <StorySection title="Read-only" description="Without can_edit_case: details on hover, no picker.">
         <div className="flex gap-12">
           <Demo label="Unassigned" canEdit={false} />
+          <Demo label="Unassigned (secondary)" canEdit={false} buttonVariant="secondary" />
           <Demo label="Assigned" canEdit={false} initialAssignees={[candidates[1], candidates[3]]} />
         </div>
       </StorySection>

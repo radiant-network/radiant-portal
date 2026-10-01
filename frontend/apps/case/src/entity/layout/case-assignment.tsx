@@ -63,6 +63,7 @@ function CaseAssignment({ caseEntity, onSaved }: CaseAssignmentProps) {
       candidates={candidates}
       assignees={caseEntity.assignees.map(toAvatarUser)}
       canEdit={canEdit}
+      buttonVariant="secondary"
       currentUserId={sessionUser?.sub}
       isLoading={isLoading}
       onApply={handleApply}

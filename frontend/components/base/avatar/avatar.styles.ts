@@ -21,9 +21,14 @@ export const avatarStyles = tv({
         text: 'text-muted-foreground/60',
       },
     },
+    buttonVariant: {
+      ghost: { container: '' },
+      secondary: { container: 'bg-secondary' },
+    },
   },
   defaultVariants: {
     variant: 'assignment',
+    buttonVariant: 'ghost',
   },
 });
 

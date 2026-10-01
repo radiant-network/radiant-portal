@@ -8,6 +8,8 @@ export interface AvatarUser {
   organization?: string;
 }
 
+export type AvatarButtonVariant = 'ghost' | 'secondary';
+
 export interface AvatarProps {
   users?: AvatarUser[];
   size?: AvatarSize;
@@ -18,6 +20,7 @@ export interface AvatarProps {
   onAssignClick?: () => void;
   /** Show the assignees hovercard; off while the assignment picker is open. */
   showDetails?: boolean;
+  buttonVariant?: AvatarButtonVariant;
 }
 
 export interface BaseAvatarProps {
@@ -25,6 +28,7 @@ export interface BaseAvatarProps {
   className?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
+  buttonVariant?: AvatarButtonVariant;
 }
 
 export interface UserAvatarProps {

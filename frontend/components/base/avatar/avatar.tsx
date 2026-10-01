@@ -26,6 +26,7 @@ export function Avatar({
   canAssign = true,
   onAssignClick,
   showDetails = true,
+  buttonVariant,
 }: AvatarProps) {
   const { t } = useI18n();
   const popoverTitle = t('common.user_selection.case_assignment');
@@ -35,7 +36,13 @@ export function Avatar({
 
   if (validUsers.length === 0) {
     return (
-      <AvatarAssignmentButton size={size} className={className} canAssign={canAssign} onAssignClick={onAssignClick} />
+      <AvatarAssignmentButton
+        size={size}
+        className={className}
+        canAssign={canAssign}
+        onAssignClick={onAssignClick}
+        buttonVariant={buttonVariant}
+      />
     );
   }
 
