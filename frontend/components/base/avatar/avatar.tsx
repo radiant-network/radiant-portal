@@ -15,8 +15,8 @@ const MAX_COUNT_DISPLAY = 99;
  *
  * - No users: AvatarAssignmentButton (bare icon, gray hover when assignable)
  * - 1 user: UserAvatar (colored circle with initials)
- * - 2+ users: an AvatarGroup, collapsing the overflow into a `+N` count chip
- *   once there are more than `maxAvatars` users.
+ * - 2+ users: an AvatarGroup showing up to `maxAvatars` avatars, the rest
+ *   collapsed into a `+N` count chip.
  */
 export function Avatar({
   users = [],
@@ -51,9 +51,8 @@ export function Avatar({
     );
   }
 
-  // When there are more users than we can show, keep room for the count chip.
   const overflow = validUsers.length > maxAvatars;
-  const shownUsers = overflow ? validUsers.slice(0, maxAvatars - 1) : validUsers;
+  const shownUsers = validUsers.slice(0, maxAvatars);
   const remaining = validUsers.length - shownUsers.length;
   const countText = remaining > MAX_COUNT_DISPLAY ? `${MAX_COUNT_DISPLAY}+` : `+${remaining}`;
 
