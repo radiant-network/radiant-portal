@@ -46,7 +46,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- --- Roles (one per tenant; each grants can_read_pii) ------------------------
-INSERT INTO public.role (tenant_code, code, name, description) VALUES
+INSERT INTO public.role (tenant_code, code, name_en, description_en) VALUES
     ('tenant_a', 'geneticist', 'Geneticist', 'Clinician who may read PII at their org'),
     ('tenant_b', 'geneticist', 'Geneticist', 'Clinician who may read PII at their org')
 ON CONFLICT (tenant_code, code) DO NOTHING;
