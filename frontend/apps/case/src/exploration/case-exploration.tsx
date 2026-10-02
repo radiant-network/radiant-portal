@@ -34,9 +34,7 @@ export default function App() {
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
-  const columns = useMemo(() => getCaseExplorationColumns(t), [t]);
-
-  const { data, isLoading, isValidating } = useSWR<CasesSearchResponse, any, CaseListInput>(
+  const { data, isLoading, isValidating, mutate } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
       listBodyWithCriteria: {
         additional_fields: additionalFields,
@@ -51,6 +49,9 @@ export default function App() {
       revalidateOnFocus: false,
     },
   );
+
+  const columns = useMemo(() => getCaseExplorationColumns(t, mutate), [t, mutate]);
+
   return (
     <>
       <HeaderNavigation
