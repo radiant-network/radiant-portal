@@ -39,7 +39,7 @@ function InterpretationCell({
 }: InterpretationCellProps) {
   const { t } = useI18n();
   const [_, setSearchParams] = useSearchParams();
-  const { list } = useDataTable();
+  const { list, count } = useDataTable();
   const { canInterpret } = useCaseVariantPermissions();
 
   const handleClick = () => {
@@ -70,7 +70,10 @@ function InterpretationCell({
         taskId={taskId}
         transcriptId={transcriptId}
         patientId={patientId}
-        handleSaveCallback={list?.mutate}
+        handleSaveCallback={() => {
+          list?.mutate();
+          count?.mutate();
+        }}
         renderTrigger={handleOpen => (
           <Tooltip>
             <TooltipTrigger asChild>

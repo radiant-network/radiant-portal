@@ -4,6 +4,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
 import type { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
+import type { TableProps } from '@/components/base/data-table/data-table';
 import type { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
 import { createEmptyQuery, hasEmptyQuery, isEqualToField } from '../libs/sqon';
@@ -32,6 +33,8 @@ export enum QBActionType {
   REMOVE_COMBINED_PILL = 'remove-combined-pill',
   CHANGE_COMBINER_OPERATOR = 'change-combiner-operator',
   SET_LABELS_ENABLED = 'set-labels-enabled',
+  SET_EXTRA_BODY_PARAMS = 'set-extra-body-params',
+  SET_EXTRA_TABLE_PROPS = 'set-extra-table-props',
   REMOVE_ALL_QUERIES = 'remove-all-queries-all',
   COMBINE_QUERIES = 'combine-queries',
   LOAD_QUERIES = 'load-queries',
@@ -91,6 +94,8 @@ export interface IQBContext {
   history: IHistory;
   settings: ISettings;
   cache: ICache;
+  extraBodyParams: Record<string, any>;
+  extraTableProps: Partial<TableProps<any>>;
 }
 
 type QBDispatch = Dispatch<ActionType>;
@@ -132,6 +137,8 @@ export function getDefaultQBContext() {
     cache: {
       selectedQueries: [],
     },
+    extraBodyParams: {},
+    extraTableProps: {},
   };
 }
 export const QBContext = createContext<IQBContext>(getDefaultQBContext());
@@ -739,6 +746,29 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       };
     }
     /**
+     * Manage extra query params
+     */
+    case QBActionType.SET_EXTRA_BODY_PARAMS: {
+      return {
+        ...context,
+        extraBodyParams: {
+          ...action.payload,
+        },
+      };
+    }
+    /**
+     * Manage extra query params
+     */
+    case QBActionType.SET_EXTRA_TABLE_PROPS: {
+      return {
+        ...context,
+        extraTableProps: {
+          ...action.payload,
+        },
+      };
+    }
+
+    /**
      * Something when wrong
      */
     default: {
@@ -782,6 +812,23 @@ export function useQBDispatch() {
 export function useQBActiveQuery(): ISyntheticSqon {
   const { activeQueryId, sqons } = useQBContext();
   return sqons.find(sqon => sqon.id === activeQueryId) ?? createEmptyQuery();
+}
+
+/**
+ * Retrieve extra body params
+ * e.g. {with_note: true, with_flag: ["flag", "pin"]}
+ */
+export function useQBExtraBodyParams(): Record<string, any> {
+  const { extraBodyParams } = useQBContext();
+  return extraBodyParams;
+}
+
+/**
+ * Retrieve extra table props
+ */
+export function useQBExtraTableProps(): Partial<TableProps<any>> {
+  const { extraTableProps } = useQBContext();
+  return extraTableProps;
 }
 
 /**

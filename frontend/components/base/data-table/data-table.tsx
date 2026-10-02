@@ -180,6 +180,11 @@ export type LoadingStates = {
   list?: boolean;
 };
 
+export type QuickfiltersProps = {
+  enabled: boolean;
+  total?: number;
+};
+
 export type TableProps<TData extends RowData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
@@ -190,6 +195,7 @@ export type TableProps<TData extends RowData> = {
   loadingStates?: LoadingStates;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: React.JSX.Element;
+  quickfilters?: QuickfiltersProps;
   total?: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
@@ -686,6 +692,9 @@ function DataTable<T extends RowData>({
     total: true,
     list: true,
   },
+  quickfilters = {
+    enabled: false,
+  },
   hasError = false,
   pagination,
   subComponent,
@@ -716,6 +725,10 @@ function DataTable<T extends RowData>({
   // container width
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  // count used for pageCount: with an active filter, 0 matches must collapse the
+  // pager to a single empty page, not keep the unfiltered page count around.
+  const count = quickfilters.enabled ? (quickfilters.total ?? 0) : total;
 
   // table interactions
   const [isUserPreferenceFetched, setIsUserPreferenceFetched] = useState<boolean>(false);
@@ -801,7 +814,7 @@ function DataTable<T extends RowData>({
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     onSortingChange: setSorting,
-    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, total) : undefined,
+    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
     state: {
       columnOrder,
       columnVisibility,
@@ -990,79 +1003,95 @@ function DataTable<T extends RowData>({
         'absolute top-0 right-0 bottom-0 left-0 bg-background z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
-      <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
-        {/* Total */}
-        {tableIndexResultPosition === 'top' && (
-          <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+      <div className={cn('w-full', { 'mb-4': hasUpperSettings })}>
+        {/* Results with TableFilters */}
+        {tableIndexResultPosition === 'top' && TableFilters !== undefined && (
+          <div className={cn('mb-2', { invisible: pagination.type === 'hidden' })}>
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
               pageSize={table.state.pagination?.pageSize ?? 20}
               total={total}
+              quickfilters={quickfilters}
             />
           </div>
         )}
 
-        {/* FiltersGroup */}
-        {TableFilters}
-
-        {/* Right Menu Options */}
-        <div className="flex justify-end">
-          {/* GroupBy */}
-          {groupByColumns.length > 0 && (
-            <DataTableGroupBy
-              grouping={grouping}
-              table={table}
-              groupByColumns={groupByColumns}
-              defaultColumnSettings={defaultColumnSettings}
-            />
-          )}
-
-          {/* columns order and visibility */}
-          {enableColumnOrdering && (
-            <>
-              <TableColumnSettings
-                columnPinning={columnPinning}
-                columnOrder={columnOrder}
-                setColumnOrder={setColumnOrder}
-                defaultSettings={defaultColumnSettings}
-                visiblitySettings={columnVisibility}
-                handleVisiblityChange={(target: string, checked: boolean) => {
-                  setColumnVisibility({ ...columnVisibility, [target]: checked });
-                  const newAdditionalFields = getFilteredAdditionalFields({
-                    columnVisibility: { ...columnVisibility, [target]: checked },
-                    defaultColumnSettings,
-                  });
-                  updateAdditionalField({
-                    newAddFields: newAdditionalFields,
-                    prevAddFields: lastFilteredAdditionalFields,
-                    setAdditionalFields: serverOptions?.setAdditionalFields,
-                  });
-                }}
-                handleOrderChange={setColumnOrder}
-                pristine={
-                  JSON.stringify(defaultColumnTableState.columnOrder) === JSON.stringify(columnOrder) &&
-                  JSON.stringify(defaultColumnTableState.columnPinning) === JSON.stringify(columnPinning) &&
-                  isEqual(defaultColumnTableState.columnSizing, columnSizing) &&
-                  isEqual(defaultColumnTableState.columnVisibility, columnVisibility)
-                }
-                handleReset={() => {
-                  setColumnOrder(defaultColumnTableState.columnOrder);
-                  setColumnSizing({});
-                  setColumnPinning(defaultColumnTableState.columnPinning);
-                  setColumnVisibility(defaultColumnTableState.columnVisibility);
-                  const allAdditionalFields = getFilteredAdditionalFields({
-                    columnVisibility: defaultColumnTableState.columnVisibility,
-                    defaultColumnSettings,
-                  });
-                  serverOptions?.setAdditionalFields?.(allAdditionalFields);
-                }}
+        <div className="w-full flex text-left justify-between items-end">
+          {/* Results without TableFilters */}
+          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
+            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+              <TableIndexResult
+                loading={loadingStates?.total}
+                pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                pageSize={table.state.pagination?.pageSize ?? 20}
+                total={total}
+                quickfilters={quickfilters}
               />
-            </>
+            </div>
           )}
 
-          {/* fullscreen toggle */}
-          {enableFullscreen && <DataTableFullscreenButton active={isFullscreen} handleClick={setIsFullscreen} />}
+          {/* FiltersGroup */}
+          {TableFilters && <div className="flex-1">{TableFilters}</div>}
+
+          {/* Right Menu Options */}
+          <div className="flex justify-end">
+            {/* GroupBy */}
+            {groupByColumns.length > 0 && (
+              <DataTableGroupBy
+                grouping={grouping}
+                table={table}
+                groupByColumns={groupByColumns}
+                defaultColumnSettings={defaultColumnSettings}
+              />
+            )}
+
+            {/* columns order and visibility */}
+            {enableColumnOrdering && (
+              <>
+                <TableColumnSettings
+                  columnPinning={columnPinning}
+                  columnOrder={columnOrder}
+                  setColumnOrder={setColumnOrder}
+                  defaultSettings={defaultColumnSettings}
+                  visiblitySettings={columnVisibility}
+                  handleVisiblityChange={(target: string, checked: boolean) => {
+                    setColumnVisibility({ ...columnVisibility, [target]: checked });
+                    const newAdditionalFields = getFilteredAdditionalFields({
+                      columnVisibility: { ...columnVisibility, [target]: checked },
+                      defaultColumnSettings,
+                    });
+                    updateAdditionalField({
+                      newAddFields: newAdditionalFields,
+                      prevAddFields: lastFilteredAdditionalFields,
+                      setAdditionalFields: serverOptions?.setAdditionalFields,
+                    });
+                  }}
+                  handleOrderChange={setColumnOrder}
+                  pristine={
+                    JSON.stringify(defaultColumnTableState.columnOrder) === JSON.stringify(columnOrder) &&
+                    JSON.stringify(defaultColumnTableState.columnPinning) === JSON.stringify(columnPinning) &&
+                    isEqual(defaultColumnTableState.columnSizing, columnSizing) &&
+                    isEqual(defaultColumnTableState.columnVisibility, columnVisibility)
+                  }
+                  handleReset={() => {
+                    setColumnOrder(defaultColumnTableState.columnOrder);
+                    setColumnSizing({});
+                    setColumnPinning(defaultColumnTableState.columnPinning);
+                    setColumnVisibility(defaultColumnTableState.columnVisibility);
+                    const allAdditionalFields = getFilteredAdditionalFields({
+                      columnVisibility: defaultColumnTableState.columnVisibility,
+                      defaultColumnSettings,
+                    });
+                    serverOptions?.setAdditionalFields?.(allAdditionalFields);
+                  }}
+                />
+              </>
+            )}
+
+            {/* fullscreen toggle */}
+            {enableFullscreen && <DataTableFullscreenButton active={isFullscreen} handleClick={setIsFullscreen} />}
+          </div>
         </div>
       </div>
 
@@ -1156,6 +1185,7 @@ function DataTable<T extends RowData>({
                 pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
                 pageSize={table.state.pagination?.pageSize ?? 20}
                 total={total}
+                quickfilters={quickfilters}
               />
             )}
           </div>

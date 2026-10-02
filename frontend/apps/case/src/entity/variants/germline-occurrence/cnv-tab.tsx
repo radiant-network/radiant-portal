@@ -10,6 +10,8 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
+
 import { isValidSeqId } from './libs/seq-id';
 import {
   defaultGermlineCNVSettings,
@@ -61,6 +63,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
         defaultPageSize={30}
         enableColumnOrdering
         enableFullscreen
+        TableFilters={<AnnotationsTableQuickfilters disabled={['interpretation']} />}
       />
     </QueryBuilder>
   );
