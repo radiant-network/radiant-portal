@@ -132,7 +132,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
             <QueryBuilderSavedFilters />
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
-            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
+            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
                 <QueryBar key={sqon.id} index={index} sqon={sqon} />
               ))}
