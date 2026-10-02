@@ -1752,6 +1752,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        cmc_mutation_url:
+          type: string
+        cmc_sample_mutated:
+          type: integer
+        cmc_sample_ratio:
+          type: number
+        cmc_tier:
+          type: string
         end:
           type: integer
         exomiser_acmg_classification:
@@ -2796,6 +2804,8 @@ components:
           type: string
         ad_ratio:
           type: number
+        alternate:
+          type: string
         aq:
           type: number
         chromosome:
@@ -2805,6 +2815,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        cmc_mutation_url:
+          type: string
+        cmc_sample_mutated:
+          type: integer
+        cmc_sample_ratio:
+          type: number
+        cmc_tier:
+          type: string
         end:
           type: integer
         flag_type:
@@ -2841,6 +2859,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        reference:
+          type: string
         rsnumber:
           type: string
         seq_id:
@@ -2869,6 +2889,7 @@ components:
           $ref: '#/components/schemas/VepImpact'
       required:
       - aa_change
+      - alternate
       - chromosome
       - clinvar
       - end
@@ -2885,6 +2906,7 @@ components:
       - locus_id
       - omim_inheritance_code
       - picked_consequences
+      - reference
       - rsnumber
       - seq_id
       - somatic_pc_tn_wgs
