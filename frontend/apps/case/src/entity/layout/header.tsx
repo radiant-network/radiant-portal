@@ -8,9 +8,8 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
+import CaseAssignment from '../../components/case-assignment';
 import { useCanEditCase } from '../../permissions/use-case-permissions';
-
-import CaseAssignment from './case-assignment';
 
 type HeaderProps = {
   data?: CaseEntity | null;
@@ -46,7 +45,18 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
         },
       ]}
       statuses={[
-        ...(data ? [<CaseAssignment key="assignment" caseEntity={data} onSaved={onAssignmentChange} />] : []),
+        ...(data
+          ? [
+              <CaseAssignment
+                key="assignment"
+                caseId={data.case_id}
+                diagnosisLabCode={data.diagnosis_lab_code}
+                assignees={data.assignees}
+                buttonVariant="secondary"
+                onSaved={onAssignmentChange}
+              />,
+            ]
+          : []),
         <Tooltip key="priority">
           <TooltipTrigger>
             <Badge variant="outline" className="px-3 py-2">

@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next';
+import { User } from 'lucide-react';
 
 import type { CaseResult } from '@/api/api';
 import AnalysisTypeCodeCell, {
@@ -14,12 +15,26 @@ import { createColumnSettings, type TableColumnDef } from '@/components/base/dat
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
+import CaseAssignmentCell from './cells/case-assignment-cell';
 import CaseStatusCell from './cells/case-status-cell';
 
 const columnHelper = createAppColumnHelper<CaseResult>();
 
-function getCaseExplorationColumns(t: TFunction<string, undefined>) {
+function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange?: () => void) {
   return [
+    // Assignment
+    columnHelper.accessor(row => row.assignees, {
+      id: 'assignees',
+      cell: info => <CaseAssignmentCell {...info} onSaved={onCaseChange} />,
+      header: () => (
+        <TooltipHeader iconOnly tooltip={t('case_exploration.case.headers.assignees_tooltip')}>
+          <User className="size-4 text-foreground" />
+        </TooltipHeader>
+      ),
+      size: 80,
+      minSize: 80,
+      enableSorting: false,
+    }),
     // case
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
@@ -247,6 +262,11 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
 }
 
 const defaultSettings = createColumnSettings([
+  {
+    id: 'assignees',
+    visible: true,
+    label: 'case_exploration.case.headers.assignees',
+  },
   {
     id: 'case_id',
     visible: true,
