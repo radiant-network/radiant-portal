@@ -8,6 +8,9 @@ import { cn } from '@/lib/utils';
 
 const defaultPaginationStyle = 'gap-1 py-2 px-2.5 h-7 text-xs';
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [30, 40, 50];
+const DEFAULT_PAGE_SIZE = DEFAULT_PAGE_SIZE_OPTIONS[0];
+
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
     role="navigation"
@@ -126,7 +129,7 @@ type PaginationPageSizeProps = {
 const PaginationPageSize = ({
   pageSize,
   onPageSizeChange,
-  pageSizeOptions = [10, 20, 30, 40, 50],
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   className,
 }: PaginationPageSizeProps) => {
   const { t } = useI18n();
@@ -164,4 +167,6 @@ export {
   PaginationPrevious,
   PaginationPageSize,
   defaultPaginationStyle,
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_SIZE_OPTIONS,
 };

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListFilter } from 'lucide-react';
 
+import { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Button } from '@/components/base/shadcn/button';
@@ -23,7 +24,7 @@ import CommunityFilters from './community-filters';
 import CommunityMemberCard from './community-member-card';
 import CommunitySearch from './community-search';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = DEFAULT_PAGE_SIZE;
 const MAX_VISIBLE_PAGES = 5;
 const SEARCH_DEBOUNCE_MS = 250;
 

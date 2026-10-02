@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import type { OccurrenceCount, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
-import DataTable, { type TableProps } from '../data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE, type TableProps } from '../data-table/data-table';
 import { DataTableProvider } from '../data-table/hooks/use-data-table';
 import { Card, CardContent } from '../shadcn/card';
 
@@ -24,7 +24,7 @@ type QueryBuilderDataTableProps<T extends RowData> = Omit<
  * Used to access QBContext and create list and count query
  */
 function QueryBuilderDataTable<T extends RowData>({
-  defaultPageSize = 10,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
   swrId,
   paginationType = 'server',
   ...props
