@@ -228,7 +228,11 @@ CREATE TABLE IF NOT EXISTS `snv__variant`(
                                              dna_change VARCHAR(2000),
                                              aa_change VARCHAR(2000),
                                              transcript_id varchar(100),
-                                             omim_inheritance_code array<varchar(5)>
+                                             omim_inheritance_code array<varchar(5)>,
+                                             cmc_mutation_url VARCHAR(255),
+                                             cmc_sample_mutated INT,
+                                             cmc_sample_ratio DOUBLE,
+                                             cmc_tier VARCHAR(8)
 ) PRIMARY KEY(locus_id);
 
 create table IF NOT EXISTS hpo_gene_panel

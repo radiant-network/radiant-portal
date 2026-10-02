@@ -44,6 +44,15 @@ func Test_GetFacets_CNVType(t *testing.T) {
 	assert.ElementsMatch(t, []string{"GAIN", "LOSS", "GAINLOH", "CNLOH"}, facets[0].Values)
 }
 
+func Test_GetFacets_CmcTier(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetFacets(t.Context(), []string{"cmc_tier"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.Equal(t, "cmc_tier", facets[0].Name)
+	assert.Equal(t, []string{"1", "2", "3", "Other"}, facets[0].Values)
+}
+
 func Test_GetFacets_WithNoNames(t *testing.T) {
 	repo := NewFacetsRepository()
 	facets, err := repo.GetFacets(t.Context(), []string{})

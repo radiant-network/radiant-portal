@@ -568,3 +568,28 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
+
+func Test_SNVOccurrence_Aggregation_By_Cmc_Tier_With_Dictionary(t *testing.T) {
+	body := `{
+			"field": "cmc_tier",
+			"sqon": {
+				"op": "and",
+				"content": []
+			},
+			"size": 10
+		}`
+	expected := `[{"key": "2", "count": 1}, {"key": "Other", "count": 1}, {"key": "1", "count": 2}, {"key": "3", "count": 0}]`
+	testAggregation(t, "aggregation", body, []string{"with_dictionary=true"}, expected)
+}
+
+func Test_SNVOccurrence_Statistics_Cmc_Sample_Ratio(t *testing.T) {
+	body := `{
+			"field": "cmc_sample_ratio",
+			"sqon": {
+				"op": "and",
+				"content": []
+			}
+		}`
+	expected := `{"min": 0.0003, "max": 0.0028, "type": "decimal"}`
+	testStatistics(t, "pagination", body, expected)
+}

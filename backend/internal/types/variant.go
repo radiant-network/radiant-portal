@@ -361,6 +361,50 @@ var GnomadV3AfField = Field{
 	Type:            DecimalType,
 	Table:           VariantTable,
 }
+var CmcSampleMutatedField = Field{
+	Name:            "cmc_sample_mutated",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	SortNullsLast:   true,
+	Type:            IntegerType,
+	Table:           VariantTable,
+}
+var CmcSampleRatioField = Field{
+	Name:            "cmc_sample_ratio",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	SortNullsLast:   true,
+	Type:            DecimalType,
+	Table:           VariantTable,
+}
+var CmcTierField = Field{
+	Name:            "cmc_tier",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	SortNullsLast:   true,
+	Table:           VariantTable,
+}
+var CmcMutationUrlField = Field{
+	Name:          "cmc_mutation_url",
+	CanBeSelected: true,
+	Table:         VariantTable,
+}
+var ReferenceField = Field{
+	Name:          "reference",
+	CanBeSelected: true,
+	Table:         VariantTable,
+}
+var AlternateField = Field{
+	Name:          "alternate",
+	CanBeSelected: true,
+	Table:         VariantTable,
+}
 var PickedTranscriptIdField = Field{
 	Name:          "transcript_id",
 	CanBeSelected: true,

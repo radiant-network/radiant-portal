@@ -1,5 +1,5 @@
-locus_id	impact_score	germline_pf_wgs	germline_pc_wgs	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	is_mane_select	is_canonical	clinvar_interpretation	rsnumber	aa_change	consequences
-1000	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]
-1001	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]
-1002	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]
-2000	4	0.99	2	0.001	hgvsg2	code1	class1	impact1	symbol1	true	true	["Benign"]	rs222222222	p.Arg19His	["splice acceptor"]
+locus_id	impact_score	germline_pf_wgs	germline_pc_wgs	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	is_mane_select	is_canonical	clinvar_interpretation	rsnumber	aa_change	consequences	cmc_sample_mutated	cmc_sample_ratio	cmc_tier	cmc_mutation_url
+1000	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]	5	0.0005	1	https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000
+1001	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]	4	0.0004	1	https://cancer.sanger.ac.uk/cosmic/search?q=COSV1001
+1002	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	["Benign", "Pathogenic"]	rs111111111	p.Arg19His	["splice acceptor"]	3	0.0003	Other	https://cancer.sanger.ac.uk/cosmic/search?q=COSV1002
+2000	4	0.99	2	0.001	hgvsg2	code1	class1	impact1	symbol1	true	true	["Benign"]	rs222222222	p.Arg19His	["splice acceptor"]	2	0.0002	2	https://cancer.sanger.ac.uk/cosmic/search?q=COSV2000
