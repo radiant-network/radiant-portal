@@ -18,9 +18,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/base/shadcn/sheet';
+import { Textarea } from '@/components/base/shadcn/textarea';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { organizationsApi } from '@/utils/api';
+
+import { isEmailList, normalizeEmailList } from '../emails';
 
 import { MAX_CODE_LENGTH, toCodeCharset, toOrganizationCode } from './organizations-utils';
 import { useOrganizationCategories } from './use-organization-categories';
@@ -31,6 +34,10 @@ const createFormSchema = z.object({
   name: z.string().min(1, 'required'),
   code: z.string().min(1, 'required').max(MAX_CODE_LENGTH, 'max_50').regex(ORGANIZATION_CODE_PATTERN, 'invalid_code'),
   category_code: z.string().min(1, 'required'),
+  notification_emails: z
+    .string()
+    .optional()
+    .refine(value => isEmailList(value ?? ''), 'invalid_email'),
 });
 
 const editFormSchema = createFormSchema.extend({
@@ -40,7 +47,7 @@ const editFormSchema = createFormSchema.extend({
 
 type FormValues = z.infer<typeof createFormSchema>;
 
-const EMPTY_FORM: FormValues = { name: '', code: '', category_code: '' };
+const EMPTY_FORM: FormValues = { name: '', code: '', category_code: '', notification_emails: '' };
 
 function ReadOnlyField({ label, value }: { label: string; value?: string }) {
   return (
@@ -79,7 +86,11 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
 
   useEffect(() => {
     if (!open) return;
-    form.reset(organization ? { ...EMPTY_FORM, name: organization.name ?? '' } : EMPTY_FORM);
+    form.reset(
+      organization
+        ? { ...EMPTY_FORM, name: organization.name ?? '', notification_emails: organization.notification_emails ?? '' }
+        : EMPTY_FORM,
+    );
     setIsCodeEdited(false);
   }, [open, organization, form]);
 
@@ -89,24 +100,34 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
   }, [name, isEdit, isCodeEdited, isSubmitted, form]);
 
   const onSubmit = async (values: FormValues) => {
+    const notificationEmails = normalizeEmailList(values.notification_emails ?? '');
     try {
       if (organization) {
         const updatedName = values.name.trim();
         // An unchanged submit is a no-op: the sheet closes with no request and no toast.
-        if (updatedName === organization.name) {
+        if (updatedName === organization.name && notificationEmails === (organization.notification_emails ?? '')) {
           onOpenChange(false);
           return;
         }
-        await organizationsApi.updateOrganization(tenant, organization.code!, { name: updatedName });
+        await organizationsApi.updateOrganization(tenant, organization.code!, {
+          name: updatedName,
+          notification_emails: notificationEmails,
+        });
       } else {
-        await organizationsApi.createOrganization(tenant, values);
+        await organizationsApi.createOrganization(tenant, { ...values, notification_emails: notificationEmails });
       }
       toast.success(t(`${i18nPrefix}.notifications.success`));
       onSaved();
       onOpenChange(false);
     } catch (error: any) {
-      if (!isEdit && error?.response?.status === 409) {
+      const status = error?.response?.status;
+      if (!isEdit && status === 409) {
         form.setError('code', { message: 'organization_code_exists' });
+        return;
+      }
+      // The API validates each address too (bare form only); its 400 names the field.
+      if (status === 400 && String(error?.response?.data?.message ?? '').includes('notification email')) {
+        form.setError('notification_emails', { message: 'invalid_email' });
         return;
       }
       toast.error(t(`${i18nPrefix}.notifications.errors.default`));
@@ -133,6 +154,20 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                schema={formSchema}
+                name="notification_emails"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('admin.organizations.fields.notification_emails')}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} placeholder="lab@example.org, lab-2@example.org" />
+                    </FormControl>
+                    <FormDescription>{t('admin.organizations.fields.notification_emails_hint')}</FormDescription>
                   </FormItem>
                 )}
               />
