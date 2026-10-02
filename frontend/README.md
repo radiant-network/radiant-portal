@@ -100,6 +100,8 @@ This structure ensures modularity, reusability, and scalability across the proje
 
 ## Pull Request workflow
 
+Read more [here](https://app.notion.com/p/ferlab/Processus-QA-Ticket-Jira-2a1b0fcecb3d81f9bc4efe1fae2fa5ae)
+
 - Create a new branch (feat/SJRA-XXXX, fix/SJRA-XXXX, chore/SJRA-XXXX)
 - Implement the new feature/bugfix
 - Create a new pull request
