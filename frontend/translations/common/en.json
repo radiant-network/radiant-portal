@@ -1,5 +1,9 @@
 {
   "a11y": {
+    "assignment_picker": {
+      "open": "Edit case assignment",
+      "remove_user": "Remove {{name}}"
+    },
     "breadcrumb": {
       "more": "More"
     },
@@ -1024,17 +1028,21 @@
       "popover_separators_values": "comma, space, new line",
       "popover_title": "Identifiers and File Formats"
     },
+    "assignment_picker": {
+      "search_placeholder": "Search by name or email",
+      "remove_all": "Remove all",
+      "apply": "Apply",
+      "no_members_found": "No members found",
+      "you": "(you)"
+    },
     "user_selection": {
       "search_placeholder": "Search",
-      "remove_assignment": "Remove assignment",
       "no_users_found": "No users found",
       "start_typing_to_search": "Start typing to search",
       "not_assigned": "Not assigned",
       "filter": "Filter",
       "reset": "Reset",
-      "assignment": "Assignment",
-      "case_assignment": "Case assignment",
-      "search": "Search"
+      "case_assignment": "Case assignment"
     },
     "unassigned_avatar": {
       "can_assign": "Assign case",
@@ -1227,6 +1235,9 @@
   },
   "case_status": {
     "error": "Status update failed. Please try again."
+  },
+  "case_assignment": {
+    "error": "Assignment update failed. Please try again."
   },
   "files": {
     "filters": {

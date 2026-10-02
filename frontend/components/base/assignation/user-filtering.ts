@@ -76,27 +76,6 @@ export function createFilteredUserList({
 }
 
 /**
- * Handles user selection logic for different scenarios
- */
-export function handleUserSelection({
-  selectedUser,
-  currentSelectedUsers,
-  isNotAssignedUser: isNotAssigned,
-}: {
-  selectedUser: AvatarUser;
-  currentSelectedUsers: AvatarUser[];
-  isNotAssignedUser: boolean;
-}): AvatarUser[] {
-  if (isNotAssigned) {
-    // If selecting 'not-assign', replace all others with just this one
-    return [selectedUser];
-  }
-  // For regular users, remove 'not-assign' if it exists and add the new user
-  const filteredUsers = currentSelectedUsers.filter(u => !isNotAssignedUser(u));
-  return [...filteredUsers, selectedUser];
-}
-
-/**
  * Handles user toggle logic for checkbox-based selection
  */
 export function handleUserToggle({

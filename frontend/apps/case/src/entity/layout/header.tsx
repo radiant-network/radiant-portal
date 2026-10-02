@@ -10,13 +10,16 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import { useCanEditCase } from '../../permissions/use-case-permissions';
 
+import CaseAssignment from './case-assignment';
+
 type HeaderProps = {
   data?: CaseEntity | null;
   isLoading: boolean;
   onStatusChange?: () => void;
+  onAssignmentChange?: () => void;
 };
 
-export default function Header({ data, isLoading, onStatusChange }: HeaderProps) {
+export default function Header({ data, isLoading, onStatusChange, onAssignmentChange }: HeaderProps) {
   const { t } = useI18n();
   const canEditCase = useCanEditCase(data?.diagnosis_lab_code);
 
@@ -43,6 +46,7 @@ export default function Header({ data, isLoading, onStatusChange }: HeaderProps)
         },
       ]}
       statuses={[
+        ...(data ? [<CaseAssignment key="assignment" caseEntity={data} onSaved={onAssignmentChange} />] : []),
         <Tooltip key="priority">
           <TooltipTrigger>
             <Badge variant="outline" className="px-3 py-2">

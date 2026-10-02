@@ -165,6 +165,21 @@ export const AssignmentStates: Story = {
               <Avatar users={[]} canAssign={false} />
               <span className="text-xs text-muted-foreground">Cannot Assign</span>
             </div>
+
+            <div className="flex flex-col items-center gap-2">
+              <Avatar
+                users={[]}
+                canAssign={true}
+                buttonVariant="secondary"
+                onAssignClick={() => alert('Assign clicked!')}
+              />
+              <span className="text-xs text-muted-foreground">Can Assign (secondary)</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[]} canAssign={false} buttonVariant="secondary" />
+              <span className="text-xs text-muted-foreground">Cannot Assign (secondary)</span>
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,9 @@
 {
   "a11y": {
+    "assignment_picker": {
+      "open": "Modifier l'assignation du cas",
+      "remove_user": "Retirer {{name}}"
+    },
     "breadcrumb": {
       "more": "Plus"
     },
@@ -1025,17 +1029,21 @@
       "popover_separators_values": "virgule, espace, retour de ligne",
       "popover_title": "Identifiants et formats de fichier"
     },
+    "assignment_picker": {
+      "search_placeholder": "Rechercher par nom ou courriel",
+      "remove_all": "Tout supprimer",
+      "apply": "Appliquer",
+      "no_members_found": "Aucun membre trouvé",
+      "you": "(vous)"
+    },
     "user_selection": {
       "search_placeholder": "Rechercher",
-      "remove_assignment": "Retirer l'assignation",
       "no_users_found": "Aucun utilisateur trouvé",
       "start_typing_to_search": "Commencez à taper pour rechercher",
       "not_assigned": "Non assigné",
       "filter": "Filtrer",
       "reset": "Réinitialiser",
-      "assignment": "Assignation",
-      "case_assignment": "Assignation du cas",
-      "search": "Rechercher"
+      "case_assignment": "Assignation du cas"
     },
     "unassigned_avatar": {
       "can_assign": "Assigner ce cas",
@@ -1228,6 +1236,9 @@
   },
   "case_status": {
     "error": "Échec de la mise à jour du statut. Veuillez réessayer."
+  },
+  "case_assignment": {
+    "error": "Échec de la mise à jour de l'assignation. Veuillez réessayer."
   },
   "files": {
     "filters": {
