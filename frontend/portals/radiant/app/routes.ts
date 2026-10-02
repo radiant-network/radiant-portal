@@ -29,5 +29,5 @@ export default [
   route('auth/callback', './routes/auth/callback.ts'),
   route('auth/logout', './routes/auth/logout.ts'),
   route('auth/refresh-token', './api/refresh-token.ts'),
-  ...prefix('api', [route('*?', './api/proxy.ts')]),
+  ...prefix('api', [route('yac/*?', './api/yac-proxy.ts'), route('*?', './api/proxy.ts')]),
 ] satisfies RouteConfig;
