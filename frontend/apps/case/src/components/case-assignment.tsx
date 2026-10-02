@@ -3,14 +3,15 @@ import { useRouteLoaderData } from 'react-router';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 
-import type { CaseAssignee, CaseEntity } from '@/api/api';
+import type { CaseAssignee } from '@/api/api';
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
-import type { AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarButtonVariant, AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { caseApi } from '@/utils/api';
 
-import { useCanEditCase } from '../../permissions/use-case-permissions';
+import { useCanEditCase } from '../permissions/use-case-permissions';
 
 // Portal layout route whose loader returns the session user.
 const PROTECTED_LAYOUT_ROUTE_ID = 'layout/protected-layout';
@@ -31,27 +32,31 @@ async function fetchCandidates(input: CandidatesInput, tenant: string) {
 }
 
 type CaseAssignmentProps = {
-  caseEntity: CaseEntity;
+  caseId: number;
+  diagnosisLabCode?: string;
+  assignees: CaseAssignee[];
+  size?: AvatarSize;
+  buttonVariant?: AvatarButtonVariant;
   onSaved?: () => void;
 };
 
-function CaseAssignment({ caseEntity, onSaved }: CaseAssignmentProps) {
+function CaseAssignment({ caseId, diagnosisLabCode, assignees, size, buttonVariant, onSaved }: CaseAssignmentProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
-  const canEdit = useCanEditCase(caseEntity.diagnosis_lab_code);
+  const canEdit = useCanEditCase(diagnosisLabCode);
   const sessionUser = useRouteLoaderData<{ sub: string }>(PROTECTED_LAYOUT_ROUTE_ID);
   const [hasOpened, setHasOpened] = useState(false);
 
   // Fetched on first opening only: the endpoint requires can_edit_case.
   const { data: candidates = [], isLoading } = useSWR<AvatarUser[], unknown, CandidatesInput | null>(
-    canEdit && hasOpened ? { key: 'case-assignment-candidates', caseId: caseEntity.case_id } : null,
+    canEdit && hasOpened ? { key: 'case-assignment-candidates', caseId } : null,
     input => fetchCandidates(input, tenant),
     { revalidateOnFocus: false },
   );
 
   async function handleApply(users: AvatarUser[]) {
     try {
-      await caseApi.putCaseAssignments(tenant, caseEntity.case_id, { user_ids: users.map(user => user.id) });
+      await caseApi.putCaseAssignments(tenant, caseId, { user_ids: users.map(user => user.id) });
       onSaved?.();
     } catch {
       toast.error(t('case_assignment.error'));
@@ -61,9 +66,10 @@ function CaseAssignment({ caseEntity, onSaved }: CaseAssignmentProps) {
   return (
     <AssignmentPicker
       candidates={candidates}
-      assignees={caseEntity.assignees.map(toAvatarUser)}
+      assignees={assignees.map(toAvatarUser)}
       canEdit={canEdit}
-      buttonVariant="secondary"
+      size={size}
+      buttonVariant={buttonVariant}
       currentUserId={sessionUser?.sub}
       isLoading={isLoading}
       onApply={handleApply}
