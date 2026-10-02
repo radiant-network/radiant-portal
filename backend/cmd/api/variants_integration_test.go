@@ -366,6 +366,22 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 	})
 }
 
+func Test_GetGermlineVariantConditions_Clinvar_NullDateLastEvaluated_Omitted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/conditions/clinvar", 2000), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		expected := `{"clinvar_id":"123460","conditions":[{"locus_id":"2000","clinvar_id":"123460","accession":"RCV000006","clinical_significance":["Uncertain significance"],"submission_count":2,"review_status":"no_assertion_criteria_provided","review_status_stars":0,"version":1,"traits":["Trait7"]}]}`
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
 func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})

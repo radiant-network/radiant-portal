@@ -43,6 +43,7 @@ func (r *ClinvarRCVRepository) GetVariantClinvarConditions(ctx context.Context, 
 		Select(strings.Join(columns, ",")).
 		Joins(fmt.Sprintf("JOIN %s %s ON %s.clinvar_name = %s.clinvar_id", types.ClinvarRCVTable.TenantQualifiedName(ctx), types.ClinvarRCVTable.Alias, types.VariantTable.Alias, types.ClinvarRCVTable.Alias)).
 		Where(fmt.Sprintf("%s.locus_id = ?", types.VariantTable.Alias), locusId).
+		Where(fmt.Sprintf("%s.submission_count > 0", types.ClinvarRCVTable.Alias)).
 		Find(&clinvarRCV).Error
 	if err != nil {
 		return nil, fmt.Errorf("error while fetching clinvar RCV: %w", err)

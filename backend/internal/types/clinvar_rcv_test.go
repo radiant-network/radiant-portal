@@ -34,6 +34,19 @@ func Test_ClinVarRCV_ToJSON(t *testing.T) {
 	assert.True(t, is_equal, "ClinvarRCV should contain a valid JSON")
 }
 
+func Test_ClinVarRCV_ToJSON_ZeroDateLastEvaluatedOmitted(t *testing.T) {
+	t.Parallel()
+	rcv := ClinvarRCV{
+		LocusId:           "12345",
+		ClinvarId:         "RCV000123456",
+		ReviewStatusStars: 0,
+	}
+
+	jsonData, err := json.Marshal(rcv)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `{"locus_id":"12345","clinvar_id":"RCV000123456","review_status_stars":0}`, string(jsonData))
+}
+
 func Test_ClinVarRCV_FromJSON(t *testing.T) {
 	t.Parallel()
 	myTime, _ := time.Parse(time.RFC3339, "2025-01-01T00:00:00Z")

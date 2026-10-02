@@ -11,7 +11,7 @@ type ClinvarRCV struct {
 	ClinvarId            string            `json:"clinvar_id" validate:"required"`
 	Accession            string            `json:"accession,omitempty"`
 	ClinicalSignificance JsonArray[string] `json:"clinical_significance,omitempty"`
-	DateLastEvaluated    time.Time         `json:"date_last_evaluated,omitempty"`
+	DateLastEvaluated    time.Time         `json:"date_last_evaluated,omitzero"`
 	SubmissionCount      int               `json:"submission_count,omitempty"`
 	ReviewStatus         string            `json:"review_status,omitempty"`
 	ReviewStatusStars    int               `json:"review_status_stars" validate:"required"`

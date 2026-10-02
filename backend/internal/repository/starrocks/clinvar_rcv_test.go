@@ -31,6 +31,32 @@ func Test_GetClinvarRCV(t *testing.T) {
 	})
 }
 
+func Test_GetClinvarRCV_ExcludesRowsWithNullOrZeroSubmissionCount(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
+		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 1000)
+		assert.NoError(t, err)
+
+		for _, rcv := range clinvarRcv {
+			assert.NotContains(t, []string{"RCV000004", "RCV000005"}, rcv.Accession)
+			assert.Positive(t, rcv.SubmissionCount)
+		}
+	})
+}
+
+func Test_GetClinvarRCV_NullDateLastEvaluated_IsZero(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
+		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 2000)
+		assert.NoError(t, err)
+
+		if assert.Len(t, clinvarRcv, 1) {
+			assert.Equal(t, "RCV000006", clinvarRcv[0].Accession)
+			assert.True(t, clinvarRcv[0].DateLastEvaluated.IsZero())
+		}
+	})
+}
+
 func Test_GetClinvarRCV_EmptyVariant(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
