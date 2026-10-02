@@ -4,6 +4,8 @@
 # If you don't need Ranger locally, comment out the include below.
 include:
   - ranger-compose.yml
+  # YAC agent (POC). Only starts with the `yac` profile: YAC_ENABLED=true make docker-run
+  - yac-compose.yml
 
 services:
   # Run-once: generate the self-signed cert + JKS keystore/truststore + PEM into the
@@ -20,7 +22,7 @@ services:
     entrypoint: ["bash", "/generate-certs.sh"]
 
   starrocks:
-    image: starrocks/allin1-ubuntu:3.5.17
+    image: starrocks/allin1-ubuntu:4.0.16
     container_name: starrocks_radiant
     ports:
       - "9030:9030"
@@ -147,7 +149,7 @@ services:
         condition: service_completed_successfully
 
   init-schema:
-    image: starrocks/allin1-ubuntu
+    image: starrocks/allin1-ubuntu:4.0.16
     container_name: init-schema
     depends_on:
       starrocks:

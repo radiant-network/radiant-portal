@@ -56,23 +56,34 @@ build-cli-all:
 test-cli:
 	@go test ./cmd/$(CLI_NAME)/... ./internal/cli/... -count=1
 
+# Optional services gated by env vars (YAC_ENABLED=true starts the YAC agent, see compose/YAC.md)
+COMPOSE_PROFILE_FLAGS := $(if $(filter true,$(YAC_ENABLED)),--profile yac,)
+
 # Create DB container
 docker-run:
-	@if docker compose -f compose/docker-compose.yml up --build 2>/dev/null; then \
+	@if docker compose -f compose/docker-compose.yml $(COMPOSE_PROFILE_FLAGS) up --build 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose -f compose/docker-compose.yml up --build; \
+		docker-compose -f compose/docker-compose.yml $(COMPOSE_PROFILE_FLAGS) up --build; \
 	fi
 
 # Shutdown DB container
 docker-down:
-	@if docker compose -f compose/docker-compose.yml down 2>/dev/null; then \
+	@if docker compose -f compose/docker-compose.yml --profile yac down 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose -f compose/docker-compose.yml down; \
+		docker-compose -f compose/docker-compose.yml --profile yac down; \
 	fi
+
+# Start only the YAC agent (no StarRocks/Keycloak/API), e.g. against QA Keycloak. See compose/YAC.md
+yac-run:
+	@docker compose -f compose/docker-compose.yml --profile yac up -d --build --no-deps --wait yac-agent
+
+# Stop only the YAC agent
+yac-down:
+	@docker compose -f compose/docker-compose.yml --profile yac rm -s -f yac-agent
 
 # Test the application (readable output via gotestsum, falls back to go test)
 test:
@@ -136,7 +147,7 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest lint fmt
+.PHONY: all build run test clean watch docker-run docker-down yac-run yac-down itest lint fmt
 
 migrate:
 	@echo "Create database migration..."

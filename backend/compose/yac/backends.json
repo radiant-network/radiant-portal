@@ -1,0 +1,26 @@
+{
+  "tenant_a": {
+    "type": "starrocks",
+    "jwtPassthrough": true,
+    "principalField": "sub",
+    "connection": {
+      "host": "starrocks",
+      "port": 9030,
+      "database": "tenant_a",
+      "ssl": { "ca": "/certs/starrocks_cert.pem" }
+    },
+    "tables": { "patient": "patient" }
+  },
+  "tenant_b": {
+    "type": "starrocks",
+    "jwtPassthrough": true,
+    "principalField": "sub",
+    "connection": {
+      "host": "starrocks",
+      "port": 9030,
+      "database": "tenant_b",
+      "ssl": { "ca": "/certs/starrocks_cert.pem" }
+    },
+    "tables": { "patient": "patient" }
+  }
+}
