@@ -5,7 +5,7 @@ import useSWR from 'swr';
 
 import type { ApiError, UserResult, UsersSearchResponse } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
-import DataTable from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
@@ -19,7 +19,6 @@ import UserFormSheet from './user-form-sheet';
 import UsersFilters from './users-filters';
 import { getUsersColumns, usersDefaultSettings } from './users-table-settings';
 
-const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 const ROLE_PARAM = 'role';
 

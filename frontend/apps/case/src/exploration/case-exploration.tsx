@@ -3,7 +3,7 @@ import useSWR from 'swr';
 
 import type { CasesSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
-import DataTable from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -28,7 +28,7 @@ export default function App() {
   const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 

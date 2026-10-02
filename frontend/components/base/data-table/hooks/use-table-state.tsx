@@ -4,6 +4,7 @@ import useSWR, { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import type { UserPreference } from '@/api/api';
+import { DEFAULT_PAGE_SIZE } from '@/components/base/shadcn/pagination';
 import { userPreferenceApi } from '@/utils/api';
 
 import type { AppFeatures, ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
@@ -128,7 +129,10 @@ export function useTableGetPreferenceEffect({
       setColumnPinning(normalizeColumnPinning(tablePreference.columnPinning));
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(tablePreference.columnVisibility);
-      setPagination({ pageSize: tablePreference.pagination?.pageSize ?? 30, pageIndex: 0 });
+      setPagination({
+        pageSize: Math.max(tablePreference.pagination?.pageSize ?? DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE),
+        pageIndex: 0,
+      });
       setAdditionalFields?.(
         getFilteredAdditionalFields({ columnVisibility: tablePreference.columnVisibility, defaultColumnSettings }),
       );
