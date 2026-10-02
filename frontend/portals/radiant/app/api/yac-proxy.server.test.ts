@@ -7,7 +7,7 @@ vi.mock('~/utils/auth.server', () => ({
   getSessionAccessToken: async () => session.token,
 }));
 
-import { proxyYac, transformUrl } from './yac-proxy';
+import { proxyYac, transformUrl } from './yac-proxy.server';
 
 type Received = { method?: string; url?: string; headers: IncomingHttpHeaders; body: Buffer };
 
