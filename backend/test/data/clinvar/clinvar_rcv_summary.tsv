@@ -3,3 +3,6 @@ locus_id	clinvar_id	accession	clinical_significance	date_last_evaluated	submissi
 1000	123456	RCV000001	["Pathogenic"]	2024-01-01 00:00:00.0	1	criteria_provided	4	1	["Trait1"]	germline
 1000	123457	RCV000002	["Likely Pathogenic"]	2025-01-01 00:00:00.0	3	criteria_provided	3	2	["Trait3"]	germline
 1001	123458	RCV000003	["Benign"]	2025-01-01 00:00:00.0	4	criteria_provided	2	3	["Trait4"]	germline
+1000	123456	RCV000004	NULL	NULL	NULL	NULL	0	1	["Trait5"]	NULL
+1000	123456	RCV000005	NULL	NULL	0	NULL	0	1	["Trait6"]	NULL
+2000	123460	RCV000006	["Uncertain significance"]	NULL	2	no_assertion_criteria_provided	0	1	["Trait7"]	germline
