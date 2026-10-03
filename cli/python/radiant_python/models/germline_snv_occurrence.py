@@ -32,6 +32,10 @@ class GermlineSNVOccurrence(BaseModel):
     ad_ratio: Union[StrictFloat, StrictInt]
     chromosome: StrictStr
     clinvar: Optional[List[StrictStr]] = None
+    cmc_mutation_url: Optional[StrictStr] = None
+    cmc_sample_mutated: Optional[StrictInt] = None
+    cmc_sample_ratio: Optional[Union[StrictFloat, StrictInt]] = None
+    cmc_tier: Optional[StrictStr] = None
     end: StrictInt
     exomiser_acmg_classification: StrictStr
     exomiser_acmg_evidence: List[StrictStr]
@@ -65,7 +69,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -122,6 +126,10 @@ class GermlineSNVOccurrence(BaseModel):
             "ad_ratio": obj.get("ad_ratio"),
             "chromosome": obj.get("chromosome"),
             "clinvar": obj.get("clinvar"),
+            "cmc_mutation_url": obj.get("cmc_mutation_url"),
+            "cmc_sample_mutated": obj.get("cmc_sample_mutated"),
+            "cmc_sample_ratio": obj.get("cmc_sample_ratio"),
+            "cmc_tier": obj.get("cmc_tier"),
             "end": obj.get("end"),
             "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
             "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
