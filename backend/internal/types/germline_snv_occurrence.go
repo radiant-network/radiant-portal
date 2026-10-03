@@ -40,6 +40,10 @@ type GermlineSNVOccurrence struct {
 	ExomiserAcmgEvidence       JsonArray[string]  `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
 	ExomiserVariantScore       float64            `json:"exomiser_variant_score" validate:"required"`
 	ExomiserGeneCombinedScore  float64            `json:"exomiser_gene_combined_score" validate:"required"`
+	CmcSampleMutated           *int               `json:"cmc_sample_mutated,omitempty"`
+	CmcSampleRatio             *float64           `json:"cmc_sample_ratio,omitempty"`
+	CmcTier                    *string            `json:"cmc_tier,omitempty"`
+	CmcMutationUrl             *string            `json:"cmc_mutation_url,omitempty"`
 } // @name GermlineSNVOccurrence
 
 type ExpandedGermlineSNVOccurrence = struct {
@@ -356,6 +360,12 @@ var GermlineSNVOccurrencesFields = []Field{
 	GermlineSNVExomiserAcmgEvidenceField,
 	GermlineSNVExomiserGeneCombinedScoreField,
 	GermlineSNVExomiserVariantScoreField,
+
+	// Oncology
+	CmcSampleMutatedField,
+	CmcSampleRatioField,
+	CmcTierField,
+	CmcMutationUrlField,
 }
 
 var GermlineSNVOccurrencesDefaultFields = []Field{

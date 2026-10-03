@@ -58,6 +58,7 @@ type Field struct {
 	Table           Table  // Table to which the field belongs
 	Type            string // Type of the field
 	IsArray         bool   // Whether the field is an array
+	SortNullsLast   bool   // Whether NULL values sort last in both directions (StarRocks puts them first on ASC)
 }
 
 // GetAlias returns the alias of the field if it is set, otherwise returns the name

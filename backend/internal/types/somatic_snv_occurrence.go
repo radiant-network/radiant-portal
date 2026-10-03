@@ -34,6 +34,12 @@ type SomaticSNVOccurrence struct {
 	Sq                  *float32           `json:"sq,omitempty"`
 	Aq                  *float32           `json:"aq,omitempty"`
 	TranscriptId        string             `json:"transcript_id,omitempty"`
+	Reference           string             `json:"reference" validate:"required"`
+	Alternate           string             `json:"alternate" validate:"required"`
+	CmcSampleMutated    *int               `json:"cmc_sample_mutated,omitempty"`
+	CmcSampleRatio      *float64           `json:"cmc_sample_ratio,omitempty"`
+	CmcTier             *string            `json:"cmc_tier,omitempty"`
+	CmcMutationUrl      *string            `json:"cmc_mutation_url,omitempty"`
 }
 
 type ExpandedSomaticSNVOccurrence struct {
@@ -223,6 +229,12 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	SomaticPcTnWgsField,
 	SomaticPfToWgsField,
 	SomaticPcToWgsField,
+	ReferenceField,
+	AlternateField,
+	CmcSampleMutatedField,
+	CmcSampleRatioField,
+	CmcTierField,
+	CmcMutationUrlField,
 }
 
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,

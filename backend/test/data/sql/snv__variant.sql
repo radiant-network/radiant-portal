@@ -58,5 +58,9 @@ CREATE TABLE `snv__variant`
     dna_change VARCHAR(2000),
     aa_change VARCHAR(2000),
     transcript_id varchar(100),
-    omim_inheritance_code array<varchar(5)>
+    omim_inheritance_code array<varchar(5)>,
+    cmc_mutation_url VARCHAR(255) NULL,
+    cmc_sample_mutated INT NULL,
+    cmc_sample_ratio DOUBLE NULL,
+    cmc_tier VARCHAR(8) NULL
     ) PRIMARY KEY(locus_id)

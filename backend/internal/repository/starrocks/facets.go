@@ -15,6 +15,10 @@ type FacetsRepository struct {
 
 func NewFacetsRepository() *FacetsRepository {
 	dictionary := map[string]Facet{
+		"cmc_tier": {
+			Name:   "cmc_tier",
+			Values: []string{"1", "2", "3", "Other"},
+		},
 		"variant_class": {
 			Name:   "variant_class",
 			Values: []string{"insertion", "deletion", "SNV", "indel", "substitution", "sequence_alteration"},

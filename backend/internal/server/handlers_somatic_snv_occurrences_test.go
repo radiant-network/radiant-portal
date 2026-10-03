@@ -60,6 +60,10 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, in
 	isCanonical := true
 	isManeSelect := true
 	hotspot := true
+	cmcSampleMutated := 12
+	cmcSampleRatio := 0.0012
+	cmcTier := "1"
+	cmcMutationUrl := "https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000"
 	return []types.SomaticSNVOccurrence{
 		{
 			LocusId:             "1000",
@@ -94,6 +98,12 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, in
 			Sq:                  &sq,
 			Aq:                  &aq,
 			TranscriptId:        "T001",
+			Reference:           "A",
+			Alternate:           "T",
+			CmcSampleMutated:    &cmcSampleMutated,
+			CmcSampleRatio:      &cmcSampleRatio,
+			CmcTier:             &cmcTier,
+			CmcMutationUrl:      &cmcMutationUrl,
 		},
 	}, nil
 }
@@ -115,9 +125,14 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 	assert.JSONEq(t, `[{
 		"aa_change":"p.Arg19His",
 		"ad_ratio":1,
+		"alternate":"T",
 		"aq":4.2,
 		"chromosome": "1",
-		"clinvar":["splice acceptor"], 
+		"clinvar":["splice acceptor"],
+		"cmc_mutation_url":"https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000",
+		"cmc_sample_mutated":12,
+		"cmc_sample_ratio":0.0012,
+		"cmc_tier":"1",
 		"end": 1001,
 		"germline_pc_wgs":3, 
 		"germline_pf_wgs":0.99, 
@@ -132,6 +147,7 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"locus_id":"1000", 
 		"omim_inheritance_code":["code1"], 
 		"picked_consequences":["Benign", "Pathogenic"], 
+		"reference":"A",
 		"rsnumber":"rs111111111", 
 		"seq_id":74, 
 		"somatic_pc_tn_wgs":6,
