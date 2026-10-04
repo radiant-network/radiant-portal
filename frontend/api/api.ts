@@ -3383,6 +3383,30 @@ export interface GermlineSNVOccurrence {
     'clinvar'?: Array<string>;
     /**
      * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'cmc_mutation_url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'cmc_sample_mutated'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'cmc_sample_ratio'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineSNVOccurrence
+     */
+    'cmc_tier'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
@@ -5572,6 +5596,12 @@ export interface SomaticSNVOccurrence {
     'ad_ratio'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'alternate': string;
+    /**
+     * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
@@ -5588,6 +5618,30 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'clinvar': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'cmc_mutation_url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'cmc_sample_mutated'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'cmc_sample_ratio'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'cmc_tier'?: string;
     /**
      * 
      * @type {number}
@@ -5678,6 +5732,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'picked_consequences': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'reference': string;
     /**
      * 
      * @type {string}

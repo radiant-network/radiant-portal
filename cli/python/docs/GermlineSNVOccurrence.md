@@ -10,6 +10,10 @@ Name | Type | Description | Notes
 **ad_ratio** | **float** |  | 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | [optional] 
+**cmc_mutation_url** | **str** |  | [optional] 
+**cmc_sample_mutated** | **int** |  | [optional] 
+**cmc_sample_ratio** | **float** |  | [optional] 
+**cmc_tier** | **str** |  | [optional] 
 **end** | **int** |  | 
 **exomiser_acmg_classification** | **str** |  | 
 **exomiser_acmg_evidence** | **List[str]** |  | 

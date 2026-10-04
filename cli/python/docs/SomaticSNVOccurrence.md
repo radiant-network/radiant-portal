@@ -7,9 +7,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **aa_change** | **str** |  | 
 **ad_ratio** | **float** |  | [optional] 
+**alternate** | **str** |  | 
 **aq** | **float** |  | [optional] 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | 
+**cmc_mutation_url** | **str** |  | [optional] 
+**cmc_sample_mutated** | **int** |  | [optional] 
+**cmc_sample_ratio** | **float** |  | [optional] 
+**cmc_tier** | **str** |  | [optional] 
 **end** | **int** |  | 
 **flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **germline_pc_wgs** | **int** |  | 
@@ -25,6 +30,7 @@ Name | Type | Description | Notes
 **locus_id** | **str** |  | 
 **omim_inheritance_code** | **List[str]** |  | 
 **picked_consequences** | **List[str]** |  | 
+**reference** | **str** |  | 
 **rsnumber** | **str** |  | 
 **seq_id** | **int** |  | 
 **somatic_pc_tn_wgs** | **int** |  | 
