@@ -65,3 +65,7 @@ func HandleFieldConflictError(c *gin.Context, message, field string) {
 func HandleUnprocessableEntityError(c *gin.Context, message string) {
 	c.JSON(http.StatusUnprocessableEntity, types.ApiError{Status: http.StatusUnprocessableEntity, Message: message})
 }
+
+func HandleRequestEntityTooLargeError(c *gin.Context, message string) {
+	c.JSON(http.StatusRequestEntityTooLarge, types.ApiError{Status: http.StatusRequestEntityTooLarge, Message: message})
+}

@@ -107,6 +107,15 @@ func Test_ActionEnforcement_IngestData_WithoutActionDenied(t *testing.T) {
 	assertActionEnforced(t, aliceID, types.ActionIngestData, http.StatusForbidden)
 }
 
+func Test_ActionEnforcement_ManageAnalysisCatalog_TenantAdminAllowed(t *testing.T) {
+	// tara holds tenant_admin, which migration 000041 grants can_manage_analysis_catalog.
+	assertActionEnforced(t, taraID, types.ActionManageAnalysisCatalog, http.StatusOK)
+}
+
+func Test_ActionEnforcement_ManageAnalysisCatalog_WithoutActionDenied(t *testing.T) {
+	assertActionEnforced(t, mikeID, types.ActionManageAnalysisCatalog, http.StatusForbidden)
+}
+
 // assertAnyActionEnforced is assertActionEnforced's RequireAnyAction twin: holding any one of
 // the actions admits the caller.
 func assertAnyActionEnforced(t *testing.T, userID string, actions []string, expectedStatus int) {
@@ -284,6 +293,7 @@ var expectedTenantActions = map[string]string{
 	"GET /:tenant/cases/:case_id/documents/filters":              types.ActionSearchCase,
 	"GET /:tenant/cases/:case_id/:seq_id/tasks_with_occurrences": types.ActionSearchCase,
 	"PATCH /:tenant/cases/:case_id":                              types.ActionEditCase,
+	"PUT /:tenant/gene_panels":                                   types.ActionManageAnalysisCatalog,
 	"GET /:tenant/genes/autocomplete":                            types.ActionSearchCase,
 	"POST /:tenant/genes/search":                                 types.ActionSearchCase,
 	"GET /:tenant/hpo/autocomplete":                              types.ActionSearchCase,

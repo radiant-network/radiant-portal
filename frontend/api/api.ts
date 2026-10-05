@@ -3125,6 +3125,62 @@ export interface GenePanelConditions {
     'count_orphanet': number;
 }
 /**
+ * Result of a gene panel upload. The file replaced all the uploaded gene panels of the tenant.
+ * @export
+ * @interface GenePanelUploadResult
+ */
+export interface GenePanelUploadResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelUploadResult
+     */
+    'genes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelUploadResult
+     */
+    'panels'?: number;
+    /**
+     * 
+     * @type {Array<GenePanelUploadWarning>}
+     * @memberof GenePanelUploadResult
+     */
+    'warnings'?: Array<GenePanelUploadWarning>;
+}
+/**
+ * A row of the gene panel file that the upload skipped, or kept with the Ensembl gene name.
+ * @export
+ * @interface GenePanelUploadWarning
+ */
+export interface GenePanelUploadWarning {
+    /**
+     * 
+     * @type {number}
+     * @memberof GenePanelUploadWarning
+     */
+    'line'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelUploadWarning
+     */
+    'message'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelUploadWarning
+     */
+    'panel_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GenePanelUploadWarning
+     */
+    'symbol'?: string;
+}
+/**
  * 
  * @export
  * @interface GeneResult
@@ -9641,6 +9697,140 @@ export class DocumentsApi extends BaseAPI {
      */
     public searchDocuments(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).searchDocuments(tenant, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * GenePanelsApi - axios parameter creator
+ * @export
+ */
+export const GenePanelsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Replaces all the uploaded gene panels of the tenant in the path with the panels of the attached `.tsv` file, in one transaction, then refreshes the tenant\'s gene panel materialized view. The prescription panels of the analysis catalog stay unchanged. Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the same result, so a retry is safe.  File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`, `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a duplicate symbol give 400, with the line in `detail.line`.  Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A row that matches no gene is skipped and returned in `warnings`; with `strict=true` it rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another panel of the tenant already uses gives 409.
+         * @summary Replace the tenant\'s gene panels
+         * @param {string} tenant Tenant code
+         * @param {File} file 
+         * @param {boolean} [strict] Reject the file when a row matches no Ensembl gene
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putGenePanels: async (tenant: string, file: File, strict?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putGenePanels', 'tenant', tenant)
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('putGenePanels', 'file', file)
+            const localVarPath = `/{tenant}/gene_panels`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (strict !== undefined) {
+                localVarQueryParameter['strict'] = strict;
+            }
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * GenePanelsApi - functional programming interface
+ * @export
+ */
+export const GenePanelsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = GenePanelsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Replaces all the uploaded gene panels of the tenant in the path with the panels of the attached `.tsv` file, in one transaction, then refreshes the tenant\'s gene panel materialized view. The prescription panels of the analysis catalog stay unchanged. Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the same result, so a retry is safe.  File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`, `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a duplicate symbol give 400, with the line in `detail.line`.  Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A row that matches no gene is skipped and returned in `warnings`; with `strict=true` it rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another panel of the tenant already uses gives 409.
+         * @summary Replace the tenant\'s gene panels
+         * @param {string} tenant Tenant code
+         * @param {File} file 
+         * @param {boolean} [strict] Reject the file when a row matches no Ensembl gene
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putGenePanels(tenant: string, file: File, strict?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GenePanelUploadResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putGenePanels(tenant, file, strict, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GenePanelsApi.putGenePanels']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * GenePanelsApi - factory interface
+ * @export
+ */
+export const GenePanelsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = GenePanelsApiFp(configuration)
+    return {
+        /**
+         * Replaces all the uploaded gene panels of the tenant in the path with the panels of the attached `.tsv` file, in one transaction, then refreshes the tenant\'s gene panel materialized view. The prescription panels of the analysis catalog stay unchanged. Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the same result, so a retry is safe.  File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`, `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a duplicate symbol give 400, with the line in `detail.line`.  Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A row that matches no gene is skipped and returned in `warnings`; with `strict=true` it rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another panel of the tenant already uses gives 409.
+         * @summary Replace the tenant\'s gene panels
+         * @param {string} tenant Tenant code
+         * @param {File} file 
+         * @param {boolean} [strict] Reject the file when a row matches no Ensembl gene
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putGenePanels(tenant: string, file: File, strict?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<GenePanelUploadResult> {
+            return localVarFp.putGenePanels(tenant, file, strict, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * GenePanelsApi - object-oriented interface
+ * @export
+ * @class GenePanelsApi
+ * @extends {BaseAPI}
+ */
+export class GenePanelsApi extends BaseAPI {
+    /**
+     * Replaces all the uploaded gene panels of the tenant in the path with the panels of the attached `.tsv` file, in one transaction, then refreshes the tenant\'s gene panel materialized view. The prescription panels of the analysis catalog stay unchanged. Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the same result, so a retry is safe.  File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`, `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a duplicate symbol give 400, with the line in `detail.line`.  Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A row that matches no gene is skipped and returned in `warnings`; with `strict=true` it rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another panel of the tenant already uses gives 409.
+     * @summary Replace the tenant\'s gene panels
+     * @param {string} tenant Tenant code
+     * @param {File} file 
+     * @param {boolean} [strict] Reject the file when a row matches no Ensembl gene
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GenePanelsApi
+     */
+    public putGenePanels(tenant: string, file: File, strict?: boolean, options?: RawAxiosRequestConfig) {
+        return GenePanelsApiFp(this.configuration).putGenePanels(tenant, file, strict, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

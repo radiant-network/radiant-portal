@@ -95,6 +95,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
 	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
+	genePanelUploader := service.NewGenePanelUploader(repoGenes, postgres.NewGenePanelsRepository(postgresDB), starrocks.NewStarrocksTenantRepository(starrocksDB))
 	// SMTP and notification settings are read per request, no restart on a relay change.
 	caseGroupNotifier := notification.NewService(repoCaseGroups, repoOrganizationsWrite, notificationTemplates, notification.NewSMTPMailer())
 
@@ -175,6 +176,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))
 	casesGroup.PATCH("/:case_id", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseHandler(repoCasesWrite))
+
+	genePanelsGroup := tenantRoutes.Group("/gene_panels")
+	genePanelsGroup.PUT("", requireAction(types.ActionManageAnalysisCatalog), server.PutGenePanelsHandler(genePanelUploader))
 
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))

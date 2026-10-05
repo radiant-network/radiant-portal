@@ -83,7 +83,7 @@ func Test_RolesRepository_ListTenantRoles_ReturnsActionsWithTheirLabels(t *testi
 		admin := roleByCodeIn(roles, "tenant_admin")
 		require.NotNil(t, admin)
 		assert.ElementsMatch(t,
-			[]string{types.ActionManageUser, types.ActionManageOrg, types.ActionManageRole},
+			[]string{types.ActionManageUser, types.ActionManageOrg, types.ActionManageRole, types.ActionManageAnalysisCatalog},
 			actionCodes(admin))
 		for _, action := range admin.Actions {
 			assert.Equal(t, types.ActionScopeTenant, action.Scope)

@@ -1628,6 +1628,42 @@ components:
       - count_omim
       - count_orphanet
       type: object
+    GenePanelUploadForm:
+      description: Multipart body of a gene panel upload.
+      properties:
+        file:
+          format: binary
+          type: string
+      required:
+      - file
+      type: object
+    GenePanelUploadResult:
+      description: Result of a gene panel upload. The file replaced all the uploaded
+        gene panels of the tenant.
+      properties:
+        genes:
+          type: integer
+        panels:
+          type: integer
+        warnings:
+          items:
+            $ref: '#/components/schemas/GenePanelUploadWarning'
+          type: array
+          uniqueItems: false
+      type: object
+    GenePanelUploadWarning:
+      description: A row of the gene panel file that the upload skipped, or kept with
+        the Ensembl gene name.
+      properties:
+        line:
+          type: integer
+        message:
+          type: string
+        panel_code:
+          type: string
+        symbol:
+          type: string
+      type: object
     GeneResult:
       properties:
         ensembl_gene_id:
@@ -5091,6 +5127,104 @@ paths:
       summary: Search documents
       tags:
       - documents
+  /{tenant}/gene_panels:
+    put:
+      description: |-
+        Replaces all the uploaded gene panels of the tenant in the path with the panels of the
+        attached `.tsv` file, in one transaction, then refreshes the tenant's gene panel
+        materialized view. The prescription panels of the analysis catalog stay unchanged.
+        Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the
+        same result, so a retry is safe.
+
+        File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`,
+        `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A
+        bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a
+        duplicate symbol give 400, with the line in `detail.line`.
+
+        Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A
+        row that matches no gene is skipped and returned in `warnings`; with `strict=true` it
+        rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another
+        panel of the tenant already uses gives 409.
+      operationId: putGenePanels
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Reject the file when a row matches no Ensembl gene
+        in: query
+        name: strict
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GenePanelUploadForm'
+        description: Gene panel file (.tsv) in the part named file
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenePanelUploadResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Conflict
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Request Entity Too Large
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Replace the tenant's gene panels
+      tags:
+      - gene_panels
   /{tenant}/genes/autocomplete:
     get:
       description: Retrieve AutoCompleteGene list of genes matching input string

@@ -206,6 +206,12 @@ func Test_BuildGenePanelMVStatement_JoinsPanelAndGenesOverFederationFilteredToTe
 	assert.Contains(t, stmt, "WHERE p.tenant_code = 'demo'")
 }
 
+func Test_BuildGenePanelMVStatement_KeepsOnlyUploadedPanels(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.Contains(t, stmt, "AND p.type_code = 'uploaded'")
+}
+
 func Test_BuildGenePanelMVStatement_RejectsInvalidTenantCode(t *testing.T) {
 	_, err := BuildGenePanelMVStatement("x'; DROP DATABASE y; --")
 	assert.Error(t, err)

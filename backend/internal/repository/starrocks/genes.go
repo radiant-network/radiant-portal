@@ -106,3 +106,22 @@ func (r *GenesRepository) SearchGenes(ctx context.Context, inputs []string) (*[]
 
 	return &genes, nil
 }
+
+const resolveGenesChunkSize = 1000
+
+// ResolveGenes runs SearchGenes in chunks on the root pool. ensembl_gene is public reference
+// data, so this reads no tenant data, and the caller (the ETL account) needs no StarRocks access.
+func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]GeneResult, error) {
+	ctx = database.ContextWithRootPool(ctx)
+	var genes []GeneResult
+	for start := 0; start < len(inputs); start += resolveGenesChunkSize {
+		chunk, err := r.SearchGenes(ctx, inputs[start:min(start+resolveGenesChunkSize, len(inputs))])
+		if err != nil {
+			return nil, err
+		}
+		if chunk != nil {
+			genes = append(genes, *chunk...)
+		}
+	}
+	return genes, nil
+}

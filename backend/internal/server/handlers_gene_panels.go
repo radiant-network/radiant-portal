@@ -1,0 +1,107 @@
+package server
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+)
+
+// GenePanelUploadMaxBytes limits the whole multipart body of a gene panel upload.
+const GenePanelUploadMaxBytes = 10 << 20
+
+type genePanelUploader interface {
+	Upload(ctx context.Context, tenantCode string, file io.Reader, strict bool) (*types.GenePanelUploadResult, error)
+}
+
+// PutGenePanelsHandler
+// @Summary Replace the tenant's gene panels
+// @Id putGenePanels
+// @Description Replaces all the uploaded gene panels of the tenant in the path with the panels of the
+// @Description attached `.tsv` file, in one transaction, then refreshes the tenant's gene panel
+// @Description materialized view. The prescription panels of the analysis catalog stay unchanged.
+// @Description Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the
+// @Description same result, so a retry is safe.
+// @Description
+// @Description File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`,
+// @Description `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A
+// @Description bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a
+// @Description duplicate symbol give 400, with the line in `detail.line`.
+// @Description
+// @Description Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A
+// @Description row that matches no gene is skipped and returned in `warnings`; with `strict=true` it
+// @Description rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another
+// @Description panel of the tenant already uses gives 409.
+// @Tags gene_panels
+// @Security bearerauth
+// @Accept multipart/form-data
+// @Param tenant path string true "Tenant code"
+// @Param request body types.GenePanelUploadForm true "Gene panel file (.tsv) in the part named file"
+// @Param strict query bool false "Reject the file when a row matches no Ensembl gene"
+// @Produce json
+// @Success 200 {object} types.GenePanelUploadResult
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 409 {object} types.ApiError
+// @Failure 413 {object} types.ApiError
+// @Failure 422 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/gene_panels [put]
+func PutGenePanelsHandler(uploader genePanelUploader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		strict, err := strconv.ParseBool(c.DefaultQuery("strict", "false"))
+		if err != nil {
+			HandleValidationError(c, fmt.Errorf("strict must be true or false"))
+			return
+		}
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, GenePanelUploadMaxBytes)
+		header, err := c.FormFile("file")
+		if err != nil {
+			var tooLarge *http.MaxBytesError
+			if errors.As(err, &tooLarge) {
+				HandleRequestEntityTooLargeError(c, fmt.Sprintf("request body exceeds %d bytes", GenePanelUploadMaxBytes))
+				return
+			}
+			HandleValidationError(c, fmt.Errorf("file: %w", err))
+			return
+		}
+		file, err := header.Open()
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		defer func() { _ = file.Close() }()
+
+		var (
+			fileErr   *types.GenePanelFileError
+			unmatched *types.UnmatchedGenesError
+			conflict  *types.GenePanelConflictError
+		)
+		result, err := uploader.Upload(c.Request.Context(), *tenant, file, strict)
+		switch {
+		case err == nil:
+			c.JSON(http.StatusOK, result)
+		case errors.As(err, &fileErr):
+			c.JSON(http.StatusBadRequest, types.ApiError{Status: http.StatusBadRequest, Message: fileErr.Error(), Detail: gin.H{"line": fileErr.Line}})
+		case errors.As(err, &unmatched):
+			c.JSON(http.StatusUnprocessableEntity, types.ApiError{Status: http.StatusUnprocessableEntity, Message: unmatched.Error(), Detail: gin.H{"warnings": unmatched.Warnings}})
+		case errors.As(err, &conflict):
+			HandleConflictError(c, conflict.Error())
+		default:
+			HandleError(c, err)
+		}
+	}
+}

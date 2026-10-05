@@ -66,6 +66,9 @@ docs/FamilyHistoryBatch.md
 docs/FiltersValue.md
 docs/GenePanelCondition.md
 docs/GenePanelConditions.md
+docs/GenePanelUploadResult.md
+docs/GenePanelUploadWarning.md
+docs/GenePanelsApi.md
 docs/GeneResult.md
 docs/GeneSearchBody.md
 docs/GenesApi.md
@@ -173,6 +176,7 @@ radiant_python/api/case_groups_api.py
 radiant_python/api/cases_api.py
 radiant_python/api/config_api.py
 radiant_python/api/documents_api.py
+radiant_python/api/gene_panels_api.py
 radiant_python/api/genes_api.py
 radiant_python/api/hpo_api.py
 radiant_python/api/igv_api.py
@@ -257,6 +261,8 @@ radiant_python/models/family_history_batch.py
 radiant_python/models/filters_value.py
 radiant_python/models/gene_panel_condition.py
 radiant_python/models/gene_panel_conditions.py
+radiant_python/models/gene_panel_upload_result.py
+radiant_python/models/gene_panel_upload_warning.py
 radiant_python/models/gene_result.py
 radiant_python/models/gene_search_body.py
 radiant_python/models/germline_cnv_occurrence.py
