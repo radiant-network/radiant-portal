@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADIANT — Patients</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   RADIANT patient view — wireframe
+
+   Styled against the radiant-portal Storybook design system. Class names
+   below mirror the real components 1:1 so this can be swapped for JSX:
+
+     .card / .card-header / .card-title / .card-content
+                                → components/base/shadcn/card
+     .info-field                → components/base/information/information-field
+     .empty                     → components/base/information/empty-field
+     .stat / .stat-value / .stat-label
+                                → components/base/stat-item/stat-item
+     .page-header               → components/base/page/page-header
+     .badge  + .badge-{variant} → components/base/shadcn/badge
+     .tabs-list / .tabs-trigger → components/base/shadcn/tabs
+     .table                     → components/base/shadcn/table
+     .btn / .btn-{variant}      → components/base/shadcn/button
+     .input / .select           → components/base/shadcn/input, select
+     .separator                 → components/base/shadcn/separator
+     .text-muted                → components/base/typography/text-muted
+
+   Tokens are taken verbatim from frontend/themes/radiant/theme.css and
+   frontend/themes/tailwind.base.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── radiant brand scale (theme.css, oklch as authored) ── */
+  --radiant-50:  oklch(0.98 0.01 228.92);
+  --radiant-100: oklch(0.96 0.03 231.05);
+  --radiant-200: oklch(0.91 0.06 224.03);
+  --radiant-300: oklch(0.85 0.10 221.85);
+  --radiant-500: oklch(0.73 0.14 227.83);
+  --radiant-700: oklch(0.53 0.11 234.92);
+  --radiant-950: oklch(0.31 0.06 236.35);
+
+  /* ── tailwind slate ── */
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1;
+  --slate-400:#94a3b8; --slate-500:#64748b; --slate-700:#334155; --slate-800:#1e293b;
+
+  /* ── semantic tokens (theme.css) ── */
+  --background: #ffffff;
+  --foreground: var(--radiant-950);
+  --primary: var(--radiant-700);
+  --primary-foreground: var(--slate-50);
+  --secondary: var(--slate-100);
+  --secondary-foreground: var(--radiant-950);
+  --muted: var(--slate-100);
+  --muted-foreground: var(--slate-500);
+  --neutral-foreground: var(--slate-800);
+  --card: #ffffff;
+  --border: var(--slate-200);
+  --input: var(--slate-300);
+  --ring: var(--radiant-700);
+  --radius: 0.5rem;
+  --table-header: var(--slate-100);
+  --table-accent: var(--slate-50);
+
+  /* ── badge colour pairs (tailwind.base.css) ── */
+  --c-red:#f87171;       --c-red-fg:#b91c1c;
+  --c-amber:#f59e0b;     --c-amber-fg:#92400e;
+  --c-orange:#fb923c;    --c-orange-fg:#9a3412;
+  --c-yellow:#facc15;    --c-yellow-fg:#854d0e;
+  --c-green:#86efac;     --c-green-fg:#166534;
+  --c-cyan:#22d3ee;      --c-cyan-fg:#155e75;
+  --c-blue:#60a5fa;      --c-blue-fg:#1d4ed8;
+  --c-violet:#a78bfa;    --c-violet-fg:#6d28d9;
+  --c-fuchsia:#e879f9;   --c-fuchsia-fg:#a21caf;
+  --c-neutral:var(--slate-400); --c-neutral-fg:var(--slate-800);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:14px; line-height:1.5;
+  background:var(--background); color:var(--foreground);
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:calc(var(--radius) - 2px)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── screens ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.show{display:flex}
+.container{width:100%;max-width:88rem;margin:0 auto;padding:0 1.5rem}
+
+/* ── navbar ── */
+.nav{height:3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.25rem;background:var(--background);flex-shrink:0}
+.nav .container{display:flex;align-items:center;gap:.25rem}
+/* themes/radiant/assets/logo/header.svg */
+.nav-logo{display:flex;align-items:center;flex-shrink:0}
+.nav-logo svg{width:1.625rem;height:1.5rem;display:block}
+.nav-study{display:inline-flex;align-items:center;gap:.375rem;height:2rem;padding:0 .625rem;margin-left:.75rem;border:1px solid var(--border);border-radius:9999px;font-size:.8125rem;font-weight:500;background:var(--background);color:var(--foreground);cursor:pointer;font-family:inherit}
+.nav-study .dot{width:.4375rem;height:.4375rem;border-radius:50%;background:var(--primary)}
+.nav-links{display:flex;align-items:center;gap:.125rem;margin-left:1.5rem}
+.nav-item{height:2rem;display:inline-flex;align-items:center;gap:.375rem;padding:0 .625rem;border:none;background:none;border-radius:var(--radius);font-family:inherit;font-size:.8125rem;font-weight:500;color:var(--muted-foreground);cursor:pointer}
+.nav-item svg{width:.875rem;height:.875rem;stroke-width:1.75}
+.nav-item:hover{background:var(--muted);color:var(--foreground)}
+.nav-item[aria-current="page"]{color:var(--primary);font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.avatar{width:1.75rem;height:1.75rem;border-radius:50%;background:var(--radiant-100);color:var(--radiant-700);display:flex;align-items:center;justify-content:center;font-size:.6875rem;font-weight:600}
+
+/* ── button (shadcn/button) ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.375rem;height:2.25rem;padding:0 .75rem;border-radius:var(--radius);font-family:inherit;font-size:.875rem;font-weight:500;cursor:pointer;border:1px solid transparent;transition:background-color .12s,border-color .12s,color .12s;white-space:nowrap}
+.btn svg{width:1rem;height:1rem;stroke-width:1.75;flex-shrink:0}
+.btn-outline{border-color:var(--border);background:var(--background);color:var(--foreground)}
+.btn-outline:hover{background:var(--muted)}
+.btn-ghost{background:none;color:var(--muted-foreground)}
+.btn-ghost:hover{background:var(--muted);color:var(--foreground)}
+.btn-icon{width:2.25rem;padding:0}
+.btn-sm{height:2rem;padding:0 .625rem;font-size:.8125rem}
+
+/* ── page header (base/page/page-header) ── */
+.page-header{background:var(--background)}
+.page-header.info{border-bottom:1px solid var(--border);padding-bottom:0}
+.ph-inner{display:flex;flex-direction:column;gap:.625rem;padding-top:.875rem}
+.ph-row{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+.ph-titleline{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.ph-title{font-size:1.375rem;font-weight:700;line-height:1.2}
+.ph-badges{display:flex;align-items:center;gap:.5rem}
+.ph-desc{font-size:.8125rem;color:var(--muted-foreground)}
+.ph-actions{display:flex;align-items:center;gap:.5rem}
+
+/* ── stat item (base/stat-item) — bordered KPI tile, per the v4 mock ── */
+.stat-row{display:flex;flex-wrap:wrap;gap:.5rem;padding:.125rem 0 .25rem}
+.stat{display:flex;flex-direction:column;gap:.0625rem;min-width:6.5rem;padding:.375rem .625rem;
+  background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}
+.stat-value{font-size:.9375rem;font-weight:700;line-height:1.3}
+.stat-label{font-size:.625rem;font-weight:600;color:var(--muted-foreground);
+  text-transform:uppercase;letter-spacing:.04em}
+.stat-sub{font-size:.6875rem;color:var(--muted-foreground)}
+
+/* ── tabs (shadcn/tabs) ── */
+/* w-fit — must not stretch inside the flex-column page header */
+.tabs-list{display:flex;align-self:stretch;width:100%;height:2.25rem;align-items:center;justify-content:center;border-radius:.625rem;background:var(--muted);padding:3px;gap:2px}
+.tabs-list .tabs-trigger{flex:1 1 0}
+.tabs-trigger{display:inline-flex;height:calc(100% - 1px);align-items:center;justify-content:center;gap:.375rem;border-radius:calc(var(--radius) - 2px);border:1px solid transparent;padding:.25rem .75rem;font-family:inherit;font-size:.875rem;font-weight:500;white-space:nowrap;color:var(--muted-foreground);background:none;cursor:pointer;transition:color .12s,box-shadow .12s}
+.tabs-trigger:hover{color:var(--foreground)}
+.tabs-trigger[data-state="active"]{background:var(--background);color:var(--foreground);box-shadow:0 1px 2px 0 rgb(0 0 0 / .05)}
+
+/* ── card (shadcn/card) ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:.75rem;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+/* card headers share the light-grey fill used by table headers, so Overview
+   and Timeline sections read with the same contrast as Treatments/Genomics */
+.card-header{padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;background:var(--table-header)}
+.card-header.bordered{border-bottom:1px solid var(--border)}
+.card-title{font-size:.9375rem;font-weight:600;line-height:1.3}
+.card-title.base{font-size:.875rem}
+.card-action{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.card-content{padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem}
+.card-content.flush{padding:0}
+.card-content.tight{gap:1rem}
+
+/* ── information field (base/information/information-field) ─────────────────
+   50/50 two-column flex, muted label, left-aligned value, NO row rules.
+   Fields are stacked by a gap-2 parent — the spacing is the separator.      */
+.info-list{display:flex;flex-direction:column;gap:.5rem}
+.info-field{display:flex;gap:.5rem;justify-content:space-between;font-size:.875rem;align-items:baseline}
+.info-label{color:var(--muted-foreground);flex:1;min-width:0}
+.info-value{flex:1;min-width:0;overflow-wrap:anywhere}
+.empty{color:var(--muted-foreground)}
+.tag-row{display:flex;flex-wrap:wrap;gap:.25rem}
+
+/* ── badge (shadcn/badge) ── */
+.badge{display:inline-flex;align-items:center;gap:.25rem;border-radius:calc(var(--radius) - 2px);padding:.125rem .375rem;font-size:.75rem;font-weight:500;white-space:nowrap;line-height:1.35}
+.badge-lg{padding:.25rem .75rem;font-size:.875rem}
+.badge-default{background:var(--primary);color:var(--primary-foreground)}
+.badge-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+.badge-outline{border:1px solid var(--border);color:var(--foreground)}
+.badge-red{background:color-mix(in srgb,var(--c-red) 20%,transparent);color:var(--c-red-fg)}
+.badge-amber{background:color-mix(in srgb,var(--c-amber) 20%,transparent);color:var(--c-amber-fg)}
+.badge-orange{background:color-mix(in srgb,var(--c-orange) 20%,transparent);color:var(--c-orange-fg)}
+.badge-yellow{background:color-mix(in srgb,var(--c-yellow) 20%,transparent);color:var(--c-yellow-fg)}
+.badge-green{background:color-mix(in srgb,var(--c-green) 20%,transparent);color:var(--c-green-fg)}
+.badge-cyan{background:color-mix(in srgb,var(--c-cyan) 20%,transparent);color:var(--c-cyan-fg)}
+.badge-blue{background:color-mix(in srgb,var(--c-blue) 20%,transparent);color:var(--c-blue-fg)}
+.badge-violet{background:color-mix(in srgb,var(--c-violet) 20%,transparent);color:var(--c-violet-fg)}
+.badge-fuchsia{background:color-mix(in srgb,var(--c-fuchsia) 20%,transparent);color:var(--c-fuchsia-fg)}
+.badge-neutral{background:color-mix(in srgb,var(--c-neutral) 20%,transparent);color:var(--c-neutral-fg)}
+
+/* ── input / select (shadcn) ── */
+.input,.select{height:2.25rem;border:1px solid var(--input);border-radius:var(--radius);background:var(--background);color:var(--foreground);font-family:inherit;font-size:.875rem;padding:0 .75rem}
+.input:focus,.select:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 18%,transparent)}
+.select{cursor:pointer;padding-right:.5rem}
+.search{position:relative;flex:1;max-width:22rem}
+.search .input{width:100%;padding-left:2.25rem}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted-foreground);pointer-events:none;display:flex}
+.search-icon svg{width:.875rem;height:.875rem;stroke-width:1.75}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FILTER BUTTON (components/base/buttons/filter-button.tsx) — dashed outline
+   trigger with a circle-plus icon, opening a checkbox popover. This is the
+   real component the v4 mock's "+ Vital status" pill was standing in for.
+   ══════════════════════════════════════════════════════════════════════════ */
+.filter-btn{display:inline-flex;align-items:center;gap:.375rem;height:2.25rem;padding:0 .75rem;
+  border:1px dashed var(--input);border-radius:var(--radius);background:var(--background);
+  color:var(--foreground);font-family:inherit;font-size:.8125rem;font-weight:500;cursor:pointer}
+.filter-btn:hover{background:var(--muted)}
+.filter-btn svg{width:1rem;height:1rem;stroke-width:1.75;flex-shrink:0;color:var(--muted-foreground)}
+.filter-btn-count{display:inline-flex;align-items:center;justify-content:center;min-width:1.25rem;
+  height:1.25rem;padding:0 .3125rem;border-radius:calc(var(--radius) - 2px);background:var(--primary);
+  color:var(--primary-foreground);font-size:.6875rem;font-weight:600}
+
+.filter-pop{position:fixed;z-index:65;width:15rem;max-height:20rem;display:none;flex-direction:column;
+  background:var(--background);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 12px 28px -8px rgb(2 6 23 / .22);overflow:hidden}
+.filter-pop.open{display:flex}
+.filter-pop-search{border-bottom:1px solid var(--border);flex-shrink:0}
+.filter-pop-search input{width:100%;border:0;padding:.625rem .75rem;font-family:inherit;
+  font-size:.8125rem;background:none;color:var(--foreground);outline:none}
+.filter-pop-list{flex:1;overflow-y:auto;padding:.25rem}
+.filter-opt{display:flex;align-items:center;gap:.5rem;width:100%;padding:.375rem .5rem;
+  border:0;background:none;border-radius:calc(var(--radius) - 3px);cursor:pointer;text-align:left;
+  font-family:inherit;font-size:.8125rem;color:var(--foreground)}
+.filter-opt:hover{background:var(--muted)}
+.filter-opt-check{width:.875rem;height:.875rem;border:1px solid var(--input);border-radius:3px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.filter-opt[aria-checked="true"] .filter-opt-check{background:var(--primary);border-color:var(--primary)}
+.filter-opt-check svg{width:.625rem;height:.625rem;stroke-width:3;color:var(--primary-foreground);
+  opacity:0;display:block}
+.filter-opt[aria-checked="true"] .filter-opt-check svg{opacity:1}
+.filter-opt-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filter-opt-count{color:var(--muted-foreground);font-size:.75rem;font-variant-numeric:tabular-nums}
+.filter-pop-empty{padding:1rem .75rem;font-size:.8125rem;color:var(--muted-foreground);text-align:center}
+.filter-pop-clear{flex-shrink:0;border-top:1px solid var(--border);padding:.25rem}
+.filter-pop-clear button{width:100%;height:1.875rem;border:0;background:none;color:var(--muted-foreground);
+  font-family:inherit;font-size:.8125rem;font-weight:500;cursor:pointer;border-radius:calc(var(--radius) - 3px)}
+.filter-pop-clear button:hover{background:var(--muted);color:var(--foreground)}
+
+/* ── table (shadcn/table) ── */
+.table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:auto;position:relative;width:100%}
+.table{width:100%;border-collapse:collapse;font-size:.875rem}
+.table thead th{background:var(--table-header);color:var(--muted-foreground);font-weight:500;font-size:.8125rem;text-align:left;padding:.625rem 1rem;white-space:nowrap;border-bottom:1px solid var(--border)}
+.table tbody td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tbody tr:last-child td{border-bottom:0}
+.table tbody tr.clickable:hover td{background:var(--table-accent);cursor:pointer}
+.table tbody td.top{vertical-align:top}
+.table-footer{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 0 0;font-size:.8125rem;color:var(--muted-foreground);flex-wrap:wrap}
+.link{color:var(--primary);font-weight:500;background:none;border:none;padding:0;font-family:inherit;font-size:inherit;cursor:pointer;text-align:left}
+.link:hover{text-decoration:underline}
+.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem}
+.text-muted{color:var(--muted-foreground)}
+.text-xs{font-size:.75rem}
+.text-sm{font-size:.875rem}
+
+/* ── layout grids (mirrors apps/case details-tab) ── */
+.content{flex:1;padding:1.25rem 0 3rem}
+.grid-detail{display:grid;grid-template-columns:1fr minmax(auto,26rem);gap:1rem;align-items:start}
+@media (max-width:900px){.grid-detail{grid-template-columns:1fr}}
+.stack{display:flex;flex-direction:column;gap:1rem}
+/* predispositions reuse the information-field pattern so the card reads the
+   same as every other card — a two-column grid collided the value of one
+   column with the label of the next */
+.pred-dot{width:.4375rem;height:.4375rem;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:.4375rem;vertical-align:.0625rem}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TIMELINE — no equivalent Storybook component, so composed from the
+   system's own primitives: badge colour pairs for event identity, muted
+   connector, text-sm titles, text-xs muted detail.
+   ══════════════════════════════════════════════════════════════════════════ */
+.tl-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.toggle{display:inline-flex;align-items:center;gap:.375rem;height:2rem;padding:0 .75rem;border:1px solid var(--border);border-radius:9999px;background:var(--background);color:var(--muted-foreground);font-family:inherit;font-size:.8125rem;font-weight:500;cursor:pointer}
+.toggle:hover{border-color:var(--input);color:var(--foreground)}
+.toggle[aria-pressed="true"]{background:var(--radiant-50);border-color:var(--radiant-300);color:var(--radiant-700)}
+.toggle .dot{width:.4375rem;height:.4375rem;border-radius:50%;flex-shrink:0}
+.toggle .n{color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+
+/* phase bands carry the same light-grey fill as card/table headers so each
+   timeline subsection is visually delimited */
+.tl-phase{display:flex;align-items:center;gap:.75rem;margin:1.25rem -1.25rem .875rem;padding:.375rem 1.25rem;background:var(--table-header);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.tl-phase:first-child{margin-top:-.25rem}
+.tl-phase-rule{display:none}
+.tl-phase-label{font-size:.75rem;font-weight:600;color:var(--muted-foreground);white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
+
+.tl-item{display:flex;gap:.875rem;position:relative;padding-bottom:1.125rem}
+.tl-item:last-child{padding-bottom:0}
+.tl-rail{position:absolute;left:.9375rem;top:2rem;bottom:0;width:1px;background:var(--border)}
+.tl-item.rail-end .tl-rail{display:none}
+.tl-glyph{width:1.875rem;height:1.875rem;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.625rem;font-weight:700;letter-spacing:.02em;background:var(--background);border:1px solid var(--border);color:var(--muted-foreground);z-index:1}
+/* disease events carry colour; treatments stay neutral so the disease
+   trajectory reads first */
+.tl-glyph.g-blue{background:color-mix(in srgb,var(--c-blue) 18%,transparent);border-color:color-mix(in srgb,var(--c-blue) 45%,transparent);color:var(--c-blue-fg)}
+.tl-glyph.g-red{background:color-mix(in srgb,var(--c-red) 18%,transparent);border-color:color-mix(in srgb,var(--c-red) 45%,transparent);color:var(--c-red-fg)}
+.tl-glyph.g-amber{background:color-mix(in srgb,var(--c-amber) 18%,transparent);border-color:color-mix(in srgb,var(--c-amber) 45%,transparent);color:var(--c-amber-fg)}
+.tl-glyph.g-orange{background:color-mix(in srgb,var(--c-orange) 18%,transparent);border-color:color-mix(in srgb,var(--c-orange) 45%,transparent);color:var(--c-orange-fg)}
+.tl-glyph.g-violet{background:color-mix(in srgb,var(--c-violet) 18%,transparent);border-color:color-mix(in srgb,var(--c-violet) 45%,transparent);color:var(--c-violet-fg)}
+.tl-glyph.g-slate{background:var(--slate-100);border-color:var(--slate-300);color:var(--slate-700)}
+
+.tl-body{flex:1;min-width:0;padding-top:.25rem}
+.tl-head{display:flex;gap:.75rem;justify-content:space-between;align-items:baseline}
+.tl-title{font-size:.875rem;font-weight:600}
+.tl-title.secondary{font-weight:500}
+.tl-when{font-size:.8125rem;color:var(--muted-foreground);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;flex-shrink:0}
+.tl-meta{font-size:.8125rem;color:var(--muted-foreground);margin-top:.1875rem}
+.tl-tags{margin-top:.375rem}
+.tl-empty{padding:2.5rem 0;text-align:center;font-size:.875rem;color:var(--muted-foreground)}
+
+/* ── treatments table cells ── */
+.dose-list{display:flex;flex-direction:column;gap:.25rem}
+.dose-item{display:flex;gap:.75rem;justify-content:space-between;font-size:.8125rem}
+.dose-key{color:var(--muted-foreground)}
+.dose-val{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cell-title{font-weight:500;margin-bottom:.125rem}
+
+/* ── sheet / slideover (shadcn/sheet) ── */
+.sheet-overlay{position:fixed;inset:0;background:rgb(2 6 23 / .5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.sheet-overlay.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;top:0;right:0;bottom:0;width:28rem;max-width:92vw;background:var(--background);border-left:1px solid var(--border);box-shadow:-4px 0 24px rgb(2 6 23 / .08);transform:translateX(100%);transition:transform .24s cubic-bezier(.32,.72,0,1);z-index:51;display:flex;flex-direction:column}
+.sheet.open{transform:translateX(0)}
+.sheet-header{display:flex;align-items:center;gap:.75rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.sheet-title{font-size:1rem;font-weight:600}
+.sheet-body{flex:1;overflow-y:auto;padding:1.5rem}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   D.A.V.I.D — centred modal dialog (shadcn/dialog shape, not the sheet)
+   ══════════════════════════════════════════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgb(2 6 23 / .5);opacity:0;pointer-events:none;transition:opacity .18s;z-index:60}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%) scale(.98);opacity:0;pointer-events:none;
+  width:min(40rem,92vw);height:70vh;background:var(--background);border:1px solid var(--border);
+  border-radius:calc(var(--radius) * 1.5);box-shadow:0 24px 48px -12px rgb(2 6 23 / .25);
+  z-index:61;display:flex;flex-direction:column;overflow:hidden;transition:opacity .18s,transform .18s}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-header{display:flex;align-items:center;gap:.625rem;padding:.875rem 1rem;border-bottom:1px solid var(--border);background:var(--table-header);flex-shrink:0}
+.modal-brand{display:flex;align-items:center;flex-shrink:0}
+.modal-brand svg{width:1.25rem;height:1.1875rem;display:block}
+.modal-title{font-size:.9375rem;font-weight:600;letter-spacing:.01em}
+.modal-sub{font-size:.6875rem;color:var(--muted-foreground);border:1px solid var(--border);
+  background:var(--background);border-radius:9999px;padding:.0625rem .4375rem;font-weight:500}
+.modal-ctx{margin-left:auto;font-size:.75rem;color:var(--muted-foreground);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:14rem}
+.modal-body{flex:1;overflow-y:auto;padding:1.25rem 1rem;display:flex;flex-direction:column;gap:.875rem}
+.modal-composer{flex-shrink:0;border-top:1px solid var(--border);padding:.75rem 1rem;display:flex;gap:.5rem;align-items:center;background:var(--background)}
+.modal-composer .input{flex:1}
+
+/* message bubbles */
+.msg{display:flex;max-width:82%}
+.msg-user{align-self:flex-end;justify-content:flex-end}
+.msg-assistant{align-self:flex-start}
+.msg-bubble{padding:.5rem .75rem;border-radius:calc(var(--radius) * 1.5);font-size:.8125rem;line-height:1.55;overflow-wrap:anywhere}
+.msg-user .msg-bubble{background:var(--primary);color:var(--primary-foreground);border-bottom-right-radius:calc(var(--radius) / 2)}
+.msg-assistant .msg-bubble{background:var(--slate-100);color:var(--foreground);border-bottom-left-radius:calc(var(--radius) / 2)}
+.msg-bubble strong{font-weight:600}
+.typing{display:inline-flex;gap:.1875rem;align-items:center;padding:.125rem 0}
+.typing i{width:.3125rem;height:.3125rem;border-radius:50%;background:var(--muted-foreground);opacity:.4;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}
+.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.25}30%{opacity:.9}}
+
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.btn-primary:hover{background:color-mix(in srgb,var(--primary) 90%,#000)}
+.btn:disabled{opacity:.55;cursor:default}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BRIM evidence — inline trigger, right next to the value it documents.
+   Deliberately muted: never bold, never primary colour.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* always visible where evidence exists (brimTrigger() emits nothing when a
+   record has no ev.evidenceText, so presence alone signals availability) */
+.brim-trigger{display:inline;transition:color .12s,background-color .12s;
+  background:none;border:0;padding:0 .1875rem;font-family:inherit;font-size:.6875rem;
+  color:var(--muted-foreground);cursor:pointer;white-space:nowrap;border-radius:calc(var(--radius) - 3px)}
+.brim-trigger:hover{color:var(--foreground);background:var(--muted)}
+
+.brim-pop{position:fixed;z-index:70;width:min(24rem,88vw);background:var(--background);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 12px 28px -8px rgb(2 6 23 / .22);
+  padding:.75rem .875rem;display:none}
+.brim-pop.open{display:block}
+.brim-pop-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.brim-pop-title{font-size:.6875rem;font-weight:600;color:var(--muted-foreground);letter-spacing:.03em;text-transform:uppercase}
+.brim-quote{margin:0;padding:0 0 0 .625rem;border-left:2px solid var(--border);
+  font-size:.8125rem;line-height:1.55;color:var(--foreground)}
+.brim-pop-link{display:inline-block;margin-top:.625rem;font-size:.75rem;color:var(--muted-foreground);text-decoration:none}
+.brim-pop-link:hover{color:var(--foreground);text-decoration:underline}
+
+/* ── tumor board session list (list only — no session detail view) ── */
+.tmb-list{display:flex;flex-direction:column}
+.tmb-item{display:flex;align-items:flex-start;gap:1rem;padding:.875rem 1.25rem;border-bottom:1px solid var(--border)}
+.tmb-item:last-child{border-bottom:0}
+.tmb-item-date{font-size:.8125rem;font-weight:600;min-width:5.5rem;flex-shrink:0;font-variant-numeric:tabular-nums}
+.tmb-item-summary{flex:1;font-size:.8125rem;color:var(--muted-foreground);line-height:1.55;min-width:0}
+.tmb-item-summary strong{color:var(--foreground)}
+.tmb-item-right{display:flex;align-items:center;gap:.375rem;flex-shrink:0}
+
+/* ── v6 clinical extensions ─────────────────────────────────────────────── */
+.analytics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.analytics-card{min-height:15rem;grid-column:span 1}
+.analytics-card.bar-chart{grid-column:span 1}
+.analytics-card.wide{grid-column:span 1}
+.analytics-card.full{grid-column:1/-1}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem}
+.kpi-strip .stat{min-width:0}
+.chart-svg{width:100%;height:11rem;display:block}
+.chart-label{font-size:11px;fill:var(--muted-foreground)}
+.chart-grid{stroke:var(--border);stroke-width:1}
+.chart-bar{fill:var(--radiant-500)}
+.chart-bar.alt{fill:var(--c-cyan)}
+.chart-line{fill:none;stroke-width:2}
+.chart-dot{stroke:var(--background);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:.75rem;font-size:.6875rem;color:var(--muted-foreground)}
+.donut-layout{display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.donut-layout .chart-svg{width:10rem;height:8rem;flex:0 0 auto}
+.donut-layout .legend{width:100%;justify-content:center;gap:.45rem .75rem;line-height:1.4}
+.legend i{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;margin-right:.25rem}
+.clinical-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
+.detail-layout{display:grid;grid-template-columns:minmax(15rem,20rem) minmax(0,1fr);gap:1rem;align-items:start}
+.detail-sidebar{display:flex;flex-direction:column;gap:1rem;position:sticky;top:1rem}
+.detail-sidebar .card-content{padding:1rem}
+.sidebar-list{display:flex;flex-direction:column;gap:.625rem}
+.sidebar-item{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;font-size:.8125rem}
+.sidebar-item strong{font-weight:500}
+.sidebar-item small{display:block;color:var(--muted-foreground);font-size:.6875rem;margin-top:.125rem}
+.module-list{display:flex;flex-direction:column;gap:.5rem}
+.module-entry{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.5rem .625rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--background);font-size:.8125rem}
+.module-status{font-size:.6875rem;color:var(--muted-foreground);white-space:nowrap}
+.value-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.value-tile{padding:.625rem .75rem;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}
+.value-tile strong{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.value-tile span{display:block;font-size:.6875rem;color:var(--muted-foreground)}
+.source-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.6875rem;color:var(--muted-foreground);border:1px solid var(--border);border-radius:999px;padding:.2rem .5rem}
+.source-pill i{width:.4rem;height:.4rem;border-radius:50%;background:var(--c-green)}
+.switch{width:2.25rem;height:1.25rem;border:0;border-radius:999px;background:var(--slate-300);position:relative;cursor:pointer}
+.switch:after{content:'';position:absolute;width:.9rem;height:.9rem;top:.175rem;left:.175rem;border-radius:50%;background:var(--background);transition:transform .15s}
+.switch.on{background:var(--primary)} .switch.on:after{transform:translateX(1rem)}
+.trial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.trial-card{padding:1rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--background)}
+.trial-card:hover{background:var(--table-accent)}
+.org-switcher{position:relative}
+.org-menu{position:absolute;top:calc(100% + .35rem);left:0;z-index:80;display:none;min-width:10rem;padding:.25rem;background:var(--background);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 12px 28px -8px rgb(2 6 23 / .22)}
+.org-menu.open{display:block}
+.org-option{display:block;width:100%;border:0;background:none;border-radius:calc(var(--radius) - 3px);padding:.5rem .625rem;text-align:left;color:var(--foreground);font:500 .8125rem/1.2 inherit;cursor:pointer}
+.org-option:hover,.org-option[aria-selected="true"]{background:var(--muted);color:var(--primary)}
+.privacy-cue{display:inline-flex;align-items:center;gap:.25rem;color:var(--muted-foreground);font-size:.6875rem}
+.privacy-cue svg{width:.75rem;height:.75rem}
+.masked-id{color:var(--muted-foreground);letter-spacing:.02em}
+.trial-head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}
+.trial-id{font-family:ui-monospace,monospace;color:var(--primary);font-weight:700;font-size:.875rem}
+.modal.compact{height:auto;max-height:86vh}
+.km-modal{width:min(76rem,96vw);height:min(44rem,90vh);max-height:90vh}
+.km-body{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(18rem,.85fr);min-height:0;flex:1}
+.km-plot-pane{padding:1.25rem;overflow:auto;min-width:0}
+.km-plot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.75rem}
+.km-plot-title{font-size:1rem;font-weight:600}
+.km-plot-sub{font-size:.75rem;color:var(--muted-foreground);margin-top:.2rem}
+.km-control{height:2rem;font-size:.75rem}
+.km-svg{width:100%;height:auto;min-height:18rem;display:block}
+.km-chat{border-left:1px solid var(--border);display:flex;flex-direction:column;min-width:0;background:var(--slate-50)}
+.km-chat-head{padding:.875rem 1rem;border-bottom:1px solid var(--border);background:var(--table-header)}
+.km-chat-title{font-size:.875rem;font-weight:600}
+.km-chat-sub{font-size:.6875rem;color:var(--muted-foreground);margin-top:.125rem}
+.km-chat-body{flex:1;overflow:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.km-chat-form{display:flex;gap:.375rem;padding:.75rem;border-top:1px solid var(--border);background:var(--background)}
+.km-chat-form .input{min-width:0;flex:1}
+.km-msg{max-width:92%;padding:.5rem .65rem;border-radius:calc(var(--radius) * 1.3);font-size:.75rem;line-height:1.5}
+.km-msg.user{align-self:flex-end;background:var(--primary);color:var(--primary-foreground);border-bottom-right-radius:3px}
+.km-msg.bot{align-self:flex-start;background:var(--background);border:1px solid var(--border);border-bottom-left-radius:3px}
+@media(max-width:800px){.km-modal{height:92vh}.km-body{grid-template-columns:1fr;grid-template-rows:minmax(18rem,1fr) minmax(15rem,.8fr)}.km-chat{border-left:0;border-top:1px solid var(--border)}}
+@media(max-width:900px){.analytics-grid,.clinical-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.analytics-card,.analytics-card.wide,.analytics-card.bar-chart{grid-column:span 1}.kpi-strip{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.detail-layout{grid-template-columns:1fr}.detail-sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.analytics-grid,.clinical-grid,.trial-grid{grid-template-columns:1fr}.kpi-strip{grid-template-columns:repeat(2,1fr)}.value-grid{grid-template-columns:repeat(2,1fr)}.tabs-list{max-width:100%;overflow-x:auto}}
+@media(max-width:620px){.detail-sidebar{display:flex}}
+
+@media print{
+  .nav,.tabs-list,.tl-controls,.ph-actions,.sheet,.sheet-overlay,.filter-bar,
+  .modal,.modal-overlay,.brim-pop,.brim-trigger{display:none!important}
+  .screen{display:block!important}
+  .card{break-inside:avoid}
+  .grid-detail{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ PATIENT LIST ═══════════════════════ -->
+<div id="screen-list" class="screen show">
+  <nav class="nav">
+    <div class="container">
+      <span class="nav-logo" aria-label="RADIANT"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="28" viewBox="0 0 30 28" fill="none"><path d="M18.8305 27.5086C22.1835 25.1882 24.6345 21.6485 25.5428 17.5365C25.9223 16.423 26.1275 15.2348 26.1275 13.9969C26.1275 12.7589 25.9223 11.5708 25.5428 10.4572C24.479 7.35303 22.0653 4.87092 19.0047 3.72006C17.8103 3.27216 16.5101 3.02333 15.1602 3.02333H8.67808V22.5381H5.64853V0H15.1664C16.4355 0 17.6672 0.167963 18.8367 0.491446C24.7838 2.10886 29.1633 7.5521 29.1633 14.0031C29.1633 20.4541 24.7776 25.8974 18.8367 27.5148L18.8305 27.5086Z" fill="#005486"/><path d="M23.21 11.1291C22.5816 9.37481 21.3686 7.85692 19.8196 6.84292L21.0078 5.56143H16.5039L17.4059 9.44946L18.7061 8.04977C19.8196 9.76672 20.479 11.8072 20.479 14.0031C20.479 17.3935 18.93 20.4292 16.5101 22.4448C14.6065 24.0249 12.168 24.9767 9.51166 24.9767H3.02955V0H0V28H9.51788C13.182 28 16.5226 26.5879 19.0171 24.2737C19.1353 24.168 19.2473 24.056 19.3593 23.944C20.6656 22.6501 21.717 21.1073 22.4386 19.3841C22.4883 19.2659 22.5319 19.154 22.5754 19.0358C22.6625 18.8118 22.7434 18.5879 22.818 18.3577C22.8554 18.2457 22.8927 18.1275 22.9238 18.0156C22.9425 17.9596 22.9611 17.8974 22.9736 17.8414C23.0047 17.7294 23.0358 17.6236 23.0607 17.5117C23.0793 17.4432 23.0918 17.381 23.1104 17.3126C23.1353 17.2131 23.1602 17.1135 23.1788 17.014L23.21 16.8834C23.4028 15.9502 23.5086 14.986 23.5086 13.9969C23.5086 13.0078 23.409 12.056 23.21 11.1291Z" fill="url(#rlg1)"/><defs><linearGradient id="rlg1" x1="-0.0124417" y1="14.0031" x2="23.5023" y2="14.0031" gradientUnits="userSpaceOnUse"><stop stop-color="#1C75BC"/><stop offset="1" stop-color="#00B6BE"/></linearGradient></defs></svg></span>
+      <div class="org-switcher"><button class="nav-study" data-org-trigger aria-expanded="false"><span class="dot"></span><span class="org-label">CBTN</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:.75rem;height:.75rem;stroke-width:2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button><div class="org-menu" role="menu"></div></div>
+      <div class="nav-links">
+        <button class="nav-item" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Patients</button>
+        <button class="nav-item" onclick="window.open('https://radiant-portal-ui-qa.radiant-tst.d3b.io/','_blank','noopener')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Genomic Cases</button>
+        <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>Files</button>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-ghost charm-trigger"
+                aria-label="Open D.A.V.I.D - AI-driven predictive analytics for personalized cancer care"
+                title="D.A.V.I.D — AI-driven predictive analytics for personalized cancer care">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/>
+            <path d="M18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/>
+          </svg>
+          <span>D.A.V.I.D</span>
+        </button>
+        <button class="btn btn-ghost btn-icon" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+        <div class="avatar">VF</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="container">
+      <div class="ph-inner">
+        <div class="ph-row">
+          <div>
+            <div class="ph-titleline"><h1 class="ph-title" id="listTitle">Patients</h1></div>
+            <p class="ph-desc">ATRT cohort · CHOP, UCSF and Seattle Children's</p>
+          </div>
+          <div class="ph-actions">
+            <button class="btn btn-outline btn-sm" id="kmOpenBtn"
+                    title="Open Kaplan–Meier cohort survival viewer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+              Visualize Cohort Survival
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="container stack">
+      <div class="tl-controls filter-bar">
+        <div class="search">
+          <label class="sr-only" for="q">Search patients</label>
+          <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span>
+          <input class="input" id="q" type="text" placeholder="Search by name, research ID or MRN" autocomplete="off">
+        </div>
+        <div id="filterBtns" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
+      </div>
+
+      <section class="card" aria-labelledby="cohortAnalyticsTitle">
+        <div class="card-header bordered">
+          <div><h2 class="card-title" id="cohortAnalyticsTitle">Cohort analytics</h2><p class="text-muted text-xs">Current registry snapshot · derived from roster fields</p></div>
+          <span class="card-action source-pill"><i></i>Live roster</span>
+        </div>
+        <div class="card-content">
+          <div class="kpi-strip" id="cohortKpis"></div>
+          <div class="analytics-grid" id="cohortCharts"></div>
+        </div>
+      </section>
+
+      <div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th scope="col">Patient</th><th scope="col">MRN</th><th scope="col">Birth year</th>
+              <th scope="col">Sex</th><th scope="col">Site</th><th scope="col">CNS integrated diagnosis</th>
+              <th scope="col">Vital status</th><th scope="col" style="text-align:right">Survival</th>
+            </tr></thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="listFoot"></span>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <select class="select" id="pageSize" aria-label="Page size"><option value="10">10 / page</option><option value="20">20 / page</option></select>
+            <button class="btn btn-outline btn-sm" id="prevPage">Previous</button>
+            <button class="btn btn-outline btn-sm" id="nextPage">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PATIENT DETAIL ═══════════════════════ -->
+<div id="screen-detail" class="screen">
+  <nav class="nav">
+    <div class="container">
+      <span class="nav-logo" aria-label="RADIANT"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="28" viewBox="0 0 30 28" fill="none"><path d="M18.8305 27.5086C22.1835 25.1882 24.6345 21.6485 25.5428 17.5365C25.9223 16.423 26.1275 15.2348 26.1275 13.9969C26.1275 12.7589 25.9223 11.5708 25.5428 10.4572C24.479 7.35303 22.0653 4.87092 19.0047 3.72006C17.8103 3.27216 16.5101 3.02333 15.1602 3.02333H8.67808V22.5381H5.64853V0H15.1664C16.4355 0 17.6672 0.167963 18.8367 0.491446C24.7838 2.10886 29.1633 7.5521 29.1633 14.0031C29.1633 20.4541 24.7776 25.8974 18.8367 27.5148L18.8305 27.5086Z" fill="#005486"/><path d="M23.21 11.1291C22.5816 9.37481 21.3686 7.85692 19.8196 6.84292L21.0078 5.56143H16.5039L17.4059 9.44946L18.7061 8.04977C19.8196 9.76672 20.479 11.8072 20.479 14.0031C20.479 17.3935 18.93 20.4292 16.5101 22.4448C14.6065 24.0249 12.168 24.9767 9.51166 24.9767H3.02955V0H0V28H9.51788C13.182 28 16.5226 26.5879 19.0171 24.2737C19.1353 24.168 19.2473 24.056 19.3593 23.944C20.6656 22.6501 21.717 21.1073 22.4386 19.3841C22.4883 19.2659 22.5319 19.154 22.5754 19.0358C22.6625 18.8118 22.7434 18.5879 22.818 18.3577C22.8554 18.2457 22.8927 18.1275 22.9238 18.0156C22.9425 17.9596 22.9611 17.8974 22.9736 17.8414C23.0047 17.7294 23.0358 17.6236 23.0607 17.5117C23.0793 17.4432 23.0918 17.381 23.1104 17.3126C23.1353 17.2131 23.1602 17.1135 23.1788 17.014L23.21 16.8834C23.4028 15.9502 23.5086 14.986 23.5086 13.9969C23.5086 13.0078 23.409 12.056 23.21 11.1291Z" fill="url(#rlg2)"/><defs><linearGradient id="rlg2" x1="-0.0124417" y1="14.0031" x2="23.5023" y2="14.0031" gradientUnits="userSpaceOnUse"><stop stop-color="#1C75BC"/><stop offset="1" stop-color="#00B6BE"/></linearGradient></defs></svg></span>
+      <div class="org-switcher"><button class="nav-study" data-org-trigger aria-expanded="false"><span class="dot"></span><span class="org-label">CBTN</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:.75rem;height:.75rem;stroke-width:2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button><div class="org-menu" role="menu"></div></div>
+      <div class="nav-links">
+        <button class="nav-item" aria-current="page" onclick="goList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Patients</button>
+        <button class="nav-item" onclick="window.open('https://radiant-portal-ui-qa.radiant-tst.d3b.io/','_blank','noopener')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Genomic Cases</button>
+        <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>Files</button>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-ghost charm-trigger"
+                aria-label="Open D.A.V.I.D - AI-driven predictive analytics for personalized cancer care"
+                title="D.A.V.I.D — AI-driven predictive analytics for personalized cancer care">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/>
+            <path d="M18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/>
+          </svg>
+          <span>D.A.V.I.D</span>
+        </button>
+        <div class="avatar">VF</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header info">
+    <div class="container">
+      <div class="ph-inner">
+        <div class="ph-row">
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div class="ph-titleline">
+              <button class="btn btn-ghost btn-icon" onclick="goList()" aria-label="Back to patients">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <h1 class="ph-title" id="dTitle">—</h1>
+              <div class="ph-badges" id="dBadges"></div>
+            </div>
+            <p class="ph-desc" id="dDesc"></p>
+          </div>
+        </div>
+        <div class="tabs-list" role="tablist" aria-label="Patient sections">
+          <button class="tabs-trigger" role="tab" id="tb-overview"   data-state="active"   aria-controls="tab-overview"   onclick="showTab('overview')">Overview</button>
+          <button class="tabs-trigger" role="tab" id="tb-timeline"   data-state="inactive" aria-controls="tab-timeline"   onclick="showTab('timeline')">Timeline</button>
+          <button class="tabs-trigger" role="tab" id="tb-treatments" data-state="inactive" aria-controls="tab-treatments" onclick="showTab('treatments')">Treatments</button>
+          <button class="tabs-trigger" role="tab" id="tb-genomics"   data-state="inactive" aria-controls="tab-genomics"   onclick="showTab('genomics')">Genomics</button>
+          <button class="tabs-trigger" role="tab" id="tb-tumorboard" data-state="inactive" aria-controls="tab-tumorboard" onclick="showTab('tumorboard')">Tumor Board</button>
+           <button class="tabs-trigger" role="tab" id="tb-laboratory" data-state="inactive" aria-controls="tab-laboratory" onclick="showTab('laboratory')">Laboratory</button>
+           <button class="tabs-trigger" role="tab" id="tb-imaging" data-state="inactive" aria-controls="tab-imaging" onclick="showTab('imaging')">Imaging</button>
+           <button class="tabs-trigger" role="tab" id="tb-trials" data-state="inactive" aria-controls="tab-trials" onclick="showTab('trials')">Clinical Trials</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="container">
+      <div class="detail-layout">
+      <aside class="detail-sidebar" id="detailSidebar"></aside>
+      <main class="detail-main">
+      <div id="tab-overview"   role="tabpanel" aria-labelledby="tb-overview"></div>
+      <div id="tab-timeline"   role="tabpanel" aria-labelledby="tb-timeline"   hidden></div>
+      <div id="tab-treatments" role="tabpanel" aria-labelledby="tb-treatments" hidden></div>
+      <div id="tab-genomics"   role="tabpanel" aria-labelledby="tb-genomics"   hidden></div>
+      <div id="tab-tumorboard" role="tabpanel" aria-labelledby="tb-tumorboard" hidden></div>
+      <div id="tab-laboratory" role="tabpanel" aria-labelledby="tb-laboratory" hidden></div>
+      <div id="tab-imaging" role="tabpanel" aria-labelledby="tb-imaging" hidden></div>
+      <div id="tab-trials" role="tabpanel" aria-labelledby="tb-trials" hidden></div>
+      </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- sheet shell — mount point for evidence viewer / AI assistant -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+  <div class="sheet-header">
+    <span class="sheet-title" id="sheetTitle">Details</span>
+    <button class="btn btn-ghost btn-icon" style="margin-left:auto" onclick="closeSheet()" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</aside>
+
+<div class="modal-overlay" id="imagingConfigOverlay" onclick="closeImagingConfig()"></div>
+<div class="modal compact" id="imagingConfig" role="dialog" aria-modal="true" aria-labelledby="imagingConfigTitle">
+  <div class="modal-header"><span class="modal-title" id="imagingConfigTitle">Flywheel / DICOM configuration</span><button class="btn btn-ghost btn-icon" style="margin-left:auto" onclick="closeImagingConfig()" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <form class="modal-body" id="imagingConfigForm">
+    <label class="info-list">API URL<input class="input" name="api" value="https://flywheel.cbtn.org/api"></label>
+    <label class="info-list">Project ID<input class="input" name="project" value="cbtn-pediatric-glioma"></label>
+    <label class="info-list">Subject label<input class="input" name="subject" value="Nadine-Esperanza"></label>
+    <label class="info-field"><span class="info-label">Open Flywheel viewer for study links</span><button type="button" class="switch on" id="viewerSwitch" aria-pressed="true"></button></label>
+    <div class="ph-actions" style="justify-content:flex-end"><button type="button" class="btn btn-outline" onclick="closeImagingConfig()">Cancel</button><button class="btn btn-primary">Save configuration</button></div>
+  </form>
+</div>
+
+<!-- D.A.V.I.D assistant — centred modal dialog (identifiers keep the internal 'charm' name) -->
+<div class="modal-overlay" id="charmOverlay"></div>
+<div class="modal" id="charmModal" role="dialog" aria-modal="true" aria-labelledby="charmTitle" aria-hidden="true">
+  <div class="modal-header">
+    <span class="modal-brand" id="charmBrand" aria-hidden="true"></span>
+    <span class="modal-title" id="charmTitle">D.A.V.I.D</span>
+    <span class="modal-sub">AI assistant</span>
+    <span class="modal-ctx" id="charmCtx"></span>
+    <button class="btn btn-ghost btn-icon" id="charmClose" aria-label="Close assistant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="modal-body" id="charmBody" aria-live="polite"></div>
+  <form class="modal-composer" id="charmForm">
+    <label class="sr-only" for="charmInput">Message D.A.V.I.D</label>
+    <input class="input" id="charmInput" type="text" autocomplete="off" placeholder="Ask about this patient…">
+    <button class="btn btn-primary" type="submit">Send</button>
+  </form>
+</div>
+
+<div class="modal-overlay" id="kmOverlay"></div>
+<div class="modal km-modal" id="kmModal" role="dialog" aria-modal="true" aria-labelledby="kmTitle" aria-hidden="true">
+  <div class="modal-header">
+    <span class="modal-title" id="kmTitle">Cohort survival analysis</span>
+    <span class="modal-sub">Kaplan–Meier</span>
+    <span class="modal-ctx">Mock registry snapshot</span>
+    <button class="btn btn-ghost btn-icon" id="kmClose" aria-label="Close survival viewer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="km-body">
+    <section class="km-plot-pane">
+      <div class="km-plot-head"><div><h2 class="km-plot-title">Overall survival</h2><p class="km-plot-sub" id="kmSummary"></p></div><label class="text-xs text-muted">Stratify by <select class="select km-control" id="kmStratify"><option value="overall">All patients</option><option value="site">Site</option><option value="dx">Diagnosis</option></select></label></div>
+      <div id="kmPlot"></div>
+    </section>
+    <aside class="km-chat">
+      <div class="km-chat-head"><div class="km-chat-title">Survival analyst</div><div class="km-chat-sub">Ask about the curve or cohort</div></div>
+      <div class="km-chat-body" id="kmChatBody" aria-live="polite"></div>
+      <form class="km-chat-form" id="kmChatForm"><label class="sr-only" for="kmChatInput">Ask about survival</label><input class="input" id="kmChatInput" autocomplete="off" placeholder="Ask about this curve…"><button class="btn btn-primary" type="submit">Send</button></form>
+    </aside>
+  </div>
+</div>
+
+<!-- Brim evidence popover — single instance, fixed position, escapes card overflow -->
+<div class="brim-pop" id="brimPop" role="dialog" aria-label="Evidence"></div>
+
+<!-- Filter button popover — single shared instance, same pattern as #brimPop -->
+<div class="filter-pop" id="filterPop" role="dialog"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   RADIANT patient view — wireframe data + rendering.
+   Records transcribed from the deidentified extract (./deid data/*.csv) so
+   enum values and missing-data patterns are realistic. Day offsets are
+   integers anchored at birth.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const DAYS_PER_YEAR = 365.25;
+
+/* themes/radiant/assets/logo/header.svg, inlined */
+const RADIANT_LOGO = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="28" viewBox="0 0 30 28" fill="none"><path d="M18.8305 27.5086C22.1835 25.1882 24.6345 21.6485 25.5428 17.5365C25.9223 16.423 26.1275 15.2348 26.1275 13.9969C26.1275 12.7589 25.9223 11.5708 25.5428 10.4572C24.479 7.35303 22.0653 4.87092 19.0047 3.72006C17.8103 3.27216 16.5101 3.02333 15.1602 3.02333H8.67808V22.5381H5.64853V0H15.1664C16.4355 0 17.6672 0.167963 18.8367 0.491446C24.7838 2.10886 29.1633 7.5521 29.1633 14.0031C29.1633 20.4541 24.7776 25.8974 18.8367 27.5148L18.8305 27.5086Z" fill="#005486"/><path d="M23.21 11.1291C22.5816 9.37481 21.3686 7.85692 19.8196 6.84292L21.0078 5.56143H16.5039L17.4059 9.44946L18.7061 8.04977C19.8196 9.76672 20.479 11.8072 20.479 14.0031C20.479 17.3935 18.93 20.4292 16.5101 22.4448C14.6065 24.0249 12.168 24.9767 9.51166 24.9767H3.02955V0H0V28H9.51788C13.182 28 16.5226 26.5879 19.0171 24.2737C19.1353 24.168 19.2473 24.056 19.3593 23.944C20.6656 22.6501 21.717 21.1073 22.4386 19.3841C22.4883 19.2659 22.5319 19.154 22.5754 19.0358C22.6625 18.8118 22.7434 18.5879 22.818 18.3577C22.8554 18.2457 22.8927 18.1275 22.9238 18.0156C22.9425 17.9596 22.9611 17.8974 22.9736 17.8414C23.0047 17.7294 23.0358 17.6236 23.0607 17.5117C23.0793 17.4432 23.0918 17.381 23.1104 17.3126C23.1353 17.2131 23.1602 17.1135 23.1788 17.014L23.21 16.8834C23.4028 15.9502 23.5086 14.986 23.5086 13.9969C23.5086 13.0078 23.409 12.056 23.21 11.1291Z" fill="url(#rlg3)"/><defs><linearGradient id="rlg3" x1="-0.0124417" y1="14.0031" x2="23.5023" y2="14.0031" gradientUnits="userSpaceOnUse"><stop stop-color="#1C75BC"/><stop offset="1" stop-color="#00B6BE"/></linearGradient></defs></svg>';
+
+/* Full ATRT cohort. Identity (name, MRN) is synthetic; site, birth year,
+   sex, diagnosis, vital status and survival come from the deidentified
+   extract so the list distribution is real. */
+const ROSTER = [
+  {id:'C1010445',name:'Ava Okafor',mrn:'MRN-UCSF-10000',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:756,surv:199,cases:1,events:3},
+  {id:'C1032093',name:'Kai Ellery',mrn:'MRN-CHOP-10274',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1343,surv:524,cases:3,events:5},
+  {id:'C1036644',name:'Nora Ibarra',mrn:'MRN-CHOP-10411',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:965,surv:254,cases:1,events:5},
+  {id:'C104427',name:'Iris Wren',mrn:'MRN-SCH-10548',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2012,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1519,surv:1125,cases:2,events:2},
+  {id:'C1056939',name:'Jonah Farrow',mrn:'MRN-SCH-10685',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2009,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:4407,surv:3766,cases:3,events:4},
+  {id:'C1070346',name:'Ruby Mireles',mrn:'MRN-SCH-10822',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1862,surv:1199,cases:1,events:4},
+  {id:'C1154847',name:'Elena Ueda',mrn:'MRN-SCH-10959',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1663,surv:1146,cases:2,events:1},
+  {id:'C1248204',name:'Arlo Bello',mrn:'MRN-CHOP-11096',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2012,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:3960,surv:1884,cases:3,events:1},
+  {id:'C1277601',name:'Clara Ismail',mrn:'MRN-CHOP-11233',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1992,surv:1308,cases:1,events:1},
+  {id:'C140712',name:'Naomi Castellano',mrn:'MRN-CHOP-11370',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2010,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:2086,surv:580,cases:2,events:5},
+  {id:'C148215',name:'Talia Sato',mrn:'MRN-SCH-11507',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2007,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:6122,surv:5920,cases:3,events:2},
+  {id:'C18819',name:'Emil Quintero',mrn:'MRN-CHOP-11644',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2008,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1000,surv:117,cases:1,events:3},
+  {id:'C196554',name:'Nico Petrov',mrn:'MRN-CHOP-11781',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2013,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:840,surv:495,cases:2,events:3},
+  {id:'C20049',name:'Rafi Baptiste',mrn:'MRN-CHOP-11918',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2003,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:3165,surv:2569,cases:3,events:2},
+  {id:'C21894',name:'Levi Iversen',mrn:'MRN-CHOP-12055',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2005,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:6344,surv:4608,cases:1,events:2},
+  {id:'C226074',name:'Amos Pashkov',mrn:'MRN-SCH-12192',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2012,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2393,surv:2246,cases:2,events:1},
+  {id:'C227058',name:'Esme Xu',mrn:'MRN-CHOP-12329',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2013,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1203,surv:697,cases:3,events:3},
+  {id:'C2322117',name:'Cyrus Escobar',mrn:'MRN-CHOP-12466',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2018,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2565,surv:2437,cases:1,events:3},
+  {id:'C2333310',name:'Elian Lund',mrn:'MRN-SCH-12603',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2016,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:806,surv:316,cases:2,events:3},
+  {id:'C2442411',name:'Nadia Fenwick',mrn:'MRN-CHOP-12740',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1703,surv:499,cases:3,events:3},
+  {id:'C2457171',name:'Rosa Marchetti',mrn:'MRN-UCSF-12877',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:1989,sex:'Female',dx:'Not Reported',vitalStatus:'deceased',vitalStatusDay:null,surv:null,cases:1,events:2},
+  {id:'C2461968',name:'Jasper Thorne',mrn:'MRN-UCSF-13014',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:2006,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:484,surv:159,cases:2,events:2},
+  {id:'C2536998',name:'Sena Vasquez',mrn:'MRN-CHOP-13151',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2014,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:3480,surv:2338,cases:3,events:2},
+  {id:'C2554956',name:'Lars Eriksen',mrn:'MRN-CHOP-13288',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:1997,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:5553,surv:4112,cases:1,events:1},
+  {id:'C2571192',name:'Odette Lomax',mrn:'MRN-SCH-13425',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1248,surv:446,cases:2,events:3},
+  {id:'C2698005',name:'Wren Tavares',mrn:'MRN-CHOP-13562',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2018,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2616,surv:2268,cases:3,events:4},
+  {id:'C2714610',name:'Ines Amara',mrn:'MRN-SCH-13699',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2010,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:836,surv:0,cases:1,events:1},
+  {id:'C2848188',name:'Marta Hurtado',mrn:'MRN-CHOP-13836',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2019,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:284,surv:65,cases:2,events:3},
+  {id:'C3422106',name:'Quinn Moreau',mrn:'MRN-CHOP-13973',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2020,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:861,surv:836,cases:3,events:2},
+  {id:'C3559497',name:'Rowan Brennan',mrn:'MRN-CHOP-14110',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2017,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2940,surv:1417,cases:1,events:1},
+  {id:'C374412',name:'Bianca Novak',mrn:'MRN-CHOP-14247',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2014,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:713,surv:523,cases:2,events:4},
+  {id:'C3816813',name:'Tobias Mensah',mrn:'MRN-CHOP-14384',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2020,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2020,surv:1383,cases:3,events:1},
+  {id:'C396306',name:'Yusuf Zimmer',mrn:'MRN-CHOP-14521',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2013,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2426,surv:1864,cases:1,events:2},
+  {id:'C4031571',name:'Zane Haddad',mrn:'MRN-SCH-14658',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2018,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:2015,surv:828,cases:2,events:1},
+  {id:'C4034646',name:'Ava Oyelaran',mrn:'MRN-SCH-14795',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1785,surv:0,cases:3,events:1},
+  {id:'C406761',name:'Theo Whitfield',mrn:'MRN-CHOP-14932',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2012,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1471,surv:433,cases:1,events:4},
+  {id:'C4174251',name:'Zoe Dinh',mrn:'MRN-CHOP-15069',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2010,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:4590,surv:244,cases:2,events:2},
+  {id:'C4261089',name:'Nora Keita',mrn:'MRN-CHOP-15206',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2010,sex:'Female',dx:'ATRT-MYC',vitalStatus:'alive',vitalStatusDay:4396,surv:245,cases:3,events:1},
+  {id:'C4483473',name:'Otis Abadi',mrn:'MRN-CHOP-15343',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2020,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1200,surv:183,cases:1,events:1},
+  {id:'C466293',name:'Jonah Vance',mrn:'MRN-CHOP-15480',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2014,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:2460,surv:2077,cases:2,events:4},
+  {id:'C4964157',name:'Ravi Rivas',mrn:'MRN-CHOP-15617',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2019,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1967,surv:727,cases:3,events:2},
+  {id:'C5254437',name:'Elena Underwood',mrn:'MRN-SCH-15754',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2019,sex:'Female',dx:'ATRT-MYC',vitalStatus:'deceased',vitalStatusDay:2176,surv:695,cases:1,events:5},
+  {id:'C5489736',name:'Sofia Duval',mrn:'MRN-CHOP-15891',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2023,sex:'Female',dx:'ATRT-SHH',vitalStatus:'deceased',vitalStatusDay:513,surv:434,cases:2,events:4},
+  {id:'C558912',name:'Clara Kaur',mrn:'MRN-SCH-16028',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2012,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1255,surv:229,cases:3,events:3},
+  {id:'C59655',name:'Naomi Solano',mrn:'MRN-CHOP-16165',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2004,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:6824,surv:3842,cases:1,events:2},
+  {id:'C603069',name:'Silas Zavala',mrn:'MRN-SCH-16302',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2015,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:626,surv:408,cases:2,events:5},
+  {id:'C607743',name:'Emil Gallo',mrn:'MRN-CHOP-16439',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2013,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:2050,surv:1312,cases:3,events:7},
+  {id:'C626070',name:'Freya Lindqvist',mrn:'MRN-CHOP-16576',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:639,surv:348,cases:1,events:3},
+  {id:'C626193',name:'Willa Hollis',mrn:'MRN-CHOP-16713',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:532,surv:362,cases:2,events:4},
+  {id:'C6538311',name:'Levi Bhatt',mrn:'MRN-CHOP-16850',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2018,sex:'Male',dx:'ATRT-SHH',vitalStatus:'deceased',vitalStatusDay:2849,surv:2575,cases:3,events:4},
+  {id:'C663708',name:'Mira Kowalski',mrn:'MRN-CHOP-16987',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2000,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:6394,surv:706,cases:1,events:4},
+  {id:'C6958725',name:'Bruno Yates',mrn:'MRN-SCH-17124',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2021,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:1469,surv:572,cases:2,events:1},
+  {id:'C698640',name:'Cyrus Guzman',mrn:'MRN-CHOP-17261',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2015,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:424,surv:74,cases:3,events:3},
+  {id:'C7611978',name:'Lila Nasser',mrn:'MRN-SCH-17398',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2021,sex:'Female',dx:'ATRT-MYC',vitalStatus:'alive',vitalStatusDay:1677,surv:230,cases:1,events:1},
+  {id:'C7617267',name:'Hugo Volkov',mrn:'MRN-SCH-17535',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2019,sex:'Male',dx:'ATRT-SHH',vitalStatus:'alive',vitalStatusDay:2204,surv:1022,cases:2,events:3},
+  {id:'C7768188',name:'Ivan Cortez',mrn:'MRN-UCSF-17672',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:2022,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1071,surv:222,cases:3,events:3},
+  {id:'C782649',name:'Hana Jansen',mrn:'MRN-SCH-17809',site:'Seattle',org:"Seattle Children's Hospital",birthYear:2005,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:6931,surv:2924,cases:1,events:1},
+  {id:'C82164',name:'Perla Okonkwo',mrn:'MRN-CHOP-18083',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2008,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:4942,surv:3019,cases:3,events:2},
+  {id:'C85854',name:'Omar Chandra',mrn:'MRN-CHOP-18494',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2011,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1098,surv:272,cases:3,events:3},
+  {id:'C876375',name:'Marta Jelani',mrn:'MRN-CHOP-18631',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:266,surv:261,cases:1,events:4},
+  {id:'C880803',name:'Yara Radich',mrn:'MRN-CHOP-18768',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:531,surv:188,cases:2,events:3},
+  {id:'C886092',name:'Delia Yoruba',mrn:'MRN-UCSF-18905',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:2016,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1943,surv:1581,cases:3,events:7},
+  {id:'C921639',name:'Bianca Fontaine',mrn:'MRN-UCSF-19042',site:'UCSF',org:"UCSF Benioff Children's Hospital",birthYear:2012,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:1990,surv:639,cases:1,events:4},
+  {id:'C964566',name:'Tobias Okafor',mrn:'MRN-CHOP-19179',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2009,sex:'Male',dx:'ATRT, NOS or NEC',vitalStatus:'alive',vitalStatusDay:3983,surv:1142,cases:2,events:2},
+  {id:'C974652',name:'Selma Delgado',mrn:'MRN-CHOP-19316',site:'CHOP',org:"The Children's Hospital of Philadelphia",birthYear:2008,sex:'Female',dx:'ATRT, NOS or NEC',vitalStatus:'deceased',vitalStatusDay:3562,surv:1998,cases:3,events:7}
+];
+
+/* Registry facets used by the cohort strip. Kept on the roster rather than
+   inferred from display strings so filters and analytics share one source. */
+ROSTER.forEach((r,i)=>{
+  r.followUpYears = r.surv==null ? 0 : +(r.surv / DAYS_PER_YEAR).toFixed(1);
+  r.imaging = i % 9 !== 0; r.genomics = i % 5 !== 0;
+  r.trial = i%4===0 ? 'PNOC021' : i%7===0 ? 'PNOC022' : null;
+  r.protocol = i%3===0 ? 'Tovorafenib' : i%3===1 ? 'Carboplatin/Vincristine' : 'Observation';
+  r.status = r.vitalStatus==='deceased' ? 'Long-term follow-up' : (i%2 ? 'Surveillance' : 'Active treatment');
+});
+
+/* Event types — full allowable-value set, mapped to the badge colour pairs */
+const EVENT_TYPES = {
+  'Initial CNS Tumor': { code:'DX', label:'Initial CNS tumour',  glyph:'g-blue',   badge:'badge-blue' },
+  'Progressive'      : { code:'PD', label:'Progression',         glyph:'g-red',    badge:'badge-red' },
+  'Recurrence'       : { code:'RC', label:'Recurrence',          glyph:'g-amber',  badge:'badge-amber' },
+  'Second Malignancy': { code:'SM', label:'Second malignancy',   glyph:'g-orange', badge:'badge-orange' },
+  'Second Primary'   : { code:'SP', label:'Second primary',      glyph:'g-violet', badge:'badge-violet' },
+  'Deceased'         : { code:'DC', label:'Deceased',            glyph:'g-slate',  badge:'badge-neutral' },
+  'Unavailable'      : { code:'NA', label:'Event unavailable',   glyph:'g-slate',  badge:'badge-neutral' }
+};
+
+const DEMO_CLINICAL = {
+  /* Counts drawn at real clinical cadence — weekly-to-fortnightly through active
+     therapy, then monthly on surveillance. Nadirs follow each chemotherapy cycle. */
+  labs:[
+    {date:'2023-06-14',wbc:5.8,hgb:12.6,plt:268,anc:3.4},{date:'2023-06-21',wbc:3.1,hgb:11.4,plt:198,anc:1.2},
+    {date:'2023-06-28',wbc:1.9,hgb:10.2,plt:112,anc:0.4},{date:'2023-07-05',wbc:3.6,hgb:10.6,plt:151,anc:1.6},
+    {date:'2023-07-19',wbc:5.2,hgb:11.5,plt:224,anc:2.8},{date:'2023-08-02',wbc:2.7,hgb:10.1,plt:134,anc:0.8},
+    {date:'2023-08-16',wbc:1.6,hgb:9.4,plt:88,anc:0.3},{date:'2023-08-30',wbc:4.1,hgb:10.8,plt:176,anc:2.1},
+    {date:'2023-09-13',wbc:5.5,hgb:11.7,plt:241,anc:3.2},{date:'2023-09-27',wbc:2.4,hgb:10.3,plt:127,anc:0.6},
+    {date:'2023-10-11',wbc:1.8,hgb:9.7,plt:96,anc:0.3},{date:'2023-10-25',wbc:3.9,hgb:10.9,plt:183,anc:1.9},
+    {date:'2023-11-02',wbc:4.9,hgb:11.9,plt:231,anc:2.7},{date:'2023-11-29',wbc:2.9,hgb:10.4,plt:142,anc:0.9},
+    {date:'2023-12-20',wbc:4.4,hgb:11.2,plt:196,anc:2.3},{date:'2024-01-17',wbc:5.6,hgb:11.8,plt:248,anc:3.0},
+    {date:'2024-02-14',wbc:5.1,hgb:12.0,plt:262,anc:2.8},{date:'2024-03-13',wbc:4.6,hgb:11.6,plt:229,anc:2.4},
+    {date:'2024-04-18',wbc:6.2,hgb:12.1,plt:289,anc:3.8},{date:'2024-05-22',wbc:5.7,hgb:12.3,plt:271,anc:3.3},
+    {date:'2024-06-26',wbc:5.0,hgb:11.9,plt:252,anc:2.9},{date:'2024-07-31',wbc:5.9,hgb:12.4,plt:283,anc:3.5},
+    {date:'2024-09-04',wbc:5.3,hgb:12.0,plt:264,anc:3.0},{date:'2024-10-24',wbc:5.4,hgb:12.8,plt:276,anc:3.1},
+    {date:'2024-12-05',wbc:4.8,hgb:12.2,plt:239,anc:2.6},{date:'2025-01-16',wbc:5.6,hgb:12.5,plt:268,anc:3.2},
+    {date:'2025-02-27',wbc:5.2,hgb:12.1,plt:255,anc:2.9},{date:'2025-04-17',wbc:4.7,hgb:11.7,plt:244,anc:2.5},
+    {date:'2025-06-05',wbc:5.4,hgb:12.3,plt:266,anc:3.1},{date:'2025-07-24',wbc:5.0,hgb:12.0,plt:251,anc:2.8},
+    {date:'2025-09-18',wbc:5.1,hgb:12.2,plt:257,anc:2.9}
+  ],
+  csf:{date:'2025-09-18',opening:'18 cm H₂O',cells:'2 /µL',protein:'31 mg/dL',glucose:'64 mg/dL',cytology:'Negative for malignant cells',cfDna:'BRAF fusion detected'},
+  /* Scores recorded as direct assessment at an encounter — never derived from
+     narrative text. Each score carries the date it was taken. */
+  performance:{
+    lansky:{score:'90',date:'2025-09-18',scale:'Lansky play-performance (≤16 yr)'},
+    karnofsky:{score:null,date:null,scale:'Karnofsky (>16 yr)'},
+    source:'Direct assessment at encounter',
+    note:'Minor fatigue after dosing; attending school full time.'
+  },
+  imaging:[
+    {date:'2025-09-18',modality:'MRI brain + spine',desc:'Stable residual optic pathway lesion; no new enhancement.',status:'Stable',session:'ses-2025-09-18'},
+    {date:'2025-04-17',modality:'MRI brain',desc:'Slight interval decrease in enhancement after tovorafenib.',status:'Partial response',session:'ses-2025-04-17'},
+    {date:'2024-10-24',modality:'MRI brain + spine',desc:'Multifocal low-grade glioma, no leptomeningeal spread.',status:'Stable',session:'ses-2024-10-24'},
+    {date:'2023-02-16',modality:'MRI brain',desc:'Progression of residual pilocytic astrocytoma.',status:'Progression',session:'ses-2023-02-16'}
+  ],
+  trials:[
+    {id:'PNOC021',title:'Tovorafenib for relapsed or progressive pLGG',phase:'Phase 2',status:'Enrolled',dates:'2024-11-06 — present',site:'CHOP',notes:'KIAA1549-BRAF fusion cohort; oral dosing ongoing.'},
+    {id:'PNOC022',title:'Molecularly guided therapy for pediatric low-grade glioma',phase:'Phase 1/2',status:'Screen failed',dates:'2023-03-14 — 2023-04-02',site:'CHOP',notes:'Prescreened; treatment assigned to standard-of-care pathway.'}
+  ],
+  vision:[
+    {date:'2025-09-18',right:'20/25',left:'20/30',finding:'Stable optic nerve pallor; no new field deficit.'},
+    {date:'2025-04-17',right:'20/25',left:'20/30',finding:'Stable.'},
+    {date:'2024-10-24',right:'20/30',left:'20/40',finding:'Mild left optic disc pallor.'}
+  ],
+  hearing:[
+    {date:'2025-09-18',right:'10 dB',left:'15 dB',finding:'Normal hearing sensitivity bilaterally.'},
+    {date:'2024-10-24',right:'10 dB',left:'15 dB',finding:'No evidence of ototoxicity.'},
+    {date:'2023-06-14',right:'15 dB',left:'20 dB',finding:'Mild high-frequency asymmetry; monitor.'}
+  ]
+};
+
+const SENTINELS = ['','not applicable','not reported','unavailable','not available','unknown','n/a'];
+const isSentinel = v => v == null || SENTINELS.includes(String(v).trim().toLowerCase());
+
+const PATIENTS = {
+  C974652: {
+    id:'C974652', name:'Patient C974652', initials:'C9',
+    org:"The Children's Hospital of Philadelphia", site:'CHOP',
+    mrn:'MRN-CHOP-00226',
+    birthYear:2008, sex:'Female', race:'Black or African American',
+    ethnicity:'Not Hispanic or Latino', zip:'071XX',
+    vitalStatus:'deceased', vitalStatusDay:3562, mrImagingDxDay:1558,
+    events:[
+      { day:1564, type:'Initial CNS Tumor', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Surgical'],
+        tumorLocations:['Cerebellum/Posterior Fossa'], tumorLocationOther:null, laterality:'Midline',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0/M1',
+        symptoms:['Emesis','Focal neurological deficit'], ev:{evidenceText:'Posterior fossa mass with brainstem abutment; intraoperative frozen section consistent with atypical teratoid/rhabdoid tumour. INI1 immunostain shows loss of nuclear expression in tumour cells.', evidenceUrl:'https://brim.example.com/evidence/C974652/event/1564'} },
+      { day:2304, type:'Recurrence', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Surgical','Imaging Only'],
+        tumorLocations:['Cerebellum/Posterior Fossa','Spinal Cord- Lumbar/Thecal Sac'], tumorLocationOther:null, laterality:'Midline',
+        metastasis:'Yes', metLocations:['Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit'], ev:{} },
+      { day:2743, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Imaging Only'], progressionMriDay:2738,
+        tumorLocations:['Spinal Cord- Lumbar/Thecal Sac','Spinal Cord- Thoracic'], tumorLocationOther:null, laterality:'Midline',
+        metastasis:'Yes', metLocations:['Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit'], ev:{} },
+      { day:3024, type:'Second Malignancy', dxCategory:'Other',
+        integratedDx:'Not otherwise specified', sourceOfDx:['Surgical'],
+        tumorLocations:['Other locations NOS'], tumorLocationOther:'Periventricular white matter', laterality:'Left',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0',
+        symptoms:['Seizure disorder'], ev:{evidenceText:'New enhancing lesion in periventricular white matter remote from the original tumour bed, within the prior radiation field. Histology is distinct from the index ATRT; favour treatment-related second malignancy.', evidenceUrl:'https://brim.example.com/evidence/C974652/event/3024'} },
+      { day:3289, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Surgical'], progressionMriDay:3281,
+        tumorLocations:['Temporal Lobe'], tumorLocationOther:null, laterality:'Left',
+        metastasis:'Yes', metLocations:['Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Seizure disorder','Focal neurological deficit'], ev:{} },
+      { day:3482, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Imaging + Cell Free DNA'], progressionMriDay:3475,
+        tumorLocations:['Cerebellum/Posterior Fossa','Other locations NOS','Temporal Lobe'],
+        tumorLocationOther:'Left perimesencephalic cistern', laterality:'Left',
+        metastasis:'Yes', metLocations:['Leptomeningeal','Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit','Behavior/Mood disorder'], ev:{evidenceText:'Interval progression with new leptomeningeal enhancement along the cervical and thoracic cord. Cell-free DNA from CSF positive for SMARCB1 loss, concordant with the primary tumour.', evidenceUrl:'https://brim.example.com/evidence/C974652/event/3482'} },
+      { day:3562, type:'Deceased', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Clinical'],
+        tumorLocations:['Brain Stem- Midbrain/Tectum','Brain Stem- Pons','Cerebellum/Posterior Fossa'],
+        tumorLocationOther:'Insula, MCA cistern', laterality:'Bilateral',
+        metastasis:'Yes', metLocations:['Leptomeningeal','Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:[], ev:{} }
+    ],
+    predispositions:{ smarcb1:'Yes', li_fraumeni:'No', nf1_nf2:'Not Evaluated', mmr:'No', cmmrd:'No', lynch:'No' },
+    surgeries:[ { day:1564, extent:'Gross/Near total resection', ev:{evidenceText:'Suboccipital craniotomy performed. Gross total resection achieved with no residual nodular enhancement on immediate post-operative MRI.', evidenceUrl:'https://brim.example.com/evidence/C974652/surgery/1564'} }, { day:3289, extent:'Gross/Near total resection', ev:{} } ],
+    radiation:[
+      { startDay:1743, endDay:null, site:'Focal/Tumor bed', siteOther:null, type:'Protons',
+        csiDose:{v:'Not Applicable',u:'Not Applicable'}, totalPrimaryDose:{v:'5400',u:'cGy'}, ev:{evidenceText:'Proton beam therapy to the posterior fossa tumour bed, 54 Gy (RBE) in 30 fractions. Craniospinal irradiation deferred given age at treatment.', evidenceUrl:'https://brim.example.com/evidence/C974652/radiation/1743'} },
+      { startDay:2344, endDay:2348, site:'Focal/Tumor bed', siteOther:null, type:'Protons',
+        csiDose:{v:'Not Applicable',u:'Not Applicable'}, totalPrimaryDose:{v:'3000 ',u:'cGy'}, ev:{} },
+      { startDay:2780, endDay:2782, site:'Focal/Tumor bed', siteOther:null, type:'Protons',
+        csiDose:{v:'Not Applicable',u:'Not Applicable'}, totalPrimaryDose:{v:'3500 ',u:'cGy'}, ev:{} }
+    ],
+    therapy:[
+      { startDay:1606, endDay:null, protocol:'DFCI Modified IRS-III', ev:{evidenceText:'Enrolled on DFCI modified IRS-III backbone. Induction with vincristine, dactinomycin and cyclophosphamide; intrathecal methotrexate added for leptomeningeal risk.', evidenceUrl:'https://brim.example.com/evidence/C974652/therapy/1606'},
+        agents:'cisplatin,cyclophosphamide,cytarabine,dactinomycin,doxorubicin,etoposide,methotrexate,temozolomide,vincristine' },
+      { startDay:null, endDay:null, protocol:'Not Applicable', agents:'temozolomide', ev:{} },
+      { startDay:null, endDay:null, protocol:'Not Applicable', agents:'etoposide', ev:{} }
+    ],
+    variants:[
+      { gene:'SMARCB1', hgvsp:'p.Arg374Ter', cls:'Pathogenic',        caseId:'CASE-974652-001', seq:'WGS', day:1571, origin:'Germline' },
+      { gene:'SMARCB1', hgvsp:'p.Arg374Ter', cls:'Pathogenic',        caseId:'CASE-974652-001', seq:'WGS', day:1571, origin:'Somatic' },
+      { gene:'SMARCB1', hgvsp:'p.Arg374Ter', cls:'Likely Pathogenic', caseId:'CASE-974652-002', seq:'WES', day:1589, origin:'Somatic' },
+      { gene:'TP53',    hgvsp:'p.Arg248Trp', cls:'VUS', caseId:'CASE-974652-001', seq:'WGS', day:1571, origin:'Somatic', vus:true },
+      { gene:'ARID1A',  hgvsp:'p.Gln1402fs', cls:'VUS', caseId:'CASE-974652-002', seq:'WES', day:1589, origin:'Somatic', vus:true }
+    ],
+    cases:[
+      { caseId:'CASE-974652-001', priority:'Urgent',  status:'In Progress', scope:'Germline + tumour', analysis:'WGS', reqBy:'CHOP', updatedDay:1571 },
+      { caseId:'CASE-974652-002', priority:'Routine', status:'Complete',    scope:'Tumour only',      analysis:'WES', reqBy:'CHOP', updatedDay:1589 }
+    ]
+  },
+
+  C7617267: {
+    id:'C7617267', name:'Patient C7617267', initials:'C7',
+    org:"Seattle Children's Hospital", site:'Seattle',
+    mrn:'MRN-SCH-00558',
+    birthYear:2019, sex:'Male', race:'White', ethnicity:'Not Hispanic or Latino', zip:'981XX',
+    vitalStatus:'alive', vitalStatusDay:2204, mrImagingDxDay:1178,
+    events:[
+      { day:1182, type:'Initial CNS Tumor', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT-SHH', sourceOfDx:['Surgical'],
+        tumorLocations:['Frontal Lobe','Ventricles'], tumorLocationOther:null, laterality:'Right',
+        metastasis:'Yes', metLocations:['Leptomeningeal'], metLocationOther:null, mStage:'M2',
+        symptoms:['Hydrocephalus','Emesis'], ev:{evidenceText:'Right frontal mass extending into the lateral ventricle with obstructive hydrocephalus. Methylation profiling classifies as ATRT-SHH subgroup.', evidenceUrl:'https://brim.example.com/evidence/C7617267/event/1182'} },
+      { day:1561, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT-SHH', sourceOfDx:['Imaging Only'], progressionMriDay:1556,
+        tumorLocations:['Frontal Lobe'], tumorLocationOther:null, laterality:'Right',
+        metastasis:'Yes', metLocations:['Leptomeningeal'], metLocationOther:null, mStage:'M2',
+        symptoms:['Focal neurological deficit'], ev:{evidenceText:'Interval enlargement of the residual right frontal enhancing component with new leptomeningeal deposits. No prior radiographic response documented.', evidenceUrl:'https://brim.example.com/evidence/C7617267/event/1561'} },
+      { day:2015, type:'Recurrence', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT-SHH', sourceOfDx:['Surgical'],
+        tumorLocations:['Parietal Lobe'], tumorLocationOther:null, laterality:'Right',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0',
+        symptoms:['Seizure disorder'], ev:{} }
+    ],
+    predispositions:{ smarcb1:'Yes', li_fraumeni:'No', nf1_nf2:'No', mmr:'Not Evaluated', cmmrd:'Not Evaluated', lynch:'Not Evaluated' },
+    surgeries:[ { day:1182, extent:'Partial resection', ev:{evidenceText:'Right frontal craniotomy with subtotal resection; residual tumour left along the caudate head to preserve perforating vessels.', evidenceUrl:'https://brim.example.com/evidence/C7617267/surgery/1182'} }, { day:2015, extent:'Gross/Near total resection', ev:{} } ],
+    radiation:[
+      { startDay:1582, endDay:1626, site:'Craniospinal with focal boost', siteOther:null, type:'Protons',
+        csiDose:{v:'3600',u:'CGE'}, totalPrimaryDose:{v:'5400',u:'CGE'}, ev:{evidenceText:'Craniospinal irradiation 36 Gy (RBE) with sequential boost to the primary bed to 54 Gy (RBE), delivered with pencil-beam scanning protons.', evidenceUrl:'https://brim.example.com/evidence/C7617267/radiation/1582'} },
+      { startDay:1582, endDay:1626, site:'Craniospinal with focal boost', siteOther:null, type:'Photons',
+        csiDose:{v:'36',u:'CGE'}, totalPrimaryDose:{v:'54',u:'CGE'}, ev:{} }
+    ],
+    therapy:[
+      { startDay:1201, endDay:1578, protocol:'ACNS0334', ev:{evidenceText:'Treated per ACNS0334 with high-dose methotrexate arm. Three cycles of induction followed by consolidation with thiotepa and carboplatin.', evidenceUrl:'https://brim.example.com/evidence/C7617267/therapy/1201'},
+        agents:'carboplatin,cisplatin,cyclophosphamide,etoposide,methotrexate,thiotepa,vincristine' },
+      { startDay:1201, endDay:null, protocol:'ACNS0334',
+        agents:'carboplatin,cisplatin,cyclophosphamide,etoposide,thiotepa,vincristine', ev:{} }
+    ],
+    variants:[
+      { gene:'SMARCB1', hgvsp:'p.Gln318Ter', cls:'Pathogenic', caseId:'CASE-7617267-001', seq:'WGS', day:1190, origin:'Germline' },
+      { gene:'SMARCB1', hgvsp:'p.Gln318Ter', cls:'Pathogenic', caseId:'CASE-7617267-001', seq:'WGS', day:1190, origin:'Somatic' },
+      { gene:'CTNNB1',  hgvsp:'p.Ser37Cys',  cls:'VUS', caseId:'CASE-7617267-001', seq:'WGS', day:1190, origin:'Somatic', vus:true }
+    ],
+    cases:[ { caseId:'CASE-7617267-001', priority:'Urgent', status:'Complete', scope:'Germline + tumour', analysis:'WGS', reqBy:'SCH', updatedDay:1190 } ]
+  },
+
+  C886092: {
+    id:'C886092', name:'Patient C886092', initials:'C8',
+    org:"UCSF Benioff Children's Hospital", site:'UCSF',
+    mrn:'MRN-UCSF-00104',
+    birthYear:2016, sex:'Female', race:'White', ethnicity:'Not Hispanic or Latino', zip:'949XX',
+    vitalStatus:'deceased', vitalStatusDay:1943, mrImagingDxDay:358,
+    events:[
+      { day:362, type:'Initial CNS Tumor', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Surgical'],
+        tumorLocations:['Frontal Lobe'], tumorLocationOther:null, laterality:'Left',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0',
+        symptoms:['Seizure disorder','Developmental delay'], ev:{evidenceText:'Left frontal lobe mass presenting with focal seizures. Pathology confirms rhabdoid morphology with retained INI1 loss on immunohistochemistry.', evidenceUrl:'https://brim.example.com/evidence/C886092/event/362'} },
+      { day:662, type:'Recurrence', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Surgical'],
+        tumorLocations:['Frontal Lobe','Parietal Lobe'], tumorLocationOther:null, laterality:'Left',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0',
+        symptoms:['Focal neurological deficit'], ev:{} },
+      { day:853, type:'Recurrence', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Imaging Only'],
+        tumorLocations:['Basal Ganglia','Cranial Nerves NOS','Parietal Lobe'], tumorLocationOther:null, laterality:'Left',
+        metastasis:'No', metLocations:[], metLocationOther:null, mStage:'M0/M1',
+        symptoms:['Focal neurological deficit','Emesis'], ev:{} },
+      { day:1384, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Imaging Only'], progressionMriDay:1379,
+        tumorLocations:['Brain Stem- Pons','Cerebellum/Posterior Fossa','Cranial Nerves NOS'], tumorLocationOther:null, laterality:'Bilateral',
+        metastasis:'Yes', metLocations:['Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit'], ev:{evidenceText:'New brainstem and posterior fossa involvement with drop metastases to the thecal sac. Disease progression on surveillance imaging without interval response.', evidenceUrl:'https://brim.example.com/evidence/C886092/event/1384'} },
+      { day:1606, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Imaging Only'], progressionMriDay:1601,
+        tumorLocations:['Brain Stem- Pons','Cerebellum/Posterior Fossa','Cranial Nerves NOS'], tumorLocationOther:null, laterality:'Bilateral',
+        metastasis:'Yes', metLocations:['Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit','Endocrinopathy'], ev:{} },
+      { day:1900, type:'Progressive', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Clinical'],
+        tumorLocations:['Brain Stem- Pons','Cerebellum/Posterior Fossa','Cranial Nerves NOS'],
+        tumorLocationOther:'Insula; Convexity', laterality:'Bilateral',
+        metastasis:'Yes', metLocations:['Brain','Leptomeningeal','Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:['Focal neurological deficit'], ev:{} },
+      { day:1943, type:'Deceased', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT, NOS or NEC', sourceOfDx:['Clinical'],
+        tumorLocations:['Brain Stem- Midbrain/Tectum','Brain Stem- Pons','Cerebellum/Posterior Fossa'],
+        tumorLocationOther:null, laterality:'Bilateral',
+        metastasis:'Yes', metLocations:['Brain','Leptomeningeal','Spine'], metLocationOther:null, mStage:'M3',
+        symptoms:[], ev:{} }
+    ],
+    predispositions:{ smarcb1:'Yes', li_fraumeni:'No', nf1_nf2:'No', mmr:'No', cmmrd:'No', lynch:'Not Evaluated' },
+    surgeries:[ { day:362, extent:'Gross/Near total resection', ev:{} }, { day:662, extent:'Gross/Near total resection', ev:{} } ],
+    radiation:[
+      { startDay:705, endDay:746, site:'Other', siteOther:'Whole brain', type:'Protons',
+        csiDose:{v:'5040',u:'cGy'}, totalPrimaryDose:{v:'Not Applicable',u:'Not Applicable'}, ev:{} },
+      { startDay:1619, endDay:1651, site:'Focal/Tumor bed', siteOther:null, type:'Protons',
+        csiDose:{v:'Not Applicable',u:'Not Applicable'}, totalPrimaryDose:{v:'3600',u:'cGy'}, ev:{} }
+    ],
+    therapy:[
+      { startDay:383,  endDay:429,  protocol:'Not Reported',   agents:'Not Reported', ev:{} },
+      { startDay:577,  endDay:633,  protocol:'Not Applicable', agents:'topotecan;tamoxifen', ev:{} },
+      { startDay:870,  endDay:1153, protocol:'MEMMAT', ev:{evidenceText:'Started MEMMAT metronomic antiangiogenic regimen after second recurrence. Bevacizumab with oral etoposide, cyclophosphamide, thalidomide and celecoxib.', evidenceUrl:'https://brim.example.com/evidence/C886092/therapy/870'},         agents:'bevacizumab,celecoxib,cyclophosphamide,cytarabine,etoposide,fenofibric acid,thalidomide' },
+      { startDay:1448, endDay:1602, protocol:'APEC1621',       agents:'tazemetostat' },
+      { startDay:1609, endDay:1818, protocol:'Not Applicable', agents:'nivolumab;bevacizumab', ev:{} },
+      { startDay:1874, endDay:1902, protocol:'Not Applicable', agents:'everolimus;ribociclib', ev:{} }
+    ],
+    variants:[
+      { gene:'SMARCB1', hgvsp:'p.Arg201Ter', cls:'Pathogenic', caseId:'CASE-886092-001', seq:'WGS', day:370, origin:'Somatic' },
+      { gene:'EZH2',    hgvsp:'p.Tyr646Asn', cls:'VUS', caseId:'CASE-886092-001', seq:'WGS', day:370, origin:'Somatic', vus:true }
+    ],
+    cases:[ { caseId:'CASE-886092-001', priority:'Routine', status:'Complete', scope:'Tumour only', analysis:'WGS', reqBy:'UCSF', updatedDay:370 } ]
+  },
+
+  C4261089: {
+    id:'C4261089', name:'Patient C4261089', initials:'C4',
+    org:"The Children's Hospital of Philadelphia", site:'CHOP',
+    mrn:'MRN-CHOP-00104',
+    birthYear:2010, sex:'Female', race:'Black or African American',
+    ethnicity:'Not Hispanic or Latino', zip:'191XX',
+    vitalStatus:'alive', vitalStatusDay:4396, mrImagingDxDay:4146,
+    events:[
+      { day:4151, type:'Initial CNS Tumor', dxCategory:'Atypical teratoid/rhabdoid tumor',
+        integratedDx:'ATRT-MYC', sourceOfDx:['Surgical'],
+        tumorLocations:['Brain Stem-Medulla','Brain Stem- Pons','Cerebellum/Posterior Fossa'],
+        tumorLocationOther:null, laterality:'Midline',
+        metastasis:'Yes', metLocations:['Brain'], metLocationOther:null, mStage:'M2',
+        symptoms:['Hydrocephalus','Emesis','Focal neurological deficit'], ev:{evidenceText:'Midline posterior fossa mass involving the medulla and pons with intracranial dissemination. Methylation class ATRT-MYC with MYC amplification on WGS.', evidenceUrl:'https://brim.example.com/evidence/C4261089/event/4151'} }
+    ],
+    predispositions:{ smarcb1:'Yes', li_fraumeni:'No', nf1_nf2:'Not Evaluated', mmr:'Not Evaluated', cmmrd:'Not Evaluated', lynch:'Not Evaluated' },
+    surgeries:[
+      { day:4151, extent:'Partial resection', ev:{evidenceText:'Midline suboccipital approach; partial resection only given adherence to the floor of the fourth ventricle and medullary involvement.', evidenceUrl:'https://brim.example.com/evidence/C4261089/surgery/4151'} },
+      { day:4176, extent:'Gross/Near total resection', ev:{} },
+      { day:4209, extent:'Gross/Near total resection', ev:{} }
+    ],
+    radiation:[
+      { startDay:4412, endDay:4448, site:'Craniospinal with focal boost', siteOther:null, type:'Protons',
+        csiDose:{v:'3600',u:'cGy'}, totalPrimaryDose:{v:'5400',u:'cGy'}, ev:{evidenceText:'Craniospinal irradiation to 36 Gy with posterior fossa boost to 54 Gy. Proton plan selected to limit cochlear and hypothalamic dose.', evidenceUrl:'https://brim.example.com/evidence/C4261089/radiation/4412'} }
+    ],
+    therapy:[
+      { startDay:4223, endDay:4356, protocol:'DFCI Modified IRS-III', ev:{evidenceText:'Induction per DFCI modified IRS-III with intrathecal chemotherapy for M2 disease. Tolerated with expected grade 3 myelosuppression.', evidenceUrl:'https://brim.example.com/evidence/C4261089/therapy/4223'},
+        agents:'cisplatin,cyclophosphamide,cytarabine,dactinomycin,doxorubicin,etoposide,methotrexate,vincristine' }
+    ],
+    variants:[
+      { gene:'SMARCB1', hgvsp:'p.Glu138Ter', cls:'Pathogenic', caseId:'CASE-4261089-001', seq:'WGS', day:4160, origin:'Somatic' },
+      { gene:'MYC',     hgvsp:'Amplification', cls:'Pathogenic', caseId:'CASE-4261089-001', seq:'WGS', day:4160, origin:'Somatic' }
+    ],
+    cases:[ { caseId:'CASE-4261089-001', priority:'Urgent', status:'In Progress', scope:'Germline + tumour', analysis:'WGS', reqBy:'CHOP', updatedDay:4160 } ]
+  }
+};
+
+/* ── helpers ──────────────────────────────────────────────────────────────── */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const EMPTY = '<span class="empty">-</span>';
+const yrs = d => d==null ? null : (d/DAYS_PER_YEAR).toFixed(1) + 'y';
+const splitMulti = v => isSentinel(v) ? [] : String(v).split(/[;,]/).map(s=>s.trim()).filter(s=>s && !isSentinel(s));
+
+function field(label, value){
+  return `<div class="info-field"><span class="info-label">${esc(label)}</span><span class="info-value">${value==null||value===''?EMPTY:value}</span></div>`;
+}
+function tags(arr, variant){
+  if(!arr || !arr.length) return EMPTY;
+  return `<span class="tag-row">${arr.map(t=>`<span class="badge ${variant||'badge-secondary'}">${esc(t)}</span>`).join('')}</span>`;
+}
+
+/* Doses normalised to Gy. The extract stores value and unit separately, mixes
+   Gy / cGy / CGE, carries trailing whitespace and puts sentinel strings in
+   numeric fields. For cGy/CGE a value under 100 is already Gy-scale. */
+function normDose(dose){
+  if(!dose) return { gy:null };
+  if(isSentinel(dose.v) || isSentinel(dose.u)) return { gy:null };
+  const n = parseFloat(String(dose.v).trim());
+  if(!isFinite(n)) return { gy:null };
+  const u = String(dose.u).trim().toLowerCase();
+  if(u === 'gy') return { gy:n };
+  if(u === 'cgy' || u === 'cge') return { gy: n < 100 ? n : n/100 };
+  return { gy:n };
+}
+const gyLabel = d => d.gy==null ? null : d.gy.toFixed(1) + ' Gy';
+
+/* Focal dose to primary = total primary − craniospinal (variable #20).
+   Focal-only patients have focal equal to total. */
+function focalBoost(csi, total){
+  if(total.gy == null) return { gy:null };
+  if(csi.gy == null) return { gy:total.gy, focalOnly:true };
+  const d = total.gy - csi.gy;
+  return d < 0 ? { gy:null } : { gy:d };
+}
+
+const initialEvent = p => p.events.find(e=>e.type==='Initial CNS Tumor') || p.events[0];
+const latestEvent  = p => p.events.length ? p.events[p.events.length-1] : null;
+function survivalDays(p){ const ie=initialEvent(p); return (ie && p.vitalStatusDay!=null) ? p.vitalStatusDay-ie.day : null; }
+function ttpDays(p){
+  const ie=initialEvent(p), fp=p.events.find(e=>e.type==='Progressive'||e.type==='Recurrence');
+  return (ie && fp) ? fp.day-ie.day : null;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BRIM EVIDENCE — Pattern A: row-level hover reveal.
+   Records carry ev:{evidenceText, evidenceUrl}. Rows without evidenceText
+   render nothing. The popover lives in a single fixed-position element at
+   body level so it escapes the card/table overflow clipping.
+   ══════════════════════════════════════════════════════════════════════════ */
+const hasEv = r => !!(r && r.ev && r.ev.evidenceText);
+
+/* Registry keyed by a token stamped on each trigger, so markup stays simple. */
+const EV_REG = new Map();
+let EV_SEQ = 0;
+function brimTrigger(record){
+  if(!hasEv(record)) return '';
+  const key = 'ev' + (++EV_SEQ);
+  EV_REG.set(key, record.ev);
+  return `<button class="brim-trigger" data-ev="${key}" aria-label="Show evidence">Evidence ↗</button>`;
+}
+
+let BRIM_OPEN = null;
+function closeBrim(){
+  const pop = document.getElementById('brimPop');
+  pop.classList.remove('open');
+  BRIM_OPEN = null;
+}
+function openBrim(btn){
+  const ev = EV_REG.get(btn.dataset.ev);
+  if(!ev) return;
+  if(BRIM_OPEN === btn){ closeBrim(); return; }   /* one at a time */
+  closeBrim();
+  const pop = document.getElementById('brimPop');
+  pop.innerHTML = `
+    <div class="brim-pop-head">
+      <span class="brim-pop-title">Evidence</span>
+      <button class="btn btn-ghost btn-icon" style="margin-left:auto;height:1.5rem;width:1.5rem" id="brimPopClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:.875rem;height:.875rem" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <blockquote class="brim-quote">${esc(ev.evidenceText)}</blockquote>
+    <a class="brim-pop-link" href="${esc(ev.evidenceUrl)}" target="_blank" rel="noopener noreferrer">View evidence in Brim →</a>`;
+  pop.classList.add('open');
+
+  /* anchor below the trigger, right-aligned, clamped to the viewport */
+  const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+  let left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+  let top  = r.bottom + 6;
+  if(top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  pop.style.left = left + 'px';
+  pop.style.top  = top + 'px';
+
+  BRIM_OPEN = btn;
+  document.getElementById('brimPopClose').addEventListener('click', closeBrim);
+}
+
+/* ── patient list ─────────────────────────────────────────────────────────── */
+/* Multi-select facets — each holds an array of accepted values, mirroring
+   components/base/buttons/filter-button.tsx (checkbox popover, not a
+   single-value <select>). */
+let FILTERS = { q:'', vital:[], site:[], dx:[] };
+let LIST_PAGE = 1, LIST_PAGE_SIZE = 10;
+function resetListPage(){ LIST_PAGE=1; }
+function displayIdentity(r){
+  if(r.site==='CHOP') return {name:r.name,mrn:r.mrn,masked:false};
+  const suffix=String(r.id||'').slice(-3).padStart(3,'0');
+  const mrnDigits=String(r.mrn||'').replace(/\D/g,'');
+  return {name:`Patient ${r.site}-${suffix}`,mrn:`•••• ••${(mrnDigits.slice(-2)||suffix.slice(-2))}`,masked:true};
+}
+function privacyCue(){return `<span class="privacy-cue" title="Identity restricted outside your organisation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Restricted</span></span>`}
+
+const FILTER_DEFS = [
+  { key:'vital', label:'Vital status', accessor:r=>r.vitalStatus,
+    options:[ {key:'alive', label:'Alive'}, {key:'deceased', label:'Deceased'} ] },
+  { key:'site', label:'Site', accessor:r=>r.site,
+     options:[ {key:'__all__', label:'All Sites'}, {key:'CHOP', label:'CHOP'}, {key:'Seattle', label:'Seattle'}, {key:'UCSF', label:'UCSF'} ] },
+  { key:'dx', label:'Diagnosis', accessor:r=>r.dx,
+    options:[ {key:'ATRT, NOS or NEC', label:'ATRT, NOS or NEC'}, {key:'ATRT-SHH', label:'ATRT-SHH'},
+              {key:'ATRT-MYC', label:'ATRT-MYC'}, {key:'Not Reported', label:'Not Reported'} ] }
+];
+
+function facetCount(def, optionKey, exceptKey){
+  /* count within the rows that already pass every OTHER active facet —
+     the same "count reflects the rest of your filters" behaviour as the
+     real DataTableFilters component. */
+  return ROSTER.filter(r=>{
+    if(optionKey!=='__all__' && def.accessor(r) !== optionKey) return false;
+    for(const d of FILTER_DEFS){
+      if(d.key===exceptKey) continue;
+      if(FILTERS[d.key].length && !FILTERS[d.key].includes(d.accessor(r))) return false;
+    }
+    return true;
+  }).length;
+}
+
+function renderFilterButtons(){
+  document.getElementById('filterBtns').innerHTML = FILTER_DEFS.map(def=>{
+    const n = FILTERS[def.key].length;
+    return `<button type="button" class="filter-btn" data-filter="${def.key}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+      <span>${esc(def.label)}</span>
+      ${n?`<span class="filter-btn-count">${n}</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+let FILTER_POP_OPEN = null;
+function closeFilterPop(){
+  document.getElementById('filterPop').classList.remove('open');
+  FILTER_POP_OPEN = null;
+}
+function renderFilterPopList(def, search){
+  const q = (search||'').trim().toLowerCase();
+  const opts = def.options
+    .map(o=>({ ...o, count: facetCount(def, o.key, def.key) }))
+    .filter(o=>!q || o.label.toLowerCase().includes(q))
+    .sort((a,b)=>{
+      const as = FILTERS[def.key].includes(a.key), bs = FILTERS[def.key].includes(b.key);
+      return as===bs ? 0 : as ? -1 : 1;   /* selected first, like the real component */
+    });
+  const list = document.querySelector('#filterPop .filter-pop-list');
+  list.innerHTML = opts.length ? opts.map(o=>{
+     const checked = def.key==='site' && o.key==='__all__' ? FILTERS.site.length===0 : FILTERS[def.key].includes(o.key);
+    return `<button type="button" class="filter-opt" role="checkbox" aria-checked="${checked}" data-opt="${esc(o.key)}">
+      <span class="filter-opt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span class="filter-opt-label">${esc(o.label)}</span>
+      <span class="filter-opt-count">${o.count}</span>
+    </button>`;
+  }).join('') : `<div class="filter-pop-empty">No results.</div>`;
+}
+function activeFilterDef(){
+  return FILTER_POP_OPEN ? FILTER_DEFS.find(d=>d.key===FILTER_POP_OPEN.dataset.filter) : null;
+}
+function openFilterPop(btn){
+  const key = btn.dataset.filter;
+  const def = FILTER_DEFS.find(d=>d.key===key);
+  if(FILTER_POP_OPEN === btn){ closeFilterPop(); return; }
+  closeFilterPop(); closeBrim();
+  const pop = document.getElementById('filterPop');
+  pop.innerHTML = `
+    <div class="filter-pop-search"><input type="text" placeholder="Search ${esc(def.label.toLowerCase())}…" id="filterPopSearch" autocomplete="off"></div>
+    <div class="filter-pop-list"></div>
+    ${FILTERS[key].length ? `<div class="filter-pop-clear"><button type="button" id="filterPopClear">Clear</button></div>` : ''}`;
+  renderFilterPopList(def, '');
+  pop.classList.add('open');
+  const r = btn.getBoundingClientRect(), w = pop.offsetWidth;
+  let left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+  pop.style.left = left + 'px';
+  pop.style.top  = (r.bottom + 6) + 'px';
+  FILTER_POP_OPEN = btn;
+}
+/* Delegated listeners attached ONCE (below, in wiring) rather than inside
+   openFilterPop — #filterPop is a single shared instance reused across every
+   open, so re-attaching per-open would stack duplicate handlers and toggle
+   options multiple times per click after a few opens. */
+function handleFilterPopInput(e){
+  const def = activeFilterDef();
+  if(def && e.target.id === 'filterPopSearch') renderFilterPopList(def, e.target.value);
+}
+function handleFilterPopClick(e){
+  const def = activeFilterDef();
+  if(!def) return;
+  const key = def.key, pop = document.getElementById('filterPop');
+  const opt = e.target.closest('.filter-opt');
+  if(opt){
+    /* renderFilterPopList() below replaces the list innerHTML while this
+       click is still bubbling, detaching e.target — leaving the outer
+       document click listener to see e.target.closest('#filterPop') as
+       null and incorrectly close the popover. Stop the bubble instead. */
+    e.stopPropagation();
+     const v = opt.dataset.opt, cur = FILTERS[key];
+     FILTERS[key] = (key==='site' && v==='__all__') ? [] : (cur.includes(v) ? cur.filter(x=>x!==v) : [...cur, v]);
+    resetListPage(); renderFilterButtons(); renderList();
+    renderFilterPopList(def, (pop.querySelector('#filterPopSearch')||{}).value || '');
+    const hasClear = !!pop.querySelector('#filterPopClear');
+    if(FILTERS[key].length && !hasClear){
+      pop.insertAdjacentHTML('beforeend', `<div class="filter-pop-clear"><button type="button" id="filterPopClear">Clear</button></div>`);
+    } else if(!FILTERS[key].length && hasClear){
+      pop.querySelector('.filter-pop-clear').remove();
+    }
+    return;
+  }
+  if(e.target.id === 'filterPopClear'){
+    FILTERS[key] = []; resetListPage(); renderFilterButtons(); renderList(); closeFilterPop();
+  }
+}
+
+function renderList(){
+  const q = FILTERS.q.trim().toLowerCase();
+  const rows = ROSTER.filter(r=>{
+    for(const def of FILTER_DEFS){
+      if(FILTERS[def.key].length && !FILTERS[def.key].includes(def.accessor(r))) return false;
+    }
+    const identity=displayIdentity(r);
+    if(q && !(identity.name.toLowerCase().includes(q) || identity.mrn.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  const pageCount=Math.max(1,Math.ceil(rows.length/LIST_PAGE_SIZE));
+  LIST_PAGE=Math.min(LIST_PAGE,pageCount);
+  const start=(LIST_PAGE-1)*LIST_PAGE_SIZE, visible=rows.slice(start,start+LIST_PAGE_SIZE);
+  document.getElementById('listTitle').textContent = ROSTER.length + ' patients';
+  document.getElementById('listBody').innerHTML = visible.length ? visible.map(r=>`
+    <tr class="clickable" tabindex="0" data-pt="${esc(r.id)}">
+      <td><span class="link">${esc(displayIdentity(r).name)}</span> ${displayIdentity(r).masked?privacyCue():''}</td>
+      <td class="text-muted code ${displayIdentity(r).masked?'masked-id':''}">${esc(displayIdentity(r).mrn)}</td>
+      <td class="text-muted mono">${r.birthYear==null?'-':r.birthYear}</td>
+      <td>${esc(r.sex)}</td>
+      <td><span class="badge badge-secondary">${esc(r.site)}</span></td>
+      <td>${esc(r.dx)}</td>
+      <td><span class="badge ${r.vitalStatus==='deceased'?'badge-neutral':'badge-green'}">${r.vitalStatus==='deceased'?'Deceased':'Alive'}</span></td>
+      <td class="mono" style="text-align:right">${r.surv!=null?r.surv+' d':'-'}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="8" style="padding:2.5rem 1rem;text-align:center" class="text-muted">No patients match these filters.</td></tr>`;
+
+  document.getElementById('listFoot').textContent = rows.length ? `Showing ${start+1}–${Math.min(start+LIST_PAGE_SIZE,rows.length)} of ${rows.length}` : 'Showing 0 of 0';
+  document.getElementById('prevPage').disabled=LIST_PAGE<=1;
+  document.getElementById('nextPage').disabled=LIST_PAGE>=pageCount;
+}
+
+/* ── patient resolution ────────────────────────────────────────────────────
+   Four patients carry hand-transcribed clinical detail. Every other roster
+   row is materialised from the closest of those four: the trajectory is
+   time-scaled onto the row's real diagnosis-to-outcome interval and the
+   identity fields are replaced, so the list and the detail always agree.  */
+const ARCHETYPES = ['C974652','C7617267','C886092','C4261089'];
+
+function pickArchetype(r){
+  if(r.vitalStatus === 'alive') return (r.events||1) <= 1 ? 'C4261089' : 'C7617267';
+  return (r.events||1) >= 6 ? 'C974652' : 'C886092';
+}
+
+function materialise(r){
+  const a = PATIENTS[pickArchetype(r)];
+  const a0 = initialEvent(a).day, aOS = a.vitalStatusDay - a0;
+  const t0 = (r.surv!=null && r.vitalStatusDay!=null) ? r.vitalStatusDay - r.surv : a0;
+  const scale = (aOS > 0 && r.surv != null) ? r.surv / aOS : 1;
+  const map = d => d==null ? null : Math.round(t0 + (d - a0) * scale);
+
+  const p = JSON.parse(JSON.stringify(a));
+  p.events.forEach(e=>{ e.day = map(e.day); if(e.progressionMriDay!=null) e.progressionMriDay = map(e.progressionMriDay); });
+  p.surgeries.forEach(s=>{ s.day = map(s.day); });
+  p.radiation.forEach(x=>{ x.startDay = map(x.startDay); x.endDay = map(x.endDay); });
+  p.therapy.forEach(t=>{ t.startDay = map(t.startDay); t.endDay = map(t.endDay); });
+  p.variants.forEach(v=>{ v.day = map(v.day); });
+  p.cases.forEach(c=>{ c.updatedDay = map(c.updatedDay); });
+  p.mrImagingDxDay = map(p.mrImagingDxDay);
+
+  const identity=displayIdentity(r);
+  p.id = r.id; p.name = identity.name; p.mrn = identity.mrn; p.site = r.site; p.org = r.org;
+  p.birthYear = r.birthYear; p.sex = r.sex;
+  p.vitalStatus = r.vitalStatus; p.vitalStatusDay = r.vitalStatusDay;
+  p.events.forEach(e=>{ if(e.integratedDx && e.integratedDx.startsWith('ATRT')) e.integratedDx = r.dx; });
+  /* re-point evidence URLs at this patient rather than the archetype */
+  [...p.events, ...p.surgeries, ...p.radiation, ...p.therapy].forEach(rec=>{
+    if(rec.ev && rec.ev.evidenceUrl) rec.ev.evidenceUrl = rec.ev.evidenceUrl.replace(a.id, r.id);
+  });
+  p.cases = p.cases.slice(0, r.cases);
+  return p;
+}
+
+function resolve(id){
+  const r = ROSTER.find(x=>x.id===id);
+  if(PATIENTS[id]){
+    /* The four detailed patients keep their own clinical records but take
+       identity from the roster, so the list and the detail never disagree. */
+    const p = PATIENTS[id];
+    if(r){ const identity=displayIdentity(r); p.name = identity.name; p.mrn = identity.mrn; p.site = r.site; p.org = r.org; }
+    p.clinical = DEMO_CLINICAL;
+    return p;
+  }
+  if(!r) return null;
+  const p = materialise(r); p.clinical = DEMO_CLINICAL; return p;
+}
+
+/* ── detail ───────────────────────────────────────────────────────────────── */
+let CUR = null;
+
+function goList(){
+  document.getElementById('screen-detail').classList.remove('show');
+  document.getElementById('screen-list').classList.add('show');
+  window.scrollTo(0,0);
+}
+
+function openPt(id){
+  const p = resolve(id);
+  if(!p) return;
+  CUR = p;
+  EV_REG.clear(); EV_SEQ = 0; closeBrim();
+  const ie = initialEvent(p), le = latestEvent(p), surv = survivalDays(p), ttp = ttpDays(p);
+
+  const restricted=p.site!=='CHOP';
+  document.getElementById('dTitle').innerHTML = esc(p.name) + (restricted ? ` ${privacyCue()}` : '');
+  document.getElementById('dBadges').innerHTML =
+    `<span class="badge badge-secondary badge-lg">${esc(ie.integratedDx)}</span>` +
+    `<span class="badge badge-lg ${p.vitalStatus==='deceased'?'badge-neutral':'badge-green'}">${p.vitalStatus==='deceased'?'Deceased':'Alive'}</span>`;
+  document.getElementById('dDesc').textContent =
+    [p.mrn, 'Born ' + p.birthYear, p.sex, p.org].join('  ·  ');
+  renderDetailSidebar(p);
+
+  renderOverview(p); renderTimeline(p); renderTreatments(p); renderGenomics(p); renderTumorBoard(p);
+  renderLaboratory(p); renderImaging(p); renderTrials(p);
+  showTab('overview');
+  document.getElementById('screen-list').classList.remove('show');
+  document.getElementById('screen-detail').classList.add('show');
+  window.scrollTo(0,0);
+}
+
+function renderDetailSidebar(p){
+  const diagnosis=initialEvent(p), latest=latestEvent(p);
+  const dateLabel=day=>day==null?'-':`Day ${day} · age ${yrs(day)}`;
+  document.getElementById('detailSidebar').innerHTML=`
+    <section class="card">
+      <div class="card-header bordered"><h2 class="card-title base">Key Dates</h2></div>
+      <div class="card-content"><div class="sidebar-list">
+        <div class="sidebar-item"><span><strong>Initial diagnosis</strong><small>${dateLabel(diagnosis&&diagnosis.day)}</small></span><span class="badge badge-secondary">Clinical</span></div>
+        <div class="sidebar-item"><span><strong>Latest encounter</strong><small>${dateLabel(latest&&latest.day)}</small></span><span class="badge badge-secondary">Registry</span></div>
+      </div></div>
+    </section>
+    <section class="card">
+      <div class="card-header bordered"><h2 class="card-title base">External Records</h2></div>
+      <div class="card-content">
+        <img src="data:image/png;base64,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" alt="TEFCA" style="display:block;width:100%;max-width:200px;height:auto;margin:0 auto .625rem">
+        <div class="sidebar-list">
+          <div class="sidebar-item"><span><strong>TEFCA exchange</strong><small>${esc(p.org||p.site||'Registry partner')}</small></span><span class="badge badge-outline">Linked</span></div>
+          <div class="sidebar-item"><span><strong>Query status</strong><small>QHIN record locate &amp; retrieve</small></span><span class="source-pill"><i></i>Connected</span></div>
+        </div>
+      </div>
+    </section>
+    </section>`;
+}
+
+function showTab(name){
+  ['overview','timeline','treatments','genomics','tumorboard','laboratory','imaging','trials'].forEach(n=>{
+    document.getElementById('tab-'+n).hidden = (n!==name);
+    document.getElementById('tb-'+n).dataset.state = (n===name) ? 'active' : 'inactive';
+  });
+}
+
+/* ── overview ─────────────────────────────────────────────────────────────── */
+function renderOverview(p){
+  const ie = initialEvent(p), le = latestEvent(p);
+  const PRED = [
+    ['smarcb1','Rhabdoid tumour (SMARCB1)'], ['li_fraumeni','Li-Fraumeni (TP53)'],
+    ['nf1_nf2','NF1 / NF2'], ['mmr','MMR'], ['cmmrd','CMMRD'], ['lynch','Lynch syndrome']
+  ];
+  const showMetSite = ['M2','M3','M4'].includes(le.mStage);
+
+  document.getElementById('tab-overview').innerHTML = `
+    <div class="grid-detail">
+      <div class="stack">
+        <section class="card">
+          <div class="card-header bordered">
+            <h2 class="card-title">Initial diagnosis</h2>
+            <div class="card-action">
+              <span class="text-muted text-xs">${p.events.length} event${p.events.length===1?'':'s'} total</span>
+              <button class="btn btn-outline btn-sm" onclick="showTab('timeline')">View timeline</button>
+            </div>
+          </div>
+          <div class="card-content tight">
+            <div class="info-list">
+              ${field('CNS diagnosis category', esc(ie.dxCategory))}
+              ${field('CNS integrated diagnosis', `<span style="font-weight:600">${esc(ie.integratedDx)}</span>${brimTrigger(ie)}`)}
+              ${field('Date of diagnosis', `Day ${ie.day} <span class="text-muted">· age ${esc(yrs(ie.day))}</span>`)}
+              ${field('Source of diagnosis', tags(ie.sourceOfDx))}
+              ${field('Date of MR imaging diagnosis', p.mrImagingDxDay!=null?`Day ${p.mrImagingDxDay}`:null)}
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header bordered">
+            <h2 class="card-title">Tumour and metastasis</h2>
+            <span class="card-action text-muted text-xs">Most recent event · ${esc((EVENT_TYPES[le.type]||{}).label||le.type)} · Day ${le.day}</span>
+          </div>
+          <div class="card-content tight">
+            <div class="info-list">
+              ${field('Tumour locations', tags(le.tumorLocations))}
+              ${field('Other location', le.tumorLocationOther ? esc(le.tumorLocationOther) : null)}
+              ${field('Laterality', esc(le.laterality))}
+              ${field('Metastasis', `<span class="badge ${le.metastasis==='Yes'?'badge-red':le.metastasis==='No'?'badge-green':'badge-neutral'}">${esc(le.metastasis)}</span>`)}
+              ${field('Metastatic stage (Chang)', `<span style="font-weight:600">${esc(le.mStage)}</span>${brimTrigger(le)}`)}
+              ${field('Metastasis site', showMetSite ? tags(le.metLocations) : EMPTY)}
+              ${field('Extraneural site', le.metLocationOther ? esc(le.metLocationOther) : null)}
+              ${field('Symptoms at event', tags(le.symptoms))}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="card">
+          <div class="card-header bordered"><h2 class="card-title">Demographics</h2></div>
+          <div class="card-content tight">
+            <div class="info-list">
+              ${field('MRN', `<span class="code">${esc(p.mrn)}</span>`)}
+              ${field('Birth year', p.birthYear)}
+              ${field('Sex', esc(p.sex))}
+              ${field('Race', esc(p.race))}
+              ${field('Ethnicity', esc(p.ethnicity))}
+              ${field('Postal code', `<span class="code">${esc(p.zip)}</span>`)}
+              ${field('Site', esc(p.org))}
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header bordered"><h2 class="card-title">Cancer predispositions</h2></div>
+          <div class="card-content tight">
+            <div class="info-list">
+              ${PRED.map(([k,label])=>{
+                const v = p.predispositions[k], yes = v==='Yes', ne = v==='Not Evaluated';
+                const colour = yes ? 'var(--c-red-fg)' : ne ? 'var(--slate-300)' : 'var(--slate-400)';
+                /* germline confirmation is documented alongside the initial
+                   diagnosis note, so a "Yes" row reuses that same evidence */
+                const value = `<span class="pred-dot" style="background:${colour}"></span>` +
+                  `<span style="${yes?'font-weight:500;color:var(--c-red-fg)':'color:var(--muted-foreground)'}">${ne?'Not evaluated':esc(v)}</span>${yes?brimTrigger(ie):''}`;
+                return field(label, value);
+              }).join('')}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>`;
+}
+
+/* ── timeline ─────────────────────────────────────────────────────────────── */
+let TL = { disease:true, surgery:true, radiation:true, therapy:true };
+
+function renderTimeline(p){
+  const items = [];
+  p.events.forEach((e,i)=>items.push({ kind:'disease', day:e.day, e, idx:i }));
+  p.surgeries.forEach(s=>items.push({ kind:'surgery', day:s.day, s }));
+  p.radiation.forEach(r=>items.push({ kind:'radiation', day:r.startDay, r }));
+  p.therapy.forEach(t=>items.push({ kind:'therapy', day:t.startDay, t }));
+  items.sort((a,b)=>{
+    const av=a.day==null?Infinity:a.day, bv=b.day==null?Infinity:b.day;
+    if(av!==bv) return av-bv;
+    return (a.kind==='disease'?0:1)-(b.kind==='disease'?0:1);
+  });
+
+  /* phase label per disease event; progression and recurrence counted
+     separately because they are clinically distinct */
+  let pd=0, rc=0, sm=0, sp=0;
+  const phase = new Map();
+  p.events.forEach((e,i)=>{
+    let l;
+    if(e.type==='Initial CNS Tumor') l='Initial presentation';
+    else if(e.type==='Progressive') l='Progression '+(++pd);
+    else if(e.type==='Recurrence') l='Recurrence '+(++rc);
+    else if(e.type==='Second Malignancy'){ ++sm; l='Second malignancy'+(sm>1?' '+sm:''); }
+    else if(e.type==='Second Primary'){ ++sp; l='Second primary'+(sp>1?' '+sp:''); }
+    else if(e.type==='Deceased') l='Outcome';
+    else l='Status unavailable';
+    phase.set(i,l);
+  });
+
+  const visible = items.filter(it=>TL[it.kind]);
+  const blocks = [];
+  let cur = null;
+  visible.forEach(it=>{
+    if(it.kind==='disease'){
+      const ph = phase.get(it.idx);
+      if(ph!==cur){ cur=ph; blocks.push({ phase:ph }); }
+    }
+    blocks.push({ it });
+  });
+  for(let i=0;i<blocks.length;i++){
+    if(blocks[i].it) blocks[i].railEnd = !blocks[i+1] || blocks[i+1].phase!==undefined;
+  }
+
+  const counts = { disease:p.events.length, surgery:p.surgeries.length, radiation:p.radiation.length, therapy:p.therapy.length };
+  const toggle = (k,label,colour)=>`<button class="toggle" aria-pressed="${TL[k]}" data-tl="${k}">
+      <span class="dot" style="background:${colour}"></span>${label}<span class="n">${counts[k]}</span></button>`;
+
+  const body = blocks.length ? blocks.map(b=>{
+    if(b.phase!==undefined){
+      return `<div class="tl-phase"><span class="tl-phase-rule"></span><span class="tl-phase-label">${esc(b.phase)}</span><span class="tl-phase-rule"></span></div>`;
+    }
+    return tlRow(b.it, b.railEnd);
+  }).join('') : `<p class="tl-empty">No events match these filters.</p>`;
+
+  document.getElementById('tab-timeline').innerHTML = `
+    <section class="card">
+      <div class="card-header bordered">
+        <h2 class="card-title">Clinical timeline</h2>
+        <span class="card-action text-muted text-sm">Relative day offsets</span>
+      </div>
+      <div class="card-content">
+        <div class="tl-controls">
+          ${toggle('disease','Diagnosis','var(--c-red)')}
+          ${toggle('surgery','Surgery','var(--slate-400)')}
+          ${toggle('radiation','Radiation','var(--slate-400)')}
+          ${toggle('therapy','Treatment','var(--slate-400)')}
+        </div>
+        <div>${body}</div>
+      </div>
+    </section>`;
+
+  document.querySelectorAll('[data-tl]').forEach(b=>b.addEventListener('click',()=>{
+    TL[b.dataset.tl] = !TL[b.dataset.tl]; renderTimeline(CUR);
+  }));
+}
+
+function tlRow(it, railEnd){
+  const cls = railEnd ? ' rail-end' : '';
+  const when = (start,end)=>{
+    if(start==null) return '<span class="empty">-</span>';
+    const base = end!=null && end!==start ? `Day ${start} – ${end}` : `Day ${start}`;
+    return `${base}<br><span class="text-xs">age ${yrs(start)}</span>`;
+  };
+
+  if(it.kind==='disease'){
+    const e = it.e, m = EVENT_TYPES[e.type] || EVENT_TYPES['Unavailable'];
+    const meta = [];
+    if(e.tumorLocations.length) meta.push(esc(e.tumorLocations.join(' · ')));
+    meta.push('Laterality ' + esc(e.laterality));
+    meta.push('M-stage ' + esc(e.mStage));
+    if(e.metastasis==='Yes' && e.metLocations.length) meta.push('Mets ' + esc(e.metLocations.join(', ')));
+    meta.push('Source ' + esc(e.sourceOfDx.join(' + ')));
+    if(e.progressionMriDay!=null) meta.push('Progression MRI Day ' + e.progressionMriDay);
+    return `<div class="tl-item${cls}">
+      <span class="tl-rail"></span>
+      <span class="tl-glyph ${m.glyph}">${m.code}</span>
+      <div class="tl-body">
+        <div class="tl-head">
+          <span class="tl-title">${esc(m.label)}${e.type!=='Deceased'?' — '+esc(e.integratedDx):''}${brimTrigger(e)}</span>
+          <span class="tl-when">${when(e.day)}</span>
+        </div>
+        <p class="tl-meta">${meta.join(' · ')}</p>
+        ${e.symptoms.length?`<div class="tl-tags">${tags(e.symptoms)}</div>`:''}
+      </div>
+    </div>`;
+  }
+
+  if(it.kind==='surgery'){
+    return `<div class="tl-item${cls}">
+      <span class="tl-rail"></span><span class="tl-glyph">SX</span>
+      <div class="tl-body"><div class="tl-head">
+        <span class="tl-title secondary">Surgery — ${esc(it.s.extent)}${brimTrigger(it.s)}</span>
+        <span class="tl-when">${when(it.s.day)}</span>
+      </div></div>
+    </div>`;
+  }
+
+  if(it.kind==='radiation'){
+    const r = it.r, csi = normDose(r.csiDose), tot = normDose(r.totalPrimaryDose), fb = focalBoost(csi,tot);
+    const site = r.site==='Other' && r.siteOther ? `Other — ${r.siteOther}` : r.site;
+    const meta = [esc(r.type)];
+    if(csi.gy!=null) meta.push('CSI ' + gyLabel(csi));
+    if(fb.gy!=null)  meta.push((fb.focalOnly?'Focal ':'Focal boost ') + gyLabel(fb));
+    if(tot.gy!=null) meta.push('Total to primary ' + gyLabel(tot));
+    return `<div class="tl-item${cls}">
+      <span class="tl-rail"></span><span class="tl-glyph">RT</span>
+      <div class="tl-body"><div class="tl-head">
+        <span class="tl-title secondary">Radiation — ${esc(site)}${brimTrigger(r)}</span>
+        <span class="tl-when">${when(r.startDay, r.endDay)}</span>
+      </div><p class="tl-meta">${meta.join(' · ')}</p></div>
+    </div>`;
+  }
+
+  const t = it.t, agents = splitMulti(t.agents);
+  return `<div class="tl-item${cls}">
+    <span class="tl-rail"></span><span class="tl-glyph">MT</span>
+    <div class="tl-body"><div class="tl-head">
+      <span class="tl-title secondary">Medical therapy${isSentinel(t.protocol)?'':' — '+esc(t.protocol)}${brimTrigger(t)}</span>
+      <span class="tl-when">${when(t.startDay, t.endDay)}</span>
+    </div>${agents.length?`<div class="tl-tags">${tags(agents)}</div>`:`<p class="tl-meta">Agents not recorded</p>`}</div>
+  </div>`;
+}
+
+/* ── treatments ───────────────────────────────────────────────────────────── */
+function renderTreatments(p){
+  const rows = [];
+  p.surgeries.forEach(s=>rows.push({ k:'sx', day:s.day, s }));
+  p.radiation.forEach(r=>rows.push({ k:'rt', day:r.startDay, r }));
+  p.therapy.forEach(t=>rows.push({ k:'mt', day:t.startDay, t }));
+  rows.sort((a,b)=>(a.day==null?Infinity:a.day)-(b.day==null?Infinity:b.day));
+
+  const dayCell = (s,e)=>{
+    if(s==null) return EMPTY;
+    return (e!=null && e!==s) ? `${s} – ${e}` : `${s}`;
+  };
+  const dose = (k,v)=>`<div class="dose-item"><span class="dose-key">${k}</span><span class="dose-val">${v==null?'-':v}</span></div>`;
+
+  const body = rows.map(r=>{
+    if(r.k==='sx') return `<tr>
+      <td class="mono top">${dayCell(r.s.day)}</td>
+      <td class="top"><span class="badge badge-secondary">Surgery</span></td>
+      <td class="top"><div class="cell-title">${esc(r.s.extent)}${brimTrigger(r.s)}</div></td>
+      <td class="top text-muted text-sm">-</td></tr>`;
+
+    if(r.k==='rt'){
+      const rr=r.r, csi=normDose(rr.csiDose), tot=normDose(rr.totalPrimaryDose), fb=focalBoost(csi,tot);
+      const isWV = /whole ventricular/i.test(rr.site);
+      const site = rr.site==='Other'&&rr.siteOther ? `Other — ${rr.siteOther}` : rr.site;
+      return `<tr>
+        <td class="mono top">${dayCell(rr.startDay, rr.endDay)}</td>
+        <td class="top"><span class="badge badge-secondary">Radiation</span></td>
+        <td class="top"><div class="cell-title">${esc(site)}${brimTrigger(rr)}</div><div class="text-muted text-sm">${esc(rr.type)}</div></td>
+        <td class="top"><div class="dose-list">
+          ${isWV ? dose('Whole ventricular', gyLabel(csi)) : dose('Craniospinal', gyLabel(csi))}
+          ${dose(fb.focalOnly?'Focal':'Focal boost', gyLabel(fb))}
+          ${dose('Total to primary', gyLabel(tot))}
+        </div></td></tr>`;
+    }
+
+    const t=r.t, agents=splitMulti(t.agents);
+    return `<tr>
+      <td class="mono top">${dayCell(t.startDay, t.endDay)}</td>
+      <td class="top"><span class="badge badge-secondary">Therapy</span></td>
+      <td class="top">
+        <div class="cell-title">${isSentinel(t.protocol)?'<span class="empty">-</span>':esc(t.protocol)}${brimTrigger(t)}</div>
+        ${agents.length?`<div class="tl-tags">${tags(agents)}</div>`:''}
+      </td>
+      <td class="top text-muted text-sm">-</td></tr>`;
+  }).join('');
+
+  document.getElementById('tab-treatments').innerHTML = `
+    <section class="card">
+      <div class="card-header bordered">
+        <h2 class="card-title">Treatment history</h2>
+        <span class="card-action text-muted text-sm">${rows.length} records · doses in Gy</span>
+      </div>
+      <div class="card-content flush">
+        <table class="table">
+          <thead><tr>
+            <th scope="col" style="width:7rem">Day</th>
+            <th scope="col" style="width:7rem">Type</th>
+            <th scope="col">Description</th>
+            <th scope="col" style="width:14rem">Dose</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+/* ── genomics ─────────────────────────────────────────────────────────────── */
+let SHOW_VUS = false;
+
+function renderGenomics(p){
+  const shown = p.variants.filter(v=>SHOW_VUS || !v.vus);
+  const clsBadge = c => c==='Pathogenic' ? 'badge-red' : c==='Likely Pathogenic' ? 'badge-orange' : 'badge-yellow';
+
+  document.getElementById('tab-genomics').innerHTML = `
+    <div class="stack">
+      <section class="card">
+        <div class="card-header bordered">
+          <h2 class="card-title">Variant interpretations</h2>
+          <div class="card-action">
+            <span class="text-muted text-sm">${shown.length} of ${p.variants.length}</span>
+            <button class="btn btn-outline btn-sm" id="vusBtn">${SHOW_VUS?'Pathogenic only':'Show all classifications'}</button>
+          </div>
+        </div>
+        <div class="card-content flush">
+          <table class="table">
+            <thead><tr>
+              <th scope="col">Gene</th><th scope="col">Variant</th><th scope="col">Classification</th>
+              <th scope="col">Origin</th><th scope="col">Case</th><th scope="col">Assay</th><th scope="col">Reported</th>
+            </tr></thead>
+            <tbody>${shown.map(v=>`<tr>
+              <td><span class="link">${esc(v.gene)}</span></td>
+              <td class="code">${esc(v.hgvsp)}</td>
+              <td><span class="badge ${clsBadge(v.cls)}">${esc(v.cls)}</span></td>
+              <td><span class="badge ${v.origin==='Germline'?'badge-violet':'badge-secondary'}">${esc(v.origin)}</span></td>
+              <td><span class="link code">${esc(v.caseId)}</span></td>
+              <td><span class="badge badge-secondary">${esc(v.seq)}</span></td>
+              <td class="text-muted mono">Day ${v.day}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header bordered"><h2 class="card-title">Genomic cases</h2></div>
+        <div class="card-content flush">
+          <table class="table">
+            <thead><tr>
+              <th scope="col">Case</th><th scope="col">Priority</th><th scope="col">Status</th>
+              <th scope="col">Sample scope</th><th scope="col">Assay</th><th scope="col">Requested by</th><th scope="col">Updated</th>
+            </tr></thead>
+            <tbody>${p.cases.map(c=>`<tr class="clickable">
+              <td><span class="link code">${esc(c.caseId)}</span></td>
+              <td><span class="badge ${c.priority==='Urgent'?'badge-violet':'badge-secondary'}">${esc(c.priority)}</span></td>
+              <td><span class="badge ${c.status==='Complete'?'badge-green':'badge-blue'}">${esc(c.status)}</span></td>
+              <td class="text-muted">${esc(c.scope)}</td>
+              <td><span class="badge badge-secondary">${esc(c.analysis)}</span></td>
+              <td class="text-muted">${esc(c.reqBy)}</td>
+              <td class="text-muted mono">Day ${c.updatedDay}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </section>
+    </div>`;
+
+  const b = document.getElementById('vusBtn');
+  if(b) b.addEventListener('click',()=>{ SHOW_VUS=!SHOW_VUS; renderGenomics(CUR); });
+}
+
+function renderLaboratory(p){
+  const c=p.clinical||DEMO_CLINICAL, last=c.labs[c.labs.length-1], perf=c.performance||{};
+  /* Lansky and Karnofsky are recorded scores, so each carries its own date.
+     A score with no date is not clinically interpretable — show it as absent. */
+  const scoreField=(label,s)=>{
+    if(!s||!s.score) return field(label,`<span class="text-muted">Not recorded</span>`);
+    return field(label,`${esc(s.score)} / 100 <span class="text-muted text-xs">· ${s.date?esc(s.date):'date unknown'}</span>`);
+  };
+  document.getElementById('tab-laboratory').innerHTML=`<div class="clinical-grid">
+    <section class="card"><div class="card-header bordered"><h2 class="card-title">Current CBC</h2><span class="card-action text-muted text-xs">${last?esc(last.date):'No recent result'}</span></div><div class="card-content tight">${last?`<div class="value-grid">
+      ${[['WBC',last.wbc,'&times;10&#8313;/L'],['Hemoglobin',last.hgb,'g/dL'],['Platelets',last.plt,'&times;10&#8313;/L'],['ANC',last.anc,'&times;10&#8313;/L']].map(x=>`<div class="value-tile"><strong>${esc(x[1])}</strong><span>${x[0]} &middot; ${x[2]}</span></div>`).join('')}</div>`:'<p class="tl-empty">No current CBC result available.</p>'}</div></section>
+    <section class="card"><div class="card-header bordered"><h2 class="card-title">Performance status</h2><span class="card-action source-pill"><i></i>${esc(perf.source||'Direct assessment')}</span></div><div class="card-content tight"><div class="info-list">${scoreField('Lansky',perf.lansky)}${scoreField('Karnofsky',perf.karnofsky)}</div><p class="text-muted text-xs" style="margin-top:.625rem">${esc(perf.note||'')}</p></div></section>
+    <section class="card" style="grid-column:1/-1"><div class="card-header bordered"><h2 class="card-title">CSF analysis</h2><span class="card-action text-muted text-xs">${esc(c.csf.date)}</span></div><div class="card-content tight"><div class="info-list">${field('Opening pressure',c.csf.opening)}${field('Cells',c.csf.cells)}${field('Protein',c.csf.protein)}${field('Glucose',c.csf.glucose)}${field('Cytology',c.csf.cytology)}${field('Cell-free DNA',c.csf.cfDna)}</div></div></section>
+  </div>`;
+}
+
+const DEFAULT_IMAGING_CONFIG={api:'https://flywheel.cbtn.org/api',project:'cbtn-pediatric-glioma',subject:'Nadine-Esperanza',viewer:true};
+function readImagingConfig(){
+  try{
+    const raw=JSON.parse(localStorage.getItem('radiant-imaging-config')||'null');
+    if(!raw||typeof raw!=='object') return {...DEFAULT_IMAGING_CONFIG};
+    return {api:typeof raw.api==='string'&&raw.api.trim()?raw.api:DEFAULT_IMAGING_CONFIG.api,
+      project:typeof raw.project==='string'&&raw.project.trim()?raw.project:DEFAULT_IMAGING_CONFIG.project,
+      subject:typeof raw.subject==='string'&&raw.subject.trim()?raw.subject:DEFAULT_IMAGING_CONFIG.subject,
+      viewer:raw.viewer===true||raw.viewer==='true'};
+  }catch(_){return {...DEFAULT_IMAGING_CONFIG}}
+}
+function readImagingSource(){
+  try{return localStorage.getItem('radiant-imaging-source')==='csv'?'csv':'flywheel'}catch(_){return 'flywheel'}
+}
+let imagingSource=readImagingSource();
+function openImagingConfig(){
+  const c=readImagingConfig(), f=document.getElementById('imagingConfigForm');
+  f.elements.api.value=c.api; f.elements.project.value=c.project; f.elements.subject.value=c.subject;
+  const sw=document.getElementById('viewerSwitch'); sw.classList.toggle('on',c.viewer); sw.setAttribute('aria-pressed',c.viewer);
+  document.getElementById('imagingConfigOverlay').classList.add('open');document.getElementById('imagingConfig').classList.add('open')
+}
+function closeImagingConfig(){document.getElementById('imagingConfigOverlay').classList.remove('open');document.getElementById('imagingConfig').classList.remove('open')}
+function renderImaging(p){
+  const c=p.clinical||DEMO_CLINICAL, cfg=readImagingConfig(), sourceLabel=imagingSource==='csv'?'Local CSV fallback':'Flywheel API';
+  document.getElementById('tab-imaging').innerHTML=`<div class="stack"><section class="card"><div class="card-header bordered"><h2 class="card-title">Imaging studies</h2><div class="card-action"><span class="source-pill"><i></i>${esc(sourceLabel)}</span><button class="btn btn-outline btn-sm" onclick="openImagingConfig()">Configure integration</button></div></div><div class="card-content flush"><table class="table"><thead><tr><th>Date</th><th>Modality</th><th>Viewer</th></tr></thead><tbody>${c.imaging.map(x=>`<tr><td class="mono">${esc(x.date)}</td><td>${esc(x.modality)}</td><td>${cfg.viewer?`<a class="link" href="https://flywheel.cbtn.org/session/${esc(x.session)}" target="_blank" rel="noopener">Open study ↗</a>`:'<span class="text-muted">Viewer off</span>'}</td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card"><div class="card-header bordered"><h2 class="card-title">DICOM connection</h2><span class="card-action source-pill"><i></i>${esc(sourceLabel)} · local state</span></div><div class="card-content tight"><div class="info-list">${field('API URL',esc(cfg.api))}${field('Project',esc(cfg.project))}${field('Subject label',esc(cfg.subject))}${field('Viewer',cfg.viewer?'Enabled':'Disabled')}${field('Last sync','2025-09-18 · 4 studies')}</div><div class="ph-actions"><button class="btn btn-outline btn-sm" onclick="imagingSource='csv';try{localStorage.setItem('radiant-imaging-source','csv')}catch(_){ }renderImaging(CUR)">Use local CSV fallback</button><button class="btn btn-primary btn-sm" onclick="imagingSource='flywheel';try{localStorage.setItem('radiant-imaging-source','flywheel')}catch(_){ }renderImaging(CUR)">Reconnect Flywheel API</button></div></div></section></div>`;
+}
+function renderTrials(p){
+  const c=p.clinical||DEMO_CLINICAL;
+  document.getElementById('tab-trials').innerHTML=`<section class="card"><div class="card-header bordered"><h2 class="card-title">Clinical trials</h2><span class="card-action text-muted text-sm">${c.trials.length} records</span></div><div class="card-content"><div class="trial-grid">${c.trials.map(t=>`<article class="trial-card"><div class="trial-head"><div><div class="trial-id">${t.id}</div><h3 class="card-title" style="margin-top:.3rem">${esc(t.title)}</h3></div><span class="badge ${t.status==='Enrolled'?'badge-green':'badge-neutral'}">${esc(t.status)}</span></div><div class="info-list" style="margin-top:1rem">${field('Phase',t.phase)}${field('Dates',t.dates)}${field('Site',t.site)}${field('Notes',t.notes)}</div></article>`).join('')}</div></div></section>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TUMOR BOARD — session list only (no session detail / report-builder view;
+   out of scope per spec). Sessions are derived from each patient's own
+   major disease events so the list is patient-specific without a separate
+   data model to keep in sync.
+   ══════════════════════════════════════════════════════════════════════════ */
+const TMB_EVENT_TYPES = ['Initial CNS Tumor','Progressive','Recurrence','Second Malignancy'];
+const TMB_LABELS = {
+  'Initial CNS Tumor':'Initial diagnosis review', 'Progressive':'Progression review',
+  'Recurrence':'Recurrence review', 'Second Malignancy':'Second malignancy review'
+};
+
+function buildTmbSessions(p){
+  const picks = p.events.filter(e=>TMB_EVENT_TYPES.includes(e.type)).slice(0,3);
+  return picks.map((e,i)=>{
+    const isLast = i === picks.length - 1;
+    const status = (p.vitalStatus==='alive' && isLast) ? 'In Progress' : 'Completed';
+    const bits = [];
+    if(e.mStage && e.mStage!=='M0') bits.push(`${e.mStage} disease`);
+    if(e.tumorLocations.length) bits.push(`primary site ${e.tumorLocations[0].toLowerCase()}`);
+    if(i===0 && p.predispositions.smarcb1==='Yes') bits.push('germline SMARCB1 status discussed');
+    bits.push(status==='Completed' ? 'consensus recorded, report finalized' : 'awaiting final case discussion');
+    return { day:e.day, label:TMB_LABELS[e.type], dx:e.integratedDx, detail:bits.join('; '), status };
+  });
+}
+
+function renderTumorBoard(p){
+  const sessions = buildTmbSessions(p).slice().reverse();   /* most recent first */
+
+  const rows = sessions.map(s=>`
+    <div class="tmb-item">
+      <div class="tmb-item-date">Day ${s.day}<span class="text-xs text-muted" style="display:block">age ${esc(yrs(s.day))}</span></div>
+      <div class="tmb-item-summary"><strong>${esc(s.label)}</strong> — ${esc(s.dx)}<br>${esc(s.detail)}</div>
+      <div class="tmb-item-right">
+        <span class="badge ${s.status==='Completed'?'badge-green':'badge-blue'}">${esc(s.status)}</span>
+        ${s.status==='Completed' ? `
+        <button class="btn btn-ghost btn-icon" title="Download tumor board report (PDF)" aria-label="Download report — Day ${s.day} session">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 15V3M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+        </button>` : ''}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('tab-tumorboard').innerHTML = `
+    <section class="card">
+      <div class="card-header bordered">
+        <h2 class="card-title">Board sessions</h2>
+        <span class="card-action text-muted text-sm">${sessions.length} session${sessions.length===1?'':'s'}</span>
+      </div>
+      <div class="card-content flush">
+        <div class="tmb-list">${rows || `<p class="tl-empty">No tumor board sessions recorded.</p>`}</div>
+      </div>
+    </section>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   D.A.V.I.D assistant, centred modal. Internal identifiers keep the
+   'charm' name (pre-rebrand) — only user-facing strings say D.A.V.I.D.
+   Conversation state lives here; a real build would swap seedCharm() and
+   the send handler for an engine.reply() call (see radiant-portal #1493).
+   ══════════════════════════════════════════════════════════════════════════ */
+let CHARM_MSGS = [];
+let CHARM_RETURN = null;
+let CHARM_FOR = null;      /* patient id the transcript was seeded for */
+
+function seedCharm(p){
+  const ie = initialEvent(p), le = latestEvent(p);
+  const dx = ie.integratedDx;
+  const path = p.variants.find(v=>/Pathogenic/.test(v.cls)) || p.variants[0];
+  const rx = p.therapy.find(t=>!isSentinel(t.protocol));
+  const rt = p.radiation[0];
+  const csi = rt ? normDose(rt.csiDose) : { gy:null };
+  const tot = rt ? normDose(rt.totalPrimaryDose) : { gy:null };
+  const rtTxt = rt
+    ? `${rt.site.toLowerCase()} ${tot.gy!=null?'to '+gyLabel(tot):''}${csi.gy!=null?' with '+gyLabel(csi)+' craniospinal':''}`
+    : 'no radiation on record';
+  const ttp = ttpDays(p);
+
+  return [
+    { role:'user', text:
+      `What is driving the ${dx} classification here, and does the ${path?path.gene:'germline'} finding change management?` },
+    { role:'assistant', text:
+      `${path ? `<strong>${esc(path.gene)} ${esc(path.hgvsp)}</strong> is reported ${esc(path.cls.toLowerCase())} on ${esc(path.seq)}${path.origin==='Germline'?', germline':''}. ` : ''}` +
+      `Biallelic ${path?esc(path.gene):'SMARCB1'} loss is the defining lesion in ATRT and is consistent with the ${esc(dx)} call. ` +
+      `${path && path.origin==='Germline'
+          ? 'Because it is germline, this meets criteria for rhabdoid tumour predisposition syndrome — cascade testing and surveillance imaging for siblings are indicated.'
+          : 'A paired germline sample would confirm whether this is constitutional; that distinction drives family counselling.'} ` +
+      `Staging is <strong>${esc(le.mStage)}</strong>${le.metLocations.length?` with ${esc(le.metLocations.join(' and ').toLowerCase())} involvement`:''}, which keeps this in the high-risk group.` },
+    { role:'assistant', text:
+      `On treatment: ${rx ? `<strong>${esc(rx.protocol)}</strong> was the backbone regimen` : 'no protocol regimen is recorded'}, ` +
+      `and radiation was ${esc(rtTxt)}. ` +
+      `${ttp!=null ? `First progression came at <strong>day ${ttp}</strong> from diagnosis. ` : 'No progression or recurrence is recorded to date. '}` +
+      `I can pull the matching EZH2-inhibitor trial criteria or compare this trajectory against the ATRT cohort — just say which.` }
+  ];
+}
+
+function charmBubble(m){
+  return `<div class="msg msg-${m.role}"><div class="msg-bubble">${m.text}</div></div>`;
+}
+function renderCharm(){
+  const body = document.getElementById('charmBody');
+  body.innerHTML = CHARM_MSGS.map(charmBubble).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+/* On the list screen there is no open patient — default to the first
+   roster entry rather than doing nothing, per spec ("current patient or
+   the first selected patient"). This never mutates the global CUR, so
+   opening the assistant from the list can't leak patient context into
+   a detail screen the user hasn't navigated to. */
+function charmSubject(){ return CUR || resolve(ROSTER[0].id); }
+
+function openCharm(){
+  const subject = charmSubject();
+  if(!subject) return;
+  if(CHARM_FOR !== subject.id){ CHARM_MSGS = seedCharm(subject); CHARM_FOR = subject.id; }
+  CHARM_RETURN = document.activeElement;
+  document.getElementById('charmCtx').textContent = subject.name;
+  renderCharm();
+  document.getElementById('charmModal').classList.add('open');
+  document.getElementById('charmModal').setAttribute('aria-hidden','false');
+  document.getElementById('charmOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('charmInput').focus(), 60);
+}
+function closeCharm(){
+  document.getElementById('charmModal').classList.remove('open');
+  document.getElementById('charmModal').setAttribute('aria-hidden','true');
+  document.getElementById('charmOverlay').classList.remove('open');
+  if(CHARM_RETURN && CHARM_RETURN.focus) CHARM_RETURN.focus();
+}
+const charmIsOpen = () => document.getElementById('charmModal').classList.contains('open');
+
+function charmSend(){
+  const input = document.getElementById('charmInput');
+  const text = input.value.trim();
+  if(!text) return;
+  CHARM_MSGS.push({ role:'user', text: esc(text) });
+  input.value = '';
+  renderCharm();
+
+  const body = document.getElementById('charmBody');
+  body.insertAdjacentHTML('beforeend',
+    `<div class="msg msg-assistant" id="charmTyping"><div class="msg-bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>`);
+  body.scrollTop = body.scrollHeight;
+
+  setTimeout(()=>{
+    const t = document.getElementById('charmTyping');
+    if(t) t.remove();
+    CHARM_MSGS.push({ role:'assistant', text:'Reviewing patient context…' });
+    renderCharm();
+  }, 800);
+}
+
+/* focus trap — keep Tab inside the dialog while it is open */
+function charmTrap(e){
+  if(e.key !== 'Tab' || !charmIsOpen()) return;
+  const nodes = document.getElementById('charmModal')
+    .querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  const list = [...nodes].filter(n=>!n.disabled && n.offsetParent !== null);
+  if(!list.length) return;
+  const first = list[0], last = list[list.length-1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+}
+
+/* ── sheet API ────────────────────────────────────────────────────────────── */
+let SHEET_RETURN = null;
+function openSheet(title, html){
+  SHEET_RETURN = document.activeElement;
+  document.getElementById('sheetTitle').textContent = title;
+  document.getElementById('sheetBody').innerHTML = html;
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheet').setAttribute('aria-hidden','false');
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheet').setAttribute('aria-hidden','true');
+  document.getElementById('sheetOverlay').classList.remove('open');
+  if(SHEET_RETURN && SHEET_RETURN.focus) SHEET_RETURN.focus();
+}
+
+function cohortCounts(key){const m={};ROSTER.forEach(r=>{const v=r[key]||'Not enrolled';m[v]=(m[v]||0)+1});return Object.entries(m).filter(x=>Number.isFinite(+x[1])&&x[1]>0).sort((a,b)=>b[1]-a[1])}
+function chartShell(title,body,cls=''){return `<section class="card analytics-card ${cls}"><div class="card-header bordered"><h3 class="card-title base">${esc(title)}</h3></div><div class="card-content tight">${body||'<p class="tl-empty">No cohort data available.</p>'}</div></section>`}
+function cohortChart(title,items,accent){
+  if(!items.length) return chartShell(title,'');
+  const max=Math.max(1,...items.map(x=>Math.max(0,Number(x[1])||0))), w=560,h=260,left=188,plot=310,rowGap=(h-24)/items.length,barHeight=Math.min(26,rowGap*.46);
+  const bars=items.map((x,i)=>{const value=Math.max(0,Number(x[1])||0),y=12+i*rowGap+(rowGap-barHeight)/2,bw=(value/max)*plot,label=String(x[0]);return `<text class="chart-label" x="${left-10}" y="${y+barHeight*.68}" text-anchor="end">${esc(label.length>25?label.slice(0,23)+'…':label)}</text><rect class="chart-bar ${i%2?'alt':''}" x="${left}" y="${y}" width="${Math.max(2,bw)}" height="${barHeight}" rx="3" fill="${accent}"/><text class="chart-label" x="${left+bw+8}" y="${y+barHeight*.68}">${value}</text>`}).join('');
+  return chartShell(title,`<svg class="chart-svg" style="aspect-ratio:${w}/${h};height:auto" preserveAspectRatio="xMidYMid meet" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title)}">${bars}</svg>`,'bar-chart');
+}
+function ageDistribution(){
+  const buckets={'0–4':0,'5–9':0,'10–14':0,'15–19':0,'20+':0};
+  ROSTER.forEach(r=>{const age=Number.isFinite(+r.birthYear)?new Date().getFullYear()-+r.birthYear:null;if(age==null)return;buckets[age<5?'0–4':age<10?'5–9':age<15?'10–14':age<20?'15–19':'20+']++});
+  return cohortChart('Age distribution at registry',Object.entries(buckets),'var(--c-violet)');
+}
+function siteStatusChart(){
+  const sites=[...new Set(ROSTER.map(r=>r.site).filter(Boolean))], statuses=['alive','deceased'];
+  if(!sites.length)return chartShell('Vital status by site','');
+  const max=Math.max(1,...sites.map(s=>ROSTER.filter(r=>r.site===s).length)), w=560,h=260,rowGap=(h-24)/sites.length,barHeight=Math.min(28,rowGap*.46);
+  const rows=sites.map((s,i)=>{const y=12+i*rowGap+(rowGap-barHeight)/2,total=ROSTER.filter(r=>r.site===s).length,alive=ROSTER.filter(r=>r.site===s&&r.vitalStatus==='alive').length,tw=270*total/max,aw=total?tw*alive/total:0;return `<text class="chart-label" x="0" y="${y+barHeight*.68}">${esc(s)}</text><rect x="92" y="${y}" width="${tw}" height="${barHeight}" rx="3" fill="var(--slate-200)"/><rect x="92" y="${y}" width="${aw}" height="${barHeight}" rx="3" fill="var(--c-green)"/><text class="chart-label" x="${100+tw}" y="${y+barHeight*.68}">${alive} alive · ${total-alive} deceased</text>`}).join('');
+  return chartShell('Vital status by site',`<svg class="chart-svg" style="aspect-ratio:${w}/${h};height:auto" preserveAspectRatio="xMidYMid meet" viewBox="0 0 ${w} ${h}" role="img" aria-label="Vital status by site">${rows}</svg><div class="legend"><span><i style="background:var(--c-green)"></i>Alive</span><span><i style="background:var(--slate-200)"></i>Deceased</span></div>`,'wide');
+}
+function renderCohortAnalytics(){
+  const total=ROSTER.length, avg=total?(ROSTER.reduce((s,r)=>s+(Number.isFinite(+r.surv)?+r.surv:0),0)/total/365.25).toFixed(1):'0.0';
+  document.getElementById('cohortKpis').innerHTML=[
+    ['Total patients',ROSTER.length,'registry records'],['Avg follow-up',avg+' yr','across cohort'],
+    ['Imaging available',ROSTER.filter(r=>r.imaging).length,`${total?Math.round(ROSTER.filter(r=>r.imaging).length/total*100):0}% of cohort`],
+    ['Genomics reports',ROSTER.filter(r=>r.genomics).length,`${total?Math.round(ROSTER.filter(r=>r.genomics).length/total*100):0}% of cohort`],
+    ['On clinical trial',ROSTER.filter(r=>r.trial).length,'active or historical']
+  ].map(x=>`<div class="stat"><span class="stat-value">${x[1]}</span><span class="stat-label">${x[0]}</span><span class="stat-sub">${x[2]}</span></div>`).join('');
+  document.getElementById('cohortCharts').innerHTML=
+    cohortChart('Patients per diagnosis',cohortCounts('dx'),'var(--primary)')+
+    cohortChart('Patients per clinical trial',cohortCounts('trial'),'var(--c-cyan)')+
+    cohortChart('Patients per treatment protocol',cohortCounts('protocol'),'var(--c-violet)')+
+    ageDistribution()+siteStatusChart();
+}
+const ORGS=['CBTN','COG','PNOC','CONNECT','PPCR'];
+let ACTIVE_ORG='CBTN';
+function renderOrgMenus(){
+  document.querySelectorAll('.org-menu').forEach(menu=>{
+    menu.innerHTML=ORGS.map(org=>`<button type="button" class="org-option" role="menuitem" aria-selected="${org===ACTIVE_ORG}">${org}</button>`).join('');
+  });
+  document.querySelectorAll('.org-label').forEach(label=>label.textContent=ACTIVE_ORG);
+  const desc=document.querySelector('.ph-desc');
+  if(desc) desc.textContent=`ATRT cohort · ${ACTIVE_ORG} workspace · CHOP, UCSF and Seattle Children's`;
+}
+function closeOrgMenus(){document.querySelectorAll('.org-menu.open').forEach(m=>m.classList.remove('open'));document.querySelectorAll('[data-org-trigger]').forEach(b=>b.setAttribute('aria-expanded','false'))}
+
+const KM_COLORS=['var(--primary)','var(--c-cyan)','var(--c-orange)','var(--c-violet)','var(--c-green)'];
+function kmGroups(mode){
+  if(mode==='overall') return [{label:'All patients',rows:ROSTER}];
+  const map={};
+  ROSTER.forEach(r=>{const key=r[mode]||'Not reported';(map[key]||(map[key]=[])).push(r)});
+  return Object.entries(map).sort((a,b)=>b[1].length-a[1].length).slice(0,5).map(x=>({label:x[0],rows:x[1]}));
+}
+function kmCurve(rows){
+  const clean=rows.filter(r=>Number.isFinite(+r.surv)&&+r.surv>=0);
+  if(!clean.length)return {points:[],censors:[],median:null,n:0};
+  const times=[...new Set(clean.map(r=>+r.surv))].sort((a,b)=>a-b), points=[{t:0,s:1}],censors=[]; let atRisk=clean.length,s=1,median=null;
+  times.forEach(t=>{
+    const at=clean.filter(r=>+r.surv>=t).length, deaths=clean.filter(r=>+r.surv===t&&r.vitalStatus==='deceased').length;
+    const cens=clean.filter(r=>+r.surv===t&&r.vitalStatus!=='deceased').length;
+    if(cens)censors.push({t,s});
+    if(deaths&&at>0){points.push({t,s});s=Math.max(0,s*(1-deaths/at));points.push({t,s});if(median===null&&s<=.5)median=t;}
+    atRisk=Math.max(0,at-deaths-cens);
+  });
+  return {points,censors,median,n:clean.length};
+}
+function kmPath(curve,x,y){return curve.points.map(p=>`${x(p.t).toFixed(1)},${y(p.s).toFixed(1)}`).join(' L ')}
+function renderKM(){
+  const mode=document.getElementById('kmStratify').value, groups=kmGroups(mode), w=760,h=390,left=62,right=22,top=22,bottom=58,pw=w-left-right,ph=h-top-bottom;
+  const all=ROSTER.filter(r=>Number.isFinite(+r.surv)&&+r.surv>=0), maxT=Math.max(365, ...all.map(r=>+r.surv||0)), x=t=>left+(t/maxT)*pw, y=s=>top+(1-s)*ph;
+  const ticks=[0,1,2,3,4,5].map(n=>n*maxT/5), grid=ticks.map(t=>`<line class="chart-grid" x1="${x(t)}" y1="${top}" x2="${x(t)}" y2="${top+ph}"/><text class="chart-label" x="${x(t)}" y="${h-28}" text-anchor="middle">${(t/365.25).toFixed(1)} y</text>`).join('');
+  const ygrid=[0,.25,.5,.75,1].map(s=>`<line class="chart-grid" x1="${left}" y1="${y(s)}" x2="${left+pw}" y2="${y(s)}"/><text class="chart-label" x="${left-10}" y="${y(s)+4}" text-anchor="end">${Math.round(s*100)}%</text>`).join('');
+  const curves=groups.map((g,i)=>{const c=kmCurve(g.rows),color=KM_COLORS[i%KM_COLORS.length],path=c.points.length?`<path d="M ${kmPath(c,x,y)}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>`:'';const censor=c.censors.map(p=>`<path d="M ${x(p.t)-4} ${y(p.s)-4} L ${x(p.t)+4} ${y(p.s)+4} M ${x(p.t)+4} ${y(p.s)-4} L ${x(p.t)-4} ${y(p.s)+4}" stroke="${color}" stroke-width="1.5"/>`).join('');return `${path}${censor}`}).join('');
+  const legend=groups.map((g,i)=>{const c=kmCurve(g.rows);return `<span><i style="background:${KM_COLORS[i%KM_COLORS.length]}"></i>${esc(g.label)} (${c.n})</span>`}).join('');
+  const overall=kmCurve(ROSTER), med=overall.median==null?'Median not reached':`${(overall.median/365.25).toFixed(1)} years`;
+  document.getElementById('kmSummary').textContent=`${all.length} evaluable records · ${ROSTER.filter(r=>r.vitalStatus!=='deceased').length} censored observations · median ${med}`;
+  document.getElementById('kmPlot').innerHTML=`<svg class="km-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Kaplan–Meier survival curve">${grid}${ygrid}<line x1="${left}" y1="${top}" x2="${left}" y2="${top+ph}" stroke="var(--foreground)"/><line x1="${left}" y1="${top+ph}" x2="${left+pw}" y2="${top+ph}" stroke="var(--foreground)"/>${curves}</svg><div class="legend">${legend}<span><i style="background:var(--muted-foreground)"></i>cross = censored</span></div><div class="text-xs text-muted" style="margin-top:.65rem">Number at risk at 0, 25, 50, 75 and 100% of follow-up: ${ticks.map(t=>all.filter(r=>+r.surv>=t).length).join(' · ')}</div>`;
+}
+let KM_CHAT=[];
+function renderKMChat(){document.getElementById('kmChatBody').innerHTML=KM_CHAT.map(m=>`<div class="km-msg ${m.role==='user'?'user':'bot'}">${m.text}</div>`).join('');const b=document.getElementById('kmChatBody');b.scrollTop=b.scrollHeight}
+function kmAnswer(q){const lower=q.toLowerCase(),curve=kmCurve(ROSTER);if(lower.includes('median'))return curve.median==null?'The median survival is not reached in this cohort.':'The estimated median survival is '+(curve.median/365.25).toFixed(1)+' years.';if(lower.includes('site'))return 'Use the Stratify by control to compare CHOP, Seattle, and UCSF curves. Each curve is computed independently with alive patients treated as censored.';if(lower.includes('censor'))return `${ROSTER.filter(r=>r.vitalStatus!=='deceased').length} patients are alive at last follow-up and contribute censoring marks.`;return `This viewer includes ${ROSTER.length} registry records and ${curve.n} evaluable survival times. Kaplan–Meier steps occur at deceased observations; ties are handled together.`}
+function openKM(){document.getElementById('kmOverlay').classList.add('open');document.getElementById('kmModal').classList.add('open');document.getElementById('kmModal').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';renderKM();if(!KM_CHAT.length)KM_CHAT=[{role:'bot',text:'I can summarize the Kaplan–Meier curve, explain censoring, or compare sites.'}];renderKMChat();document.getElementById('kmChatInput').focus()}
+function closeKM(){document.getElementById('kmOverlay').classList.remove('open');document.getElementById('kmModal').classList.remove('open');document.getElementById('kmModal').setAttribute('aria-hidden','true');document.body.style.overflow=''}
+
+/* ── wiring ───────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderFilterButtons();
+  renderOrgMenus();
+  renderCohortAnalytics();
+  renderList();
+
+  document.getElementById('q').addEventListener('input',e=>{ FILTERS.q=e.target.value; resetListPage(); renderList(); });
+  document.getElementById('pageSize').addEventListener('change',e=>{ LIST_PAGE_SIZE=Number(e.target.value)||10; resetListPage(); renderList(); });
+  document.getElementById('prevPage').addEventListener('click',()=>{ if(LIST_PAGE>1){LIST_PAGE--;renderList();} });
+  document.getElementById('nextPage').addEventListener('click',()=>{
+    const q=FILTERS.q.trim().toLowerCase(), n=ROSTER.filter(r=>{
+      for(const d of FILTER_DEFS) if(FILTERS[d.key].length&&!FILTERS[d.key].includes(d.accessor(r))) return false;
+       const identity=displayIdentity(r);
+       return !q||identity.name.toLowerCase().includes(q)||identity.mrn.toLowerCase().includes(q);
+    }).length;
+    if(LIST_PAGE<Math.ceil(n/LIST_PAGE_SIZE)){LIST_PAGE++;renderList();}
+  });
+  document.getElementById('filterBtns').addEventListener('click', e=>{
+    const btn = e.target.closest('.filter-btn');
+    if(btn) openFilterPop(btn);
+  });
+  document.getElementById('filterPop').addEventListener('click', handleFilterPopClick);
+  document.getElementById('filterPop').addEventListener('input', handleFilterPopInput);
+  document.getElementById('kmOpenBtn').addEventListener('click', openKM);
+  document.getElementById('kmClose').addEventListener('click', closeKM);
+  document.getElementById('kmOverlay').addEventListener('click', closeKM);
+  document.getElementById('kmStratify').addEventListener('change', renderKM);
+  document.getElementById('kmChatForm').addEventListener('submit',e=>{
+    e.preventDefault();const input=document.getElementById('kmChatInput'),q=input.value.trim();if(!q)return;
+    KM_CHAT.push({role:'user',text:esc(q)});input.value='';renderKMChat();
+    setTimeout(()=>{KM_CHAT.push({role:'bot',text:kmAnswer(q)});renderKMChat()},500);
+  });
+  document.querySelectorAll('[data-org-trigger]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const menu=btn.parentElement.querySelector('.org-menu'), open=menu.classList.toggle('open');
+    closeOrgMenus();
+    if(open){menu.classList.add('open');btn.setAttribute('aria-expanded','true');}
+  }));
+  document.querySelectorAll('.org-menu').forEach(menu=>menu.addEventListener('click',e=>{
+    const option=e.target.closest('.org-option'); if(!option)return;
+    ACTIVE_ORG=option.textContent.trim(); renderOrgMenus(); closeOrgMenus();
+  }));
+
+  /* D.A.V.I.D assistant */
+  document.getElementById('charmBrand').innerHTML = RADIANT_LOGO;
+  document.querySelectorAll('.charm-trigger').forEach(b=>b.addEventListener('click', openCharm));
+  document.getElementById('charmClose').addEventListener('click', closeCharm);
+  document.getElementById('charmOverlay').addEventListener('click', closeCharm);
+  document.getElementById('charmForm').addEventListener('submit', e=>{ e.preventDefault(); charmSend(); });
+  document.getElementById('viewerSwitch').addEventListener('click',e=>{
+    const on=e.currentTarget.classList.toggle('on'); e.currentTarget.setAttribute('aria-pressed',on);
+  });
+  document.getElementById('imagingConfigForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const fd=new FormData(e.currentTarget);
+    const cfg=Object.fromEntries(fd.entries());
+    cfg.viewer=document.getElementById('viewerSwitch').getAttribute('aria-pressed')==='true';
+    try{localStorage.setItem('radiant-imaging-config',JSON.stringify(cfg));}catch(_){/* storage may be unavailable; retain in-memory defaults */}
+    closeImagingConfig(); if(CUR) renderImaging(CUR);
+  });
+
+  document.addEventListener('click',e=>{
+    /* Brim evidence — inline row/field trigger */
+    const trig = e.target.closest('.brim-trigger');
+    if(trig){ e.stopPropagation(); openBrim(trig); return; }
+    if(!e.target.closest('#brimPop')) closeBrim();
+    if(!e.target.closest('#filterPop') && !e.target.closest('.filter-btn')) closeFilterPop();
+    if(!e.target.closest('.org-switcher')) closeOrgMenus();
+
+    const row = e.target.closest('[data-pt]');
+    if(row) openPt(row.dataset.pt);
+  });
+
+  document.addEventListener('keydown',e=>{
+    charmTrap(e);
+    if(e.key==='Escape'){
+      if(document.getElementById('kmModal').classList.contains('open')) { closeKM(); return; }
+      if(FILTER_POP_OPEN) { closeFilterPop(); return; }
+      if(BRIM_OPEN) { closeBrim(); return; }
+      if(charmIsOpen()) { closeCharm(); return; }
+      if(document.getElementById('sheet').classList.contains('open')) closeSheet();
+    }
+    if((e.key==='Enter'||e.key===' ') && e.target.matches && e.target.matches('tr[data-pt]')){
+      e.preventDefault(); openPt(e.target.dataset.pt);
+    }
+  });
+
+  window.addEventListener('resize', ()=>{ closeBrim(); closeFilterPop(); });
+  window.addEventListener('scroll', ()=>{ closeBrim(); closeFilterPop(); }, true);
+});
+</script>
+</body>
+</html>
