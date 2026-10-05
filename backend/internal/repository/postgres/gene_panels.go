@@ -28,8 +28,6 @@ type panelGeneRow struct {
 	Symbol    string `gorm:"column:symbol"`
 }
 
-const panelGeneInsertBatchSize = 1000
-
 // ReplaceUploadedGenePanels deletes the tenant's uploaded panels and creates the given ones, in one
 // transaction. Panels of another type (the analysis catalog's prescription panels) stay unchanged.
 func (r *GenePanelsRepository) ReplaceUploadedGenePanels(ctx context.Context, tenantCode string, panels []types.GenePanel) error {
@@ -72,7 +70,7 @@ func (r *GenePanelsRepository) ReplaceUploadedGenePanels(ctx context.Context, te
 			for i, g := range panel.Genes {
 				rows[i] = panelGeneRow{PanelID: id, EnsemblID: g.EnsemblID, Symbol: g.Symbol}
 			}
-			if err := tx.Table("panel_has_genes").CreateInBatches(rows, panelGeneInsertBatchSize).Error; err != nil {
+			if err := tx.Table("panel_has_genes").Create(&rows).Error; err != nil {
 				return fmt.Errorf("insert genes of panel %q of %q: %w", panel.Code, tenantCode, err)
 			}
 		}
