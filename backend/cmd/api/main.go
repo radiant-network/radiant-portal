@@ -95,9 +95,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
 	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
-	genePanelUploader := service.NewGenePanelUploader(repoGenes, postgres.NewGenePanelsRepository(postgresDB), starrocks.NewStarrocksTenantRepository(starrocksDB))
+	repoGenePanelPG := postgres.NewGenePanelsRepository(postgresDB) // We need PG because we write the panels in PG
+	repoTenants := starrocks.NewStarrocksTenantRepository(starrocksDB)
+
 	// SMTP and notification settings are read per request, no restart on a relay change.
 	caseGroupNotifier := notification.NewService(repoCaseGroups, repoOrganizationsWrite, notificationTemplates, notification.NewSMTPMailer())
+
+	genePanelUploader := service.NewGenePanelUploader(repoGenes, repoGenePanelPG, repoTenants)
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
