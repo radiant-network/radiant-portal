@@ -844,6 +844,72 @@ components:
       - CaseStatusInconclusive
       - CaseStatusReopened
       - CaseStatusRevoked
+    CaseSystemStatusChange:
+      description: One case status change, applied only if the case is still in one
+        of expected_status_codes.
+      properties:
+        case_id:
+          example: 123
+          type: integer
+        expected_status_codes:
+          example:
+          - processing
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        status_code:
+          enum:
+          - processing
+          - in_progress
+          example: in_progress
+          type: string
+      required:
+      - case_id
+      - expected_status_codes
+      - status_code
+      type: object
+    CaseSystemStatusRequest:
+      description: Status changes the pipeline applies to cases. Only submitted ->
+        processing and processing -> in_progress are allowed.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseSystemStatusChange'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
+    CaseSystemStatusResponse:
+      description: Outcome of each requested status change, in request order.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseSystemStatusResult'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
+    CaseSystemStatusResult:
+      description: updated is false when the case was no longer in an expected status;
+        it is then left unchanged and current_status_code tells what it is. current_status_code
+        may be any case status, including a tenant's own.
+      properties:
+        case_id:
+          example: 123
+          type: integer
+        current_status_code:
+          example: in_progress
+          type: string
+        updated:
+          type: boolean
+      required:
+      - case_id
+      - current_status_code
+      - updated
+      type: object
     CaseTask:
       properties:
         created_on:
@@ -4863,6 +4929,77 @@ paths:
       security:
       - bearerauth: []
       summary: Search cases
+      tags:
+      - cases
+  /{tenant}/cases/system_status:
+    patch:
+      description: Used by the pipeline to change system case statuses. Any other
+        change is rejected with a 400. Each change applies only if the case is still
+        in one of expected_status_codes; otherwise the case is left unchanged and
+        returned with updated false and its current status. Requires can_ingest_data
+        at the diagnosis lab of every case; a case the tenant does not hold refuses
+        the whole request with a 403.
+      operationId: patchCaseSystemStatus
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseSystemStatusRequest'
+        description: Status changes
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseSystemStatusResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Set the system status of cases
       tags:
       - cases
   /{tenant}/documents/{document_id}/download_url:

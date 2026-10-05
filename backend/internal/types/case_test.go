@@ -1,7 +1,9 @@
 package types
 
 import (
+	"maps"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -58,4 +60,57 @@ func Test_CaseStatuses_UserAndSystemSetsAreDisjoint(t *testing.T) {
 	for _, code := range SystemAppliedCaseStatuses {
 		assert.NotContainsf(t, UserAppliedCaseStatuses, code, "%q is listed as both system- and user-applied", code)
 	}
+}
+
+func Test_ValidateSystemCaseStatusChange_AcceptsSubmittedToProcessing(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.NoError(t, err)
+}
+
+func Test_ValidateSystemCaseStatusChange_AcceptsProcessingToInProgress(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusInProgress, ExpectedStatusCodes: []string{CaseStatusProcessing}})
+	assert.NoError(t, err)
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsUserTargetStatus(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusCompleted, ExpectedStatusCodes: []string{CaseStatusInProgress}})
+	assert.EqualError(t, err, `case 1: status_code "completed" cannot be set by the system, expected one of: processing, in_progress`)
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsSubmittedAsTarget(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusSubmitted, ExpectedStatusCodes: []string{CaseStatusDraft}})
+	assert.EqualError(t, err, `case 1: status_code "submitted" cannot be set by the system, expected one of: processing, in_progress`)
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsEmptyTarget(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, `case 1: status_code "" cannot be set by the system, expected one of: processing, in_progress`)
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsSubmittedToInProgress(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusInProgress, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, "case 1: submitted -> in_progress is not an allowed change, in_progress can only be set from processing")
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsUserStatusAsExpected(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted, CaseStatusInReview}})
+	assert.EqualError(t, err, "case 1: in_review -> processing is not an allowed change, processing can only be set from submitted")
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsMissingExpected(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing})
+	assert.EqualError(t, err, "case 1: expected_status_codes is required")
+}
+
+func Test_ValidateSystemCaseStatusChange_RejectsMissingCaseId(t *testing.T) {
+	err := ValidateSystemCaseStatusChange(CaseSystemStatusChange{StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, "case_id must be a positive integer, got 0")
+}
+
+func Test_CaseSystemStatusChange_StatusCodeEnumMatchesTransitions(t *testing.T) {
+	field, ok := reflect.TypeOf(CaseSystemStatusChange{}).FieldByName("StatusCode")
+	assert.True(t, ok, "CaseSystemStatusChange.StatusCode has been renamed; update this guard")
+
+	documented := strings.Split(field.Tag.Get("enums"), ",")
+	assert.ElementsMatch(t, slices.Collect(maps.Keys(systemCaseStatusTransitions)), documented, "the `enums` tag on CaseSystemStatusChange.StatusCode has drifted from the allowed transitions")
 }

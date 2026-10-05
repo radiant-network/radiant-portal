@@ -331,6 +331,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.PATCH("/batch", requireIngestEverywhere, server.PatchCaseBatchHandler(repoBatches, auth))
 	casesGroup.PUT("/batch", requireIngestEverywhere, server.PutCaseBatchHandler(repoBatches, auth))
 
+	// The pipeline's status changes, checked like the case batches: can_ingest_data at the lab of
+	// every case the payload names.
+	requireIngestAtEveryCase := server.RequireActionAtEvery(auth, repoAuth, types.ActionIngestData, server.OrgsFromCaseIDsBody(repoAuth))
+	casesGroup.PATCH("/system_status", requireIngestAtEveryCase, server.PatchCaseSystemStatusHandler(repoCasesWrite))
+
 	return r
 }
 

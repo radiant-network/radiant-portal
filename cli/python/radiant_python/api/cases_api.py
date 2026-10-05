@@ -23,6 +23,8 @@ from radiant_python.models.autocomplete_result import AutocompleteResult
 from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.case_entity import CaseEntity
 from radiant_python.models.case_filters import CaseFilters
+from radiant_python.models.case_system_status_request import CaseSystemStatusRequest
+from radiant_python.models.case_system_status_response import CaseSystemStatusResponse
 from radiant_python.models.cases_search_response import CasesSearchResponse
 from radiant_python.models.create_batch_response import CreateBatchResponse
 from radiant_python.models.create_case_batch_body import CreateCaseBatchBody
@@ -2820,6 +2822,310 @@ class CasesApi:
         return self.api_client.param_serialize(
             method='PATCH',
             resource_path='/{tenant}/cases/batch',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def patch_case_system_status(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_system_status_request: Annotated[CaseSystemStatusRequest, Field(description="Status changes")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> CaseSystemStatusResponse:
+        """Set the system status of cases
+
+        Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_system_status_request: Status changes (required)
+        :type case_system_status_request: CaseSystemStatusRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._patch_case_system_status_serialize(
+            tenant=tenant,
+            case_system_status_request=case_system_status_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CaseSystemStatusResponse",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def patch_case_system_status_with_http_info(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_system_status_request: Annotated[CaseSystemStatusRequest, Field(description="Status changes")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[CaseSystemStatusResponse]:
+        """Set the system status of cases
+
+        Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_system_status_request: Status changes (required)
+        :type case_system_status_request: CaseSystemStatusRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._patch_case_system_status_serialize(
+            tenant=tenant,
+            case_system_status_request=case_system_status_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CaseSystemStatusResponse",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def patch_case_system_status_without_preload_content(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_system_status_request: Annotated[CaseSystemStatusRequest, Field(description="Status changes")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set the system status of cases
+
+        Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_system_status_request: Status changes (required)
+        :type case_system_status_request: CaseSystemStatusRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._patch_case_system_status_serialize(
+            tenant=tenant,
+            case_system_status_request=case_system_status_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CaseSystemStatusResponse",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _patch_case_system_status_serialize(
+        self,
+        tenant,
+        case_system_status_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if case_system_status_request is not None:
+            _body_params = case_system_status_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerauth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='PATCH',
+            resource_path='/{tenant}/cases/system_status',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

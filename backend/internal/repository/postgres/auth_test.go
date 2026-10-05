@@ -562,3 +562,43 @@ func Test_AuthRepository_HasActionInTenant_IgnoresOrgScope(t *testing.T) {
 		assert.True(t, inTenant, "a grant at any org admits the caller when the org is not consulted")
 	})
 }
+
+func Test_AuthRepository_OrgsForCases_KeysEachCaseByItsLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		orgs, err := repo.OrgsForCases(t.Context(), "radiant", []int{1, 2})
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]string{1: "CQGC", 2: "CQGC"}, orgs)
+	})
+}
+
+func Test_AuthRepository_OrgsForCases_UnknownCaseIsAbsent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		orgs, err := repo.OrgsForCases(t.Context(), "radiant", []int{1, 999999})
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]string{1: "CQGC"}, orgs)
+	})
+}
+
+func Test_AuthRepository_OrgsForCases_OtherTenantCaseIsAbsent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		orgs, err := repo.OrgsForCases(t.Context(), "tenant_b", []int{1})
+		assert.NoError(t, err)
+		assert.Empty(t, orgs)
+	})
+}
+
+func Test_AuthRepository_OrgsForCases_NoCasesIsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
+
+		orgs, err := repo.OrgsForCases(t.Context(), "radiant", nil)
+		assert.NoError(t, err)
+		assert.Empty(t, orgs)
+	})
+}

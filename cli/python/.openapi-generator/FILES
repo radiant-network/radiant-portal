@@ -33,6 +33,10 @@ docs/CaseResult.md
 docs/CaseSequencingExperiment.md
 docs/CaseSequencingExperimentBatch.md
 docs/CaseStatus.md
+docs/CaseSystemStatusChange.md
+docs/CaseSystemStatusRequest.md
+docs/CaseSystemStatusResponse.md
+docs/CaseSystemStatusResult.md
 docs/CaseTask.md
 docs/CaseTaskBatch.md
 docs/CasesApi.md
@@ -226,6 +230,10 @@ radiant_python/models/case_result.py
 radiant_python/models/case_sequencing_experiment.py
 radiant_python/models/case_sequencing_experiment_batch.py
 radiant_python/models/case_status.py
+radiant_python/models/case_system_status_change.py
+radiant_python/models/case_system_status_request.py
+radiant_python/models/case_system_status_response.py
+radiant_python/models/case_system_status_result.py
 radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py

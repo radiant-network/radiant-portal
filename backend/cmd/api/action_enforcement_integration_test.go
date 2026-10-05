@@ -203,7 +203,9 @@ var orgResolvedTenantRoutes = map[string]bool{
 	// One lab per record, and the action is required at every one of them.
 	"POST /:tenant/cases/batch":  true,
 	"PATCH /:tenant/cases/batch": true,
-	"PUT /:tenant/cases/batch":   true,
+	// One lab per case_id, like the case batches.
+	"PATCH /:tenant/cases/system_status": true,
+	"PUT /:tenant/cases/batch":           true,
 }
 
 // Org-scoped action, but nothing in the request names an organization: these batch records are
@@ -350,5 +352,6 @@ var expectedTenantActions = map[string]string{
 	"PUT /:tenant/sequencing/batch":                                                         types.ActionIngestData,
 	"POST /:tenant/cases/batch":                                                             types.ActionIngestData,
 	"PATCH /:tenant/cases/batch":                                                            types.ActionIngestData,
+	"PATCH /:tenant/cases/system_status":                                                    types.ActionIngestData,
 	"PUT /:tenant/cases/batch":                                                              types.ActionIngestData,
 }
