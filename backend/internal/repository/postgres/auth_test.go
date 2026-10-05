@@ -563,42 +563,42 @@ func Test_AuthRepository_HasActionInTenant_IgnoresOrgScope(t *testing.T) {
 	})
 }
 
-func Test_AuthRepository_OrgsForCases_KeysEachCaseByItsLab(t *testing.T) {
+func Test_AuthRepository_DiagnosisLabForCases_KeysEachCaseByItsLab(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
-		orgs, err := repo.OrgsForCases(t.Context(), "radiant", []int{1, 2})
+		labs, err := repo.DiagnosisLabForCases(t.Context(), "radiant", []int{1, 2})
 		assert.NoError(t, err)
-		assert.Equal(t, map[int]string{1: "CQGC", 2: "CQGC"}, orgs)
+		assert.Equal(t, map[int]string{1: "CQGC", 2: "CQGC"}, labs)
 	})
 }
 
-func Test_AuthRepository_OrgsForCases_UnknownCaseIsAbsent(t *testing.T) {
+func Test_AuthRepository_DiagnosisLabForCases_UnknownCaseIsAbsent(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
-		orgs, err := repo.OrgsForCases(t.Context(), "radiant", []int{1, 999999})
+		labs, err := repo.DiagnosisLabForCases(t.Context(), "radiant", []int{1, 999999})
 		assert.NoError(t, err)
-		assert.Equal(t, map[int]string{1: "CQGC"}, orgs)
+		assert.Equal(t, map[int]string{1: "CQGC"}, labs)
 	})
 }
 
-func Test_AuthRepository_OrgsForCases_OtherTenantCaseIsAbsent(t *testing.T) {
+func Test_AuthRepository_DiagnosisLabForCases_OtherTenantCaseIsAbsent(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
-		orgs, err := repo.OrgsForCases(t.Context(), "tenant_b", []int{1})
+		labs, err := repo.DiagnosisLabForCases(t.Context(), "tenant_b", []int{1})
 		assert.NoError(t, err)
-		assert.Empty(t, orgs)
+		assert.Empty(t, labs)
 	})
 }
 
-func Test_AuthRepository_OrgsForCases_NoCasesIsEmpty(t *testing.T) {
+func Test_AuthRepository_DiagnosisLabForCases_NoCasesIsEmpty(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 
-		orgs, err := repo.OrgsForCases(t.Context(), "radiant", nil)
+		labs, err := repo.DiagnosisLabForCases(t.Context(), "radiant", nil)
 		assert.NoError(t, err)
-		assert.Empty(t, orgs)
+		assert.Empty(t, labs)
 	})
 }

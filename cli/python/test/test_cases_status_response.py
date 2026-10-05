@@ -14,10 +14,10 @@
 
 import unittest
 
-from radiant_python.models.case_system_status_response import CaseSystemStatusResponse
+from radiant_python.models.cases_status_response import CasesStatusResponse
 
-class TestCaseSystemStatusResponse(unittest.TestCase):
-    """CaseSystemStatusResponse unit test stubs"""
+class TestCasesStatusResponse(unittest.TestCase):
+    """CasesStatusResponse unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,27 +25,27 @@ class TestCaseSystemStatusResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> CaseSystemStatusResponse:
-        """Test CaseSystemStatusResponse
+    def make_instance(self, include_optional) -> CasesStatusResponse:
+        """Test CasesStatusResponse
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `CaseSystemStatusResponse`
+        # uncomment below to create an instance of `CasesStatusResponse`
         """
-        model = CaseSystemStatusResponse()
+        model = CasesStatusResponse()
         if include_optional:
-            return CaseSystemStatusResponse(
+            return CasesStatusResponse(
                 cases = [
-                    radiant_python.models.case_system_status_result.CaseSystemStatusResult(
+                    radiant_python.models.case_status_change_result.CaseStatusChangeResult(
                         case_id = 123, 
                         current_status_code = 'in_progress', 
                         updated = True, )
                     ]
             )
         else:
-            return CaseSystemStatusResponse(
+            return CasesStatusResponse(
                 cases = [
-                    radiant_python.models.case_system_status_result.CaseSystemStatusResult(
+                    radiant_python.models.case_status_change_result.CaseStatusChangeResult(
                         case_id = 123, 
                         current_status_code = 'in_progress', 
                         updated = True, )
@@ -53,8 +53,8 @@ class TestCaseSystemStatusResponse(unittest.TestCase):
         )
         """
 
-    def testCaseSystemStatusResponse(self):
-        """Test CaseSystemStatusResponse"""
+    def testCasesStatusResponse(self):
+        """Test CasesStatusResponse"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

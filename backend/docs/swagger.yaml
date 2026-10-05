@@ -844,7 +844,7 @@ components:
       - CaseStatusInconclusive
       - CaseStatusReopened
       - CaseStatusRevoked
-    CaseSystemStatusChange:
+    CaseStatusChange:
       description: One case status change, applied only if the case is still in one
         of expected_status_codes.
       properties:
@@ -869,30 +869,7 @@ components:
       - expected_status_codes
       - status_code
       type: object
-    CaseSystemStatusRequest:
-      description: Status changes the pipeline applies to cases. Only submitted ->
-        processing and processing -> in_progress are allowed.
-      properties:
-        cases:
-          items:
-            $ref: '#/components/schemas/CaseSystemStatusChange'
-          type: array
-          uniqueItems: false
-      required:
-      - cases
-      type: object
-    CaseSystemStatusResponse:
-      description: Outcome of each requested status change, in request order.
-      properties:
-        cases:
-          items:
-            $ref: '#/components/schemas/CaseSystemStatusResult'
-          type: array
-          uniqueItems: false
-      required:
-      - cases
-      type: object
-    CaseSystemStatusResult:
+    CaseStatusChangeResult:
       description: updated is false when the case was no longer in an expected status;
         it is then left unchanged and current_status_code tells what it is. current_status_code
         may be any case status, including a tenant's own.
@@ -975,6 +952,29 @@ components:
       required:
       - count
       - list
+      type: object
+    CasesStatusRequest:
+      description: Status changes the pipeline applies to cases. Only submitted ->
+        processing and processing -> in_progress are allowed.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseStatusChange'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
+    CasesStatusResponse:
+      description: Outcome of each requested status change, in request order.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseStatusChangeResult'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
       type: object
     ClientAuthConfig:
       description: Public Keycloak settings for the OAuth2 device authorization grant.
@@ -4931,7 +4931,7 @@ paths:
       summary: Search cases
       tags:
       - cases
-  /{tenant}/cases/system_status:
+  /{tenant}/cases/status:
     patch:
       description: Used by the pipeline to change system case statuses. Any other
         change is rejected with a 400. Each change applies only if the case is still
@@ -4939,7 +4939,7 @@ paths:
         returned with updated false and its current status. Requires can_ingest_data
         at the diagnosis lab of every case; a case the tenant does not hold refuses
         the whole request with a 403.
-      operationId: patchCaseSystemStatus
+      operationId: patchCasesStatus
       parameters:
       - description: Tenant code
         in: path
@@ -4951,7 +4951,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CaseSystemStatusRequest'
+              $ref: '#/components/schemas/CasesStatusRequest'
         description: Status changes
         required: true
       responses:
@@ -4959,7 +4959,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CaseSystemStatusResponse'
+                $ref: '#/components/schemas/CasesStatusResponse'
           description: OK
         "400":
           content:
@@ -4999,7 +4999,7 @@ paths:
                 type: string
       security:
       - bearerauth: []
-      summary: Set the system status of cases
+      summary: Set the status of cases
       tags:
       - cases
   /{tenant}/documents/{document_id}/download_url:

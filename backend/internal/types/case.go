@@ -89,20 +89,20 @@ func ValidateUserAppliedCaseStatus(code string) error {
 	return nil
 }
 
-// systemCaseStatusTransitions maps each status the pipeline may set to the only status it may
+// pipelineCaseStatusTransitions maps each status the pipeline may set to the only status it may
 // set it from.
-var systemCaseStatusTransitions = map[CaseStatus]CaseStatus{
+var pipelineCaseStatusTransitions = map[CaseStatus]CaseStatus{
 	CaseStatusProcessing: CaseStatusSubmitted,
 	CaseStatusInProgress: CaseStatusProcessing,
 }
 
-func ValidateSystemCaseStatusChange(change CaseSystemStatusChange) error {
+func ValidateCaseStatusChange(change CaseStatusChange) error {
 	if change.CaseID <= 0 {
 		return fmt.Errorf("case_id must be a positive integer, got %d", change.CaseID)
 	}
-	from, ok := systemCaseStatusTransitions[change.StatusCode]
+	from, ok := pipelineCaseStatusTransitions[change.StatusCode]
 	if !ok {
-		return fmt.Errorf("case %d: status_code %q cannot be set by the system, expected one of: %s, %s", change.CaseID, change.StatusCode, CaseStatusProcessing, CaseStatusInProgress)
+		return fmt.Errorf("case %d: status_code %q is not allowed, expected one of: %s, %s", change.CaseID, change.StatusCode, CaseStatusProcessing, CaseStatusInProgress)
 	}
 	if len(change.ExpectedStatusCodes) == 0 {
 		return fmt.Errorf("case %d: expected_status_codes is required", change.CaseID)
@@ -115,33 +115,33 @@ func ValidateSystemCaseStatusChange(change CaseSystemStatusChange) error {
 	return nil
 }
 
-// CaseSystemStatusRequest is the body of PATCH /{tenant}/cases/system_status.
+// CasesStatusRequest is the body of PATCH /{tenant}/cases/status.
 // @Description Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
-type CaseSystemStatusRequest struct {
-	Cases []CaseSystemStatusChange `json:"cases" validate:"required"`
-} // @name CaseSystemStatusRequest
+type CasesStatusRequest struct {
+	Cases []CaseStatusChange `json:"cases" validate:"required"`
+} // @name CasesStatusRequest
 
-// CaseSystemStatusChange
+// CaseStatusChange
 // @Description One case status change, applied only if the case is still in one of expected_status_codes.
-type CaseSystemStatusChange struct {
+type CaseStatusChange struct {
 	CaseID              int      `json:"case_id" validate:"required" example:"123"`
 	StatusCode          string   `json:"status_code" validate:"required" enums:"processing,in_progress" example:"in_progress"`
 	ExpectedStatusCodes []string `json:"expected_status_codes" validate:"required" example:"processing"`
-} // @name CaseSystemStatusChange
+} // @name CaseStatusChange
 
-// CaseSystemStatusResponse
+// CasesStatusResponse
 // @Description Outcome of each requested status change, in request order.
-type CaseSystemStatusResponse struct {
-	Cases []CaseSystemStatusResult `json:"cases" validate:"required"`
-} // @name CaseSystemStatusResponse
+type CasesStatusResponse struct {
+	Cases []CaseStatusChangeResult `json:"cases" validate:"required"`
+} // @name CasesStatusResponse
 
-// CaseSystemStatusResult
+// CaseStatusChangeResult
 // @Description updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant's own.
-type CaseSystemStatusResult struct {
+type CaseStatusChangeResult struct {
 	CaseID            int    `json:"case_id" validate:"required" example:"123"`
 	Updated           bool   `json:"updated" validate:"required"`
 	CurrentStatusCode string `json:"current_status_code" validate:"required" example:"in_progress"`
-} // @name CaseSystemStatusResult
+} // @name CaseStatusChangeResult
 
 // CaseResult - Search cases result
 // @Description Line represented a case in case list

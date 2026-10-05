@@ -18,7 +18,7 @@ type caseOrgLookup interface {
 	OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error)
 	OrgsForDocument(ctx context.Context, tenantCode string, documentID int) ([]string, error)
 	OrgsForSubmitterCases(ctx context.Context, tenantCode string, pairs [][2]string) (map[[2]string]string, error)
-	OrgsForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error)
+	DiagnosisLabForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error)
 }
 
 // OrgFromCaseParam resolves the org from the :case_id the route already names — occurrence
@@ -198,7 +198,7 @@ func OrgsFromCaseIDsBody(repo caseOrgLookup) OrgResolver {
 			caseIDs = append(caseIDs, record.CaseID)
 		}
 
-		resolved, err := repo.OrgsForCases(c.Request.Context(), *tenant, caseIDs)
+		resolved, err := repo.DiagnosisLabForCases(c.Request.Context(), *tenant, caseIDs)
 		if err != nil {
 			return nil, err
 		}

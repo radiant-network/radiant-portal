@@ -114,14 +114,14 @@ func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, c *Case) (b
 	return tx.RowsAffected > 0, nil
 }
 
-// SetSystemCaseStatus moves a case to status only while it is still in one of expected, so a
+// SetCaseStatusIfExpected moves a case to status only while it is still in one of expected, so a
 // status a user set in the meantime is never overwritten. It returns nil when the tenant holds
 // no such case.
 //
 // The case row is locked before its status is read, so the status reported on a miss is the one
 // the decision was made on: no writer can change it between the check and the answer.
-func (r *CasesRepository) SetSystemCaseStatus(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseSystemStatusResult, error) {
-	var result *types.CaseSystemStatusResult
+func (r *CasesRepository) SetCaseStatusIfExpected(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error) {
+	var result *types.CaseStatusChangeResult
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		current := []string{}
 		err := tx.Table(types.CaseTable.Name).
@@ -135,7 +135,7 @@ func (r *CasesRepository) SetSystemCaseStatus(ctx context.Context, tenantCode st
 			return nil
 		}
 		if !slices.Contains(expected, current[0]) {
-			result = &types.CaseSystemStatusResult{CaseID: caseID, Updated: false, CurrentStatusCode: current[0]}
+			result = &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: current[0]}
 			return nil
 		}
 
@@ -145,7 +145,7 @@ func (r *CasesRepository) SetSystemCaseStatus(ctx context.Context, tenantCode st
 		if updated.Error != nil {
 			return fmt.Errorf("error setting status of case %d: %w", caseID, updated.Error)
 		}
-		result = &types.CaseSystemStatusResult{CaseID: caseID, Updated: true, CurrentStatusCode: status}
+		result = &types.CaseStatusChangeResult{CaseID: caseID, Updated: true, CurrentStatusCode: status}
 		return nil
 	})
 	if err != nil {

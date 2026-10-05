@@ -43,13 +43,13 @@ from radiant_python.models.case_result import CaseResult
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
 from radiant_python.models.case_status import CaseStatus
-from radiant_python.models.case_system_status_change import CaseSystemStatusChange
-from radiant_python.models.case_system_status_request import CaseSystemStatusRequest
-from radiant_python.models.case_system_status_response import CaseSystemStatusResponse
-from radiant_python.models.case_system_status_result import CaseSystemStatusResult
+from radiant_python.models.case_status_change import CaseStatusChange
+from radiant_python.models.case_status_change_result import CaseStatusChangeResult
 from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
+from radiant_python.models.cases_status_request import CasesStatusRequest
+from radiant_python.models.cases_status_response import CasesStatusResponse
 from radiant_python.models.client_auth_config import ClientAuthConfig
 from radiant_python.models.client_config import ClientConfig
 from radiant_python.models.clinvar_rcv import ClinvarRCV

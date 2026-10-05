@@ -1848,7 +1848,7 @@
           "response": []
         },
         {
-          "name": "Set System Status",
+          "name": "Set Cases Status",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1872,14 +1872,14 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/cases/system_status",
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/status",
               "host": [
                 "{{radiant-api-url}}"
               ],
               "path": [
                 "{{tenant}}",
                 "cases",
-                "system_status"
+                "status"
               ]
             }
           },

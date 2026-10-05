@@ -604,39 +604,39 @@ func Test_PatchCaseHandler_RepositoryErrorIsInternal(t *testing.T) {
 	assert.NotContains(t, w.Body.String(), "connection refused")
 }
 
-type caseSystemStatusSetterMock struct {
-	results map[int]*types.CaseSystemStatusResult
+type caseStatusSetterMock struct {
+	results map[int]*types.CaseStatusChangeResult
 	err     error
-	calls   []types.CaseSystemStatusChange
+	calls   []types.CaseStatusChange
 	tenant  string
 }
 
-func (m *caseSystemStatusSetterMock) SetSystemCaseStatus(_ context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseSystemStatusResult, error) {
+func (m *caseStatusSetterMock) SetCaseStatusIfExpected(_ context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error) {
 	m.tenant = tenantCode
-	m.calls = append(m.calls, types.CaseSystemStatusChange{CaseID: caseID, StatusCode: status, ExpectedStatusCodes: expected})
+	m.calls = append(m.calls, types.CaseStatusChange{CaseID: caseID, StatusCode: status, ExpectedStatusCodes: expected})
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.results[caseID], nil
 }
 
-func servePatchCaseSystemStatus(repo caseSystemStatusSetter, body string) *httptest.ResponseRecorder {
+func servePatchCasesStatus(repo caseStatusSetter, body string) *httptest.ResponseRecorder {
 	router := tenantRouter()
-	router.PATCH("/:tenant/cases/system_status", PatchCaseSystemStatusHandler(repo))
+	router.PATCH("/:tenant/cases/status", PatchCasesStatusHandler(repo))
 
-	req, _ := http.NewRequest("PATCH", "/radiant/cases/system_status", bytes.NewBufferString(body))
+	req, _ := http.NewRequest("PATCH", "/radiant/cases/status", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	return w
 }
 
-func Test_PatchCaseSystemStatusHandler_ReportsEachCase(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{results: map[int]*types.CaseSystemStatusResult{
+func Test_PatchCasesStatusHandler_ReportsEachCase(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
 		123: {CaseID: 123, Updated: true, CurrentStatusCode: "in_progress"},
 		456: {CaseID: 456, Updated: false, CurrentStatusCode: "revoked"},
 	}}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[
+	w := servePatchCasesStatus(repo, `{"cases":[
 		{"case_id":123,"status_code":"in_progress","expected_status_codes":["processing"]},
 		{"case_id":456,"status_code":"in_progress","expected_status_codes":["processing"]}]}`)
 
@@ -645,43 +645,43 @@ func Test_PatchCaseSystemStatusHandler_ReportsEachCase(t *testing.T) {
 		{"case_id":123,"updated":true,"current_status_code":"in_progress"},
 		{"case_id":456,"updated":false,"current_status_code":"revoked"}]}`, w.Body.String())
 	assert.Equal(t, "radiant", repo.tenant)
-	assert.Equal(t, []types.CaseSystemStatusChange{
+	assert.Equal(t, []types.CaseStatusChange{
 		{CaseID: 123, StatusCode: "in_progress", ExpectedStatusCodes: []string{"processing"}},
 		{CaseID: 456, StatusCode: "in_progress", ExpectedStatusCodes: []string{"processing"}},
 	}, repo.calls)
 }
 
-func Test_PatchCaseSystemStatusHandler_SubmittedToProcessing(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{results: map[int]*types.CaseSystemStatusResult{
+func Test_PatchCasesStatusHandler_SubmittedToProcessing(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
 		1: {CaseID: 1, Updated: true, CurrentStatusCode: "processing"},
 	}}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"cases":[{"case_id":1,"updated":true,"current_status_code":"processing"}]}`, w.Body.String())
 }
 
-func Test_PatchCaseSystemStatusHandler_RejectsDisallowedChange(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[{"case_id":1,"status_code":"in_progress","expected_status_codes":["submitted"]}]}`)
+func Test_PatchCasesStatusHandler_RejectsDisallowedChange(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"in_progress","expected_status_codes":["submitted"]}]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, `{"status":400,"message":"case 1: submitted -> in_progress is not an allowed change, in_progress can only be set from processing"}`, w.Body.String())
 	assert.Empty(t, repo.calls)
 }
 
-func Test_PatchCaseSystemStatusHandler_RejectsOtherTargetStatus(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[{"case_id":1,"status_code":"completed","expected_status_codes":["in_progress"]}]}`)
+func Test_PatchCasesStatusHandler_RejectsOtherTargetStatus(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"completed","expected_status_codes":["in_progress"]}]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"case 1: status_code \"completed\" cannot be set by the system, expected one of: processing, in_progress"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"case 1: status_code \"completed\" is not allowed, expected one of: processing, in_progress"}`, w.Body.String())
 	assert.Empty(t, repo.calls)
 }
 
-func Test_PatchCaseSystemStatusHandler_OneInvalidChangeWritesNothing(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[
+func Test_PatchCasesStatusHandler_OneInvalidChangeWritesNothing(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[
 		{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]},
 		{"case_id":2,"status_code":"revoked","expected_status_codes":["processing"]}]}`)
 
@@ -689,9 +689,9 @@ func Test_PatchCaseSystemStatusHandler_OneInvalidChangeWritesNothing(t *testing.
 	assert.Empty(t, repo.calls, "the valid change listed first must not be applied either")
 }
 
-func Test_PatchCaseSystemStatusHandler_RejectsDuplicateCase(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[
+func Test_PatchCasesStatusHandler_RejectsDuplicateCase(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[
 		{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]},
 		{"case_id":1,"status_code":"in_progress","expected_status_codes":["processing"]}]}`)
 
@@ -700,33 +700,33 @@ func Test_PatchCaseSystemStatusHandler_RejectsDuplicateCase(t *testing.T) {
 	assert.Empty(t, repo.calls)
 }
 
-func Test_PatchCaseSystemStatusHandler_RejectsEmptyCases(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[]}`)
+func Test_PatchCasesStatusHandler_RejectsEmptyCases(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, `{"status":400,"message":"cases is required"}`, w.Body.String())
 }
 
-func Test_PatchCaseSystemStatusHandler_RejectsMalformedBody(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{}
-	w := servePatchCaseSystemStatus(repo, "not json")
+func Test_PatchCasesStatusHandler_RejectsMalformedBody(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, "not json")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Empty(t, repo.calls)
 }
 
-func Test_PatchCaseSystemStatusHandler_CaseGoneSinceTheGateIsNotFound(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{results: map[int]*types.CaseSystemStatusResult{}}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[{"case_id":7,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+func Test_PatchCasesStatusHandler_CaseGoneSinceTheGateIsNotFound(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{}}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":7,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.JSONEq(t, `{"status":404,"message":"case 7 not found"}`, w.Body.String())
 }
 
-func Test_PatchCaseSystemStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
-	repo := &caseSystemStatusSetterMock{err: errors.New("connection refused")}
-	w := servePatchCaseSystemStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+func Test_PatchCasesStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
+	repo := &caseStatusSetterMock{err: errors.New("connection refused")}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())

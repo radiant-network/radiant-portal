@@ -1581,84 +1581,58 @@ export type CaseStatus = typeof CaseStatus[keyof typeof CaseStatus];
 /**
  * One case status change, applied only if the case is still in one of expected_status_codes.
  * @export
- * @interface CaseSystemStatusChange
+ * @interface CaseStatusChange
  */
-export interface CaseSystemStatusChange {
+export interface CaseStatusChange {
     /**
      * 
      * @type {number}
-     * @memberof CaseSystemStatusChange
+     * @memberof CaseStatusChange
      */
     'case_id': number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof CaseSystemStatusChange
+     * @memberof CaseStatusChange
      */
     'expected_status_codes': Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof CaseSystemStatusChange
+     * @memberof CaseStatusChange
      */
-    'status_code': CaseSystemStatusChangeStatusCodeEnum;
+    'status_code': CaseStatusChangeStatusCodeEnum;
 }
 
-export const CaseSystemStatusChangeStatusCodeEnum = {
+export const CaseStatusChangeStatusCodeEnum = {
     Processing: 'processing',
     InProgress: 'in_progress'
 } as const;
 
-export type CaseSystemStatusChangeStatusCodeEnum = typeof CaseSystemStatusChangeStatusCodeEnum[keyof typeof CaseSystemStatusChangeStatusCodeEnum];
+export type CaseStatusChangeStatusCodeEnum = typeof CaseStatusChangeStatusCodeEnum[keyof typeof CaseStatusChangeStatusCodeEnum];
 
-/**
- * Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
- * @export
- * @interface CaseSystemStatusRequest
- */
-export interface CaseSystemStatusRequest {
-    /**
-     * 
-     * @type {Array<CaseSystemStatusChange>}
-     * @memberof CaseSystemStatusRequest
-     */
-    'cases': Array<CaseSystemStatusChange>;
-}
-/**
- * Outcome of each requested status change, in request order.
- * @export
- * @interface CaseSystemStatusResponse
- */
-export interface CaseSystemStatusResponse {
-    /**
-     * 
-     * @type {Array<CaseSystemStatusResult>}
-     * @memberof CaseSystemStatusResponse
-     */
-    'cases': Array<CaseSystemStatusResult>;
-}
 /**
  * updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant\'s own.
  * @export
- * @interface CaseSystemStatusResult
+ * @interface CaseStatusChangeResult
  */
-export interface CaseSystemStatusResult {
+export interface CaseStatusChangeResult {
     /**
      * 
      * @type {number}
-     * @memberof CaseSystemStatusResult
+     * @memberof CaseStatusChangeResult
      */
     'case_id': number;
     /**
      * 
      * @type {string}
-     * @memberof CaseSystemStatusResult
+     * @memberof CaseStatusChangeResult
      */
     'current_status_code': string;
     /**
      * 
      * @type {boolean}
-     * @memberof CaseSystemStatusResult
+     * @memberof CaseStatusChangeResult
      */
     'updated': boolean;
 }
@@ -1766,6 +1740,32 @@ export interface CasesSearchResponse {
      * @memberof CasesSearchResponse
      */
     'list': Array<CaseResult>;
+}
+/**
+ * Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
+ * @export
+ * @interface CasesStatusRequest
+ */
+export interface CasesStatusRequest {
+    /**
+     * 
+     * @type {Array<CaseStatusChange>}
+     * @memberof CasesStatusRequest
+     */
+    'cases': Array<CaseStatusChange>;
+}
+/**
+ * Outcome of each requested status change, in request order.
+ * @export
+ * @interface CasesStatusResponse
+ */
+export interface CasesStatusResponse {
+    /**
+     * 
+     * @type {Array<CaseStatusChangeResult>}
+     * @memberof CasesStatusResponse
+     */
+    'cases': Array<CaseStatusChangeResult>;
 }
 /**
  * Public Keycloak settings for the OAuth2 device authorization grant.
@@ -8501,18 +8501,18 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
-         * @summary Set the system status of cases
+         * @summary Set the status of cases
          * @param {string} tenant Tenant code
-         * @param {CaseSystemStatusRequest} caseSystemStatusRequest Status changes
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchCaseSystemStatus: async (tenant: string, caseSystemStatusRequest: CaseSystemStatusRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        patchCasesStatus: async (tenant: string, casesStatusRequest: CasesStatusRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('patchCaseSystemStatus', 'tenant', tenant)
-            // verify required parameter 'caseSystemStatusRequest' is not null or undefined
-            assertParamExists('patchCaseSystemStatus', 'caseSystemStatusRequest', caseSystemStatusRequest)
-            const localVarPath = `/{tenant}/cases/system_status`
+            assertParamExists('patchCasesStatus', 'tenant', tenant)
+            // verify required parameter 'casesStatusRequest' is not null or undefined
+            assertParamExists('patchCasesStatus', 'casesStatusRequest', casesStatusRequest)
+            const localVarPath = `/{tenant}/cases/status`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -8536,7 +8536,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(caseSystemStatusRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(casesStatusRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8880,16 +8880,16 @@ export const CasesApiFp = function(configuration?: Configuration) {
         },
         /**
          * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
-         * @summary Set the system status of cases
+         * @summary Set the status of cases
          * @param {string} tenant Tenant code
-         * @param {CaseSystemStatusRequest} caseSystemStatusRequest Status changes
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async patchCaseSystemStatus(tenant: string, caseSystemStatusRequest: CaseSystemStatusRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseSystemStatusResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCaseSystemStatus(tenant, caseSystemStatusRequest, options);
+        async patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CasesStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCasesStatus(tenant, casesStatusRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCaseSystemStatus']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCasesStatus']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -9071,14 +9071,14 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
-         * @summary Set the system status of cases
+         * @summary Set the status of cases
          * @param {string} tenant Tenant code
-         * @param {CaseSystemStatusRequest} caseSystemStatusRequest Status changes
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchCaseSystemStatus(tenant: string, caseSystemStatusRequest: CaseSystemStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<CaseSystemStatusResponse> {
-            return localVarFp.patchCaseSystemStatus(tenant, caseSystemStatusRequest, options).then((request) => request(axios, basePath));
+        patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<CasesStatusResponse> {
+            return localVarFp.patchCasesStatus(tenant, casesStatusRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
@@ -9265,15 +9265,15 @@ export class CasesApi extends BaseAPI {
 
     /**
      * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
-     * @summary Set the system status of cases
+     * @summary Set the status of cases
      * @param {string} tenant Tenant code
-     * @param {CaseSystemStatusRequest} caseSystemStatusRequest Status changes
+     * @param {CasesStatusRequest} casesStatusRequest Status changes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public patchCaseSystemStatus(tenant: string, caseSystemStatusRequest: CaseSystemStatusRequest, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).patchCaseSystemStatus(tenant, caseSystemStatusRequest, options).then((request) => request(this.axios, this.basePath));
+    public patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCasesStatus(tenant, casesStatusRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -14,10 +14,10 @@
 
 import unittest
 
-from radiant_python.models.case_system_status_result import CaseSystemStatusResult
+from radiant_python.models.case_status_change_result import CaseStatusChangeResult
 
-class TestCaseSystemStatusResult(unittest.TestCase):
-    """CaseSystemStatusResult unit test stubs"""
+class TestCaseStatusChangeResult(unittest.TestCase):
+    """CaseStatusChangeResult unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,30 +25,30 @@ class TestCaseSystemStatusResult(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> CaseSystemStatusResult:
-        """Test CaseSystemStatusResult
+    def make_instance(self, include_optional) -> CaseStatusChangeResult:
+        """Test CaseStatusChangeResult
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `CaseSystemStatusResult`
+        # uncomment below to create an instance of `CaseStatusChangeResult`
         """
-        model = CaseSystemStatusResult()
+        model = CaseStatusChangeResult()
         if include_optional:
-            return CaseSystemStatusResult(
+            return CaseStatusChangeResult(
                 case_id = 123,
                 current_status_code = 'in_progress',
                 updated = True
             )
         else:
-            return CaseSystemStatusResult(
+            return CaseStatusChangeResult(
                 case_id = 123,
                 current_status_code = 'in_progress',
                 updated = True,
         )
         """
 
-    def testCaseSystemStatusResult(self):
-        """Test CaseSystemStatusResult"""
+    def testCaseStatusChangeResult(self):
+        """Test CaseStatusChangeResult"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

@@ -108,7 +108,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**list_case_assignment_candidates**](docs/CasesApi.md#list_case_assignment_candidates) | **GET** /{tenant}/cases/{case_id}/assignment_candidates | List the users who may be assigned a case
 *CasesApi* | [**patch_case**](docs/CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 *CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
-*CasesApi* | [**patch_case_system_status**](docs/CasesApi.md#patch_case_system_status) | **PATCH** /{tenant}/cases/system_status | Set the system status of cases
+*CasesApi* | [**patch_cases_status**](docs/CasesApi.md#patch_cases_status) | **PATCH** /{tenant}/cases/status | Set the status of cases
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 *CasesApi* | [**put_case_assignments**](docs/CasesApi.md#put_case_assignments) | **PUT** /{tenant}/cases/{case_id}/assignments | Set the users a case is assigned to
 *CasesApi* | [**put_case_batch**](docs/CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
@@ -232,13 +232,13 @@ Class | Method | HTTP request | Description
  - [CaseSequencingExperiment](docs/CaseSequencingExperiment.md)
  - [CaseSequencingExperimentBatch](docs/CaseSequencingExperimentBatch.md)
  - [CaseStatus](docs/CaseStatus.md)
- - [CaseSystemStatusChange](docs/CaseSystemStatusChange.md)
- - [CaseSystemStatusRequest](docs/CaseSystemStatusRequest.md)
- - [CaseSystemStatusResponse](docs/CaseSystemStatusResponse.md)
- - [CaseSystemStatusResult](docs/CaseSystemStatusResult.md)
+ - [CaseStatusChange](docs/CaseStatusChange.md)
+ - [CaseStatusChangeResult](docs/CaseStatusChangeResult.md)
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
+ - [CasesStatusRequest](docs/CasesStatusRequest.md)
+ - [CasesStatusResponse](docs/CasesStatusResponse.md)
  - [ClientAuthConfig](docs/ClientAuthConfig.md)
  - [ClientConfig](docs/ClientConfig.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)

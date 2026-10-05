@@ -19,15 +19,15 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from radiant_python.models.case_system_status_result import CaseSystemStatusResult
+from radiant_python.models.case_status_change import CaseStatusChange
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CaseSystemStatusResponse(BaseModel):
+class CasesStatusRequest(BaseModel):
     """
-    Outcome of each requested status change, in request order.
+    Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
     """ # noqa: E501
-    cases: List[CaseSystemStatusResult]
+    cases: List[CaseStatusChange]
     __properties: ClassVar[List[str]] = ["cases"]
 
     model_config = ConfigDict(
@@ -48,7 +48,7 @@ class CaseSystemStatusResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CaseSystemStatusResponse from a JSON string"""
+        """Create an instance of CasesStatusRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,7 +80,7 @@ class CaseSystemStatusResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CaseSystemStatusResponse from a dict"""
+        """Create an instance of CasesStatusRequest from a dict"""
         if obj is None:
             return None
 
@@ -88,7 +88,7 @@ class CaseSystemStatusResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cases": [CaseSystemStatusResult.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None
+            "cases": [CaseStatusChange.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None
         })
         return _obj
 
