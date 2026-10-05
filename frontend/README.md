@@ -117,3 +117,58 @@ Read more [here](https://app.notion.com/p/ferlab/Processus-QA-Ticket-Jira-2a1b0f
 ## Unit Testing
 
 For small specific cases (regex, small functions), unit tests can be implemented and run locally. The UI and user interactions should not be tested through unit tests; they are covered through the Cypress test suite.
+
+
+## Claude skills for non-frontend developers
+
+Non-frontend developers need to use the `frontend-ui-consumer` Claude skill. It needs to be added locally to your environment.
+
+```markdown
+---
+name: frontend-ui-consumer
+description: >
+  Use when a backend/full-stack dev edits frontend code (any .tsx/.jsx under `frontend/apps/`, `frontend/portals/`, or `frontend/components/`) to wire data into existing UI — fetching, forms, routing, column setup, etc. Enforces consumer-only mode: compose from existing primitives, never create or mutate UI components, never write custom Tailwind values, never use raw interactive HTML. Skip for pure frontend engineering work (new design-system components, Storybook additions, shadcn primitive edits).
+metadata:
+  type: guardrail
+  audience: backend-full-stack
+---
+
+You are helping a backend/full-stack engineer integrate data into an existing front-end layout. You are strictly a **consumer** of the UI library.
+
+## Forbidden
+
+- Creating new UI components in `frontend/components/base/` or `frontend/components/base/shadcn/`
+- Mutating any file in `frontend/components/base/shadcn/`
+- Running `npx shadcn@latest add <component>` on a component that already exists in `frontend/components/base/shadcn/` — the CLI overwrites the file silently and wipes any local modifications. If a primitive needs changes, edit it in place.
+- Writing arbitrary Tailwind values: `h-[42px]`, `bg-[#f3f4f6]`, `text-[14.5px]`, `w-[320px]`, etc.
+- Using raw interactive HTML: `<button>`, `<input>`, `<select>`, `<textarea>`, `<a>` for in-app routes
+- Hand-rolling layout primitives when a wrapper exists (modals, dropdowns, tooltips, tables, forms, badges, etc.)
+
+## Component selection order
+
+Mirror `frontend/CLAUDE.md`:
+
+1. **Storybook story first** — look under `frontend/components/stories/`. These reflect the real design system; the component used in a story is the right one.
+2. **Existing wrapper** — look under `frontend/components/base/` (excluding `shadcn/`). A wrapper may exist even without a story.
+3. **shadcn primitive** — only as a last resort, from `frontend/components/base/shadcn/`. Flag the gap explicitly in your response so the user knows you fell back here.
+
+For common cases:
+- Button → `@/components/base/shadcn/button`
+- Input / Textarea / Select → shadcn equivalents in `base/shadcn/`
+- Table → `@/components/base/data-table/data-table` (not raw `<table>` or shadcn `<Table>` directly)
+- In-app navigation → wrap the path with `useLocalPath()` (for `<Link to={localPath('/case')}>`) or use `useLocalNavigation()` for programmatic nav. Both come from `@/components/hooks/use-local-path` and auto-prefix the current tenant. Never hand-write `/radiant/...`. Use raw `useNavigate` only for history moves (`navigate(-1)`).
+
+## Styling
+
+- Semantic tokens only: `bg-card`, `text-primary`, `warning-bg`, `primary-text`, `gap-4`, `p-2`, `rounded-md`
+- Spacing / sizing via Tailwind scale (`gap-4`, `p-6`, `w-full`, `h-9`) — never arbitrary values
+- Dark mode comes free via tokens; never write `dark:bg-[...]`
+
+## i18n
+
+Any user-visible string goes through `useI18n()` — no hardcoded strings in JSX. Keys live in `frontend/translations/`.
+
+## Hard stop
+
+If a requested UI feature or design pattern cannot be achieved with existing primitives + wrappers + tokens, **STOP IMMEDIATELY** and tell the user a front-end engineering handoff is required. Do not improvise a custom component, do not inline SVGs, do not write arbitrary Tailwind. Name the gap specifically ("the design calls for a split-button dropdown, no wrapper exists for that") so the FE handoff is actionable.
+```
