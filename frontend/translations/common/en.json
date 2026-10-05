@@ -60,7 +60,10 @@
         "code_hint": "Can't be changed after creation. Letters, numbers, underscores, and dashes.",
         "name": "Name",
         "notification_emails": "Notification emails",
-        "notification_emails_hint": "Comma-separated addresses that receive the data-availability email and its manifest for this laboratory. Leave empty for no notification."
+        "notification_emails_hint": "Separate addresses with commas.",
+        "notification_placeholder": "diagnosticlab@example.org, geneticist@example.org",
+        "notification_section": "Notifications",
+        "notification_section_description": "An email with the file manifest is sent to the addresses below when new genomic data is available."
       },
       "filters": {
         "category": "Category",
@@ -350,6 +353,7 @@
         "invalid_code": "Letters, numbers, underscores and dashes; start with a letter.",
         "at_least_one_permission": "Select at least one permission.",
         "invalid_email": "Enter a valid email.",
+        "invalid_notification_emails": "Enter valid email addresses, separated by commas.",
         "invalid_role_code": "Must start with a lowercase letter and contain only lowercase letters, numbers and underscores",
         "organization_code_exists": "An organization with this code already exists.",
         "role_code_exists": "A role with this code already exists.",

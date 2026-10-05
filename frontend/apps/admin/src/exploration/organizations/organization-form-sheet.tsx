@@ -6,10 +6,12 @@ import { z } from 'zod';
 
 import type { OrganizationResponse } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
+import { FieldDescription, FieldLegend, FieldSet } from '@/components/base/shadcn/field';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Input } from '@/components/base/shadcn/input';
 import { Label } from '@/components/base/shadcn/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
+import { Separator } from '@/components/base/shadcn/separator';
 import {
   Sheet,
   SheetContent,
@@ -37,7 +39,7 @@ const createFormSchema = z.object({
   notification_emails: z
     .string()
     .optional()
-    .refine(value => isEmailList(value ?? ''), 'invalid_email'),
+    .refine(value => isEmailList(value ?? ''), 'invalid_notification_emails'),
 });
 
 const editFormSchema = createFormSchema.extend({
@@ -127,7 +129,7 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
       }
       // The API validates each address too (bare form only); its 400 names the field.
       if (status === 400 && String(error?.response?.data?.message ?? '').includes('notification email')) {
-        form.setError('notification_emails', { message: 'invalid_email' });
+        form.setError('notification_emails', { message: 'invalid_notification_emails' });
         return;
       }
       toast.error(t(`${i18nPrefix}.notifications.errors.default`));
@@ -154,20 +156,6 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                schema={formSchema}
-                name="notification_emails"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('admin.organizations.fields.notification_emails')}</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={3} placeholder="lab@example.org, lab-2@example.org" />
-                    </FormControl>
-                    <FormDescription>{t('admin.organizations.fields.notification_emails_hint')}</FormDescription>
                   </FormItem>
                 )}
               />
@@ -228,6 +216,29 @@ function OrganizationFormSheet({ open, onOpenChange, organization, onSaved }: Or
                   />
                 </>
               )}
+              <Separator />
+              <FieldSet>
+                <FieldLegend>{t('admin.organizations.fields.notification_section')}</FieldLegend>
+                <FieldDescription>{t('admin.organizations.fields.notification_section_description')}</FieldDescription>
+                <FormField
+                  control={form.control}
+                  schema={formSchema}
+                  name="notification_emails"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('admin.organizations.fields.notification_emails')}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          rows={3}
+                          placeholder={t('admin.organizations.fields.notification_placeholder')}
+                        />
+                      </FormControl>
+                      <FormDescription>{t('admin.organizations.fields.notification_emails_hint')}</FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </FieldSet>
             </div>
             <SheetFooter className="border-t p-6 flex-row justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
