@@ -85,3 +85,27 @@ func Test_printCreatePlan_AuthBlockPrecedesViews(t *testing.T) {
 	assert.Less(t, strings.Index(out, "auth.pii_lab_patient"), strings.Index(out, "`demo_tenant`.`patient`"),
 		"both auth views must be created before the patient view that references them")
 }
+
+func Test_printViews_CreatesThenRefreshesGenePanelMVAfterViews(t *testing.T) {
+	var buf bytes.Buffer
+	src := fakeColumnSource{cols: map[string][]string{"cases": {"id"}}}
+
+	require.NoError(t, printViews(t.Context(), &buf, "demo", src))
+
+	out := buf.String()
+	create := strings.Index(out, "CREATE MATERIALIZED VIEW IF NOT EXISTS `demo_tenant`.`gene_panel_mv`")
+	refresh := strings.Index(out, "REFRESH MATERIALIZED VIEW `demo_tenant`.`gene_panel_mv` FORCE WITH SYNC MODE")
+	require.NotEqual(t, -1, create)
+	require.NotEqual(t, -1, refresh)
+	assert.Less(t, strings.Index(out, "CREATE DATABASE IF NOT EXISTS `demo_tenant`"), create, "the MV needs the tenant database")
+	assert.Less(t, create, refresh)
+}
+
+func Test_printCreatePlan_ShowsMaterializedViewAccessPolicy(t *testing.T) {
+	var buf bytes.Buffer
+	src := fakeColumnSource{cols: map[string][]string{"cases": {"id"}}}
+
+	require.NoError(t, printCreatePlan(t.Context(), &buf, "demo", "Demo", src))
+
+	assert.Contains(t, buf.String(), "ensure materialized view access policy sr_access_demo_mvs → SELECT on demo_tenant.* for role demo_user")
+}

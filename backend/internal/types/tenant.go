@@ -20,6 +20,10 @@ func ValidateTenantCode(code string) error {
 	return nil
 }
 
+// TenantGenePanelMV is the per-tenant materialized view (panel, symbol) over the tenant's
+// panel / panel_has_genes rows.
+const TenantGenePanelMV = "gene_panel_mv"
+
 // ViewTables are the tables the API reads through the radiant_jdbc federation; each gets a
 // per-tenant view in StarRocks (created from the StarRocks tenant repository) and its
 // federatable columns are resolved from PostgreSQL (from the Postgres tenant repository).

@@ -228,3 +228,25 @@ func Test_RangerAdminClient_EnsureViewAccessPolicy_TargetsTheViewResourceNotTabl
 	access := items[0].(map[string]any)["accesses"].([]any)[0].(map[string]any)
 	assert.Equal(t, "select", access["type"])
 }
+
+func Test_RangerAdminClient_EnsureMaterializedViewAccessPolicy_TargetsTheMaterializedViewResource(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureMaterializedViewAccessPolicy(context.Background(),
+		"sr_access_demo_mvs", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy)
+	assert.EqualValues(t, 0, fake.createdPolicy["policyType"], "a materialized view grant is still an access policy")
+	resources := fake.createdPolicy["resources"].(map[string]any)
+	assert.Equal(t, []any{"demo_tenant"}, resources["database"].(map[string]any)["values"])
+	assert.Equal(t, []any{"*"}, resources["materialized_view"].(map[string]any)["values"])
+	assert.NotContains(t, resources, "table", "table and materialized_view are sibling hierarchies")
+	assert.NotContains(t, resources, "view", "view and materialized_view are sibling hierarchies")
+	items := fake.createdPolicy["policyItems"].([]any)
+	assert.Equal(t, []any{"demo_user"}, items[0].(map[string]any)["roles"])
+	access := items[0].(map[string]any)["accesses"].([]any)[0].(map[string]any)
+	assert.Equal(t, "select", access["type"])
+}
