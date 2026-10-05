@@ -173,7 +173,7 @@ func Test_EnsureTenantRangerConfig_GrantsSelectOnTenantMaterializedViews(t *test
 	require.NoError(t, EnsureTenantRangerConfig(context.Background(), m, "cbtn"))
 
 	assert.Equal(t, []string{TenantMaterializedViewAccessPolicy("cbtn")}, m.mvNames,
-		"gene_panel_mv is a materialized view: the table and view policies do not reach it")
+		"materialized views need their own policy: the table and view policies do not reach them")
 	assert.Equal(t, []string{"cbtn_tenant"}, m.mvDBs[TenantMaterializedViewAccessPolicy("cbtn")])
 	assert.Equal(t, []string{"*"}, m.mvObjects[TenantMaterializedViewAccessPolicy("cbtn")])
 }

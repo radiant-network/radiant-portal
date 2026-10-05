@@ -67,7 +67,8 @@ How the views are built:
 - Ensures the Ranger role `<code>_user`.
 - Ensures the access policy `sr_access_<code>` granting `<code>_user` `SELECT` on
   `<code>_tenant.*`, plus `sr_access_<code>_views` (the `view` resource) and
-  `sr_access_<code>_mvs` (the `materialized_view` resource, e.g. `gene_panel_mv`).
+  `sr_access_<code>_mvs` (the `materialized_view` resource, every MV of the tenant database,
+  so a new per-tenant MV needs no new policy).
 - Bootstraps the global PII-masking policies (idempotent, tenant-independent): the
   `user_role` masking-subject marker, `SELECT` on the `auth` database + a row-filter per
   `auth` view, and the `patient` column masks (`sr_mask_pii_redact`, `sr_mask_dob`) over
