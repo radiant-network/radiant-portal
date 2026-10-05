@@ -28,7 +28,7 @@ export default defineConfig({
   experimentalWebKitSupport: false,
   allowCypressEnv: false,
   expose: {
-    keycloak_host: "https://auth.qa.juno.cqdg.ferlab.bio",
+    keycloak_host: "https://auth.dev.qlin.aws.sante.quebec",
     keycloak_realm: "qlin",
     keycloak_client: "radiant",
     api_client: "radiant",
