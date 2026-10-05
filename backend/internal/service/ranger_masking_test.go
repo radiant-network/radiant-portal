@@ -21,12 +21,16 @@ type maskingRecorder struct {
 	maskExprs        map[string]string   // policy name -> mask expr
 	nested           []string            // "parent/child" from AddRoleToRole
 	failAtMask       string
-	failAtViewPolicy string // EnsureViewAccessPolicy returns an error for this policy name
-	failRole         string // EnsureRole returns an error for this role name
+	mvNames          []string
+	mvDBs            map[string][]string // policy name -> databases
+	mvObjects        map[string][]string // policy name -> materialized views
+	failAtViewPolicy string              // EnsureViewAccessPolicy returns an error for this policy name
+	failAtMVPolicy   string              // EnsureMaterializedViewAccessPolicy returns an error for this policy name
+	failRole         string              // EnsureRole returns an error for this role name
 }
 
 func newMaskingRecorder() *maskingRecorder {
-	return &maskingRecorder{accessTables: map[string][]string{}, viewDBs: map[string][]string{}, rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}}
+	return &maskingRecorder{accessTables: map[string][]string{}, viewDBs: map[string][]string{}, mvDBs: map[string][]string{}, mvObjects: map[string][]string{}, rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}}
 }
 
 func (m *maskingRecorder) EnsureRole(ctx context.Context, name string) error {
@@ -47,6 +51,15 @@ func (m *maskingRecorder) EnsureViewAccessPolicy(ctx context.Context, name strin
 	}
 	m.viewNames = append(m.viewNames, name)
 	m.viewDBs[name] = databases
+	return nil
+}
+func (m *maskingRecorder) EnsureMaterializedViewAccessPolicy(ctx context.Context, name string, databases, mvs, roles []string) error {
+	if m.failAtMVPolicy == name {
+		return errors.New("boom")
+	}
+	m.mvNames = append(m.mvNames, name)
+	m.mvDBs[name] = databases
+	m.mvObjects[name] = mvs
 	return nil
 }
 func (m *maskingRecorder) EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error {
@@ -152,4 +165,26 @@ func Test_EnsureTenantRangerConfig_WrapsViewPolicyFailureWithPolicyName(t *testi
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), TenantViewAccessPolicy("cbtn"))
 	assert.Empty(t, m.nested, "a failed view grant must not leave the role nested as if access were complete")
+}
+
+func Test_EnsureTenantRangerConfig_GrantsSelectOnTenantMaterializedViews(t *testing.T) {
+	m := newMaskingRecorder()
+
+	require.NoError(t, EnsureTenantRangerConfig(context.Background(), m, "cbtn"))
+
+	assert.Equal(t, []string{TenantMaterializedViewAccessPolicy("cbtn")}, m.mvNames,
+		"gene_panel_mv is a materialized view: the table and view policies do not reach it")
+	assert.Equal(t, []string{"cbtn_tenant"}, m.mvDBs[TenantMaterializedViewAccessPolicy("cbtn")])
+	assert.Equal(t, []string{"*"}, m.mvObjects[TenantMaterializedViewAccessPolicy("cbtn")])
+}
+
+func Test_EnsureTenantRangerConfig_WrapsMaterializedViewPolicyFailureWithPolicyName(t *testing.T) {
+	m := newMaskingRecorder()
+	m.failAtMVPolicy = TenantMaterializedViewAccessPolicy("cbtn")
+
+	err := EnsureTenantRangerConfig(context.Background(), m, "cbtn")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), TenantMaterializedViewAccessPolicy("cbtn"))
+	assert.Empty(t, m.nested, "a failed MV grant must not leave the role nested as if access were complete")
 }

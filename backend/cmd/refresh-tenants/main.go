@@ -1,11 +1,14 @@
 // Command refresh-tenants re-applies the derived StarRocks + Ranger configuration for
 // every tenant — or one with -code — after a schema or policy change. It refreshes the
-// per-tenant StarRocks views AND the global Ranger PII-masking policies (self-access +
-// row-filter on auth.pii_grant, patient column masks) plus each tenant role's nesting
-// under the masking-subject marker. Idempotent, control-plane only.
+// per-tenant StarRocks views, creates or refreshes each tenant's gene panel MV, AND the
+// global Ranger PII-masking policies (self-access + row-filter on auth.pii_grant, patient
+// column masks) plus each tenant role's nesting under the masking-subject marker.
+// Idempotent, control-plane only.
 //
 // Unlike the API-startup view refresh (cmd/api/view_refresh.go), this needs Ranger admin
-// creds, so masking lives here — the manual / break-glass entry point.
+// creds, so masking lives here — the manual / break-glass entry point. The gene panel MV
+// lives here too: the startup refresh exits on error, and an MV refresh reads Postgres
+// through JDBC, so a failure there would crash-loop the API.
 //
 //	go run ./cmd/refresh-tenants            # every tenant
 //	go run ./cmd/refresh-tenants -code demo # one tenant
@@ -56,6 +59,10 @@ func main() {
 			fatal("refresh all views", err)
 		}
 		slog.Info("refreshed tenant views", slog.Int("tenants", len(codes)), slog.Any("codes", codes))
+		if err := service.EnsureAllGenePanelMVs(ctx, views, codes); err != nil {
+			fatal("ensure gene panel mvs", err)
+		}
+		slog.Info("ensured gene panel mvs", slog.Any("codes", codes))
 	}
 
 	if err := service.RefreshMaskingPolicies(ctx, ranger, codes); err != nil {
@@ -77,6 +84,9 @@ func refreshOne(ctx context.Context, tenants *postgres.TenantRepository, views *
 	}
 	if err := views.EnsureClinicalViews(ctx, code, columns); err != nil {
 		fatal("refresh views", err)
+	}
+	if err := views.EnsureGenePanelMV(ctx, code); err != nil {
+		fatal("ensure gene panel mv", err)
 	}
 	slog.Info("refreshed tenant views", slog.String("tenant", code), slog.Int("views", len(types.ViewTables)))
 }

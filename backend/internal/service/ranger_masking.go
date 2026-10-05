@@ -143,6 +143,11 @@ func EnsureTenantRangerConfig(ctx context.Context, ranger RangerTenantProvisione
 	if err := ranger.EnsureViewAccessPolicy(ctx, viewPolicy, []string{db}, []string{"*"}, []string{role}); err != nil {
 		return fmt.Errorf("ranger: ensure view access policy %q: %w", viewPolicy, err)
 	}
+	// Neither policy above reaches a materialized view (types.TenantGenePanelMV).
+	mvPolicy := TenantMaterializedViewAccessPolicy(code)
+	if err := ranger.EnsureMaterializedViewAccessPolicy(ctx, mvPolicy, []string{db}, []string{"*"}, []string{role}); err != nil {
+		return fmt.Errorf("ranger: ensure materialized view access policy %q: %w", mvPolicy, err)
+	}
 	if err := ranger.AddRoleToRole(ctx, RangerMaskingRole, role); err != nil {
 		return fmt.Errorf("ranger: nest role %q under %q: %w", role, RangerMaskingRole, err)
 	}

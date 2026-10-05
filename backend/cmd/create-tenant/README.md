@@ -37,6 +37,11 @@ Three ordered phases (order matters — each builds on the previous):
 - Creates the tenant database **`<code>_tenant`** (e.g. `demo` → `demo_tenant`).
 - Creates one view per federated clinical table over the `radiant_jdbc` federation,
   filtered to the tenant: `… FROM radiant_jdbc.public.<table> WHERE tenant_code = '<code>'`.
+- Creates the gene panel materialized view **`<code>_tenant.gene_panel_mv(panel, symbol)`**
+  (`panel` = the panel name) over `radiant_jdbc.public.panel` / `panel_has_genes`, filtered to
+  the tenant, then refreshes it synchronously. `REFRESH DEFERRED MANUAL`: StarRocks does not
+  detect changes in a PostgreSQL JDBC table, so the API refreshes it (`FORCE WITH SYNC MODE`)
+  after each panel write. `IF NOT EXISTS`: a change to its definition needs a drop and a re-create.
 
 How the views are built:
 - **Columns are introspected from `information_schema`**, excluding types the
@@ -55,12 +60,14 @@ How the views are built:
 > **Note:** a StarRocks view IS a Ranger access boundary (since #72910 was fixed), but
 > only against a policy on the `view` resource — a `table` policy does not reach it. Tenant
 > isolation therefore comes from the database-level login check plus both per-tenant access
-> policies (`sr_access_<code>` and `sr_access_<code>_views`).
+> policies (`sr_access_<code>` and `sr_access_<code>_views`). A materialized view is a
+> third sibling resource (`materialized_view`), covered by `sr_access_<code>_mvs`.
 
 ### 3. Ranger — the access gate + PII masking
 - Ensures the Ranger role `<code>_user`.
 - Ensures the access policy `sr_access_<code>` granting `<code>_user` `SELECT` on
-  `<code>_tenant.*`.
+  `<code>_tenant.*`, plus `sr_access_<code>_views` (the `view` resource) and
+  `sr_access_<code>_mvs` (the `materialized_view` resource, e.g. `gene_panel_mv`).
 - Bootstraps the global PII-masking policies (idempotent, tenant-independent): the
   `user_role` masking-subject marker, `SELECT` on the `auth` database + a row-filter per
   `auth` view, and the `patient` column masks (`sr_mask_pii_redact`, `sr_mask_dob`) over

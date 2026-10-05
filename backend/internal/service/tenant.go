@@ -25,10 +25,12 @@ type TenantReader interface {
 type StarrocksTenantProvisioner interface {
 	EnsureAuthDatabase(ctx context.Context) error
 	EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error
+	EnsureGenePanelMV(ctx context.Context, tenantCode string) error
 }
 
 type RangerTenantProvisioner interface {
 	RangerMaskingProvisioner
+	EnsureMaterializedViewAccessPolicy(ctx context.Context, name string, databases, mvs, roles []string) error
 	AddRoleToRole(ctx context.Context, parent, child string) error
 }
 
@@ -45,6 +47,10 @@ func TenantAccessPolicy(tenantCode string) string {
 
 func TenantViewAccessPolicy(tenantCode string) string {
 	return "sr_access_" + tenantCode + "_views"
+}
+
+func TenantMaterializedViewAccessPolicy(tenantCode string) string {
+	return "sr_access_" + tenantCode + "_mvs"
 }
 
 // CreateTenant onboards a tenant, idempotently. Order is load-bearing: Ranger's
@@ -67,6 +73,9 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 	}
 	if err := deps.Starrocks.EnsureClinicalViews(ctx, code, columns); err != nil {
 		return fmt.Errorf("starrocks: create views for %q: %w", code, err)
+	}
+	if err := deps.Starrocks.EnsureGenePanelMV(ctx, code); err != nil {
+		return fmt.Errorf("starrocks: create gene panel mv for %q: %w", code, err)
 	}
 
 	// Global PII-masking policies first (they ensure the marker role the tenant role nests
@@ -105,4 +114,22 @@ func RefreshAllTenantViews(ctx context.Context, reader TenantReader, sr Starrock
 		}
 	}
 	return codes, errors.Join(errs...)
+}
+
+type GenePanelMVProvisioner interface {
+	EnsureGenePanelMV(ctx context.Context, tenantCode string) error
+}
+
+// EnsureAllGenePanelMVs creates (if missing) and refreshes the gene panel MV of each given
+// tenant, continuing past a per-tenant failure and returning the failures joined. It is kept
+// out of RefreshAllTenantViews on purpose: the API startup refresh calls that function and
+// exits on error, so a JDBC refresh failure there would crash-loop every replica.
+func EnsureAllGenePanelMVs(ctx context.Context, sr GenePanelMVProvisioner, codes []string) error {
+	var errs []error
+	for _, code := range codes {
+		if err := sr.EnsureGenePanelMV(ctx, code); err != nil {
+			errs = append(errs, fmt.Errorf("refresh gene panel mv %q: %w", code, err))
+		}
+	}
+	return errors.Join(errs...)
 }
