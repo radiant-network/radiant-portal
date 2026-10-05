@@ -12,7 +12,8 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// GenePanelUploadMaxBytes limits the whole multipart body of a gene panel upload.
+// GenePanelUploadMaxBytes limits the whole multipart body of a gene panel upload: 10 MiB
+// (10 × 1024 × 1024 = 10,485,760 bytes).
 const GenePanelUploadMaxBytes = 10 << 20
 
 type genePanelUploader interface {
@@ -22,21 +23,22 @@ type genePanelUploader interface {
 // PutGenePanelsHandler
 // @Summary Replace the tenant's gene panels
 // @Id putGenePanels
-// @Description Replaces all the uploaded gene panels of the tenant in the path with the panels of the
-// @Description attached `.tsv` file, in one transaction, then refreshes the tenant's gene panel
-// @Description materialized view. The prescription panels of the analysis catalog stay unchanged.
-// @Description Requires the `can_manage_analysis_catalog` action. The same file sent twice gives the
-// @Description same result, so a retry is safe.
+// @Description Replaces the gene panels of the tenant in the path with the panels of the attached
+// @Description `.tsv` file: panels missing from the file are removed, the others are created or
+// @Description replaced. The change is all or nothing, and the new panels are available for variant
+// @Description filtering when the call returns. Other panels of the tenant, such as the panels of
+// @Description the analysis catalog, are not changed. Requires the `can_manage_analysis_catalog`
+// @Description action. Sending the same file again gives the same result, so a retry is safe.
 // @Description
 // @Description File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`,
 // @Description `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A
 // @Description bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a
 // @Description duplicate symbol give 400, with the line in `detail.line`.
 // @Description
-// @Description Each symbol is resolved to its Ensembl gene (an `ensembl_id` wins over the symbol). A
-// @Description row that matches no gene is skipped and returned in `warnings`; with `strict=true` it
-// @Description rejects the file (422, the rows in `detail.warnings`). A `panel_code` that another
-// @Description panel of the tenant already uses gives 409.
+// @Description Each row must name a known gene, by symbol or by `ensembl_id` (the ID wins when both
+// @Description are given). A row with an unknown gene is skipped and returned in `warnings`; with
+// @Description `strict=true` the file is rejected instead (422, the rows in `detail.warnings`). A
+// @Description `panel_code` that another panel of the tenant already uses gives 409.
 // @Tags gene_panels
 // @Security bearerauth
 // @Accept multipart/form-data
