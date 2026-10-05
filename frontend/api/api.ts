@@ -4808,7 +4808,7 @@ export interface PatientDayDate {
     'day'?: number;
 }
 /**
- * Radiation dose, raw from the source (Gy, cGy or CGE), not normalized
+ * Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
  * @export
  * @interface PatientDose
  */
@@ -5447,7 +5447,7 @@ export interface PatientRadiation {
      * @type {PatientDose}
      * @memberof PatientRadiation
      */
-    'focal_dose': PatientDose;
+    'focal_boost_dose'?: PatientDose;
     /**
      * 
      * @type {string}
@@ -5472,6 +5472,12 @@ export interface PatientRadiation {
      * @memberof PatientRadiation
      */
     'stop': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDose}
+     * @memberof PatientRadiation
+     */
+    'total_primary_dose': PatientDose;
     /**
      * 
      * @type {string}

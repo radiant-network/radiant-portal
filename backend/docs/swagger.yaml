@@ -2419,7 +2419,9 @@ components:
           type: integer
       type: object
     PatientDose:
-      description: Radiation dose, raw from the source (Gy, cGy or CGE), not normalized
+      description: Radiation dose, raw from the source, not normalized. The unit is
+        Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not
+        Available.
       properties:
         unit:
           type: string
@@ -2771,7 +2773,7 @@ components:
       properties:
         craniospinal_dose:
           $ref: '#/components/schemas/PatientDose'
-        focal_dose:
+        focal_boost_dose:
           $ref: '#/components/schemas/PatientDose'
         site:
           type: string
@@ -2781,15 +2783,17 @@ components:
           $ref: '#/components/schemas/PatientDayDate'
         stop:
           $ref: '#/components/schemas/PatientDayDate'
+        total_primary_dose:
+          $ref: '#/components/schemas/PatientDose'
         type:
           type: string
         type_other:
           type: string
       required:
       - craniospinal_dose
-      - focal_dose
       - start
       - stop
+      - total_primary_dose
       type: object
     PatientStatistics:
       description: Statistics on every patient the caller can see, regardless of the

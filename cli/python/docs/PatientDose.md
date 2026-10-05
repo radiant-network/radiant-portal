@@ -1,6 +1,6 @@
 # PatientDose
 
-Radiation dose, raw from the source (Gy, cGy or CGE), not normalized
+Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
 
 ## Properties
 

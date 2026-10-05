@@ -29,14 +29,15 @@ class PatientRadiation(BaseModel):
     Radiation course of a patient
     """ # noqa: E501
     craniospinal_dose: PatientDose
-    focal_dose: PatientDose
+    focal_boost_dose: Optional[PatientDose] = None
     site: Optional[StrictStr] = None
     site_other: Optional[StrictStr] = None
     start: PatientDayDate
     stop: PatientDayDate
+    total_primary_dose: PatientDose
     type: Optional[StrictStr] = None
     type_other: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["craniospinal_dose", "focal_dose", "site", "site_other", "start", "stop", "type", "type_other"]
+    __properties: ClassVar[List[str]] = ["craniospinal_dose", "focal_boost_dose", "site", "site_other", "start", "stop", "total_primary_dose", "type", "type_other"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -80,15 +81,18 @@ class PatientRadiation(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of craniospinal_dose
         if self.craniospinal_dose:
             _dict['craniospinal_dose'] = self.craniospinal_dose.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of focal_dose
-        if self.focal_dose:
-            _dict['focal_dose'] = self.focal_dose.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of focal_boost_dose
+        if self.focal_boost_dose:
+            _dict['focal_boost_dose'] = self.focal_boost_dose.to_dict()
         # override the default output from pydantic by calling `to_dict()` of start
         if self.start:
             _dict['start'] = self.start.to_dict()
         # override the default output from pydantic by calling `to_dict()` of stop
         if self.stop:
             _dict['stop'] = self.stop.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of total_primary_dose
+        if self.total_primary_dose:
+            _dict['total_primary_dose'] = self.total_primary_dose.to_dict()
         return _dict
 
     @classmethod
@@ -102,11 +106,12 @@ class PatientRadiation(BaseModel):
 
         _obj = cls.model_validate({
             "craniospinal_dose": PatientDose.from_dict(obj["craniospinal_dose"]) if obj.get("craniospinal_dose") is not None else None,
-            "focal_dose": PatientDose.from_dict(obj["focal_dose"]) if obj.get("focal_dose") is not None else None,
+            "focal_boost_dose": PatientDose.from_dict(obj["focal_boost_dose"]) if obj.get("focal_boost_dose") is not None else None,
             "site": obj.get("site"),
             "site_other": obj.get("site_other"),
             "start": PatientDayDate.from_dict(obj["start"]) if obj.get("start") is not None else None,
             "stop": PatientDayDate.from_dict(obj["stop"]) if obj.get("stop") is not None else None,
+            "total_primary_dose": PatientDose.from_dict(obj["total_primary_dose"]) if obj.get("total_primary_dose") is not None else None,
             "type": obj.get("type"),
             "type_other": obj.get("type_other")
         })

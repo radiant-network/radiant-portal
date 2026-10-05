@@ -152,7 +152,7 @@ type PatientSurgery struct {
 }
 
 // PatientDose - Radiation dose
-// @Description Radiation dose, raw from the source (Gy, cGy or CGE), not normalized
+// @Description Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
 // @Name PatientDose
 type PatientDose struct {
 	Value *string `json:"value"`
@@ -169,8 +169,9 @@ type PatientRadiation struct {
 	SiteOther        *string        `json:"site_other"`
 	Type             *string        `json:"type"`
 	TypeOther        *string        `json:"type_other"`
-	CraniospinalDose PatientDose    `json:"craniospinal_dose" validate:"required"`
-	FocalDose        PatientDose    `json:"focal_dose" validate:"required"`
+	CraniospinalDose PatientDose    `json:"craniospinal_dose" validate:"required"`  // total_radiation_dose
+	TotalPrimaryDose PatientDose    `json:"total_primary_dose" validate:"required"` // total_radiation_dose_focal
+	FocalBoostDose   *PatientDose   `json:"focal_boost_dose"`                       // Total to primary minus craniospinal; null unless both are numbers in the same unit
 }
 
 // PatientTherapy - Medical therapy of a patient

@@ -24,7 +24,7 @@ from typing_extensions import Self
 
 class PatientDose(BaseModel):
     """
-    Radiation dose, raw from the source (Gy, cGy or CGE), not normalized
+    Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
     """ # noqa: E501
     unit: Optional[StrictStr] = None
     value: Optional[StrictStr] = None

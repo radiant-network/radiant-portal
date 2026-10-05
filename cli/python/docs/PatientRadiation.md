@@ -7,11 +7,12 @@ Radiation course of a patient
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **craniospinal_dose** | [**PatientDose**](PatientDose.md) |  | 
-**focal_dose** | [**PatientDose**](PatientDose.md) |  | 
+**focal_boost_dose** | [**PatientDose**](PatientDose.md) |  | [optional] 
 **site** | **str** |  | [optional] 
 **site_other** | **str** |  | [optional] 
 **start** | [**PatientDayDate**](PatientDayDate.md) |  | 
 **stop** | [**PatientDayDate**](PatientDayDate.md) |  | 
+**total_primary_dose** | [**PatientDose**](PatientDose.md) |  | 
 **type** | **str** |  | [optional] 
 **type_other** | **str** |  | [optional] 
 
