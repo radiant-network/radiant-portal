@@ -420,10 +420,11 @@ export const CasesTable = {
     },
     /**
      * Validates the sent requests to api on page change functionality.
+     * @param enoughData  Is there more than one page (default: true).
      */
-    shouldRequestOnPageChange() {
+    shouldRequestOnPageChange(enoughData: boolean = true) {
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest1');
@@ -431,40 +432,42 @@ export const CasesTable = {
       cy.wait('@searchRequest1');
       cy.waitWhileLoad(60 * 1000);
 
-      cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
-        expect(req.body.page_index).to.deep.equal(1);
-        req.continue();
-      }).as('searchRequest2');
-      CasesTable.actions.clickPaginationButton('next');
-      cy.wait('@searchRequest2');
-      cy.waitWhileLoad(60 * 1000);
+      if (enoughData) {
+        cy.intercept('POST', '**/search', req => {
+          expect(req.body.limit).to.deep.equal(30);
+          expect(req.body.page_index).to.deep.equal(1);
+          req.continue();
+        }).as('searchRequest2');
+        CasesTable.actions.clickPaginationButton('next');
+        cy.wait('@searchRequest2');
+        cy.waitWhileLoad(60 * 1000);
 
-      cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
-        expect(req.body.page_index).to.deep.equal(0);
-        req.continue();
-      }).as('searchRequest3');
-      CasesTable.actions.clickPaginationButton('previous');
-      cy.wait('@searchRequest3');
-      cy.waitWhileLoad(60 * 1000);
+        cy.intercept('POST', '**/search', req => {
+          expect(req.body.limit).to.deep.equal(30);
+          expect(req.body.page_index).to.deep.equal(0);
+          req.continue();
+        }).as('searchRequest3');
+        CasesTable.actions.clickPaginationButton('previous');
+        cy.wait('@searchRequest3');
+        cy.waitWhileLoad(60 * 1000);
 
-      cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
-        expect(req.body.page_index).to.deep.equal(1);
-        req.continue();
-      }).as('searchRequest4');
-      CasesTable.actions.clickPaginationButton('next');
-      cy.wait('@searchRequest4');
-      cy.waitWhileLoad(60 * 1000);
+        cy.intercept('POST', '**/search', req => {
+          expect(req.body.limit).to.deep.equal(30);
+          expect(req.body.page_index).to.deep.equal(1);
+          req.continue();
+        }).as('searchRequest4');
+        CasesTable.actions.clickPaginationButton('next');
+        cy.wait('@searchRequest4');
+        cy.waitWhileLoad(60 * 1000);
 
-      cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
-        expect(req.body.page_index).to.deep.equal(0);
-        req.continue();
-      }).as('searchRequest5');
-      CasesTable.actions.clickPaginationButton('first');
-      cy.wait('@searchRequest5');
+        cy.intercept('POST', '**/search', req => {
+          expect(req.body.limit).to.deep.equal(30);
+          expect(req.body.page_index).to.deep.equal(0);
+          req.continue();
+        }).as('searchRequest5');
+        CasesTable.actions.clickPaginationButton('first');
+        cy.wait('@searchRequest5');
+      }
     },
     /**
      * Validates the sent request to api on search selecting functionality.
