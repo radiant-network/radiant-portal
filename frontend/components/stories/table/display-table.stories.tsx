@@ -197,6 +197,17 @@ export const WithHeaderGroups: Story = {
   ),
 };
 
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+  render: args => (
+    <StorySection title="Loading" description="Renders skeleton rows in place of the data while it is loading.">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
 export const Empty: Story = {
   args: {
     data: [],

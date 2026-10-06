@@ -1,6 +1,7 @@
 import { FlexRender, type OnChangeFn, type RowData, type RowSelectionState } from '@tanstack/react-table';
 import { SearchIcon } from 'lucide-react';
 
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import {
   Table,
   TableBody,
@@ -18,6 +19,7 @@ import Empty from '../empties/empty';
 import { HEADER_HEIGHT, ROW_HEIGHT, type TableColumnDef, useAppTable } from './data-table';
 
 const TABLE_MAX_HEIGHT = HEADER_HEIGHT + ROW_HEIGHT * 10;
+const SKELETON_ROW_COUNT = 10;
 
 type SimpleTableProps<TData extends RowData> = {
   variant?: 'default' | 'borderless' | 'border';
@@ -26,6 +28,7 @@ type SimpleTableProps<TData extends RowData> = {
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   fullHeight?: boolean;
+  loading?: boolean;
   dataCy?: string;
 };
 
@@ -41,6 +44,7 @@ function DisplayTable({
   rowSelection = {},
   onRowSelectionChange,
   fullHeight = false,
+  loading = false,
   dataCy,
 }: SimpleTableProps<any>) {
   const { t } = useI18n();
@@ -53,6 +57,7 @@ function DisplayTable({
     enableRowSelection: !!onRowSelectionChange && !!rowSelection,
     onRowSelectionChange: onRowSelectionChange,
   });
+  const hasRows = table.getRowModel().rows.length > 0;
 
   return (
     <div
@@ -70,14 +75,24 @@ function DisplayTable({
                   style={{ width: `${header.getSize()}px` }}
                   colSpan={header.colSpan}
                 >
-                  {header.isPlaceholder ? null : <FlexRender header={header} />}
+                  {loading && <Skeleton className="w-full h-[24px]" />}
+                  {!loading && !header.isPlaceholder && <FlexRender header={header} />}
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {loading &&
+            Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+              <TableRow key={`skeleton-row-${index}`} variant={variant}>
+                <TableCell colSpan={table.getAllLeafColumns().length} className="h-[41px]">
+                  <Skeleton className="w-full h-[20px]" />
+                </TableCell>
+              </TableRow>
+            ))}
+          {!loading &&
+            hasRows &&
             table.getRowModel().rows.map(row => (
               <TableRow key={row.id} variant={variant} data-state={row.getIsSelected() && 'selected'}>
                 {row.getVisibleCells().map(cell => (
@@ -86,8 +101,8 @@ function DisplayTable({
                   </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
+            ))}
+          {!loading && !hasRows && (
             <TableRow variant={variant}>
               <TableCell colSpan={table.getAllLeafColumns().length} className="h-24 text-center">
                 <Empty title={t('common.table.no_result')} iconType="custom" icon={SearchIcon} size="mini" />
@@ -95,25 +110,27 @@ function DisplayTable({
             </TableRow>
           )}
         </TableBody>
-        <TableFooter>
-          {table.getFooterGroups().map(footerGroup => (
-            <TableRow key={footerGroup.id} variant={variant}>
-              {footerGroup.headers.map(header => {
-                const footerColSpan = header.column.columnDef.meta?.footerColSpan;
-                if (footerColSpan === 0) return null;
-                return (
-                  <TableCell
-                    key={header.id}
-                    style={{ width: `${header.getSize()}px` }}
-                    colSpan={footerColSpan ?? header.colSpan}
-                  >
-                    {header.isPlaceholder ? null : <FlexRender footer={header} />}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableFooter>
+        {!loading && (
+          <TableFooter>
+            {table.getFooterGroups().map(footerGroup => (
+              <TableRow key={footerGroup.id} variant={variant}>
+                {footerGroup.headers.map(header => {
+                  const footerColSpan = header.column.columnDef.meta?.footerColSpan;
+                  if (footerColSpan === 0) return null;
+                  return (
+                    <TableCell
+                      key={header.id}
+                      style={{ width: `${header.getSize()}px` }}
+                      colSpan={footerColSpan ?? header.colSpan}
+                    >
+                      {header.isPlaceholder ? null : <FlexRender footer={header} />}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableFooter>
+        )}
       </Table>
     </div>
   );

@@ -30,7 +30,7 @@ function TreatmentsTab({ patient, isLoading }: TreatmentsTabProps) {
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {isLoading ? <Skeleton className="h-48 w-full" /> : <DisplayTable data={rows} columns={columns} fullHeight />}
+        <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
       </CardContent>
     </Card>
   );
