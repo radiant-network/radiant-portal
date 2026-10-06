@@ -76,8 +76,8 @@ class PatientEntity(BaseModel):
     @field_validator('gender')
     def gender_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['female', 'male', 'unknown']):
-            raise ValueError("must be one of enum values ('female', 'male', 'unknown')")
+        if value not in set(['female', 'male', 'not_reported', 'not_available']):
+            raise ValueError("must be one of enum values ('female', 'male', 'not_reported', 'not_available')")
         return value
 
     @field_validator('patient_id_type')
