@@ -70,13 +70,15 @@ func (r *StarrocksTenantRepository) EnsureGenePanelMV(ctx context.Context, tenan
 }
 
 // RefreshGenePanelMV reloads the tenant's gene panel MV from Postgres and returns when the
-// refresh task ends, so a caller that just wrote panels reads them back.
+// refresh task ends, so a caller that just wrote panels reads them back. Pinned to the root pool:
+// the upload route calls it inside a request, where the caller's own connection holds no
+// REFRESH privilege on the MV.
 func (r *StarrocksTenantRepository) RefreshGenePanelMV(ctx context.Context, tenantCode string) error {
 	stmt, err := BuildGenePanelMVRefreshStatement(tenantCode)
 	if err != nil {
 		return err
 	}
-	if err := r.db.WithContext(ctx).Exec(stmt).Error; err != nil {
+	if err := r.db.WithContext(database.ContextWithRootPool(ctx)).Exec(stmt).Error; err != nil {
 		return fmt.Errorf("refresh gene panel mv for %q: %w", tenantCode, err)
 	}
 	return nil
@@ -85,7 +87,8 @@ func (r *StarrocksTenantRepository) RefreshGenePanelMV(ctx context.Context, tena
 // BuildGenePanelMVStatement builds the DDL of the tenant's gene panel MV. IF NOT EXISTS keeps
 // it idempotent, so a change to the definition needs a drop and a re-create. DEFERRED: no
 // refresh at creation, EnsureGenePanelMV refreshes it synchronously. DISTINCT, because
-// panel_has_genes is keyed by Ensembl ID and two IDs can share a symbol.
+// panel_has_genes is keyed by Ensembl ID and two IDs can share a symbol. Every panel type: the
+// upload fills the genes of the analysis catalog's panels too.
 func BuildGenePanelMVStatement(tenantCode string) (string, error) {
 	if err := types.ValidateTenantCode(tenantCode); err != nil {
 		return "", err

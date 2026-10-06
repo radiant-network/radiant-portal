@@ -1,11 +1,15 @@
 package starrocks
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GetGeneAutoComplete(t *testing.T) {
@@ -120,5 +124,57 @@ func Test_SearchGenes_NoInput(t *testing.T) {
 		genes, err := repo.SearchGenes(t.Context(), []string{})
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(*genes))
+	})
+}
+
+// withClosedUserPool binds a closed per-user pool to ctx: a query routed to it fails, so a
+// query that succeeds ran on the root pool.
+func withClosedUserPool(t *testing.T, ctx context.Context) context.Context {
+	t.Helper()
+	pool, err := sql.Open("mysql", "nobody@tcp(127.0.0.1:1)/none")
+	require.NoError(t, err)
+	require.NoError(t, pool.Close())
+	return database.ContextWithUserPool(ctx, pool)
+}
+
+func Test_ResolveGenes_MatchesSymbolsAndIDsAcrossChunks(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		inputs := []string{"TNMD"}
+		for i := 0; i < resolveGenesChunkSize+10; i++ {
+			inputs = append(inputs, fmt.Sprintf("NOGENE%d", i))
+		}
+		inputs = append(inputs, "ENSG00000157764")
+
+		genes, err := repo.ResolveGenes(t.Context(), inputs)
+
+		require.NoError(t, err)
+		names := make([]string, len(genes))
+		for i, g := range genes {
+			names[i] = g.Name
+		}
+		assert.ElementsMatch(t, []string{"TNMD", "BRAF"}, names)
+	})
+}
+
+func Test_ResolveGenes_NoInput(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		genes, err := repo.ResolveGenes(t.Context(), nil)
+
+		require.NoError(t, err)
+		assert.Empty(t, genes)
+	})
+}
+
+func Test_ResolveGenes_RunsOnRootPoolEvenWithAUserPoolBound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		genes, err := repo.ResolveGenes(withClosedUserPool(t, t.Context()), []string{"TNMD"})
+
+		require.NoError(t, err)
+		assert.Len(t, genes, 1)
 	})
 }

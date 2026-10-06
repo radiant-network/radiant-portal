@@ -8,6 +8,7 @@ from radiant_python.api.case_groups_api import CaseGroupsApi
 from radiant_python.api.cases_api import CasesApi
 from radiant_python.api.config_api import ConfigApi
 from radiant_python.api.documents_api import DocumentsApi
+from radiant_python.api.gene_panels_api import GenePanelsApi
 from radiant_python.api.genes_api import GenesApi
 from radiant_python.api.hpo_api import HpoApi
 from radiant_python.api.igv_api import IgvApi
