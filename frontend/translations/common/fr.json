@@ -20,6 +20,10 @@
       "title": "Barre latérale",
       "toggle": "Basculer la barre latérale"
     },
+    "tabs": {
+      "next": "Onglets suivants",
+      "previous": "Onglets précédents"
+    },
     "spinner": {
       "loading": "Chargement en cours"
     }

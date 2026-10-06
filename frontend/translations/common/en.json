@@ -20,6 +20,10 @@
       "title": "Sidebar",
       "toggle": "Toggle Sidebar"
     },
+    "tabs": {
+      "next": "Next tabs",
+      "previous": "Previous tabs"
+    },
     "spinner": {
       "loading": "Loading"
     }

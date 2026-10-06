@@ -3,8 +3,9 @@ import { type ComponentProps, useEffect, useState } from 'react';
 import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
 import InformationField from '@/components/base/information/information-field';
+import ScrollableTabsList from '@/components/base/navigation/scrollable-tabs-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
+import { Tabs, TabsContent, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { byProbandFirst, getFetusRank, getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
 import { formatDate } from '@/components/lib/date';
@@ -125,7 +126,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
         </CardHeader>
         <CardContent className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full">
+            <ScrollableTabsList>
               {members.map(member => (
                 <TabsTrigger key={getMemberKey(member)} value={getMemberKey(member)}>
                   {getFetusRank(member, members)
@@ -134,7 +135,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
                   {isPrenatalMother(member, members) && ` (${t('common.relationships.mother')})`}
                 </TabsTrigger>
               ))}
-            </TabsList>
+            </ScrollableTabsList>
             {members.map(member => (
               <TabsContent key={getMemberKey(member)} value={getMemberKey(member)}>
                 <PatientInfoDisplay member={member} />
