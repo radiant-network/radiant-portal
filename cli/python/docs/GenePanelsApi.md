@@ -15,10 +15,10 @@ Replace the tenant's gene panels
 Sets the genes of the tenant's panels from the attached `.tsv` file. A panel of the
 file that the tenant already has (same code, any case), such as a panel of the
 analysis catalog, keeps its name and settings and gets the genes of the file. A new
-code creates a panel named by its code. Panels created by an earlier upload and
-missing from the file are removed; other panels missing from the file are not
-changed. The change is all or nothing, and the genes are available for variant
-filtering when the call returns. Requires the `can_manage_analysis_catalog` action.
+code creates a panel named by its code. The file is the tenant's full list: a panel
+missing from it loses its genes, and a panel created by an earlier upload is removed.
+The change is all or nothing, and the genes are available for variant filtering when
+the call returns. Requires the `can_manage_analysis_catalog` action.
 Sending the same file again gives the same result, so a retry is safe.
 
 File: UTF-8 TSV, max 10 MiB, one row per gene, with a header row. Column `symbol` holds

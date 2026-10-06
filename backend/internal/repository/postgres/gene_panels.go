@@ -29,10 +29,10 @@ type panelGeneRow struct {
 	Symbol    string `gorm:"column:symbol"`
 }
 
-// ReplaceGenePanels sets the genes of each given panel, in one transaction. A panel of the tenant
-// with the same code (case-insensitive), of any type, keeps its row (name, type, analysis catalog
-// link) and gets its genes replaced. A new code is created as an uploaded panel named by its code.
-// The tenant's uploaded panels missing from the list are removed. Other panels stay unchanged.
+// ReplaceGenePanels makes the given panels the tenant's full gene panel list, in one transaction. A
+// panel of the tenant with the same code (case-insensitive), of any type, keeps its row (name, type,
+// analysis catalog link) and gets its genes replaced. A new code is created as an uploaded panel
+// named by its code. A panel missing from the list loses its genes; if uploaded, it is removed.
 func (r *GenePanelsRepository) ReplaceGenePanels(ctx context.Context, tenantCode string, panels []types.GenePanel) error {
 	codes := make([]string, len(panels))
 	for i, p := range panels {
@@ -44,7 +44,7 @@ func (r *GenePanelsRepository) ReplaceGenePanels(ctx context.Context, tenantCode
 		if err := tx.Exec("SELECT pg_advisory_xact_lock(hashtext(?))", "gene_panels:"+tenantCode).Error; err != nil {
 			return fmt.Errorf("lock gene panels of %q: %w", tenantCode, err)
 		}
-		if err := removeUploadedPanelsNotIn(tx, tenantCode, codes); err != nil {
+		if err := clearPanelsNotIn(tx, tenantCode, codes); err != nil {
 			return err
 		}
 		for _, panel := range panels {
@@ -70,18 +70,19 @@ func (r *GenePanelsRepository) ReplaceGenePanels(ctx context.Context, tenantCode
 	})
 }
 
-func removeUploadedPanelsNotIn(tx *gorm.DB, tenantCode string, codes []string) error {
-	stale := "SELECT id FROM panel WHERE tenant_code = ? AND type_code = ? AND lower(code) NOT IN ?"
-	if err := tx.Exec("DELETE FROM panel_has_genes WHERE panel_id IN ("+stale+")",
-		tenantCode, types.PanelTypeUploaded, codes).Error; err != nil {
-		return fmt.Errorf("delete genes of removed panels of %q: %w", tenantCode, err)
+func clearPanelsNotIn(tx *gorm.DB, tenantCode string, codes []string) error {
+	if err := tx.Exec(`
+		DELETE FROM panel_has_genes
+		WHERE panel_id IN (SELECT id FROM panel WHERE tenant_code = ? AND lower(code) NOT IN ?)`,
+		tenantCode, codes).Error; err != nil {
+		return fmt.Errorf("delete genes of panels missing from the file of %q: %w", tenantCode, err)
 	}
-	if err := tx.Exec("DELETE FROM panel WHERE id IN ("+stale+")",
+	if err := tx.Exec("DELETE FROM panel WHERE tenant_code = ? AND type_code = ? AND lower(code) NOT IN ?",
 		tenantCode, types.PanelTypeUploaded, codes).Error; err != nil {
 		if isForeignKeyViolation(err) {
 			return &types.GenePanelConflictError{Message: "an uploaded panel missing from the file is used by the analysis catalog"}
 		}
-		return fmt.Errorf("delete removed panels of %q: %w", tenantCode, err)
+		return fmt.Errorf("delete uploaded panels missing from the file of %q: %w", tenantCode, err)
 	}
 	return nil
 }

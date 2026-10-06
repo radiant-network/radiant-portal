@@ -113,7 +113,7 @@ func Test_ReplaceGenePanels_SecondUploadRemovesUploadedPanelsMissingFromIt(t *te
 	})
 }
 
-func Test_ReplaceGenePanels_KeepsAPrescriptionPanelMissingFromTheFileWithItsGenes(t *testing.T) {
+func Test_ReplaceGenePanels_ClearsTheGenesOfAPrescriptionPanelMissingFromTheFile(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		insertPrescriptionPanel(t, env.Postgres, tenant, "PRESC")
@@ -121,8 +121,10 @@ func Test_ReplaceGenePanels_KeepsAPrescriptionPanelMissingFromTheFileWithItsGene
 
 		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{heartPanel}))
 
-		assert.Contains(t, readTenantPanels(t, env.Postgres, tenant),
-			storedPanelGene{Code: "PRESC", Name: "PRESC name", TypeCode: "physical", EnsemblID: "ENSG00000092054", Symbol: "MYH7"})
+		assert.Equal(t, []storedPanelGene{
+			{Code: "HRT", Name: "HRT", TypeCode: "uploaded", EnsemblID: "ENSG00000118194", Symbol: "TNNT2"},
+			{Code: "PRESC", Name: "PRESC name", TypeCode: "physical"},
+		}, readTenantPanels(t, env.Postgres, tenant), "the catalog panel stays, with no gene")
 	})
 }
 

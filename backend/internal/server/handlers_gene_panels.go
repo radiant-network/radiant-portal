@@ -26,10 +26,10 @@ type genePanelUploader interface {
 // @Description Sets the genes of the tenant's panels from the attached `.tsv` file. A panel of the
 // @Description file that the tenant already has (same code, any case), such as a panel of the
 // @Description analysis catalog, keeps its name and settings and gets the genes of the file. A new
-// @Description code creates a panel named by its code. Panels created by an earlier upload and
-// @Description missing from the file are removed; other panels missing from the file are not
-// @Description changed. The change is all or nothing, and the genes are available for variant
-// @Description filtering when the call returns. Requires the `can_manage_analysis_catalog` action.
+// @Description code creates a panel named by its code. The file is the tenant's full list: a panel
+// @Description missing from it loses its genes, and a panel created by an earlier upload is removed.
+// @Description The change is all or nothing, and the genes are available for variant filtering when
+// @Description the call returns. Requires the `can_manage_analysis_catalog` action.
 // @Description Sending the same file again gives the same result, so a retry is safe.
 // @Description
 // @Description File: UTF-8 TSV, max 10 MiB, one row per gene, with a header row. Column `symbol` holds
