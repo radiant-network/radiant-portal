@@ -47,10 +47,10 @@ var DefaultRoles = []roleSeed{
 	{
 		Code:          "data_manager",
 		NameEn:        "Data Manager",
-		DescriptionEn: "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s).",
+		DescriptionEn: "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s), and manage the network's gene panels.",
 		NameFr:        "Gestionnaire de données",
-		DescriptionFr: "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées.",
-		Actions:       []string{"can_ingest_data"},
+		DescriptionFr: "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées, et gérer les panels de gènes du réseau.",
+		Actions:       []string{"can_ingest_data", "can_manage_analysis_catalog"},
 	},
 }
 

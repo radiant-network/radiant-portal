@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
@@ -90,6 +91,37 @@ func Test_RolesRepository_ListTenantRoles_ReturnsActionsWithTheirLabels(t *testi
 			assert.NotEmpty(t, action.Name, "action %q carries its labels so the list needs no second call", action.Code)
 			assert.NotEmpty(t, action.Description, "action %q carries its labels so the list needs no second call", action.Code)
 		}
+	})
+}
+
+func Test_RolesRepository_ListTenantRoles_DataManagerIngestsAndManagesAnalysisCatalog(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		roles, err := repo.ListTenantRoles(t.Context(), types.DefaultTenantCode)
+		require.NoError(t, err)
+
+		dataManager := roleByCodeIn(roles, "data_manager")
+		require.NotNil(t, dataManager)
+		assert.ElementsMatch(t,
+			[]string{types.ActionIngestData, types.ActionManageAnalysisCatalog},
+			actionCodes(dataManager))
+		assert.Equal(t, types.RoleScopeMixed, dataManager.Scope)
+	})
+}
+
+func Test_RolesRepository_ListTenantRoles_DataManagerDescriptionMatchesDefaultRoles(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewRolesRepository(database.PostgresDB{DB: env.Postgres})
+
+		roles, err := repo.ListTenantRoles(t.Context(), types.DefaultTenantCode)
+		require.NoError(t, err)
+
+		dataManager := roleByCodeIn(roles, "data_manager")
+		require.NotNil(t, dataManager)
+		idx := slices.IndexFunc(DefaultRoles, func(r roleSeed) bool { return r.Code == "data_manager" })
+		require.NotEqual(t, -1, idx)
+		assert.Equal(t, DefaultRoles[idx].DescriptionEn, dataManager.Description)
 	})
 }
 
