@@ -69,9 +69,9 @@ The OpenAPI schema names below are the Go types' `@Name` (`backend/internal/type
 
 ```typescript
 type PatientIdType = 'mrn' | 'research_id';
-type Gender = 'female' | 'male' | 'unknown';
+type Gender = 'female' | 'male' | 'not_reported' | 'not_available';
 type VitalStatus = 'alive' | 'deceased';
-type EventType = 'initial_cns_tumor' | 'progressive' | 'recurrence' | 'second_malignancy' | 'deceased' | 'unavailable';
+type EventType = 'initial_cns_tumor' | 'progressive' | 'recurrence' | 'second_malignancy' | 'deceased' | 'unavailable' | 'not_reported';
 type KeyDateSource = 'clinical' | 'registry';
 
 interface PatientIdentity {

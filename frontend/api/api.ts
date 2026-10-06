@@ -5173,7 +5173,8 @@ export interface PatientEntity {
 export const PatientEntityGenderEnum = {
     Female: 'female',
     Male: 'male',
-    Unknown: 'unknown'
+    NotReported: 'not_reported',
+    NotAvailable: 'not_available'
 } as const;
 
 export type PatientEntityGenderEnum = typeof PatientEntityGenderEnum[keyof typeof PatientEntityGenderEnum];
@@ -5270,7 +5271,8 @@ export const PatientEventEventTypeEnum = {
     Recurrence: 'recurrence',
     SecondMalignancy: 'second_malignancy',
     Deceased: 'deceased',
-    Unavailable: 'unavailable'
+    Unavailable: 'unavailable',
+    NotReported: 'not_reported'
 } as const;
 
 export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof typeof PatientEventEventTypeEnum];
@@ -5526,7 +5528,8 @@ export interface PatientListItem {
 export const PatientListItemGenderEnum = {
     Female: 'female',
     Male: 'male',
-    Unknown: 'unknown'
+    NotReported: 'not_reported',
+    NotAvailable: 'not_available'
 } as const;
 
 export type PatientListItemGenderEnum = typeof PatientListItemGenderEnum[keyof typeof PatientListItemGenderEnum];

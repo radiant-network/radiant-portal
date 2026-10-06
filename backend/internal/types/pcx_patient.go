@@ -27,7 +27,7 @@ type PatientIdentity struct {
 type PatientListItem struct {
 	PatientIdentity
 	BirthYear                    *int    `json:"birth_year"`
-	Gender                       string  `json:"gender" validate:"required" enums:"female,male,unknown"`
+	Gender                       string  `json:"gender" validate:"required" enums:"female,male,not_reported,not_available"`
 	CnsIntegratedDiagnosis       *string `json:"cns_integrated_diagnosis"`        // From the initial event
 	CnsIntegratedDiagnosisSource *string `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
 	VitalStatus                  string  `json:"vital_status" validate:"required" enums:"alive,deceased"`
@@ -135,7 +135,7 @@ type PatientEntity struct {
 // @Name PatientEvent
 type PatientEvent struct {
 	PatientDayDate
-	EventType                    string   `json:"event_type" validate:"required" enums:"initial_cns_tumor,progressive,recurrence,second_malignancy,deceased,unavailable"`
+	EventType                    string   `json:"event_type" validate:"required" enums:"initial_cns_tumor,progressive,recurrence,second_malignancy,deceased,unavailable,not_reported"`
 	CnsDiagnosisCategory         *string  `json:"cns_diagnosis_category"`
 	CnsIntegratedDiagnosis       *string  `json:"cns_integrated_diagnosis"`
 	CnsIntegratedDiagnosisSource *string  `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan

@@ -2574,7 +2574,8 @@ components:
           enum:
           - female
           - male
-          - unknown
+          - not_reported
+          - not_available
           type: string
         given_name:
           description: Placeholder when can_read_phi is false
@@ -2687,6 +2688,7 @@ components:
           - second_malignancy
           - deceased
           - unavailable
+          - not_reported
           type: string
         metastasis:
           description: Yes, No or Not Applicable, as in the source
@@ -2812,7 +2814,8 @@ components:
           enum:
           - female
           - male
-          - unknown
+          - not_reported
+          - not_available
           type: string
         given_name:
           description: Placeholder when can_read_phi is false

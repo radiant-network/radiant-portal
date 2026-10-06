@@ -43,8 +43,8 @@ class PatientEvent(BaseModel):
     @field_validator('event_type')
     def event_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['initial_cns_tumor', 'progressive', 'recurrence', 'second_malignancy', 'deceased', 'unavailable']):
-            raise ValueError("must be one of enum values ('initial_cns_tumor', 'progressive', 'recurrence', 'second_malignancy', 'deceased', 'unavailable')")
+        if value not in set(['initial_cns_tumor', 'progressive', 'recurrence', 'second_malignancy', 'deceased', 'unavailable', 'not_reported']):
+            raise ValueError("must be one of enum values ('initial_cns_tumor', 'progressive', 'recurrence', 'second_malignancy', 'deceased', 'unavailable', 'not_reported')")
         return value
 
     model_config = ConfigDict(

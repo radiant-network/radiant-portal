@@ -18,7 +18,7 @@ func Test_SecureRoutes(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(env.Starrocks, env.Postgres)
+		router := setupRouter(env.Starrocks, env.Postgres, true)
 		randomPort := 10000 + rand.Intn(50000)
 
 		srv := &http.Server{
@@ -56,6 +56,10 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/cases/1",
 			"radiant/cases/filters",
 			"radiant/cases/autocomplete",
+			"radiant/patients/autocomplete",
+			"radiant/patients/filters",
+			"radiant/patients/statistics",
+			"radiant/patients/0b8c3a52-6f2e-4b55-9d7a-2c1f0e4a9b31",
 			"radiant/cases/1/assignment_candidates",
 			"radiant/genes/autocomplete",
 			"radiant/hpo/autocomplete",
@@ -97,6 +101,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/roles",
 			"radiant/users",
 			"radiant/cases/search",
+			"radiant/patients/search",
 			"radiant/genes/search",
 			"radiant/interpretations/v2/germline/1/1/1/1",
 			"radiant/interpretations/v2/somatic/1/1/1/1",

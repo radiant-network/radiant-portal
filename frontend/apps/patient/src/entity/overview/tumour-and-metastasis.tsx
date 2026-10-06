@@ -1,3 +1,4 @@
+import SkeletonCard from '@/components/base/cards/skeleton-card';
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, type CardProps, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -5,30 +6,37 @@ import { useI18n } from '@/components/hooks/i18n';
 type TumourAndMetastasisCardProps = {
   tumor_locations?: string[];
   tumor_location_other?: string;
-  laterality?: string;
   metastasis?: string;
-  m_stage?: string;
-  metastasis_location?: string[];
+  metastasis_locations?: string[];
   metastasis_location_other?: string;
-  symptoms_at_event?: string[];
   event_type?: string;
   event_day?: number;
+  isLoading?: boolean;
 } & CardProps;
 
 function TumourAndMetastasisCard({
   tumor_locations,
   tumor_location_other,
-  laterality,
   metastasis,
-  m_stage,
-  metastasis_location,
+  metastasis_locations,
   metastasis_location_other,
-  symptoms_at_event,
   event_type,
   event_day,
+  isLoading,
   ...cardProps
 }: TumourAndMetastasisCardProps) {
   const { t } = useI18n();
+
+  if (isLoading) {
+    return (
+      <SkeletonCard
+        data-cy="tumour-and-metastasis-card"
+        title={t('patient_entity.overview.tumour_and_metastasis.title')}
+        rows={4}
+        {...cardProps}
+      />
+    );
+  }
 
   return (
     <Card data-cy="tumour-and-metastasis-card" {...cardProps}>
@@ -54,34 +62,19 @@ function TumourAndMetastasisCard({
             {tumor_location_other}
           </InformationField>
         )}
-        {laterality && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.laterality')}>
-            {laterality}
-          </InformationField>
-        )}
         {metastasis && (
           <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis')}>
             {metastasis}
           </InformationField>
         )}
-        {m_stage && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.m_stage')}>
-            {m_stage}
-          </InformationField>
-        )}
-        {metastasis_location && metastasis_location.length > 0 && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_location')}>
-            {metastasis_location.join(', ')}
+        {metastasis_locations && metastasis_locations.length > 0 && (
+          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_locations')}>
+            {metastasis_locations.join(', ')}
           </InformationField>
         )}
         {metastasis_location_other && (
           <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_location_other')}>
             {metastasis_location_other}
-          </InformationField>
-        )}
-        {symptoms_at_event && symptoms_at_event.length > 0 && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.symptoms_at_event')}>
-            {symptoms_at_event.join(', ')}
           </InformationField>
         )}
       </CardContent>

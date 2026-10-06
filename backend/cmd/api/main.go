@@ -43,7 +43,11 @@ func init() {
 	_ = flag.Set("logtostderr", "true")
 }
 
-func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
+// patientViewEnabledEnv turns on the PCX 3.0 patient view routes (/{tenant}/patients/*, except the
+// batches). Off by default: the routes are not registered, so they answer 404.
+const patientViewEnabledEnv = "PATIENT_VIEW_ENABLED"
+
+func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool) *gin.Engine {
 	// Auth service
 	auth := utils.NewKeycloakAuth()
 
@@ -323,6 +327,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	patientsGroup := tenantRoutes.Group("/patients")
 	patientsGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
 	patientsGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
+	if patientViewEnabled {
+		patientsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchPatientsHandler())
+		patientsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.PatientsAutocompleteHandler())
+		patientsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.PatientsFiltersHandler())
+		patientsGroup.GET("/statistics", requireAction(types.ActionSearchCase), server.PatientsStatisticsHandler())
+		patientsGroup.GET("/:patient_key", requireAction(types.ActionSearchCase), server.PatientEntityHandler())
+	}
 
 	samplesGroup := tenantRoutes.Group("/samples")
 	samplesGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
@@ -416,7 +427,7 @@ func main() {
 		}
 	}
 
-	r := setupRouter(dbStarrocks, dbPostgres)
+	r := setupRouter(dbStarrocks, dbPostgres, utils.GetBoolEnvOrDefault(patientViewEnabledEnv, false))
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {

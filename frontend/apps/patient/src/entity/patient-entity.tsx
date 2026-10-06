@@ -124,7 +124,7 @@ export default function App() {
             <Sidebar patient={data} isLoading={isLoading} />
             <div className="min-w-0">
               <TabsContent value={PatientEntityTabs.Overview}>
-                <OverviewTab />
+                <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
                 <TimelineTab />
