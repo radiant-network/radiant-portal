@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 )
@@ -39,6 +40,21 @@ func (t Table) qualifyWith(database string) string {
 		return t.Name
 	}
 	return database + "." + t.Name
+}
+
+// TenantOnlyTables exist only in the tenant database: unlike the other PerTenant tables, there
+// is no bare-name copy to fall back on when no tenant is bound (TENANT_VIEWS_READ_ENABLED off).
+var TenantOnlyTables = []Table{TenantGenePanelTable}
+
+// FieldsForContext drops the fields of TenantOnlyTables when no tenant is bound to ctx, so a
+// query on them is rejected as an unknown field (400) instead of failing in StarRocks.
+func FieldsForContext(ctx context.Context, fields []Field) []Field {
+	if TenantDatabaseOrEmpty(ctx) != "" {
+		return fields
+	}
+	return sliceutils.Filter(fields, func(field Field, index int, slice []Field) bool {
+		return !slices.Contains(TenantOnlyTables, field.Table)
+	})
 }
 
 const (

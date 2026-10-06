@@ -491,3 +491,38 @@ func Test_Somatic_SNV_GetStatisticsOccurrences_Cmc_Sample_Ratio(t *testing.T) {
 		assert.EqualValues(t, types.DecimalType, statistics.Type)
 	})
 }
+
+func Test_Somatic_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, c.Count)
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_Return_Zero_When_Unknown_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"UNKNOWN"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 0, c.Count)
+	})
+}
+
+func Test_Somatic_SNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_Hits(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 1}, {Bucket: "ONCO", Count: 2}}, aggregate)
+	})
+}

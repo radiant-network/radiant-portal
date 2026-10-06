@@ -54,6 +54,7 @@ var perTenantTables = map[string]bool{
 	types.SomaticCNVOccurrenceTable.Name:  types.SomaticCNVOccurrenceTable.PerTenant,
 	types.ExomiserTable.Name:              types.ExomiserTable.PerTenant,
 	types.VariantTable.Name:               types.VariantTable.PerTenant,
+	types.TenantGenePanelTable.Name:       types.TenantGenePanelTable.PerTenant,
 }
 
 // TenantKeyOffset is added to each tenant key column, scaled by the tenant's index in Need.Tenants,
