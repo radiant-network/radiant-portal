@@ -3,37 +3,19 @@ package types
 import (
 	"fmt"
 	"regexp"
-	"strings"
-	"unicode"
-
-	"golang.org/x/text/unicode/norm"
 )
 
-// PanelTypeUploaded marks the panels that the gene panel upload owns (migration 000041).
+// PanelTypeUploaded marks the panels that a gene panel upload created, as opposed to the panels of
+// the analysis catalog. An upload removes the uploaded panels missing from its file (migration 000041).
 const PanelTypeUploaded = "uploaded"
 
-const genePanelCodeMaxLength = 50
+var genePanelCodePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{0,49}$`)
 
-var genePanelCodeSeparators = regexp.MustCompile(`[^A-Z0-9]+`)
-
-// GenePanelCodeFromName derives a panel code from its name: accents removed, upper case, every run
-// of other characters replaced by one '_', cut to 50 characters. "Rétinopathie (AR)" gives
-// "RETINOPATHIE_AR". An error when nothing is left.
-func GenePanelCodeFromName(name string) (string, error) {
-	var b strings.Builder
-	for _, r := range norm.NFD.String(name) {
-		if !unicode.Is(unicode.Mn, r) {
-			b.WriteRune(r)
-		}
+func ValidateGenePanelCode(code string) error {
+	if !genePanelCodePattern.MatchString(code) {
+		return fmt.Errorf("panel code %q must match %s", code, genePanelCodePattern.String())
 	}
-	code := strings.Trim(genePanelCodeSeparators.ReplaceAllString(strings.ToUpper(b.String()), "_"), "_")
-	if len(code) > genePanelCodeMaxLength {
-		code = strings.TrimRight(code[:genePanelCodeMaxLength], "_")
-	}
-	if code == "" {
-		return "", fmt.Errorf("panel %q has no letter or digit to make a panel code", name)
-	}
-	return code, nil
+	return nil
 }
 
 type GenePanelRow struct {
@@ -85,7 +67,7 @@ type GenePanelUploadWarning struct {
 	Message string `json:"message"`
 } // @name GenePanelUploadWarning
 
-// @Description Result of a gene panel upload. The file replaced all the uploaded gene panels of the tenant.
+// @Description Result of a gene panel upload: the panels of the file and the genes they now hold.
 type GenePanelUploadResult struct {
 	Panels   int                      `json:"panels"`
 	Genes    int                      `json:"genes"`
@@ -101,8 +83,8 @@ func (e *UnmatchedGenesError) Error() string {
 	return fmt.Sprintf("%d row(s) match no Ensembl gene", len(e.Warnings))
 }
 
-// GenePanelConflictError is a panel code that another panel of the tenant already uses, or an
-// uploaded panel that the analysis catalog references.
+// GenePanelConflictError is an uploaded panel missing from the file that the analysis catalog
+// still references, so the upload cannot remove it.
 type GenePanelConflictError struct {
 	Message string
 }

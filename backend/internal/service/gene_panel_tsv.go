@@ -10,11 +10,18 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+const (
+	genePanelColumnSymbol = "symbol"
+	genePanelColumnPanels = "panels"
+)
+
+// byteOrderMark is U+FEFF, which Excel writes at the start of a UTF-8 file.
+var byteOrderMark = string(rune(0xFEFF))
+
 // ParseGenePanelTSV reads a gene panel file: UTF-8 TSV with a header row, then one row per gene. The
-// first column holds the gene symbols (its header is free text). Each other column is one panel,
-// named by its header, with true or false in each row (any case; an empty cell is false). It returns
-// the panels in column order, each with the rows marked true. A bad file gives a
-// *types.GenePanelFileError.
+// `symbol` column holds the gene symbol, the `panels` column the comma-separated codes of the panels
+// the gene is in. Other columns (such as `version`) are ignored. It returns the panels in the order
+// of their first row, each named by its code. A bad file gives a *types.GenePanelFileError.
 func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 	reader := csv.NewReader(r)
 	reader.Comma = '\t'
@@ -28,11 +35,13 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 	if err != nil {
 		return nil, readError(err)
 	}
-	panels, err := genePanelColumns(header)
+	symbolCol, panelsCol, err := genePanelColumns(header)
 	if err != nil {
 		return nil, err
 	}
 
+	var panels []types.GenePanelInput
+	panelByCode := map[string]int{}
 	lineBySymbol := map[string]int{}
 	for {
 		record, err := reader.Read()
@@ -46,7 +55,7 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 		if len(record) != len(header) {
 			return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("row has %d columns, header has %d", len(record), len(header))}
 		}
-		row := types.GenePanelRow{Line: line, Symbol: strings.TrimSpace(record[0])}
+		row := types.GenePanelRow{Line: line, Symbol: strings.TrimSpace(record[symbolCol])}
 		if row.Symbol == "" {
 			return nil, &types.GenePanelFileError{Line: line, Message: "symbol is empty"}
 		}
@@ -55,13 +64,27 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 		}
 		lineBySymbol[strings.ToUpper(row.Symbol)] = line
 
-		for i := range panels {
-			in, err := genePanelCell(record[i+1])
-			if err != nil {
-				return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel %q: %s", panels[i].Name, err)}
+		inRow := map[int]bool{}
+		for _, raw := range strings.Split(record[panelsCol], ",") {
+			code := strings.TrimSpace(raw)
+			if code == "" {
+				continue
 			}
-			if in {
-				panels[i].Rows = append(panels[i].Rows, row)
+			if err := types.ValidateGenePanelCode(code); err != nil {
+				return nil, &types.GenePanelFileError{Line: line, Message: err.Error()}
+			}
+			idx, seen := panelByCode[strings.ToUpper(code)]
+			if !seen {
+				idx = len(panels)
+				panelByCode[strings.ToUpper(code)] = idx
+				panels = append(panels, types.GenePanelInput{Code: code, Name: code})
+			}
+			if panels[idx].Code != code {
+				return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel code %q differs from %q only by case", code, panels[idx].Code)}
+			}
+			if !inRow[idx] {
+				inRow[idx] = true
+				panels[idx].Rows = append(panels[idx].Rows, row)
 			}
 		}
 	}
@@ -69,44 +92,40 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 	if len(lineBySymbol) == 0 {
 		return nil, &types.GenePanelFileError{Message: "file has no gene row"}
 	}
-	return panels, nil
-}
-
-// genePanelColumns reads the panels from the header: one per column after the symbol column. Two
-// names that give the same panel code (e.g. that differ only by case) are rejected.
-func genePanelColumns(header []string) ([]types.GenePanelInput, error) {
-	if len(header) < 2 {
-		return nil, &types.GenePanelFileError{Line: 1, Message: "header needs the symbol column and at least one panel column"}
-	}
-	panels := make([]types.GenePanelInput, 0, len(header)-1)
-	nameByCode := map[string]string{}
-	for i, raw := range header[1:] {
-		name := strings.TrimSpace(raw)
-		if name == "" {
-			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("column %d has no panel name", i+2)}
-		}
-		code, err := types.GenePanelCodeFromName(name)
-		if err != nil {
-			return nil, &types.GenePanelFileError{Line: 1, Message: err.Error()}
-		}
-		if other, dup := nameByCode[code]; dup {
-			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("panels %q and %q are the same panel (code %s)", other, name, code)}
-		}
-		nameByCode[code] = name
-		panels = append(panels, types.GenePanelInput{Code: code, Name: name})
+	if len(panels) == 0 {
+		return nil, &types.GenePanelFileError{Message: "file names no panel"}
 	}
 	return panels, nil
 }
 
-func genePanelCell(value string) (bool, error) {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "true":
-		return true, nil
-	case "false", "":
-		return false, nil
-	default:
-		return false, fmt.Errorf("%q is not true or false", value)
+// genePanelColumns finds the symbol and panels columns by header name, ignoring case.
+func genePanelColumns(header []string) (int, int, error) {
+	symbolCol, panelsCol := -1, -1
+	for i, raw := range header {
+		name := strings.ToLower(strings.TrimSpace(raw))
+		if i == 0 {
+			name = strings.TrimPrefix(name, byteOrderMark)
+		}
+		switch name {
+		case genePanelColumnSymbol:
+			if symbolCol >= 0 {
+				return 0, 0, &types.GenePanelFileError{Line: 1, Message: `duplicate column "symbol"`}
+			}
+			symbolCol = i
+		case genePanelColumnPanels:
+			if panelsCol >= 0 {
+				return 0, 0, &types.GenePanelFileError{Line: 1, Message: `duplicate column "panels"`}
+			}
+			panelsCol = i
+		}
 	}
+	if symbolCol < 0 {
+		return 0, 0, &types.GenePanelFileError{Line: 1, Message: `missing column "symbol"`}
+	}
+	if panelsCol < 0 {
+		return 0, 0, &types.GenePanelFileError{Line: 1, Message: `missing column "panels"`}
+	}
+	return symbolCol, panelsCol, nil
 }
 
 // readError wraps a failure to read the file. With LazyQuotes and a free field count, encoding/csv

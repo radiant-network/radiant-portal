@@ -87,8 +87,8 @@ func (r *StarrocksTenantRepository) RefreshGenePanelMV(ctx context.Context, tena
 // BuildGenePanelMVStatement builds the DDL of the tenant's gene panel MV. IF NOT EXISTS keeps
 // it idempotent, so a change to the definition needs a drop and a re-create. DEFERRED: no
 // refresh at creation, EnsureGenePanelMV refreshes it synchronously. DISTINCT, because
-// panel_has_genes is keyed by Ensembl ID and two IDs can share a symbol. Only uploaded panels:
-// the analysis catalog's prescription panels share the table and must not reach the facet.
+// panel_has_genes is keyed by Ensembl ID and two IDs can share a symbol. Every panel type: the
+// upload fills the genes of the analysis catalog's panels too.
 func BuildGenePanelMVStatement(tenantCode string) (string, error) {
 	if err := types.ValidateTenantCode(tenantCode); err != nil {
 		return "", err
@@ -99,8 +99,8 @@ func BuildGenePanelMVStatement(tenantCode string) (string, error) {
 		"AS SELECT DISTINCT p.name AS panel, g.symbol AS symbol "+
 		"FROM radiant_jdbc.public.panel p "+
 		"JOIN radiant_jdbc.public.panel_has_genes g ON g.panel_id = p.id "+
-		"WHERE p.tenant_code = '%s' AND p.type_code = '%s'",
-		types.TenantDatabase(tenantCode), types.TenantGenePanelMV, tenantCode, types.PanelTypeUploaded), nil
+		"WHERE p.tenant_code = '%s'",
+		types.TenantDatabase(tenantCode), types.TenantGenePanelMV, tenantCode), nil
 }
 
 // BuildGenePanelMVRefreshStatement builds the refresh of the tenant's gene panel MV. FORCE,

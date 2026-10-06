@@ -29,7 +29,7 @@ type fakeGenePanelStore struct {
 	got       []types.GenePanel
 }
 
-func (f *fakeGenePanelStore) ReplaceUploadedGenePanels(_ context.Context, tenantCode string, panels []types.GenePanel) error {
+func (f *fakeGenePanelStore) ReplaceGenePanels(_ context.Context, tenantCode string, panels []types.GenePanel) error {
 	f.called, f.gotTenant, f.got = true, tenantCode, panels
 	return f.err
 }
@@ -56,23 +56,23 @@ func newTestUploader(genes ...types.GeneResult) (*GenePanelUploader, *fakeGeneRe
 	return NewGenePanelUploader(resolver, store, mv), resolver, store, mv
 }
 
-const oneSCN1A = "symbol\tEpilepsy\nSCN1A\ttrue\n"
+const oneSCN1A = "symbol\tpanels\nSCN1A\tEPILEP\n"
 
 func Test_GenePanelUploader_Upload_ReplacesPanelsThenRefreshesMV(t *testing.T) {
 	uploader, _, store, mv := newTestUploader(scn1a, kcnq2)
 
-	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\tCardio\n"+
-		"scn1a\ttrue\tfalse\n"+
-		"KCNQ2\ttrue\ttrue\n"), false)
+	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\tversion\n"+
+		"scn1a\tEPILEP\tEPILEP_v2\n"+
+		"KCNQ2\tEPILEP,CARDIO\tEPILEP_v2,CARDIO_v1\n"), false)
 
 	require.NoError(t, err)
 	assert.Equal(t, "radiant", store.gotTenant)
 	assert.Equal(t, []types.GenePanel{
-		{Code: "EPILEPSY", Name: "Epilepsy", Genes: []types.GenePanelGene{
+		{Code: "EPILEP", Name: "EPILEP", Genes: []types.GenePanelGene{
 			{EnsemblID: "ENSG00000144285", Symbol: "SCN1A"},
 			{EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
 		}},
-		{Code: "CARDIO", Name: "Cardio", Genes: []types.GenePanelGene{
+		{Code: "CARDIO", Name: "CARDIO", Genes: []types.GenePanelGene{
 			{EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
 		}},
 	}, store.got)
@@ -83,9 +83,9 @@ func Test_GenePanelUploader_Upload_ReplacesPanelsThenRefreshesMV(t *testing.T) {
 func Test_GenePanelUploader_Upload_LooksUpEachSymbolOnceInUpperCase(t *testing.T) {
 	uploader, resolver, _, _ := newTestUploader(scn1a)
 
-	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\tNeuro\tCardio\n"+
-		"scn1a\ttrue\ttrue\tfalse\n"+
-		"MYH7\tfalse\tfalse\tfalse\n"), false)
+	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\n"+
+		"scn1a\tEPILEP,NEURO\n"+
+		"MYH7\t\n"), false)
 
 	require.NoError(t, err)
 	assert.Equal(t, []string{"SCN1A"}, resolver.gotInputs, "a gene in no panel is not looked up")
@@ -94,9 +94,9 @@ func Test_GenePanelUploader_Upload_LooksUpEachSymbolOnceInUpperCase(t *testing.T
 func Test_GenePanelUploader_Upload_UnmatchedSymbolInTwoPanelsIsWarnedOnce(t *testing.T) {
 	uploader, _, store, _ := newTestUploader(scn1a)
 
-	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\tNeuro\n"+
-		"SCN1A\ttrue\tfalse\n"+
-		"NOTAGENE\ttrue\ttrue\n"), false)
+	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\n"+
+		"SCN1A\tEPILEP\n"+
+		"NOTAGENE\tEPILEP,NEURO\n"), false)
 
 	require.NoError(t, err)
 	assert.Equal(t, []types.GenePanelGene{{EnsemblID: "ENSG00000144285", Symbol: "SCN1A"}}, store.got[0].Genes)
@@ -110,9 +110,9 @@ func Test_GenePanelUploader_Upload_UnmatchedSymbolInTwoPanelsIsWarnedOnce(t *tes
 func Test_GenePanelUploader_Upload_StrictRejectsUnmatchedSymbolBeforeWriting(t *testing.T) {
 	uploader, _, store, _ := newTestUploader(scn1a)
 
-	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\tNeuro\n"+
-		"SCN1A\ttrue\tfalse\n"+
-		"NOTAGENE\ttrue\ttrue\n"), true)
+	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\n"+
+		"SCN1A\tEPILEP\n"+
+		"NOTAGENE\tEPILEP,NEURO\n"), true)
 
 	var unmatched *types.UnmatchedGenesError
 	require.True(t, errors.As(err, &unmatched), "want *UnmatchedGenesError, got %v", err)
@@ -138,7 +138,7 @@ func Test_GenePanelUploader_Upload_SymbolSharedByTwoGenesKeepsBoth(t *testing.T)
 func Test_GenePanelUploader_Upload_SymbolThatIsAnEnsemblIDKeepsTheGeneName(t *testing.T) {
 	uploader, _, store, _ := newTestUploader(scn1a)
 
-	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\nensg00000144285\ttrue\n"), false)
+	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\nensg00000144285\tEPILEP\n"), false)
 
 	require.NoError(t, err)
 	assert.Equal(t, []types.GenePanelGene{{EnsemblID: "ENSG00000144285", Symbol: "SCN1A"}}, store.got[0].Genes)
@@ -150,9 +150,9 @@ func Test_GenePanelUploader_Upload_SymbolThatIsAnEnsemblIDKeepsTheGeneName(t *te
 func Test_GenePanelUploader_Upload_TwoRowsOnOneGeneKeepsTheFirst(t *testing.T) {
 	uploader, _, store, _ := newTestUploader(scn1a)
 
-	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tEpilepsy\n"+
-		"SCN1A\ttrue\n"+
-		"ENSG00000144285\ttrue\n"), false)
+	result, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\n"+
+		"SCN1A\tEPILEP\n"+
+		"ENSG00000144285\tEPILEP\n"), false)
 
 	require.NoError(t, err)
 	assert.Equal(t, []types.GenePanelGene{{EnsemblID: "ENSG00000144285", Symbol: "SCN1A"}}, store.got[0].Genes)
@@ -164,7 +164,7 @@ func Test_GenePanelUploader_Upload_TwoRowsOnOneGeneKeepsTheFirst(t *testing.T) {
 func Test_GenePanelUploader_Upload_BadFileWritesNothing(t *testing.T) {
 	uploader, _, store, _ := newTestUploader(scn1a)
 
-	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\n"), false)
+	_, err := uploader.Upload(t.Context(), "radiant", strings.NewReader("symbol\tpanels\n"), false)
 
 	var fileErr *types.GenePanelFileError
 	assert.True(t, errors.As(err, &fileErr))

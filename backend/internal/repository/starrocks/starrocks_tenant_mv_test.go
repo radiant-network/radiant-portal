@@ -86,7 +86,7 @@ func Test_EnsureGenePanelMV_ExcludesOtherTenantsPanels(t *testing.T) {
 	})
 }
 
-func Test_EnsureGenePanelMV_ExcludesPrescriptionPanels(t *testing.T) {
+func Test_EnsureGenePanelMV_IncludesPrescriptionPanels(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		code := mvScratchTenant(t, env.Postgres)
 		insertPanel(t, env.Postgres, code, "EPI", "Epilepsy", map[string]string{"ENSG01": "SCN1A"})
@@ -96,7 +96,7 @@ func Test_EnsureGenePanelMV_ExcludesPrescriptionPanels(t *testing.T) {
 
 		require.NoError(t, repo.EnsureGenePanelMV(t.Context(), code))
 
-		assert.Equal(t, []panelSymbol{{"Epilepsy", "SCN1A"}}, readGenePanelMV(t, env.Starrocks, code))
+		assert.Equal(t, []panelSymbol{{"Epilepsy", "SCN1A"}, {"Epilepsy prescription", "KCNQ2"}}, readGenePanelMV(t, env.Starrocks, code))
 	})
 }
 

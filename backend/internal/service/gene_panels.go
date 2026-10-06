@@ -13,8 +13,8 @@ type GeneResolver interface {
 	ResolveGenes(ctx context.Context, inputs []string) ([]types.GeneResult, error)
 }
 
-type UploadedGenePanelStore interface {
-	ReplaceUploadedGenePanels(ctx context.Context, tenantCode string, panels []types.GenePanel) error
+type GenePanelStore interface {
+	ReplaceGenePanels(ctx context.Context, tenantCode string, panels []types.GenePanel) error
 }
 
 type GenePanelMVRefresher interface {
@@ -23,16 +23,16 @@ type GenePanelMVRefresher interface {
 
 type GenePanelUploader struct {
 	genes  GeneResolver
-	store  UploadedGenePanelStore
+	store  GenePanelStore
 	mviews GenePanelMVRefresher
 }
 
-func NewGenePanelUploader(genes GeneResolver, store UploadedGenePanelStore, mviews GenePanelMVRefresher) *GenePanelUploader {
+func NewGenePanelUploader(genes GeneResolver, store GenePanelStore, mviews GenePanelMVRefresher) *GenePanelUploader {
 	return &GenePanelUploader{genes: genes, store: store, mviews: mviews}
 }
 
-// Upload replaces the tenant's uploaded gene panels with the panels of the file, then refreshes the
-// tenant's gene panel MV. A row that matches no Ensembl gene is skipped and reported, or, when
+// Upload sets the genes of the tenant's panels from the file (see ReplaceGenePanels), then refreshes
+// the tenant's gene panel MV. A row that matches no Ensembl gene is skipped and reported, or, when
 // strict, rejects the file with a *types.UnmatchedGenesError. The MV refresh runs after the commit:
 // if it fails, the panels are saved and the same upload can be sent again.
 func (u *GenePanelUploader) Upload(ctx context.Context, tenantCode string, file io.Reader, strict bool) (*types.GenePanelUploadResult, error) {
@@ -49,7 +49,7 @@ func (u *GenePanelUploader) Upload(ctx context.Context, tenantCode string, file 
 		return nil, &types.UnmatchedGenesError{Warnings: unmatched}
 	}
 
-	if err := u.store.ReplaceUploadedGenePanels(ctx, tenantCode, panels); err != nil {
+	if err := u.store.ReplaceGenePanels(ctx, tenantCode, panels); err != nil {
 		return nil, err
 	}
 	if err := u.mviews.RefreshGenePanelMV(ctx, tenantCode); err != nil {

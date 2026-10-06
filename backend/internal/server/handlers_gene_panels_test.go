@@ -59,7 +59,7 @@ func Test_PutGenePanelsHandler_PassesFileTenantAndStrict(t *testing.T) {
 	uploader := &mockGenePanelUploader{result: &types.GenePanelUploadResult{Panels: 1, Genes: 2, Warnings: []types.GenePanelUploadWarning{
 		{Line: 3, Symbol: "NOTAGENE", Message: "symbol matches no Ensembl gene, row skipped"},
 	}}}
-	body, contentType := multipartBody(t, "file", "symbol\tEpilepsy\n")
+	body, contentType := multipartBody(t, "file", "symbol\tpanels\n")
 
 	w := servePutGenePanels(uploader, "?strict=true", body, contentType)
 
@@ -68,7 +68,7 @@ func Test_PutGenePanelsHandler_PassesFileTenantAndStrict(t *testing.T) {
 		{"line":3,"symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
 	]}`, w.Body.String())
 	assert.Equal(t, "radiant", uploader.gotTenant)
-	assert.Equal(t, "symbol\tEpilepsy\n", uploader.gotFile)
+	assert.Equal(t, "symbol\tpanels\n", uploader.gotFile)
 	assert.True(t, uploader.gotStrict)
 }
 
@@ -107,7 +107,7 @@ func Test_PutGenePanelsHandler_MissingFilePart(t *testing.T) {
 func Test_PutGenePanelsHandler_NotMultipart(t *testing.T) {
 	uploader := &mockGenePanelUploader{}
 
-	w := servePutGenePanels(uploader, "", strings.NewReader("symbol\tEpilepsy\n"), "text/tab-separated-values")
+	w := servePutGenePanels(uploader, "", strings.NewReader("symbol\tpanels\n"), "text/tab-separated-values")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.False(t, uploader.called)
@@ -149,13 +149,13 @@ func Test_PutGenePanelsHandler_UnmatchedGenesGives422WithWarnings(t *testing.T) 
 }
 
 func Test_PutGenePanelsHandler_ConflictGives409(t *testing.T) {
-	uploader := &mockGenePanelUploader{err: &types.GenePanelConflictError{Message: `panel "Epilepsy" (code EPILEPSY) is already used by another panel of the tenant`}}
+	uploader := &mockGenePanelUploader{err: &types.GenePanelConflictError{Message: "an uploaded panel missing from the file is used by the analysis catalog"}}
 	body, contentType := multipartBody(t, "file", "x")
 
 	w := servePutGenePanels(uploader, "", body, contentType)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"panel \"Epilepsy\" (code EPILEPSY) is already used by another panel of the tenant"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"an uploaded panel missing from the file is used by the analysis catalog"}`, w.Body.String())
 }
 
 func Test_PutGenePanelsHandler_OtherErrorGives500(t *testing.T) {

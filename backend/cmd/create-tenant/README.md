@@ -39,8 +39,7 @@ Three ordered phases (order matters — each builds on the previous):
   filtered to the tenant: `… FROM radiant_jdbc.public.<table> WHERE tenant_code = '<code>'`.
 - Creates the gene panel materialized view **`<code>_tenant.gene_panel_mv(panel, symbol)`**
   (`panel` = the panel name) over `radiant_jdbc.public.panel` / `panel_has_genes`, filtered to
-  the tenant and to its `uploaded` panels (prescription panels stay out), then refreshes it
-  synchronously. `REFRESH DEFERRED MANUAL`: StarRocks does not
+  the tenant, then refreshes it synchronously. `REFRESH DEFERRED MANUAL`: StarRocks does not
   detect changes in a PostgreSQL JDBC table, so the API refreshes it (`FORCE WITH SYNC MODE`)
   after each panel write. `IF NOT EXISTS`: a change to its definition needs a drop and a re-create.
 

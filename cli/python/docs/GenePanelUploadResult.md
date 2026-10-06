@@ -1,6 +1,6 @@
 # GenePanelUploadResult
 
-Result of a gene panel upload. The file replaced all the uploaded gene panels of the tenant.
+Result of a gene panel upload: the panels of the file and the genes they now hold.
 
 ## Properties
 

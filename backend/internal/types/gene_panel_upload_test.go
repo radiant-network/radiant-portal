@@ -5,39 +5,26 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func Test_GenePanelCodeFromName_UpperCaseWithUnderscores(t *testing.T) {
-	code, err := GenePanelCodeFromName("Cardiac arrhythmia")
-	require.NoError(t, err)
-	assert.Equal(t, "CARDIAC_ARRHYTHMIA", code)
+func Test_ValidateGenePanelCode_AcceptsLettersDigitsUnderscoreDash(t *testing.T) {
+	assert.NoError(t, ValidateGenePanelCode("EPILEP"))
+	assert.NoError(t, ValidateGenePanelCode("c_seg-y2"))
 }
 
-func Test_GenePanelCodeFromName_RemovesAccents(t *testing.T) {
-	code, err := GenePanelCodeFromName("Rétinopathie héréditaire")
-	require.NoError(t, err)
-	assert.Equal(t, "RETINOPATHIE_HEREDITAIRE", code)
+func Test_ValidateGenePanelCode_RejectsSpace(t *testing.T) {
+	assert.ErrorContains(t, ValidateGenePanelCode("EPI LEP"), `panel code "EPI LEP"`)
 }
 
-func Test_GenePanelCodeFromName_CollapsesRunsAndTrimsEdges(t *testing.T) {
-	code, err := GenePanelCodeFromName("  (Heart -- disease) v2. ")
-	require.NoError(t, err)
-	assert.Equal(t, "HEART_DISEASE_V2", code)
+func Test_ValidateGenePanelCode_RejectsLeadingUnderscore(t *testing.T) {
+	assert.Error(t, ValidateGenePanelCode("_EPILEP"))
 }
 
-func Test_GenePanelCodeFromName_CutsTo50WithoutTrailingUnderscore(t *testing.T) {
-	code, err := GenePanelCodeFromName(strings.Repeat("a", 49) + " b")
-	require.NoError(t, err)
-	assert.Equal(t, strings.Repeat("A", 49), code)
+func Test_ValidateGenePanelCode_RejectsMoreThan50Characters(t *testing.T) {
+	assert.NoError(t, ValidateGenePanelCode(strings.Repeat("A", 50)))
+	assert.Error(t, ValidateGenePanelCode(strings.Repeat("A", 51)))
 }
 
-func Test_GenePanelCodeFromName_NoLetterOrDigit(t *testing.T) {
-	_, err := GenePanelCodeFromName("--- !")
-	assert.ErrorContains(t, err, `panel "--- !" has no letter or digit`)
-}
-
-func Test_GenePanelCodeFromName_Empty(t *testing.T) {
-	_, err := GenePanelCodeFromName("")
-	assert.Error(t, err)
+func Test_ValidateGenePanelCode_RejectsEmpty(t *testing.T) {
+	assert.Error(t, ValidateGenePanelCode(""))
 }

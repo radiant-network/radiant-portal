@@ -12,25 +12,25 @@ Method | HTTP request | Description
 
 Replace the tenant's gene panels
 
-Replaces the gene panels of the tenant in the path with the panels of the attached
-`.tsv` file: panels missing from the file are removed, the others are created or
-replaced. The change is all or nothing, and the new panels are available for variant
-filtering when the call returns. Other panels of the tenant, such as the panels of
-the analysis catalog, are not changed. Requires the `can_manage_analysis_catalog`
-action. Sending the same file again gives the same result, so a retry is safe.
+Sets the genes of the tenant's panels from the attached `.tsv` file. A panel of the
+file that the tenant already has (same code, any case), such as a panel of the
+analysis catalog, keeps its name and settings and gets the genes of the file. A new
+code creates a panel named by its code. Panels created by an earlier upload and
+missing from the file are removed; other panels missing from the file are not
+changed. The change is all or nothing, and the genes are available for variant
+filtering when the call returns. Requires the `can_manage_analysis_catalog` action.
+Sending the same file again gives the same result, so a retry is safe.
 
-File: UTF-8 TSV, max 10 MiB, one row per gene. The first column holds the gene
-symbols. Each other column is one panel: its header is the panel name, and each cell
-is `true` when the gene is in the panel, `false` or empty when it is not (any case).
-A bad layout, an empty or duplicate symbol, two panel names that are the same panel
-(they differ only by case or punctuation), or a cell that is not true or false give
-400, with the line in `detail.line`.
+File: UTF-8 TSV, max 10 MiB, one row per gene, with a header row. Column `symbol` holds
+the gene symbol, column `panels` the comma-separated codes of the panels the gene is
+in. Other columns, such as `version`, are ignored. A missing column, an empty or
+duplicate symbol, a bad panel code, or two codes that differ only by case give 400,
+with the line in `detail.line`.
 
 Each symbol must be a known gene (an Ensembl gene ID is also accepted). A row with an
 unknown gene is skipped and returned in `warnings`; with `strict=true` the file is
-rejected instead (422, the rows in `detail.warnings`). Each panel gets a code from
-its name (upper case, accents removed, `_` for spaces and punctuation); a code that
-another panel of the tenant already uses gives 409.
+rejected instead (422, the rows in `detail.warnings`). An uploaded panel missing from
+the file that the analysis catalog still uses gives 409.
 
 ### Example
 

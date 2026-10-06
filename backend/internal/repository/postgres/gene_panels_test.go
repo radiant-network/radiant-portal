@@ -47,131 +47,150 @@ func readTenantPanels(t *testing.T, pg *gorm.DB, tenantCode string) []storedPane
 	return rows
 }
 
+// insertPrescriptionPanel adds an analysis catalog style panel (type physical) with one gene.
 func insertPrescriptionPanel(t *testing.T, pg *gorm.DB, tenantCode, code string) {
 	t.Helper()
-	require.NoError(t, pg.Exec("INSERT INTO panel (code, name, type_code, tenant_code) VALUES (?, ?, 'physical', ?)",
-		code, code+" name", tenantCode).Error)
+	var id int
+	require.NoError(t, pg.Raw("INSERT INTO panel (code, name, type_code, tenant_code) VALUES (?, ?, 'physical', ?) RETURNING id",
+		code, code+" name", tenantCode).Scan(&id).Error)
+	require.NoError(t, pg.Exec("INSERT INTO panel_has_genes (panel_id, ensembl_id, symbol) VALUES (?, 'ENSG00000092054', 'MYH7')", id).Error)
 }
 
-var epilepsyPanel = types.GenePanel{Code: "EPI", Name: "Epilepsy", Genes: []types.GenePanelGene{
+var epilepsyPanel = types.GenePanel{Code: "EPILEP", Name: "EPILEP", Genes: []types.GenePanelGene{
 	{EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
 	{EnsemblID: "ENSG00000144285", Symbol: "SCN1A"},
 }}
 
-func Test_ReplaceUploadedGenePanels_CreatesUploadedPanelsWithGenes(t *testing.T) {
+var heartPanel = types.GenePanel{Code: "HRT", Name: "HRT", Genes: []types.GenePanelGene{
+	{EnsemblID: "ENSG00000118194", Symbol: "TNNT2"},
+}}
+
+func Test_ReplaceGenePanels_CreatesNewCodesAsUploadedPanelsNamedByCode(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
 
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{
-			epilepsyPanel,
-			{Code: "EMPTY", Name: "No gene matched"},
-		}))
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, {Code: "EMPTY", Name: "EMPTY"}}))
 
 		assert.Equal(t, []storedPanelGene{
-			{Code: "EMPTY", Name: "No gene matched", TypeCode: "uploaded"},
-			{Code: "EPI", Name: "Epilepsy", TypeCode: "uploaded", EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
-			{Code: "EPI", Name: "Epilepsy", TypeCode: "uploaded", EnsemblID: "ENSG00000144285", Symbol: "SCN1A"},
+			{Code: "EMPTY", Name: "EMPTY", TypeCode: "uploaded"},
+			{Code: "EPILEP", Name: "EPILEP", TypeCode: "uploaded", EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
+			{Code: "EPILEP", Name: "EPILEP", TypeCode: "uploaded", EnsemblID: "ENSG00000144285", Symbol: "SCN1A"},
 		}, readTenantPanels(t, env.Postgres, tenant))
 	})
 }
 
-func Test_ReplaceUploadedGenePanels_SecondUploadRemovesPanelsNotInIt(t *testing.T) {
+func Test_ReplaceGenePanels_FillsTheGenesOfAnExistingPanelAndKeepsItsRow(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
+		insertPrescriptionPanel(t, env.Postgres, tenant, "EPILEP")
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{
-			epilepsyPanel,
-			{Code: "HRT", Name: "Heart", Genes: []types.GenePanelGene{{EnsemblID: "ENSG00000092054", Symbol: "MYH7"}}},
-		}))
 
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{
-			{Code: "HRT", Name: "Heart", Genes: []types.GenePanelGene{{EnsemblID: "ENSG00000118194", Symbol: "TNNT2"}}},
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{
+			{Code: "epilep", Name: "epilep", Genes: epilepsyPanel.Genes},
 		}))
 
 		assert.Equal(t, []storedPanelGene{
-			{Code: "HRT", Name: "Heart", TypeCode: "uploaded", EnsemblID: "ENSG00000118194", Symbol: "TNNT2"},
+			{Code: "EPILEP", Name: "EPILEP name", TypeCode: "physical", EnsemblID: "ENSG00000075043", Symbol: "KCNQ2"},
+			{Code: "EPILEP", Name: "EPILEP name", TypeCode: "physical", EnsemblID: "ENSG00000144285", Symbol: "SCN1A"},
+		}, readTenantPanels(t, env.Postgres, tenant), "same code in any case: name and type kept, genes replaced")
+	})
+}
+
+func Test_ReplaceGenePanels_SecondUploadRemovesUploadedPanelsMissingFromIt(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		tenant := genePanelScratchTenant(t, env.Postgres)
+		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, heartPanel}))
+
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{
+			{Code: "HRT", Name: "HRT", Genes: []types.GenePanelGene{{EnsemblID: "ENSG00000092054", Symbol: "MYH7"}}},
+		}))
+
+		assert.Equal(t, []storedPanelGene{
+			{Code: "HRT", Name: "HRT", TypeCode: "uploaded", EnsemblID: "ENSG00000092054", Symbol: "MYH7"},
 		}, readTenantPanels(t, env.Postgres, tenant))
 	})
 }
 
-func Test_ReplaceUploadedGenePanels_SameUploadTwiceGivesSameResult(t *testing.T) {
+func Test_ReplaceGenePanels_KeepsAPrescriptionPanelMissingFromTheFileWithItsGenes(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
+		insertPrescriptionPanel(t, env.Postgres, tenant, "PRESC")
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
+
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{heartPanel}))
+
+		assert.Contains(t, readTenantPanels(t, env.Postgres, tenant),
+			storedPanelGene{Code: "PRESC", Name: "PRESC name", TypeCode: "physical", EnsemblID: "ENSG00000092054", Symbol: "MYH7"})
+	})
+}
+
+func Test_ReplaceGenePanels_SameUploadTwiceGivesSameResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		tenant := genePanelScratchTenant(t, env.Postgres)
+		insertPrescriptionPanel(t, env.Postgres, tenant, "EPILEP")
+		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, heartPanel}))
 		first := readTenantPanels(t, env.Postgres, tenant)
 
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, heartPanel}))
 
 		assert.Equal(t, first, readTenantPanels(t, env.Postgres, tenant))
 	})
 }
 
-func Test_ReplaceUploadedGenePanels_KeepsPrescriptionPanels(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		tenant := genePanelScratchTenant(t, env.Postgres)
-		insertPrescriptionPanel(t, env.Postgres, tenant, "PRESC")
-		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
-
-		rows := readTenantPanels(t, env.Postgres, tenant)
-		assert.Contains(t, rows, storedPanelGene{Code: "PRESC", Name: "PRESC name", TypeCode: "physical"})
-		assert.Len(t, rows, 3)
-	})
-}
-
-func Test_ReplaceUploadedGenePanels_LeavesOtherTenantsUntouched(t *testing.T) {
+func Test_ReplaceGenePanels_LeavesOtherTenantsUntouched(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		other := genePanelScratchTenant(t, env.Postgres)
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), other, []types.GenePanel{epilepsyPanel}))
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), other, []types.GenePanel{epilepsyPanel}))
 
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{{Code: "HRT", Name: "Heart"}}))
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{
+			{Code: "EPILEP", Name: "EPILEP", Genes: heartPanel.Genes},
+		}))
 
-		assert.Len(t, readTenantPanels(t, env.Postgres, other), 2)
+		assert.Len(t, readTenantPanels(t, env.Postgres, other), 2, "same code in another tenant is another panel")
 	})
 }
 
-func Test_ReplaceUploadedGenePanels_CodeOfAPrescriptionPanelIsAConflictAndRollsBack(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		tenant := genePanelScratchTenant(t, env.Postgres)
-		insertPrescriptionPanel(t, env.Postgres, tenant, "PRESC")
-		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
-		before := readTenantPanels(t, env.Postgres, tenant)
-
-		err := repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{
-			{Code: "HRT", Name: "Heart"},
-			{Code: "presc", Name: "Clash"},
-		})
-
-		var conflict *types.GenePanelConflictError
-		require.True(t, errors.As(err, &conflict), "want *GenePanelConflictError, got %v", err)
-		assert.Equal(t, `panel "Clash" (code presc) is already used by another panel of the tenant`, conflict.Message)
-		assert.Equal(t, before, readTenantPanels(t, env.Postgres, tenant), "a failure on panel N keeps the previous panels")
-	})
-}
-
-func Test_ReplaceUploadedGenePanels_UploadedPanelUsedByAnalysisCatalogIsAConflict(t *testing.T) {
+func Test_ReplaceGenePanels_UploadedPanelUsedByAnalysisCatalogIsAConflictAndRollsBack(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
-		require.NoError(t, repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, heartPanel}))
 		// The seeded catalog rows set their ids explicitly, so the identity sequence lags behind.
 		require.NoError(t, env.Postgres.Exec(`
 			INSERT INTO analysis_catalog (id, code, name, panel_id, tenant_code)
 			SELECT (SELECT MAX(id) + 1 FROM analysis_catalog), 'GPTEST', 'Gene panel test', id, tenant_code
-			FROM panel WHERE tenant_code = ? AND code = 'EPI'`,
+			FROM panel WHERE tenant_code = ? AND code = 'EPILEP'`,
 			tenant).Error)
+		before := readTenantPanels(t, env.Postgres, tenant)
 
-		err := repo.ReplaceUploadedGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel})
+		err := repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{
+			{Code: "HRT", Name: "HRT", Genes: epilepsyPanel.Genes},
+		})
 
 		var conflict *types.GenePanelConflictError
 		require.True(t, errors.As(err, &conflict), "want *GenePanelConflictError, got %v", err)
-		assert.Equal(t, "an uploaded gene panel is used by the analysis catalog", conflict.Message)
+		assert.Equal(t, "an uploaded panel missing from the file is used by the analysis catalog", conflict.Message)
+		assert.Equal(t, before, readTenantPanels(t, env.Postgres, tenant), "a failure keeps the previous panels")
+	})
+}
+
+func Test_ReplaceGenePanels_KeepingTheCatalogPanelInTheFileIsAccepted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		tenant := genePanelScratchTenant(t, env.Postgres)
+		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
+		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, panel_id, tenant_code)
+			SELECT (SELECT MAX(id) + 1 FROM analysis_catalog), 'GPTEST', 'Gene panel test', id, tenant_code
+			FROM panel WHERE tenant_code = ? AND code = 'EPILEP'`,
+			tenant).Error)
+
+		assert.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}),
+			"the panel keeps its id, so the catalog link holds")
 	})
 }

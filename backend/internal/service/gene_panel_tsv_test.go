@@ -23,50 +23,45 @@ func requireFileError(t *testing.T, err error, line int, contains string) {
 	assert.Contains(t, fileErr.Message, contains)
 }
 
-func Test_ParseGenePanelTSV_OnePanelPerColumnWithTheRowsMarkedTrue(t *testing.T) {
-	panels, err := parseTSV(t, "symbol\tEpilepsy\tCardio\n"+
-		"SCN1A\ttrue\tfalse\n"+
-		"MYH7\tfalse\ttrue\n"+
-		"KCNQ2\ttrue\ttrue\n")
+func Test_ParseGenePanelTSV_GroupsGenesByPanelCodeInOrderOfFirstRow(t *testing.T) {
+	panels, err := parseTSV(t, "symbol\tpanels\tversion\n"+
+		"AAAS\tPOLYM,RGDIEP\tPOLYM_v1,RGDIEP_v2\n"+
+		"AARS1\tEPILEP,POLYM\tEPILEP_v2,POLYM_v1\n")
 
 	require.NoError(t, err)
 	assert.Equal(t, []types.GenePanelInput{
-		{Code: "EPILEPSY", Name: "Epilepsy", Rows: []types.GenePanelRow{{Line: 2, Symbol: "SCN1A"}, {Line: 4, Symbol: "KCNQ2"}}},
-		{Code: "CARDIO", Name: "Cardio", Rows: []types.GenePanelRow{{Line: 3, Symbol: "MYH7"}, {Line: 4, Symbol: "KCNQ2"}}},
+		{Code: "POLYM", Name: "POLYM", Rows: []types.GenePanelRow{{Line: 2, Symbol: "AAAS"}, {Line: 3, Symbol: "AARS1"}}},
+		{Code: "RGDIEP", Name: "RGDIEP", Rows: []types.GenePanelRow{{Line: 2, Symbol: "AAAS"}}},
+		{Code: "EPILEP", Name: "EPILEP", Rows: []types.GenePanelRow{{Line: 3, Symbol: "AARS1"}}},
 	}, panels)
 }
 
-func Test_ParseGenePanelTSV_CellsIgnoreCaseAndEmptyIsFalse(t *testing.T) {
-	panels, err := parseTSV(t, "gene\tEpilepsy\n"+
-		"SCN1A\tTRUE\n"+
-		"MYH7\t\n"+
-		"KCNQ2\tFalse\n"+
-		"TNMD\t True \n")
+func Test_ParseGenePanelTSV_VersionColumnIsOptionalAndIgnored(t *testing.T) {
+	panels, err := parseTSV(t, "symbol\tpanels\nAAAS\tPOLYM\n")
 
 	require.NoError(t, err)
-	assert.Equal(t, []types.GenePanelRow{{Line: 2, Symbol: "SCN1A"}, {Line: 5, Symbol: "TNMD"}}, panels[0].Rows)
+	assert.Equal(t, []types.GenePanelInput{{Code: "POLYM", Name: "POLYM", Rows: []types.GenePanelRow{{Line: 2, Symbol: "AAAS"}}}}, panels)
 }
 
-func Test_ParseGenePanelTSV_PanelWithNoTrueCellIsKeptEmpty(t *testing.T) {
-	panels, err := parseTSV(t, "symbol\tEpilepsy\tEmpty\nSCN1A\ttrue\tfalse\n")
+func Test_ParseGenePanelTSV_FindsColumnsByNameInAnyOrderWithBOMAndCRLF(t *testing.T) {
+	panels, err := parseTSV(t, byteOrderMark+"Panels\tVersion\tSymbol\r\nPOLYM\tPOLYM_v1\tAAAS\r\n")
 
 	require.NoError(t, err)
-	assert.Equal(t, types.GenePanelInput{Code: "EMPTY", Name: "Empty"}, panels[1])
+	assert.Equal(t, []types.GenePanelInput{{Code: "POLYM", Name: "POLYM", Rows: []types.GenePanelRow{{Line: 2, Symbol: "AAAS"}}}}, panels)
 }
 
-func Test_ParseGenePanelTSV_DerivesTheCodeFromTheTrimmedHeader(t *testing.T) {
-	panels, err := parseTSV(t, "\ufeffsymbol\t Rétinopathie (AR) \nSCN1A\ttrue\n")
+func Test_ParseGenePanelTSV_TrimsCodesAndSkipsEmptyAndRepeatedOnes(t *testing.T) {
+	panels, err := parseTSV(t, "symbol\tpanels\n AAAS \t POLYM , ,POLYM,\n")
 
 	require.NoError(t, err)
-	assert.Equal(t, "RETINOPATHIE_AR", panels[0].Code)
-	assert.Equal(t, "Rétinopathie (AR)", panels[0].Name)
+	assert.Equal(t, []types.GenePanelInput{{Code: "POLYM", Name: "POLYM", Rows: []types.GenePanelRow{{Line: 2, Symbol: "AAAS"}}}}, panels)
 }
 
-func Test_ParseGenePanelTSV_TrimsSymbolsAndSkipsBlankLinesWithCRLF(t *testing.T) {
-	panels, err := parseTSV(t, "symbol\tEpilepsy\r\n\r\n SCN1A \ttrue\r\n")
+func Test_ParseGenePanelTSV_GeneInNoPanelIsAccepted(t *testing.T) {
+	panels, err := parseTSV(t, "symbol\tpanels\nAAAS\t\nAARS1\tPOLYM\n")
 
 	require.NoError(t, err)
-	assert.Equal(t, []types.GenePanelRow{{Line: 3, Symbol: "SCN1A"}}, panels[0].Rows)
+	assert.Equal(t, []types.GenePanelInput{{Code: "POLYM", Name: "POLYM", Rows: []types.GenePanelRow{{Line: 3, Symbol: "AARS1"}}}}, panels)
 }
 
 func Test_ParseGenePanelTSV_EmptyFile(t *testing.T) {
@@ -75,58 +70,63 @@ func Test_ParseGenePanelTSV_EmptyFile(t *testing.T) {
 }
 
 func Test_ParseGenePanelTSV_HeaderOnly(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\n")
+	_, err := parseTSV(t, "symbol\tpanels\n")
 	requireFileError(t, err, 0, "no gene row")
 }
 
-func Test_ParseGenePanelTSV_HeaderWithNoPanelColumn(t *testing.T) {
-	_, err := parseTSV(t, "symbol\nSCN1A\n")
-	requireFileError(t, err, 1, "at least one panel column")
+func Test_ParseGenePanelTSV_NoRowNamesAPanel(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tpanels\nAAAS\t\n")
+	requireFileError(t, err, 0, "file names no panel")
 }
 
-func Test_ParseGenePanelTSV_CommaSeparatedFileHasNoPanelColumn(t *testing.T) {
-	_, err := parseTSV(t, "symbol,Epilepsy\nSCN1A,true\n")
-	requireFileError(t, err, 1, "at least one panel column")
+func Test_ParseGenePanelTSV_MissingSymbolColumn(t *testing.T) {
+	_, err := parseTSV(t, "gene\tpanels\nAAAS\tPOLYM\n")
+	requireFileError(t, err, 1, `missing column "symbol"`)
 }
 
-func Test_ParseGenePanelTSV_EmptyPanelHeader(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\t \nSCN1A\ttrue\ttrue\n")
-	requireFileError(t, err, 1, "column 3 has no panel name")
+func Test_ParseGenePanelTSV_MissingPanelsColumn(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tversion\nAAAS\tPOLYM_v1\n")
+	requireFileError(t, err, 1, `missing column "panels"`)
 }
 
-func Test_ParseGenePanelTSV_PanelHeaderWithNoLetterOrDigit(t *testing.T) {
-	_, err := parseTSV(t, "symbol\t---\nSCN1A\ttrue\n")
-	requireFileError(t, err, 1, `panel "---" has no letter or digit`)
+func Test_ParseGenePanelTSV_DuplicateSymbolColumn(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tpanels\tSYMBOL\nAAAS\tPOLYM\tAAAS\n")
+	requireFileError(t, err, 1, `duplicate column "symbol"`)
 }
 
-func Test_ParseGenePanelTSV_TwoHeadersThatDifferOnlyByCase(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\tepilepsy\nSCN1A\ttrue\ttrue\n")
-	requireFileError(t, err, 1, `panels "Epilepsy" and "epilepsy" are the same panel (code EPILEPSY)`)
+func Test_ParseGenePanelTSV_DuplicatePanelsColumn(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tpanels\tpanels\nAAAS\tPOLYM\tPOLYM\n")
+	requireFileError(t, err, 1, `duplicate column "panels"`)
 }
 
-func Test_ParseGenePanelTSV_TwoHeadersThatGiveTheSameCode(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tHeart-disease\tHeart disease\nSCN1A\ttrue\ttrue\n")
-	requireFileError(t, err, 1, "(code HEART_DISEASE)")
+func Test_ParseGenePanelTSV_CommaSeparatedFileHasNoSymbolColumn(t *testing.T) {
+	_, err := parseTSV(t, "symbol,panels\nAAAS,POLYM\n")
+	requireFileError(t, err, 1, `missing column "symbol"`)
 }
 
 func Test_ParseGenePanelTSV_RowWithWrongColumnCount(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\tCardio\nSCN1A\ttrue\n")
+	_, err := parseTSV(t, "symbol\tpanels\tversion\nAAAS\tPOLYM\n")
 	requireFileError(t, err, 2, "row has 2 columns, header has 3")
 }
 
 func Test_ParseGenePanelTSV_EmptySymbol(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\n \ttrue\n")
+	_, err := parseTSV(t, "symbol\tpanels\n \tPOLYM\n")
 	requireFileError(t, err, 2, "symbol is empty")
 }
 
 func Test_ParseGenePanelTSV_DuplicateSymbolIgnoresCase(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\nSCN1A\ttrue\nscn1a\tfalse\n")
-	requireFileError(t, err, 3, `symbol "scn1a" is already on line 2`)
+	_, err := parseTSV(t, "symbol\tpanels\nAAAS\tPOLYM\naaas\tRGDIEP\n")
+	requireFileError(t, err, 3, `symbol "aaas" is already on line 2`)
 }
 
-func Test_ParseGenePanelTSV_CellThatIsNotTrueOrFalse(t *testing.T) {
-	_, err := parseTSV(t, "symbol\tEpilepsy\nSCN1A\tyes\n")
-	requireFileError(t, err, 2, `panel "Epilepsy": "yes" is not true or false`)
+func Test_ParseGenePanelTSV_BadPanelCode(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tpanels\nAAAS\tPOLYM,EPI LEP\n")
+	requireFileError(t, err, 2, `panel code "EPI LEP"`)
+}
+
+func Test_ParseGenePanelTSV_PanelCodesThatDifferOnlyByCase(t *testing.T) {
+	_, err := parseTSV(t, "symbol\tpanels\nAAAS\tPOLYM\nAARS1\tpolym\n")
+	requireFileError(t, err, 3, `panel code "polym" differs from "POLYM" only by case`)
 }
 
 type failingReader struct{}

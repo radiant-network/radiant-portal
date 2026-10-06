@@ -1,7 +1,7 @@
 -- Gene panel upload (RAD-10).
---   panel_type 'uploaded'          — marks the panels that PUT /{tenant}/gene_panels owns. Each
---                                    upload replaces only these, so the prescription panels of the
---                                    analysis catalog (same panel table) stay unchanged.
+--   panel_type 'uploaded'          — marks the panels that PUT /{tenant}/gene_panels created. An
+--                                    upload removes the uploaded panels missing from its file; the
+--                                    analysis catalog's panels (same table) are never removed.
 --   can_manage_analysis_catalog    — tenant-scoped action that gates the upload. Granted to the
 --                                    default tenant_admin role of every tenant.
 -- Data-safe and idempotent.

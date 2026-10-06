@@ -23,25 +23,25 @@ type genePanelUploader interface {
 // PutGenePanelsHandler
 // @Summary Replace the tenant's gene panels
 // @Id putGenePanels
-// @Description Replaces the gene panels of the tenant in the path with the panels of the attached
-// @Description `.tsv` file: panels missing from the file are removed, the others are created or
-// @Description replaced. The change is all or nothing, and the new panels are available for variant
-// @Description filtering when the call returns. Other panels of the tenant, such as the panels of
-// @Description the analysis catalog, are not changed. Requires the `can_manage_analysis_catalog`
-// @Description action. Sending the same file again gives the same result, so a retry is safe.
+// @Description Sets the genes of the tenant's panels from the attached `.tsv` file. A panel of the
+// @Description file that the tenant already has (same code, any case), such as a panel of the
+// @Description analysis catalog, keeps its name and settings and gets the genes of the file. A new
+// @Description code creates a panel named by its code. Panels created by an earlier upload and
+// @Description missing from the file are removed; other panels missing from the file are not
+// @Description changed. The change is all or nothing, and the genes are available for variant
+// @Description filtering when the call returns. Requires the `can_manage_analysis_catalog` action.
+// @Description Sending the same file again gives the same result, so a retry is safe.
 // @Description
-// @Description File: UTF-8 TSV, max 10 MiB, one row per gene. The first column holds the gene
-// @Description symbols. Each other column is one panel: its header is the panel name, and each cell
-// @Description is `true` when the gene is in the panel, `false` or empty when it is not (any case).
-// @Description A bad layout, an empty or duplicate symbol, two panel names that are the same panel
-// @Description (they differ only by case or punctuation), or a cell that is not true or false give
-// @Description 400, with the line in `detail.line`.
+// @Description File: UTF-8 TSV, max 10 MiB, one row per gene, with a header row. Column `symbol` holds
+// @Description the gene symbol, column `panels` the comma-separated codes of the panels the gene is
+// @Description in. Other columns, such as `version`, are ignored. A missing column, an empty or
+// @Description duplicate symbol, a bad panel code, or two codes that differ only by case give 400,
+// @Description with the line in `detail.line`.
 // @Description
 // @Description Each symbol must be a known gene (an Ensembl gene ID is also accepted). A row with an
 // @Description unknown gene is skipped and returned in `warnings`; with `strict=true` the file is
-// @Description rejected instead (422, the rows in `detail.warnings`). Each panel gets a code from
-// @Description its name (upper case, accents removed, `_` for spaces and punctuation); a code that
-// @Description another panel of the tenant already uses gives 409.
+// @Description rejected instead (422, the rows in `detail.warnings`). An uploaded panel missing from
+// @Description the file that the analysis catalog still uses gives 409.
 // @Tags gene_panels
 // @Security bearerauth
 // @Accept multipart/form-data
