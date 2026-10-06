@@ -10,18 +10,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-const (
-	genePanelColumnCode      = "panel_code"
-	genePanelColumnName      = "panel_name"
-	genePanelColumnSymbol    = "symbol"
-	genePanelColumnEnsemblID = "ensembl_id"
-)
-
-var genePanelRequiredColumns = []string{genePanelColumnCode, genePanelColumnName, genePanelColumnSymbol}
-
-// ParseGenePanelTSV reads a gene panel file: UTF-8 TSV, a header row with panel_code, panel_name,
-// symbol and an optional ensembl_id, then one row per gene. It returns the panels in file order.
-// A bad file gives a *types.GenePanelFileError.
+// ParseGenePanelTSV reads a gene panel file: UTF-8 TSV with a header row, then one row per gene. The
+// first column holds the gene symbols (its header is free text). Each other column is one panel,
+// named by its header, with true or false in each row (any case; an empty cell is false). It returns
+// the panels in column order, each with the rows marked true. A bad file gives a
+// *types.GenePanelFileError.
 func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 	reader := csv.NewReader(r)
 	reader.Comma = '\t'
@@ -35,15 +28,12 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 	if err != nil {
 		return nil, readError(err)
 	}
-	columns, err := genePanelColumns(header)
+	panels, err := genePanelColumns(header)
 	if err != nil {
 		return nil, err
 	}
 
-	var panels []types.GenePanelInput
-	byCode := map[string]int{}
-	codeByName := map[string]string{}
-	geneLines := map[string]int{}
+	lineBySymbol := map[string]int{}
 	for {
 		record, err := reader.Read()
 		if errors.Is(err, io.EOF) {
@@ -56,110 +46,67 @@ func ParseGenePanelTSV(r io.Reader) ([]types.GenePanelInput, error) {
 		if len(record) != len(header) {
 			return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("row has %d columns, header has %d", len(record), len(header))}
 		}
-		code, name, row, err := genePanelRow(record, columns, line)
-		if err != nil {
-			return nil, err
+		row := types.GenePanelRow{Line: line, Symbol: strings.TrimSpace(record[0])}
+		if row.Symbol == "" {
+			return nil, &types.GenePanelFileError{Line: line, Message: "symbol is empty"}
 		}
+		if prev, dup := lineBySymbol[strings.ToUpper(row.Symbol)]; dup {
+			return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("symbol %q is already on line %d", row.Symbol, prev)}
+		}
+		lineBySymbol[strings.ToUpper(row.Symbol)] = line
 
-		idx, seen := byCode[strings.ToLower(code)]
-		if !seen {
-			if other, taken := codeByName[strings.ToLower(name)]; taken {
-				return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel_name %q is already used by panel_code %q", name, other)}
+		for i := range panels {
+			in, err := genePanelCell(record[i+1])
+			if err != nil {
+				return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel %q: %s", panels[i].Name, err)}
 			}
-			idx = len(panels)
-			byCode[strings.ToLower(code)] = idx
-			codeByName[strings.ToLower(name)] = code
-			panels = append(panels, types.GenePanelInput{Code: code, Name: name})
+			if in {
+				panels[i].Rows = append(panels[i].Rows, row)
+			}
 		}
-		panel := &panels[idx]
-		if panel.Code != code {
-			return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel_code %q differs from %q only by case", code, panel.Code)}
-		}
-		if panel.Name != name {
-			return nil, &types.GenePanelFileError{Line: line, Message: fmt.Sprintf("panel_code %q has two names: %q and %q", code, panel.Name, name)}
-		}
-		if err := checkDuplicateGene(geneLines, panel.Code, row); err != nil {
-			return nil, err
-		}
-		panel.Rows = append(panel.Rows, row)
 	}
 
-	if len(panels) == 0 {
+	if len(lineBySymbol) == 0 {
 		return nil, &types.GenePanelFileError{Message: "file has no gene row"}
 	}
 	return panels, nil
 }
 
-func genePanelColumns(header []string) (map[string]int, error) {
-	columns := map[string]int{}
-	for i, raw := range header {
-		name := strings.ToLower(strings.TrimSpace(raw))
-		if i == 0 {
-			name = strings.TrimPrefix(name, "\ufeff")
-		}
-		switch name {
-		case genePanelColumnCode, genePanelColumnName, genePanelColumnSymbol, genePanelColumnEnsemblID:
-		default:
-			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("unknown column %q", raw)}
-		}
-		if _, dup := columns[name]; dup {
-			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("duplicate column %q", name)}
-		}
-		columns[name] = i
+// genePanelColumns reads the panels from the header: one per column after the symbol column. Two
+// names that give the same panel code (e.g. that differ only by case) are rejected.
+func genePanelColumns(header []string) ([]types.GenePanelInput, error) {
+	if len(header) < 2 {
+		return nil, &types.GenePanelFileError{Line: 1, Message: "header needs the symbol column and at least one panel column"}
 	}
-	for _, required := range genePanelRequiredColumns {
-		if _, ok := columns[required]; !ok {
-			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("missing column %q", required)}
+	panels := make([]types.GenePanelInput, 0, len(header)-1)
+	nameByCode := map[string]string{}
+	for i, raw := range header[1:] {
+		name := strings.TrimSpace(raw)
+		if name == "" {
+			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("column %d has no panel name", i+2)}
 		}
+		code, err := types.GenePanelCodeFromName(name)
+		if err != nil {
+			return nil, &types.GenePanelFileError{Line: 1, Message: err.Error()}
+		}
+		if other, dup := nameByCode[code]; dup {
+			return nil, &types.GenePanelFileError{Line: 1, Message: fmt.Sprintf("panels %q and %q are the same panel (code %s)", other, name, code)}
+		}
+		nameByCode[code] = name
+		panels = append(panels, types.GenePanelInput{Code: code, Name: name})
 	}
-	return columns, nil
+	return panels, nil
 }
 
-func genePanelRow(record []string, columns map[string]int, line int) (string, string, types.GenePanelRow, error) {
-	field := func(name string) string {
-		idx, ok := columns[name]
-		if !ok {
-			return ""
-		}
-		return strings.TrimSpace(record[idx])
+func genePanelCell(value string) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "true":
+		return true, nil
+	case "false", "":
+		return false, nil
+	default:
+		return false, fmt.Errorf("%q is not true or false", value)
 	}
-	code, name := field(genePanelColumnCode), field(genePanelColumnName)
-	row := types.GenePanelRow{Line: line, Symbol: field(genePanelColumnSymbol), EnsemblID: strings.ToUpper(field(genePanelColumnEnsemblID))}
-
-	if err := types.ValidateGenePanelCode(code); err != nil {
-		return "", "", row, &types.GenePanelFileError{Line: line, Message: err.Error()}
-	}
-	if name == "" {
-		return "", "", row, &types.GenePanelFileError{Line: line, Message: "panel_name is empty"}
-	}
-	if row.Symbol == "" {
-		return "", "", row, &types.GenePanelFileError{Line: line, Message: "symbol is empty"}
-	}
-	if row.EnsemblID != "" {
-		if err := types.ValidateEnsemblGeneID(row.EnsemblID); err != nil {
-			return "", "", row, &types.GenePanelFileError{Line: line, Message: err.Error()}
-		}
-	}
-	return code, name, row, nil
-}
-
-// checkDuplicateGene rejects a second row with the same symbol or Ensembl ID in one panel. seen
-// maps a panel-scoped key to the line that first used it.
-func checkDuplicateGene(seen map[string]int, panelCode string, row types.GenePanelRow) error {
-	symbolKey := panelCode + "\x00symbol\x00" + strings.ToUpper(row.Symbol)
-	if prev, dup := seen[symbolKey]; dup {
-		return &types.GenePanelFileError{Line: row.Line, Message: fmt.Sprintf("symbol %q is already in panel_code %q (line %d)", row.Symbol, panelCode, prev)}
-	}
-	seen[symbolKey] = row.Line
-	if row.EnsemblID == "" {
-		return nil
-	}
-	idKey := panelCode + "\x00ensembl_id\x00" + row.EnsemblID
-	if prev, dup := seen[idKey]; dup {
-		return &types.GenePanelFileError{Line: row.Line, Message: fmt.Sprintf("ensembl_id %q is already in panel_code %q (line %d)", row.EnsemblID, panelCode, prev)}
-	}
-	seen[idKey] = row.Line
-	return nil
 }
 
 // readError wraps a failure to read the file. With LazyQuotes and a free field count, encoding/csv

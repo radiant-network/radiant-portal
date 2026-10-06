@@ -57,18 +57,18 @@ func servePutGenePanels(uploader genePanelUploader, query string, body io.Reader
 
 func Test_PutGenePanelsHandler_PassesFileTenantAndStrict(t *testing.T) {
 	uploader := &mockGenePanelUploader{result: &types.GenePanelUploadResult{Panels: 1, Genes: 2, Warnings: []types.GenePanelUploadWarning{
-		{Line: 3, PanelCode: "EPI", Symbol: "NOTAGENE", Message: "symbol matches no Ensembl gene, row skipped"},
+		{Line: 3, Symbol: "NOTAGENE", Message: "symbol matches no Ensembl gene, row skipped"},
 	}}}
-	body, contentType := multipartBody(t, "file", "panel_code\tpanel_name\tsymbol\n")
+	body, contentType := multipartBody(t, "file", "symbol\tEpilepsy\n")
 
 	w := servePutGenePanels(uploader, "?strict=true", body, contentType)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"panels":1,"genes":2,"warnings":[
-		{"line":3,"panel_code":"EPI","symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
+		{"line":3,"symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
 	]}`, w.Body.String())
 	assert.Equal(t, "radiant", uploader.gotTenant)
-	assert.Equal(t, "panel_code\tpanel_name\tsymbol\n", uploader.gotFile)
+	assert.Equal(t, "symbol\tEpilepsy\n", uploader.gotFile)
 	assert.True(t, uploader.gotStrict)
 }
 
@@ -107,7 +107,7 @@ func Test_PutGenePanelsHandler_MissingFilePart(t *testing.T) {
 func Test_PutGenePanelsHandler_NotMultipart(t *testing.T) {
 	uploader := &mockGenePanelUploader{}
 
-	w := servePutGenePanels(uploader, "", strings.NewReader("panel_code\tpanel_name\tsymbol\n"), "text/tab-separated-values")
+	w := servePutGenePanels(uploader, "", strings.NewReader("symbol\tEpilepsy\n"), "text/tab-separated-values")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.False(t, uploader.called)
@@ -136,7 +136,7 @@ func Test_PutGenePanelsHandler_BadFileGives400WithLine(t *testing.T) {
 
 func Test_PutGenePanelsHandler_UnmatchedGenesGives422WithWarnings(t *testing.T) {
 	uploader := &mockGenePanelUploader{err: &types.UnmatchedGenesError{Warnings: []types.GenePanelUploadWarning{
-		{Line: 3, PanelCode: "EPI", Symbol: "NOTAGENE", Message: "symbol matches no Ensembl gene, row skipped"},
+		{Line: 3, Symbol: "NOTAGENE", Message: "symbol matches no Ensembl gene, row skipped"},
 	}}}
 	body, contentType := multipartBody(t, "file", "x")
 
@@ -144,18 +144,18 @@ func Test_PutGenePanelsHandler_UnmatchedGenesGives422WithWarnings(t *testing.T) 
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 	assert.JSONEq(t, `{"status":422,"message":"1 row(s) match no Ensembl gene","detail":{"warnings":[
-		{"line":3,"panel_code":"EPI","symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
+		{"line":3,"symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
 	]}}`, w.Body.String())
 }
 
 func Test_PutGenePanelsHandler_ConflictGives409(t *testing.T) {
-	uploader := &mockGenePanelUploader{err: &types.GenePanelConflictError{Message: `panel_code "EPILEP" is already used by another panel of the tenant`}}
+	uploader := &mockGenePanelUploader{err: &types.GenePanelConflictError{Message: `panel "Epilepsy" (code EPILEPSY) is already used by another panel of the tenant`}}
 	body, contentType := multipartBody(t, "file", "x")
 
 	w := servePutGenePanels(uploader, "", body, contentType)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
-	assert.JSONEq(t, `{"status":409,"message":"panel_code \"EPILEP\" is already used by another panel of the tenant"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":409,"message":"panel \"Epilepsy\" (code EPILEPSY) is already used by another panel of the tenant"}`, w.Body.String())
 }
 
 func Test_PutGenePanelsHandler_OtherErrorGives500(t *testing.T) {

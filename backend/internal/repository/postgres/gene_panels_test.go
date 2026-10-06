@@ -151,7 +151,7 @@ func Test_ReplaceUploadedGenePanels_CodeOfAPrescriptionPanelIsAConflictAndRollsB
 
 		var conflict *types.GenePanelConflictError
 		require.True(t, errors.As(err, &conflict), "want *GenePanelConflictError, got %v", err)
-		assert.Equal(t, `panel_code "presc" is already used by another panel of the tenant`, conflict.Message)
+		assert.Equal(t, `panel "Clash" (code presc) is already used by another panel of the tenant`, conflict.Message)
 		assert.Equal(t, before, readTenantPanels(t, env.Postgres, tenant), "a failure on panel N keeps the previous panels")
 	})
 }

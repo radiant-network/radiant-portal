@@ -88,14 +88,14 @@ func Test_PutGenePanels_UploadFillsTheTenantMV(t *testing.T) {
 		tenant := genePanelUploadTenant(t, env)
 		router := genePanelUploadRouter(env)
 
-		w := putGenePanelFile(t, router, tenant, "", "panel_code\tpanel_name\tsymbol\n"+
-			"EPI\tEpilepsy\ttnmd\n"+
-			"EPI\tEpilepsy\tNOTAGENE\n"+
-			"ONC\tOncology\tBRAF\n")
+		w := putGenePanelFile(t, router, tenant, "", "symbol\tEpilepsy\tOncology\n"+
+			"tnmd\ttrue\tfalse\n"+
+			"NOTAGENE\ttrue\ttrue\n"+
+			"BRAF\tfalse\ttrue\n")
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `{"panels":2,"genes":2,"warnings":[
-			{"line":3,"panel_code":"EPI","symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
+			{"line":3,"symbol":"NOTAGENE","message":"symbol matches no Ensembl gene, row skipped"}
 		]}`, w.Body.String())
 		assert.Equal(t, []genePanelMVRow{{"Epilepsy", "TNMD"}, {"Oncology", "BRAF"}}, readTenantGenePanelMV(t, env.Starrocks, tenant))
 	})
@@ -105,9 +105,9 @@ func Test_PutGenePanels_SecondUploadReplacesTheFirstInTheMV(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelUploadTenant(t, env)
 		router := genePanelUploadRouter(env)
-		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "panel_code\tpanel_name\tsymbol\nEPI\tEpilepsy\tTNMD\n").Code)
+		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "symbol\tEpilepsy\nTNMD\ttrue\n").Code)
 
-		w := putGenePanelFile(t, router, tenant, "", "panel_code\tpanel_name\tsymbol\nONC\tOncology\tBRAF\n")
+		w := putGenePanelFile(t, router, tenant, "", "symbol\tOncology\nBRAF\ttrue\n")
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, []genePanelMVRow{{"Oncology", "BRAF"}}, readTenantGenePanelMV(t, env.Starrocks, tenant))
@@ -118,9 +118,9 @@ func Test_PutGenePanels_StrictUnmatchedKeepsThePreviousPanels(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		tenant := genePanelUploadTenant(t, env)
 		router := genePanelUploadRouter(env)
-		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "panel_code\tpanel_name\tsymbol\nEPI\tEpilepsy\tTNMD\n").Code)
+		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "symbol\tEpilepsy\nTNMD\ttrue\n").Code)
 
-		w := putGenePanelFile(t, router, tenant, "?strict=true", "panel_code\tpanel_name\tsymbol\nONC\tOncology\tNOTAGENE\n")
+		w := putGenePanelFile(t, router, tenant, "?strict=true", "symbol\tOncology\nNOTAGENE\ttrue\n")
 
 		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 		assert.Equal(t, []genePanelMVRow{{"Epilepsy", "TNMD"}}, readTenantGenePanelMV(t, env.Starrocks, tenant))

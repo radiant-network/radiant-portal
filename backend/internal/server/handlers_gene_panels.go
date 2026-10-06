@@ -30,15 +30,18 @@ type genePanelUploader interface {
 // @Description the analysis catalog, are not changed. Requires the `can_manage_analysis_catalog`
 // @Description action. Sending the same file again gives the same result, so a retry is safe.
 // @Description
-// @Description File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`,
-// @Description `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A
-// @Description bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a
-// @Description duplicate symbol give 400, with the line in `detail.line`.
+// @Description File: UTF-8 TSV, max 10 MiB, one row per gene. The first column holds the gene
+// @Description symbols. Each other column is one panel: its header is the panel name, and each cell
+// @Description is `true` when the gene is in the panel, `false` or empty when it is not (any case).
+// @Description A bad layout, an empty or duplicate symbol, two panel names that are the same panel
+// @Description (they differ only by case or punctuation), or a cell that is not true or false give
+// @Description 400, with the line in `detail.line`.
 // @Description
-// @Description Each row must name a known gene, by symbol or by `ensembl_id` (the ID wins when both
-// @Description are given). A row with an unknown gene is skipped and returned in `warnings`; with
-// @Description `strict=true` the file is rejected instead (422, the rows in `detail.warnings`). A
-// @Description `panel_code` that another panel of the tenant already uses gives 409.
+// @Description Each symbol must be a known gene (an Ensembl gene ID is also accepted). A row with an
+// @Description unknown gene is skipped and returned in `warnings`; with `strict=true` the file is
+// @Description rejected instead (422, the rows in `detail.warnings`). Each panel gets a code from
+// @Description its name (upper case, accents removed, `_` for spaces and punctuation); a code that
+// @Description another panel of the tenant already uses gives 409.
 // @Tags gene_panels
 // @Security bearerauth
 // @Accept multipart/form-data

@@ -59,7 +59,7 @@ func (r *GenePanelsRepository) ReplaceUploadedGenePanels(ctx context.Context, te
 				RETURNING id`,
 				panel.Code, panel.Name, types.PanelTypeUploaded, tenantCode).Scan(&id).Error; err != nil {
 				if isUniqueViolation(err) {
-					return &types.GenePanelConflictError{Message: fmt.Sprintf("panel_code %q is already used by another panel of the tenant", panel.Code)}
+					return &types.GenePanelConflictError{Message: fmt.Sprintf("panel %q (code %s) is already used by another panel of the tenant", panel.Name, panel.Code)}
 				}
 				return fmt.Errorf("insert panel %q of %q: %w", panel.Code, tenantCode, err)
 			}

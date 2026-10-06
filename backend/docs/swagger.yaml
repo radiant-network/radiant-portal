@@ -1652,14 +1652,12 @@ components:
           uniqueItems: false
       type: object
     GenePanelUploadWarning:
-      description: A row of the gene panel file that the upload skipped, or kept with
-        the Ensembl gene name.
+      description: A gene row of the file that the upload skipped, or kept with the
+        Ensembl gene name.
       properties:
         line:
           type: integer
         message:
-          type: string
-        panel_code:
           type: string
         symbol:
           type: string
@@ -5137,15 +5135,18 @@ paths:
         the analysis catalog, are not changed. Requires the `can_manage_analysis_catalog`
         action. Sending the same file again gives the same result, so a retry is safe.
 
-        File: UTF-8 TSV, max 10 MiB. A header row with the columns `panel_code`, `panel_name`,
-        `symbol` and an optional `ensembl_id`, then one row per gene, many panels per file. A
-        bad layout, a bad `panel_code`, two panels with the same `panel_name`, an empty or a
-        duplicate symbol give 400, with the line in `detail.line`.
+        File: UTF-8 TSV, max 10 MiB, one row per gene. The first column holds the gene
+        symbols. Each other column is one panel: its header is the panel name, and each cell
+        is `true` when the gene is in the panel, `false` or empty when it is not (any case).
+        A bad layout, an empty or duplicate symbol, two panel names that are the same panel
+        (they differ only by case or punctuation), or a cell that is not true or false give
+        400, with the line in `detail.line`.
 
-        Each row must name a known gene, by symbol or by `ensembl_id` (the ID wins when both
-        are given). A row with an unknown gene is skipped and returned in `warnings`; with
-        `strict=true` the file is rejected instead (422, the rows in `detail.warnings`). A
-        `panel_code` that another panel of the tenant already uses gives 409.
+        Each symbol must be a known gene (an Ensembl gene ID is also accepted). A row with an
+        unknown gene is skipped and returned in `warnings`; with `strict=true` the file is
+        rejected instead (422, the rows in `detail.warnings`). Each panel gets a code from
+        its name (upper case, accents removed, `_` for spaces and punctuation); a code that
+        another panel of the tenant already uses gives 409.
       operationId: putGenePanels
       parameters:
       - description: Tenant code

@@ -1,6 +1,6 @@
 # GenePanelUploadWarning
 
-A row of the gene panel file that the upload skipped, or kept with the Ensembl gene name.
+A gene row of the file that the upload skipped, or kept with the Ensembl gene name.
 
 ## Properties
 
@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **line** | **int** |  | [optional] 
 **message** | **str** |  | [optional] 
-**panel_code** | **str** |  | [optional] 
 **symbol** | **str** |  | [optional] 
 
 ## Example

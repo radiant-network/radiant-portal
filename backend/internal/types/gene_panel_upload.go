@@ -3,33 +3,42 @@ package types
 import (
 	"fmt"
 	"regexp"
+	"strings"
+	"unicode"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 // PanelTypeUploaded marks the panels that the gene panel upload owns (migration 000041).
 const PanelTypeUploaded = "uploaded"
 
-var genePanelCodePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{0,49}$`)
+const genePanelCodeMaxLength = 50
 
-var ensemblGeneIDPattern = regexp.MustCompile(`^ENSG[0-9]{11}$`)
+var genePanelCodeSeparators = regexp.MustCompile(`[^A-Z0-9]+`)
 
-func ValidateGenePanelCode(code string) error {
-	if !genePanelCodePattern.MatchString(code) {
-		return fmt.Errorf("panel_code %q must match %s", code, genePanelCodePattern.String())
+// GenePanelCodeFromName derives a panel code from its name: accents removed, upper case, every run
+// of other characters replaced by one '_', cut to 50 characters. "Rétinopathie (AR)" gives
+// "RETINOPATHIE_AR". An error when nothing is left.
+func GenePanelCodeFromName(name string) (string, error) {
+	var b strings.Builder
+	for _, r := range norm.NFD.String(name) {
+		if !unicode.Is(unicode.Mn, r) {
+			b.WriteRune(r)
+		}
 	}
-	return nil
-}
-
-func ValidateEnsemblGeneID(id string) error {
-	if !ensemblGeneIDPattern.MatchString(id) {
-		return fmt.Errorf("ensembl_id %q must match %s", id, ensemblGeneIDPattern.String())
+	code := strings.Trim(genePanelCodeSeparators.ReplaceAllString(strings.ToUpper(b.String()), "_"), "_")
+	if len(code) > genePanelCodeMaxLength {
+		code = strings.TrimRight(code[:genePanelCodeMaxLength], "_")
 	}
-	return nil
+	if code == "" {
+		return "", fmt.Errorf("panel %q has no letter or digit to make a panel code", name)
+	}
+	return code, nil
 }
 
 type GenePanelRow struct {
-	Line      int
-	Symbol    string
-	EnsemblID string
+	Line   int
+	Symbol string
 }
 
 type GenePanelInput struct {
@@ -69,12 +78,11 @@ type GenePanelUploadForm struct {
 	File string `json:"file" format:"binary" binding:"required"`
 } // @name GenePanelUploadForm
 
-// @Description A row of the gene panel file that the upload skipped, or kept with the Ensembl gene name.
+// @Description A gene row of the file that the upload skipped, or kept with the Ensembl gene name.
 type GenePanelUploadWarning struct {
-	Line      int    `json:"line"`
-	PanelCode string `json:"panel_code"`
-	Symbol    string `json:"symbol"`
-	Message   string `json:"message"`
+	Line    int    `json:"line"`
+	Symbol  string `json:"symbol"`
+	Message string `json:"message"`
 } // @name GenePanelUploadWarning
 
 // @Description Result of a gene panel upload. The file replaced all the uploaded gene panels of the tenant.

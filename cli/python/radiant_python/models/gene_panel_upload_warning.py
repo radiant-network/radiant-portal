@@ -24,13 +24,12 @@ from typing_extensions import Self
 
 class GenePanelUploadWarning(BaseModel):
     """
-    A row of the gene panel file that the upload skipped, or kept with the Ensembl gene name.
+    A gene row of the file that the upload skipped, or kept with the Ensembl gene name.
     """ # noqa: E501
     line: Optional[StrictInt] = None
     message: Optional[StrictStr] = None
-    panel_code: Optional[StrictStr] = None
     symbol: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["line", "message", "panel_code", "symbol"]
+    __properties: ClassVar[List[str]] = ["line", "message", "symbol"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,7 +84,6 @@ class GenePanelUploadWarning(BaseModel):
         _obj = cls.model_validate({
             "line": obj.get("line"),
             "message": obj.get("message"),
-            "panel_code": obj.get("panel_code"),
             "symbol": obj.get("symbol")
         })
         return _obj

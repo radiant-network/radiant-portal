@@ -63,17 +63,13 @@ func (u *GenePanelUploader) Upload(ctx context.Context, tenantCode string, file 
 	return &types.GenePanelUploadResult{Panels: len(panels), Genes: genes, Warnings: warnings}, nil
 }
 
-// genePanelLookupKeys returns the Ensembl ID of each row that has one, else its symbol.
+// genePanelLookupKeys returns each symbol once, in upper case.
 func genePanelLookupKeys(inputs []types.GenePanelInput) []string {
 	seen := map[string]bool{}
 	var keys []string
 	for _, panel := range inputs {
 		for _, row := range panel.Rows {
-			key := row.EnsemblID
-			if key == "" {
-				key = row.Symbol
-			}
-			key = strings.ToUpper(key)
+			key := strings.ToUpper(row.Symbol)
 			if !seen[key] {
 				seen[key] = true
 				keys = append(keys, key)
@@ -98,15 +94,9 @@ func indexGenes(genes []types.GeneResult) geneIndex {
 	return idx
 }
 
-// lookup returns the genes of a row. An Ensembl ID wins over the symbol. A symbol that several
-// Ensembl genes share gives all of them.
+// lookup returns the genes of a row: the Ensembl genes named by its symbol (all of them when
+// several share it), else the gene whose Ensembl ID the symbol is.
 func (idx geneIndex) lookup(row types.GenePanelRow) []types.GeneResult {
-	if row.EnsemblID != "" {
-		if g, ok := idx.byID[row.EnsemblID]; ok {
-			return []types.GeneResult{g}
-		}
-		return nil
-	}
 	if genes := idx.bySymbol[strings.ToUpper(row.Symbol)]; len(genes) > 0 {
 		return genes
 	}
@@ -116,39 +106,50 @@ func (idx geneIndex) lookup(row types.GenePanelRow) []types.GeneResult {
 	return nil
 }
 
-// resolveGenePanels maps each row to its Ensembl genes. It returns the panels, all the warnings,
+// resolveGenePanels maps each row to its Ensembl genes. A row is in as many panels as it has true
+// cells, so each row is resolved and warned about once. It returns the panels, all the warnings,
 // and the subset of the warnings for rows that match no gene.
 func resolveGenePanels(inputs []types.GenePanelInput, idx geneIndex) ([]types.GenePanel, []types.GenePanelUploadWarning, []types.GenePanelUploadWarning) {
 	panels := make([]types.GenePanel, 0, len(inputs))
 	warnings := []types.GenePanelUploadWarning{}
 	var unmatched []types.GenePanelUploadWarning
+	genesByLine := map[int][]types.GeneResult{}
+	warned := map[types.GenePanelUploadWarning]bool{}
+	warn := func(row types.GenePanelRow, message string) types.GenePanelUploadWarning {
+		w := types.GenePanelUploadWarning{Line: row.Line, Symbol: row.Symbol, Message: message}
+		if !warned[w] {
+			warned[w] = true
+			warnings = append(warnings, w)
+		}
+		return w
+	}
+	resolve := func(row types.GenePanelRow) []types.GeneResult {
+		if genes, done := genesByLine[row.Line]; done {
+			return genes
+		}
+		genes := idx.lookup(row)
+		genesByLine[row.Line] = genes
+		if len(genes) == 0 {
+			unmatched = append(unmatched, warn(row, "symbol matches no Ensembl gene, row skipped"))
+		}
+		for _, g := range genes {
+			if !strings.EqualFold(g.Name, row.Symbol) {
+				warn(row, fmt.Sprintf("Ensembl gene %s is named %s, %s kept", g.GeneID, g.Name, g.Name))
+			}
+		}
+		return genes
+	}
+
 	for _, input := range inputs {
 		panel := types.GenePanel{Code: input.Code, Name: input.Name}
 		lineByID := map[string]int{}
 		for _, row := range input.Rows {
-			warn := func(message string) types.GenePanelUploadWarning {
-				w := types.GenePanelUploadWarning{Line: row.Line, PanelCode: input.Code, Symbol: row.Symbol, Message: message}
-				warnings = append(warnings, w)
-				return w
-			}
-			genes := idx.lookup(row)
-			if len(genes) == 0 {
-				message := "symbol matches no Ensembl gene, row skipped"
-				if row.EnsemblID != "" {
-					message = fmt.Sprintf("ensembl_id %s matches no Ensembl gene, row skipped", row.EnsemblID)
-				}
-				unmatched = append(unmatched, warn(message))
-				continue
-			}
-			for _, g := range genes {
+			for _, g := range resolve(row) {
 				if prev, dup := lineByID[g.GeneID]; dup {
-					warn(fmt.Sprintf("same Ensembl gene %s as line %d, row skipped", g.GeneID, prev))
+					warn(row, fmt.Sprintf("same Ensembl gene %s as line %d, row skipped", g.GeneID, prev))
 					continue
 				}
 				lineByID[g.GeneID] = row.Line
-				if !strings.EqualFold(g.Name, row.Symbol) {
-					warn(fmt.Sprintf("Ensembl gene %s is named %s, %s kept", g.GeneID, g.Name, g.Name))
-				}
 				panel.Genes = append(panel.Genes, types.GenePanelGene{EnsemblID: g.GeneID, Symbol: g.Name})
 			}
 		}
