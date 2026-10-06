@@ -129,7 +129,7 @@ func (r *CasesRepository) SetCaseStatusIfExpected(ctx context.Context, tenantCod
 			Where("id = ? AND tenant_code = ?", caseID, tenantCode).
 			Pluck("status_code", &current).Error
 		if err != nil {
-			return fmt.Errorf("error reading status of case %d: %w", caseID, err)
+			return err
 		}
 		if len(current) == 0 {
 			return nil
@@ -139,17 +139,13 @@ func (r *CasesRepository) SetCaseStatusIfExpected(ctx context.Context, tenantCod
 			return nil
 		}
 
-		updated := tx.Model(&types.Case{}).
-			Where("id = ? AND tenant_code = ?", caseID, tenantCode).
-			Update("status_code", status)
-		if updated.Error != nil {
-			return fmt.Errorf("error setting status of case %d: %w", caseID, updated.Error)
-		}
 		result = &types.CaseStatusChangeResult{CaseID: caseID, Updated: true, CurrentStatusCode: status}
-		return nil
+		return tx.Model(&types.Case{}).
+			Where("id = ? AND tenant_code = ?", caseID, tenantCode).
+			Update("status_code", status).Error
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error changing status of case %d: %w", caseID, err)
 	}
 	return result, nil
 }
