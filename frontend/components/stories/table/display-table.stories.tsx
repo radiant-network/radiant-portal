@@ -131,6 +131,20 @@ export const Border: Story = {
   ),
 };
 
+export const FullHeight: Story = {
+  args: {
+    fullHeight: true,
+  },
+  render: args => (
+    <StorySection
+      title="Full height"
+      description="Renders every row without the default 10-row max height, so the table never scrolls vertically."
+    >
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
 export const WithHeaderGroups: Story = {
   args: {
     variant: 'border',
@@ -178,6 +192,17 @@ export const WithHeaderGroups: Story = {
   },
   render: args => (
     <StorySection title="With header groups">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+  render: args => (
+    <StorySection title="Loading" description="Renders skeleton rows in place of the data while it is loading.">
       <DisplayTable {...args} />
     </StorySection>
   ),
