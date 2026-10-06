@@ -131,6 +131,20 @@ export const Border: Story = {
   ),
 };
 
+export const FullHeight: Story = {
+  args: {
+    fullHeight: true,
+  },
+  render: args => (
+    <StorySection
+      title="Full height"
+      description="Renders every row without the default 10-row max height, so the table never scrolls vertically."
+    >
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
 export const WithHeaderGroups: Story = {
   args: {
     variant: 'border',

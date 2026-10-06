@@ -91,7 +91,7 @@ export default function App() {
                 <TimelineTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
-                <TreatmentsTab />
+                <TreatmentsTab patientId={patientId} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
                 <GenomicsTab />

@@ -25,6 +25,7 @@ type SimpleTableProps<TData extends RowData> = {
   columns: TableColumnDef<TData, any>[];
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  fullHeight?: boolean;
   dataCy?: string;
 };
 
@@ -39,6 +40,7 @@ function DisplayTable({
   data,
   rowSelection = {},
   onRowSelectionChange,
+  fullHeight = false,
   dataCy,
 }: SimpleTableProps<any>) {
   const { t } = useI18n();
@@ -53,7 +55,10 @@ function DisplayTable({
   });
 
   return (
-    <div className="rounded-md w-full overflow-auto" style={{ maxHeight: `${TABLE_MAX_HEIGHT}px` }}>
+    <div
+      className="rounded-md w-full overflow-auto"
+      style={fullHeight ? undefined : { maxHeight: `${TABLE_MAX_HEIGHT}px` }}
+    >
       <Table data-cy={dataCy} className={cn({ 'border-collapse': variant == 'border' })}>
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (

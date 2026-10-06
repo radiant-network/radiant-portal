@@ -1043,3 +1043,96 @@ export async function fetchPatientCancerPredispositions(_patientId: string): Pro
   await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
   return PATIENT_CANCER_PREDISPOSITIONS_MOCK;
 }
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists
+export type PatientSurgery = {
+  surgery_date: number | null;
+  extent_of_tumor_resection: string;
+};
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists
+export type PatientRadiation = {
+  radiation_start_date: number | null;
+  radiation_site: string;
+  // Raw extract value, may hold several doses (e.g. "3600/5400")
+  total_radiation_dose: string | null;
+  total_radiation_dose_unit: string | null;
+};
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists
+export type PatientRegimen = {
+  regimen_start_date: number | null;
+  chemotherapy_agents: string[];
+};
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists
+export type PatientTreatments = {
+  surgeries: PatientSurgery[];
+  radiations: PatientRadiation[];
+  regimens: PatientRegimen[];
+};
+
+// Same placeholder for every patient
+// plus the duplicate craniospinal rows flagged in the analysis.
+const PATIENT_TREATMENTS_MOCK: PatientTreatments = {
+  surgeries: [
+    { surgery_date: 1564, extent_of_tumor_resection: 'Gross/Near total resection' },
+    { surgery_date: 3289, extent_of_tumor_resection: 'Gross/Near total resection' },
+  ],
+  radiations: [
+    {
+      radiation_start_date: 1026,
+      radiation_site: 'Craniospinal',
+      total_radiation_dose: '3600/5400',
+      total_radiation_dose_unit: 'CGE',
+    },
+    {
+      radiation_start_date: 1026,
+      radiation_site: 'Craniospinal',
+      total_radiation_dose: '36/54',
+      total_radiation_dose_unit: 'CGE',
+    },
+    {
+      radiation_start_date: 1743,
+      radiation_site: 'Focal/Tumor bed',
+      total_radiation_dose: '5400',
+      total_radiation_dose_unit: 'cGy',
+    },
+    {
+      radiation_start_date: 2344,
+      radiation_site: 'Focal/Tumor bed',
+      total_radiation_dose: '3000 ',
+      total_radiation_dose_unit: 'cGy',
+    },
+    {
+      radiation_start_date: 2780,
+      radiation_site: 'Focal/Tumor bed',
+      total_radiation_dose: '35',
+      total_radiation_dose_unit: 'Gy',
+    },
+  ],
+  regimens: [
+    {
+      regimen_start_date: 1606,
+      chemotherapy_agents: [
+        'cisplatin',
+        'cyclophosphamide',
+        'cytarabine',
+        'dactinomycin',
+        'doxorubicin',
+        'etoposide',
+        'methotrexate',
+        'temozolomide',
+        'vincristine',
+      ],
+    },
+    { regimen_start_date: null, chemotherapy_agents: ['temozolomide'] },
+    { regimen_start_date: null, chemotherapy_agents: ['etoposide'] },
+  ],
+};
+
+// TODO: replace with a call to the generated patient API client once the backend endpoint lands
+export async function fetchPatientTreatments(_patientId: string): Promise<PatientTreatments> {
+  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  return PATIENT_TREATMENTS_MOCK;
+}
