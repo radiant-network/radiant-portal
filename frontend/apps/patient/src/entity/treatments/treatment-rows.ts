@@ -1,59 +1,58 @@
-import type { PatientRadiation, PatientTreatments } from '../../api/patient';
+import type { PatientDose, PatientEntity, PatientRadiation } from '@/api/api';
 
 export type TreatmentType = 'surgery' | 'radiation' | 'medical_therapy';
+
+export const DOSE_KEYS = ['craniospinal', 'focal_boost', 'total_primary'] as const;
+
+export type TreatmentDoses = Record<(typeof DOSE_KEYS)[number], string | null>;
 
 export type TreatmentRow = {
   day: number | null;
   type: TreatmentType;
   description: string | string[];
-  dose: string | null;
+  doses: TreatmentDoses | null;
 };
 
-// Below this value a cGy/CGE dose is already Gy-scale (extract mixes magnitudes)
-const GY_SCALE_THRESHOLD = 100;
-const CGY_PER_GY = 100;
-
-// TODO: confirm with the backend whether doses are normalised server-side
-export function formatDoseInGy(value: string | null, unit: string | null): string | null {
-  if (value == null || unit == null) return null;
-
-  const normalizedUnit = unit.trim().toLowerCase();
-  const doses = value.split('/').map(part => {
-    const dose = parseFloat(part.trim());
-    if (!Number.isFinite(dose)) return null;
-    if (normalizedUnit === 'cgy' || normalizedUnit === 'cge') {
-      return dose < GY_SCALE_THRESHOLD ? dose : dose / CGY_PER_GY;
-    }
-    return dose;
-  });
-
-  if (doses.some(dose => dose == null)) return null;
-  return `${doses.map(dose => dose!.toFixed(1)).join('/')} Gy`;
+// Displayed as sent by the backend; a sentinel fills both fields, so show it once
+export function formatDose(dose: PatientDose | undefined): string | null {
+  const value = dose?.value?.trim();
+  const unit = dose?.unit?.trim();
+  if (!value) return null;
+  if (!unit || unit === value) return value;
+  return `${value} ${unit}`;
 }
 
-function formatRadiationDose(radiation: PatientRadiation) {
-  return formatDoseInGy(radiation.total_radiation_dose, radiation.total_radiation_dose_unit);
+function getRadiationDoses(radiation: PatientRadiation): TreatmentDoses {
+  return {
+    craniospinal: formatDose(radiation.craniospinal_dose),
+    focal_boost: formatDose(radiation.focal_boost_dose),
+    total_primary: formatDose(radiation.total_primary_dose),
+  };
 }
 
-export function toTreatmentRows({ surgeries, radiations, regimens }: PatientTreatments): TreatmentRow[] {
+export function toTreatmentRows({
+  surgeries,
+  radiations,
+  therapies,
+}: Pick<PatientEntity, 'surgeries' | 'radiations' | 'therapies'>): TreatmentRow[] {
   const rows: TreatmentRow[] = [
     ...surgeries.map(surgery => ({
-      day: surgery.surgery_date,
+      day: surgery.day ?? null,
       type: 'surgery' as const,
-      description: surgery.extent_of_tumor_resection,
-      dose: null,
+      description: surgery.extent_of_tumor_resection ?? '',
+      doses: null,
     })),
     ...radiations.map(radiation => ({
-      day: radiation.radiation_start_date,
+      day: radiation.start.day ?? null,
       type: 'radiation' as const,
-      description: radiation.radiation_site,
-      dose: formatRadiationDose(radiation),
+      description: radiation.site ?? '',
+      doses: getRadiationDoses(radiation),
     })),
-    ...regimens.map(regimen => ({
-      day: regimen.regimen_start_date,
+    ...therapies.map(therapy => ({
+      day: therapy.start.day ?? null,
       type: 'medical_therapy' as const,
-      description: regimen.chemotherapy_agents,
-      dose: null,
+      description: therapy.chemotherapy_agents,
+      doses: null,
     })),
   ];
 

@@ -1172,6 +1172,11 @@
         "surgery": "Surgery",
         "radiation": "Radiation",
         "medical_therapy": "Medical therapy"
+      },
+      "doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
       }
     }
   },

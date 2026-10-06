@@ -1173,6 +1173,11 @@
         "surgery": "Chirurgie",
         "radiation": "Radiothérapie",
         "medical_therapy": "Traitement médical"
+      },
+      "doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
       }
     }
   },

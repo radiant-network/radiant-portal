@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { TFunction } from 'i18next';
 
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
@@ -5,7 +6,7 @@ import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { createAppColumnHelper, type TableColumnDef } from '@/components/base/data-table/data-table';
 import { Badge } from '@/components/base/shadcn/badge';
 
-import type { TreatmentRow } from './treatment-rows';
+import { DOSE_KEYS, type TreatmentRow } from './treatment-rows';
 
 const columnHelper = createAppColumnHelper<TreatmentRow>();
 
@@ -43,10 +44,23 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
       },
       header: t('patient_entity.treatments.columns.description'),
     }),
-    columnHelper.accessor('dose', {
-      cell: info => info.getValue() ?? <EmptyCell />,
+    columnHelper.accessor('doses', {
+      cell: info => {
+        const doses = info.getValue();
+        if (!doses) return <EmptyCell />;
+        return (
+          <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+            {DOSE_KEYS.map(key => (
+              <Fragment key={key}>
+                <dt className="text-muted-foreground">{t(`patient_entity.treatments.doses.${key}`)}</dt>
+                <dd>{doses[key] ?? <EmptyCell />}</dd>
+              </Fragment>
+            ))}
+          </dl>
+        );
+      },
       header: t('patient_entity.treatments.columns.dose'),
-      size: 140,
+      size: 200,
     }),
   ] as TableColumnDef<TreatmentRow, any>[];
 }

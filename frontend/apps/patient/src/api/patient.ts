@@ -1,3 +1,11 @@
+import {
+  type PatientEntity,
+  PatientEntityGenderEnum,
+  PatientEntityPatientIdTypeEnum,
+  PatientEntityVitalStatusEnum,
+  PatientKeyDateSourceEnum,
+} from '@/api/api';
+
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists
 export type PatientSite = 'UCSF' | 'CHOP' | 'Seattle';
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists
@@ -1044,76 +1052,86 @@ export async function fetchPatientCancerPredispositions(_patientId: string): Pro
   return PATIENT_CANCER_PREDISPOSITIONS_MOCK;
 }
 
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientSurgery = {
-  surgery_date: number | null;
-  extent_of_tumor_resection: string;
-};
+const NOT_APPLICABLE_DOSE = { value: 'Not Applicable', unit: 'Not Applicable' };
 
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientRadiation = {
-  radiation_start_date: number | null;
-  radiation_site: string;
-  // Raw extract value, may hold several doses (e.g. "3600/5400")
-  total_radiation_dose: string | null;
-  total_radiation_dose_unit: string | null;
-};
-
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientRegimen = {
-  regimen_start_date: number | null;
-  chemotherapy_agents: string[];
-};
-
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientTreatments = {
-  surgeries: PatientSurgery[];
-  radiations: PatientRadiation[];
-  regimens: PatientRegimen[];
-};
-
-// Same placeholder for every patient
-// plus the duplicate craniospinal rows flagged in the analysis.
-const PATIENT_TREATMENTS_MOCK: PatientTreatments = {
+// Same placeholder for every patient, lifted from the v6.2 wireframe (Kai Ellery).
+// Treatments include the duplicate craniospinal rows flagged in the analysis.
+// TODO: remove once the backend implements the patient entity endpoint
+export const PATIENT_ENTITY_MOCK: PatientEntity = {
+  patient_key: 'C1032093',
+  patient_id: 'C1032093',
+  patient_id_type: PatientEntityPatientIdTypeEnum.ResearchId,
+  given_name: 'Kai',
+  family_name: 'Ellery',
+  gender: PatientEntityGenderEnum.Male,
+  birth_year: 2015,
+  organization_code: 'CHOP',
+  organization_name: "The Children's Hospital of Philadelphia",
+  vital_status: PatientEntityVitalStatusEnum.Deceased,
+  vital_status_at: { day: 1343 },
+  survival_days: 524,
+  can_read_phi: false,
+  has_imaging: false,
+  case_count: 0,
+  cases: [],
+  events: [],
+  imaging: [],
+  key_dates: {
+    initial_diagnosis: { day: 819, source: PatientKeyDateSourceEnum.Clinical },
+    latest_encounter: { day: 1343, source: PatientKeyDateSourceEnum.Registry },
+  },
   surgeries: [
-    { surgery_date: 1564, extent_of_tumor_resection: 'Gross/Near total resection' },
-    { surgery_date: 3289, extent_of_tumor_resection: 'Gross/Near total resection' },
+    { day: 1564, extent_of_tumor_resection: 'Gross/Near total resection' },
+    { day: 3289, extent_of_tumor_resection: 'Gross/Near total resection' },
   ],
   radiations: [
     {
-      radiation_start_date: 1026,
-      radiation_site: 'Craniospinal',
-      total_radiation_dose: '3600/5400',
-      total_radiation_dose_unit: 'CGE',
+      start: { day: 1026 },
+      stop: { day: 1070 },
+      site: 'Craniospinal with focal boost',
+      type: 'Protons',
+      craniospinal_dose: { value: '3600', unit: 'CGE' },
+      focal_boost_dose: { value: '1800', unit: 'CGE' },
+      total_primary_dose: { value: '5400', unit: 'CGE' },
     },
     {
-      radiation_start_date: 1026,
-      radiation_site: 'Craniospinal',
-      total_radiation_dose: '36/54',
-      total_radiation_dose_unit: 'CGE',
+      start: { day: 1026 },
+      stop: { day: 1070 },
+      site: 'Craniospinal with focal boost',
+      type: 'Protons',
+      craniospinal_dose: { value: '36', unit: 'CGE' },
+      focal_boost_dose: { value: '18', unit: 'CGE' },
+      total_primary_dose: { value: '54', unit: 'CGE' },
     },
     {
-      radiation_start_date: 1743,
-      radiation_site: 'Focal/Tumor bed',
-      total_radiation_dose: '5400',
-      total_radiation_dose_unit: 'cGy',
+      start: { day: 1743 },
+      stop: { day: 1785 },
+      site: 'Focal/Tumor bed',
+      type: 'Protons',
+      craniospinal_dose: NOT_APPLICABLE_DOSE,
+      total_primary_dose: { value: '5400', unit: 'cGy' },
     },
     {
-      radiation_start_date: 2344,
-      radiation_site: 'Focal/Tumor bed',
-      total_radiation_dose: '3000 ',
-      total_radiation_dose_unit: 'cGy',
+      start: { day: 2344 },
+      stop: {},
+      site: 'Focal/Tumor bed',
+      type: 'Photons',
+      craniospinal_dose: NOT_APPLICABLE_DOSE,
+      total_primary_dose: { value: '3000 ', unit: 'cGy' },
     },
     {
-      radiation_start_date: 2780,
-      radiation_site: 'Focal/Tumor bed',
-      total_radiation_dose: '35',
-      total_radiation_dose_unit: 'Gy',
+      start: { day: 2780 },
+      stop: {},
+      site: 'Focal/Tumor bed',
+      type: 'Photons',
+      craniospinal_dose: { value: 'Not Reported', unit: 'Not Reported' },
+      total_primary_dose: { value: '35', unit: 'Gy' },
     },
   ],
-  regimens: [
+  therapies: [
     {
-      regimen_start_date: 1606,
+      start: { day: 1606 },
+      stop: {},
       chemotherapy_agents: [
         'cisplatin',
         'cyclophosphamide',
@@ -1126,13 +1144,7 @@ const PATIENT_TREATMENTS_MOCK: PatientTreatments = {
         'vincristine',
       ],
     },
-    { regimen_start_date: null, chemotherapy_agents: ['temozolomide'] },
-    { regimen_start_date: null, chemotherapy_agents: ['etoposide'] },
+    { start: {}, stop: {}, chemotherapy_agents: ['temozolomide'] },
+    { start: {}, stop: {}, chemotherapy_agents: ['etoposide'] },
   ],
 };
-
-// TODO: replace with a call to the generated patient API client once the backend endpoint lands
-export async function fetchPatientTreatments(_patientId: string): Promise<PatientTreatments> {
-  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
-  return PATIENT_TREATMENTS_MOCK;
-}
