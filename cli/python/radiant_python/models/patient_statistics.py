@@ -32,11 +32,12 @@ class PatientStatistics(BaseModel):
     by_age_bucket: List[Aggregation] = Field(description="Keys 0-4, 5-9, 10-14, 15-19, 20+")
     by_diagnosis: List[Aggregation]
     by_organization: List[PatientOrganizationVitalCount]
+    by_protocol: List[Aggregation] = Field(description="Patients per protocol_name, a patient counted once per protocol")
     imaging_count: StrictInt
     survival: List[PatientSurvival] = Field(description="Input of the Kaplan-Meier")
     total: StrictInt
     with_cases_count: StrictInt
-    __properties: ClassVar[List[str]] = ["by_age_bucket", "by_diagnosis", "by_organization", "imaging_count", "survival", "total", "with_cases_count"]
+    __properties: ClassVar[List[str]] = ["by_age_bucket", "by_diagnosis", "by_organization", "by_protocol", "imaging_count", "survival", "total", "with_cases_count"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -98,6 +99,13 @@ class PatientStatistics(BaseModel):
                 if _item_by_organization:
                     _items.append(_item_by_organization.to_dict())
             _dict['by_organization'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in by_protocol (list)
+        _items = []
+        if self.by_protocol:
+            for _item_by_protocol in self.by_protocol:
+                if _item_by_protocol:
+                    _items.append(_item_by_protocol.to_dict())
+            _dict['by_protocol'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in survival (list)
         _items = []
         if self.survival:
@@ -120,6 +128,7 @@ class PatientStatistics(BaseModel):
             "by_age_bucket": [Aggregation.from_dict(_item) for _item in obj["by_age_bucket"]] if obj.get("by_age_bucket") is not None else None,
             "by_diagnosis": [Aggregation.from_dict(_item) for _item in obj["by_diagnosis"]] if obj.get("by_diagnosis") is not None else None,
             "by_organization": [PatientOrganizationVitalCount.from_dict(_item) for _item in obj["by_organization"]] if obj.get("by_organization") is not None else None,
+            "by_protocol": [Aggregation.from_dict(_item) for _item in obj["by_protocol"]] if obj.get("by_protocol") is not None else None,
             "imaging_count": obj.get("imaging_count"),
             "survival": [PatientSurvival.from_dict(_item) for _item in obj["survival"]] if obj.get("survival") is not None else None,
             "total": obj.get("total"),

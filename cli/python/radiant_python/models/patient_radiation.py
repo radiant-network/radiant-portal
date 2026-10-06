@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.patient_day_date import PatientDayDate
 from radiant_python.models.patient_dose import PatientDose
@@ -30,6 +30,7 @@ class PatientRadiation(BaseModel):
     """ # noqa: E501
     craniospinal_dose: PatientDose
     focal_boost_dose: Optional[PatientDose] = None
+    is_initial_treatment: Optional[StrictBool] = Field(default=None, description="null when Not Reported")
     site: Optional[StrictStr] = None
     site_other: Optional[StrictStr] = None
     start: PatientDayDate
@@ -37,7 +38,7 @@ class PatientRadiation(BaseModel):
     total_primary_dose: PatientDose
     type: Optional[StrictStr] = None
     type_other: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["craniospinal_dose", "focal_boost_dose", "site", "site_other", "start", "stop", "total_primary_dose", "type", "type_other"]
+    __properties: ClassVar[List[str]] = ["craniospinal_dose", "focal_boost_dose", "is_initial_treatment", "site", "site_other", "start", "stop", "total_primary_dose", "type", "type_other"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,6 +108,7 @@ class PatientRadiation(BaseModel):
         _obj = cls.model_validate({
             "craniospinal_dose": PatientDose.from_dict(obj["craniospinal_dose"]) if obj.get("craniospinal_dose") is not None else None,
             "focal_boost_dose": PatientDose.from_dict(obj["focal_boost_dose"]) if obj.get("focal_boost_dose") is not None else None,
+            "is_initial_treatment": obj.get("is_initial_treatment"),
             "site": obj.get("site"),
             "site_other": obj.get("site_other"),
             "start": PatientDayDate.from_dict(obj["start"]) if obj.get("start") is not None else None,

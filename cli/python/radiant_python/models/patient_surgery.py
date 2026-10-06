@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from datetime import date
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,7 +30,8 @@ class PatientSurgery(BaseModel):
     var_date: Optional[date] = Field(default=None, alias="date")
     day: Optional[StrictInt] = None
     extent_of_tumor_resection: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["date", "day", "extent_of_tumor_resection"]
+    is_initial_treatment: Optional[StrictBool] = Field(default=None, description="null when Not Reported")
+    __properties: ClassVar[List[str]] = ["date", "day", "extent_of_tumor_resection", "is_initial_treatment"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,7 +86,8 @@ class PatientSurgery(BaseModel):
         _obj = cls.model_validate({
             "date": obj.get("date"),
             "day": obj.get("day"),
-            "extent_of_tumor_resection": obj.get("extent_of_tumor_resection")
+            "extent_of_tumor_resection": obj.get("extent_of_tumor_resection"),
+            "is_initial_treatment": obj.get("is_initial_treatment")
         })
         return _obj
 

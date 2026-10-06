@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **cns_diagnosis_category** | **str** |  | [optional] 
 **cns_integrated_diagnosis** | **str** |  | [optional] 
+**cns_integrated_diagnosis_source** | **str** | Dataset of the diagnosis, e.g. CBTN or OpenPedCan | [optional] 
 **var_date** | **date** |  | [optional] 
 **day** | **int** |  | [optional] 
 **event_type** | **str** |  | 

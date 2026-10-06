@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **can_read_phi** | **bool** |  | 
 **case_count** | **int** | Portal cases, 0 outside the portal | 
 **cns_integrated_diagnosis** | **str** | From the initial event | [optional] 
+**cns_integrated_diagnosis_source** | **str** | Dataset of the diagnosis, e.g. CBTN or OpenPedCan | [optional] 
 **family_name** | **str** | Placeholder when can_read_phi is false | 
 **gender** | **str** |  | 
 **given_name** | **str** | Placeholder when can_read_phi is false | 

@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **case_count** | **int** | Portal cases, 0 outside the portal | 
 **cases** | [**List[PatientCase]**](PatientCase.md) |  | 
 **cns_integrated_diagnosis** | **str** | From the initial event | [optional] 
+**cns_integrated_diagnosis_source** | **str** | Dataset of the diagnosis, e.g. CBTN or OpenPedCan | [optional] 
 **data_type_cohort** | **str** |  | [optional] 
 **diagnosis_type_cohort** | **str** |  | [optional] 
 **ethnicity** | **str** |  | [optional] 
