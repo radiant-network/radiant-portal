@@ -159,7 +159,8 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 			_, mapped := expectedTenantActions[key]
 			_, mappedToAny := expectedTenantAnyActions[key]
 			_, memberOnly := membershipOnlyTenantRoutes[key]
-			assert.Truef(t, mapped || mappedToAny || memberOnly, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions (or RequireAnyAction and expectedTenantAnyActions), or declare it in membershipOnlyTenantRoutes if it is intentionally member-readable", key)
+			_, perChange := perChangeActionTenantRoutes[key]
+			assert.Truef(t, mapped || mappedToAny || memberOnly || perChange, "route %q is not mapped to an action — gate it with RequireAction and add it to expectedTenantActions (or RequireAnyAction and expectedTenantAnyActions), or declare it in membershipOnlyTenantRoutes if it is intentionally member-readable", key)
 		}
 
 		// Reverse direction: every mapped route must still exist, so the maps can't rot.
@@ -172,7 +173,16 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 		for key := range membershipOnlyTenantRoutes {
 			assert.Truef(t, actual[key], "member-only route %q is no longer registered — remove it from membershipOnlyTenantRoutes", key)
 		}
+		for key := range perChangeActionTenantRoutes {
+			assert.Truef(t, actual[key], "per-change route %q is no longer registered — remove it from perChangeActionTenantRoutes", key)
+		}
 	})
+}
+
+// Each change in the payload needs its own action at its own case's lab, picked by what the
+// change does: can_ingest_data for one involving a system status, can_edit_case for any other.
+var perChangeActionTenantRoutes = map[string][]string{
+	"PATCH /:tenant/cases/status": {types.ActionIngestData, types.ActionEditCase},
 }
 
 // Gated by tenant membership alone: referential reads any member may see.
@@ -203,9 +213,7 @@ var orgResolvedTenantRoutes = map[string]bool{
 	// One lab per record, and the action is required at every one of them.
 	"POST /:tenant/cases/batch":  true,
 	"PATCH /:tenant/cases/batch": true,
-	// One lab per case_id, like the case batches.
-	"PATCH /:tenant/cases/status": true,
-	"PUT /:tenant/cases/batch":    true,
+	"PUT /:tenant/cases/batch":   true,
 }
 
 // Org-scoped action, but nothing in the request names an organization: these batch records are
@@ -249,6 +257,12 @@ func Test_OrgScopedRoutesResolveTheirOrg(t *testing.T) {
 			}
 			assert.Truef(t, orgResolvedTenantRoutes[route] || inTenantOrgActionRoutes[route],
 				"route %q is gated on the org-scoped action %q but resolves no org — gate it with requireActionAt and a resolver, then declare it in orgResolvedTenantRoutes, or gate it with requireActionInTenant and declare it in inTenantOrgActionRoutes if the request names no org", route, action)
+		}
+
+		for route, routeActions := range perChangeActionTenantRoutes {
+			for _, action := range routeActions {
+				assert.Equalf(t, types.ActionScopeOrg, scopes[action], "per-change route %q checks %q at each case's lab, so it must be an org-scoped action", route, action)
+			}
 		}
 
 		for route := range orgResolvedTenantRoutes {
@@ -352,6 +366,5 @@ var expectedTenantActions = map[string]string{
 	"PUT /:tenant/sequencing/batch":                                                         types.ActionIngestData,
 	"POST /:tenant/cases/batch":                                                             types.ActionIngestData,
 	"PATCH /:tenant/cases/batch":                                                            types.ActionIngestData,
-	"PATCH /:tenant/cases/status":                                                           types.ActionIngestData,
 	"PUT /:tenant/cases/batch":                                                              types.ActionIngestData,
 }

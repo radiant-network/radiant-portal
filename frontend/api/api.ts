@@ -1601,16 +1601,8 @@ export interface CaseStatusChange {
      * @type {string}
      * @memberof CaseStatusChange
      */
-    'status_code': CaseStatusChangeStatusCodeEnum;
+    'status_code': string;
 }
-
-export const CaseStatusChangeStatusCodeEnum = {
-    Processing: 'processing',
-    InProgress: 'in_progress'
-} as const;
-
-export type CaseStatusChangeStatusCodeEnum = typeof CaseStatusChangeStatusCodeEnum[keyof typeof CaseStatusChangeStatusCodeEnum];
-
 /**
  * updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant\'s own.
  * @export
@@ -1742,7 +1734,7 @@ export interface CasesSearchResponse {
     'list': Array<CaseResult>;
 }
 /**
- * Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
+ * Status changes to apply to cases. A change between two user statuses needs can_edit_case at the case\'s lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and is limited to submitted -> processing and processing -> in_progress.
  * @export
  * @interface CasesStatusRequest
  */
@@ -9546,7 +9538,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
          * @summary Set the status of cases
          * @param {string} tenant Tenant code
          * @param {CasesStatusRequest} casesStatusRequest Status changes
@@ -9925,7 +9917,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
          * @summary Set the status of cases
          * @param {string} tenant Tenant code
          * @param {CasesStatusRequest} casesStatusRequest Status changes
@@ -10116,7 +10108,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
-         * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
          * @summary Set the status of cases
          * @param {string} tenant Tenant code
          * @param {CasesStatusRequest} casesStatusRequest Status changes
@@ -10310,7 +10302,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+     * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
      * @summary Set the status of cases
      * @param {string} tenant Tenant code
      * @param {CasesStatusRequest} casesStatusRequest Status changes

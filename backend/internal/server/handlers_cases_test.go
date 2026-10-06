@@ -666,17 +666,28 @@ func Test_PatchCasesStatusHandler_RejectsDisallowedChange(t *testing.T) {
 	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"in_progress","expected_status_codes":["submitted"]}]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"case 1: submitted -> in_progress is not an allowed change, in_progress can only be set from processing"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"case 1: submitted -> in_progress is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress"}`, w.Body.String())
 	assert.Empty(t, repo.calls)
 }
 
-func Test_PatchCasesStatusHandler_RejectsOtherTargetStatus(t *testing.T) {
+func Test_PatchCasesStatusHandler_RejectsUnknownTargetStatus(t *testing.T) {
 	repo := &caseStatusSetterMock{}
-	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"completed","expected_status_codes":["in_progress"]}]}`)
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"archived","expected_status_codes":["in_progress"]}]}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"case 1: status_code \"completed\" is not allowed, expected one of: processing, in_progress"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"case 1: unknown status_code \"archived\""}`, w.Body.String())
 	assert.Empty(t, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_AppliesUserChange(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
+		1: {CaseID: 1, Updated: true, CurrentStatusCode: "completed"},
+	}}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"completed","expected_status_codes":["in_progress","in_review"]}]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"cases":[{"case_id":1,"updated":true,"current_status_code":"completed"}]}`, w.Body.String())
+	assert.Equal(t, []types.CaseStatusChange{{CaseID: 1, StatusCode: "completed", ExpectedStatusCodes: []string{"in_progress", "in_review"}}}, repo.calls)
 }
 
 func Test_PatchCasesStatusHandler_OneInvalidChangeWritesNothing(t *testing.T) {

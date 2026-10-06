@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,13 +30,6 @@ class CaseStatusChange(BaseModel):
     expected_status_codes: List[StrictStr]
     status_code: StrictStr
     __properties: ClassVar[List[str]] = ["case_id", "expected_status_codes", "status_code"]
-
-    @field_validator('status_code')
-    def status_code_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['processing', 'in_progress']):
-            raise ValueError("must be one of enum values ('processing', 'in_progress')")
-        return value
 
     model_config = ConfigDict(
         populate_by_name=True,

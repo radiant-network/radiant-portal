@@ -1,6 +1,6 @@
 # CasesStatusRequest
 
-Status changes the pipeline applies to cases. Only submitted -> processing and processing -> in_progress are allowed.
+Status changes to apply to cases. A change between two user statuses needs can_edit_case at the case's lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and is limited to submitted -> processing and processing -> in_progress.
 
 ## Properties
 

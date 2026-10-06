@@ -18,7 +18,6 @@ type caseOrgLookup interface {
 	OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error)
 	OrgsForDocument(ctx context.Context, tenantCode string, documentID int) ([]string, error)
 	OrgsForSubmitterCases(ctx context.Context, tenantCode string, pairs [][2]string) (map[[2]string]string, error)
-	DiagnosisLabForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error)
 }
 
 // OrgFromCaseParam resolves the org from the :case_id the route already names — occurrence
@@ -163,53 +162,6 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 			}
 		}
 
-		return slices.Sorted(maps.Keys(orgs)), nil
-	}
-}
-
-// OrgsFromCaseIDsBody resolves the diagnosis lab of every case_id in a {"cases":[{"case_id":…}]}
-// payload, for the all-of gate. A case the tenant does not hold resolves to nothing, which
-// denies the whole request: it is refused, never reported, so the gate does not reveal whether
-// a case exists.
-func OrgsFromCaseIDsBody(repo caseOrgLookup) OrgResolver {
-	return func(c *gin.Context) ([]string, error) {
-		tenant, err := GetTenant(c)
-		if err != nil {
-			return nil, err
-		}
-
-		var body struct {
-			Cases []struct {
-				CaseID int `json:"case_id"`
-			} `json:"cases"`
-		}
-		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
-			return nil, nil
-		}
-		if len(body.Cases) == 0 {
-			return nil, nil
-		}
-
-		caseIDs := make([]int, 0, len(body.Cases))
-		for _, record := range body.Cases {
-			if record.CaseID == 0 {
-				return nil, nil
-			}
-			caseIDs = append(caseIDs, record.CaseID)
-		}
-
-		resolved, err := repo.DiagnosisLabForCases(c.Request.Context(), *tenant, caseIDs)
-		if err != nil {
-			return nil, err
-		}
-		orgs := map[string]bool{}
-		for _, caseID := range caseIDs {
-			lab, found := resolved[caseID]
-			if !found {
-				return nil, nil
-			}
-			orgs[lab] = true
-		}
 		return slices.Sorted(maps.Keys(orgs)), nil
 	}
 }

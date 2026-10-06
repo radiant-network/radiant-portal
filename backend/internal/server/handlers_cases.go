@@ -271,12 +271,13 @@ type caseStatusSetter interface {
 	SetCaseStatusIfExpected(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error)
 }
 
-// PatchCasesStatusHandler applies the status changes the pipeline makes as it processes a
-// case. The whole request is validated before any case is written, so a rejected change leaves
-// every case of the request untouched.
+// PatchCasesStatusHandler applies conditional status changes to several cases: those the
+// pipeline makes as it processes a case, and those a geneticist makes afterwards. The whole
+// request is validated before any case is written, so a rejected change leaves every case of the
+// request untouched.
 // @Summary Set the status of cases
 // @Id patchCasesStatus
-// @Description Used by the pipeline to change system case statuses. Any other change is rejected with a 400. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status. Requires can_ingest_data at the diagnosis lab of every case; a case the tenant does not hold refuses the whole request with a 403.
+// @Description Change the status of several cases. A change between two user statuses needs can_edit_case at the case's diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
