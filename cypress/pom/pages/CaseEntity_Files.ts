@@ -202,16 +202,8 @@ export const CaseEntity_Files = {
      * @param object The object to view (file | variants).
      */
     selectAction(dataFile: any, object: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
-          if (position !== -1) {
-            cy.get(selectors.tableCell(dataFile)).eq(position).find('button').clickAndWait({ force: true });
-            cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
-          } else {
-            cy.handleColumnNotFound('actions');
-          }
-        })
-      );
+      cy.get(selectors.tableCell(dataFile)).last().find('button').clickAndWait({ force: true });
+      cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
     },
     /**
      * Shows all columns in the table.
