@@ -10,6 +10,17 @@ const selectors = {
 
 const tableColumns = [
   {
+    id: 'assignees',
+    name: '[class~="lucide-user"]',
+    apiField: 'assignees',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 0,
+    tooltip: 'Case assignment',
+  },
+  {
     id: 'case',
     name: 'Case',
     apiField: 'case_id',
@@ -17,7 +28,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -28,7 +39,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 1,
+    position: 2,
     tooltip: null,
   },
   {
@@ -39,7 +50,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 2,
+    position: 3,
     tooltip: `Patient's medical record number`,
   },
   {
@@ -50,7 +61,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 3,
+    position: 4,
     tooltip: null,
   },
   {
@@ -61,7 +72,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 4,
+    position: 5,
     tooltip: null,
   },
   {
@@ -72,7 +83,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 5,
+    position: 6,
     tooltip: /(?=.*Somatic)(?=.*Solo germline)(?=.*Family germline)/, // RegExp that checks that all 3 are present (in any order)
   },
   {
@@ -83,7 +94,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 6,
+    position: 7,
     tooltip: null,
   },
   {
@@ -94,7 +105,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 7,
+    position: 8,
     tooltip: null,
   },
   {
@@ -105,7 +116,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 8,
+    position: 9,
     tooltip: 'Requested by',
   },
   {
@@ -116,7 +127,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 9,
+    position: 10,
     tooltip: null,
   },
   {
@@ -127,7 +138,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 11,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
@@ -138,7 +149,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 12,
     tooltip: 'Date of last case modification (yyyy-mm-dd)',
   },
   {
@@ -149,7 +160,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 13,
     tooltip: 'Prescribing doctor',
   },
   {
@@ -160,7 +171,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Molecular diagnostic laboratory',
   },
   {
@@ -171,7 +182,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 14,
+    position: 15,
     tooltip: 'Organization managing the patient’s file',
   },
   {
@@ -182,7 +193,7 @@ const tableColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 16,
     tooltip: null,
   },
 ];
@@ -245,16 +256,8 @@ export const CasesTable = {
      * @param object The object to view (case | variants).
      */
     selectAction(dataCase: any, object: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
-          if (position !== -1) {
-            cy.get(selectors.tableCell(dataCase)).eq(position).find('button').clickAndWait({ force: true });
-            cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
-          } else {
-            cy.handleColumnNotFound('actions');
-          }
-        })
-      );
+      cy.get(selectors.tableCell(dataCase)).last().find('button').clickAndWait({ force: true });
+      cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
     },
     /**
      * Select a suggestion in the list.

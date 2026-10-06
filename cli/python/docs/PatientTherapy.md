@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **chemotherapy_agents** | **List[str]** |  | 
 **chemotherapy_type** | **str** |  | [optional] 
 **is_initial_treatment** | **bool** | null when Not Reported | [optional] 
+**protocol_arm** | **str** |  | [optional] 
+**protocol_name** | **str** |  | [optional] 
 **protocol_name_and_arm** | **str** |  | [optional] 
 **start** | [**PatientDayDate**](PatientDayDate.md) |  | 
 **stop** | [**PatientDayDate**](PatientDayDate.md) |  | 

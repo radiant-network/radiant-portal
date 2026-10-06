@@ -6,12 +6,16 @@ Initial treatment summary of a patient
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**first_chemo_ever** | [**PatientDayDate**](PatientDayDate.md) |  | 
 **first_event** | [**PatientDayDate**](PatientDayDate.md) |  | 
-**first_methotrexate** | [**PatientDayDate**](PatientDayDate.md) |  | 
-**first_radiation** | [**PatientDayDate**](PatientDayDate.md) |  | 
+**first_methotrexate_ever** | [**PatientDayDate**](PatientDayDate.md) |  | 
+**first_radiation_ever** | [**PatientDayDate**](PatientDayDate.md) |  | 
+**had_initial_chemo** | **bool** |  | 
 **had_initial_methotrexate** | **bool** |  | 
 **had_initial_radiation** | **bool** |  | 
+**initial_chemo** | [**PatientDayDate**](PatientDayDate.md) |  | 
 **initial_dx** | [**PatientDayDate**](PatientDayDate.md) |  | 
+**initial_radiation** | [**PatientDayDate**](PatientDayDate.md) |  | 
 **initial_treatment_order** | **str** |  | [optional] 
 
 ## Example

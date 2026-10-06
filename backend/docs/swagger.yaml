@@ -2520,6 +2520,9 @@ components:
         cns_integrated_diagnosis:
           description: From the initial event
           type: string
+        cns_integrated_diagnosis_source:
+          description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
         data_type_cohort:
           type: string
         diagnosis_type_cohort:
@@ -2633,6 +2636,9 @@ components:
         cns_diagnosis_category:
           type: string
         cns_integrated_diagnosis:
+          type: string
+        cns_integrated_diagnosis_source:
+          description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
           type: string
         date:
           example: "2020-01-31"
@@ -2763,6 +2769,9 @@ components:
         cns_integrated_diagnosis:
           description: From the initial event
           type: string
+        cns_integrated_diagnosis_source:
+          description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
         family_name:
           description: Placeholder when can_read_phi is false
           type: string
@@ -2841,6 +2850,9 @@ components:
           $ref: '#/components/schemas/PatientDose'
         focal_boost_dose:
           $ref: '#/components/schemas/PatientDose'
+        is_initial_treatment:
+          description: null when Not Reported
+          type: boolean
         site:
           type: string
         site_other:
@@ -2881,6 +2893,12 @@ components:
             $ref: '#/components/schemas/PatientOrganizationVitalCount'
           type: array
           uniqueItems: false
+        by_protocol:
+          description: Patients per protocol_name, a patient counted once per protocol
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
         imaging_count:
           type: integer
         survival:
@@ -2897,6 +2915,7 @@ components:
       - by_age_bucket
       - by_diagnosis
       - by_organization
+      - by_protocol
       - imaging_count
       - survival
       - total
@@ -2913,6 +2932,9 @@ components:
           type: integer
         extent_of_tumor_resection:
           type: string
+        is_initial_treatment:
+          description: null when Not Reported
+          type: boolean
       type: object
     PatientSurvival:
       description: Survival time of one patient, for the Kaplan-Meier
@@ -2944,6 +2966,10 @@ components:
         is_initial_treatment:
           description: null when Not Reported
           type: boolean
+        protocol_arm:
+          type: string
+        protocol_name:
+          type: string
         protocol_name_and_arm:
           type: string
         start:
@@ -2958,27 +2984,39 @@ components:
     PatientTreatmentSummary:
       description: Initial treatment summary of a patient
       properties:
+        first_chemo_ever:
+          $ref: '#/components/schemas/PatientDayDate'
         first_event:
           $ref: '#/components/schemas/PatientDayDate'
-        first_methotrexate:
+        first_methotrexate_ever:
           $ref: '#/components/schemas/PatientDayDate'
-        first_radiation:
+        first_radiation_ever:
           $ref: '#/components/schemas/PatientDayDate'
+        had_initial_chemo:
+          type: boolean
         had_initial_methotrexate:
           type: boolean
         had_initial_radiation:
           type: boolean
+        initial_chemo:
+          $ref: '#/components/schemas/PatientDayDate'
         initial_dx:
+          $ref: '#/components/schemas/PatientDayDate'
+        initial_radiation:
           $ref: '#/components/schemas/PatientDayDate'
         initial_treatment_order:
           type: string
       required:
+      - first_chemo_ever
       - first_event
-      - first_methotrexate
-      - first_radiation
+      - first_methotrexate_ever
+      - first_radiation_ever
+      - had_initial_chemo
       - had_initial_methotrexate
       - had_initial_radiation
+      - initial_chemo
       - initial_dx
+      - initial_radiation
       type: object
     PatientsSearchResponse:
       properties:

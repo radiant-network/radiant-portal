@@ -44,6 +44,7 @@ class PatientEntity(BaseModel):
     case_count: StrictInt = Field(description="Portal cases, 0 outside the portal")
     cases: List[PatientCase]
     cns_integrated_diagnosis: Optional[StrictStr] = Field(default=None, description="From the initial event")
+    cns_integrated_diagnosis_source: Optional[StrictStr] = Field(default=None, description="Dataset of the diagnosis, e.g. CBTN or OpenPedCan")
     data_type_cohort: Optional[StrictStr] = None
     diagnosis_type_cohort: Optional[StrictStr] = None
     ethnicity: Optional[StrictStr] = None
@@ -70,7 +71,7 @@ class PatientEntity(BaseModel):
     treatment_summary: Optional[PatientTreatmentSummary] = None
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -203,6 +204,7 @@ class PatientEntity(BaseModel):
             "case_count": obj.get("case_count"),
             "cases": [PatientCase.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None,
             "cns_integrated_diagnosis": obj.get("cns_integrated_diagnosis"),
+            "cns_integrated_diagnosis_source": obj.get("cns_integrated_diagnosis_source"),
             "data_type_cohort": obj.get("data_type_cohort"),
             "diagnosis_type_cohort": obj.get("diagnosis_type_cohort"),
             "ethnicity": obj.get("ethnicity"),

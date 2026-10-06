@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **var_date** | **date** |  | [optional] 
 **day** | **int** |  | [optional] 
 **extent_of_tumor_resection** | **str** |  | [optional] 
+**is_initial_treatment** | **bool** | null when Not Reported | [optional] 
 
 ## Example
 
