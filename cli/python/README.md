@@ -161,8 +161,13 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**create_organization**](docs/OrganizationsApi.md#create_organization) | **POST** /{tenant}/organizations | Create an organization
 *OrganizationsApi* | [**list_organizations**](docs/OrganizationsApi.md#list_organizations) | **GET** /{tenant}/organizations | List the tenant&#39;s organizations
 *OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
+*PatientsApi* | [**autocomplete_patients**](docs/PatientsApi.md#autocomplete_patients) | **GET** /{tenant}/patients/autocomplete | Get AutocompleteResult list of PCX patients matching prefix
+*PatientsApi* | [**patient_entity**](docs/PatientsApi.md#patient_entity) | **GET** /{tenant}/patients/{patient_key} | Get PatientEntity patient entity
+*PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
+*PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
+*PatientsApi* | [**search_patients**](docs/PatientsApi.md#search_patients) | **POST** /{tenant}/patients/search | Search PCX patients
 *RolesApi* | [**create_role**](docs/RolesApi.md#create_role) | **POST** /{tenant}/roles | Create a custom role
 *RolesApi* | [**delete_role**](docs/RolesApi.md#delete_role) | **DELETE** /{tenant}/roles/{code} | Delete a custom role
 *RolesApi* | [**get_role**](docs/RolesApi.md#get_role) | **GET** /{tenant}/roles/{code} | Get one of the tenant&#39;s roles
@@ -293,6 +298,24 @@ Class | Method | HTTP request | Description
  - [PatchCase](docs/PatchCase.md)
  - [PatchCaseBatchBody](docs/PatchCaseBatchBody.md)
  - [PatientBatch](docs/PatientBatch.md)
+ - [PatientCase](docs/PatientCase.md)
+ - [PatientDayDate](docs/PatientDayDate.md)
+ - [PatientDose](docs/PatientDose.md)
+ - [PatientEntity](docs/PatientEntity.md)
+ - [PatientEvent](docs/PatientEvent.md)
+ - [PatientFilters](docs/PatientFilters.md)
+ - [PatientImagingSession](docs/PatientImagingSession.md)
+ - [PatientKeyDate](docs/PatientKeyDate.md)
+ - [PatientKeyDates](docs/PatientKeyDates.md)
+ - [PatientListItem](docs/PatientListItem.md)
+ - [PatientOrganizationVitalCount](docs/PatientOrganizationVitalCount.md)
+ - [PatientRadiation](docs/PatientRadiation.md)
+ - [PatientStatistics](docs/PatientStatistics.md)
+ - [PatientSurgery](docs/PatientSurgery.md)
+ - [PatientSurvival](docs/PatientSurvival.md)
+ - [PatientTherapy](docs/PatientTherapy.md)
+ - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
+ - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
  - [RoleActionResult](docs/RoleActionResult.md)
