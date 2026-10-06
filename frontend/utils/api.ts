@@ -12,6 +12,7 @@ import {
   OccurrenceNotesApi,
   OccurrencesApi,
   OrganizationsApi,
+  PatientsApi,
   RolesApi,
   SavedFiltersApi,
   SequencingApi,
@@ -47,3 +48,4 @@ export const valueSetsApi = new ValueSetsApi(config, BASE_PATH, axiosClient);
 export const usersApi = new UsersApi(config, BASE_PATH, axiosClient);
 export const rolesApi = new RolesApi(config, BASE_PATH, axiosClient);
 export const actionsApi = new ActionsApi(config, BASE_PATH, axiosClient);
+export const patientsApi = new PatientsApi(config, BASE_PATH, axiosClient);

@@ -60,7 +60,10 @@
         "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
         "name": "Nom",
         "notification_emails": "Courriels de notification",
-        "notification_emails_hint": "Adresses séparées par des virgules qui reçoivent le courriel de disponibilité des données et son manifeste pour ce laboratoire. Laissez vide pour aucune notification."
+        "notification_emails_hint": "Séparez les adresses par des virgules.",
+        "notification_placeholder": "diagnosticlab@exemple.org, geneticien@exemple.org",
+        "notification_section": "Notifications",
+        "notification_section_description": "Un courriel avec le manifeste des fichiers est envoyé aux adresses ci-dessous lorsque de nouvelles données génomiques sont disponibles."
       },
       "filters": {
         "category": "Catégorie",
@@ -350,6 +353,7 @@
         "invalid_code": "Lettres, chiffres, traits de soulignement et tirets; commencez par une lettre.",
         "at_least_one_permission": "Sélectionnez au moins une permission.",
         "invalid_email": "Saisissez une adresse courriel valide.",
+        "invalid_notification_emails": "Entrez des adresses courriel valides, séparées par des virgules.",
         "invalid_role_code": "Doit commencer par une lettre minuscule et ne contenir que des lettres minuscules, des chiffres et des traits de soulignement.",
         "organization_code_exists": "Une organisation avec ce code existe déjà.",
         "role_code_exists": "Un rôle avec ce code existe déjà.",
@@ -1153,6 +1157,27 @@
         "query_status_description": "Localisation et récupération des dossiers QHIN",
         "linked": "Lié",
         "connected": "Connecté"
+      }
+    },
+    "treatments": {
+      "title_count_one": "{{count}} traitement",
+      "title_count_other": "{{count}} traitements",
+      "day_value": "Jour {{day}}",
+      "columns": {
+        "day": "Jour",
+        "type": "Type",
+        "description": "Description",
+        "dose": "Dose"
+      },
+      "types": {
+        "surgery": "Chirurgie",
+        "radiation": "Radiothérapie",
+        "medical_therapy": "Traitement médical"
+      },
+      "doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
       }
     }
   },

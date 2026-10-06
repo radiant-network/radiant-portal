@@ -26,15 +26,16 @@ type PatientIdentity struct {
 // @Name PatientListItem
 type PatientListItem struct {
 	PatientIdentity
-	BirthYear              *int    `json:"birth_year"`
-	Gender                 string  `json:"gender" validate:"required" enums:"female,male,unknown"`
-	CnsIntegratedDiagnosis *string `json:"cns_integrated_diagnosis"` // From the initial event
-	VitalStatus            string  `json:"vital_status" validate:"required" enums:"alive,deceased"`
-	AgeAtVitalStatusDays   *int    `json:"age_at_vital_status_days"`
-	AgeAtInitialDxDays     *int    `json:"age_at_initial_dx_days"`
-	SurvivalDays           *int    `json:"survival_days"` // Vital status day minus initial diagnosis day
-	HasImaging             bool    `json:"has_imaging" validate:"required"`
-	CaseCount              int     `json:"case_count" validate:"required"` // Portal cases, 0 outside the portal
+	BirthYear                    *int    `json:"birth_year"`
+	Gender                       string  `json:"gender" validate:"required" enums:"female,male,unknown"`
+	CnsIntegratedDiagnosis       *string `json:"cns_integrated_diagnosis"`        // From the initial event
+	CnsIntegratedDiagnosisSource *string `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+	VitalStatus                  string  `json:"vital_status" validate:"required" enums:"alive,deceased"`
+	AgeAtVitalStatusDays         *int    `json:"age_at_vital_status_days"`
+	AgeAtInitialDxDays           *int    `json:"age_at_initial_dx_days"`
+	SurvivalDays                 *int    `json:"survival_days"` // Vital status day minus initial diagnosis day
+	HasImaging                   bool    `json:"has_imaging" validate:"required"`
+	CaseCount                    int     `json:"case_count" validate:"required"` // Portal cases, 0 outside the portal
 }
 
 type PatientsSearchResponse = SearchResponse[PatientListItem]
@@ -57,6 +58,7 @@ type PatientStatistics struct {
 	WithCasesCount int64                           `json:"with_cases_count" validate:"required"`
 	ByDiagnosis    []Aggregation                   `json:"by_diagnosis" validate:"required"`
 	ByAgeBucket    []Aggregation                   `json:"by_age_bucket" validate:"required"` // Keys 0-4, 5-9, 10-14, 15-19, 20+
+	ByProtocol     []Aggregation                   `json:"by_protocol" validate:"required"`   // Patients per protocol_name, a patient counted once per protocol
 	ByOrganization []PatientOrganizationVitalCount `json:"by_organization" validate:"required"`
 	Survival       []PatientSurvival               `json:"survival" validate:"required"` // Input of the Kaplan-Meier
 }
@@ -133,14 +135,15 @@ type PatientEntity struct {
 // @Name PatientEvent
 type PatientEvent struct {
 	PatientDayDate
-	EventType               string   `json:"event_type" validate:"required" enums:"initial_cns_tumor,progressive,recurrence,second_malignancy,deceased,unavailable"`
-	CnsDiagnosisCategory    *string  `json:"cns_diagnosis_category"`
-	CnsIntegratedDiagnosis  *string  `json:"cns_integrated_diagnosis"`
-	TumorLocations          []string `json:"tumor_locations" validate:"required"`
-	TumorLocationOther      *string  `json:"tumor_location_other"`
-	Metastasis              *string  `json:"metastasis"` // Yes, No or Not Applicable, as in the source
-	MetastasisLocations     []string `json:"metastasis_locations" validate:"required"`
-	MetastasisLocationOther *string  `json:"metastasis_location_other"`
+	EventType                    string   `json:"event_type" validate:"required" enums:"initial_cns_tumor,progressive,recurrence,second_malignancy,deceased,unavailable"`
+	CnsDiagnosisCategory         *string  `json:"cns_diagnosis_category"`
+	CnsIntegratedDiagnosis       *string  `json:"cns_integrated_diagnosis"`
+	CnsIntegratedDiagnosisSource *string  `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+	TumorLocations               []string `json:"tumor_locations" validate:"required"`
+	TumorLocationOther           *string  `json:"tumor_location_other"`
+	Metastasis                   *string  `json:"metastasis"` // Yes, No or Not Applicable, as in the source
+	MetastasisLocations          []string `json:"metastasis_locations" validate:"required"`
+	MetastasisLocationOther      *string  `json:"metastasis_location_other"`
 }
 
 // PatientSurgery - Surgery of a patient
@@ -149,6 +152,7 @@ type PatientEvent struct {
 type PatientSurgery struct {
 	PatientDayDate
 	ExtentOfTumorResection *string `json:"extent_of_tumor_resection"`
+	IsInitialTreatment     *bool   `json:"is_initial_treatment"` // null when Not Reported
 }
 
 // PatientDose - Radiation dose
@@ -163,15 +167,16 @@ type PatientDose struct {
 // @Description Radiation course of a patient
 // @Name PatientRadiation
 type PatientRadiation struct {
-	Start            PatientDayDate `json:"start" validate:"required"`
-	Stop             PatientDayDate `json:"stop" validate:"required"`
-	Site             *string        `json:"site"`
-	SiteOther        *string        `json:"site_other"`
-	Type             *string        `json:"type"`
-	TypeOther        *string        `json:"type_other"`
-	CraniospinalDose PatientDose    `json:"craniospinal_dose" validate:"required"`  // total_radiation_dose
-	TotalPrimaryDose PatientDose    `json:"total_primary_dose" validate:"required"` // total_radiation_dose_focal
-	FocalBoostDose   *PatientDose   `json:"focal_boost_dose"`                       // Total to primary minus craniospinal; null unless both are numbers in the same unit
+	Start              PatientDayDate `json:"start" validate:"required"`
+	Stop               PatientDayDate `json:"stop" validate:"required"`
+	Site               *string        `json:"site"`
+	SiteOther          *string        `json:"site_other"`
+	Type               *string        `json:"type"`
+	TypeOther          *string        `json:"type_other"`
+	CraniospinalDose   PatientDose    `json:"craniospinal_dose" validate:"required"`  // total_radiation_dose
+	TotalPrimaryDose   PatientDose    `json:"total_primary_dose" validate:"required"` // total_radiation_dose_focal
+	FocalBoostDose     *PatientDose   `json:"focal_boost_dose"`                       // Total to primary minus craniospinal; null unless both are numbers in the same unit
+	IsInitialTreatment *bool          `json:"is_initial_treatment"`                   // null when Not Reported
 }
 
 // PatientTherapy - Medical therapy of a patient
@@ -181,6 +186,8 @@ type PatientTherapy struct {
 	Start              PatientDayDate `json:"start" validate:"required"`
 	Stop               PatientDayDate `json:"stop" validate:"required"`
 	ProtocolNameAndArm *string        `json:"protocol_name_and_arm"`
+	ProtocolName       *string        `json:"protocol_name"`
+	ProtocolArm        *string        `json:"protocol_arm"`
 	ChemotherapyType   *string        `json:"chemotherapy_type"`
 	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
 	IsInitialTreatment *bool          `json:"is_initial_treatment"` // null when Not Reported
@@ -204,9 +211,13 @@ type PatientImagingSession struct {
 type PatientTreatmentSummary struct {
 	InitialDx              PatientDayDate `json:"initial_dx" validate:"required"`
 	FirstEvent             PatientDayDate `json:"first_event" validate:"required"`
-	FirstRadiation         PatientDayDate `json:"first_radiation" validate:"required"`
-	FirstMethotrexate      PatientDayDate `json:"first_methotrexate" validate:"required"`
+	FirstRadiationEver     PatientDayDate `json:"first_radiation_ever" validate:"required"`
+	InitialRadiation       PatientDayDate `json:"initial_radiation" validate:"required"`
+	FirstChemoEver         PatientDayDate `json:"first_chemo_ever" validate:"required"`
+	InitialChemo           PatientDayDate `json:"initial_chemo" validate:"required"`
+	FirstMethotrexateEver  PatientDayDate `json:"first_methotrexate_ever" validate:"required"`
 	HadInitialRadiation    bool           `json:"had_initial_radiation" validate:"required"`
+	HadInitialChemo        bool           `json:"had_initial_chemo" validate:"required"`
 	HadInitialMethotrexate bool           `json:"had_initial_methotrexate" validate:"required"`
 	InitialTreatmentOrder  *string        `json:"initial_treatment_order"`
 }

@@ -29,6 +29,7 @@ class PatientEvent(BaseModel):
     """ # noqa: E501
     cns_diagnosis_category: Optional[StrictStr] = None
     cns_integrated_diagnosis: Optional[StrictStr] = None
+    cns_integrated_diagnosis_source: Optional[StrictStr] = Field(default=None, description="Dataset of the diagnosis, e.g. CBTN or OpenPedCan")
     var_date: Optional[date] = Field(default=None, alias="date")
     day: Optional[StrictInt] = None
     event_type: StrictStr
@@ -37,7 +38,7 @@ class PatientEvent(BaseModel):
     metastasis_locations: List[StrictStr]
     tumor_location_other: Optional[StrictStr] = None
     tumor_locations: List[StrictStr]
-    __properties: ClassVar[List[str]] = ["cns_diagnosis_category", "cns_integrated_diagnosis", "date", "day", "event_type", "metastasis", "metastasis_location_other", "metastasis_locations", "tumor_location_other", "tumor_locations"]
+    __properties: ClassVar[List[str]] = ["cns_diagnosis_category", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "date", "day", "event_type", "metastasis", "metastasis_location_other", "metastasis_locations", "tumor_location_other", "tumor_locations"]
 
     @field_validator('event_type')
     def event_type_validate_enum(cls, value):
@@ -99,6 +100,7 @@ class PatientEvent(BaseModel):
         _obj = cls.model_validate({
             "cns_diagnosis_category": obj.get("cns_diagnosis_category"),
             "cns_integrated_diagnosis": obj.get("cns_integrated_diagnosis"),
+            "cns_integrated_diagnosis_source": obj.get("cns_integrated_diagnosis_source"),
             "date": obj.get("date"),
             "day": obj.get("day"),
             "event_type": obj.get("event_type"),
