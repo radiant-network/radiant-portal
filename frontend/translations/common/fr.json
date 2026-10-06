@@ -1240,6 +1240,8 @@
         "status_code": "Statut"
       },
       "headers": {
+        "assignees": "Assignation",
+        "assignees_tooltip": "Assignation du cas",
         "case_id": "Cas",
         "patient_id": "Patient",
         "submitter_patient_id": "Dossier",

@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { User } from 'lucide-react';
+
 import type { CaseEntity, CaseStatus, Term, VepImpact } from '@/api/api';
 import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
@@ -10,6 +13,8 @@ import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
 import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/table/cells/occurrence-actions-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
+import AssignmentPicker from '@/components/base/assignation/assignment-picker';
+import type { AvatarUser } from '@/components/base/avatar';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
@@ -897,7 +902,58 @@ function WithInterpretPermission({ granted, children }: { granted: boolean; chil
   );
 }
 
+const assignmentCandidates: AvatarUser[] = [
+  { id: 'user-1', name: 'Vincent Ferretti', email: 'vincent.ferretti.hsj@ssss.gouv.qc.ca' },
+  { id: 'user-2', name: 'Sophie Dubois', email: 'sdubois.hsj@ssss.gouv.qc.ca' },
+  { id: 'user-3', name: 'Amélie Lefebvre', email: 'alefebvre.hsj@ssss.gouv.qc.ca' },
+];
+
+/**
+ * Renders what CaseAssignmentCell renders: the real cell reads the session user from the
+ * portal's data router and calls the API, neither of which exists in Storybook.
+ */
+function AssignmentCellDemo({ canEdit, rowIndex }: { canEdit: boolean; rowIndex: number }) {
+  // Cycles through unassigned, one assignee and an overflowing group.
+  const [assignees, setAssignees] = useState<AvatarUser[]>(
+    [[], [assignmentCandidates[1]], assignmentCandidates][rowIndex % 3],
+  );
+
+  return (
+    <AssignmentPicker
+      candidates={assignmentCandidates}
+      assignees={assignees}
+      canEdit={canEdit}
+      currentUserId="user-1"
+      size="xs"
+      align="start"
+      onApply={setAssignees}
+    />
+  );
+}
+
 export const applicationFirstSetCellColumns = [
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'case_assignment',
+    cell: info => <AssignmentCellDemo canEdit rowIndex={info.row.index} />,
+    header: () => (
+      <TooltipHeader iconOnly tooltip="CaseAssignmentCell (Case-Exploration)">
+        <User className="size-4 text-foreground" />
+      </TooltipHeader>
+    ),
+    size: 80,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'case_assignment_read_only',
+    cell: info => <AssignmentCellDemo canEdit={false} rowIndex={info.row.index} />,
+    header: 'CaseAssignmentCell (no permission)',
+    size: 170,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'hgvsg',
     cell: info => {

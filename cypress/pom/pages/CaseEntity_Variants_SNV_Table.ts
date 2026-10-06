@@ -629,16 +629,8 @@ const generateSNVTableActions = (config: SNVTableConfig) => {
      * @param action The action id to do (preview | view_variant | open_in_igv | ucsc | litvar).
      */
     selectAction(dataVariant: any, action: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
-          if (position !== -1) {
-            cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.actionButton).clickAndWait({ force: true });
-            cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(action)}`).clickAndWait({ force: true });
-          } else {
-            cy.handleColumnNotFound('actions');
-          }
-        })
-      );
+      cy.get(tableCellSelector(dataVariant)).last().find(CommonSelectors.actionButton).clickAndWait({ force: true });
+      cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(action)}`).clickAndWait({ force: true });
     },
     /**
      * Shows all columns in the table.

@@ -739,16 +739,8 @@ export const VariantEntity_Patients = {
          * @param object The object to view (case | variants).
          */
         selectAction(object: string) {
-          cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.uninterpreted.tableId), tableColumns.uninterpreted, 'actions').then(position => {
-              if (position !== -1) {
-                cy.get(CommonSelectors.tableRow(selectors.uninterpreted.tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find('button').clickAndWait({ force: true });
-                cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
-              } else {
-                cy.handleColumnNotFound('actions');
-              }
-            })
-          );
+          cy.get(CommonSelectors.tableRow(selectors.uninterpreted.tableId)).eq(0).find(CommonSelectors.tableCellData).last().find('button').clickAndWait({ force: true });
+          cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(object)}`).clickAndWait({ force: true });
         },
         /**
          * Select the tab to show the table.
