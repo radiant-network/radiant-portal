@@ -1097,6 +1097,44 @@
       "imaging": "Imagerie",
       "clinical_trials": "Essais cliniques"
     },
+    "overview": {
+      "initial_diagnosis": {
+        "title": "Diagnostic initial",
+        "cns_diagnosis_category": "Catégorie de diagnostic SNC",
+        "cns_integrated_diagnosis": "Diagnostic intégré SNC",
+        "event_date": "Date du diagnostic",
+        "source_of_event_diagnosis": "Source du diagnostic",
+        "date_of_initial_diagnosis_mri": "Date du diagnostic par IRM",
+        "events_total": "{{count}} événements au total",
+        "view_timeline": "Voir la chronologie"
+      },
+      "tumour_and_metastasis": {
+        "title": "Tumeur et métastases",
+        "tumor_locations": "Localisations tumorales",
+        "tumor_location_other": "Autre localisation",
+        "laterality": "Latéralité",
+        "metastasis": "Métastase",
+        "m_stage": "Stade métastatique (Chang)",
+        "metastasis_location": "Site de métastase",
+        "metastasis_location_other": "Site extraneural",
+        "symptoms_at_event": "Symptômes lors de l'événement",
+        "most_recent_event": "Événement le plus récent · {{type}} · Jour {{day}}"
+      },
+      "demographics": {
+        "title": "Données démographiques",
+        "mrn": "MRN",
+        "birth_year": "Année de naissance",
+        "gender": "Sexe",
+        "race": "Race",
+        "ethnicity": "Ethnicité",
+        "address_postal_code": "Code postal",
+        "organization_name": "Site"
+      },
+      "cancer_predispositions": {
+        "title": "Prédispositions au cancer",
+        "cancer_predisposition": "Liste des prédispositions"
+      }
+    },
     "sidebar": {
       "key_dates": {
         "title": "Dates clés",

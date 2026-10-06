@@ -12,19 +12,6 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.ConfigOptions) => {
   if (!config.expose) {
     config.expose = {};
   }
-
-  // Public configuration values (non-sensitive)
-  config.expose = {
-    ...config.expose,
-    keycloak_host: process.env.KEYCLOAK_HOST || 'https://auth.qa.juno.cqdg.ferlab.bio',
-    keycloak_realm: process.env.KEYCLOAK_REALM || 'CQDG',
-    keycloak_client: process.env.KEYCLOAK_CLIENT || 'cqdg-client',
-    api_base_url: process.env.CYPRESS_API_BASE_URL || 'https://radiant-api.qa.juno.cqdg.ferlab.bio/',
-    api_tenant: process.env.CYPRESS_API_TENANT || 'radiant',
-    api_client: process.env.CYPRESS_API_CLIENT || 'radiant',
-  };
-
-  // Sensitive values (credentials)
   config.env = {
     ...config.env,
     user_username: process.env.CYPRESS_USER_USERNAME,

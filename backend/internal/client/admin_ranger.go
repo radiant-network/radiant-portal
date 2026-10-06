@@ -149,6 +149,16 @@ func (c *RangerAdminClient) EnsureViewAccessPolicy(ctx context.Context, name str
 	}, roles))
 }
 
+// EnsureMaterializedViewAccessPolicy grants SELECT against the `materialized_view` resource,
+// a third sibling of `table` and `view` under `database`: neither of their policies reaches it.
+func (c *RangerAdminClient) EnsureMaterializedViewAccessPolicy(ctx context.Context, name string, databases, mvs, roles []string) error {
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":           map[string]any{"values": []string{"default_catalog"}},
+		"database":          map[string]any{"values": databases},
+		"materialized_view": map[string]any{"values": mvs},
+	}, roles))
+}
+
 func selectPolicy(name string, resources map[string]any, roles []string) map[string]any {
 	return map[string]any{
 		"policyType":     0,

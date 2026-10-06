@@ -55,6 +55,61 @@ func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, ten
 	return nil
 }
 
+// EnsureGenePanelMV creates the tenant's gene panel MV, then refreshes it. Run it after
+// EnsureClinicalViews, which creates the tenant database. The refresh makes the MV current
+// when this returns: the refresh that StarRocks starts at creation is asynchronous.
+func (r *StarrocksTenantRepository) EnsureGenePanelMV(ctx context.Context, tenantCode string) error {
+	stmt, err := BuildGenePanelMVStatement(tenantCode)
+	if err != nil {
+		return err
+	}
+	if err := r.db.WithContext(ctx).Exec(stmt).Error; err != nil {
+		return fmt.Errorf("ensure gene panel mv for %q: %w", tenantCode, err)
+	}
+	return r.RefreshGenePanelMV(ctx, tenantCode)
+}
+
+// RefreshGenePanelMV reloads the tenant's gene panel MV from Postgres and returns when the
+// refresh task ends, so a caller that just wrote panels reads them back.
+func (r *StarrocksTenantRepository) RefreshGenePanelMV(ctx context.Context, tenantCode string) error {
+	stmt, err := BuildGenePanelMVRefreshStatement(tenantCode)
+	if err != nil {
+		return err
+	}
+	if err := r.db.WithContext(ctx).Exec(stmt).Error; err != nil {
+		return fmt.Errorf("refresh gene panel mv for %q: %w", tenantCode, err)
+	}
+	return nil
+}
+
+// BuildGenePanelMVStatement builds the DDL of the tenant's gene panel MV. IF NOT EXISTS keeps
+// it idempotent, so a change to the definition needs a drop and a re-create. DEFERRED: no
+// refresh at creation, EnsureGenePanelMV refreshes it synchronously. DISTINCT, because
+// panel_has_genes is keyed by Ensembl ID and two IDs can share a symbol.
+func BuildGenePanelMVStatement(tenantCode string) (string, error) {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("CREATE MATERIALIZED VIEW IF NOT EXISTS `%s`.`%s` "+
+		"DISTRIBUTED BY HASH(`symbol`) "+
+		"REFRESH DEFERRED MANUAL "+
+		"AS SELECT DISTINCT p.name AS panel, g.symbol AS symbol "+
+		"FROM radiant_jdbc.public.panel p "+
+		"JOIN radiant_jdbc.public.panel_has_genes g ON g.panel_id = p.id "+
+		"WHERE p.tenant_code = '%s'",
+		types.TenantDatabase(tenantCode), types.TenantGenePanelMV, tenantCode), nil
+}
+
+// BuildGenePanelMVRefreshStatement builds the refresh of the tenant's gene panel MV. FORCE,
+// because StarRocks does not detect data changes in a PostgreSQL JDBC table.
+func BuildGenePanelMVRefreshStatement(tenantCode string) (string, error) {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("REFRESH MATERIALIZED VIEW `%s`.`%s` FORCE WITH SYNC MODE",
+		types.TenantDatabase(tenantCode), types.TenantGenePanelMV), nil
+}
+
 // BuildAuthStatements builds the global auth database + the PII-grant view DDL. Order
 // matters: pii_lab_patient reads pii_grant, and the patient view reads both.
 func BuildAuthStatements() []string {

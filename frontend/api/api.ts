@@ -4818,6 +4818,980 @@ export const PatientBatchSexCodeEnum = {
 export type PatientBatchSexCodeEnum = typeof PatientBatchSexCodeEnum[keyof typeof PatientBatchSexCodeEnum];
 
 /**
+ * Portal case the patient is part of
+ * @export
+ * @interface PatientCase
+ */
+export interface PatientCase {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'analysis_catalog_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCase
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'case_type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'diagnosis_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'priority_code'?: string;
+    /**
+     * proband, or the relationship_to_proband code
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'relationship': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'updated_on': string;
+}
+/**
+ * Age in days, and the calendar date when the caller can read PHI
+ * @export
+ * @interface PatientDayDate
+ */
+export interface PatientDayDate {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientDayDate
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientDayDate
+     */
+    'day'?: number;
+}
+/**
+ * Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
+ * @export
+ * @interface PatientDose
+ */
+export interface PatientDose {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientDose
+     */
+    'unit'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientDose
+     */
+    'value'?: string;
+}
+/**
+ * Data of the patient page
+ * @export
+ * @interface PatientEntity
+ */
+export interface PatientEntity {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'age_at_initial_dx_days'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'age_at_vital_status_days'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'birth_date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'birth_year'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientEntity
+     */
+    'can_read_phi': boolean;
+    /**
+     * Portal cases, 0 outside the portal
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'case_count': number;
+    /**
+     * 
+     * @type {Array<PatientCase>}
+     * @memberof PatientEntity
+     */
+    'cases': Array<PatientCase>;
+    /**
+     * From the initial event
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'cns_integrated_diagnosis'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'data_type_cohort'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'diagnosis_type_cohort'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'ethnicity'?: string;
+    /**
+     * 
+     * @type {Array<PatientEvent>}
+     * @memberof PatientEntity
+     */
+    'events': Array<PatientEvent>;
+    /**
+     * Placeholder when can_read_phi is false
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'family_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'gender': PatientEntityGenderEnum;
+    /**
+     * Placeholder when can_read_phi is false
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'given_name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientEntity
+     */
+    'has_imaging': boolean;
+    /**
+     * 
+     * @type {Array<PatientImagingSession>}
+     * @memberof PatientEntity
+     */
+    'imaging': Array<PatientImagingSession>;
+    /**
+     * BRIM link, format to be defined
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'initial_diagnosis_evidence_url'?: string;
+    /**
+     * 
+     * @type {PatientKeyDates}
+     * @memberof PatientEntity
+     */
+    'key_dates': PatientKeyDates;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'organization_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'patient_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'patient_id_type': PatientEntityPatientIdTypeEnum;
+    /**
+     * Opaque key for the patient page URL, the same for every user
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'patient_key': string;
+    /**
+     * Full with PHI access, 3 digits + XX otherwise
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'postal_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'race'?: string;
+    /**
+     * Portal patient id, null outside the portal
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'radiant_patient_id'?: number;
+    /**
+     * 
+     * @type {Array<PatientRadiation>}
+     * @memberof PatientEntity
+     */
+    'radiations': Array<PatientRadiation>;
+    /**
+     * 
+     * @type {Array<PatientSurgery>}
+     * @memberof PatientEntity
+     */
+    'surgeries': Array<PatientSurgery>;
+    /**
+     * Vital status day minus initial diagnosis day
+     * @type {number}
+     * @memberof PatientEntity
+     */
+    'survival_days'?: number;
+    /**
+     * 
+     * @type {Array<PatientTherapy>}
+     * @memberof PatientEntity
+     */
+    'therapies': Array<PatientTherapy>;
+    /**
+     * 
+     * @type {PatientTreatmentSummary}
+     * @memberof PatientEntity
+     */
+    'treatment_summary'?: PatientTreatmentSummary;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'vital_status': PatientEntityVitalStatusEnum;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientEntity
+     */
+    'vital_status_at': PatientDayDate;
+}
+
+export const PatientEntityGenderEnum = {
+    Female: 'female',
+    Male: 'male',
+    Unknown: 'unknown'
+} as const;
+
+export type PatientEntityGenderEnum = typeof PatientEntityGenderEnum[keyof typeof PatientEntityGenderEnum];
+export const PatientEntityPatientIdTypeEnum = {
+    Mrn: 'mrn',
+    ResearchId: 'research_id'
+} as const;
+
+export type PatientEntityPatientIdTypeEnum = typeof PatientEntityPatientIdTypeEnum[keyof typeof PatientEntityPatientIdTypeEnum];
+export const PatientEntityVitalStatusEnum = {
+    Alive: 'alive',
+    Deceased: 'deceased'
+} as const;
+
+export type PatientEntityVitalStatusEnum = typeof PatientEntityVitalStatusEnum[keyof typeof PatientEntityVitalStatusEnum];
+
+/**
+ * Disease event of a patient
+ * @export
+ * @interface PatientEvent
+ */
+export interface PatientEvent {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'cns_diagnosis_category'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'cns_integrated_diagnosis'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientEvent
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'event_type': PatientEventEventTypeEnum;
+    /**
+     * Yes, No or Not Applicable, as in the source
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'metastasis'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'metastasis_location_other'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientEvent
+     */
+    'metastasis_locations': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'tumor_location_other'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientEvent
+     */
+    'tumor_locations': Array<string>;
+}
+
+export const PatientEventEventTypeEnum = {
+    InitialCnsTumor: 'initial_cns_tumor',
+    Progressive: 'progressive',
+    Recurrence: 'recurrence',
+    SecondMalignancy: 'second_malignancy',
+    Deceased: 'deceased',
+    Unavailable: 'unavailable'
+} as const;
+
+export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof typeof PatientEventEventTypeEnum];
+
+/**
+ * Values of the patient list filters
+ * @export
+ * @interface PatientFilters
+ */
+export interface PatientFilters {
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'cns_integrated_diagnosis': Array<FiltersValue>;
+    /**
+     * label = organization name
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'organization_code': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'vital_status': Array<FiltersValue>;
+}
+/**
+ * Imaging session of a patient
+ * @export
+ * @interface PatientImagingSession
+ */
+export interface PatientImagingSession {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'anatomical_site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientImagingSession
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'flywheel_url'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'imaging_modality'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'session_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
+    'session_name': string;
+}
+/**
+ * Key date of the patient sidebar, with the source it comes from
+ * @export
+ * @interface PatientKeyDate
+ */
+export interface PatientKeyDate {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientKeyDate
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientKeyDate
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientKeyDate
+     */
+    'source': PatientKeyDateSourceEnum;
+}
+
+export const PatientKeyDateSourceEnum = {
+    Clinical: 'clinical',
+    Registry: 'registry'
+} as const;
+
+export type PatientKeyDateSourceEnum = typeof PatientKeyDateSourceEnum[keyof typeof PatientKeyDateSourceEnum];
+
+/**
+ * Key dates of the patient sidebar
+ * @export
+ * @interface PatientKeyDates
+ */
+export interface PatientKeyDates {
+    /**
+     * 
+     * @type {PatientKeyDate}
+     * @memberof PatientKeyDates
+     */
+    'initial_diagnosis': PatientKeyDate;
+    /**
+     * 
+     * @type {PatientKeyDate}
+     * @memberof PatientKeyDates
+     */
+    'latest_encounter': PatientKeyDate;
+}
+/**
+ * A PCX patient in the patient list
+ * @export
+ * @interface PatientListItem
+ */
+export interface PatientListItem {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'age_at_initial_dx_days'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'age_at_vital_status_days'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'birth_year'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientListItem
+     */
+    'can_read_phi': boolean;
+    /**
+     * Portal cases, 0 outside the portal
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'case_count': number;
+    /**
+     * From the initial event
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'cns_integrated_diagnosis'?: string;
+    /**
+     * Placeholder when can_read_phi is false
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'family_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'gender': PatientListItemGenderEnum;
+    /**
+     * Placeholder when can_read_phi is false
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'given_name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientListItem
+     */
+    'has_imaging': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'organization_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'patient_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'patient_id_type': PatientListItemPatientIdTypeEnum;
+    /**
+     * Opaque key for the patient page URL, the same for every user
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'patient_key': string;
+    /**
+     * Portal patient id, null outside the portal
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'radiant_patient_id'?: number;
+    /**
+     * Vital status day minus initial diagnosis day
+     * @type {number}
+     * @memberof PatientListItem
+     */
+    'survival_days'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'vital_status': PatientListItemVitalStatusEnum;
+}
+
+export const PatientListItemGenderEnum = {
+    Female: 'female',
+    Male: 'male',
+    Unknown: 'unknown'
+} as const;
+
+export type PatientListItemGenderEnum = typeof PatientListItemGenderEnum[keyof typeof PatientListItemGenderEnum];
+export const PatientListItemPatientIdTypeEnum = {
+    Mrn: 'mrn',
+    ResearchId: 'research_id'
+} as const;
+
+export type PatientListItemPatientIdTypeEnum = typeof PatientListItemPatientIdTypeEnum[keyof typeof PatientListItemPatientIdTypeEnum];
+export const PatientListItemVitalStatusEnum = {
+    Alive: 'alive',
+    Deceased: 'deceased'
+} as const;
+
+export type PatientListItemVitalStatusEnum = typeof PatientListItemVitalStatusEnum[keyof typeof PatientListItemVitalStatusEnum];
+
+/**
+ * Alive and deceased patients of one organization
+ * @export
+ * @interface PatientOrganizationVitalCount
+ */
+export interface PatientOrganizationVitalCount {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientOrganizationVitalCount
+     */
+    'alive': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientOrganizationVitalCount
+     */
+    'deceased': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientOrganizationVitalCount
+     */
+    'organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientOrganizationVitalCount
+     */
+    'organization_name': string;
+}
+/**
+ * Radiation course of a patient
+ * @export
+ * @interface PatientRadiation
+ */
+export interface PatientRadiation {
+    /**
+     * 
+     * @type {PatientDose}
+     * @memberof PatientRadiation
+     */
+    'craniospinal_dose': PatientDose;
+    /**
+     * 
+     * @type {PatientDose}
+     * @memberof PatientRadiation
+     */
+    'focal_boost_dose'?: PatientDose;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientRadiation
+     */
+    'site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientRadiation
+     */
+    'site_other'?: string;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientRadiation
+     */
+    'start': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientRadiation
+     */
+    'stop': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDose}
+     * @memberof PatientRadiation
+     */
+    'total_primary_dose': PatientDose;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientRadiation
+     */
+    'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientRadiation
+     */
+    'type_other'?: string;
+}
+/**
+ * Statistics on every patient the caller can see, regardless of the list filters
+ * @export
+ * @interface PatientStatistics
+ */
+export interface PatientStatistics {
+    /**
+     * Keys 0-4, 5-9, 10-14, 15-19, 20+
+     * @type {Array<Aggregation>}
+     * @memberof PatientStatistics
+     */
+    'by_age_bucket': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof PatientStatistics
+     */
+    'by_diagnosis': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<PatientOrganizationVitalCount>}
+     * @memberof PatientStatistics
+     */
+    'by_organization': Array<PatientOrganizationVitalCount>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientStatistics
+     */
+    'imaging_count': number;
+    /**
+     * Input of the Kaplan-Meier
+     * @type {Array<PatientSurvival>}
+     * @memberof PatientStatistics
+     */
+    'survival': Array<PatientSurvival>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientStatistics
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientStatistics
+     */
+    'with_cases_count': number;
+}
+/**
+ * Surgery of a patient
+ * @export
+ * @interface PatientSurgery
+ */
+export interface PatientSurgery {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientSurgery
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientSurgery
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientSurgery
+     */
+    'extent_of_tumor_resection'?: string;
+}
+/**
+ * Survival time of one patient, for the Kaplan-Meier
+ * @export
+ * @interface PatientSurvival
+ */
+export interface PatientSurvival {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientSurvival
+     */
+    'cns_integrated_diagnosis'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientSurvival
+     */
+    'days': number;
+    /**
+     * true when deceased
+     * @type {boolean}
+     * @memberof PatientSurvival
+     */
+    'event': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientSurvival
+     */
+    'organization_code': string;
+}
+/**
+ * Medical therapy of a patient
+ * @export
+ * @interface PatientTherapy
+ */
+export interface PatientTherapy {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientTherapy
+     */
+    'chemotherapy_agents': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTherapy
+     */
+    'chemotherapy_type'?: string;
+    /**
+     * null when Not Reported
+     * @type {boolean}
+     * @memberof PatientTherapy
+     */
+    'is_initial_treatment'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTherapy
+     */
+    'protocol_name_and_arm'?: string;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTherapy
+     */
+    'start': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTherapy
+     */
+    'stop': PatientDayDate;
+}
+/**
+ * Initial treatment summary of a patient
+ * @export
+ * @interface PatientTreatmentSummary
+ */
+export interface PatientTreatmentSummary {
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
+    'first_event': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
+    'first_methotrexate': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
+    'first_radiation': PatientDayDate;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientTreatmentSummary
+     */
+    'had_initial_methotrexate': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientTreatmentSummary
+     */
+    'had_initial_radiation': boolean;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
+    'initial_dx': PatientDayDate;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTreatmentSummary
+     */
+    'initial_treatment_order'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface PatientsSearchResponse
+ */
+export interface PatientsSearchResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientsSearchResponse
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<PatientListItem>}
+     * @memberof PatientsSearchResponse
+     */
+    'list': Array<PatientListItem>;
+}
+/**
  * 
  * @export
  * @interface PubmedCitation
@@ -14327,6 +15301,174 @@ export class OrganizationsApi extends BaseAPI {
 export const PatientsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Retrieve AutocompleteResult list matching prefix, of type patient_id or patient_name (names only where can_read_phi is true). A selected suggestion becomes a search criterion on the field named by its type.
+         * @summary Get AutocompleteResult list of PCX patients matching prefix
+         * @param {string} tenant Tenant code
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompletePatients: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('autocompletePatients', 'tenant', tenant)
+            // verify required parameter 'prefix' is not null or undefined
+            assertParamExists('autocompletePatients', 'prefix', prefix)
+            const localVarPath = `/{tenant}/patients/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (prefix !== undefined) {
+                localVarQueryParameter['prefix'] = prefix;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientEntity patient entity
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientEntity: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientEntity', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientEntity', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientFilters patient list filters
+         * @summary Get PatientFilters patient list filters
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsFilters: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientsFilters', 'tenant', tenant)
+            const localVarPath = `/{tenant}/patients/filters`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
+         * @summary Get PatientStatistics cohort analytics
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsStatistics: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientsStatistics', 'tenant', tenant)
+            const localVarPath = `/{tenant}/patients/statistics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new patient batch
          * @summary Create a new patient batch
          * @param {string} tenant Tenant code
@@ -14424,6 +15566,50 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * @summary Search PCX patients
+         * @param {string} tenant Tenant code
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchPatients: async (tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchPatients', 'tenant', tenant)
+            // verify required parameter 'listBodyWithCriteria' is not null or undefined
+            assertParamExists('searchPatients', 'listBodyWithCriteria', listBodyWithCriteria)
+            const localVarPath = `/{tenant}/patients/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(listBodyWithCriteria, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -14434,6 +15620,61 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
 export const PatientsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PatientsApiAxiosParamCreator(configuration)
     return {
+        /**
+         * Retrieve AutocompleteResult list matching prefix, of type patient_id or patient_name (names only where can_read_phi is true). A selected suggestion becomes a search criterion on the field named by its type.
+         * @summary Get AutocompleteResult list of PCX patients matching prefix
+         * @param {string} tenant Tenant code
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async autocompletePatients(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompletePatients(tenant, prefix, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.autocompletePatients']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientEntity patient entity
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientEntity>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientEntity(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientEntity']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientFilters patient list filters
+         * @summary Get PatientFilters patient list filters
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientsFilters(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsFilters(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsFilters']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
+         * @summary Get PatientStatistics cohort analytics
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientsStatistics(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientStatistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsStatistics(tenant, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsStatistics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
@@ -14464,6 +15705,20 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.putPatientBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * @summary Search PCX patients
+         * @param {string} tenant Tenant code
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchPatients(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientsSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchPatients(tenant, listBodyWithCriteria, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.searchPatients']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -14474,6 +15729,49 @@ export const PatientsApiFp = function(configuration?: Configuration) {
 export const PatientsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = PatientsApiFp(configuration)
     return {
+        /**
+         * Retrieve AutocompleteResult list matching prefix, of type patient_id or patient_name (names only where can_read_phi is true). A selected suggestion becomes a search criterion on the field named by its type.
+         * @summary Get AutocompleteResult list of PCX patients matching prefix
+         * @param {string} tenant Tenant code
+         * @param {string} prefix Prefix
+         * @param {string} [limit] Limit
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        autocompletePatients(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
+            return localVarFp.autocompletePatients(tenant, prefix, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientEntity patient entity
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientEntity> {
+            return localVarFp.patientEntity(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientFilters patient list filters
+         * @summary Get PatientFilters patient list filters
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsFilters(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientFilters> {
+            return localVarFp.patientsFilters(tenant, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
+         * @summary Get PatientStatistics cohort analytics
+         * @param {string} tenant Tenant code
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsStatistics(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientStatistics> {
+            return localVarFp.patientsStatistics(tenant, options).then((request) => request(axios, basePath));
+        },
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
@@ -14498,6 +15796,17 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
         putPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.putPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * @summary Search PCX patients
+         * @param {string} tenant Tenant code
+         * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchPatients(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<PatientsSearchResponse> {
+            return localVarFp.searchPatients(tenant, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -14508,6 +15817,57 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
  * @extends {BaseAPI}
  */
 export class PatientsApi extends BaseAPI {
+    /**
+     * Retrieve AutocompleteResult list matching prefix, of type patient_id or patient_name (names only where can_read_phi is true). A selected suggestion becomes a search criterion on the field named by its type.
+     * @summary Get AutocompleteResult list of PCX patients matching prefix
+     * @param {string} tenant Tenant code
+     * @param {string} prefix Prefix
+     * @param {string} [limit] Limit
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public autocompletePatients(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).autocompletePatients(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientEntity patient entity
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientEntity(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientFilters patient list filters
+     * @summary Get PatientFilters patient list filters
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientsFilters(tenant: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientsFilters(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
+     * @summary Get PatientStatistics cohort analytics
+     * @param {string} tenant Tenant code
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientsStatistics(tenant: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientsStatistics(tenant, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Create a new patient batch
      * @summary Create a new patient batch
@@ -14534,6 +15894,19 @@ export class PatientsApi extends BaseAPI {
      */
     public putPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).putPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+     * @summary Search PCX patients
+     * @param {string} tenant Tenant code
+     * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public searchPatients(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).searchPatients(tenant, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

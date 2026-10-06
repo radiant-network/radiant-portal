@@ -43,7 +43,7 @@ Config and env wiring: `cypress.config.ts` (defaults in `expose`/`baseUrl`) and 
 - `CYPRESS_USER_USERNAME`, `CYPRESS_USER_PASSWORD` — test user credentials
 - `KEYCLOAK_CLIENT_SECRET` — OAuth client secret
 
-Non-sensitive values (URLs, tenant, realm, client) have defaults in config and can be overridden via the corresponding env vars (`CYPRESS_API_BASE_URL`, `CYPRESS_API_TENANT`, `KEYCLOAK_HOST`, …).
+Non-sensitive values (URLs, tenant, realm, client) are fixed in the `expose` block of `cypress.config.ts` — env vars no longer override them; only `CYPRESS_BASE_URL` selects the target portal (QA, a Ferlease, a local portal). Every target uses the `radiant-local` client (excluded from secret rotation): `keycloak_redirect_uri` decouples the `cy.login()` redirect from `baseUrl`, so its single whitelisted URI covers them all.
 
 ## Page Object Model (POM) Pattern
 

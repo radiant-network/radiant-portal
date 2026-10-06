@@ -40,6 +40,12 @@ func (d *recordingTenantDeps) FederatableColumnsForViews(ctx context.Context) (m
 func (d *recordingTenantDeps) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
 	return d.record("EnsureClinicalViews")
 }
+func (d *recordingTenantDeps) EnsureGenePanelMV(ctx context.Context, tenantCode string) error {
+	return d.record("EnsureGenePanelMV")
+}
+func (d *recordingTenantDeps) EnsureMaterializedViewAccessPolicy(ctx context.Context, name string, databases, mvs, roles []string) error {
+	return d.record("EnsureMaterializedViewAccessPolicy")
+}
 func (d *recordingTenantDeps) EnsureRole(ctx context.Context, name string) error {
 	return d.record("EnsureRole")
 }
@@ -71,12 +77,12 @@ func Test_CreateTenant_RunsAllStepsInPostgresStarrocksRangerOrder(t *testing.T) 
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"EnsureTenant", "SeedDefaultRoles", // Phase A — Postgres
-		"EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews", // Phase B — StarRocks
+		"EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews", "EnsureGenePanelMV", // Phase B — StarRocks
 		// Phase C — Ranger: global masking bootstrap (marker role + auth grant/row-filter +
 		// shared-DB grant + 2 masks)...
 		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "EnsureRowFilterPolicy", "EnsureRowFilterPolicy", "EnsureAccessPolicy", "EnsureMaskPolicy", "EnsureMaskPolicy",
-		// ...then this tenant's role + table/view access policies + nesting under the marker.
-		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "AddRoleToRole",
+		// ...then this tenant's role + table/view/MV access policies + nesting under the marker.
+		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "EnsureMaterializedViewAccessPolicy", "AddRoleToRole",
 	}, d.calls)
 }
 
@@ -90,14 +96,16 @@ func Test_CreateTenant_StopsAndWrapsOnFirstFailure(t *testing.T) {
 	assert.Equal(t, []string{"EnsureTenant", "SeedDefaultRoles", "EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews"}, d.calls)
 }
 
-// refreshRecorder records which tenants EnsureClinicalViews was called for, and can
-// be told to fail for specific tenant codes.
+// refreshRecorder records which tenants EnsureClinicalViews / EnsureGenePanelMV were called
+// for, and can be told to fail for specific tenant codes.
 type refreshRecorder struct {
-	tenants     []string
-	refreshed   []string
-	authCalls   int
-	columnCalls int
-	failTenant  map[string]bool
+	tenants      []string
+	refreshed    []string
+	mvs          []string
+	authCalls    int
+	columnCalls  int
+	failTenant   map[string]bool
+	failMVTenant map[string]bool
 }
 
 func (d *refreshRecorder) ListTenants(ctx context.Context) ([]string, error) { return d.tenants, nil }
@@ -109,6 +117,14 @@ func (d *refreshRecorder) FederatableColumnsForViews(ctx context.Context) (map[s
 func (d *refreshRecorder) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
 	d.refreshed = append(d.refreshed, tenantCode)
 	if d.failTenant[tenantCode] {
+		return errors.New("boom")
+	}
+	return nil
+}
+
+func (d *refreshRecorder) EnsureGenePanelMV(ctx context.Context, tenantCode string) error {
+	d.mvs = append(d.mvs, tenantCode)
+	if d.failMVTenant[tenantCode] {
 		return errors.New("boom")
 	}
 	return nil
@@ -134,6 +150,55 @@ func Test_RefreshAllTenantViews_ContinuesPastAFailingTenantAndJoinsErrors(t *tes
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `refresh "demo"`)
 	assert.Equal(t, []string{"radiant", "demo", "cbtn"}, d.refreshed, "a failing tenant must not stop the others")
+}
+
+func Test_CreateTenant_StopsBeforeRangerWhenGenePanelMVFails(t *testing.T) {
+	d := &recordingTenantDeps{failAt: "EnsureGenePanelMV"}
+
+	err := CreateTenant(context.Background(), d.deps(), "demo", "Demo Hospital")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `starrocks: create gene panel mv for "demo"`)
+	assert.NotContains(t, d.calls, "EnsureRole", "no Ranger step after a StarRocks failure")
+}
+
+func Test_RefreshAllTenantViews_DoesNotTouchGenePanelMV(t *testing.T) {
+	d := &refreshRecorder{tenants: []string{"radiant", "demo"}}
+
+	_, err := RefreshAllTenantViews(context.Background(), d, d)
+
+	require.NoError(t, err)
+	assert.Empty(t, d.mvs, "the API startup refresh exits on error, so the MV must stay off this path")
+}
+
+func Test_EnsureAllGenePanelMVs_EnsuresEveryGivenTenant(t *testing.T) {
+	d := &refreshRecorder{}
+
+	require.NoError(t, EnsureAllGenePanelMVs(context.Background(), d, []string{"radiant", "demo"}))
+
+	assert.Equal(t, []string{"radiant", "demo"}, d.mvs)
+}
+
+func Test_EnsureAllGenePanelMVs_NoTenants_IsNoOp(t *testing.T) {
+	d := &refreshRecorder{}
+
+	require.NoError(t, EnsureAllGenePanelMVs(context.Background(), d, nil))
+
+	assert.Empty(t, d.mvs)
+}
+
+func Test_EnsureAllGenePanelMVs_ContinuesPastAFailingTenantAndJoinsErrors(t *testing.T) {
+	d := &refreshRecorder{failMVTenant: map[string]bool{"demo": true}}
+
+	err := EnsureAllGenePanelMVs(context.Background(), d, []string{"radiant", "demo", "cbtn"})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `refresh gene panel mv "demo"`)
+	assert.Equal(t, []string{"radiant", "demo", "cbtn"}, d.mvs, "a failing MV must not stop the others")
+}
+
+func Test_TenantMaterializedViewAccessPolicy_NamingConvention(t *testing.T) {
+	assert.Equal(t, "sr_access_demo_mvs", TenantMaterializedViewAccessPolicy("demo"))
 }
 
 func Test_TenantAccessPolicy_And_RangerTenantRole_NamingConventions(t *testing.T) {

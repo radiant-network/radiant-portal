@@ -130,7 +130,6 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
           CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
-          KEYCLOAK_CLIENT_SECRET: ${{ secrets.CYPRESS_KEYCLOAK_CLIENT_SECRET }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
           SG_ID=$(aws ec2 describe-security-groups \
@@ -153,7 +152,6 @@ jobs:
               --arg base_url "$CYPRESS_BASE_URL" \
               --arg username "$CYPRESS_USER_USERNAME" \
               --arg password "$CYPRESS_USER_PASSWORD" \
-              --arg kc_secret "$KEYCLOAK_CLIENT_SECRET" \
               --arg spec "${SHARDS[$i]}" \
               --arg shard_id "$i" \
               '{containerOverrides:[{name:"ferlease-cypress",environment:[
@@ -161,7 +159,6 @@ jobs:
                 {name:"CYPRESS_BASE_URL",value:$base_url},
                 {name:"CYPRESS_USER_USERNAME",value:$username},
                 {name:"CYPRESS_USER_PASSWORD",value:$password},
-                {name:"KEYCLOAK_CLIENT_SECRET",value:$kc_secret},
                 {name:"CYPRESS_SPEC",value:$spec},
                 {name:"SHARD_ID",value:$shard_id}
               ]}]}')
@@ -198,13 +195,13 @@ jobs:
             [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
             [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${PROXY_BASE}/?key=${RURL#s3://qlin-dev-cypress-artifacts/}|Shard ${i}>  "
           done
-          # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-"
-          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v "SJRA-" | wc -l | tr -d " ")
+          # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-", "CLIN-" or "RAD-"
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | grep -v -e "SJRA-" -e "CLIN-" -e "RAD-" | wc -l | tr -d " ")
           NEW_FAILS=${NEW_FAILS:-0}
           TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F "(attempt 3)" | wc -l | tr -d " ")
           TOTAL_FAILS=${TOTAL_FAILS:-0}
           # Only keep new failure screenshots in the combined zip
-          find /tmp/all_screenshots -type f \( ! -name "*(attempt 3)*" -o -name "*SJRA-*" \) -delete 2>/dev/null || true
+          find /tmp/all_screenshots -type f \( ! -name "*(attempt 3)*" -o -name "*SJRA-*" -o -name "*CLIN-*" -o -name "*RAD-*" \) -delete 2>/dev/null || true
           find /tmp/all_screenshots -mindepth 1 -type d -empty -delete 2>/dev/null || true
           COMBINED_ZURL=""
           if [ -n "$(ls -A /tmp/all_screenshots/ 2>/dev/null)" ]; then

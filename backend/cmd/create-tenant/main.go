@@ -98,6 +98,8 @@ func printCreatePlan(ctx context.Context, w io.Writer, code, name string, cols s
 	fprintf(w, "  ensure role %s (empty; membership owned by user provisioning)\n", service.RangerTenantRole(code))
 	fprintf(w, "  ensure access policy %s → SELECT on %s.* for role %s\n",
 		service.TenantAccessPolicy(code), types.TenantDatabase(code), service.RangerTenantRole(code))
+	fprintf(w, "  ensure materialized view access policy %s → SELECT on %s.* for role %s\n",
+		service.TenantMaterializedViewAccessPolicy(code), types.TenantDatabase(code), service.RangerTenantRole(code))
 	return nil
 }
 
@@ -113,6 +115,15 @@ func printViews(ctx context.Context, w io.Writer, code string, cols service.View
 	for _, stmt := range stmts {
 		fprintf(w, "  %s;\n", stmt)
 	}
+	mv, err := starrocks.BuildGenePanelMVStatement(code)
+	if err != nil {
+		return err
+	}
+	refresh, err := starrocks.BuildGenePanelMVRefreshStatement(code)
+	if err != nil {
+		return err
+	}
+	fprintf(w, "  %s;\n  %s;\n", mv, refresh)
 	return nil
 }
 

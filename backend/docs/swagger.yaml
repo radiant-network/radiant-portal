@@ -2446,6 +2446,553 @@ components:
       - submitter_patient_id
       - submitter_patient_id_type
       type: object
+    PatientCase:
+      description: Portal case the patient is part of
+      properties:
+        analysis_catalog_code:
+          type: string
+        case_id:
+          type: integer
+        case_type_code:
+          type: string
+        diagnosis_lab_code:
+          type: string
+        priority_code:
+          type: string
+        relationship:
+          description: proband, or the relationship_to_proband code
+          type: string
+        status_code:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - case_id
+      - case_type_code
+      - diagnosis_lab_code
+      - relationship
+      - status_code
+      - updated_on
+      type: object
+    PatientDayDate:
+      description: Age in days, and the calendar date when the caller can read PHI
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+      type: object
+    PatientDose:
+      description: Radiation dose, raw from the source, not normalized. The unit is
+        Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not
+        Available.
+      properties:
+        unit:
+          type: string
+        value:
+          type: string
+      type: object
+    PatientEntity:
+      description: Data of the patient page
+      properties:
+        age_at_initial_dx_days:
+          type: integer
+        age_at_vital_status_days:
+          type: integer
+        birth_date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        birth_year:
+          type: integer
+        can_read_phi:
+          type: boolean
+        case_count:
+          description: Portal cases, 0 outside the portal
+          type: integer
+        cases:
+          items:
+            $ref: '#/components/schemas/PatientCase'
+          type: array
+          uniqueItems: false
+        cns_integrated_diagnosis:
+          description: From the initial event
+          type: string
+        data_type_cohort:
+          type: string
+        diagnosis_type_cohort:
+          type: string
+        ethnicity:
+          type: string
+        events:
+          items:
+            $ref: '#/components/schemas/PatientEvent'
+          type: array
+          uniqueItems: false
+        family_name:
+          description: Placeholder when can_read_phi is false
+          type: string
+        gender:
+          enum:
+          - female
+          - male
+          - unknown
+          type: string
+        given_name:
+          description: Placeholder when can_read_phi is false
+          type: string
+        has_imaging:
+          type: boolean
+        imaging:
+          items:
+            $ref: '#/components/schemas/PatientImagingSession'
+          type: array
+          uniqueItems: false
+        initial_diagnosis_evidence_url:
+          description: BRIM link, format to be defined
+          type: string
+        key_dates:
+          $ref: '#/components/schemas/PatientKeyDates'
+        organization_code:
+          type: string
+        organization_name:
+          type: string
+        patient_id:
+          type: string
+        patient_id_type:
+          enum:
+          - mrn
+          - research_id
+          type: string
+        patient_key:
+          description: Opaque key for the patient page URL, the same for every user
+          format: uuid
+          type: string
+        postal_code:
+          description: Full with PHI access, 3 digits + XX otherwise
+          type: string
+        race:
+          type: string
+        radiant_patient_id:
+          description: Portal patient id, null outside the portal
+          type: integer
+        radiations:
+          items:
+            $ref: '#/components/schemas/PatientRadiation'
+          type: array
+          uniqueItems: false
+        surgeries:
+          items:
+            $ref: '#/components/schemas/PatientSurgery'
+          type: array
+          uniqueItems: false
+        survival_days:
+          description: Vital status day minus initial diagnosis day
+          type: integer
+        therapies:
+          items:
+            $ref: '#/components/schemas/PatientTherapy'
+          type: array
+          uniqueItems: false
+        treatment_summary:
+          $ref: '#/components/schemas/PatientTreatmentSummary'
+        vital_status:
+          enum:
+          - alive
+          - deceased
+          type: string
+        vital_status_at:
+          $ref: '#/components/schemas/PatientDayDate'
+      required:
+      - can_read_phi
+      - case_count
+      - cases
+      - events
+      - family_name
+      - gender
+      - given_name
+      - has_imaging
+      - imaging
+      - key_dates
+      - organization_code
+      - organization_name
+      - patient_id
+      - patient_id_type
+      - patient_key
+      - radiations
+      - surgeries
+      - therapies
+      - vital_status
+      - vital_status_at
+      type: object
+    PatientEvent:
+      description: Disease event of a patient
+      properties:
+        cns_diagnosis_category:
+          type: string
+        cns_integrated_diagnosis:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        event_type:
+          enum:
+          - initial_cns_tumor
+          - progressive
+          - recurrence
+          - second_malignancy
+          - deceased
+          - unavailable
+          type: string
+        metastasis:
+          description: Yes, No or Not Applicable, as in the source
+          type: string
+        metastasis_location_other:
+          type: string
+        metastasis_locations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        tumor_location_other:
+          type: string
+        tumor_locations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      required:
+      - event_type
+      - metastasis_locations
+      - tumor_locations
+      type: object
+    PatientFilters:
+      description: Values of the patient list filters
+      properties:
+        cns_integrated_diagnosis:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        organization_code:
+          description: label = organization name
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        vital_status:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+      required:
+      - cns_integrated_diagnosis
+      - organization_code
+      - vital_status
+      type: object
+    PatientImagingSession:
+      description: Imaging session of a patient
+      properties:
+        anatomical_site:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        flywheel_url:
+          type: string
+        imaging_modality:
+          type: string
+        session_id:
+          type: string
+        session_name:
+          type: string
+      required:
+      - session_id
+      - session_name
+      type: object
+    PatientKeyDate:
+      description: Key date of the patient sidebar, with the source it comes from
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        source:
+          enum:
+          - clinical
+          - registry
+          type: string
+      required:
+      - source
+      type: object
+    PatientKeyDates:
+      description: Key dates of the patient sidebar
+      properties:
+        initial_diagnosis:
+          $ref: '#/components/schemas/PatientKeyDate'
+        latest_encounter:
+          $ref: '#/components/schemas/PatientKeyDate'
+      required:
+      - initial_diagnosis
+      - latest_encounter
+      type: object
+    PatientListItem:
+      description: A PCX patient in the patient list
+      properties:
+        age_at_initial_dx_days:
+          type: integer
+        age_at_vital_status_days:
+          type: integer
+        birth_year:
+          type: integer
+        can_read_phi:
+          type: boolean
+        case_count:
+          description: Portal cases, 0 outside the portal
+          type: integer
+        cns_integrated_diagnosis:
+          description: From the initial event
+          type: string
+        family_name:
+          description: Placeholder when can_read_phi is false
+          type: string
+        gender:
+          enum:
+          - female
+          - male
+          - unknown
+          type: string
+        given_name:
+          description: Placeholder when can_read_phi is false
+          type: string
+        has_imaging:
+          type: boolean
+        organization_code:
+          type: string
+        organization_name:
+          type: string
+        patient_id:
+          type: string
+        patient_id_type:
+          enum:
+          - mrn
+          - research_id
+          type: string
+        patient_key:
+          description: Opaque key for the patient page URL, the same for every user
+          format: uuid
+          type: string
+        radiant_patient_id:
+          description: Portal patient id, null outside the portal
+          type: integer
+        survival_days:
+          description: Vital status day minus initial diagnosis day
+          type: integer
+        vital_status:
+          enum:
+          - alive
+          - deceased
+          type: string
+      required:
+      - can_read_phi
+      - case_count
+      - family_name
+      - gender
+      - given_name
+      - has_imaging
+      - organization_code
+      - organization_name
+      - patient_id
+      - patient_id_type
+      - patient_key
+      - vital_status
+      type: object
+    PatientOrganizationVitalCount:
+      description: Alive and deceased patients of one organization
+      properties:
+        alive:
+          type: integer
+        deceased:
+          type: integer
+        organization_code:
+          type: string
+        organization_name:
+          type: string
+      required:
+      - alive
+      - deceased
+      - organization_code
+      - organization_name
+      type: object
+    PatientRadiation:
+      description: Radiation course of a patient
+      properties:
+        craniospinal_dose:
+          $ref: '#/components/schemas/PatientDose'
+        focal_boost_dose:
+          $ref: '#/components/schemas/PatientDose'
+        site:
+          type: string
+        site_other:
+          type: string
+        start:
+          $ref: '#/components/schemas/PatientDayDate'
+        stop:
+          $ref: '#/components/schemas/PatientDayDate'
+        total_primary_dose:
+          $ref: '#/components/schemas/PatientDose'
+        type:
+          type: string
+        type_other:
+          type: string
+      required:
+      - craniospinal_dose
+      - start
+      - stop
+      - total_primary_dose
+      type: object
+    PatientStatistics:
+      description: Statistics on every patient the caller can see, regardless of the
+        list filters
+      properties:
+        by_age_bucket:
+          description: Keys 0-4, 5-9, 10-14, 15-19, 20+
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        by_diagnosis:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        by_organization:
+          items:
+            $ref: '#/components/schemas/PatientOrganizationVitalCount'
+          type: array
+          uniqueItems: false
+        imaging_count:
+          type: integer
+        survival:
+          description: Input of the Kaplan-Meier
+          items:
+            $ref: '#/components/schemas/PatientSurvival'
+          type: array
+          uniqueItems: false
+        total:
+          type: integer
+        with_cases_count:
+          type: integer
+      required:
+      - by_age_bucket
+      - by_diagnosis
+      - by_organization
+      - imaging_count
+      - survival
+      - total
+      - with_cases_count
+      type: object
+    PatientSurgery:
+      description: Surgery of a patient
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        extent_of_tumor_resection:
+          type: string
+      type: object
+    PatientSurvival:
+      description: Survival time of one patient, for the Kaplan-Meier
+      properties:
+        cns_integrated_diagnosis:
+          type: string
+        days:
+          type: integer
+        event:
+          description: true when deceased
+          type: boolean
+        organization_code:
+          type: string
+      required:
+      - days
+      - event
+      - organization_code
+      type: object
+    PatientTherapy:
+      description: Medical therapy of a patient
+      properties:
+        chemotherapy_agents:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        chemotherapy_type:
+          type: string
+        is_initial_treatment:
+          description: null when Not Reported
+          type: boolean
+        protocol_name_and_arm:
+          type: string
+        start:
+          $ref: '#/components/schemas/PatientDayDate'
+        stop:
+          $ref: '#/components/schemas/PatientDayDate'
+      required:
+      - chemotherapy_agents
+      - start
+      - stop
+      type: object
+    PatientTreatmentSummary:
+      description: Initial treatment summary of a patient
+      properties:
+        first_event:
+          $ref: '#/components/schemas/PatientDayDate'
+        first_methotrexate:
+          $ref: '#/components/schemas/PatientDayDate'
+        first_radiation:
+          $ref: '#/components/schemas/PatientDayDate'
+        had_initial_methotrexate:
+          type: boolean
+        had_initial_radiation:
+          type: boolean
+        initial_dx:
+          $ref: '#/components/schemas/PatientDayDate'
+        initial_treatment_order:
+          type: string
+      required:
+      - first_event
+      - first_methotrexate
+      - first_radiation
+      - had_initial_methotrexate
+      - had_initial_radiation
+      - initial_dx
+      type: object
+    PatientsSearchResponse:
+      properties:
+        count:
+          type: integer
+        list:
+          items:
+            $ref: '#/components/schemas/PatientListItem'
+          type: array
+          uniqueItems: false
+      required:
+      - count
+      - list
+      type: object
     PubmedCitation:
       properties:
         id:
@@ -8482,6 +9029,129 @@ paths:
       summary: Update an organization
       tags:
       - organizations
+  /{tenant}/patients/{patient_key}:
+    get:
+      description: Retrieve PatientEntity by its patient_key. 404 for an unknown
+        or malformed key, with no hint that the patient exists.
+      operationId: patientEntity
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientEntity'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientEntity patient entity
+      tags:
+      - patients
+  /{tenant}/patients/autocomplete:
+    get:
+      description: Retrieve AutocompleteResult list matching prefix, of type
+        patient_id or patient_name (names only where can_read_phi is true). A selected
+        suggestion becomes a search criterion on the field named by its type.
+      operationId: autocompletePatients
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutocompleteResult'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get AutocompleteResult list of PCX patients matching prefix
+      tags:
+      - patients
   /{tenant}/patients/batch:
     post:
       description: Create a new patient batch
@@ -8613,6 +9283,164 @@ paths:
       security:
       - bearerauth: []
       summary: Update existing patients (batch)
+      tags:
+      - patients
+  /{tenant}/patients/filters:
+    get:
+      description: Retrieve PatientFilters patient list filters
+      operationId: patientsFilters
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientFilters'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientFilters patient list filters
+      tags:
+      - patients
+  /{tenant}/patients/search:
+    post:
+      description: 'Search PCX patients. Default sort: can_read_phi desc, organization_code
+        asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis,
+        patient_id and patient_name (the latter only matches rows where can_read_phi
+        is true).'
+      operationId: searchPatients
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientsSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Search PCX patients
+      tags:
+      - patients
+  /{tenant}/patients/statistics:
+    get:
+      description: Retrieve PatientStatistics on every PCX patient the caller
+        can see, regardless of the list filters
+      operationId: patientsStatistics
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientStatistics'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientStatistics cohort analytics
       tags:
       - patients
   /{tenant}/roles:

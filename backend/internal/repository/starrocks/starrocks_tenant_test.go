@@ -186,3 +186,45 @@ func Test_BuildViewStatements_RejectsInvalidTenantCode(t *testing.T) {
 		assert.Error(t, err, "expected error for invalid tenant code %q", code)
 	}
 }
+
+// --- BuildGenePanelMVStatement -----------------------------------------------
+
+func Test_BuildGenePanelMVStatement_CreatesDeferredManualMVInTenantDatabaseIfNotExists(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.True(t, strings.HasPrefix(stmt, "CREATE MATERIALIZED VIEW IF NOT EXISTS `demo_tenant`.`gene_panel_mv` "), stmt)
+	assert.Contains(t, stmt, "REFRESH DEFERRED MANUAL",
+		"no async refresh at creation: EnsureGenePanelMV refreshes synchronously, and the API after each write")
+}
+
+func Test_BuildGenePanelMVStatement_JoinsPanelAndGenesOverFederationFilteredToTenant(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.Contains(t, stmt, "SELECT DISTINCT p.name AS panel, g.symbol AS symbol")
+	assert.Contains(t, stmt, "FROM radiant_jdbc.public.panel p")
+	assert.Contains(t, stmt, "JOIN radiant_jdbc.public.panel_has_genes g ON g.panel_id = p.id")
+	assert.Contains(t, stmt, "WHERE p.tenant_code = 'demo'")
+}
+
+func Test_BuildGenePanelMVStatement_RejectsInvalidTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVStatement("x'; DROP DATABASE y; --")
+	assert.Error(t, err)
+}
+
+func Test_BuildGenePanelMVStatement_RejectsEmptyTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVStatement("")
+	assert.Error(t, err)
+}
+
+// --- BuildGenePanelMVRefreshStatement ----------------------------------------
+
+func Test_BuildGenePanelMVRefreshStatement_ForcesSyncRefreshOfTenantMV(t *testing.T) {
+	stmt, err := BuildGenePanelMVRefreshStatement("demo")
+	require.NoError(t, err)
+	assert.Equal(t, "REFRESH MATERIALIZED VIEW `demo_tenant`.`gene_panel_mv` FORCE WITH SYNC MODE", stmt)
+}
+
+func Test_BuildGenePanelMVRefreshStatement_RejectsInvalidTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVRefreshStatement("Demo")
+	assert.Error(t, err)
+}

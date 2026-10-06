@@ -1,0 +1,88 @@
+view,field,description,access policy
+v_pcx_30_demographics_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_demographics_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_demographics_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_demographics_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_demographics_combined,given_name,Patient's real first name as recorded by the contributing institution.,Show for PHI access only.
+v_pcx_30_demographics_combined,given_name_deid,"De-identification placeholder for the patient's first name, built as <research_id>_given_name; contains no real name information.",Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_demographics_combined,family_name,Patient's real last name as recorded by the contributing institution.,Show for PHI access only.
+v_pcx_30_demographics_combined,family_name_deid,"De-identification placeholder for the patient's last name, built as <research_id>_family_name; contains no real name information.",Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_demographics_combined,birth_date,Patient's full date of birth. Identified counterpart to birth_year.,Show for PHI access only.
+v_pcx_30_demographics_combined,birth_year,Patient's year of birth. Month and day are removed for de-identification.,OK to show to all users.
+v_pcx_30_demographics_combined,race,Patient's race as reported by the contributing institution.,OK to show to all users.
+v_pcx_30_demographics_combined,ethnicity,Patient's ethnicity as reported by the contributing institution.,OK to show to all users.
+v_pcx_30_demographics_combined,gender,"Patient's administrative sex as recorded by the contributing institution, lowercased.",OK to show to all users.
+v_pcx_30_demographics_combined,address_postal_code,"Patient's real residential ZIP code, or XXXXX when unavailable.",Show for PHI access only.
+v_pcx_30_demographics_combined,address_postal_code_deid,"Patient's ZIP code truncated to the first 3 digits plus XX, and fully masked to XXXXX when missing or in a restricted low-population 3-digit prefix.",OK to show to all users.
+v_pcx_30_demographics_combined,diagnosis_type_cohort,The patient's primary diagnosis group used to define the cohort for this release.,OK to show to all users.
+v_pcx_30_demographics_combined,data_type_cohort,"The source cohort the patient's data came from: 'radiant' for RADIANT patients, 'cbtn-non-radiant' for CBTN patients not in RADIANT.",OK to show to all users.
+v_pcx_30_event_level_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_event_level_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_event_level_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_event_level_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_event_level_combined,event_type,"The type of diagnosis-related event determined via surgery, imaging, or clinical observation.",OK to show to all users.
+v_pcx_30_event_level_combined,event_date,"Calendar date of the diagnosis-related event, derived as date of birth plus age_at_event_days. Identified counterpart to age_at_event_days. Note: rows with the -1 unknown-date sentinel yield date of birth minus one day.",Show for PHI access only.
+v_pcx_30_event_level_combined,age_at_event_days,Patient age in days at the diagnosis-related event. A value of -1 indicates an unknown date.,OK to show to all users.
+v_pcx_30_event_level_combined,metastasis,Whether metastatic disease was present at the time of the event.,OK to show to all users.
+v_pcx_30_event_level_combined,metastasis_location,The site of the metastasis. Semicolon-delimited when more than one site is recorded.,OK to show to all users.
+v_pcx_30_event_level_combined,metastasis_location_other,Free-text value supplied when the coded metastasis_location does not cover the finding (the site of the metastasis).,OK to show to all users.
+v_pcx_30_event_level_combined,cns_diagnosis_category,The diagnosis at the time of the event (broad diagnosis category).,OK to show to all users.
+v_pcx_30_event_level_combined,cns_integrated_diagnosis,The diagnosis at the time of the event (WHO integrated histologic plus molecular diagnosis).,OK to show to all users.
+v_pcx_30_event_level_combined,tumor_locations,The anatomical site of the tumor. Semicolon-delimited when more than one site is recorded.,OK to show to all users.
+v_pcx_30_event_level_combined,tumor_location_other,Free-text value supplied when the coded tumor_locations does not cover the finding (the anatomical site of the tumor).,OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_medical_therapy_level_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_medical_therapy_level_combined,protocol_name_and_arm,Name of the treatment protocol the patient is enrolled on or being treated in accordance with. Sourced from the unmasked internal-use protocol name.,OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,chemotherapy_type,Whether the regimen followed a treatment protocol (with or without enrollment) or other standard of care.,OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,regimen_start_date,"Calendar date the medical therapy regimen started, derived as date of birth plus age_at_regimen_start_days. Identified counterpart to age_at_regimen_start_days. NULL when the age value is a non-numeric unknown such as 'Not Reported'.",Show for PHI access only.
+v_pcx_30_medical_therapy_level_combined,age_at_regimen_start_days,"Patient age in days at the start of the medical therapy regimen. May carry 'Not Reported', 'Not Available', or 'Not Applicable' for unknowns.",OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,regimen_stop_date,"Calendar date the medical therapy regimen ended, derived as date of birth plus age_at_regimen_stop_days. Identified counterpart to age_at_regimen_stop_days. NULL when the age value is a non-numeric unknown such as 'Not Reported'.",Show for PHI access only.
+v_pcx_30_medical_therapy_level_combined,age_at_regimen_stop_days,"Patient age in days at the end of the medical therapy regimen. May carry 'Not Reported', 'Not Available', or 'Not Applicable' for unknowns.",OK to show to all users.
+v_pcx_30_medical_therapy_level_combined,chemotherapy_agents,Therapeutic agent being administered. Sourced from the unmasked internal-use agent list.,OK to show to all users.
+v_pcx_30_patient_level_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_patient_level_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_patient_level_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_patient_level_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_patient_level_combined,vital_status_date,"Calendar date of the most recent known vital status, derived as date of birth plus age_at_vital_status_days. Identified counterpart to age_at_vital_status_days.",Show for PHI access only.
+v_pcx_30_patient_level_combined,age_at_vital_status_days,Patient age in days at the most recent known vital status. An unknown date surfaces as NULL rather than -1.,OK to show to all users.
+v_pcx_30_patient_level_combined,vital_status,"The patient's most recent known vital status, as of the patient age in age_at_vital_status_days. Deceased outranks alive; the largest day count breaks ties within a tier.",OK to show to all users.
+v_pcx_30_radiation_level_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_radiation_level_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_radiation_level_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_radiation_level_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_radiation_level_combined,radiation_start_date,"Calendar date the radiation round started, derived as date of birth plus age_at_radiation_start_days. Identified counterpart to age_at_radiation_start_days.",Show for PHI access only.
+v_pcx_30_radiation_level_combined,age_at_radiation_start_days,Patient age in days at the start of the radiation round.,OK to show to all users.
+v_pcx_30_radiation_level_combined,radiation_stop_date,"Calendar date the radiation round ended, derived as date of birth plus age_at_radiation_stop_days. Identified counterpart to age_at_radiation_stop_days.",Show for PHI access only.
+v_pcx_30_radiation_level_combined,age_at_radiation_stop_days,Patient age in days at the end of the radiation round.,OK to show to all users.
+v_pcx_30_radiation_level_combined,radiation_site,Field or site of radiation.,OK to show to all users.
+v_pcx_30_radiation_level_combined,radiation_site_other,Free-text value supplied when the coded radiation_site does not cover the finding (field or site of radiation).,OK to show to all users.
+v_pcx_30_radiation_level_combined,radiation_type,Method or type of radiation delivered.,OK to show to all users.
+v_pcx_30_radiation_level_combined,radiation_type_other,Free-text value supplied when the coded radiation_type does not cover the finding (method or type of radiation delivered).,OK to show to all users.
+v_pcx_30_radiation_level_combined,total_radiation_dose,Dose of craniospinal radiation given.,OK to show to all users.
+v_pcx_30_radiation_level_combined,total_radiation_dose_unit,Unit of measure for total_radiation_dose (dose of craniospinal radiation given).,OK to show to all users.
+v_pcx_30_radiation_level_combined,total_radiation_dose_focal,Total radiation given to the primary site.,OK to show to all users.
+v_pcx_30_radiation_level_combined,total_radiation_dose_focal_unit,Unit of measure for total_radiation_dose_focal (total radiation given to the primary site).,OK to show to all users.
+v_pcx_30_surgery_level_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_surgery_level_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_surgery_level_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_surgery_level_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_surgery_level_combined,surgery_date,"Calendar date of the tumor-related surgery, derived as date of birth plus age_at_surgery_days. Identified counterpart to age_at_surgery_days. Note: rows with the -1 unknown-date sentinel yield date of birth minus one day.",Show for PHI access only.
+v_pcx_30_surgery_level_combined,age_at_surgery_days,Patient age in days when the tumor-related surgery (resection or biopsy) was performed. A value of -1 indicates an unknown date.,OK to show to all users.
+v_pcx_30_surgery_level_combined,extent_of_tumor_resection,Extent of tumor resection performed during the surgery.,OK to show to all users.
+v_pcx_30_treatment_summary_combined,mrn,Medical record number at the contributing institution. Identified counterpart to research_id.,Show for PHI access only. Never show at the same time as research ID.
+v_pcx_30_treatment_summary_combined,research_id,De-identified patient research identifier.,Show for non-PHI access only. Never show at the same time as MRN.
+v_pcx_30_treatment_summary_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_treatment_summary_combined,organization_code,"Short code for the contributing institution, joined from pcx_30_organization_ref.",OK to show to all users.
+v_pcx_30_treatment_summary_combined,initial_dx_date,"Calendar date of initial CNS diagnosis, taken as the earliest event_date for an initial event. Identified counterpart to age_at_initial_dx_days.",Show for PHI access only.
+v_pcx_30_treatment_summary_combined,age_at_initial_dx_days,Patient age in days at initial CNS diagnosis. A value of -1 indicates an unknown date.,OK to show to all users.
+v_pcx_30_treatment_summary_combined,first_event_date,"Calendar date of the first event of type progression, recurrence, second malignancy, or deceased. Identified counterpart to age_at_first_event_days.",Show for PHI access only.
+v_pcx_30_treatment_summary_combined,age_at_first_event_days,"Patient age in days at first event that is of event type progression, recurrence, second malignancy, or deceased. A value of -1 indicates an unknown date.",OK to show to all users.
+v_pcx_30_treatment_summary_combined,first_radiation_date,Calendar date the first radiation treatment started. Identified counterpart to age_at_first_radiation_days.,Show for PHI access only.
+v_pcx_30_treatment_summary_combined,age_at_first_radiation_days,Patient age in days at the start of first radiation treatment.,OK to show to all users.
+v_pcx_30_treatment_summary_combined,first_methotrexate_date,Calendar date the first methotrexate regimen started. Identified counterpart to age_at_first_methotrexate_days.,Show for PHI access only.
+v_pcx_30_treatment_summary_combined,age_at_first_methotrexate_days,Patient age in days at the start of first methotrexate treatment.,OK to show to all users.
+v_pcx_30_treatment_summary_combined,had_initial_radiation,"Yes/No column indicating whether the patient had radiation as part of their initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). Decided on the age-in-days measures.",OK to show to all users.
+v_pcx_30_treatment_summary_combined,had_initial_methotrexate,"Yes/No column indicating whether the patient had methotrexate as part of their initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). Decided on the age-in-days measures.",OK to show to all users.
+v_pcx_30_treatment_summary_combined,initial_treatment_order,"The order of treatments the patient received as part of their initial treatment, specific to radiation, methotrexate, neither, or both.",OK to show to all users.

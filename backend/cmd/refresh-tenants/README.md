@@ -17,10 +17,16 @@ go run ./cmd/refresh-tenants -code demo # one tenant
    the per-tenant views to be recreated. (See [`create-tenant`](../create-tenant) for how
    the views are built — this command re-runs that same view DDL.) Recreating is safe: each
    view is `DROP` + `CREATE`, and a missing tenant database is created on the fly.
-2. **Global Ranger PII-masking policies.** The masking-subject marker role, SELECT on the
+2. **Per-tenant gene panel MV.** `<code>_tenant.gene_panel_mv` is created if missing
+   (`IF NOT EXISTS`, so a definition change needs a manual drop first), then refreshed
+   synchronously from Postgres. Run this once for existing tenants before the gene panel
+   filter is exposed: without the MV the filter fails with "unknown table". Only this
+   command (and `create-tenant`) does it, never the API startup refresh.
+3. **Global Ranger PII-masking policies.** The masking-subject marker role, SELECT on the
    `auth` database + a row-filter per `auth` view, and the `patient` column masks — plus re-nesting each
    tenant role under the marker so its members are masking subjects. These are static
-   (independent of tenant count) and idempotently upserted.
+   (independent of tenant count) and idempotently upserted. The per-tenant reconcile also
+   upserts `sr_access_<code>_mvs` (SELECT on the tenant's materialized views).
 
 The view refresh also happens **automatically in the API on startup** when a migration
 changed the schema (gated by `VIEW_REFRESH_ON_STARTUP_ENABLED`, serialized across replicas

@@ -9,12 +9,12 @@ describe('VariantEntity - EvidCond - ClinVar - Sort', () => {
     cy.visitVariantEvidCondPage(data.variantGermline.locus_id);
   };
 
-  it('Number [SJRA-1962]', () => {
+  it('Number', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('submission_count', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
-  it('Tag [SJRA-1962]', () => {
+  it('Tag', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });

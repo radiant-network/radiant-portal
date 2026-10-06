@@ -53,7 +53,7 @@ Cypress.Commands.add('login', () => {
           url: `${getExpose('keycloak_host')}/realms/${getExpose('keycloak_realm')}/protocol/openid-connect/auth`,
           qs: {
             client_id: getExpose('keycloak_client'),
-            redirect_uri: Cypress.config('baseUrl'),
+            redirect_uri: getExpose('keycloak_redirect_uri') || Cypress.config('baseUrl'),
             kc_idp_hint: null,
             scope: 'openid',
             state: createUUID(),
