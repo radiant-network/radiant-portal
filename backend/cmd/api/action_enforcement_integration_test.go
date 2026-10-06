@@ -112,6 +112,11 @@ func Test_ActionEnforcement_ManageAnalysisCatalog_TenantAdminAllowed(t *testing.
 	assertActionEnforced(t, taraID, types.ActionManageAnalysisCatalog, http.StatusOK)
 }
 
+func Test_ActionEnforcement_ManageAnalysisCatalog_DataManagerAllowed(t *testing.T) {
+	// gabe holds data_manager, which migration 000042 grants can_manage_analysis_catalog.
+	assertActionEnforced(t, gabeID, types.ActionManageAnalysisCatalog, http.StatusOK)
+}
+
 func Test_ActionEnforcement_ManageAnalysisCatalog_WithoutActionDenied(t *testing.T) {
 	assertActionEnforced(t, mikeID, types.ActionManageAnalysisCatalog, http.StatusForbidden)
 }

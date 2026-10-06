@@ -566,7 +566,7 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO public.role (tenant_code, code, name_en, description_en) VALUES
     ('qlin', 'member',       'Member',       'Search cases and view the knowledge base.'),
     ('qlin', 'geneticist',   'Geneticist',   'Read PII, download files, and interpret, comment on, and flag variants.'),
-    ('qlin', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing).')
+    ('qlin', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing) and manage gene panels.')
 ON CONFLICT (tenant_code, code) DO NOTHING;
 
 INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES
@@ -581,8 +581,9 @@ INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES
     ('qlin', 'geneticist',   'can_flag_variant'),    -- org-scoped
     ('qlin', 'geneticist',   'can_download_file'),   -- org-scoped
 
-    -- data_manager: batch ingestion
-    ('qlin', 'data_manager', 'can_ingest_data')      -- org-scoped
+    -- data_manager: batch ingestion + gene panel upload
+    ('qlin', 'data_manager', 'can_ingest_data'),     -- org-scoped
+    ('qlin', 'data_manager', 'can_manage_analysis_catalog') -- tenant-scoped
 ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
 
 
