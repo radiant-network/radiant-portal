@@ -57,15 +57,15 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Autocomplete.** Same behaviour as the case list search box (`DataTableFilters` with `filterSearch`, `minSearchLength` 1, 10 results grouped by type): a case-insensitive prefix match on `patient_id` (type `patient_id`) and on the full name (type `patient_name`, only where `can_read_phi` is true), read from `v_pcx_30_patient_list` as the user, ordered by value, capped by `limit`. It returns the shared `AutocompleteResult` so the existing component works unchanged.
 
-**Filters.** Values only (key, label), like the case filters; probably no per-value counts (to confirm at the grooming).
+**Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts.
 
-**Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype.
+**Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
 **Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set. Returns 404 when the demographics row is not found.
 
 ## Models
 
-The OpenAPI schema names below are the Go types' `@Name`; the generated TypeScript client will expose them as-is. Shapes in TypeScript notation; `| null` marks a value that can be missing or masked.
+The OpenAPI schema names below are the Go types' `@Name` (`backend/internal/types/pcx_patient.go`); the generated TypeScript client exposes them as-is. Shapes in TypeScript notation; `| null` marks a value that can be missing or masked. In the generated client those fields are optional (`?:`), like the other types of the portal.
 
 ```typescript
 type PatientIdType = 'mrn' | 'research_id';
@@ -89,7 +89,8 @@ interface PatientIdentity {
 interface PatientListItem extends PatientIdentity {
   birth_year: number | null;
   gender: Gender;
-  cns_integrated_diagnosis: string | null; // from the initial event
+  cns_integrated_diagnosis: string | null;        // from the initial event
+  cns_integrated_diagnosis_source: string | null; // dataset of that diagnosis, e.g. CBTN or OpenPedCan
   vital_status: VitalStatus;
   age_at_vital_status_days: number | null;
   age_at_initial_dx_days: number | null;
@@ -98,40 +99,47 @@ interface PatientListItem extends PatientIdentity {
   case_count: number;              // portal cases, 0 outside the portal
 }
 
-interface PatientFilterValue { key: string; label?: string } // no counts, like the case filters (to confirm)
+// PatientsSearchResponse = { list: PatientListItem[]; count: number }
+
+// Filters reuse the shared FiltersValue { key, label? } of the case filters: no counts.
+interface PatientFilters {
+  vital_status: FiltersValue[];
+  organization_code: FiltersValue[]; // label = organization_name
+  cns_integrated_diagnosis: FiltersValue[];
+}
 
 // Autocomplete reuses the shared AutocompleteResult { type, value } of the case list:
 // type = 'patient_id' | 'patient_name' (names only where can_read_phi is true); it becomes a search criterion on that field.
-interface PatientFilters {
-  vital_status: PatientFilterValue[];
-  organization_code: PatientFilterValue[]; // label = organization_name
-  cns_integrated_diagnosis: PatientFilterValue[];
-}
 
+// Buckets reuse the shared Aggregation { key, label?, count }.
 interface PatientStatistics {
   total: number;
   imaging_count: number;
   with_cases_count: number;
-  by_diagnosis: { key: string; count: number }[];
-  by_age_bucket: { key: '0-4' | '5-9' | '10-14' | '15-19' | '20+'; count: number }[]; // OPEN: age today (from birth_year) or age at initial diagnosis?
-  by_organization: { organization_code: string; organization_name: string; alive: number; deceased: number }[];
-  survival: { organization_code: string; cns_integrated_diagnosis: string | null; days: number; event: boolean }[]; // input for YAC's Kaplan-Meier (format to agree with HIDIVE), event = deceased
+  by_diagnosis: Aggregation[];
+  by_age_bucket: Aggregation[];    // keys 0-4, 5-9, 10-14, 15-19, 20+. OPEN: age today (from birth_year) or age at initial diagnosis?
+  by_protocol: Aggregation[];      // patients per protocol_name, a patient counted once per protocol
+  by_organization: PatientOrganizationVitalCount[];
+  survival: PatientSurvival[];     // input for YAC's Kaplan-Meier (format to agree with HIDIVE)
 }
 
-interface KeyDate { day: number | null; date: string | null; source: KeyDateSource }
-interface DayDate { day: number | null; date: string | null }
+interface PatientOrganizationVitalCount { organization_code: string; organization_name: string; alive: number; deceased: number }
+interface PatientSurvival { organization_code: string; cns_integrated_diagnosis: string | null; days: number; event: boolean } // event = deceased
+
+interface PatientDayDate { day: number | null; date: string | null }
+interface PatientKeyDate extends PatientDayDate { source: KeyDateSource }
+interface PatientKeyDates { initial_diagnosis: PatientKeyDate; latest_encounter: PatientKeyDate } // hard-coded sources: clinical, registry
 
 interface PatientEntity extends PatientListItem {
   birth_date: string | null;
   race: string | null;
   ethnicity: string | null;
-  postal_code: string;             // full when can_read_phi, 3 digits + XX otherwise
+  postal_code: string | null;      // full when can_read_phi, 3 digits + XX otherwise
   diagnosis_type_cohort: string | null;
   data_type_cohort: string | null;
-  key_dates: { initial_diagnosis: KeyDate; latest_encounter: KeyDate }; // hard-coded sources: clinical, registry
+  key_dates: PatientKeyDates;
   initial_diagnosis_evidence_url: string | null; // BRIM link, format TBD
-  tumor_board_reports: { report_id: string; day: number | null; date: string | null }[]; // TBD: from the tumor board view (not ready yet); its S3 URL is never returned
-  vital_status_at: DayDate;
+  vital_status_at: PatientDayDate;
   events: PatientEvent[];
   surgeries: PatientSurgery[];
   radiations: PatientRadiation[];
@@ -141,10 +149,11 @@ interface PatientEntity extends PatientListItem {
   cases: PatientCase[];
 }
 
-interface PatientEvent extends DayDate {
+interface PatientEvent extends PatientDayDate {
   event_type: EventType;
   cns_diagnosis_category: string | null;
   cns_integrated_diagnosis: string | null;
+  cns_integrated_diagnosis_source: string | null;
   tumor_locations: string[];
   tumor_location_other: string | null;
   metastasis: string | null;       // Yes / No / Not Applicable, as in the source
@@ -152,30 +161,39 @@ interface PatientEvent extends DayDate {
   metastasis_location_other: string | null;
 }
 
-interface PatientSurgery extends DayDate { extent_of_tumor_resection: string | null }
+interface PatientSurgery extends PatientDayDate {
+  extent_of_tumor_resection: string | null;
+  is_initial_treatment: boolean | null; // source Yes / No; null when Not Reported
+}
 
-interface Dose { value: string | null; unit: string | null } // raw from the view (Gy, cGy or CGE), no normalization
+// Raw from the view, no normalization. unit = Gy, cGy or CGE, or a sentinel (Not Applicable, Not Reported, Not Available).
+interface PatientDose { value: string | null; unit: string | null }
+
 interface PatientRadiation {
-  start: DayDate;
-  stop: DayDate;
+  start: PatientDayDate;
+  stop: PatientDayDate;
   site: string | null;
   site_other: string | null;
   type: string | null;
   type_other: string | null;
-  craniospinal_dose: Dose;         // total_radiation_dose
-  focal_dose: Dose;                // total_radiation_dose_focal
+  craniospinal_dose: PatientDose;  // total_radiation_dose
+  total_primary_dose: PatientDose; // total_radiation_dose_focal ("Total to Primary")
+  focal_boost_dose: PatientDose | null; // total to primary - craniospinal, only when both are numbers in the same unit
+  is_initial_treatment: boolean | null;
 }
 
 interface PatientTherapy {
-  start: DayDate;
-  stop: DayDate;
+  start: PatientDayDate;
+  stop: PatientDayDate;
   protocol_name_and_arm: string | null;
+  protocol_name: string | null;
+  protocol_arm: string | null;
   chemotherapy_type: string | null;
   chemotherapy_agents: string[];
   is_initial_treatment: boolean | null; // source Yes / No; null when Not Reported
 }
 
-interface PatientImagingSession extends DayDate {
+interface PatientImagingSession extends PatientDayDate {
   session_id: string;
   session_name: string;
   anatomical_site: string | null;
@@ -183,12 +201,17 @@ interface PatientImagingSession extends DayDate {
   flywheel_url: string | null;
 }
 
+// "ever" = first occurrence at any time; "initial" = part of the initial treatment.
 interface PatientTreatmentSummary {
-  initial_dx: DayDate;
-  first_event: DayDate;
-  first_radiation: DayDate;
-  first_methotrexate: DayDate;
+  initial_dx: PatientDayDate;
+  first_event: PatientDayDate;
+  first_radiation_ever: PatientDayDate;
+  initial_radiation: PatientDayDate;
+  first_chemo_ever: PatientDayDate;
+  initial_chemo: PatientDayDate;
+  first_methotrexate_ever: PatientDayDate;
   had_initial_radiation: boolean;
+  had_initial_chemo: boolean;
   had_initial_methotrexate: boolean;
   initial_treatment_order: string | null;
 }
@@ -201,11 +224,11 @@ interface PatientCase {
   case_type_code: string;
   analysis_catalog_code: string | null;
   diagnosis_lab_code: string;
-  updated_on: string;
+  updated_on: string;              // date-time
 }
 ```
 
-The Laboratory (CBC), predisposition and clinical-trial models are added once the other team's views are described; until then those tabs have no API data.
+Not in the contract yet, to be added without breaking anything: the tumor board reports (their view is not ready; B8 adds the list and the download endpoint), and the Laboratory (CBC), predisposition and clinical-trial models, once the other team's views are described. Until then those tabs have no API data.
 
 ## Frontend alignment
 

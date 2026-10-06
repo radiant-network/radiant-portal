@@ -32,6 +32,7 @@ class PatientListItem(BaseModel):
     can_read_phi: StrictBool
     case_count: StrictInt = Field(description="Portal cases, 0 outside the portal")
     cns_integrated_diagnosis: Optional[StrictStr] = Field(default=None, description="From the initial event")
+    cns_integrated_diagnosis_source: Optional[StrictStr] = Field(default=None, description="Dataset of the diagnosis, e.g. CBTN or OpenPedCan")
     family_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
     gender: StrictStr
     given_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
@@ -44,7 +45,7 @@ class PatientListItem(BaseModel):
     radiant_patient_id: Optional[StrictInt] = Field(default=None, description="Portal patient id, null outside the portal")
     survival_days: Optional[StrictInt] = Field(default=None, description="Vital status day minus initial diagnosis day")
     vital_status: StrictStr
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_year", "can_read_phi", "case_count", "cns_integrated_diagnosis", "family_name", "gender", "given_name", "has_imaging", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "radiant_patient_id", "survival_days", "vital_status"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_year", "can_read_phi", "case_count", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "family_name", "gender", "given_name", "has_imaging", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "radiant_patient_id", "survival_days", "vital_status"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -124,6 +125,7 @@ class PatientListItem(BaseModel):
             "can_read_phi": obj.get("can_read_phi"),
             "case_count": obj.get("case_count"),
             "cns_integrated_diagnosis": obj.get("cns_integrated_diagnosis"),
+            "cns_integrated_diagnosis_source": obj.get("cns_integrated_diagnosis_source"),
             "family_name": obj.get("family_name"),
             "gender": obj.get("gender"),
             "given_name": obj.get("given_name"),

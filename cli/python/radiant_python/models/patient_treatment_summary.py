@@ -27,14 +27,18 @@ class PatientTreatmentSummary(BaseModel):
     """
     Initial treatment summary of a patient
     """ # noqa: E501
+    first_chemo_ever: PatientDayDate
     first_event: PatientDayDate
-    first_methotrexate: PatientDayDate
-    first_radiation: PatientDayDate
+    first_methotrexate_ever: PatientDayDate
+    first_radiation_ever: PatientDayDate
+    had_initial_chemo: StrictBool
     had_initial_methotrexate: StrictBool
     had_initial_radiation: StrictBool
+    initial_chemo: PatientDayDate
     initial_dx: PatientDayDate
+    initial_radiation: PatientDayDate
     initial_treatment_order: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["first_event", "first_methotrexate", "first_radiation", "had_initial_methotrexate", "had_initial_radiation", "initial_dx", "initial_treatment_order"]
+    __properties: ClassVar[List[str]] = ["first_chemo_ever", "first_event", "first_methotrexate_ever", "first_radiation_ever", "had_initial_chemo", "had_initial_methotrexate", "had_initial_radiation", "initial_chemo", "initial_dx", "initial_radiation", "initial_treatment_order"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -75,18 +79,27 @@ class PatientTreatmentSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of first_chemo_ever
+        if self.first_chemo_ever:
+            _dict['first_chemo_ever'] = self.first_chemo_ever.to_dict()
         # override the default output from pydantic by calling `to_dict()` of first_event
         if self.first_event:
             _dict['first_event'] = self.first_event.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of first_methotrexate
-        if self.first_methotrexate:
-            _dict['first_methotrexate'] = self.first_methotrexate.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of first_radiation
-        if self.first_radiation:
-            _dict['first_radiation'] = self.first_radiation.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of first_methotrexate_ever
+        if self.first_methotrexate_ever:
+            _dict['first_methotrexate_ever'] = self.first_methotrexate_ever.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of first_radiation_ever
+        if self.first_radiation_ever:
+            _dict['first_radiation_ever'] = self.first_radiation_ever.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of initial_chemo
+        if self.initial_chemo:
+            _dict['initial_chemo'] = self.initial_chemo.to_dict()
         # override the default output from pydantic by calling `to_dict()` of initial_dx
         if self.initial_dx:
             _dict['initial_dx'] = self.initial_dx.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of initial_radiation
+        if self.initial_radiation:
+            _dict['initial_radiation'] = self.initial_radiation.to_dict()
         return _dict
 
     @classmethod
@@ -99,12 +112,16 @@ class PatientTreatmentSummary(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "first_chemo_ever": PatientDayDate.from_dict(obj["first_chemo_ever"]) if obj.get("first_chemo_ever") is not None else None,
             "first_event": PatientDayDate.from_dict(obj["first_event"]) if obj.get("first_event") is not None else None,
-            "first_methotrexate": PatientDayDate.from_dict(obj["first_methotrexate"]) if obj.get("first_methotrexate") is not None else None,
-            "first_radiation": PatientDayDate.from_dict(obj["first_radiation"]) if obj.get("first_radiation") is not None else None,
+            "first_methotrexate_ever": PatientDayDate.from_dict(obj["first_methotrexate_ever"]) if obj.get("first_methotrexate_ever") is not None else None,
+            "first_radiation_ever": PatientDayDate.from_dict(obj["first_radiation_ever"]) if obj.get("first_radiation_ever") is not None else None,
+            "had_initial_chemo": obj.get("had_initial_chemo"),
             "had_initial_methotrexate": obj.get("had_initial_methotrexate"),
             "had_initial_radiation": obj.get("had_initial_radiation"),
+            "initial_chemo": PatientDayDate.from_dict(obj["initial_chemo"]) if obj.get("initial_chemo") is not None else None,
             "initial_dx": PatientDayDate.from_dict(obj["initial_dx"]) if obj.get("initial_dx") is not None else None,
+            "initial_radiation": PatientDayDate.from_dict(obj["initial_radiation"]) if obj.get("initial_radiation") is not None else None,
             "initial_treatment_order": obj.get("initial_treatment_order")
         })
         return _obj

@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **by_age_bucket** | [**List[Aggregation]**](Aggregation.md) | Keys 0-4, 5-9, 10-14, 15-19, 20+ | 
 **by_diagnosis** | [**List[Aggregation]**](Aggregation.md) |  | 
 **by_organization** | [**List[PatientOrganizationVitalCount]**](PatientOrganizationVitalCount.md) |  | 
+**by_protocol** | [**List[Aggregation]**](Aggregation.md) | Patients per protocol_name, a patient counted once per protocol | 
 **imaging_count** | **int** |  | 
 **survival** | [**List[PatientSurvival]**](PatientSurvival.md) | Input of the Kaplan-Meier | 
 **total** | **int** |  | 

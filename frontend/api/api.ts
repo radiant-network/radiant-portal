@@ -4881,6 +4881,12 @@ export interface PatientEntity {
      */
     'cns_integrated_diagnosis'?: string;
     /**
+     * Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+     * @type {string}
+     * @memberof PatientEntity
+     */
+    'cns_integrated_diagnosis_source'?: string;
+    /**
      * 
      * @type {string}
      * @memberof PatientEntity
@@ -5076,6 +5082,12 @@ export interface PatientEvent {
      * @memberof PatientEvent
      */
     'cns_integrated_diagnosis'?: string;
+    /**
+     * Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+     * @type {string}
+     * @memberof PatientEvent
+     */
+    'cns_integrated_diagnosis_source'?: string;
     /**
      * 
      * @type {string}
@@ -5306,6 +5318,12 @@ export interface PatientListItem {
      */
     'cns_integrated_diagnosis'?: string;
     /**
+     * Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'cns_integrated_diagnosis_source'?: string;
+    /**
      * Placeholder when can_read_phi is false
      * @type {string}
      * @memberof PatientListItem
@@ -5449,6 +5467,12 @@ export interface PatientRadiation {
      */
     'focal_boost_dose'?: PatientDose;
     /**
+     * null when Not Reported
+     * @type {boolean}
+     * @memberof PatientRadiation
+     */
+    'is_initial_treatment'?: boolean;
+    /**
      * 
      * @type {string}
      * @memberof PatientRadiation
@@ -5516,6 +5540,12 @@ export interface PatientStatistics {
      */
     'by_organization': Array<PatientOrganizationVitalCount>;
     /**
+     * Patients per protocol_name, a patient counted once per protocol
+     * @type {Array<Aggregation>}
+     * @memberof PatientStatistics
+     */
+    'by_protocol': Array<Aggregation>;
+    /**
      * 
      * @type {number}
      * @memberof PatientStatistics
@@ -5564,6 +5594,12 @@ export interface PatientSurgery {
      * @memberof PatientSurgery
      */
     'extent_of_tumor_resection'?: string;
+    /**
+     * null when Not Reported
+     * @type {boolean}
+     * @memberof PatientSurgery
+     */
+    'is_initial_treatment'?: boolean;
 }
 /**
  * Survival time of one patient, for the Kaplan-Meier
@@ -5625,6 +5661,18 @@ export interface PatientTherapy {
      * @type {string}
      * @memberof PatientTherapy
      */
+    'protocol_arm'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTherapy
+     */
+    'protocol_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTherapy
+     */
     'protocol_name_and_arm'?: string;
     /**
      * 
@@ -5650,19 +5698,31 @@ export interface PatientTreatmentSummary {
      * @type {PatientDayDate}
      * @memberof PatientTreatmentSummary
      */
+    'first_chemo_ever': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
     'first_event': PatientDayDate;
     /**
      * 
      * @type {PatientDayDate}
      * @memberof PatientTreatmentSummary
      */
-    'first_methotrexate': PatientDayDate;
+    'first_methotrexate_ever': PatientDayDate;
     /**
      * 
      * @type {PatientDayDate}
      * @memberof PatientTreatmentSummary
      */
-    'first_radiation': PatientDayDate;
+    'first_radiation_ever': PatientDayDate;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientTreatmentSummary
+     */
+    'had_initial_chemo': boolean;
     /**
      * 
      * @type {boolean}
@@ -5680,7 +5740,19 @@ export interface PatientTreatmentSummary {
      * @type {PatientDayDate}
      * @memberof PatientTreatmentSummary
      */
+    'initial_chemo': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
     'initial_dx': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTreatmentSummary
+     */
+    'initial_radiation': PatientDayDate;
     /**
      * 
      * @type {string}

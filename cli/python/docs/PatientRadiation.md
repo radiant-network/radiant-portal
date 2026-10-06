@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **craniospinal_dose** | [**PatientDose**](PatientDose.md) |  | 
 **focal_boost_dose** | [**PatientDose**](PatientDose.md) |  | [optional] 
+**is_initial_treatment** | **bool** | null when Not Reported | [optional] 
 **site** | **str** |  | [optional] 
 **site_other** | **str** |  | [optional] 
 **start** | [**PatientDayDate**](PatientDayDate.md) |  | 

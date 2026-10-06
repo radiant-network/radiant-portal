@@ -30,10 +30,12 @@ class PatientTherapy(BaseModel):
     chemotherapy_agents: List[StrictStr]
     chemotherapy_type: Optional[StrictStr] = None
     is_initial_treatment: Optional[StrictBool] = Field(default=None, description="null when Not Reported")
+    protocol_arm: Optional[StrictStr] = None
+    protocol_name: Optional[StrictStr] = None
     protocol_name_and_arm: Optional[StrictStr] = None
     start: PatientDayDate
     stop: PatientDayDate
-    __properties: ClassVar[List[str]] = ["chemotherapy_agents", "chemotherapy_type", "is_initial_treatment", "protocol_name_and_arm", "start", "stop"]
+    __properties: ClassVar[List[str]] = ["chemotherapy_agents", "chemotherapy_type", "is_initial_treatment", "protocol_arm", "protocol_name", "protocol_name_and_arm", "start", "stop"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,6 +97,8 @@ class PatientTherapy(BaseModel):
             "chemotherapy_agents": obj.get("chemotherapy_agents"),
             "chemotherapy_type": obj.get("chemotherapy_type"),
             "is_initial_treatment": obj.get("is_initial_treatment"),
+            "protocol_arm": obj.get("protocol_arm"),
+            "protocol_name": obj.get("protocol_name"),
             "protocol_name_and_arm": obj.get("protocol_name_and_arm"),
             "start": PatientDayDate.from_dict(obj["start"]) if obj.get("start") is not None else None,
             "stop": PatientDayDate.from_dict(obj["stop"]) if obj.get("stop") is not None else None

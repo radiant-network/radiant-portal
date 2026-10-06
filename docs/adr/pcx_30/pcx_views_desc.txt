@@ -31,30 +31,31 @@ mysql> describe v_pcx_30_demographics_combined;
 | data_type_cohort      | varchar      | YES  | false | NULL    |       |
 | can_read_phi          | boolean      | YES  | false | NULL    |       |
 +-----------------------+--------------+------+-------+---------+-------+
-16 rows in set (0.036 sec)
+16 rows in set (0.044 sec)
 
 mysql> describe v_pcx_30_event_level_combined;
-+---------------------------+--------------+------+-------+---------+-------+
-| Field                     | Type         | Null | Key   | Default | Extra |
-+---------------------------+--------------+------+-------+---------+-------+
-| organization_name         | varchar(256) | YES  | false | NULL    |       |
-| organization_code         | varchar(64)  | YES  | false | NULL    |       |
-| patient_id                | varchar(256) | YES  | false | NULL    |       |
-| patient_id_type           | varchar      | YES  | false | NULL    |       |
-| radiant_patient_id        | int          | YES  | false | NULL    |       |
-| event_type                | varchar(500) | YES  | false | NULL    |       |
-| event_date                | datetime     | YES  | false | NULL    |       |
-| age_at_event_days         | float        | YES  | false | NULL    |       |
-| metastasis                | varchar      | YES  | false | NULL    |       |
-| metastasis_location       | varchar      | YES  | false | NULL    |       |
-| metastasis_location_other | varchar      | YES  | false | NULL    |       |
-| cns_diagnosis_category    | varchar(500) | YES  | false | NULL    |       |
-| cns_integrated_diagnosis  | varchar(500) | YES  | false | NULL    |       |
-| tumor_locations           | varchar      | YES  | false | NULL    |       |
-| tumor_location_other      | varchar      | YES  | false | NULL    |       |
-| can_read_phi              | boolean      | YES  | false | NULL    |       |
-+---------------------------+--------------+------+-------+---------+-------+
-16 rows in set (0.035 sec)
++---------------------------------+--------------+------+-------+---------+-------+
+| Field                           | Type         | Null | Key   | Default | Extra |
++---------------------------------+--------------+------+-------+---------+-------+
+| organization_name               | varchar(256) | YES  | false | NULL    |       |
+| organization_code               | varchar(64)  | YES  | false | NULL    |       |
+| patient_id                      | varchar(256) | YES  | false | NULL    |       |
+| patient_id_type                 | varchar      | YES  | false | NULL    |       |
+| radiant_patient_id              | int          | YES  | false | NULL    |       |
+| event_type                      | varchar(500) | YES  | false | NULL    |       |
+| event_date                      | datetime     | YES  | false | NULL    |       |
+| age_at_event_days               | int          | YES  | false | NULL    |       |
+| metastasis                      | varchar      | YES  | false | NULL    |       |
+| metastasis_location             | varchar      | YES  | false | NULL    |       |
+| metastasis_location_other       | varchar      | YES  | false | NULL    |       |
+| cns_diagnosis_category          | varchar(500) | YES  | false | NULL    |       |
+| cns_integrated_diagnosis        | varchar      | YES  | false | NULL    |       |
+| cns_integrated_diagnosis_source | varchar      | YES  | false | NULL    |       |
+| tumor_locations                 | varchar      | YES  | false | NULL    |       |
+| tumor_location_other            | varchar      | YES  | false | NULL    |       |
+| can_read_phi                    | boolean      | YES  | false | NULL    |       |
++---------------------------------+--------------+------+-------+---------+-------+
+17 rows in set (0.034 sec)
 
 mysql> describe v_pcx_30_medical_therapy_level_combined;
 +---------------------------+---------------+------+-------+---------+-------+
@@ -65,7 +66,9 @@ mysql> describe v_pcx_30_medical_therapy_level_combined;
 | patient_id                | varchar(256)  | YES  | false | NULL    |       |
 | patient_id_type           | varchar       | YES  | false | NULL    |       |
 | radiant_patient_id        | int           | YES  | false | NULL    |       |
-| protocol_name_and_arm     | varchar(1000) | YES  | false | NULL    |       |
+| protocol_name_and_arm     | varchar       | YES  | false | NULL    |       |
+| protocol_name             | varchar       | YES  | false | NULL    |       |
+| protocol_arm              | varchar       | YES  | false | NULL    |       |
 | chemotherapy_type         | varchar(1000) | YES  | false | NULL    |       |
 | regimen_start_date        | datetime      | YES  | false | NULL    |       |
 | age_at_regimen_start_days | varchar(1000) | YES  | false | NULL    |       |
@@ -75,7 +78,7 @@ mysql> describe v_pcx_30_medical_therapy_level_combined;
 | is_initial_treatment      | varchar       | YES  | false | NULL    |       |
 | can_read_phi              | boolean       | YES  | false | NULL    |       |
 +---------------------------+---------------+------+-------+---------+-------+
-14 rows in set (0.057 sec)
+16 rows in set (0.033 sec)
 
 mysql> describe v_pcx_30_mri_images_combined;
 +-----------------------+--------------+------+-------+---------+-------+
@@ -98,7 +101,7 @@ mysql> describe v_pcx_30_mri_images_combined;
 | flywheel_url          | varchar      | YES  | false | NULL    |       |
 | can_read_phi          | boolean      | YES  | false | NULL    |       |
 +-----------------------+--------------+------+-------+---------+-------+
-16 rows in set (0.049 sec)
+16 rows in set (0.117 sec)
 
 mysql> describe v_pcx_30_patient_level_combined;
 +--------------------------+--------------+------+-------+---------+-------+
@@ -110,11 +113,11 @@ mysql> describe v_pcx_30_patient_level_combined;
 | patient_id_type          | varchar      | YES  | false | NULL    |       |
 | radiant_patient_id       | int          | YES  | false | NULL    |       |
 | vital_status_date        | datetime     | YES  | false | NULL    |       |
-| age_at_vital_status_days | double       | YES  | false | NULL    |       |
+| age_at_vital_status_days | int          | YES  | false | NULL    |       |
 | vital_status             | varchar      | YES  | false | NULL    |       |
 | can_read_phi             | boolean      | YES  | false | NULL    |       |
 +--------------------------+--------------+------+-------+---------+-------+
-9 rows in set (0.036 sec)
+9 rows in set (0.040 sec)
 
 mysql> describe v_pcx_30_radiation_level_combined;
 +---------------------------------+---------------+------+-------+---------+-------+
@@ -137,9 +140,10 @@ mysql> describe v_pcx_30_radiation_level_combined;
 | total_radiation_dose_unit       | varchar(1000) | YES  | false | NULL    |       |
 | total_radiation_dose_focal      | varchar(1000) | YES  | false | NULL    |       |
 | total_radiation_dose_focal_unit | varchar(1000) | YES  | false | NULL    |       |
+| is_initial_treatment            | varchar       | YES  | false | NULL    |       |
 | can_read_phi                    | boolean       | YES  | false | NULL    |       |
 +---------------------------------+---------------+------+-------+---------+-------+
-18 rows in set (0.036 sec)
+19 rows in set (0.038 sec)
 
 mysql> describe v_pcx_30_surgery_level_combined;
 +---------------------------+---------------+------+-------+---------+-------+
@@ -153,33 +157,41 @@ mysql> describe v_pcx_30_surgery_level_combined;
 | surgery_date              | datetime      | YES  | false | NULL    |       |
 | age_at_surgery_days       | varchar(1000) | YES  | false | NULL    |       |
 | extent_of_tumor_resection | varchar(1000) | YES  | false | NULL    |       |
+| is_initial_treatment      | varchar       | YES  | false | NULL    |       |
 | can_read_phi              | boolean       | YES  | false | NULL    |       |
 +---------------------------+---------------+------+-------+---------+-------+
-9 rows in set (0.037 sec)
+10 rows in set (0.034 sec)
 
 mysql> describe v_pcx_30_treatment_summary_combined;
-+--------------------------------+--------------+------+-------+---------+-------+
-| Field                          | Type         | Null | Key   | Default | Extra |
-+--------------------------------+--------------+------+-------+---------+-------+
-| patient_id                     | varchar(256) | YES  | false | NULL    |       |
-| patient_id_type                | varchar      | YES  | false | NULL    |       |
-| radiant_patient_id             | int          | YES  | false | NULL    |       |
-| organization_name              | varchar(256) | YES  | false | NULL    |       |
-| organization_code              | varchar(64)  | YES  | false | NULL    |       |
-| initial_dx_date                | datetime     | YES  | false | NULL    |       |
-| age_at_initial_dx_days         | int          | YES  | false | NULL    |       |
-| first_event_date               | datetime     | YES  | false | NULL    |       |
-| age_at_first_event_days        | int          | YES  | false | NULL    |       |
-| first_radiation_date           | datetime     | YES  | false | NULL    |       |
-| age_at_first_radiation_days    | int          | YES  | false | NULL    |       |
-| first_methotrexate_date        | datetime     | YES  | false | NULL    |       |
-| age_at_first_methotrexate_days | int          | YES  | false | NULL    |       |
-| had_initial_radiation          | varchar      | YES  | false | NULL    |       |
-| had_initial_methotrexate       | varchar      | YES  | false | NULL    |       |
-| initial_treatment_order        | varchar      | YES  | false | NULL    |       |
-| can_read_phi                   | boolean      | YES  | false | NULL    |       |
-+--------------------------------+--------------+------+-------+---------+-------+
-17 rows in set (0.041 sec)
++-------------------------------------+--------------+------+-------+---------+-------+
+| Field                               | Type         | Null | Key   | Default | Extra |
++-------------------------------------+--------------+------+-------+---------+-------+
+| patient_id                          | varchar(256) | YES  | false | NULL    |       |
+| patient_id_type                     | varchar      | YES  | false | NULL    |       |
+| radiant_patient_id                  | int          | YES  | false | NULL    |       |
+| organization_name                   | varchar(256) | YES  | false | NULL    |       |
+| organization_code                   | varchar(64)  | YES  | false | NULL    |       |
+| initial_dx_date                     | datetime     | YES  | false | NULL    |       |
+| age_at_initial_dx_days              | int          | YES  | false | NULL    |       |
+| first_event_date                    | datetime     | YES  | false | NULL    |       |
+| age_at_first_event_days             | int          | YES  | false | NULL    |       |
+| first_radiation_ever_date           | datetime     | YES  | false | NULL    |       |
+| age_at_first_radiation_ever_days    | int          | YES  | false | NULL    |       |
+| initial_radiation_date              | datetime     | YES  | false | NULL    |       |
+| age_at_initial_radiation_days       | int          | YES  | false | NULL    |       |
+| first_chemo_ever_date               | datetime     | YES  | false | NULL    |       |
+| age_at_first_chemo_ever_days        | int          | YES  | false | NULL    |       |
+| initial_chemo_date                  | datetime     | YES  | false | NULL    |       |
+| age_at_initial_chemo_days           | int          | YES  | false | NULL    |       |
+| first_methotrexate_ever_date        | datetime     | YES  | false | NULL    |       |
+| age_at_first_methotrexate_ever_days | int          | YES  | false | NULL    |       |
+| had_initial_radiation               | varchar      | YES  | false | NULL    |       |
+| had_initial_chemo                   | varchar      | YES  | false | NULL    |       |
+| had_initial_methotrexate            | varchar      | YES  | false | NULL    |       |
+| initial_treatment_order             | varchar      | YES  | false | NULL    |       |
+| can_read_phi                        | boolean      | YES  | false | NULL    |       |
++-------------------------------------+--------------+------+-------+---------+-------+
+24 rows in set (0.035 sec)
 
 mysql> describe v_cbc_latest_results;
 +-----------------------------+------------------+------+-------+---------+-------+
@@ -218,7 +230,7 @@ mysql> describe v_cbc_latest_results;
 | administrative_dates        | bigint           | YES  | false | NULL    |       |
 | can_read_phi                | boolean          | YES  | false | NULL    |       |
 +-----------------------------+------------------+------+-------+---------+-------+
-32 rows in set (0.045 sec)
+32 rows in set (0.038 sec)
 
 mysql> describe v_csf_results_latest_by_component;
 +----------------------------------+------------------+------+-------+---------+-------+
@@ -294,7 +306,7 @@ mysql> describe v_csf_results_latest_by_component;
 | age_at_last_csf_result_days      | int              | YES  | false | NULL    |       |
 | can_read_phi                     | boolean          | YES  | false | NULL    |       |
 +----------------------------------+------------------+------+-------+---------+-------+
-69 rows in set (0.039 sec)
+69 rows in set (0.042 sec)
 
 mysql> describe v_csf_tumor_analysis_latest;
 +-----------------------------+------------------+------+-------+---------+-------+
@@ -327,7 +339,7 @@ mysql> describe v_csf_tumor_analysis_latest;
 | families_ever               | varchar(1048576) | YES  | false | NULL    |       |
 | can_read_phi                | boolean          | YES  | false | NULL    |       |
 +-----------------------------+------------------+------+-------+---------+-------+
-26 rows in set (0.044 sec)
+26 rows in set (0.169 sec)
 
 mysql> describe v_lansky_karnofsky_latest;
 +--------------------+------------------+------+-------+---------+-------+
@@ -349,4 +361,4 @@ mysql> describe v_lansky_karnofsky_latest;
 | date_semantic      | varchar(1048576) | YES  | false | NULL    |       |
 | can_read_phi       | boolean          | YES  | false | NULL    |       |
 +--------------------+------------------+------+-------+---------+-------+
-15 rows in set (0.036 sec)
+15 rows in set (0.045 sec)
