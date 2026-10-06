@@ -341,12 +341,12 @@ export const isEmpty = (value: unknown): boolean => {
 
 /**
  * Checks if the current environment is a FERLEASE environment.
- * Determines this by checking if CYPRESS_BASE_URL contains 'sjra-', 'clin-'.
+ * Determines this by checking if CYPRESS_BASE_URL contains 'sjra-', 'clin-', 'rad-'.
  * @returns True if running in a FERLEASE environment, false otherwise.
  */
 export const isFerlease = (): boolean => {
   const url = process.env.CYPRESS_BASE_URL !== undefined ? process.env.CYPRESS_BASE_URL : '';
-  return url.includes('sjra-') || url.includes('clin-');
+  return url.includes('sjra-') || url.includes('clin-') || url.includes('rad-');
 };
 
 /**
