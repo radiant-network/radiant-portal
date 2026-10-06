@@ -925,3 +925,121 @@ export async function fetchPatientSidebarInfo(_patientId: string): Promise<Patie
   await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
   return PATIENT_SIDEBAR_INFO_MOCK;
 }
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists.
+// Fields map to the v_pcx_30_event_level_combined view (Patient View analysis §B4).
+// source_of_event_diagnosis and date_of_initial_diagnosis_mri are not yet in StarRocks
+// (Build readiness: "defer or drop") — kept here to match the wireframe until confirmed.
+// event_count is derived (COUNT on event_level) and surfaced in the card header to anchor
+// the event-scoped data to the patient's event history.
+export type PatientInitialDiagnosis = {
+  cns_diagnosis_category?: string;
+  cns_integrated_diagnosis?: string;
+  event_date?: string;
+  source_of_event_diagnosis?: string;
+  date_of_initial_diagnosis_mri?: string;
+  event_count?: number;
+};
+
+// Placeholder lifted from the v6.2 wireframe (Kai Ellery, ATRT-SHH).
+const PATIENT_INITIAL_DIAGNOSIS_MOCK: PatientInitialDiagnosis = {
+  cns_diagnosis_category: 'Embryonal tumor',
+  cns_integrated_diagnosis: 'ATRT-SHH',
+  event_date: 'Day 0',
+  source_of_event_diagnosis: 'Pathology',
+  date_of_initial_diagnosis_mri: 'Day −3',
+  event_count: 5,
+};
+
+// TODO: replace with a call to the generated patient API client once the backend endpoint lands
+export async function fetchPatientInitialDiagnosis(_patientId: string): Promise<PatientInitialDiagnosis> {
+  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  return PATIENT_INITIAL_DIAGNOSIS_MOCK;
+}
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists.
+// Fields map to the v_pcx_30_event_level_combined view (Patient View analysis §B4).
+// laterality, m_stage (Chang) and symptoms_at_event are not yet in StarRocks
+// (Build readiness: "defer or drop") — kept here to match the wireframe until confirmed.
+// event_type and event_day describe the most recent event the fields are drawn from
+// (prototype card-action: "Most recent event · {type} · Day {N}").
+export type PatientTumourAndMetastasis = {
+  tumor_locations?: string[];
+  tumor_location_other?: string;
+  laterality?: string;
+  metastasis?: string;
+  m_stage?: string;
+  metastasis_location?: string[];
+  metastasis_location_other?: string;
+  symptoms_at_event?: string[];
+  event_type?: string;
+  event_day?: number;
+};
+
+// Placeholder lifted from the v6.2 wireframe (Kai Ellery, ATRT-SHH).
+const PATIENT_TUMOUR_AND_METASTASIS_MOCK: PatientTumourAndMetastasis = {
+  tumor_locations: ['Cerebellum'],
+  laterality: 'Left',
+  metastasis: 'Yes',
+  m_stage: 'M0',
+  metastasis_location: ['Leptomeningeal'],
+  symptoms_at_event: ['Focal neurological deficit'],
+  event_type: 'Progressive',
+  event_day: 1026,
+};
+
+// TODO: replace with a call to the generated patient API client once the backend endpoint lands
+export async function fetchPatientTumourAndMetastasis(_patientId: string): Promise<PatientTumourAndMetastasis> {
+  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  return PATIENT_TUMOUR_AND_METASTASIS_MOCK;
+}
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists.
+// Fields map to the v_pcx_30_demographics_combined view (Patient View analysis §B4).
+// mrn and birth_date are PHI; birth_year is the OK-to-all coarsened counterpart.
+// address_postal_code is truncated in the de-identified extract.
+export type PatientDemographics = {
+  mrn?: string;
+  birth_year?: number;
+  gender?: string;
+  race?: string;
+  ethnicity?: string;
+  address_postal_code?: string;
+  organization_name?: string;
+};
+
+// Placeholder lifted from the v6.2 wireframe (Kai Ellery, CHOP).
+const PATIENT_DEMOGRAPHICS_MOCK: PatientDemographics = {
+  mrn: 'MRN-CHOP-10274',
+  birth_year: 2015,
+  gender: 'Male',
+  race: 'White',
+  ethnicity: 'Not Hispanic or Latino',
+  address_postal_code: '19104',
+  organization_name: "The Children's Hospital of Philadelphia",
+};
+
+// TODO: replace with a call to the generated patient API client once the backend endpoint lands
+export async function fetchPatientDemographics(_patientId: string): Promise<PatientDemographics> {
+  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  return PATIENT_DEMOGRAPHICS_MOCK;
+}
+
+// TODO: replace with generated type from frontend/api/ once backend endpoint exists.
+// Lower priority for November (Build readiness) and cancer-specific per the Generalising
+// section of the Patient View analysis.
+// Wireframe enum: Rhabdoid tumour (SMARCB1) · Li-Fraumeni (TP53) · NF1 / NF2 · MMR · CMMRD · Lynch syndrome.
+export type PatientCancerPredispositions = {
+  cancer_predisposition?: string[];
+};
+
+// Placeholder lifted from the v6.2 wireframe (Kai Ellery, ATRT-SHH).
+const PATIENT_CANCER_PREDISPOSITIONS_MOCK: PatientCancerPredispositions = {
+  cancer_predisposition: ['SMARCB1 rhabdoid'],
+};
+
+// TODO: replace with a call to the generated patient API client once the backend endpoint lands
+export async function fetchPatientCancerPredispositions(_patientId: string): Promise<PatientCancerPredispositions> {
+  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  return PATIENT_CANCER_PREDISPOSITIONS_MOCK;
+}

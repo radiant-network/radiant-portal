@@ -1096,6 +1096,44 @@
       "imaging": "Imaging",
       "clinical_trials": "Clinical Trials"
     },
+    "overview": {
+      "initial_diagnosis": {
+        "title": "Initial diagnosis",
+        "cns_diagnosis_category": "CNS diagnosis category",
+        "cns_integrated_diagnosis": "CNS integrated diagnosis",
+        "event_date": "Date of diagnosis",
+        "source_of_event_diagnosis": "Source of diagnosis",
+        "date_of_initial_diagnosis_mri": "Date of MR imaging diagnosis",
+        "events_total": "{{count}} events total",
+        "view_timeline": "View timeline"
+      },
+      "tumour_and_metastasis": {
+        "title": "Tumour and metastasis",
+        "tumor_locations": "Tumour locations",
+        "tumor_location_other": "Other location",
+        "laterality": "Laterality",
+        "metastasis": "Metastasis",
+        "m_stage": "Metastatic stage (Chang)",
+        "metastasis_location": "Metastasis site",
+        "metastasis_location_other": "Extraneural site",
+        "symptoms_at_event": "Symptoms at event",
+        "most_recent_event": "Most recent event · {{type}} · Day {{day}}"
+      },
+      "demographics": {
+        "title": "Demographics",
+        "mrn": "MRN",
+        "birth_year": "Birth year",
+        "gender": "Sex",
+        "race": "Race",
+        "ethnicity": "Ethnicity",
+        "address_postal_code": "Postal code",
+        "organization_name": "Site"
+      },
+      "cancer_predispositions": {
+        "title": "Cancer predispositions",
+        "cancer_predisposition": "Predisposition list"
+      }
+    },
     "sidebar": {
       "key_dates": {
         "title": "Key Dates",
