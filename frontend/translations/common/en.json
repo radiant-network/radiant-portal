@@ -1239,6 +1239,8 @@
         "status_code": "Status"
       },
       "headers": {
+        "assignees": "Assignment",
+        "assignees_tooltip": "Case assignment",
         "case_id": "Case",
         "patient_id": "Patient",
         "submitter_patient_id": "MRN",
