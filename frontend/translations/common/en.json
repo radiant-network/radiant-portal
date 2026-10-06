@@ -1157,6 +1157,27 @@
         "linked": "Linked",
         "connected": "Connected"
       }
+    },
+    "treatments": {
+      "title_count_one": "{{count}} treatment",
+      "title_count_other": "{{count}} treatments",
+      "day_value": "Day {{day}}",
+      "columns": {
+        "day": "Day",
+        "type": "Type",
+        "description": "Description",
+        "dose": "Dose"
+      },
+      "types": {
+        "surgery": "Surgery",
+        "radiation": "Radiation",
+        "medical_therapy": "Medical therapy"
+      },
+      "doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
+      }
     }
   },
   "patient_exploration": {

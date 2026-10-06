@@ -159,7 +159,9 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		return nil, err
 	}
 
-	panel, err := utils.GetFilter(db, types.PanelTable, "name", nil)
+	// Uploaded panels are gene lists for the variant filter, not prescriptions: no case uses them.
+	isPrescriptionPanel := fmt.Sprintf("%s.type_code <> '%s'", types.PanelTable.Alias, types.PanelTypeUploaded)
+	panel, err := utils.GetFilter(db, types.PanelTable, "name", &isPrescriptionPanel)
 	if err != nil {
 		return nil, err
 	}

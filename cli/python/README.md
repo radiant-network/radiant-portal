@@ -118,6 +118,7 @@ Class | Method | HTTP request | Description
 *DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
 *DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /{tenant}/documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
 *DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /{tenant}/documents/search | Search documents
+*GenePanelsApi* | [**put_gene_panels**](docs/GenePanelsApi.md#put_gene_panels) | **PUT** /{tenant}/gene_panels | Replace the tenant&#39;s gene panels
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 *GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
@@ -271,6 +272,8 @@ Class | Method | HTTP request | Description
  - [FiltersValue](docs/FiltersValue.md)
  - [GenePanelCondition](docs/GenePanelCondition.md)
  - [GenePanelConditions](docs/GenePanelConditions.md)
+ - [GenePanelUploadResult](docs/GenePanelUploadResult.md)
+ - [GenePanelUploadWarning](docs/GenePanelUploadWarning.md)
  - [GeneResult](docs/GeneResult.md)
  - [GeneSearchBody](docs/GeneSearchBody.md)
  - [GermlineCNVOccurrence](docs/GermlineCNVOccurrence.md)

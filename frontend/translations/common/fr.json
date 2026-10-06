@@ -1158,6 +1158,27 @@
         "linked": "Lié",
         "connected": "Connecté"
       }
+    },
+    "treatments": {
+      "title_count_one": "{{count}} traitement",
+      "title_count_other": "{{count}} traitements",
+      "day_value": "Jour {{day}}",
+      "columns": {
+        "day": "Jour",
+        "type": "Type",
+        "description": "Description",
+        "dose": "Dose"
+      },
+      "types": {
+        "surgery": "Chirurgie",
+        "radiation": "Radiothérapie",
+        "medical_therapy": "Traitement médical"
+      },
+      "doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
+      }
     }
   },
   "patient_exploration": {

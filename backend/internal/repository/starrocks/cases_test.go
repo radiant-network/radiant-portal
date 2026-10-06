@@ -430,6 +430,23 @@ func Test_GetCasesFilters(t *testing.T) {
 	})
 }
 
+func Test_GetCasesFilters_LeavesOutUploadedPanels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec("INSERT INTO panel (code, name, type_code, tenant_code) VALUES ('GPFILTER', 'GPFILTER', 'uploaded', 'radiant')").Error)
+		t.Cleanup(func() { env.Postgres.Exec("DELETE FROM panel WHERE code = 'GPFILTER' AND tenant_code = 'radiant'") })
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		filters, err := repo.GetCasesFilters(t.Context())
+
+		require.NoError(t, err)
+		keys := make([]string, len(filters.Panel))
+		for i, p := range filters.Panel {
+			keys[i] = p.Key
+		}
+		assert.ElementsMatch(t, []string{"EPILEP", "HEART"}, keys)
+	})
+}
+
 func Test_GetCaseEntity(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

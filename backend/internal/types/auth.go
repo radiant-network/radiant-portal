@@ -59,6 +59,9 @@ const (
 // ActionEditCase gates editing a case (org-scoped) (migration 000032).
 const ActionEditCase = "can_edit_case"
 
+// ActionManageAnalysisCatalog gates the gene panel upload (tenant-scoped) (migration 000041).
+const ActionManageAnalysisCatalog = "can_manage_analysis_catalog"
+
 // ActionResponse carries the action catalog entry. name/description are the English labels for
 // now; resolving them by the caller's locale is a separate cross-cutting task.
 // @Description Action from the authorization catalog.

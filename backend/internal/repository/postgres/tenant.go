@@ -26,7 +26,7 @@ var DefaultRoles = []roleSeed{
 		DescriptionEn: "Full administrative access to this network: manage members, organizations, and roles.",
 		NameFr:        "Administrateur",
 		DescriptionFr: "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles.",
-		Actions:       []string{"can_manage_user", "can_manage_org", "can_manage_role"},
+		Actions:       []string{"can_manage_user", "can_manage_org", "can_manage_role", "can_manage_analysis_catalog"},
 	},
 	{
 		Code:          "member",

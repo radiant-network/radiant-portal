@@ -95,8 +95,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUsers := postgres.NewUsersRepository(postgresDB)
 	repoRoles := postgres.NewRolesRepository(postgresDB)
 	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
+	repoGenePanelPG := postgres.NewGenePanelsRepository(postgresDB) // We need PG because we write the panels in PG
+	repoTenants := starrocks.NewStarrocksTenantRepository(starrocksDB)
+
 	// SMTP and notification settings are read per request, no restart on a relay change.
 	caseGroupNotifier := notification.NewService(repoCaseGroups, repoOrganizationsWrite, notificationTemplates, notification.NewSMTPMailer())
+
+	genePanelUploader := service.NewGenePanelUploader(repoGenes, repoGenePanelPG, repoTenants)
 
 	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
 	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
@@ -175,6 +180,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))
 	casesGroup.PATCH("/:case_id", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseHandler(repoCasesWrite))
+
+	genePanelsGroup := tenantRoutes.Group("/gene_panels")
+	genePanelsGroup.PUT("", requireAction(types.ActionManageAnalysisCatalog), server.PutGenePanelsHandler(genePanelUploader))
 
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))

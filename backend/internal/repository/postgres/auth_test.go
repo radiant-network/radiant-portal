@@ -154,7 +154,7 @@ func Test_AuthRepository_ListActions(t *testing.T) {
 
 		actions, err := repo.ListActions(t.Context())
 		assert.NoError(t, err)
-		assert.Len(t, actions, 12) // 8 from migration 000009 + 3 from 000018 + 1 from 000032
+		assert.Len(t, actions, 13) // 8 from migration 000009 + 3 from 000018 + 1 from 000032 + 1 from 000041
 
 		byCode := map[string]types.ActionResponse{}
 		for _, a := range actions {
