@@ -1,10 +1,9 @@
+import type { PatientKeyDate } from '@/api/api';
 import EmptyField from '@/components/base/information/empty-field';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-
-import type { PatientKeyDate } from '../../api/patient';
 
 import SidebarItem from './sidebar-item';
 

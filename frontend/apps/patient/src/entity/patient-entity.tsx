@@ -121,7 +121,7 @@ export default function App() {
         </TabsList>
         <Container>
           <div className="grid gap-4 items-start max-w-8xl mx-auto w-full p-0 md:p-3 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)]">
-            <Sidebar patientId={patientId} />
+            <Sidebar patient={data} isLoading={isLoading} />
             <div className="min-w-0">
               <TabsContent value={PatientEntityTabs.Overview}>
                 <OverviewTab />

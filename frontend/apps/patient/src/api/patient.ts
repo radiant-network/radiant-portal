@@ -897,42 +897,19 @@ export async function fetchPatientsList(): Promise<PatientsSearchResponse> {
 }
 
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientKeyDate = {
-  day: number | null;
-  // TODO: confirm the list of source codes with the backend
-  source: string;
-};
-
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
 export type PatientExternalRecords = {
   organization: string;
   linked: boolean;
   connected: boolean;
 };
 
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientSidebarInfo = {
-  initial_diagnosis: PatientKeyDate;
-  latest_encounter: PatientKeyDate;
-  external_records: PatientExternalRecords;
-};
-
 // Same placeholder for every patient, lifted from the v6.2 wireframe (Kai Ellery).
-const PATIENT_SIDEBAR_INFO_MOCK: PatientSidebarInfo = {
-  initial_diagnosis: { day: 819, source: 'clinical' },
-  latest_encounter: { day: 1343, source: 'registry' },
-  external_records: {
-    organization: "The Children's Hospital of Philadelphia",
-    linked: true,
-    connected: true,
-  },
+// TODO: replace once the backend provides external records
+export const PATIENT_EXTERNAL_RECORDS_MOCK: PatientExternalRecords = {
+  organization: "The Children's Hospital of Philadelphia",
+  linked: true,
+  connected: true,
 };
-
-// TODO: replace with a call to the generated patient API client once the backend endpoint lands
-export async function fetchPatientSidebarInfo(_patientId: string): Promise<PatientSidebarInfo> {
-  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
-  return PATIENT_SIDEBAR_INFO_MOCK;
-}
 
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists.
 // Fields map to the v_pcx_30_event_level_combined view (Patient View analysis §B4).
