@@ -1,3 +1,4 @@
+import SkeletonCard from '@/components/base/cards/skeleton-card';
 import InformationField from '@/components/base/information/information-field';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader, type CardProps, CardTitle } from '@/components/base/shadcn/card';
@@ -6,24 +7,33 @@ import { useI18n } from '@/components/hooks/i18n';
 type InitialDiagnosisCardProps = {
   cns_diagnosis_category?: string;
   cns_integrated_diagnosis?: string;
-  event_date?: string;
-  source_of_event_diagnosis?: string;
-  date_of_initial_diagnosis_mri?: string;
+  event_day?: number;
   event_count?: number;
   onViewTimeline?: () => void;
+  isLoading?: boolean;
 } & CardProps;
 
 function InitialDiagnosisCard({
   cns_diagnosis_category,
   cns_integrated_diagnosis,
-  event_date,
-  source_of_event_diagnosis,
-  date_of_initial_diagnosis_mri,
+  event_day,
   event_count,
   onViewTimeline,
+  isLoading,
   ...cardProps
 }: InitialDiagnosisCardProps) {
   const { t } = useI18n();
+
+  if (isLoading) {
+    return (
+      <SkeletonCard
+        data-cy="initial-diagnosis-card"
+        title={t('patient_entity.overview.initial_diagnosis.title')}
+        rows={3}
+        {...cardProps}
+      />
+    );
+  }
 
   return (
     <Card data-cy="initial-diagnosis-card" {...cardProps}>
@@ -53,19 +63,9 @@ function InitialDiagnosisCard({
             {cns_integrated_diagnosis}
           </InformationField>
         )}
-        {event_date && (
+        {event_day !== undefined && (
           <InformationField label={t('patient_entity.overview.initial_diagnosis.event_date')}>
-            {event_date}
-          </InformationField>
-        )}
-        {source_of_event_diagnosis && (
-          <InformationField label={t('patient_entity.overview.initial_diagnosis.source_of_event_diagnosis')}>
-            {source_of_event_diagnosis}
-          </InformationField>
-        )}
-        {date_of_initial_diagnosis_mri && (
-          <InformationField label={t('patient_entity.overview.initial_diagnosis.date_of_initial_diagnosis_mri')}>
-            {date_of_initial_diagnosis_mri}
+            {t('patient_entity.overview.initial_diagnosis.day', { day: event_day })}
           </InformationField>
         )}
       </CardContent>

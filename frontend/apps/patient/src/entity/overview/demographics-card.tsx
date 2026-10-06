@@ -1,3 +1,4 @@
+import SkeletonCard from '@/components/base/cards/skeleton-card';
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, type CardProps, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -8,8 +9,9 @@ type DemographicsCardProps = {
   gender?: string;
   race?: string;
   ethnicity?: string;
-  address_postal_code?: string;
+  postal_code?: string;
   organization_name?: string;
+  isLoading?: boolean;
 } & CardProps;
 
 function DemographicsCard({
@@ -18,11 +20,23 @@ function DemographicsCard({
   gender,
   race,
   ethnicity,
-  address_postal_code,
+  postal_code,
   organization_name,
+  isLoading,
   ...cardProps
 }: DemographicsCardProps) {
   const { t } = useI18n();
+
+  if (isLoading) {
+    return (
+      <SkeletonCard
+        data-cy="demographics-card"
+        title={t('patient_entity.overview.demographics.title')}
+        rows={6}
+        {...cardProps}
+      />
+    );
+  }
 
   return (
     <Card data-cy="demographics-card" {...cardProps}>
@@ -41,9 +55,9 @@ function DemographicsCard({
         {ethnicity && (
           <InformationField label={t('patient_entity.overview.demographics.ethnicity')}>{ethnicity}</InformationField>
         )}
-        {address_postal_code && (
-          <InformationField label={t('patient_entity.overview.demographics.address_postal_code')}>
-            {address_postal_code}
+        {postal_code && (
+          <InformationField label={t('patient_entity.overview.demographics.postal_code')}>
+            {postal_code}
           </InformationField>
         )}
         {organization_name && (
