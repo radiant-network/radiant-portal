@@ -2,6 +2,8 @@ package server
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +15,7 @@ import (
 
 const tenantGenePanelFilterBody = `{"sqon":{"op":"in","content":{"field":"tenant_gene_panel","value":["ONCO"]}}}`
 const tenantGenePanelAggregateBody = `{"field":"tenant_gene_panel","sqon":{"op":"and","content":[]}}`
-const tenantGenePanelStatisticsBody = `{"field":"impact_score","sqon":{"op":"in","content":{"field":"tenant_gene_panel","value":["ONCO"]}}}`
+const tenantGenePanelStatisticsBody = `{"field":"start","sqon":{"op":"in","content":{"field":"tenant_gene_panel","value":["ONCO"]}}}`
 
 // bindTenantViews mirrors RequireTenantAccess with TENANT_VIEWS_READ_ENABLED on: it binds the
 // path tenant to the request context.
@@ -170,4 +172,39 @@ func Test_OccurrencesSomaticSNVStatisticsHandler_Rejects_TenantGenePanel_Without
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, `{"status":400,"message":"error during build statistics query unauthorized or unknown field: tenant_gene_panel"}`, w.Body.String())
+}
+
+func Test_OccurrencesGermlineSNVAggregateHandler_Returns_404_When_TenantGenePanel_With_Dictionary(t *testing.T) {
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", bindTenantViews, OccurrencesGermlineSNVAggregateHandler(&MockRepository{}, &MockFacetsRepository{}))
+
+	w := postTenantGenePanel(router, "/radiant/occurrences/germline/snv/1/1/1/aggregate?with_dictionary=true", tenantGenePanelAggregateBody)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"facet not found"}`, w.Body.String())
+}
+
+func Test_OccurrencesSomaticSNVAggregateHandler_Returns_404_When_TenantGenePanel_With_Dictionary(t *testing.T) {
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", bindTenantViews, OccurrencesSomaticSNVAggregateHandler(&MockSomaticSNVOccurrencesRepository{}, &MockFacetsRepository{}))
+
+	w := postTenantGenePanel(router, "/radiant/occurrences/somatic/snv/1/1/1/aggregate?with_dictionary=true", tenantGenePanelAggregateBody)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"facet not found"}`, w.Body.String())
+}
+
+type failingFacetsRepository struct{}
+
+func (failingFacetsRepository) GetFacets(context.Context, []string) ([]types.Facet, error) {
+	return nil, errors.New("boom")
+}
+
+func Test_OccurrencesGermlineSNVAggregateHandler_Returns_500_When_Facets_Fail(t *testing.T) {
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineSNVAggregateHandler(&MockRepository{}, failingFacetsRepository{}))
+
+	w := postTenantGenePanel(router, "/radiant/occurrences/germline/snv/1/1/1/aggregate?with_dictionary=true", `{"field":"variant_class","sqon":{"op":"and","content":[]}}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

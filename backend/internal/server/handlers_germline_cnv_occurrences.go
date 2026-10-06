@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -223,6 +224,10 @@ func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader, f
 
 		if queryParam.WithDictionary {
 			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
+			if errors.Is(err, types.ErrFacetNotFound) {
+				HandleNotFoundError(c, "facet")
+				return
+			}
 			if err != nil {
 				HandleError(c, err)
 				return

@@ -1,5 +1,9 @@
 package types
 
+import "errors"
+
+var ErrFacetNotFound = errors.New("facet not found")
+
 type Facet struct {
 	Name   string   `json:"name"`
 	Values []string `json:"values"`

@@ -130,7 +130,7 @@ func (r *FacetsRepository) GetFacets(ctx context.Context, facetNames []string) (
 		if facet, exists := r.facetsDictionary[name]; exists {
 			facets = append(facets, facet)
 		} else {
-			return nil, fmt.Errorf("facet \"%s\" not found", name)
+			return nil, fmt.Errorf("%w: %q", types.ErrFacetNotFound, name)
 		}
 	}
 

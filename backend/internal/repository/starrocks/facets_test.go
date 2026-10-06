@@ -3,6 +3,7 @@ package starrocks
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,6 +65,6 @@ func Test_GetFacet_FacetNotFound(t *testing.T) {
 	repo := NewFacetsRepository()
 	facetNames := []string{"non_existent_facet"}
 	facets, err := repo.GetFacets(t.Context(), facetNames)
-	assert.Error(t, err)
+	assert.ErrorIs(t, err, types.ErrFacetNotFound)
 	assert.Nil(t, facets)
 }
