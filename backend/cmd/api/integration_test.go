@@ -160,6 +160,7 @@ func Test_SecureRoutes(t *testing.T) {
 		// PATCH requests
 		for _, route := range []string{
 			"radiant/cases/batch",
+			"radiant/cases/status",
 			"radiant/cases/1",
 		} {
 			req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)

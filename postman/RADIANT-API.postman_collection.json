@@ -1848,6 +1848,44 @@
           "response": []
         },
         {
+          "name": "Set Cases Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cases\": [\n    {\n      \"case_id\": 1,\n      \"status_code\": \"in_progress\",\n      \"expected_status_codes\": [\"processing\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/status",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Assignment Candidates",
           "request": {
             "auth": {

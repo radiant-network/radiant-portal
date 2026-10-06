@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -111,6 +112,42 @@ func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, c *Case) (b
 		return false, fmt.Errorf("error patching case %d: %w", caseID, tx.Error)
 	}
 	return tx.RowsAffected > 0, nil
+}
+
+// SetCaseStatusIfExpected moves a case to status only while it is still in one of expected, so a
+// status a user set in the meantime is never overwritten. It returns nil when the tenant holds
+// no such case.
+//
+// The case row is locked before its status is read, so the status reported on a miss is the one
+// the decision was made on: no writer can change it between the check and the answer.
+func (r *CasesRepository) SetCaseStatusIfExpected(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error) {
+	var result *types.CaseStatusChangeResult
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		current := []string{}
+		err := tx.Table(types.CaseTable.Name).
+			Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ? AND tenant_code = ?", caseID, tenantCode).
+			Pluck("status_code", &current).Error
+		if err != nil {
+			return err
+		}
+		if len(current) == 0 {
+			return nil
+		}
+		if !slices.Contains(expected, current[0]) {
+			result = &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: current[0]}
+			return nil
+		}
+
+		result = &types.CaseStatusChangeResult{CaseID: caseID, Updated: true, CurrentStatusCode: status}
+		return tx.Model(&types.Case{}).
+			Where("id = ? AND tenant_code = ?", caseID, tenantCode).
+			Update("status_code", status).Error
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error changing status of case %d: %w", caseID, err)
+	}
+	return result, nil
 }
 
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(ctx context.Context, caseHasSeqExp *types.CaseHasSequencingExperiment) error {

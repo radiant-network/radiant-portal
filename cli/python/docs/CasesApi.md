@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**list_case_assignment_candidates**](CasesApi.md#list_case_assignment_candidates) | **GET** /{tenant}/cases/{case_id}/assignment_candidates | List the users who may be assigned a case
 [**patch_case**](CasesApi.md#patch_case) | **PATCH** /{tenant}/cases/{case_id} | Update a case
 [**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
+[**patch_cases_status**](CasesApi.md#patch_cases_status) | **PATCH** /{tenant}/cases/status | Set the status of cases
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
 [**put_case_assignments**](CasesApi.md#put_case_assignments) | **PUT** /{tenant}/cases/{case_id}/assignments | Set the users a case is assigned to
 [**put_case_batch**](CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
@@ -795,6 +796,92 @@ Name | Type | Description  | Notes
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patch_cases_status**
+> CasesStatusResponse patch_cases_status(tenant, cases_status_request)
+
+Set the status of cases
+
+Change the status of several cases. A change between two user statuses needs can_edit_case at the case's diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.cases_status_request import CasesStatusRequest
+from radiant_python.models.cases_status_response import CasesStatusResponse
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    cases_status_request = radiant_python.CasesStatusRequest() # CasesStatusRequest | Status changes
+
+    try:
+        # Set the status of cases
+        api_response = api_instance.patch_cases_status(tenant, cases_status_request)
+        print("The response of CasesApi->patch_cases_status:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling CasesApi->patch_cases_status: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **cases_status_request** | [**CasesStatusRequest**](CasesStatusRequest.md)| Status changes | 
+
+### Return type
+
+[**CasesStatusResponse**](CasesStatusResponse.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

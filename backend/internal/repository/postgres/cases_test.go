@@ -329,6 +329,117 @@ func Test_PatchCase_OwnTenantCaseIsWritable(t *testing.T) {
 	})
 }
 
+func Test_SetCaseStatusIfExpected_MovesSubmittedToProcessing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100030, types.CaseStatusSubmitted)
+
+		var before time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&before).Error)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: true, CurrentStatusCode: types.CaseStatusProcessing}, result)
+		assert.Equal(t, types.CaseStatusProcessing, statusOfCase(t, env.Postgres, caseID))
+
+		var after time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&after).Error)
+		assert.True(t, after.After(before), "updated_on did not advance: before %s, after %s", before, after)
+	})
+}
+
+func Test_SetCaseStatusIfExpected_UnexpectedStatusIsLeftUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100031, types.CaseStatusRevoked)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusRevoked}, result)
+		assert.Equal(t, types.CaseStatusRevoked, statusOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_SetCaseStatusIfExpected_AlreadyInTargetIsNotUpdated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100032, types.CaseStatusInProgress)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusInProgress}, result)
+	})
+}
+
+// A user's change still uncommitted when the pipeline call arrives: the call must wait for it,
+// then decide on, and report, the status the user committed.
+func Test_SetCaseStatusIfExpected_WaitsForAConcurrentUserChange(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100034, types.CaseStatusProcessing)
+
+		userTx := env.Postgres.Begin()
+		require.NoError(t, userTx.Error)
+		committed := false
+		t.Cleanup(func() {
+			if !committed {
+				userTx.Rollback()
+			}
+		})
+		require.NoError(t, userTx.Exec("UPDATE cases SET status_code = ? WHERE id = ?", types.CaseStatusRevoked, caseID).Error)
+
+		type outcome struct {
+			result *types.CaseStatusChangeResult
+			err    error
+		}
+		done := make(chan outcome, 1)
+		go func() {
+			result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+			done <- outcome{result, err}
+		}()
+
+		select {
+		case got := <-done:
+			t.Fatalf("SetCaseStatusIfExpected returned %+v, %v while the user's change still held the row; want it to wait", got.result, got.err)
+		case <-time.After(300 * time.Millisecond):
+		}
+
+		require.NoError(t, userTx.Commit().Error)
+		committed = true
+
+		select {
+		case got := <-done:
+			assert.NoError(t, got.err)
+			assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusRevoked}, got.result)
+		case <-time.After(10 * time.Second):
+			t.Fatal("SetCaseStatusIfExpected did not return after the user's change committed")
+		}
+		assert.Equal(t, types.CaseStatusRevoked, statusOfCase(t, env.Postgres, caseID), "the user's status must not be overwritten")
+	})
+}
+
+func Test_SetCaseStatusIfExpected_UnknownCaseIsNil(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, 999999, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Nil(t, result)
+	})
+}
+
+func Test_SetCaseStatusIfExpected_CrossTenantCaseIsNilAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100033, types.CaseStatusSubmitted)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), "tenant_b", caseID, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Nil(t, result, "radiant's case must not be visible from tenant_b")
+		assert.Equal(t, types.CaseStatusSubmitted, statusOfCase(t, env.Postgres, caseID), "the status must be left untouched")
+	})
+}
+
 func Test_CaseStatusDictionary_MatchesStatusTable(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewValueSetsRepository(database.PostgresDB{DB: env.Postgres})

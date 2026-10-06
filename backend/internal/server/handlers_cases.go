@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -262,6 +264,80 @@ func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
 		}
 
 		c.Status(http.StatusOK)
+	}
+}
+
+type caseStatusSetter interface {
+	SetCaseStatusIfExpected(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error)
+}
+
+// PatchCasesStatusHandler applies conditional status changes to several cases: those the
+// pipeline makes as it processes a case, and those a geneticist makes afterwards. The whole
+// request is validated before any case is written, so a rejected change leaves every case of the
+// request untouched.
+// @Summary Set the status of cases
+// @Id patchCasesStatus
+// @Description Change the status of several cases. A change between two user statuses needs can_edit_case at the case's diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param message body types.CasesStatusRequest true "Status changes"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.CasesStatusResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/status [patch]
+func PatchCasesStatusHandler(repo caseStatusSetter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		var body types.CasesStatusRequest
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if len(body.Cases) == 0 {
+			HandleValidationError(c, errors.New("cases is required"))
+			return
+		}
+		seen := map[int]bool{}
+		for _, change := range body.Cases {
+			if err := types.ValidateCaseStatusChange(change); err != nil {
+				HandleValidationError(c, err)
+				return
+			}
+			if seen[change.CaseID] {
+				HandleValidationError(c, fmt.Errorf("case %d is listed more than once", change.CaseID))
+				return
+			}
+			seen[change.CaseID] = true
+		}
+
+		results := make([]types.CaseStatusChangeResult, 0, len(body.Cases))
+		for _, change := range body.Cases {
+			result, err := repo.SetCaseStatusIfExpected(c.Request.Context(), *tenant, change.CaseID, change.StatusCode, change.ExpectedStatusCodes)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			if result == nil {
+				// The gate resolved every case, so this one was deleted since.
+				HandleNotFoundError(c, fmt.Sprintf("case %d", change.CaseID))
+				return
+			}
+			results = append(results, *result)
+		}
+
+		c.JSON(http.StatusOK, types.CasesStatusResponse{Cases: results})
 	}
 }
 

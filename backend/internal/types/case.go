@@ -89,6 +89,88 @@ func ValidateUserAppliedCaseStatus(code string) error {
 	return nil
 }
 
+// pipelineCaseStatusTransitions maps each status the pipeline may set to the only status it may
+// set it from. They are the only allowed changes that involve a system status.
+var pipelineCaseStatusTransitions = map[CaseStatus]CaseStatus{
+	CaseStatusProcessing: CaseStatusSubmitted,
+	CaseStatusInProgress: CaseStatusProcessing,
+}
+
+// IsSystemCaseStatusChange reports whether a change sets a case to, or expects it in, a
+// system-applied status. Such a change belongs to the pipeline, whatever its other side.
+func IsSystemCaseStatusChange(change CaseStatusChange) bool {
+	if slices.Contains(SystemAppliedCaseStatuses, change.StatusCode) {
+		return true
+	}
+	for _, expected := range change.ExpectedStatusCodes {
+		if slices.Contains(SystemAppliedCaseStatuses, expected) {
+			return true
+		}
+	}
+	return false
+}
+
+func ValidateCaseStatusChange(change CaseStatusChange) error {
+	if change.CaseID <= 0 {
+		return fmt.Errorf("case_id must be a positive integer, got %d", change.CaseID)
+	}
+	if change.StatusCode == "" {
+		return fmt.Errorf("case %d: status_code is required", change.CaseID)
+	}
+	if len(change.ExpectedStatusCodes) == 0 {
+		return fmt.Errorf("case %d: expected_status_codes is required", change.CaseID)
+	}
+
+	if IsSystemCaseStatusChange(change) {
+		from, ok := pipelineCaseStatusTransitions[change.StatusCode]
+		for _, expected := range change.ExpectedStatusCodes {
+			if !ok || expected != from {
+				return fmt.Errorf("case %d: %s -> %s is not an allowed change, the only changes involving a system status are %s -> %s and %s -> %s",
+					change.CaseID, expected, change.StatusCode, CaseStatusSubmitted, CaseStatusProcessing, CaseStatusProcessing, CaseStatusInProgress)
+			}
+		}
+		return nil
+	}
+
+	if !slices.Contains(UserAppliedCaseStatuses, change.StatusCode) {
+		return fmt.Errorf("case %d: unknown status_code %q", change.CaseID, change.StatusCode)
+	}
+	for _, expected := range change.ExpectedStatusCodes {
+		if !slices.Contains(UserAppliedCaseStatuses, expected) {
+			return fmt.Errorf("case %d: unknown expected status code %q", change.CaseID, expected)
+		}
+	}
+	return nil
+}
+
+// CasesStatusRequest is the body of PATCH /{tenant}/cases/status.
+// @Description Status changes to apply to cases. A change between two user statuses needs can_edit_case at the case's lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and is limited to submitted -> processing and processing -> in_progress.
+type CasesStatusRequest struct {
+	Cases []CaseStatusChange `json:"cases" validate:"required"`
+} // @name CasesStatusRequest
+
+// CaseStatusChange
+// @Description One case status change, applied only if the case is still in one of expected_status_codes.
+type CaseStatusChange struct {
+	CaseID              int      `json:"case_id" validate:"required" example:"123"`
+	StatusCode          string   `json:"status_code" validate:"required" example:"in_progress"`
+	ExpectedStatusCodes []string `json:"expected_status_codes" validate:"required" example:"processing"`
+} // @name CaseStatusChange
+
+// CasesStatusResponse
+// @Description Outcome of each requested status change, in request order.
+type CasesStatusResponse struct {
+	Cases []CaseStatusChangeResult `json:"cases" validate:"required"`
+} // @name CasesStatusResponse
+
+// CaseStatusChangeResult
+// @Description updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant's own.
+type CaseStatusChangeResult struct {
+	CaseID            int    `json:"case_id" validate:"required" example:"123"`
+	Updated           bool   `json:"updated" validate:"required"`
+	CurrentStatusCode string `json:"current_status_code" validate:"required" example:"in_progress"`
+} // @name CaseStatusChangeResult
+
 // CaseResult - Search cases result
 // @Description Line represented a case in case list
 // @Name CaseResult

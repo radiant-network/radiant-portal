@@ -1579,6 +1579,56 @@ export type CaseStatus = typeof CaseStatus[keyof typeof CaseStatus];
 
 
 /**
+ * One case status change, applied only if the case is still in one of expected_status_codes.
+ * @export
+ * @interface CaseStatusChange
+ */
+export interface CaseStatusChange {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseStatusChange
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseStatusChange
+     */
+    'expected_status_codes': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseStatusChange
+     */
+    'status_code': string;
+}
+/**
+ * updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant\'s own.
+ * @export
+ * @interface CaseStatusChangeResult
+ */
+export interface CaseStatusChangeResult {
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseStatusChangeResult
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseStatusChangeResult
+     */
+    'current_status_code': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CaseStatusChangeResult
+     */
+    'updated': boolean;
+}
+/**
  * 
  * @export
  * @interface CaseTask
@@ -1682,6 +1732,32 @@ export interface CasesSearchResponse {
      * @memberof CasesSearchResponse
      */
     'list': Array<CaseResult>;
+}
+/**
+ * Status changes to apply to cases. A change between two user statuses needs can_edit_case at the case\'s lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and is limited to submitted -> processing and processing -> in_progress.
+ * @export
+ * @interface CasesStatusRequest
+ */
+export interface CasesStatusRequest {
+    /**
+     * 
+     * @type {Array<CaseStatusChange>}
+     * @memberof CasesStatusRequest
+     */
+    'cases': Array<CaseStatusChange>;
+}
+/**
+ * Outcome of each requested status change, in request order.
+ * @export
+ * @interface CasesStatusResponse
+ */
+export interface CasesStatusResponse {
+    /**
+     * 
+     * @type {Array<CaseStatusChangeResult>}
+     * @memberof CasesStatusResponse
+     */
+    'cases': Array<CaseStatusChangeResult>;
 }
 /**
  * Public Keycloak settings for the OAuth2 device authorization grant.
@@ -9515,6 +9591,50 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+         * @summary Set the status of cases
+         * @param {string} tenant Tenant code
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCasesStatus: async (tenant: string, casesStatusRequest: CasesStatusRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patchCasesStatus', 'tenant', tenant)
+            // verify required parameter 'casesStatusRequest' is not null or undefined
+            assertParamExists('patchCasesStatus', 'casesStatusRequest', casesStatusRequest)
+            const localVarPath = `/{tenant}/cases/status`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(casesStatusRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {string} tenant Tenant code
@@ -9850,6 +9970,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+         * @summary Set the status of cases
+         * @param {string} tenant Tenant code
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CasesStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCasesStatus(tenant, casesStatusRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCasesStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {string} tenant Tenant code
@@ -10025,6 +10159,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+         * @summary Set the status of cases
+         * @param {string} tenant Tenant code
+         * @param {CasesStatusRequest} casesStatusRequest Status changes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<CasesStatusResponse> {
+            return localVarFp.patchCasesStatus(tenant, casesStatusRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
@@ -10207,6 +10352,19 @@ export class CasesApi extends BaseAPI {
      */
     public patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Change the status of several cases. A change between two user statuses needs can_edit_case at the case\'s diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+     * @summary Set the status of cases
+     * @param {string} tenant Tenant code
+     * @param {CasesStatusRequest} casesStatusRequest Status changes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public patchCasesStatus(tenant: string, casesStatusRequest: CasesStatusRequest, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCasesStatus(tenant, casesStatusRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

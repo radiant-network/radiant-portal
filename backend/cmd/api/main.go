@@ -350,6 +350,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	casesGroup.PATCH("/batch", requireIngestEverywhere, server.PatchCaseBatchHandler(repoBatches, auth))
 	casesGroup.PUT("/batch", requireIngestEverywhere, server.PutCaseBatchHandler(repoBatches, auth))
 
+	// Checked change by change at each case's lab: can_ingest_data for a change involving a system
+	// status (the pipeline's), can_edit_case for any other.
+	casesGroup.PATCH("/status", server.RequireCaseStatusChangeActions(auth, repoAuth), server.PatchCasesStatusHandler(repoCasesWrite))
+
 	return r
 }
 

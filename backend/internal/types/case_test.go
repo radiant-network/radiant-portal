@@ -59,3 +59,80 @@ func Test_CaseStatuses_UserAndSystemSetsAreDisjoint(t *testing.T) {
 		assert.NotContainsf(t, UserAppliedCaseStatuses, code, "%q is listed as both system- and user-applied", code)
 	}
 }
+
+func Test_ValidateCaseStatusChange_AcceptsSubmittedToProcessing(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.NoError(t, err)
+}
+
+func Test_ValidateCaseStatusChange_AcceptsProcessingToInProgress(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusInProgress, ExpectedStatusCodes: []string{CaseStatusProcessing}})
+	assert.NoError(t, err)
+}
+
+func Test_ValidateCaseStatusChange_AcceptsUserToUser(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusCompleted, ExpectedStatusCodes: []string{CaseStatusInProgress, CaseStatusInReview}})
+	assert.NoError(t, err)
+}
+
+func Test_ValidateCaseStatusChange_RejectsSubmittedAsTarget(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusSubmitted, ExpectedStatusCodes: []string{CaseStatusDraft}})
+	assert.EqualError(t, err, "case 1: draft -> submitted is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress")
+}
+
+func Test_ValidateCaseStatusChange_RejectsSubmittedToInProgress(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusInProgress, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, "case 1: submitted -> in_progress is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress")
+}
+
+func Test_ValidateCaseStatusChange_RejectsProcessingToUserStatusOtherThanInProgress(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusInReview, ExpectedStatusCodes: []string{CaseStatusProcessing}})
+	assert.EqualError(t, err, "case 1: processing -> in_review is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress")
+}
+
+func Test_ValidateCaseStatusChange_RejectsUserStatusToProcessing(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted, CaseStatusInReview}})
+	assert.EqualError(t, err, "case 1: in_review -> processing is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress")
+}
+
+func Test_ValidateCaseStatusChange_RejectsUnknownTarget(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: "archived", ExpectedStatusCodes: []string{CaseStatusInProgress}})
+	assert.EqualError(t, err, `case 1: unknown status_code "archived"`)
+}
+
+func Test_ValidateCaseStatusChange_RejectsUnknownExpected(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusCompleted, ExpectedStatusCodes: []string{"archived"}})
+	assert.EqualError(t, err, `case 1: unknown expected status code "archived"`)
+}
+
+func Test_ValidateCaseStatusChange_RejectsEmptyTarget(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, "case 1: status_code is required")
+}
+
+func Test_ValidateCaseStatusChange_RejectsMissingExpected(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{CaseID: 1, StatusCode: CaseStatusProcessing})
+	assert.EqualError(t, err, "case 1: expected_status_codes is required")
+}
+
+func Test_ValidateCaseStatusChange_RejectsMissingCaseId(t *testing.T) {
+	err := ValidateCaseStatusChange(CaseStatusChange{StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted}})
+	assert.EqualError(t, err, "case_id must be a positive integer, got 0")
+}
+
+func Test_IsSystemCaseStatusChange_SystemTarget(t *testing.T) {
+	assert.True(t, IsSystemCaseStatusChange(CaseStatusChange{StatusCode: CaseStatusProcessing, ExpectedStatusCodes: []string{CaseStatusSubmitted}}))
+}
+
+func Test_IsSystemCaseStatusChange_SystemExpectedOnly(t *testing.T) {
+	assert.True(t, IsSystemCaseStatusChange(CaseStatusChange{StatusCode: CaseStatusInProgress, ExpectedStatusCodes: []string{CaseStatusProcessing}}),
+		"processing -> in_progress lands on a user status but leaves a system one")
+}
+
+func Test_IsSystemCaseStatusChange_OneSystemExpectedAmongUserOnes(t *testing.T) {
+	assert.True(t, IsSystemCaseStatusChange(CaseStatusChange{StatusCode: CaseStatusInReview, ExpectedStatusCodes: []string{CaseStatusInProgress, CaseStatusDraft}}))
+}
+
+func Test_IsSystemCaseStatusChange_UserToUser(t *testing.T) {
+	assert.False(t, IsSystemCaseStatusChange(CaseStatusChange{StatusCode: CaseStatusInReview, ExpectedStatusCodes: []string{CaseStatusInProgress}}))
+}
