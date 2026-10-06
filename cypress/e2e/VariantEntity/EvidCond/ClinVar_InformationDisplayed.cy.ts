@@ -11,22 +11,22 @@ describe('VariantEntity - EvidCond - ClinVar - Information displayed', () => {
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
   };
 
-  it('Evaluated [SJRA-1962]', () => {
+  it('Evaluated', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('evaluated', data.variantGermline.clinvar_evidence);
   });
 
-  it('Condition [SJRA-1962]', () => {
+  it('Condition', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('condition', data.variantGermline.clinvar_evidence);
   });
 
-  it('Classification [SJRA-1962]', () => {
+  it('Classification', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('classification', data.variantGermline.clinvar_evidence);
   });
 
-  it('Submissions [SJRA-1962]', () => {
+  it('Submissions', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('submission_count', data.variantGermline.clinvar_evidence);
   });
@@ -36,12 +36,12 @@ describe('VariantEntity - EvidCond - ClinVar - Information displayed', () => {
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('status', data.variantGermline.clinvar_evidence);
   });
 
-  it('Origin [SJRA-1962]', () => {
+  it('Origin', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('origin', data.variantGermline.clinvar_evidence);
   });
 
-  it('RCV Link [SJRA-1962]', () => {
+  it('RCV Link', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('rcv_link', data.variantGermline.clinvar_evidence);
   });
