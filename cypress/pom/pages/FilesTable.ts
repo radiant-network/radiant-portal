@@ -370,7 +370,7 @@ export const FilesTable = {
      */
     shouldRequestOnPageChange() {
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest1');
@@ -379,7 +379,7 @@ export const FilesTable = {
       cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest2');
@@ -388,7 +388,7 @@ export const FilesTable = {
       cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('searchRequest3');
@@ -397,7 +397,7 @@ export const FilesTable = {
       cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest4');
@@ -406,7 +406,7 @@ export const FilesTable = {
       cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
-        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest5');

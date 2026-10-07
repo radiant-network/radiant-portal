@@ -52,6 +52,7 @@ import DataTableSkeletonLoading from '@/components/base/data-table/data-table-sk
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import {
+  DEFAULT_PAGE_SIZE,
   Pagination,
   PaginationContent,
   PaginationFirst,
@@ -92,6 +93,8 @@ import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
  */
 export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
+
+export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from '@/components/base/shadcn/pagination';
 
 /**
  * Type of `columnDef.meta`, shared by every data table in the app.
@@ -668,7 +671,7 @@ function getRowFlexRender<T extends RowData>({
  *   type: 'server',
  *   state: {
  *     pageIndex: 0,
- *     pageSize: 10,
+ *     pageSize: 30,
  *   },
  *  onPaginationChange: (newPagination) => { ... },
  * }
@@ -760,7 +763,7 @@ function DataTable<T extends RowData>({
   // Default internal pagination state for locale and server pagination
   const paginationAtom = useCreateAtom<PaginationState>({
     pageIndex: pagination.state?.pageIndex || 0,
-    pageSize: pagination.state?.pageSize || 10,
+    pageSize: pagination.state?.pageSize || DEFAULT_PAGE_SIZE,
   });
   const internalPagination = useSelector(paginationAtom);
 
@@ -968,7 +971,7 @@ function DataTable<T extends RowData>({
     if (pagination.type !== 'hidden' && pagination.onPaginationChange) {
       pagination.onPaginationChange({
         pageIndex: 0,
-        pageSize: pagination.state?.pageSize || 20,
+        pageSize: pagination.state?.pageSize || DEFAULT_PAGE_SIZE,
       });
     }
   }, [sorting]);
@@ -1010,7 +1013,7 @@ function DataTable<T extends RowData>({
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-              pageSize={table.state.pagination?.pageSize ?? 20}
+              pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
               total={total}
               quickfilters={quickfilters}
             />
@@ -1024,7 +1027,7 @@ function DataTable<T extends RowData>({
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.state.pagination?.pageSize ?? 20}
+                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
                 total={total}
                 quickfilters={quickfilters}
               />
@@ -1099,7 +1102,7 @@ function DataTable<T extends RowData>({
       {tableState === DataTableState.LOADING && (
         <DataTableSkeletonLoading
           headerGroups={table.getHeaderGroups()}
-          pagination={pagination.state || { pageIndex: 0, pageSize: 20 }}
+          pagination={pagination.state || { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE }}
           columnSettings={defaultColumnSettings}
         />
       )}
@@ -1183,7 +1186,7 @@ function DataTable<T extends RowData>({
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.state.pagination?.pageSize ?? 20}
+                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
                 total={total}
                 quickfilters={quickfilters}
               />
@@ -1193,7 +1196,7 @@ function DataTable<T extends RowData>({
             <div>
               {/* PageSize select */}
               <PaginationPageSize
-                pageSize={table.state.pagination?.pageSize ?? 20}
+                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
                 onPageSizeChange={pageSize => {
                   table.setPageSize(pageSize);
                 }}

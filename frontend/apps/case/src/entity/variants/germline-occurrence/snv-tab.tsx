@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import type { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
@@ -69,7 +70,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
           swrId={`${seqId}-${taskId}`}
           columns={columns}
           defaultColumnSettings={defaultGermlineSNVSettings}
-          defaultPageSize={30}
+          defaultPageSize={DEFAULT_PAGE_SIZE}
           enableColumnOrdering
           enableFullscreen
           TableFilters={<AnnotationsTableQuickfilters />}

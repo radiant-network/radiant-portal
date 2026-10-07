@@ -27,6 +27,6 @@ describe('Cases - Request Validation', () => {
 
   it('Paging', () => {
     setupTest();
-    CasesTable.validations.shouldRequestOnPageChange();
+    CasesTable.validations.shouldRequestOnPageChange(false /*enoughData*/);
   });
 });

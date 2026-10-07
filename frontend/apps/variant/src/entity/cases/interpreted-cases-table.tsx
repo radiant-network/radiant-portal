@@ -10,7 +10,7 @@ import type {
   VariantInterpretedCasesSearchResponse,
 } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
-import DataTable from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { variantsApi } from '@/utils/api';
@@ -40,7 +40,7 @@ function InterpretedCasesTable() {
   const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
   const [sorting, setSorting] = useState<SortBody[]>([{ field: 'interpretation_updated_on', order: 'desc' }]);
 
