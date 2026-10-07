@@ -127,7 +127,7 @@ Non-frontend developers need to use the `frontend-ui-consumer` Claude skill. It 
 ---
 name: frontend-ui-consumer
 description: >
-  Use when a backend/full-stack dev edits frontend code (any .tsx/.jsx under `frontend/apps/`, `frontend/portals/`, or `frontend/components/`) to wire data into existing UI — fetching, forms, routing, column setup, etc. Enforces consumer-only mode: compose from existing primitives, never create or mutate UI components, never write custom Tailwind values, never use raw interactive HTML. Skip for pure frontend engineering work (new design-system components, Storybook additions, shadcn primitive edits).
+  Use when a backend/full-stack dev edits frontend code (any .tsx/.jsx under `frontend/apps/`, `frontend/portals/`, or `frontend/components/`) to wire data into existing UI — fetching, forms, routing, column setup, etc. Enforces consumer-only mode: compose from existing primitives, never create or mutate UI components, never write custom Tailwind values, never use raw interactive HTML. Also keeps Storybook stories in sync when the edited component already has one, and adds a story when a new reusable primitive is introduced. Skip for pure frontend engineering work (new design-system components, shadcn primitive edits).
 metadata:
   type: guardrail
   audience: backend-full-stack
@@ -167,6 +167,15 @@ For common cases:
 ## i18n
 
 Any user-visible string goes through `useI18n()` — no hardcoded strings in JSX. Keys live in `frontend/translations/`.
+
+## Storybook
+
+Stories live under `frontend/components/stories/` and are the source of truth for how a primitive is used.
+
+- **Edit an existing story when you change the primitive's API.** If you add a prop, change a default, rename an export, or alter the rendered output of a component that already has a story, update that story in the same PR. A story that no longer matches the component is worse than no story.
+- **Add a story only when you introduce a new reusable primitive in `frontend/components/base/` (not shadcn/).** The story documents the public surface and makes the primitive discoverable to the next consumer. Keep it minimal: one `default` export + representative `args` or `render`, no fetch calls, no router, no auth, no app-level state.
+- **Do not add a story for app-level or page-level compositions in `frontend/apps/` or `frontend/portals/`.** Those are one-off assemblies, not reusable primitives — they belong in Cypress, not Storybook.
+- If the pattern you need already has a story but the story is missing a variant you depend on (empty state, loading, long content), add that variant to the existing story rather than creating a new one.
 
 ## Hard stop
 
