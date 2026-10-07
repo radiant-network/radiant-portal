@@ -1,6 +1,5 @@
-import { formatDate } from 'date-fns';
-
 import { useI18n } from '@/components/hooks/i18n';
+import { formatDate } from '@/components/lib/date';
 
 import EmptyCell from './empty-cell';
 
