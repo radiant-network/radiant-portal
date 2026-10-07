@@ -4,7 +4,7 @@
    Run against StarRocks (MySQL protocol) as root:
        mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
    (StarRocks rejects `--` line comments when piped, so we use C-style comments,
-    matching init_starrocks.sql.)
+    matching scripts/seed/sql/starrocks_schema.sql.)
 
    StarRocks users (JWT for alice/bob/wendy, native for svc_admin_api) live in
    02_starrocks_admin_user.sql — run it after this file.

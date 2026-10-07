@@ -61,7 +61,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 365 \
 
 TLS_CERT_FILE=/tmp/gw-cert.pem TLS_KEY_FILE=/tmp/gw-key.pem \
 STARROCKS_ADDR=127.0.0.1:9030 \
-KEYCLOAK_HOST=http://localhost:8080 KEYCLOAK_REALM=CQDG \
+KEYCLOAK_HOST=http://localhost:8080 KEYCLOAK_REALM=radiant \
 KEYCLOAK_CLIENT_ID=radiant CLIENT_SECRET= \
 go run ./cmd/mysql-gateway
 ```

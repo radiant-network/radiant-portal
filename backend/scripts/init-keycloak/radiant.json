@@ -1,6 +1,6 @@
 {
   "id": "ace6228d-a0dd-401c-a964-06acb78ccacc",
-  "realm": "CQDG",
+  "realm": "radiant",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -525,6 +525,101 @@
           "query-users"
         ]
       }
+    },
+    {
+      "id": "6f0c4a1e-0c3b-4d4e-9d1a-2b7f3c1a0001",
+      "username": "cbtn-admin",
+      "email": "cbtn-admin@localstack.invalid",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Ada",
+      "lastName": "Admin",
+      "realmRoles": [
+        "default"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cbtn-admin",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "6f0c4a1e-0c3b-4d4e-9d1a-2b7f3c1a0002",
+      "username": "cbtn-phi-chop",
+      "email": "cbtn-phi-chop@localstack.invalid",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Charlotte",
+      "lastName": "Philly",
+      "realmRoles": [
+        "default"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cbtn-phi-chop",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "6f0c4a1e-0c3b-4d4e-9d1a-2b7f3c1a0003",
+      "username": "cbtn-phi-sch",
+      "email": "cbtn-phi-sch@localstack.invalid",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Samuel",
+      "lastName": "Seattle",
+      "realmRoles": [
+        "default"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cbtn-phi-sch",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "6f0c4a1e-0c3b-4d4e-9d1a-2b7f3c1a0004",
+      "username": "cbtn-lab",
+      "email": "cbtn-lab@localstack.invalid",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Laura",
+      "lastName": "Lab",
+      "realmRoles": [
+        "default"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cbtn-lab",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "6f0c4a1e-0c3b-4d4e-9d1a-2b7f3c1a0005",
+      "username": "cbtn-nophi",
+      "email": "cbtn-nophi@localstack.invalid",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Nina",
+      "lastName": "Nophi",
+      "realmRoles": [
+        "default"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cbtn-nophi",
+          "temporary": false
+        }
+      ]
     }
   ],
   "clients": [
@@ -652,12 +747,12 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/CQDG/account/",
+      "baseUrl": "/realms/radiant/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/CQDG/account/*"],
+      "redirectUris": ["/realms/radiant/account/*"],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -697,12 +792,12 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/CQDG/account/",
+      "baseUrl": "/realms/radiant/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/CQDG/account/*"],
+      "redirectUris": ["/realms/radiant/account/*"],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -951,12 +1046,12 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/CQDG/console/",
+      "baseUrl": "/admin/radiant/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/admin/CQDG/console/*"],
+      "redirectUris": ["/admin/radiant/console/*"],
       "webOrigins": ["+"],
       "notBefore": 0,
       "bearerOnly": false,

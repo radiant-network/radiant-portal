@@ -52,16 +52,16 @@ points at the local StarRocks, and that StarRocks doesn't know remote users.
 | `YAC_PORT` | `8007` | Host port |
 | `YAC_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins |
 | `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#main` | Git ref or local clone path (relative to `compose/`) |
-| `YAC_KEYCLOAK` | `http://keycloak:8080/realms/CQDG` | Keycloak realm URL the agent trusts. It is the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin` |
+| `YAC_KEYCLOAK` | `http://keycloak:8080/realms/radiant` | Keycloak realm URL the agent trusts. It is the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin` |
 
 `YAC_KEYCLOAK` sets both the issuer and the key URL, so the realm URL must be reachable from the
 container **and** match the tokens' `iss` claim. That holds for QA. Locally it doesn't: tokens are
-minted through `http://localhost:8080/realms/CQDG`, so the default issuer doesn't match and local
+minted through `http://localhost:8080/realms/radiant`, so the default issuer doesn't match and local
 tokens get a 401.
 
 ## Auth and data (JWT passthrough)
 
-The agent verifies Keycloak JWTs (realm `CQDG`, audience `radiant`, the same as the API) and runs
+The agent verifies Keycloak JWTs (realm `radiant`, audience `radiant`, the same as the API) and runs
 every StarRocks query **as the caller**: the token is forwarded as the StarRocks password and the
 StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore apply per user.
 
@@ -80,7 +80,7 @@ curl -s localhost:8007/        # {"status":"running"}
 
 tok() { curl -s -d client_id=radiant -d 'client_secret=ShutThisIsASecret!' -d "username=$1@demo.org" \
   -d 'password=radiant123!' -d grant_type=password \
-  http://localhost:8080/realms/CQDG/protocol/openid-connect/token | jq -r .access_token; }
+  http://localhost:8080/realms/radiant/protocol/openid-connect/token | jq -r .access_token; }
 
 # Same query, different users: alice sees patient 1003 masked, wendy sees it in clear.
 for u in alice wendy; do

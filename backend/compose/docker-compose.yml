@@ -105,7 +105,7 @@ services:
       DB_PASSWORD:
       DB_HOST: starrocks
       DB_PORT: 9030
-      DB_NAME: test_db
+      DB_NAME: radiant
       # Enables TLS to StarRocks (internal/database/starrocks.go reads this CA).
       DB_SSL_CA: /certs/starrocks_cert.pem
       PGUSER: radiant
@@ -116,16 +116,40 @@ services:
       PGSSLMODE: disable
       CORS_ALLOWED_ORIGINS: "*"
       KEYCLOAK_HOST: http://keycloak:8080
-      KEYCLOAK_REALM: CQDG
+      KEYCLOAK_REALM: radiant
       AWS_ACCESS_KEY_ID: access
       AWS_SECRET_ACCESS_KEY: secret
       PUBMED_BASE_URL: https://api.ncbi.nlm.nih.gov
+      # Multi-tenant layout, as in QA: reads go to <code>_tenant and the shared `radiant` database, and the
+      # startup refresh creates the auth.* and <code>_tenant.* views of every tenant seeded by pg-seed.
+      TENANT_VIEWS_READ_ENABLED: "true"
+      VIEW_REFRESH_ON_STARTUP_ENABLED: "true"
+      PATIENT_VIEW_ENABLED: "true"
+      # Reads run as the calling user through mysql-proxy, so Ranger and the PCX views' current_user() see who
+      # is asking: PHI masking behaves as in QA. STARROCKS_PROXY_READ_ENABLED=false make docker-run reads as root.
+      STARROCKS_PROXY_READ_ENABLED: ${STARROCKS_PROXY_READ_ENABLED:-true}
+      STARROCKS_PROXY_ADDR: mysql-proxy:9031
     depends_on:
-      init-schema:
+      provision:
         condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
+      mysql-proxy:
+        condition: service_started
       keycloak:
+        condition: service_healthy
+
+  # Translates the API's cleartext JWT login into StarRocks' OIDC handshake, so each query runs as the user.
+  mysql-proxy:
+    build:
+      context: ../
+      dockerfile: mysql-proxy.Dockerfile
+    container_name: mysql-proxy
+    volumes:
+      - starrocks-certs:/certs:ro
+    environment:
+      STARROCKS_ADDR: starrocks:9030
+      STARROCKS_SSL_CA: /certs/starrocks_cert.pem
+    depends_on:
+      starrocks:
         condition: service_healthy
 
   worker:
@@ -143,40 +167,129 @@ services:
       PGDATABASE: radiant
       PGSSLMODE: disable
     depends_on:
-      init-schema:
-        condition: service_completed_successfully
-      postgres-clinical-data:
+      pg-seed:
         condition: service_completed_successfully
 
-  init-schema:
+  # Seed of tenant cbtn (scripts/seed): fake PCX patients built from the de-identified CSVs of scripts/seed/data/deid,
+  # their portal patients, cases, occurrences and interpretations. See scripts/seed/README.md.
+  #   pg-migrate -> pg-seed ─┐
+  #   seed-build ────────────┼-> provision (tenant, users, Ranger) -> api -> sr-views
+  #   starrocks  -> sr-seed ─┘        ranger ┘
+  seed-build:
+    image: python:3.12-slim
+    container_name: seed-build
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ../scripts/seed:/seed:ro
+      - seed-out:/out
+    command: ["python3", "/seed/build_seed.py", "--out", "/out"]
+
+  # The schema must exist before pg-seed, and before the API starts so that its startup view refresh sees tenant
+  # cbtn. Same files and tracking table (schema_migrations) as the API's own migration step, which then has nothing to do.
+  pg-migrate:
+    image: migrate/migrate:v4.19.1
+    container_name: pg-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../scripts/init-sql/migrations:/migrations:ro
+    command: ["-path", "/migrations", "-database", "postgres://radiant:radiant@postgres:5432/radiant?sslmode=disable", "up"]
+
+  pg-seed:
+    image: postgres:14
+    container_name: pg-seed
+    depends_on:
+      pg-migrate:
+        condition: service_completed_successfully
+      seed-build:
+        condition: service_completed_successfully
+    volumes:
+      - seed-out:/out:ro
+    environment:
+      PGPASSWORD: radiant
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-q", "-h", "postgres", "-U", "radiant", "-d", "radiant", "-f", "/out/postgres_seed.sql"]
+
+  sr-seed:
     image: starrocks/allin1-ubuntu:4.0.16
-    container_name: init-schema
+    container_name: sr-seed
     depends_on:
       starrocks:
         condition: service_healthy
+      seed-build:
+        condition: service_completed_successfully
     volumes:
-      - ../scripts/init-sql:/docker-entrypoint-initdb.d
-      # CA bundle for the mysql client's --ssl-ca below.
+      - seed-out:/out:ro
       - starrocks-certs:/certs:ro
-    entrypoint: >
-      /bin/bash -c "sleep 10 &&
-      mysql -hstarrocks -P9030 -uroot --ssl-mode=VERIFY_CA --ssl-ca=/certs/starrocks_cert.pem < /docker-entrypoint-initdb.d/init_starrocks.sql;"
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        sleep 10
+        mysql -hstarrocks -P9030 -uroot --ssl-mode=VERIFY_CA --ssl-ca=/certs/starrocks_cert.pem < /out/starrocks_seed.sql
 
-  postgres-clinical-data:
-    image: postgres
+  # Tenant cbtn through the real tools, as in QA (scripts/seed/out/provision.sh): create-tenant (default roles,
+  # cbtn_tenant views, Ranger role and access policies), refresh-tenants (masking, auth and shared-database
+  # policies), then create-user -sub for each demo user of the realm import (StarRocks JWT user, grants, Ranger role).
+  provision:
+    build:
+      context: ../
+      dockerfile: toolbox.Dockerfile
+    container_name: provision
+    depends_on:
+      pg-seed:
+        condition: service_completed_successfully
+      sr-seed:
+        condition: service_completed_successfully
+      ranger-register:
+        condition: service_completed_successfully
+    volumes:
+      - seed-out:/out:ro
+      - starrocks-certs:/certs:ro
+    environment:
+      DB_HOST: starrocks
+      DB_PORT: 9030
+      DB_NAME: radiant
+      DB_USERNAME: root
+      DB_PASSWORD:
+      DB_SSL_CA: /certs/starrocks_cert.pem
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: radiant
+      PGUSER: radiant
+      PGPASSWORD: radiant
+      PGSSLMODE: disable
+      RANGER_URL: http://ranger:6080
+      RANGER_ADMIN_USER: admin
+      RANGER_ADMIN_PASSWORD: rangerR0cks!
+      # Baked into each StarRocks JWT user: tokens are minted on the host (localhost:8080), keys fetched in-network.
+      STARROCKS_JWT_JWKS_URL: http://keycloak:8080/realms/radiant/protocol/openid-connect/certs
+      STARROCKS_JWT_REQUIRED_ISSUER: http://localhost:8080/realms/radiant
+      STARROCKS_JWT_REQUIRED_AUDIENCE: radiant
+    command: ["sh", "/out/provision.sh"]
+
+  # The PCX views read auth.* and cbtn_tenant.* views, created by provision (create-tenant) and the API: wait for them.
+  sr-views:
+    image: starrocks/allin1-ubuntu:4.0.16
+    container_name: sr-views
     depends_on:
       api:
         condition: service_started
     volumes:
-      - ../scripts/init-sql:/docker-entrypoint-initdb.d
-    entrypoint: ["sh", "-c"]
+      - seed-out:/out:ro
+      - starrocks-certs:/certs:ro
+    entrypoint: ["bash", "-c"]
     command:
-      - -c
       - |
-        export PGPASSWORD='radiant'; sleep 10 && psql -h postgres -U radiant -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;
+        sr() { mysql -hstarrocks -P9030 -uroot --ssl-mode=VERIFY_CA --ssl-ca=/certs/starrocks_cert.pem "$$@"; }
+        ready() { sr -e "SELECT 1 FROM cbtn_tenant.family LIMIT 0; SELECT 1 FROM auth.pii_lab_patient LIMIT 0" >/dev/null 2>&1; }
+        for i in $$(seq 60); do ready && break; sleep 5; done
+        ready || { echo "cbtn_tenant / auth views missing: is VIEW_REFRESH_ON_STARTUP_ENABLED on for the api?"; exit 1; }
+        sr < /out/starrocks_views.sql
 
 # Shared volume holding the StarRocks SSL artifacts (keystore.jks, cert.pem,
 # truststore.jks) produced by the cert-init service and mounted into StarRocks
-# and every StarRocks client (api, init-schema, ranger).
+# and every StarRocks client (api, sr-seed, sr-views, ranger). seed-out holds the SQL built by seed-build.
 volumes:
   starrocks-certs:
+  seed-out:
