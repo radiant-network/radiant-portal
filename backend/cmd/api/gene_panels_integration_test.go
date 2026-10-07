@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/service"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -151,5 +153,87 @@ func Test_PutGenePanels_FillsTheGenesOfAnAnalysisCatalogPanel(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, []genePanelMVRow{{"Epilepsy", "TNMD"}}, readTenantGenePanelMV(t, env.Starrocks, tenant),
 			"the catalog panel keeps its name and gets the genes")
+	})
+}
+
+// genePanelsFixtureDB is the database the "gene_panels" fixture folder is loaded into.
+const genePanelsFixtureDB = "gene_panels"
+
+// bindTenantToGenePanelsFixture makes the tenant read path resolve against the "gene_panels"
+// fixture: per-tenant occurrence tables become views in <tenant>_tenant over the fixture tables,
+// next to the real gene_panel_mv, and the shared database points at the fixture database.
+// Changing types.SharedDatabase is safe only because the caller is serial (ExclusivePostgres):
+// Go starts the paused parallel tests after every sequential test has returned.
+func bindTenantToGenePanelsFixture(t *testing.T, env *testutils.Env, tenant string) context.Context {
+	t.Helper()
+	for _, table := range []types.Table{types.GermlineSNVOccurrenceTable, types.SomaticSNVOccurrenceTable, types.VariantTable} {
+		require.NoError(t, env.Starrocks.Exec(fmt.Sprintf("CREATE VIEW `%s_tenant`.`%s` AS SELECT * FROM `%s`.`%s`",
+			tenant, table.Name, genePanelsFixtureDB, table.Name)).Error)
+	}
+	shared := types.SharedDatabase
+	types.SharedDatabase = genePanelsFixtureDB
+	t.Cleanup(func() { types.SharedDatabase = shared })
+	return types.ContextWithTenant(t.Context(), tenant)
+}
+
+func aggregateTenantGenePanel(t *testing.T, ctx context.Context, snvFields []types.Field, aggregate func(context.Context, types.AggQuery) ([]types.Aggregation, error)) []types.Aggregation {
+	t.Helper()
+	query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.FieldsForContext(ctx, snvFields))
+	require.NoError(t, err)
+	buckets, err := aggregate(ctx, query)
+	require.NoError(t, err)
+	return buckets
+}
+
+func Test_PutGenePanels_UploadedPanelsFilterAndAggregateSNVOccurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: genePanelsFixtureDB, Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		tenant := genePanelUploadTenant(t, env)
+		router := genePanelUploadRouter(env)
+		w := putGenePanelFile(t, router, tenant, "", "symbol\tpanels\n"+
+			"BRAF\tEPILEP,ONCO\n"+
+			"TP53\tONCO\n"+
+			"MYH7\tCARDIO\n")
+		require.Equal(t, http.StatusOK, w.Code, w.Body.String())
+
+		ctx := bindTenantToGenePanelsFixture(t, env, tenant)
+		sr := database.StarrocksDB{DB: env.Starrocks}
+		germline := starrocks.NewGermlineSNVOccurrencesRepository(sr)
+		somatic := starrocks.NewSomaticSNVOccurrencesRepository(sr)
+
+		// The buckets are the panel codes: the upload names a new panel by its code. CARDIO (MYH7)
+		// has no consequence in the case, so it is not a bucket.
+		assert.Equal(t, []types.Aggregation{{Bucket: "EPILEP", Count: 2}, {Bucket: "ONCO", Count: 3}},
+			aggregateTenantGenePanel(t, ctx, types.GermlineSNVOccurrencesFields, func(ctx context.Context, q types.AggQuery) ([]types.Aggregation, error) {
+				return germline.AggregateOccurrences(ctx, 1, 1, 1, q)
+			}))
+		assert.Equal(t, []types.Aggregation{{Bucket: "EPILEP", Count: 1}, {Bucket: "ONCO", Count: 2}},
+			aggregateTenantGenePanel(t, ctx, types.SomaticSNVOccurrencesFields, func(ctx context.Context, q types.AggQuery) ([]types.Aggregation, error) {
+				return somatic.AggregateOccurrences(ctx, 1, 1, 1, q)
+			}))
+
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []any{"EPILEP"}}}
+		countQuery, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.FieldsForContext(ctx, types.GermlineSNVOccurrencesFields))
+		require.NoError(t, err)
+		count, err := germline.CountOccurrences(ctx, 1, 1, 1, countQuery)
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, count.Count)
+	})
+}
+
+func Test_PutGenePanels_ReuploadUpdatesTheTenantGenePanelFacet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: genePanelsFixtureDB, Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		tenant := genePanelUploadTenant(t, env)
+		router := genePanelUploadRouter(env)
+		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "symbol\tpanels\nBRAF\tEPILEP,ONCO\n").Code)
+		require.Equal(t, http.StatusOK, putGenePanelFile(t, router, tenant, "", "symbol\tpanels\nTP53\tONCO\n").Code)
+
+		ctx := bindTenantToGenePanelsFixture(t, env, tenant)
+		germline := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// EPILEP left the file, so it is gone; ONCO now holds TP53 only (loci 1000 and 1001).
+		assert.Equal(t, []types.Aggregation{{Bucket: "ONCO", Count: 2}},
+			aggregateTenantGenePanel(t, ctx, types.GermlineSNVOccurrencesFields, func(ctx context.Context, q types.AggQuery) ([]types.Aggregation, error) {
+				return germline.AggregateOccurrences(ctx, 1, 1, 1, q)
+			}))
 	})
 }
