@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { LineChart, Search } from 'lucide-react';
 import useSWR from 'swr';
 
+import type { SearchCriterion } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
+import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { Input } from '@/components/base/shadcn/input';
@@ -14,13 +17,15 @@ import { useLocalPath } from '@/components/hooks/use-local-path';
 
 import { fetchPatientsList, type Patient, type PatientsSearchResponse } from '../api/patient';
 
+import PatientExplorationTableFilters from './patient-exploration-table-filters';
+
 const COLUMN_KEYS = [
   'patient',
   'mrn',
   'birth_year',
   'sex',
   'site',
-  'cns_diagnosis',
+  'cns_integrated_diagnosis',
   'vital_status',
   'survival',
 ] as const;
@@ -35,6 +40,8 @@ function formatSurvival(days: number | null): string {
 function PatientExploration() {
   const { t } = useI18n();
   const localPath = useLocalPath();
+  // TODO: pass searchCriteria to fetchPatientsList once the backend endpoint lands
+  const [, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const { data, isLoading } = useSWR<PatientsSearchResponse>('patient-exploration', fetchPatientsList, {
     revalidateOnFocus: false,
   });
@@ -46,7 +53,7 @@ function PatientExploration() {
     <>
       <HeaderNavigation
         isLoading={false}
-        title={t('patient_exploration.title')}
+        title={t('patient_exploration.title', { total: data?.count ?? 0 })}
         description={t('patient_exploration.description')}
         variant="info"
         buttons={[
@@ -66,11 +73,12 @@ function PatientExploration() {
       <main className="bg-muted h-screen overflow-auto p-3">
         <Card className="h-auto size-max w-full">
           <CardContent>
-            <div className="flex items-center gap-2 py-4">
+            <div className="flex flex-col gap-3 py-4">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-8" placeholder={t('patient_exploration.search_placeholder')} disabled />
+                <Input className="pl-8" placeholder={t('patient_exploration.search_placeholder')} />
               </div>
+              <PatientExplorationTableFilters loading={isLoading} setSearchCriteria={setSearchCriteria} />
             </div>
 
             <Table>
@@ -131,12 +139,20 @@ function PatientRow({ patient, localPath }: { patient: Patient; localPath: (path
         <div className="text-muted-foreground text-xs">{patient.patient_id}</div>
       </TableCell>
       <TableCell className="font-mono text-xs">{patient.mrn}</TableCell>
-      <TableCell>{patient.birth_year}</TableCell>
+      <TableCell className="font-mono text-xs">{patient.birth_year}</TableCell>
       <TableCell>{patient.sex}</TableCell>
-      <TableCell>{patient.site}</TableCell>
-      <TableCell>{patient.cns_diagnosis}</TableCell>
-      <TableCell className="capitalize">{patient.vital_status}</TableCell>
-      <TableCell className="text-right tabular-nums">{formatSurvival(patient.survival_days)}</TableCell>
+      <TableCell>
+        <Badge variant="secondary">{patient.site}</Badge>
+      </TableCell>
+      <TableCell>{patient.cns_integrated_diagnosis}</TableCell>
+      <TableCell>
+        <Badge variant={patient.vital_status === 'alive' ? 'green' : 'neutral'} className="capitalize">
+          {patient.vital_status}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right font-mono text-xs tabular-nums">
+        {formatSurvival(patient.survival_days)}
+      </TableCell>
     </TableRow>
   );
 }
