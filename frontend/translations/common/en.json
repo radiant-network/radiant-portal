@@ -1177,7 +1177,7 @@
     }
   },
   "patient_exploration": {
-    "title": "Patients",
+    "title": "{{total}} Patients",
     "description": "ATRT cohort · CHOP, UCSF and Seattle Children's",
     "search_placeholder": "Search by name, research ID or MRN",
     "actions": {
@@ -1189,9 +1189,17 @@
       "birth_year": "Birth year",
       "sex": "Sex",
       "site": "Site",
-      "cns_diagnosis": "CNS integrated diagnosis",
+      "cns_integrated_diagnosis": "CNS integrated diagnosis",
       "vital_status": "Vital status",
       "survival": "Survival"
+    },
+    "filters": {
+      "vital_status": "Vital status",
+      "organization_name": "Site",
+      "cns_integrated_diagnosis": "Diagnosis",
+      "age_at_initial_dx_days": "Age at diagnosis",
+      "had_initial_methotrexate": "Treatment exposure",
+      "diagnosis_type_cohort": "Cohort"
     },
     "pagination": {
       "previous": "Previous",
