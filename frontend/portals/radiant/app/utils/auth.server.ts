@@ -96,7 +96,9 @@ export const getSessionRefreshToken = async (request: Request): Promise<string> 
   return refreshTokenSession.get('token');
 };
 
-export const refreshAccessToken = async (request: Request): Promise<string[] | null> => {
+export const refreshAccessToken = async (
+  request: Request,
+): Promise<{ accessToken: string; cookies: string[] } | null> => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
   const refreshToken = refreshTokenSession.get('token');
   if (!isTokenValid(refreshToken)) return null;
@@ -118,7 +120,7 @@ export const refreshAccessToken = async (request: Request): Promise<string[] | n
     cookies.push(await refreshTokenSessionStorage.commitSession(refreshTokenSession));
   }
 
-  return cookies;
+  return { accessToken: tokens.accessToken(), cookies };
 };
 
 export const login = async (request: Request): Promise<Response> => {
