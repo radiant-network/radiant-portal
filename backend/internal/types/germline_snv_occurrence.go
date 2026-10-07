@@ -342,6 +342,7 @@ var GermlineSNVOccurrencesFields = []Field{
 	CosmicGenePanelField,
 	OmimInheritanceField,
 	OrphanetGenePanelField,
+	TenantGenePanelField,
 
 	// Predictions
 	CaddScoreField,

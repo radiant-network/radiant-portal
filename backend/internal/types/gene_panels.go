@@ -47,7 +47,21 @@ var OrphanetGenePanelField = Field{
 	Table:           OrphanetGenePanelTable,
 }
 
-var GenePanelsTables = []Table{HpoGenePanelTable, OmimGenePanelTable, DddGenePanelTable, CosmicGenePanelTable, OrphanetGenePanelTable}
+// TenantGenePanelTable is the tenant's gene panel MV (panel, symbol), in the tenant database.
+var TenantGenePanelTable = Table{
+	Name:      TenantGenePanelMV,
+	Alias:     "tgp",
+	PerTenant: true,
+}
+var TenantGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "tenant_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           TenantGenePanelTable,
+}
+
+var GenePanelsTables = []Table{HpoGenePanelTable, OmimGenePanelTable, DddGenePanelTable, CosmicGenePanelTable, OrphanetGenePanelTable, TenantGenePanelTable}
 
 type GenePanelCondition = struct {
 	Symbol          string            `json:"-"`

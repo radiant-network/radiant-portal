@@ -252,6 +252,7 @@ var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	OmimGenePanelField,
 	DddGenePanelField,
 	CosmicGenePanelField,
+	TenantGenePanelField,
 
 	// Pathogenicity facets
 	VepImpactFilterField,
