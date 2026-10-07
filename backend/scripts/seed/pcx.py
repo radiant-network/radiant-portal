@@ -1,6 +1,6 @@
 """PCX side of the seed: the de-identified CSVs + fake PHI -> the source tables the secured views read.
 
-Each pcx_30_*_deid CSV becomes the identified v_pcx_30_*_combined table of radiant_data_dev, as in PRD, so the
+Each pcx_30_*_deid CSV becomes the identified v_pcx_30_*_combined table of the source database (radiant_data_dev in PRD), so the
 templates of scripts/pcx_tables render with only the tenant substituted. The fake PHI is derived from the research id (a hash,
 not a random draw), so a patient keeps the same MRN, names and birth date when the CSVs are exported again.
 MRI sessions and labs have no CSV yet: they are generated from each patient's timeline.
@@ -8,7 +8,6 @@ MRI sessions and labs have no CSV yet: they are generated from each patient's ti
 import csv, datetime as dt, hashlib, os, re
 
 TODAY = dt.date(2026, 10, 1)
-SOURCE_DB = "radiant_data_dev"
 FIRST_DIGITAL_MRI = dt.date(2010, 1, 1)
 FLYWHEEL = "https://flywheel.example.org"
 
