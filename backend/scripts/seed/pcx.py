@@ -1,7 +1,7 @@
 """PCX side of the seed: the de-identified CSVs + fake PHI -> the source tables the secured views read.
 
 Each pcx_30_*_deid CSV becomes the identified v_pcx_30_*_combined table of radiant_data_dev, as in PRD, so the
-upstream templates render with only the tenant substituted. The fake PHI is derived from the research id (a hash,
+templates of scripts/pcx_tables render with only the tenant substituted. The fake PHI is derived from the research id (a hash,
 not a random draw), so a patient keeps the same MRN, names and birth date when the CSVs are exported again.
 MRI sessions and labs have no CSV yet: they are generated from each patient's timeline.
 """
@@ -113,14 +113,36 @@ def identified(name, header):
     return cols
 
 
-def build(deid_dir, org_ref):
+# Organizations the de-identified CSVs reference that organization_ref_table.sql does not carry yet
+# (reported to the data team 2026-10-06). Added only while still absent upstream, so this list stops
+# having any effect once they land — delete it then, and keep the codes if upstream picks different
+# ones only after checking nothing is already seeded against these.
+PENDING_ORGS = [
+    {"code": "NCH", "name": "Nicklaus Children's Hospital", "category_code": "healthcare_provider", "tenant_code": "radiant"},
+    {"code": "NYU", "name": "NYU Langone Health", "category_code": "healthcare_provider", "tenant_code": "radiant"},
+]
+
+
+def read_organization_ref(pcx_dir):
+    """organization_name -> code, from the INSERT of radiant-prod/organization_ref/organization_ref_table.sql."""
+    path = os.path.join(pcx_dir, "radiant-prod", "organization_ref", "organization_ref_table.sql")
+    sql = open(path, encoding="utf-8").read()
+    rows = [dict(zip(["code", "name", "category_code", "tenant_code"], [v.replace("''", "'") for v in r]))
+            for r in re.findall(r"\('((?:[^']|'')*)', '((?:[^']|'')*)', '([^']*)', '([^']*)'\)", sql)]
+    if not rows:
+        raise SystemExit(f"no organization found in {path}")
+    names = {r["name"] for r in rows}
+    return rows + [o for o in PENDING_ORGS if o["name"] not in names]
+
+
+def build(deid_dir, organizations):
     """Read the deid CSVs, give every patient a fake identity. Returns (patients by rid, {table: (cols, rows)})."""
-    codes = {r["name"]: r["code"] for r in read_csv(org_ref)}
+    codes = {r["name"]: r["code"] for r in organizations}
     demo = read_csv(os.path.join(deid_dir, "pcx_30_demographics_deid.csv"))
     patients = {}
     for r in demo:
         if r["organization_name"] not in codes:
-            raise SystemExit(f"{r['research_id']}: organization {r['organization_name']!r} is not in {org_ref}")
+            raise SystemExit(f"{r['research_id']}: organization {r['organization_name']!r} is not in the organization reference")
         patients[r["research_id"]] = Patient(r, codes[r["organization_name"]])
     data = {name: read_csv(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv")) for name in TABLES}
     for rows in data.values():

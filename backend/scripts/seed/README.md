@@ -10,16 +10,16 @@ Fake identities are added on top of the CSVs: MRNs, names, birth dates, calendar
 ## Pipeline
 
 ```
-data/deid/pcx_30_*_deid.csv ──┐
-upstream/ (views, orgs, dict) ├─ build_seed.py ─> out/postgres_seed.sql
-sql/starrocks_schema.sql ─────┘                   out/starrocks_seed.sql
-views/*.sql.tmpl                                  out/starrocks_views.sql
+data/deid/pcx_30_*_deid.csv ─────┐
+../pcx_tables/ (views, orgs, dict) ├─ build_seed.py ─> out/postgres_seed.sql
+sql/starrocks_schema.sql ────────┘                   out/starrocks_seed.sql
+views/*.sql.tmpl                                     out/starrocks_views.sql
 ```
 
 | File | Role |
 | --- | --- |
 | `fake_deid.py` → `data/deid/` | Stand-ins for the real `pcx_30_*_deid` CSVs, same columns and unknown-value conventions. Replace the folder with the real export when it arrives. |
-| `sync_upstream.py` → `upstream/` | Copy of RADIANT-Timeline-Abstraction (the source of truth for the PCX data): the secured view templates, `organization_ref.csv`, the data dictionary. `VERSION` records the commit. |
+| `../pcx_tables/` | Maintained by the RADIANT-Timeline-Abstraction team, the source of truth for the PCX data. The seed reads the secured view templates (`access_controlled_views/*.sql.tmpl`), the organization reference (`radiant-prod/organization_ref/organization_ref_table.sql`, plus `pcx.PENDING_ORGS` until upstream adds them) and `view_data_dictionary_access_policy.csv`. |
 | `pcx.py` | CSVs + fake identity → the identified `radiant_data_dev.v_pcx_30_*_combined` tables, as in PRD; MRI sessions and labs generated from each patient's timeline. |
 | `genomics.py` | Portal patients (`data_type_cohort = 'radiant'`), one somatic tumor-normal case and one germline case each, variants and occurrences driven by the diagnosis, CNVs, Exomiser, interpretations, notes and flags. |
 | `build_seed.py` | Assembles the three SQL files. |
@@ -28,7 +28,6 @@ views/*.sql.tmpl                                  out/starrocks_views.sql
 
 ```bash
 python3 fake_deid.py                                  # regenerate the fake CSVs
-python3 sync_upstream.py ~/Dev/RADIANT/RADIANT-Timeline-Abstraction
 python3 build_seed.py                                 # writes out/ (git-ignored)
 ```
 

@@ -181,9 +181,10 @@ services:
     environment:
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
-      - ../scripts/seed:/seed:ro
+      # scripts/seed and scripts/pcx_tables (the PCX view templates and references it renders).
+      - ../scripts:/scripts:ro
       - seed-out:/out
-    command: ["python3", "/seed/build_seed.py", "--out", "/out"]
+    command: ["python3", "/scripts/seed/build_seed.py", "--out", "/out"]
 
   # The schema must exist before pg-seed, and before the API starts so that its startup view refresh sees tenant
   # cbtn. Same files and tracking table (schema_migrations) as the API's own migration step, which then has nothing to do.
