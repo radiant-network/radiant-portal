@@ -1,14 +1,12 @@
 import { useId } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
-import { enCA } from 'date-fns/locale/en-CA';
-import { frCA } from 'date-fns/locale/fr-CA';
 import { CalendarIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Calendar } from '@/components/base/shadcn/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { useI18n } from '@/components/hooks/i18n';
+import { formatLocalizedDate } from '@/components/lib/date';
 import { cn } from '@/lib/utils';
 
 type DateRangePickerProps = {
@@ -33,9 +31,8 @@ function DateRangePicker({
   const { t, language } = useI18n();
   const valueId = useId();
 
-  const locale = language === 'fr' ? frCA : enCA;
   const dateFormat = t('common.date.month_day_year');
-  const formatDate = (date: Date) => format(date, dateFormat, { locale });
+  const formatDate = (date: Date) => formatLocalizedDate(date, dateFormat, language);
 
   let label = placeholder ?? t('common.date_picker.placeholder');
   if (value?.from) {

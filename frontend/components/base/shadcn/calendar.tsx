@@ -1,13 +1,13 @@
 import * as React from 'react';
 import type { DayButton } from 'react-day-picker';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
-import { enCA, frCA } from 'react-day-picker/locale';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
 
 import { Button, buttonVariants } from '@/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
+import { getDateFnsLocale } from '@/components/lib/date';
 import { cn } from '@/lib/utils';
 
 const calendarVariants = tv({
@@ -40,7 +40,7 @@ function Calendar({
 }) {
   const { language } = useI18n();
   const defaultClassNames = getDefaultClassNames();
-  const resolvedLocale = locale ?? (language === 'fr' ? frCA : enCA);
+  const resolvedLocale = locale ?? getDateFnsLocale(language);
 
   return (
     <DayPicker

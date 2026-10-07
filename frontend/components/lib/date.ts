@@ -1,6 +1,5 @@
+import { enCA, frCA } from 'react-day-picker/locale';
 import { format, formatDistance, isThisYear, isToday, parseISO } from 'date-fns';
-import { enCA } from 'date-fns/locale/en-CA';
-import { frCA } from 'date-fns/locale/fr-CA';
 import type { TFunction } from 'i18next';
 
 const DATE_PART_LENGTH = 10;
@@ -29,6 +28,15 @@ export function formatRelativeByCurrentTime(t: TFunction<string, undefined>, dat
 
 export function formatDistanceDate(datetime: string, currentLanguage: string) {
   return formatDistance(new Date(), new Date(datetime), {
-    locale: currentLanguage === 'fr' ? frCA : enCA,
+    locale: getDateFnsLocale(currentLanguage),
   });
+}
+
+// react-day-picker locales are date-fns locales plus the calendar's translated aria labels
+export function getDateFnsLocale(language: string) {
+  return language === 'fr' ? frCA : enCA;
+}
+
+export function formatLocalizedDate(date: Date, pattern: string, language: string) {
+  return format(date, pattern, { locale: getDateFnsLocale(language) });
 }

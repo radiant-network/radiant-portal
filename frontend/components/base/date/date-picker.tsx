@@ -1,7 +1,5 @@
 import { useId, useState } from 'react';
-import { format, isValid, parse } from 'date-fns';
-import { enCA } from 'date-fns/locale/en-CA';
-import { frCA } from 'date-fns/locale/fr-CA';
+import { isValid, parse } from 'date-fns';
 import { CalendarIcon, ChevronDownIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
@@ -9,6 +7,7 @@ import { Calendar } from '@/components/base/shadcn/calendar';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/base/shadcn/input-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { useI18n } from '@/components/hooks/i18n';
+import { formatLocalizedDate, getDateFnsLocale } from '@/components/lib/date';
 import { cn } from '@/lib/utils';
 
 export type DatePickerVariant = 'icon-left' | 'icon-right' | 'input' | 'icon';
@@ -39,9 +38,8 @@ function DatePicker({
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(value);
 
-  const locale = language === 'fr' ? frCA : enCA;
   const dateFormat = t('common.date.month_day_year');
-  const formattedValue = value ? format(value, dateFormat, { locale }) : '';
+  const formattedValue = value ? formatLocalizedDate(value, dateFormat, language) : '';
   // Text being typed in the `input` variant, null when not editing
   const [draft, setDraft] = useState<string | null>(null);
 
@@ -52,7 +50,7 @@ function DatePicker({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDraft(event.target.value);
-    const date = parse(event.target.value, dateFormat, new Date(), { locale });
+    const date = parse(event.target.value, dateFormat, new Date(), { locale: getDateFnsLocale(language) });
     if (isValid(date)) {
       onChange(date);
       setMonth(date);
