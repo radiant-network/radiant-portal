@@ -3,15 +3,25 @@ import type { DayButton } from 'react-day-picker';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
 import { enCA, frCA } from 'react-day-picker/locale';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import type { VariantProps } from 'tailwind-variants';
+import { tv } from 'tailwind-variants';
 
 import { Button, buttonVariants } from '@/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
-const CELL_SIZES = {
-  default: '[--cell-size:--spacing(7)]',
-  md: '[--cell-size:--spacing(9.5)]',
-};
+const calendarVariants = tv({
+  base: 'group/calendar bg-background p-3 [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
+  variants: {
+    size: {
+      default: '[--cell-size:--spacing(7)]',
+      md: '[--cell-size:--spacing(9.5)]',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
 
 function Calendar({
   className,
@@ -19,14 +29,14 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = 'label',
   buttonVariant = 'ghost',
-  size = 'default',
+  size,
   locale,
   formatters,
   components,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
-  size?: keyof typeof CELL_SIZES;
+  size?: VariantProps<typeof calendarVariants>['size'];
 }) {
   const { language } = useI18n();
   const defaultClassNames = getDefaultClassNames();
@@ -36,8 +46,7 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        'group/calendar bg-background p-3 [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
-        CELL_SIZES[size],
+        calendarVariants({ size }),
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className,
