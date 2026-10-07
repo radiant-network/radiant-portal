@@ -17,6 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import date
 from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
@@ -29,7 +30,7 @@ class ClinvarRCV(BaseModel):
     accession: Optional[StrictStr] = None
     clinical_significance: Optional[List[StrictStr]] = None
     clinvar_id: StrictStr
-    date_last_evaluated: Optional[StrictStr] = None
+    date_last_evaluated: Optional[date] = None
     locus_id: StrictStr
     origins: Optional[List[StrictStr]] = None
     review_status: Optional[StrictStr] = None

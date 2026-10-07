@@ -1,9 +1,5 @@
 package types
 
-import (
-	"time"
-)
-
 // ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
 // @Description ClinvarRCV represents a Reference ClinVar record - data aggregated by variant-condition pair
 type ClinvarRCV struct {
@@ -11,7 +7,7 @@ type ClinvarRCV struct {
 	ClinvarId            string            `json:"clinvar_id" validate:"required"`
 	Accession            string            `json:"accession,omitempty"`
 	ClinicalSignificance JsonArray[string] `json:"clinical_significance,omitempty"`
-	DateLastEvaluated    time.Time         `json:"date_last_evaluated,omitempty,omitzero"`
+	DateLastEvaluated    *DateISO8601      `json:"date_last_evaluated,omitempty" swaggertype:"string" format:"date" example:"2020-07-08"`
 	SubmissionCount      int               `json:"submission_count,omitempty"`
 	ReviewStatus         string            `json:"review_status,omitempty"`
 	ReviewStatusStars    int               `json:"review_status_stars" validate:"required"`

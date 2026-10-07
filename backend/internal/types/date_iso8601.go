@@ -35,6 +35,25 @@ func (d *DateISO8601) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+// Scan reads a SQL DATE column. With parseTime=true the driver returns a time.Time at midnight UTC;
+// raw bytes or strings are accepted when the driver does not parse times.
+func (d *DateISO8601) Scan(value any) error {
+	switch v := value.(type) {
+	case nil:
+		*d = DateISO8601{}
+		return nil
+	case time.Time:
+		*d = DateISO8601(v)
+		return nil
+	case []byte:
+		return d.UnmarshalText(v)
+	case string:
+		return d.UnmarshalText([]byte(v))
+	default:
+		return fmt.Errorf("cannot scan %T into DateISO8601", value)
+	}
+}
+
 func (d *DateISO8601) MarshalJSON() ([]byte, error) {
 	if time.Time(*d).IsZero() {
 		return []byte(`""`), nil
