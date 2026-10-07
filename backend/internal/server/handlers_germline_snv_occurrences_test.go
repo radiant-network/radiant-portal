@@ -376,7 +376,7 @@ func (m *MockFacetsRepository) GetFacets(ctx context.Context, facetNames []strin
 		return []types.Facet{cnvTypeFacet}, nil
 	}
 
-	return nil, fmt.Errorf("%w: %q", types.ErrFacetNotFound, facetNames)
+	return nil, fmt.Errorf("error")
 }
 
 func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {
