@@ -1,7 +1,6 @@
 package types
 
 import (
-	"context"
 	"fmt"
 	"slices"
 
@@ -56,12 +55,6 @@ type QueryConfig struct {
 	DefaultFields []Field
 	DefaultSort   []SortField
 	IdField       Field
-}
-
-// ForContext returns the config with AllFields restricted by FieldsForContext.
-func (c QueryConfig) ForContext(ctx context.Context) QueryConfig {
-	c.AllFields = FieldsForContext(ctx, c.AllFields)
-	return c
 }
 
 type ListQuery interface {

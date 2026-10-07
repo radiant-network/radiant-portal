@@ -60,7 +60,9 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig.ForContext(c.Request.Context()), body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
+		config := types.SomaticSNVOccurrencesQueryConfig
+		config.AllFields = types.FieldsForContext(c.Request.Context(), config.AllFields)
+		query, err := types.NewOccurrenceListQueryFromSqon(config, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
 		if err != nil {
 			HandleValidationError(c, err)
 			return

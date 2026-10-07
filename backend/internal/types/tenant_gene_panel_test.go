@@ -55,17 +55,6 @@ func Test_FieldsForContext_Keeps_All_Fields_When_Tenant_Bound(t *testing.T) {
 	assert.Equal(t, []Field{OmimGenePanelField, TenantGenePanelField}, fields)
 }
 
-func Test_QueryConfig_ForContext_Drops_TenantOnly_Fields_Without_Mutating_Config(t *testing.T) {
-	t.Parallel()
-	config := QueryConfig{AllFields: []Field{OmimGenePanelField, TenantGenePanelField}, IdField: GermlineSNVLocusIdField}
-
-	restricted := config.ForContext(context.Background())
-
-	assert.Equal(t, []Field{OmimGenePanelField}, restricted.AllFields)
-	assert.Equal(t, GermlineSNVLocusIdField, restricted.IdField)
-	assert.Equal(t, []Field{OmimGenePanelField, TenantGenePanelField}, config.AllFields)
-}
-
 func Test_NewOccurrenceCountQueryFromSqon_Reject_TenantGenePanel_When_No_Tenant(t *testing.T) {
 	t.Parallel()
 	fields := FieldsForContext(context.Background(), GermlineSNVOccurrencesFields)
