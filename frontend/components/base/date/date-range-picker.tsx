@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { enCA } from 'date-fns/locale/en-CA';
@@ -30,6 +31,7 @@ function DateRangePicker({
   id,
 }: DateRangePickerProps) {
   const { t, language } = useI18n();
+  const valueId = useId();
 
   const locale = language === 'fr' ? frCA : enCA;
   const dateFormat = t('common.date.month_day_year');
@@ -48,10 +50,12 @@ function DateRangePicker({
           variant="outline"
           disabled={disabled}
           data-empty={!value?.from}
+          // A <label htmlFor> overrides the button text, so expose the value as a description
+          aria-describedby={id ? valueId : undefined}
           className={cn('justify-start font-normal data-[empty=true]:text-muted-foreground', className)}
         >
           <CalendarIcon />
-          {label}
+          <span id={valueId}>{label}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="start">
@@ -61,6 +65,7 @@ function DateRangePicker({
           onSelect={onChange}
           defaultMonth={value?.from}
           numberOfMonths={numberOfMonths}
+          autoFocus
         />
       </PopoverContent>
     </Popover>

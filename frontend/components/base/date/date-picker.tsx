@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { format, isValid, parse } from 'date-fns';
 import { enCA } from 'date-fns/locale/en-CA';
 import { frCA } from 'date-fns/locale/fr-CA';
@@ -35,6 +35,7 @@ function DatePicker({
   id,
 }: DatePickerProps) {
   const { t, language } = useI18n();
+  const valueId = useId();
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(value);
 
@@ -67,6 +68,7 @@ function DatePicker({
         month={month}
         onMonthChange={setMonth}
         captionLayout={captionLayout}
+        autoFocus
       />
     </PopoverContent>
   );
@@ -130,6 +132,8 @@ function DatePicker({
           variant="outline"
           disabled={disabled}
           data-empty={!value}
+          // A <label htmlFor> overrides the button text, so expose the value as a description
+          aria-describedby={id ? valueId : undefined}
           className={cn(
             'w-full font-normal data-[empty=true]:text-muted-foreground',
             variant === 'icon-right' ? 'justify-between' : 'justify-start',
@@ -137,7 +141,7 @@ function DatePicker({
           )}
         >
           {variant === 'icon-left' && <CalendarIcon />}
-          {formattedValue || placeholder || t('common.date_picker.placeholder')}
+          <span id={valueId}>{formattedValue || placeholder || t('common.date_picker.placeholder')}</span>
           {variant === 'icon-right' && <ChevronDownIcon />}
         </Button>
       </PopoverTrigger>
