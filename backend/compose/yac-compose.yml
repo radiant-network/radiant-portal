@@ -2,8 +2,9 @@
 # Gated by the `yac` profile: a plain `docker compose up` never starts it. Use
 # `YAC_ENABLED=true make docker-run` (or `COMPOSE_PROFILES=yac docker compose up`).
 #
-# The LLM is a local Ollama on the host (Docker on macOS has no GPU access, so a containerised
-# Ollama is CPU-only and too slow). Before starting: `ollama serve` and `ollama pull qwen3:14b`.
+# A user who enters their own OpenAI key in the chat is served by OpenAI. Without one, the LLM is
+# a local Ollama on the host (Docker on macOS has no GPU access, so a containerised Ollama is
+# CPU-only and too slow). For that: `ollama serve` and `ollama pull qwen3:14b`.
 #
 # The image is built straight from the public git repo. To iterate on agent code, point
 # YAC_BUILD_CONTEXT at a local clone (path relative to this file), e.g. ../../../udi-yac.
@@ -21,7 +22,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      OPENAI_BASE_URL: ${YAC_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      # Lowercase on purpose. The agent's settings read it case-insensitively, but the OpenAI SDK
+      # reads only OPENAI_BASE_URL and applies it to every client it builds, which would send a
+      # user's own key (X-OpenAI-Key) to Ollama. Lowercase keeps it on the agent's default
+      # client only: requests with a user key go to api.openai.com, the others to Ollama.
+      openai_base_url: ${YAC_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
       GPT_MODEL_NAME: ${YAC_MODEL:-qwen3:14b}
       UDI_CORS_ORIGINS: ${YAC_CORS_ORIGINS:-http://localhost:3000}
       # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. The issuer is
