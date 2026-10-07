@@ -15,6 +15,8 @@ import argparse, datetime as dt, json, os, re, sys
 import genomics, pcx
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# The PCX views, organization reference and data dictionary, maintained by the RADIANT-Timeline-Abstraction team.
+PCX_DIR = os.path.join(HERE, "..", "pcx_tables")
 TENANT = "cbtn"
 TENANT_DB, SHARED_DB = f"{TENANT}_tenant", "radiant"
 TEMPLATE_VIEW_DB = "cbtn_tenant"
@@ -68,9 +70,10 @@ def insert(table, cols, rows, quote=q, suffix=""):
     return "\n".join(out)
 
 
-patients, data, pcx_tables = pcx.build(args.deid, os.path.join(HERE, "upstream", "organization_ref.csv"))
+organizations = pcx.read_organization_ref(PCX_DIR)
+patients, data, pcx_tables = pcx.build(args.deid, organizations)
 g, pg, sr, ids = genomics.build(patients, data, None)
-org_ref = {r["code"]: r for r in pcx.read_csv(os.path.join(HERE, "upstream", "organization_ref.csv"))}
+org_ref = {r["code"]: r for r in organizations}
 providers = sorted({p.org for p in patients.values()})
 
 # ---------------------------------------------------------------- Postgres
@@ -254,7 +257,7 @@ for p in patients.values():
 pcx_tables["v_pcx_30_mri_images_combined"] = (pcx.MRI_COLS, mri)
 for k, cols in pcx.LAB_TABLES.items():
     pcx_tables[k] = (cols, labs[k])
-dictionary = pcx.read_csv(os.path.join(HERE, "upstream", "view_data_dictionary_access_policy.csv"))
+dictionary = pcx.read_csv(os.path.join(PCX_DIR, "view_data_dictionary_access_policy.csv"))
 pcx_tables["v_pcx_30_data_dictionary"] = ([("display_order", "INT"), ("table_name", "VARCHAR(128)"), ("source_file", "VARCHAR(128)"),
                                            ("field_name", "VARCHAR(128)"), ("description", "VARCHAR(2000)")],
                                           [[i + 1, r["view"], None, r["field"], r["description"]] for i, r in enumerate(dictionary)])
@@ -268,10 +271,10 @@ for name, (cols, rows) in pcx_tables.items():
     S.append(insert(f"{pcx.SOURCE_DB}.`{name}`", [f"`{c}`" for c, _ in cols], rows))
 
 # ---------------------------------------------------------------- StarRocks: views
-V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/seed/upstream/access_controlled_views
-   ({open(os.path.join(HERE, 'upstream', 'VERSION')).read().strip()}), then Radiant's own views (scripts/seed/views).
+V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tables/access_controlled_views (owned by the
+   RADIANT-Timeline-Abstraction team), then Radiant's own views (scripts/seed/views).
    Needs the auth.* and {TENANT_DB}.* views the API creates at startup. */"""]
-views_dir = os.path.join(HERE, "upstream", "access_controlled_views")
+views_dir = os.path.join(PCX_DIR, "access_controlled_views")
 seeded = set(pcx_tables)
 for file in sorted(os.listdir(views_dir)):
     if not file.endswith(".sql.tmpl"):
