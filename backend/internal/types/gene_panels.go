@@ -47,8 +47,7 @@ var OrphanetGenePanelField = Field{
 	Table:           OrphanetGenePanelTable,
 }
 
-// TenantGenePanelTable is the tenant's gene panel MV (panel, symbol). It exists only in the
-// tenant database, so its fields need a tenant bound to the request (see TenantOnlyTables).
+// TenantGenePanelTable is the tenant's gene panel MV (panel, symbol), in the tenant database.
 var TenantGenePanelTable = Table{
 	Name:      TenantGenePanelMV,
 	Alias:     "tgp",

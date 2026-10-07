@@ -60,9 +60,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 			return
 		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		config := types.SomaticSNVOccurrencesQueryConfig
-		config.AllFields = types.FieldsForContext(c.Request.Context(), config.AllFields)
-		query, err := types.NewOccurrenceListQueryFromSqon(config, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, body.AdditionalFields, body.Sqon, p, body.Sort, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -131,7 +129,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 			HandleValidationError(c, err)
 			return
 		}
-		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.FieldsForContext(c.Request.Context(), types.SomaticSNVOccurrencesFields), types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
+		query, err := types.NewOccurrenceCountQueryFromSqon(body.Sqon, types.SomaticSNVOccurrencesFields, types.WithNoteFilter(body.WithNote), types.WithFlagFilter(body.WithFlag), types.WithInterpretationFilter(body.WithInterpretation))
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -197,7 +195,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, fac
 			return
 		}
 
-		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.FieldsForContext(c.Request.Context(), types.SomaticSNVOccurrencesFields))
+		query, err := types.NewAggregationQueryFromSqon(body.Field, body.Sqon, types.SomaticSNVOccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
@@ -295,7 +293,7 @@ func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gi
 			return
 		}
 
-		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.FieldsForContext(c.Request.Context(), types.SomaticSNVOccurrencesFields))
+		query, err := types.NewStatisticsQueryFromSqon(body.Field, body.Sqon, types.SomaticSNVOccurrencesFields)
 		if err != nil {
 			HandleValidationError(c, err)
 			return

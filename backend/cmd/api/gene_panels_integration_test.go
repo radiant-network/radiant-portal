@@ -178,7 +178,7 @@ func bindTenantToGenePanelsFixture(t *testing.T, env *testutils.Env, tenant stri
 
 func aggregateTenantGenePanel(t *testing.T, ctx context.Context, snvFields []types.Field, aggregate func(context.Context, types.AggQuery) ([]types.Aggregation, error)) []types.Aggregation {
 	t.Helper()
-	query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.FieldsForContext(ctx, snvFields))
+	query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, snvFields)
 	require.NoError(t, err)
 	buckets, err := aggregate(ctx, query)
 	require.NoError(t, err)
@@ -212,7 +212,7 @@ func Test_PutGenePanels_UploadedPanelsFilterAndAggregateSNVOccurrences(t *testin
 			}))
 
 		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []any{"EPILEP"}}}
-		countQuery, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.FieldsForContext(ctx, types.GermlineSNVOccurrencesFields))
+		countQuery, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
 		require.NoError(t, err)
 		count, err := germline.CountOccurrences(ctx, 1, 1, 1, countQuery)
 		require.NoError(t, err)

@@ -35,61 +35,19 @@ func Test_CNVOccurrencesFields_Do_Not_Contain_TenantGenePanelField(t *testing.T)
 	assert.NotContains(t, SomaticCNVOccurrencesFields, TenantGenePanelField)
 }
 
-func Test_FieldsForContext_Drops_TenantOnly_Fields_When_No_Tenant(t *testing.T) {
+func Test_NewOccurrenceCountQueryFromSqon_Accept_TenantGenePanel(t *testing.T) {
 	t.Parallel()
-	fields := FieldsForContext(context.Background(), []Field{OmimGenePanelField, TenantGenePanelField})
-	assert.Equal(t, []Field{OmimGenePanelField}, fields)
-}
 
-func Test_FieldsForContext_Drops_TenantOnly_Fields_When_Empty_Tenant(t *testing.T) {
-	t.Parallel()
-	ctx := ContextWithTenant(context.Background(), "")
-	fields := FieldsForContext(ctx, []Field{OmimGenePanelField, TenantGenePanelField})
-	assert.Equal(t, []Field{OmimGenePanelField}, fields)
-}
-
-func Test_FieldsForContext_Keeps_All_Fields_When_Tenant_Bound(t *testing.T) {
-	t.Parallel()
-	ctx := ContextWithTenant(context.Background(), "tenant1")
-	fields := FieldsForContext(ctx, []Field{OmimGenePanelField, TenantGenePanelField})
-	assert.Equal(t, []Field{OmimGenePanelField, TenantGenePanelField}, fields)
-}
-
-func Test_NewOccurrenceCountQueryFromSqon_Reject_TenantGenePanel_When_No_Tenant(t *testing.T) {
-	t.Parallel()
-	fields := FieldsForContext(context.Background(), GermlineSNVOccurrencesFields)
-
-	_, err := NewOccurrenceCountQueryFromSqon(tenantGenePanelSqon(), fields)
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "unauthorized or unknown field: tenant_gene_panel")
-}
-
-func Test_NewOccurrenceCountQueryFromSqon_Accept_TenantGenePanel_When_Tenant_Bound(t *testing.T) {
-	t.Parallel()
-	fields := FieldsForContext(ContextWithTenant(context.Background(), "tenant1"), GermlineSNVOccurrencesFields)
-
-	query, err := NewOccurrenceCountQueryFromSqon(tenantGenePanelSqon(), fields)
+	query, err := NewOccurrenceCountQueryFromSqon(tenantGenePanelSqon(), GermlineSNVOccurrencesFields)
 
 	require.NoError(t, err)
 	assert.True(t, query.HasFieldFromTables(TenantGenePanelTable))
 }
 
-func Test_NewAggregationQueryFromSqon_Reject_TenantGenePanel_When_No_Tenant(t *testing.T) {
+func Test_NewAggregationQueryFromSqon_Accept_TenantGenePanel(t *testing.T) {
 	t.Parallel()
-	fields := FieldsForContext(context.Background(), SomaticSNVOccurrencesFields)
 
-	_, err := NewAggregationQueryFromSqon("tenant_gene_panel", nil, fields)
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "tenant_gene_panel can not be aggregated")
-}
-
-func Test_NewAggregationQueryFromSqon_Accept_TenantGenePanel_When_Tenant_Bound(t *testing.T) {
-	t.Parallel()
-	fields := FieldsForContext(ContextWithTenant(context.Background(), "tenant1"), SomaticSNVOccurrencesFields)
-
-	query, err := NewAggregationQueryFromSqon("tenant_gene_panel", nil, fields)
+	query, err := NewAggregationQueryFromSqon("tenant_gene_panel", nil, SomaticSNVOccurrencesFields)
 
 	require.NoError(t, err)
 	assert.Equal(t, TenantGenePanelField, query.GetAggregateField())
