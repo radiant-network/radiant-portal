@@ -1471,6 +1471,12 @@ export interface CaseSequencingExperiment {
     'experimental_strategy_code': string;
     /**
      * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'fetus_id'?: number;
+    /**
+     * 
      * @type {boolean}
      * @memberof CaseSequencingExperiment
      */

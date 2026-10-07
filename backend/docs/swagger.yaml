@@ -774,6 +774,8 @@ components:
           type: string
         experimental_strategy_code:
           type: string
+        fetus_id:
+          type: integer
         has_variants:
           type: boolean
         histology_code:

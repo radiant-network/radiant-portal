@@ -19,27 +19,40 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { bySubjectFirst, getFetusRank, isPrenatalMother } from '@/components/lib/case-entity';
 
-function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
+type SequencingVariantFiltersEntryProps = {
+  caseSeqExp: CaseSequencingExperiment;
+  sequencingExperiments: CaseSequencingExperiment[];
+};
+
+function SequencingVariantFiltersSelectValue({
+  caseSeqExp,
+  sequencingExperiments,
+}: SequencingVariantFiltersEntryProps) {
   const { t } = useI18n();
+  const fetusRank = getFetusRank(caseSeqExp, sequencingExperiments);
 
   return (
     <div className="inline-flex gap-1">
-      <span className="font-bold capitalize">
-        {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
+      <span className="font-bold">
+        {fetusRank
+          ? t('case_entity.details.fetus_numbered', { index: fetusRank })
+          : t(`common.relationships.${caseSeqExp.relationship_to_proband}`)}
+        {isPrenatalMother(caseSeqExp, sequencingExperiments) && ` (${t('common.relationships.mother')})`}
       </span>
       <span>
-        ({t('case_entity.variants.filters.sequencing_id')} {seq_id})
+        ({t('case_entity.variants.filters.sequencing_id')} {caseSeqExp.seq_id})
       </span>
     </div>
   );
 }
 
-function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment) {
+function SequencingVariantFiltersSelectItem({ caseSeqExp, sequencingExperiments }: SequencingVariantFiltersEntryProps) {
   const { t } = useI18n();
   return (
     <div>
-      <SequencingVariantFiltersSelectValue {...caseSeqExp} />
+      <SequencingVariantFiltersSelectValue caseSeqExp={caseSeqExp} sequencingExperiments={sequencingExperiments} />
       <div className="flex items-center text-muted-foreground color-muted text-xs">
         {t('case_entity.variants.filters.sample_submitter_id')} {caseSeqExp.sample_submitter_id}
         {caseSeqExp.affected_status_code && (
@@ -92,6 +105,7 @@ function SequencingVariantFilters({
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
+  const orderedSequencingExperiments = [...sequencingExperiments].sort(bySubjectFirst);
   const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === selectedSeqId);
   const selectedTask = tasks.find(task => task.id === selectedTaskId);
   const latestTaskId = tasks[0]?.id; // the API returns tasks ordered by created_on DESC
@@ -147,17 +161,23 @@ function SequencingVariantFilters({
             handleChange(Number(value));
           }}
         >
-          <SelectTrigger className="min-w-[125px] max-w-[200px] " size="xs">
+          <SelectTrigger className="min-w-[125px] max-w-[280px]" size="xs">
             <SelectValue>
               {selectedSequencingExperiment && (
-                <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />
+                <SequencingVariantFiltersSelectValue
+                  caseSeqExp={selectedSequencingExperiment}
+                  sequencingExperiments={orderedSequencingExperiments}
+                />
               )}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {sequencingExperiments.map(seqExp => (
+            {orderedSequencingExperiments.map(seqExp => (
               <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
-                <SequencingVariantFiltersSelectItem {...seqExp} />
+                <SequencingVariantFiltersSelectItem
+                  caseSeqExp={seqExp}
+                  sequencingExperiments={orderedSequencingExperiments}
+                />
               </SelectItem>
             ))}
           </SelectContent>

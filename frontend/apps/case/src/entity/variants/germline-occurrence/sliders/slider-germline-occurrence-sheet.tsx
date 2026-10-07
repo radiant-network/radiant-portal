@@ -108,6 +108,10 @@ export function GermlineOccurrenceSheetContent({
     patientSelected,
   );
 
+  // The sequencing knows whose genome it is; the member resolved from its patient_id is the
+  // mother on a prenatal case, where the sample is drawn from her.
+  const relationshipToProband = patientSelected?.relationship_to_proband ?? patient?.relationship_to_proband;
+
   const interpretation = useSWR<InterpretationGermline>(
     {
       caseId,
@@ -139,7 +143,7 @@ export function GermlineOccurrenceSheetContent({
       <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
         <SliderPatientRow
           patientId={patient?.patient_id}
-          relationshipToProband={patient?.relationship_to_proband}
+          relationshipToProband={relationshipToProband}
           seqId={caseSequencing?.seq_id}
         />
       </SliderHeader>
@@ -236,7 +240,7 @@ export function GermlineOccurrenceSheetContent({
           transmission={expandResult.data.transmission}
           parental_origin={expandResult.data.parental_origin}
           genotype_quality={expandResult.data.genotype_quality}
-          relationshipToProband={patient?.relationship_to_proband}
+          relationshipToProband={relationshipToProband}
           filter={expandResult.data.filter}
           father_calls={expandResult.data.father_calls}
           mother_calls={expandResult.data.mother_calls}

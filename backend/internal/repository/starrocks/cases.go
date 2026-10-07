@@ -280,7 +280,9 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context,
 		Select("DISTINCT(seq_id)").
 		Where("ingested_at is not null and (task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral')) and case_id = ?", caseId)
 	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)
-	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
+	// patient_id and fetus_id both appear: a fetal sample is drawn from the mother, so patient_id
+	// is hers while fetus_id names whose genome was sequenced.
+	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, spl.fetus_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {

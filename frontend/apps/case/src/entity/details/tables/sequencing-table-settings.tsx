@@ -7,13 +7,14 @@ import ExperimentalStrategyCell from '@/components/base/data-table/cells/experim
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { getFetusRank, isPrenatalMother } from '@/components/lib/case-entity';
 import StatusCell from 'components/base/data-table/cells/status-cell';
 
 import SequencingActionsCell from './cells/sequencing-actions-cell';
 
 const columnHelper = createAppColumnHelper<CaseSequencingExperiment>();
 
-function getColumns(t: TFunction<string, undefined>) {
+function getColumns(t: TFunction<string, undefined>, sequencingExperiments: CaseSequencingExperiment[]) {
   return [
     // Sequencing ID
     columnHelper.accessor(row => row.seq_id, {
@@ -38,13 +39,20 @@ function getColumns(t: TFunction<string, undefined>) {
     // Patient
     columnHelper.accessor(row => row.relationship_to_proband, {
       id: 'relation_to_proband',
-      cell: info => (
-        <BadgeCell className="capitalize" variant="outline">
-          {info.getValue()}
-        </BadgeCell>
-      ),
+      cell: info => {
+        const fetusRank = getFetusRank(info.row.original, sequencingExperiments);
+
+        return (
+          <BadgeCell variant="outline">
+            {fetusRank
+              ? t('case_entity.details.fetus_numbered', { index: fetusRank })
+              : t(`common.relationships.${info.getValue()}`)}
+            {isPrenatalMother(info.row.original, sequencingExperiments) && ` (${t('common.relationships.mother')})`}
+          </BadgeCell>
+        );
+      },
       header: t('case_entity.details.patient'),
-      size: 110,
+      size: 150,
       minSize: 40,
     }),
     // Sample Type
