@@ -10,7 +10,7 @@ const selectors = {
     tableId: '[data-cy="bioinformatics-table"]',
   },
   sequencingCard: {
-    tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship}") ${CommonSelectors.tableCellData}`,
+    tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship.slice(1)}") ${CommonSelectors.tableCellData}`,
     tableId: '[id="sequencing-experiments"]',
   },
 };
