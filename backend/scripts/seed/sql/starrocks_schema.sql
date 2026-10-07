@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS test_db;
+/* StarRocks tables of the local stack. {shared} = SHARED_DATABASE (radiant), {tenant} = <code>_tenant.
+   Extracted from the former init-sql/init_starrocks.sql; the per-tenant tables are those with PerTenant: true
+   in internal/types. Keep in sync with the test DDL (test/data/sql). */
 
-USE test_db;
-
-CREATE TABLE IF NOT EXISTS `snv__consequence`
+CREATE TABLE IF NOT EXISTS {shared}.`snv__consequence`
 (
     `locus_id`                bigint(20) NOT NULL COMMENT "",
     `symbol`                  varchar(30)  NOT NULL COMMENT "",
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `snv__consequence`
     `dna_change`              varchar(1000) NULL COMMENT ""
     ) ENGINE=OLAP;
 
-CREATE TABLE IF NOT EXISTS `clinvar`
+CREATE TABLE IF NOT EXISTS {shared}.`clinvar`
 (
     `locus_id`          bigint NOT NULL,
     `chromosome`        varchar(2) NULL,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `clinvar`
     ) ENGINE = OLAP
     PRIMARY KEY(`locus_id`);
 
-CREATE TABLE IF NOT EXISTS `snv__consequence_filter_partitioned`
+CREATE TABLE IF NOT EXISTS {shared}.`snv__consequence_filter_partitioned`
 (
     `part`                    tinyint NOT NULL COMMENT "",
     `locus_id`                bigint(20) NULL COMMENT "",
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `snv__consequence_filter_partitioned`
     `vep_impact`              varchar(20) NULL COMMENT ""
     ) ENGINE=OLAP;
 
-CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__occurrence`
 (
     part                            INT     NOT NULL,
     seq_id                          INT     NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
     ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 
-CREATE TABLE IF NOT EXISTS `snv__variant`(
+CREATE TABLE IF NOT EXISTS {tenant}.`snv__variant`(
                                              locus_id BIGINT NOT NULL,
                                              germline_pf_wgs DOUBLE,
                                              germline_pf_wxs DOUBLE,
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS `snv__variant`(
                                              cmc_tier VARCHAR(8)
 ) PRIMARY KEY(locus_id);
 
-create table IF NOT EXISTS hpo_gene_panel
+CREATE TABLE IF NOT EXISTS {shared}.`hpo_gene_panel`
 (
     symbol varchar(20)  NOT NULL,
     panel  varchar(250) NOT NULL,
@@ -243,21 +243,21 @@ create table IF NOT EXISTS hpo_gene_panel
     hpo_term_id  varchar(200) NOT NULL
 );
 
-create table IF NOT EXISTS hpo_term
+CREATE TABLE IF NOT EXISTS {shared}.`hpo_term`
 (
     id varchar(2000)  NOT NULL,
     name  varchar(2000) NOT NULL,
     term  varchar(2000) NOT NULL
 );
 
-create table IF NOT EXISTS mondo_term
+CREATE TABLE IF NOT EXISTS {shared}.`mondo_term`
 (
     id varchar(2000)  NOT NULL,
     name  varchar(2000) NOT NULL,
     term  varchar(2000) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS omim_gene_panel
+CREATE TABLE IF NOT EXISTS {shared}.`omim_gene_panel`
 (
     `symbol`            varchar(30)  NOT NULL COMMENT "",
     `panel`             varchar(200) NOT NULL COMMENT "",
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS omim_gene_panel
 ) ENGINE=OLAP
          DUPLICATE KEY(`symbol`, `panel`);
 
-CREATE TABLE IF NOT EXISTS orphanet_gene_panel
+CREATE TABLE IF NOT EXISTS {shared}.`orphanet_gene_panel`
 (
     symbol varchar(30)  NOT NULL,
     panel  varchar(250) NOT NULL,
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS orphanet_gene_panel
     inheritance_code array<varchar(3)> NULL
 );
 
-CREATE TABLE IF NOT EXISTS staging_sequencing_experiment
+CREATE TABLE IF NOT EXISTS {shared}.`staging_sequencing_experiment`
 (
     case_id INT NOT NULL,
     seq_id INT NOT NULL,
@@ -303,8 +303,7 @@ CREATE TABLE IF NOT EXISTS staging_sequencing_experiment
     deleted BOOLEAN NOT NULL DEFAULT "false"
 ) PRIMARY KEY (case_id, seq_id, task_id);
 
-
-CREATE TABLE IF NOT EXISTS `clinvar_rcv_summary`
+CREATE TABLE IF NOT EXISTS {shared}.`clinvar_rcv_summary`
 (
     `locus_id`              BIGINT(20)   NOT NULL,
     `clinvar_id`            VARCHAR(32)  NOT NULL,
@@ -334,7 +333,7 @@ ENGINE = OLAP
 DISTRIBUTED BY HASH(`locus_id`)
 BUCKETS 10;
 
-CREATE TABLE IF NOT EXISTS exomiser
+CREATE TABLE IF NOT EXISTS {tenant}.`exomiser`
 (
     part                 INT,
     seq_id               INT,
@@ -356,8 +355,7 @@ PARTITION BY (`part`)
 DISTRIBUTED BY HASH(`locus_id`)
 BUCKETS 10;
 
-
-CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__occurrence` (
      part int(11) NOT NULL,
      seq_id int(11) NULL,
      task_id int(11) NOT NULL,
@@ -397,8 +395,7 @@ CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
 
--- seq_id holds the tumor sequencing id: somatic CNV has no tumor_seq_id/normal_seq_id pair.
-CREATE TABLE IF NOT EXISTS `somatic__cnv__occurrence` (
+CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__occurrence` (
      part int(11) NOT NULL,
      seq_id int(11) NULL,
      task_id int(11) NOT NULL,
@@ -423,8 +420,8 @@ CREATE TABLE IF NOT EXISTS `somatic__cnv__occurrence` (
      ciend array<int(11)> NULL,
      cipos array<int(11)> NULL,
      phased boolean NULL,
-     -- DRAGEN allele-specific copy number: absent on 3.10.8, declared but omitted per record
-     -- on 4.2.4, so expect these to be NULL on older files.
+
+
      cn int(11) NULL,
      cnf FLOAT NULL,
      cnq FLOAT NULL,
@@ -448,7 +445,7 @@ CREATE TABLE IF NOT EXISTS `somatic__cnv__occurrence` (
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
 
-CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
+CREATE TABLE IF NOT EXISTS {tenant}.`somatic__snv__occurrence`
 (
     part                            INT    NOT NULL,
     task_id                         INT    NOT NULL,
@@ -457,7 +454,7 @@ CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
     normal_seq_id                   INT,
     quality                         FLOAT,
     filter                          VARCHAR(255),
-    -- INFO fields
+
     info_hotspotallele              VARCHAR(255),
     info_hotspot                    BOOLEAN,
     info_old_record                 VARCHAR(2000),
@@ -481,7 +478,7 @@ CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
     info_dp                         INT,
     info_haplotype_score            FLOAT,
     info_aq                         FLOAT,
-    -- Tumor FORMAT
+
     tumor_calls                     ARRAY<INT>,
     tumor_dp                        INT,
     tumor_gq                        INT,
@@ -495,7 +492,7 @@ CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
     tumor_phased                    BOOLEAN,
     tumor_gt_status                 VARCHAR(50),
     tumor_sq                        FLOAT,
-    -- Normal FORMAT
+
     normal_calls                    ARRAY<INT>,
     normal_dp                       INT,
     normal_gq                       INT,
@@ -512,170 +509,7 @@ CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
 ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `task_id`, `tumor_seq_id`, `locus_id`);
 
-INSERT OVERWRITE clinvar (locus_id, chromosome, start, reference, alternate, name)
-VALUES
-    (1000, '1', '1111', 'A', 'T', '111111'),
-    (2000, '2', '2222', 'C', 'G', '222222');
-
-INSERT OVERWRITE snv__consequence (locus_id, consequences, is_picked, sift_pred, sift_score, fathmm_score, fathmm_pred, revel_score, cadd_score, cadd_phred, spliceai_ds, spliceai_type, gnomad_pli, gnomad_loeuf, biotype, symbol, transcript_id)
-VALUES
-    (1000, ['csq10'], true, 'T', 0.1, 0.1, 'T', 0.1, 0.1, 0.1, 0.1, ['AG'], 0.1, 0.1, 'IG_C_gene', 'BRAF', 'T001'),
-    (1000, ['csq11'], false, 'T', 0.11, 0.11, 'T', 0.11, 0.11, 0.11, 0.11, ['AT'], 0.11, 0.11, 'IG_C_pseudogene', 'BRAC', 'T011'),
-    (2000, ['csq20'], true, 'T', 0.2, 0.2, 'T', 0.2, 0.2, 0.2, 0.2, ['AT'], 0.2, 0.2, 'IG_C_pseudogene', 'BRAC', 'T002');
-
-INSERT OVERWRITE snv__consequence_filter_partitioned (part, locus_id, consequence, symbol, impact_score, sift_pred, is_deleterious)
-VALUES
-    (1, 1000, 'csq10', 'BRAF', 3, 'T', true),
-    (1, 1000, 'csq11', 'BRAC', 3, 'T', true),
-    (1, 2000, 'csq20', 'BRAC', 1, 'T', true);
-
-INSERT OVERWRITE germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio, exomiser_moi, exomiser_acmg_classification, exomiser_acmg_evidence, exomiser_variant_score, exomiser_gene_combined_score)
-VALUES
-    (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.9, 0.8),
-    (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
-    (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9),
-    -- Prenatal cases 71-74 of insert_clinical_data.sql. task_id is the case-scoped
-    -- radiant_germline_annotation task there (84/85/86/89), not the alignment task — the API reads
-    -- occurrences on the (seq_id, task_id) pair it resolves from Postgres task_context.
-    -- part=1 so the loci already covered by snv__consequence_filter_partitioned apply as-is.
-    (1, 73, 84, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.72, 0.65),  -- case 71, fetus 1
-    (1, 73, 84, 2000, 120, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1', 'PM2'], 0.88, 0.79),
-    (1, 74, 85, 1000, 110, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.70, 0.64),  -- case 72, twin fetus 2
-    (1, 74, 85, 2000, 130, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.86, 0.77),
-    (1, 75, 85, 1000, 105, 'PASS', 'HOM', 0.5, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.91, 0.84),      -- case 72, twin fetus 3
-    (1, 77, 85, 1000, 140, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.68, 0.61),  -- case 72, mother
-    (1, 76, 86, 1000, 115, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.71, 0.66),  -- case 73, fetus 4
-    (1, 76, 86, 2000, 125, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.87, 0.78),
-    (1, 78, 86, 1000, 135, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.69, 0.62),  -- case 73, mother
-    (1, 79, 86, 2000, 145, 'PASS', 'HET', 1.0, 0, 'Likely pathogenic', ['PVS1'], 0.85, 0.76),      -- case 73, father
-    (1, 80, 89, 1000, 118, 'PASS', 'HET', 1.0, 0, 'Uncertain significance', ['PM2'], 0.73, 0.67),  -- case 74, fetus 5 (only genome of the case)
-    (1, 80, 89, 2000, 128, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PVS1', 'PM2'], 0.89, 0.80);
-
-INSERT OVERWRITE snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, somatic_pc_tn_wgs, somatic_pn_tn_wgs, somatic_pf_tn_wgs, somatic_pc_to_wgs, somatic_pn_to_wgs, somatic_pf_to_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
-VALUES
-    (1000, 3, 0.10, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 10, 50, 0.2, 14, 40, 0.35, 0.01, 'hgvsg10', 'AD', 'insertion', 'MODIFIER', 'BRAF', true, false, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
-    (1001, 3, 0.11, 11, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 11, 51, 0.21, 15, 40, 0.375, 0.01, 'hgvsg11', 'AD', 'deletion', 'LOW', 'BRCA1', false, true, ['Benign', 'Pathogenic'], 'rs111111112', 'p.Arg2019His', ['splice acceptor'], 'locus_full_1001', '1', 1112, 'A', 'T', 'T001'),
-    (1002, 3, 0.12, 12, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 12, 52, 0.22, 16, 40, 0.4, 0.01, 'hgvsg12', 'AD', 'SNV', 'MODERATE', 'BRCA2', true, false, ['Benign', 'Pathogenic'], 'rs111111113', 'p.Arg21His', ['splice acceptor'], 'locus_full_1002', '1', 1113, 'A', 'T', 'T001'),
-    (2000, 1, 0.20, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 20, 60, 0.3, 24, 40, 0.6, 0.02, 'hgvsg21', 'Smu', 'indel', 'HIGH', 'BRAF', false, true, ['Pathogenic'], 'rs2222221', 'p.Arg29His', ['splice acceptor'], 'locus_full_2000', '2', 2221, 'C', 'G', 'T002'),
-    (2001, 1, 0.21, 21, 100, 40, 50, 0.80, 20, 50, 0.4, 21, 61, 0.31, 25, 40, 0.625, 0.02, 'hgvsg22', 'Smu', 'substitution', 'MODIFIER', 'BRCA1', true, false, ['Pathogenic'], 'rs2222222', 'p.Ar3019His', ['splice acceptor'], 'locus_full_2001', '2', 2222, 'C', 'G', 'T002');
-
-INSERT OVERWRITE staging_sequencing_experiment (seq_id, task_id, case_id, task_type, part, analysis_type, ingested_at, histology_type)
-VALUES
-    (1, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (19, 19, 7,'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (62, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral'),
-    (63, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal'),
-    -- Prenatal cases 71-74. A row here with a non-null ingested_at is what flips has_variants
-    -- on the case's sequencing experiments, and its `part` is the partition the occurrence
-    -- queries look up by seq_id — so it must match the germline__snv__occurrence rows above.
-    (73, 84, 71, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (74, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (75, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (77, 85, 72, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (76, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (78, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (79, 86, 73, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (80, 89, 74, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal');
-
-INSERT OVERWRITE omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
-VALUES
-('BRAF', 'Noonan syndrome 7', 164757, 613706, ['AD'], ['Autosomal dominant']),
-('TP53', 'Basal cell carcinoma 7', 191170,614740, ['AD'], ['Autosomal dominant']),
-('BRAF','LEOPARD syndrome 3',164757, 613707, ['AD'], ['Autosomal dominant']),
-('BRAC', 'Osteosarcoma', 191170, 259500, ['Smu'], ['Somatic mutation']),
-('TML1', 'Leukemia/lymphoma, T-cell', 603769, 603769, null, null);
-
-INSERT OVERWRITE hpo_gene_panel (symbol, panel, hpo_term_name, hpo_term_id)
-VALUES
-    ('TP53', 'Colon cancer(HP:0003003)', 'Colon cancer','HP:0003003'),
-    ('BRAF','Acne(HP:0001061)','Acne', 'HP:0001061'),
-    ('BRAF','Brachydactyly(HP:0001156)','Brachydactyly', 'HP:0001156'),
-    ('BRAF','Epicanthus(HP:0000286)','Epicanthus', 'HP:0000286');
-
-
-INSERT OVERWRITE orphanet_gene_panel (symbol, panel, disorder_id, type_of_inheritance)
-VALUES
-    ('TP53', 'Familial pancreatic carcinoma', 3708,['Autosomal dominant','Multigenic/multifactorial']),
-    ('BRAF','Pilomyxoid astrocytoma',19660, ['Not applicable']),
-    ('BRAF','Cardiofaciocutaneous syndrome',1559, ['Autosomal dominant']),
-    ('BRAF','Classic hairy cell leukemia',10778, ['Unknown']);
-
-INSERT OVERWRITE mondo_term (id, name, term)
-VALUES
-('MONDO:0000001', 'blood group incompatibility', 'MONDO:0000001 blood group incompatibility'),
-('MONDO:0000002', 'blood vessel neoplasm', 'MONDO:0000002 blood vessel neoplasm'),
-('MONDO:0000003', 'colorblindness, partial', 'MONDO:0000003 colorblindness, partial'),
-('MONDO:0700092', 'neurodevelopmental disorder', 'MONDO:0700092 neurodevelopmental disorder');
-
-INSERT OVERWRITE hpo_term (id, name, term)
-VALUES
-    ('HP:0000001', 'Nocturia', 'HP:0000001 Nocturia'),
-    ('HP:0000002', 'Abnormality of body height', 'HP:0000002 Abnormality of body height'),
-    ('HP:0000003', 'Multicystic kidney dysplasia', 'HP:0000003 Multicystic kidney dysplasia'),
-    ('HP:0010818', 'Generalized tonic seizure', 'HP:0010818 Generalized tonic seizure'),
-    ('HP:0002011', 'Morphological central nervous system abnormality', 'HP:0002011 Morphological central nervous system abnormality'),
-    ('HP:0004325', 'Decreased body weight', 'HP:0004325 Decreased body weight'),
-    ('HP:0007068', 'Inferior cerebellar vermis hypoplasia', 'HP:0007068 Inferior cerebellar vermis hypoplasia'),
-    ('HP:0010819', 'Atonic seizure', 'HP:0010819 Atonic seizure'),
-    ('HP:0012443', 'Abnormal brain morphology', 'HP:0012443 Abnormal brain morphology'),
-    ('HP:0009800', 'Maternal diabetes', 'HP:0009800 Maternal diabetes'),
-    ('HP:0010519', 'Increased fetal movement', 'HP:0010519 Increased fetal movement'),
-    ('HP:0100622', 'Maternal seizure', 'HP:0100622 Maternal seizure'),
-    ('HP:0000479', 'Abnormal retinal morphology', 'HP:0000479 Abnormal retinal morphology'),
-    ('HP:0001562', 'Oligohydramnios', 'HP:0001562 Oligohydramnios'),
-    ('HP:0001561', 'Polyhydramnios', 'HP:0001561 Polyhydramnios'),
-    -- Values of the seeded abnormal EMG (case 1): without them the exam shows a bare HP code.
-    ('HP:0003457', 'EMG abnormality', 'HP:0003457 EMG abnormality'),
-    ('HP:0003458', 'EMG: myopathic abnormalities', 'HP:0003458 EMG: myopathic abnormalities');
-
-INSERT OVERWRITE test_db.clinvar_rcv_summary
-(locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins, submissions, clinical_significance_count)
-VALUES
-    (1000,'RCV000000001','SCV000000001',['Pathogenic'], DATE('2023-01-01 00:00:00'),10,'reviewed',4,1, ['Trait1'],['somatic'],
-        [row('Submitter1', 'SCV000000001', 1, 'reviewed', 4, 'Pathogenic', DATE('2023-01-01 00:00:00'))], map{'Pathogenic': 10});
-
-
-INSERT OVERWRITE test_db.exomiser
-(part, seq_id, locus_id, id, locus_hash, moi, variant_score, gene_combined_score, variant_rank, rank, symbol, acmg_classification, acmg_evidence)
-VALUES
-    (1, 1, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Pathogenic', ['PVS1', 'PM2']),
-    (2, 2, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Pathogenic', ['PVS1', 'PM2']),
-    (3, 3, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Benign', ['PVS1', 'PM2']);
-
-
-INSERT OVERWRITE test_db.germline__cnv__occurrence
-(part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, length, name, quality, calls, filter, bc, cn, pe, sm, svtype,
-svlen, reflen, ciend, cipos, nb_snv)
-VALUES
-    (1, 1, 1, 1, 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150], NULL),
-    (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], 1),
-    (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], 1);
-
--- Task 87 is the tumor_only_variant_calling task on tumoral seq 62 of case 22 — the same tumor
--- sequencing the somatic SNV rows below use. CNV3 is CNLOH: copy-neutral, so its gnomad_* stay
--- NULL by design, and it carries no ASCN block at all.
-INSERT OVERWRITE test_db.somatic__cnv__occurrence
-(part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, alternate, length, name, quality, calls, filter, bc, pe, sm,
-svtype, svlen, reflen, ciend, cipos, cn, cnf, cnq, mcn, mcnf, mcnq, maf, sd, ascn_as, nb_snv, gnomad_sf)
-VALUES
-    (1, 62, 87, 1, 'aliquot1', '1', 1000, 2000, 'GAIN', '<DUP>', 1000, 'SCNV1', 0.999, [1, 2, 3], 'PASS', 2, [1, 2], 0.5, 'DUP', 1000, 1000, [100, 200], [50, 150], 3, 3.12, 42.5, 1, 1.04, 30.2, 0.42, 0.11, 2, 4, 0.012),
-    (1, 62, 87, 2, 'aliquot1', '2', 2000, 3000, 'LOSS', '<DEL>', 1000, 'SCNV2', 0.888, [4, 5, 6], 'PASS', 3, [3, 4], 0.6, 'DEL', 1000, 1000, [200, 300], [150, 250], 1, 1.05, 38.0, 0, 0.02, 25.0, 0.01, 0.14, 1, 2, 0.004),
-    (1, 62, 87, 3, 'aliquot1', 'X', 3000, 4000, 'CNLOH', '<LOH>', 1000, 'SCNV3', 0.777, [7, 8, 9], 'PASS', 4, [5, 6], 0.7, 'LOH', 1000, 1000, [300, 400], [250, 350], NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL);
-
-INSERT OVERWRITE test_db.somatic__snv__occurrence (
-    part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,
-    info_hotspotallele,tumor_ad_ratio
-)
-VALUES
-    (1, 74, 62, 1000, 63, 31.63, 'None', 'T', 0.41),
-    (1, 74, 62, 1001, 63, 43.43, 'PASS', 'F', 0.09),
-    (1, 74, 62, 1002, 63, 99.82, 'LowQual', 'T', 0.67),
-    (1, 74, 62, 2000, 63, 55.61, 'None', 'F', 0.72),
-    (1, 74, 62, 2001, 63, 41.56, 'LowQual', 'T', 0.65);
-
-
-CREATE TABLE IF NOT EXISTS `ensembl_gene` (
+CREATE TABLE IF NOT EXISTS {shared}.`ensembl_gene` (
                                 `gene_id` varchar(128) NULL COMMENT "",
                                 `chromosome` varchar(10) NULL COMMENT "",
                                 `start` bigint(20) NULL COMMENT "",
@@ -698,20 +532,7 @@ CREATE TABLE IF NOT EXISTS `ensembl_gene` (
 ) ENGINE=OLAP
     DUPLICATE KEY(`gene_id`, `chromosome`);
 
-INSERT OVERWRITE test_db.ensembl_gene(gene_id, name, alias) VALUES
-                                                       ('ENSG00000000003', 'TSPAN6', ['T245','TM4SF6','TSPAN-6']),
-                                                       ('ENSG00000000005', 'TNMD', ['BRICD4','CHM1L','MYODULIN', 'TEM', 'TENDIN']),
-                                                       ('ENSG00000000419', 'DPM1', ['CDGIE','MPDS']),
-                                                       ('ENSG00000000457', 'SCYL3', ['PACE-1','PACE1']),
-                                                       ('ENSG00000000460', 'FIRRM', ['APOLO1','C1ORF112','FLIP', 'FLJ10706', 'MEICA1']),
-                                                       ('ENSG00000000938', 'FGR', ['C-FGR','P55C-FGR','SRC2']),
-                                                       ('ENSG00000000971', 'CFH', ['ARMD4','ARMS1','FHL1','HF','HF1','HF2','HUS']),
-                                                       ('ENSG00000001036', 'FUCA2', ['DJ20N2.5','MGC1314']),
-                                                       ('ENSG00000001084', 'GCLC', ['GCS','GLCL','GLCLC']),
-                                                       ('ENSG00000001167', 'NFYA', ['CBF-B','HAP2','NF-YA']),
-                                                       ('ENSG00000143420', 'ENSA', ['ARPP-19E','MGC4319','MGC78563','MGC8394']);
-
-CREATE TABLE IF NOT EXISTS `ensembl_exon_by_gene` (
+CREATE TABLE IF NOT EXISTS {shared}.`ensembl_exon_by_gene` (
                                         `gene_id` varchar(128) NULL COMMENT "",
                                         `exon_id` varchar(128) NULL COMMENT "",
                                         `chromosome` varchar(10) NULL COMMENT "",
@@ -734,21 +555,7 @@ CREATE TABLE IF NOT EXISTS `ensembl_exon_by_gene` (
 ) ENGINE=OLAP
 DUPLICATE KEY(`gene_id`, `exon_id`, `chromosome`);
 
-
-INSERT OVERWRITE test_db.ensembl_exon_by_gene (gene_id, exon_id, chromosome, start, end) VALUES
-      ('ENSG00000000003', 'ENSE00000000001', '1', 1000, 1100),
-      ('ENSG00000000003', 'ENSE00000000002', '1', 1200, 1300),
-      ('ENSG00000000005', 'ENSE00000000003', '2', 2000, 2100),
-      ('ENSG00000000419', 'ENSE00000000004', '3', 3000, 3100),
-      ('ENSG00000000457', 'ENSE00000000005', '4', 4000, 4100),
-      ('ENSG00000000460', 'ENSE00000000006', '5', 5000, 5100),
-      ('ENSG00000000938', 'ENSE00000000007', '6', 6000, 6100),
-      ('ENSG00000000971', 'ENSE00000000008', '7', 7000, 7100),
-      ('ENSG00000001036', 'ENSE00000000009', '8', 8000, 8100),
-      ('ENSG00000001084', 'ENSE00000000010', '9', 9000, 9100);
-
-
-CREATE TABLE IF NOT EXISTS `cytoband` (
+CREATE TABLE IF NOT EXISTS {shared}.`cytoband` (
                             `chromosome` char(2) NOT NULL COMMENT "",
                             `cytoband` varchar(20) NOT NULL COMMENT "",
                             `start` bigint(20) NOT NULL COMMENT "",
@@ -757,19 +564,7 @@ CREATE TABLE IF NOT EXISTS `cytoband` (
 ) ENGINE=OLAP
 DUPLICATE KEY(`chromosome`, `cytoband`);
 
-INSERT OVERWRITE test_db.cytoband (chromosome, cytoband, start, end, gie_stain) VALUES
-('1', 'p36.33', 0, 2300000, 'gneg'),
-('1', 'p36.32', 2300000, 5300000, 'gpos25'),
-('1', 'p36.31', 5300000, 7100000, 'gneg'),
-('1', 'p36.23', 7100000, 9200000, 'gpos50'),
-('1', 'p36.22', 9200000, 12600000, 'gneg'),
-('1', 'p36.21', 12600000, 16100000, 'gpos75'),
-('1', 'p36.13', 16100000, 20300000, 'gneg'),
-('1', 'p36.12', 20300000, 23900000, 'gpos100'),
-('1', 'p36.11', 23900000, 28000000, 'gneg'),
-('1', 'p35.3', 28000000, 30200000, 'gpos75');
-
-CREATE TABLE IF NOT EXISTS gnomad_genomes_v3 (
+CREATE TABLE IF NOT EXISTS {shared}.`gnomad_genomes_v3` (
     `locus_id` bigint(20) NOT NULL,
     `af` double NULL,
     `ac` INT(11),
@@ -777,11 +572,7 @@ CREATE TABLE IF NOT EXISTS gnomad_genomes_v3 (
     `hom` INT(11)
 );
 
-INSERT OVERWRITE gnomad_genomes_v3 (locus_id, af, ac, an, hom) VALUES
-                                                              (1000, 0.01, 1, 100, 0),
-                                                              (2000, 0.02, 4, 200, 2);
-
-CREATE TABLE IF NOT EXISTS topmed_bravo (
+CREATE TABLE IF NOT EXISTS {shared}.`topmed_bravo` (
     `locus_id` bigint(20) NOT NULL,
     `af` double NULL,
     `ac` INT(11),
@@ -789,28 +580,19 @@ CREATE TABLE IF NOT EXISTS topmed_bravo (
     `hom` INT(11)
 );
 
-INSERT OVERWRITE topmed_bravo (locus_id, af, ac, an, hom) VALUES
-                                                              (1000, 0.001, 1, 1000, 0),
-                                                              (2000, 0.002, 4, 2000, 2);
-
-CREATE TABLE IF NOT EXISTS 1000_genomes (
+CREATE TABLE IF NOT EXISTS {shared}.`1000_genomes` (
     `locus_id` bigint(20) NOT NULL,
     `af` double NULL,
     `ac` INT(11),
     `an` INT(11)
 );
 
-INSERT OVERWRITE 1000_genomes (locus_id, af, ac, an) VALUES
-                                                         (1000, 0.0001, 1, 10000),
-                                                         (2000, 0.0002, 4, 20000);
+CREATE TABLE IF NOT EXISTS {shared}.`ddd_gene_panel` (
+    symbol varchar(30) NOT NULL,
+    panel varchar(250) NOT NULL
+) DUPLICATE KEY(`symbol`);
 
-CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
-		PROPERTIES
-		(
-			"type"="jdbc",
-			"user"="radiant",
-			"password"="radiant",
-			"jdbc_uri"="jdbc:postgresql://postgres:5432/radiant",
-			"driver_url"="https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.3/postgresql-42.3.3.jar",
-			"driver_class"="org.postgresql.Driver"
-		);
+CREATE TABLE IF NOT EXISTS {shared}.`cosmic_gene_panel` (
+    symbol varchar(30) NOT NULL,
+    panel varchar(250) NOT NULL
+) DUPLICATE KEY(`symbol`);

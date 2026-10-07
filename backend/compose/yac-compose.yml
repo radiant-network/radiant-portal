@@ -7,7 +7,7 @@
 #
 # The image is built straight from the public git repo. To iterate on agent code, point
 # YAC_BUILD_CONTEXT at a local clone (path relative to this file), e.g. ../../../udi-yac.
-# Auth: Keycloak JWTs (CQDG realm), passed through to StarRocks. See YAC.md for the env
+# Auth: Keycloak JWTs (radiant realm), passed through to StarRocks. See YAC.md for the env
 # overrides and a smoke test.
 services:
   yac-agent:
@@ -26,9 +26,9 @@ services:
       UDI_CORS_ORIGINS: ${YAC_CORS_ORIGINS:-http://localhost:3000}
       # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. Keys are
       # fetched in-network; the issuer is the host-facing URL tokens are minted through.
-      JWT_JWKS_URL: "${YAC_KEYCLOAK:-http://keycloak:8080/realms/CQDG}/protocol/openid-connect/certs"
+      JWT_JWKS_URL: "${YAC_KEYCLOAK:-http://keycloak:8080/realms/radiant}/protocol/openid-connect/certs"
       JWT_ALGORITHM: RS256
-      JWT_ISSUER: ${YAC_KEYCLOAK:-http://keycloak:8080/realms/CQDG}
+      JWT_ISSUER: ${YAC_KEYCLOAK:-http://keycloak:8080/realms/radiant}
       JWT_AUDIENCE: radiant
       # StarRocks packages with JWT passthrough: queries run as the caller (StarRocks user =
       # Keycloak sub), so Ranger masks/filters apply per user. See yac/backends.json.

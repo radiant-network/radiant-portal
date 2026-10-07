@@ -51,15 +51,15 @@ export PGPORT="${PGPORT:-5432}"
 export PGDATABASE="${PGDATABASE:-radiant}"
 export PGUSER="${PGUSER:-radiant}"
 export PGPASSWORD="${PGPASSWORD:-radiant}"
-export STARROCKS_JWT_JWKS_URL=http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs
-export STARROCKS_JWT_REQUIRED_ISSUER=http://localhost:8080/realms/CQDG
+export STARROCKS_JWT_JWKS_URL=http://keycloak:8080/realms/radiant/protocol/openid-connect/certs
+export STARROCKS_JWT_REQUIRED_ISSUER=http://localhost:8080/realms/radiant
 export STARROCKS_JWT_REQUIRED_AUDIENCE=radiant
 
-# Admin API auth is the CQDG-realm service account (radiant-admin-cli) seeded by
-# scripts/init-keycloak/cqdg.json — a client_credentials grant, not a human admin,
+# Admin API auth is the radiant-realm service account (radiant-admin-cli) seeded by
+# scripts/init-keycloak/radiant.json — a client_credentials grant, not a human admin,
 # so it is not blocked by OTP the way the old ROPC (kcadmin) flow was.
 export KEYCLOAK_HOST=http://localhost:8080
-export KEYCLOAK_REALM=CQDG
+export KEYCLOAK_REALM=radiant
 export KEYCLOAK_ADMIN_CLIENT_ID=radiant-admin-cli
 export KEYCLOAK_ADMIN_CLIENT_SECRET=radiant-admin-secret
 

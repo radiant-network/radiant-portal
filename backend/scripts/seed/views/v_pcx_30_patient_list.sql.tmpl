@@ -1,0 +1,80 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_patient_list  (VIEW, one row per PCX patient, for the patient list API)
+
+   Built ONLY on the secured pcx_30 views of the same database, never on the source tables: it adds
+   no PHI rule of its own and reads nothing the caller cannot already read.
+
+   The views are joined on (organization_code, patient_id_type, patient_id). That key is stable
+   across views for a given caller: can_read_phi depends only on the row's organization (org grant)
+   and its radiant_patient_id (lab grant), both identical in every view of the same patient. An
+   identifier missing from one view (patient_id NULL) simply leaves that view's columns NULL.
+
+   Unknown ages (-1 sentinel) become NULL; survival_days needs both a vital-status age and a known
+   initial-diagnosis age. vital_status and gender become the API codes (lowercase, "not reported" ->
+   "not_reported"). The diagnosis and its source come from ONE initial event, the earliest with a known
+   age: a -1 (unknown date) sorts last instead of winning the minimum.
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_patient_list AS
+SELECT d.organization_code,
+       d.organization_name,
+       d.patient_id,
+       d.patient_id_type,
+       d.radiant_patient_id,
+       d.given_name,
+       d.family_name,
+       CAST(d.birth_year AS INT) AS birth_year,
+       replace(lower(d.gender), ' ', '_') AS gender,
+       d.diagnosis_type_cohort,
+       d.data_type_cohort,
+       e.cns_integrated_diagnosis,
+       e.cns_integrated_diagnosis_source,
+       lower(pl.vital_status) AS vital_status,
+       CAST(pl.age_at_vital_status_days AS INT) AS age_at_vital_status_days,
+       dx.age_at_initial_dx_days,
+       CASE WHEN pl.age_at_vital_status_days IS NOT NULL AND dx.age_at_initial_dx_days IS NOT NULL
+            THEN CAST(pl.age_at_vital_status_days AS INT) - dx.age_at_initial_dx_days END AS survival_days,
+       mri.patient_id IS NOT NULL AS has_imaging,
+       COALESCE(c.case_count, 0) AS case_count,
+       d.can_read_phi
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_level_combined pl
+  ON pl.organization_code = d.organization_code
+ AND pl.patient_id_type = d.patient_id_type
+ AND pl.patient_id = d.patient_id
+LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source
+           FROM (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
+                        row_number() OVER (PARTITION BY organization_code, patient_id_type, patient_id
+                                           ORDER BY age_at_event_days < 0, age_at_event_days, cns_integrated_diagnosis) AS rn
+                 FROM {{.TenantCode}}_tenant.v_pcx_30_event_level_combined
+                 WHERE event_type = 'Initial CNS Tumor') ranked
+           WHERE rn = 1) e
+  ON e.organization_code = d.organization_code
+ AND e.patient_id_type = d.patient_id_type
+ AND e.patient_id = d.patient_id
+LEFT JOIN (SELECT d2.organization_code, d2.patient_id_type, d2.patient_id,
+                  COALESCE(ts2.age_at_initial_dx_days, e2.age_at_initial_event_days) AS age_at_initial_dx_days
+           FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d2
+           LEFT JOIN (SELECT organization_code, patient_id_type, patient_id,
+                             CASE WHEN age_at_initial_dx_days >= 0 THEN age_at_initial_dx_days END AS age_at_initial_dx_days
+                      FROM {{.TenantCode}}_tenant.v_pcx_30_treatment_summary_combined) ts2
+             ON ts2.organization_code = d2.organization_code AND ts2.patient_id_type = d2.patient_id_type AND ts2.patient_id = d2.patient_id
+           LEFT JOIN (SELECT organization_code, patient_id_type, patient_id,
+                             CAST(min(CASE WHEN age_at_event_days >= 0 THEN age_at_event_days END) AS INT) AS age_at_initial_event_days
+                      FROM {{.TenantCode}}_tenant.v_pcx_30_event_level_combined
+                      WHERE event_type = 'Initial CNS Tumor'
+                      GROUP BY organization_code, patient_id_type, patient_id) e2
+             ON e2.organization_code = d2.organization_code AND e2.patient_id_type = d2.patient_id_type AND e2.patient_id = d2.patient_id) dx
+  ON dx.organization_code = d.organization_code
+ AND dx.patient_id_type = d.patient_id_type
+ AND dx.patient_id = d.patient_id
+LEFT JOIN (SELECT DISTINCT organization_code, patient_id_type, patient_id
+           FROM {{.TenantCode}}_tenant.v_pcx_30_mri_images_combined) mri
+  ON mri.organization_code = d.organization_code
+ AND mri.patient_id_type = d.patient_id_type
+ AND mri.patient_id = d.patient_id
+LEFT JOIN (SELECT patient_id, count(DISTINCT case_id) AS case_count
+           FROM (SELECT id AS case_id, proband_id AS patient_id FROM {{.TenantCode}}_tenant.cases
+                 UNION ALL
+                 SELECT case_id, family_member_id AS patient_id FROM {{.TenantCode}}_tenant.family) m
+           GROUP BY patient_id) c
+  ON c.patient_id = d.radiant_patient_id

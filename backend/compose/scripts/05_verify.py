@@ -45,7 +45,7 @@ NATIVE_USERS = {"root": None, "svc_admin_api": "adminpass1"}
 JWT_USERS = {"alice", "bob", "wendy"}
 
 KC_URL = os.environ.get("KC_URL", "http://localhost:8080")
-REALM = os.environ.get("REALM", "CQDG")
+REALM = os.environ.get("REALM", "radiant")
 CLIENT_ID = os.environ.get("CLIENT_ID", "radiant")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "ShutThisIsASecret!")
 USER_PASSWORD = os.environ.get("USER_PASSWORD", "radiant123!")

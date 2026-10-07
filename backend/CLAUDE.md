@@ -93,6 +93,21 @@ make clean         # Remove binaries
 make migrate       # Create new migration file
 ```
 
+### Local stack data
+
+`make docker-run` seeds a single data tenant, `cbtn`, from `scripts/seed/` (see its README):
+- fake PCX 3.0 patients built from de-identified CSVs
+- their portal patients, cases, occurrences and interpretations
+
+The stack runs the multi-tenant layout, as QA does:
+- `TENANT_VIEWS_READ_ENABLED` is on; shared tables live in `radiant`, `PerTenant` tables in `cbtn_tenant`.
+- `pg-migrate` and `pg-seed` run before the API.
+- `provision` runs `create-tenant`, `refresh-tenants` and `create-user` with the toolbox image, as in QA.
+- Reads go through `mysql-proxy` as the user (`STARROCKS_PROXY_READ_ENABLED`, on by default), so Ranger and PHI masking apply locally.
+- `scripts/seed/verify_phi.py` checks the PHI matrix per demo user.
+
+Keycloak realm `radiant` (`scripts/init-keycloak/radiant.json`) holds the demo users (`cbtn-admin`, `cbtn-phi-chop`, `cbtn-phi-sch`, `cbtn-lab`, `cbtn-nophi`; password = username).
+
 ## API Server
 
 **Entry point:** `cmd/api/main.go`
