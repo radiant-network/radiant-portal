@@ -1,0 +1,19 @@
+# The last matching pattern wins: general paths first, more specific ones after.
+
+# Backend (Go API, worker, tools, migrations).
+/backend/ @jecos @celinepelletier @creativeyann17 @emmanuelnau @chamorin @kritchie
+
+# PCX 3.0 view scripts, maintained by the RADIANT-Timeline-Abstraction team (source of truth for the PCX data).
+/backend/scripts/pcx_tables/ @calkinsh
+
+# End-to-end tests.
+/cypress/ @kstonge
+
+# Frontend monorepo.
+/frontend/ @lflangis @AltefrohneGaelle
+
+# Code generated from the OpenAPI spec (make doc, make generate-client-*): no owner, reviewed with the API change
+# that regenerates it. Keep these lines last.
+/backend/docs/
+/frontend/api/
+/cli/python/
