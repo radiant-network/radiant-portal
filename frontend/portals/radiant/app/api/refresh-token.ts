@@ -6,13 +6,13 @@ import { refreshAccessToken } from '~/utils/auth.server';
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method === 'POST') {
-    const cookies = await refreshAccessToken(request);
-    if (!cookies) {
+    const refreshed = await refreshAccessToken(request);
+    if (!refreshed) {
       return new Response(null, { status: HttpStatusCode.Unauthorized });
     }
 
     const headers = new Headers();
-    cookies.forEach(cookie => headers.append('Set-Cookie', cookie));
+    refreshed.cookies.forEach(cookie => headers.append('Set-Cookie', cookie));
 
     return new Response(JSON.stringify({ success: true }), { status: HttpStatusCode.Ok, headers });
   }
