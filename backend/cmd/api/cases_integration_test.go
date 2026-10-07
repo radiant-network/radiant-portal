@@ -440,6 +440,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 		"data_type_code":[
 			{"key":"aggqc", "label":"Aggregate Quality Control Report"},
 			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"chrmr", "label":"Mitochondrial Report"},
 			{"key":"clinical_report", "label":"Clinical Report"},
 			{"key":"cnvvis", "label":"CNV Visualization"}, 
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -470,6 +471,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"key":"tsv", "label":"TSV File"}, 
 			{"key":"txt", "label":"Text File"},
 			{"key":"vcf", "label":"VCF File"},
+			{"key":"xlsx", "label":"XLSX Spreadsheet File"},
 			{"key":"zip", "label":"ZIP Archive File"}
 		], 
 		"relationship_to_proband_code":[

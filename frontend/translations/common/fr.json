@@ -508,7 +508,8 @@
       "csv": "Fichier CSV",
       "pdf": "Fichier PDF",
       "txt": "Fichier texte",
-      "gvcf": "Fichier GVCF"
+      "gvcf": "Fichier GVCF",
+      "xlsx": "Fichier tableur XLSX"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
@@ -526,7 +527,8 @@
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
       "exomiser": "Rapport Exomiser",
-      "clinical_report": "Rapport clinique"
+      "clinical_report": "Rapport clinique",
+      "chrmr": "Rapport mitochondrial"
     },
     "query_bar": {
       "selector": "Q{{index}}",
