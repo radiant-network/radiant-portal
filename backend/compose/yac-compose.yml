@@ -24,11 +24,12 @@ services:
       OPENAI_BASE_URL: ${YAC_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
       GPT_MODEL_NAME: ${YAC_MODEL:-qwen3:14b}
       UDI_CORS_ORIGINS: ${YAC_CORS_ORIGINS:-http://localhost:3000}
-      # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. Keys are
-      # fetched in-network; the issuer is the host-facing URL tokens are minted through.
+      # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. The issuer is
+      # the host-facing URL tokens are minted through; locally the keys are fetched in-network
+      # (keycloak:8080), since localhost is the container itself. YAC_KEYCLOAK (e.g. QA) sets both.
       JWT_JWKS_URL: "${YAC_KEYCLOAK:-http://keycloak:8080/realms/radiant}/protocol/openid-connect/certs"
       JWT_ALGORITHM: RS256
-      JWT_ISSUER: ${YAC_KEYCLOAK:-http://keycloak:8080/realms/radiant}
+      JWT_ISSUER: ${YAC_KEYCLOAK:-http://localhost:8080/realms/radiant}
       JWT_AUDIENCE: radiant
       # StarRocks packages with JWT passthrough: queries run as the caller (StarRocks user =
       # Keycloak sub), so Ranger masks/filters apply per user. See yac/backends.json.

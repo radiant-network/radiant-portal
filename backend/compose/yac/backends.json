@@ -1,26 +1,1313 @@
 {
-  "tenant_a": {
+  "cbtn": {
     "type": "starrocks",
     "jwtPassthrough": true,
     "principalField": "sub",
     "connection": {
       "host": "starrocks",
       "port": 9030,
-      "database": "tenant_a",
-      "ssl": { "ca": "/certs/starrocks_cert.pem" }
+      "database": "cbtn_tenant",
+      "ssl": {
+        "ca": "/certs/starrocks_cert.pem"
+      }
     },
-    "tables": { "patient": "patient" }
-  },
-  "tenant_b": {
-    "type": "starrocks",
-    "jwtPassthrough": true,
-    "principalField": "sub",
-    "connection": {
-      "host": "starrocks",
-      "port": 9030,
-      "database": "tenant_b",
-      "ssl": { "ca": "/certs/starrocks_cert.pem" }
+    "tables": {
+      "patient": "v_pcx_30_patient_level_combined",
+      "demographics": "v_pcx_30_demographics_combined",
+      "event": "v_pcx_30_event_level_combined",
+      "medical_therapy": "v_pcx_30_medical_therapy_level_combined",
+      "radiation": "v_pcx_30_radiation_level_combined",
+      "surgery": "v_pcx_30_surgery_level_combined",
+      "treatment_summary": "v_pcx_30_treatment_summary_combined",
+      "mri_image": "v_pcx_30_mri_images_combined",
+      "cbc_latest": "v_cbc_latest_results",
+      "csf_results_latest": "v_csf_results_latest_by_component",
+      "csf_tumor_analysis_latest": "v_csf_tumor_analysis_latest",
+      "lansky_karnofsky_latest": "v_lansky_karnofsky_latest"
     },
-    "tables": { "patient": "patient" }
+    "schemas": {
+      "patient": {
+        "description": "Patient survival information, including the most recent known vital status and the patient age in days at which it was determined.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "vital_status_date",
+            "description": "Calendar date of the most recent known vital status, derived as date of birth plus age_at_vital_status_days. Identified counterpart to age_at_vital_status_days."
+          },
+          {
+            "name": "age_at_vital_status_days",
+            "description": "Patient age in days at the most recent known vital status. An unknown date surfaces as NULL rather than -1."
+          },
+          {
+            "name": "vital_status",
+            "description": "The patient's most recent known vital status, as of the patient age in age_at_vital_status_days. Deceased outranks alive; the largest day count breaks ties within a tier."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "primaryKey": [
+          "patient_id"
+        ]
+      },
+      "demographics": {
+        "description": "Patient demographic and cohort information, including birth year, race, ethnicity, sex, geographic area, and the diagnosis and data source cohorts the patient belongs to.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "given_name",
+            "description": "Patient's real first name as recorded by the contributing institution."
+          },
+          {
+            "name": "family_name",
+            "description": "Patient's real last name as recorded by the contributing institution."
+          },
+          {
+            "name": "birth_date",
+            "description": "Patient's full date of birth. Identified counterpart to birth_year."
+          },
+          {
+            "name": "birth_year",
+            "description": "Patient's year of birth. Month and day are removed for de-identification."
+          },
+          {
+            "name": "race",
+            "description": "Patient's race as reported by the contributing institution."
+          },
+          {
+            "name": "ethnicity",
+            "description": "Patient's ethnicity as reported by the contributing institution."
+          },
+          {
+            "name": "gender",
+            "description": "Patient's administrative sex as recorded by the contributing institution, lowercased."
+          },
+          {
+            "name": "address_postal_code",
+            "description": "Patient's real residential ZIP code, or XXXXX when unavailable."
+          },
+          {
+            "name": "diagnosis_type_cohort",
+            "description": "The patient's primary diagnosis group used to define the cohort for this release."
+          },
+          {
+            "name": "data_type_cohort",
+            "description": "The source cohort the patient's data came from: 'radiant' for RADIANT patients, 'cbtn-non-radiant' for CBTN patients not in RADIANT."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "event": {
+        "description": "Disease events across the patient's cancer journey, including initial diagnosis, progression, recurrence, second malignancy, and death, with the diagnosis, tumor location, and metastasis status recorded at each event.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "event_type",
+            "description": "The type of diagnosis-related event determined via surgery, imaging, or clinical observation."
+          },
+          {
+            "name": "event_date",
+            "description": "Calendar date of the diagnosis-related event, derived as date of birth plus age_at_event_days. Identified counterpart to age_at_event_days. Note: rows with the -1 unknown-date sentinel yield date of birth minus one day."
+          },
+          {
+            "name": "age_at_event_days",
+            "description": "Patient age in days at the diagnosis-related event. A value of -1 indicates an unknown date."
+          },
+          {
+            "name": "metastasis",
+            "description": "Whether metastatic disease was present at the time of the event."
+          },
+          {
+            "name": "metastasis_location",
+            "description": "The site of the metastasis. Semicolon-delimited when more than one site is recorded."
+          },
+          {
+            "name": "metastasis_location_other",
+            "description": "Free-text value supplied when the coded metastasis_location does not cover the finding (the site of the metastasis)."
+          },
+          {
+            "name": "cns_diagnosis_category",
+            "description": "The diagnosis at the time of the event (broad diagnosis category)."
+          },
+          {
+            "name": "cns_integrated_diagnosis",
+            "description": "The diagnosis at the time of the event (WHO integrated histologic plus molecular diagnosis). Where CBTN recorded only a non-specific \"NOS or NEC\" value and a more specific molecular subtype was available from OpenPedCan for that event's biospecimen, the more specific value is shown instead; cns_integrated_diagnosis_source records which source won."
+          },
+          {
+            "name": "cns_integrated_diagnosis_source",
+            "description": "Which source supplied cns_integrated_diagnosis on this row: 'CBTN' where the value is as CBTN recorded it, or 'OpenPedCan' where a non-specific CBTN \"NOS or NEC\" value was replaced by a more specific molecular subtype from openpedcan_histologies_annotated, matched on the event's biospecimen sample ID. Provenance metadata only: it carries no patient identifier and is meaningless without the diagnosis column it describes."
+          },
+          {
+            "name": "tumor_locations",
+            "description": "The anatomical site of the tumor. Semicolon-delimited when more than one site is recorded."
+          },
+          {
+            "name": "tumor_location_other",
+            "description": "Free-text value supplied when the coded tumor_locations does not cover the finding (the anatomical site of the tumor)."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "medical_therapy": {
+        "description": "Systemic therapy treatment, including the treatment protocol, whether the patient was enrolled on that protocol, the treatment timing expressed as patient age in days, the chemotherapy agents administered, and whether the regimen was part of the patient's initial treatment.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "protocol_name_and_arm",
+            "description": "Name of the treatment protocol the patient is enrolled on or being treated in accordance with. Sourced from the unmasked internal-use protocol name."
+          },
+          {
+            "name": "protocol_name",
+            "description": "The protocol name alone, split from protocol_name_and_arm on its first colon. Repeats the whole value when there is no colon, so a sentinel such as Not Applicable, Not Reported or Other appears unchanged. The same trial appears both with and without an arm and all of its rows share one protocol_name, so this column can be grouped on."
+          },
+          {
+            "name": "protocol_arm",
+            "description": "The arm, stratum or regimen within the protocol, split from protocol_name_and_arm on its first colon; any further colons are kept, for example Stratum N1: Standard Risk. Not Applicable when the value has no colon, which covers both a protocol that genuinely has no arm and a protocol that is itself unrecorded, so read protocol_name before treating this as an absence of arm."
+          },
+          {
+            "name": "chemotherapy_type",
+            "description": "Whether the regimen followed a treatment protocol (with or without enrollment) or other standard of care."
+          },
+          {
+            "name": "regimen_start_date",
+            "description": "Calendar date the medical therapy regimen started, derived as date of birth plus age_at_regimen_start_days. Identified counterpart to age_at_regimen_start_days. NULL when the age value is a non-numeric unknown such as 'Not Reported'."
+          },
+          {
+            "name": "age_at_regimen_start_days",
+            "description": "Patient age in days at the start of the medical therapy regimen. May carry 'Not Reported', 'Not Available', or 'Not Applicable' for unknowns."
+          },
+          {
+            "name": "regimen_stop_date",
+            "description": "Calendar date the medical therapy regimen ended, derived as date of birth plus age_at_regimen_stop_days. Identified counterpart to age_at_regimen_stop_days. NULL when the age value is a non-numeric unknown such as 'Not Reported'."
+          },
+          {
+            "name": "age_at_regimen_stop_days",
+            "description": "Patient age in days at the end of the medical therapy regimen. May carry 'Not Reported', 'Not Available', or 'Not Applicable' for unknowns."
+          },
+          {
+            "name": "chemotherapy_agents",
+            "description": "Therapeutic agent being administered. Sourced from the unmasked internal-use agent list."
+          },
+          {
+            "name": "is_initial_treatment",
+            "description": "yes/no column indicating whether this regimen was part of the patient's initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). 'no' also covers rows where this could not be determined. Derived from ages in days only, so it exposes no calendar date."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "radiation": {
+        "description": "Radiation therapy treatment, including the treatment timing expressed as patient age in days, the field or site treated, the radiation method delivered, the prescribed dose, and whether the course was part of the patient's initial treatment.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "radiation_start_date",
+            "description": "Calendar date the radiation round started, derived as date of birth plus age_at_radiation_start_days. Identified counterpart to age_at_radiation_start_days."
+          },
+          {
+            "name": "age_at_radiation_start_days",
+            "description": "Patient age in days at the start of the radiation round."
+          },
+          {
+            "name": "radiation_stop_date",
+            "description": "Calendar date the radiation round ended, derived as date of birth plus age_at_radiation_stop_days. Identified counterpart to age_at_radiation_stop_days."
+          },
+          {
+            "name": "age_at_radiation_stop_days",
+            "description": "Patient age in days at the end of the radiation round."
+          },
+          {
+            "name": "radiation_site",
+            "description": "Field or site of radiation."
+          },
+          {
+            "name": "radiation_site_other",
+            "description": "Free-text value supplied when the coded radiation_site does not cover the finding (field or site of radiation)."
+          },
+          {
+            "name": "radiation_type",
+            "description": "Method or type of radiation delivered."
+          },
+          {
+            "name": "radiation_type_other",
+            "description": "Free-text value supplied when the coded radiation_type does not cover the finding (method or type of radiation delivered)."
+          },
+          {
+            "name": "total_radiation_dose",
+            "description": "Dose of craniospinal radiation given."
+          },
+          {
+            "name": "total_radiation_dose_unit",
+            "description": "Unit of measure for total_radiation_dose (dose of craniospinal radiation given)."
+          },
+          {
+            "name": "total_radiation_dose_focal",
+            "description": "Total radiation given to the primary site."
+          },
+          {
+            "name": "total_radiation_dose_focal_unit",
+            "description": "Unit of measure for total_radiation_dose_focal (total radiation given to the primary site)."
+          },
+          {
+            "name": "is_initial_treatment",
+            "description": "yes/no column indicating whether this radiation course was part of the patient's initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death), based on the course start age. 'no' also covers rows where this could not be determined. Derived from ages in days only, so it exposes no calendar date."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "surgery": {
+        "description": "Tumor-directed surgery, including the patient age in days at the procedure, the extent of tumor resection achieved, and whether the surgery was part of the patient's initial treatment.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "surgery_date",
+            "description": "Calendar date of the tumor-related surgery, derived as date of birth plus age_at_surgery_days. Identified counterpart to age_at_surgery_days. Note: rows with the -1 unknown-date sentinel yield date of birth minus one day."
+          },
+          {
+            "name": "age_at_surgery_days",
+            "description": "Patient age in days when the tumor-related surgery (resection or biopsy) was performed. A value of -1 indicates an unknown date."
+          },
+          {
+            "name": "extent_of_tumor_resection",
+            "description": "Extent of tumor resection performed during the surgery."
+          },
+          {
+            "name": "is_initial_treatment",
+            "description": "yes/no column indicating whether this surgery was part of the patient's initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). 'no' also covers rows where this could not be determined. Derived from ages in days only, so it exposes no calendar date."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "treatment_summary": {
+        "description": "Summary measures of each patient's initial treatment, including patient age in days at initial diagnosis and at first event, the age in days at the first-ever and first-initial radiation and chemotherapy, the age at first-ever methotrexate, whether each was part of initial treatment, and the order in which radiation and chemotherapy were given.",
+        "fields": [
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "initial_dx_date",
+            "description": "Calendar date of initial CNS diagnosis, taken as the earliest event_date for an initial event. Identified counterpart to age_at_initial_dx_days."
+          },
+          {
+            "name": "age_at_initial_dx_days",
+            "description": "Patient age in days at initial CNS diagnosis. A value of -1 indicates an unknown date."
+          },
+          {
+            "name": "first_event_date",
+            "description": "Calendar date of the first event of type progression, recurrence, second malignancy, or deceased. Identified counterpart to age_at_first_event_days."
+          },
+          {
+            "name": "age_at_first_event_days",
+            "description": "Patient age in days at first event that is of event type progression, recurrence, second malignancy, or deceased. A value of -1 indicates an unknown date."
+          },
+          {
+            "name": "first_radiation_ever_date",
+            "description": "Calendar date the patient's first radiation treatment ever started. Identified counterpart to age_at_first_radiation_ever_days."
+          },
+          {
+            "name": "age_at_first_radiation_ever_days",
+            "description": "Patient age in days at the start of the patient's first radiation treatment ever, whether or not it was part of initial treatment."
+          },
+          {
+            "name": "initial_radiation_date",
+            "description": "Calendar date the first radiation treatment that was part of initial treatment started. Identified counterpart to age_at_initial_radiation_days."
+          },
+          {
+            "name": "age_at_initial_radiation_days",
+            "description": "Patient age in days at the start of the first radiation treatment that was part of the patient's initial treatment. Null when no radiation fell within the initial treatment window."
+          },
+          {
+            "name": "first_chemo_ever_date",
+            "description": "Calendar date the patient's first chemotherapy regimen ever started, for any agent. Identified counterpart to age_at_first_chemo_ever_days."
+          },
+          {
+            "name": "age_at_first_chemo_ever_days",
+            "description": "Patient age in days at the start of the patient's first chemotherapy regimen ever, for any agent, whether or not it was part of initial treatment."
+          },
+          {
+            "name": "initial_chemo_date",
+            "description": "Calendar date the first chemotherapy regimen that was part of initial treatment started. Identified counterpart to age_at_initial_chemo_days."
+          },
+          {
+            "name": "age_at_initial_chemo_days",
+            "description": "Patient age in days at the start of the first chemotherapy regimen that was part of the patient's initial treatment. Null when no chemotherapy fell within the initial treatment window."
+          },
+          {
+            "name": "first_methotrexate_ever_date",
+            "description": "Calendar date the patient's first methotrexate regimen ever started. Identified counterpart to age_at_first_methotrexate_ever_days."
+          },
+          {
+            "name": "age_at_first_methotrexate_ever_days",
+            "description": "Patient age in days at the start of the patient's first methotrexate regimen ever, whether or not it was part of initial treatment."
+          },
+          {
+            "name": "had_initial_radiation",
+            "description": "Yes/No column indicating whether the patient had radiation as part of their initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). 'no' also covers rows where this could not be determined."
+          },
+          {
+            "name": "had_initial_chemo",
+            "description": "Yes/No column indicating whether the patient had chemotherapy, for any agent, as part of their initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). 'no' also covers rows where this could not be determined."
+          },
+          {
+            "name": "had_initial_methotrexate",
+            "description": "Yes/No column indicating whether the patient had methotrexate as part of their initial treatment (the treatment that occurred prior to the first relapse, progression, second malignancy, or death). 'no' also covers rows where this could not be determined."
+          },
+          {
+            "name": "initial_treatment_order",
+            "description": "The order of initial treatments the patient received, specific to radiation, chemotherapy, both, or neither. Values: radiation_before_chemotherapy, chemo_before_radiation, radiation_and_chemo_same_day, chemo_only_no_initial_radiation, radiation_only_no_initial_chemo, no_initial_radiation_or_chemo."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "mri_image": {
+        "description": "MRI imaging sessions, one row per image series, with the patient age in days at the session.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data to this release."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, joined from pcx_30_organization_ref."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. Currently NULL on every row: this view's patient set has no overlap with the portal's, which holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "flywheel_subject_id",
+            "description": "Flywheel internal identifier for the subject."
+          },
+          {
+            "name": "flywheel_project_id",
+            "description": "Flywheel internal identifier for the project holding the session."
+          },
+          {
+            "name": "flywheel_project_name",
+            "description": "Flywheel project name, generally the diagnosis cohort (e.g. Medullo_v2)."
+          },
+          {
+            "name": "session_id",
+            "description": "Flywheel internal identifier for the imaging session."
+          },
+          {
+            "name": "session_name",
+            "description": "Flywheel session label. Embeds patient age in days and time of day but no calendar date (e.g. 5766d_B_brain_18h40m)."
+          },
+          {
+            "name": "session_date",
+            "description": "Calendar date of the imaging session, derived as date of birth plus age_at_session_days. Identified counterpart to age_at_session_days."
+          },
+          {
+            "name": "age_at_session_days",
+            "description": "Patient age in days at the imaging session. Integer 0-44945; this domain has no unknown-date sentinel."
+          },
+          {
+            "name": "anatomical_site",
+            "description": "Anatomical region imaged (e.g. brain, spine, brain-spine)."
+          },
+          {
+            "name": "imaging_modality",
+            "description": "Imaging modality of the session. Currently MRI for every row."
+          },
+          {
+            "name": "flywheel_url",
+            "description": "Deep link to the session in Flywheel. CHOP hosts all images regardless of contributing institution."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "cbc_latest": {
+        "description": "Latest complete blood count (CBC) results per patient.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data, from stg_cbtn_enrollment_final."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, from pcx_30_organization_ref. This is the vocabulary auth.pii_grant keys on; NULL for 16 patients, who consequently fail closed to de-identified."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "wbc_value",
+            "description": "Latest WBC result value. NOT unit-normalized - read with its unit; the same analyte arrives in incompatible units across contributing systems."
+          },
+          {
+            "name": "wbc_unit",
+            "description": "Unit of measure for wbc_value. Required to interpret the value; e.g. ANC appears as both '/uL' and 'x10E9/L', which differ by 1000x."
+          },
+          {
+            "name": "wbc_observed_at",
+            "description": "Calendar timestamp of the latest WBC observation. Identified counterpart to age_at_wbc_days."
+          },
+          {
+            "name": "age_at_wbc_days",
+            "description": "Patient age in days at the latest WBC observation, derived from date of birth. De-identified counterpart to wbc_observed_at. Exact to the day and reaching ~59 years, so not automatically anonymous when combined with a known diagnosis."
+          },
+          {
+            "name": "wbc_loinc",
+            "description": "LOINC code identifying the WBC observation. NULL where the source system supplied no LOINC coding (ANC coverage is 81.5%), in which case the analyte was matched on its local code_text."
+          },
+          {
+            "name": "wbc_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the WBC observation, retained verbatim for provenance."
+          },
+          {
+            "name": "hemoglobin_value",
+            "description": "Latest hemoglobin result value. NOT unit-normalized - read with its unit; the same analyte arrives in incompatible units across contributing systems."
+          },
+          {
+            "name": "hemoglobin_unit",
+            "description": "Unit of measure for hemoglobin_value. Required to interpret the value; e.g. ANC appears as both '/uL' and 'x10E9/L', which differ by 1000x."
+          },
+          {
+            "name": "hemoglobin_observed_at",
+            "description": "Calendar timestamp of the latest hemoglobin observation. Identified counterpart to age_at_hemoglobin_days."
+          },
+          {
+            "name": "age_at_hemoglobin_days",
+            "description": "Patient age in days at the latest hemoglobin observation, derived from date of birth. De-identified counterpart to hemoglobin_observed_at. Exact to the day and reaching ~59 years, so not automatically anonymous when combined with a known diagnosis."
+          },
+          {
+            "name": "hemoglobin_loinc",
+            "description": "LOINC code identifying the hemoglobin observation. NULL where the source system supplied no LOINC coding (ANC coverage is 81.5%), in which case the analyte was matched on its local code_text."
+          },
+          {
+            "name": "hemoglobin_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the hemoglobin observation, retained verbatim for provenance."
+          },
+          {
+            "name": "platelets_value",
+            "description": "Latest platelet result value. NOT unit-normalized - read with its unit; the same analyte arrives in incompatible units across contributing systems."
+          },
+          {
+            "name": "platelets_unit",
+            "description": "Unit of measure for platelets_value. Required to interpret the value; e.g. ANC appears as both '/uL' and 'x10E9/L', which differ by 1000x."
+          },
+          {
+            "name": "platelets_observed_at",
+            "description": "Calendar timestamp of the latest platelet observation. Identified counterpart to age_at_platelets_days."
+          },
+          {
+            "name": "age_at_platelets_days",
+            "description": "Patient age in days at the latest platelet observation, derived from date of birth. De-identified counterpart to platelets_observed_at. Exact to the day and reaching ~59 years, so not automatically anonymous when combined with a known diagnosis."
+          },
+          {
+            "name": "platelets_loinc",
+            "description": "LOINC code identifying the platelet observation. NULL where the source system supplied no LOINC coding (ANC coverage is 81.5%), in which case the analyte was matched on its local code_text."
+          },
+          {
+            "name": "platelets_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the platelet observation, retained verbatim for provenance."
+          },
+          {
+            "name": "anc_value",
+            "description": "Latest absolute neutrophil count (ANC) result value. NOT unit-normalized - read with its unit; the same analyte arrives in incompatible units across contributing systems."
+          },
+          {
+            "name": "anc_unit",
+            "description": "Unit of measure for anc_value. Required to interpret the value; e.g. ANC appears as both '/uL' and 'x10E9/L', which differ by 1000x."
+          },
+          {
+            "name": "anc_observed_at",
+            "description": "Calendar timestamp of the latest absolute neutrophil count (ANC) observation. Identified counterpart to age_at_anc_days."
+          },
+          {
+            "name": "age_at_anc_days",
+            "description": "Patient age in days at the latest absolute neutrophil count (ANC) observation, derived from date of birth. De-identified counterpart to anc_observed_at. Exact to the day and reaching ~59 years, so not automatically anonymous when combined with a known diagnosis."
+          },
+          {
+            "name": "anc_loinc",
+            "description": "LOINC code identifying the absolute neutrophil count (ANC) observation. NULL where the source system supplied no LOINC coding (ANC coverage is 81.5%), in which case the analyte was matched on its local code_text."
+          },
+          {
+            "name": "anc_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the absolute neutrophil count (ANC) observation, retained verbatim for provenance."
+          },
+          {
+            "name": "analytes_found",
+            "description": "Count of the four CBC analytes that resolved for this patient (1-4)."
+          },
+          {
+            "name": "administrative_dates",
+            "description": "Count of this patient's analyte timestamps derived from Observation.issued rather than a clinical effective date; such a value is a release-time proxy, not an event time. Currently 0 for every row."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "csf_results_latest": {
+        "description": "Latest cerebrospinal fluid (CSF) lab results per patient, one column per component.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data, from stg_cbtn_enrollment_final."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, from pcx_30_organization_ref. This is the vocabulary auth.pii_grant keys on; a NULL fails closed to de-identified with dates and free text hidden."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "patient_best_evidence",
+            "description": "Strongest evidence anywhere for this patient that a tumour-relevant analysis was on CSF: 'named', 'text_confirmed' or 'same_day_only'. NULL marks the 240 patients who have routine CSF chemistry or cell counts only and no tumour-relevant analysis at all. No specimen-to-report link exists in the source data, which is why this tiering is necessary."
+          },
+          {
+            "name": "protein_display",
+            "description": "Most recent CSF total protein pre-composed as comparator + value + unit, e.g. '<10 mg/dL'. READ THIS RATHER THAN protein_value: the comparator is load-bearing and a '<' result is below the assay limit, not a measurement. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "protein_value",
+            "description": "Numeric CSF total protein WITHOUT its comparator. Do not read in isolation - see protein_display."
+          },
+          {
+            "name": "protein_comparator",
+            "description": "Comparator attached to protein_value, typically '<' or '>' when the result is outside the assay's reportable range; NULL for an absolute measurement."
+          },
+          {
+            "name": "protein_unit",
+            "description": "Unit of measure for protein_value; uniformly mg/dL for this analyte."
+          },
+          {
+            "name": "protein_observed_at",
+            "description": "Calendar timestamp of the most recent CSF total protein (UTC), from DiagnosticReport.effective_date_time - a genuine clinical date. Identified counterpart to age_at_protein_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_protein_days",
+            "description": "Patient age in days at the most recent CSF total protein. De-identified counterpart to protein_observed_at. NULL precisely when the component is absent, so a NULL age means the test was not done rather than the age being unknown. Comparing this against another component's age reveals whether the two came from the same puncture without exposing either date."
+          },
+          {
+            "name": "protein_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the CSF total protein, retained verbatim for provenance and to audit which code the analyte was matched on."
+          },
+          {
+            "name": "glucose_display",
+            "description": "Most recent CSF glucose pre-composed as comparator + value + unit, e.g. '<10 mg/dL'. READ THIS RATHER THAN glucose_value: the comparator is load-bearing and a '<' result is below the assay limit, not a measurement. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "glucose_value",
+            "description": "Numeric CSF glucose WITHOUT its comparator. Do not read in isolation - see glucose_display."
+          },
+          {
+            "name": "glucose_comparator",
+            "description": "Comparator attached to glucose_value, typically '<' or '>' when the result is outside the assay's reportable range; NULL for an absolute measurement."
+          },
+          {
+            "name": "glucose_unit",
+            "description": "Unit of measure for glucose_value; uniformly mg/dL for this analyte."
+          },
+          {
+            "name": "glucose_observed_at",
+            "description": "Calendar timestamp of the most recent CSF glucose (UTC), from DiagnosticReport.effective_date_time - a genuine clinical date. Identified counterpart to age_at_glucose_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_glucose_days",
+            "description": "Patient age in days at the most recent CSF glucose. De-identified counterpart to glucose_observed_at. NULL precisely when the component is absent, so a NULL age means the test was not done rather than the age being unknown. Comparing this against another component's age reveals whether the two came from the same puncture without exposing either date."
+          },
+          {
+            "name": "glucose_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the CSF glucose, retained verbatim for provenance and to audit which code the analyte was matched on."
+          },
+          {
+            "name": "wbc_display",
+            "description": "Most recent CSF nucleated cell (white cell) count pre-composed as value + unit. Cell counts arrive under six unit spellings ('/uL', '/ul', '/mm3', 'CUMM', 'x10E6/L' and the micro-sign form) which are all numerically EQUIVALENT - verified against the data, not assumed - so values can be compared directly across them. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "wbc_value",
+            "description": "Numeric CSF nucleated cell (white cell) count. Differential denominators ('CSF number of cells counted', etc., 676 of ~690 values exactly 100) are deliberately EXCLUDED - they count cells inspected, not concentration."
+          },
+          {
+            "name": "wbc_unit",
+            "description": "Unit of measure for wbc_value. Six equivalent spellings occur; the value is comparable across all of them without conversion."
+          },
+          {
+            "name": "wbc_observed_at",
+            "description": "Calendar timestamp of the most recent CSF nucleated cell (white cell) count (UTC). Identified counterpart to age_at_wbc_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_wbc_days",
+            "description": "Patient age in days at the most recent CSF nucleated cell (white cell) count. De-identified counterpart to wbc_observed_at; NULL precisely when the component is absent."
+          },
+          {
+            "name": "wbc_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the CSF nucleated cell (white cell) count, retained verbatim for provenance."
+          },
+          {
+            "name": "rbc_display",
+            "description": "Most recent CSF red cell count pre-composed as value + unit. Cell counts arrive under six unit spellings ('/uL', '/ul', '/mm3', 'CUMM', 'x10E6/L' and the micro-sign form) which are all numerically EQUIVALENT - verified against the data, not assumed - so values can be compared directly across them. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "rbc_value",
+            "description": "Numeric CSF red cell count. Differential denominators ('CSF number of cells counted', etc., 676 of ~690 values exactly 100) are deliberately EXCLUDED - they count cells inspected, not concentration."
+          },
+          {
+            "name": "rbc_unit",
+            "description": "Unit of measure for rbc_value. Six equivalent spellings occur; the value is comparable across all of them without conversion."
+          },
+          {
+            "name": "rbc_observed_at",
+            "description": "Calendar timestamp of the most recent CSF red cell count (UTC). Identified counterpart to age_at_rbc_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_rbc_days",
+            "description": "Patient age in days at the most recent CSF red cell count. De-identified counterpart to rbc_observed_at; NULL precisely when the component is absent."
+          },
+          {
+            "name": "rbc_source_code_text",
+            "description": "Local result name as recorded by the contributing system for the CSF red cell count, retained verbatim for provenance."
+          },
+          {
+            "name": "cytology_evidence_tier",
+            "description": "How this specific cytology result was attributed to CSF: 'named' (report name states CSF), 'text_confirmed' (the result text states CSF and no competing source), or 'same_day_only' (no source stated, but CSF was drawn that day - weakest). Necessary because no specimen-to-report link exists."
+          },
+          {
+            "name": "cytology_test_name",
+            "description": "Local order name of the most recent CSF cytology as recorded by the contributing system, retained verbatim for provenance."
+          },
+          {
+            "name": "malignant_cells",
+            "description": "DERIVED finding classified from the cytology narrative: positive, suspicious, negative, non_diagnostic, no_malignancy_statement, or NULL where no narrative exists. Deliberately visible to all callers as the de-identified stand-in for the gated free text - a clinical finding, not an identifier. A deterministic keyword classifier with three negation passes, so treat it as a screening aid and confirm against cytology_final_diagnosis for case-by-case use."
+          },
+          {
+            "name": "multi_specimen_report",
+            "description": "1 when the underlying report covered more than one specimen, so the malignant_cells finding may pertain to a non-CSF part and needs confirmation. Read alongside malignant_cells; suppressing this flag while showing the label would present a reviewable inference as settled fact."
+          },
+          {
+            "name": "cytology_final_diagnosis",
+            "description": "The pathologist's Final Diagnosis / Impression for the most recent CSF cytology, verbatim. FREE CLINICAL TEXT CONTAINING PHI: the specimen label quoted in these reports includes the patient name and medical record number. Gated behind PHI access and masked whole - there is no partial or redacted form. Non-PHI callers get malignant_cells instead."
+          },
+          {
+            "name": "cytology_result_text",
+            "description": "All diagnostic narrative sections of the most recent CSF cytology report stitched together, verbatim. FREE CLINICAL TEXT CONTAINING PHI - patient name, medical record number and provider names appear. Gated behind PHI access and masked whole. Up to 10,805 characters; assembled once when the base table was materialised under a raised group_concat_max_len, since the 1024-byte default truncates silently."
+          },
+          {
+            "name": "cytology_observed_at",
+            "description": "Calendar timestamp of the most recent CSF cytology (UTC). Identified counterpart to age_at_cytology_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_cytology_days",
+            "description": "Patient age in days at the most recent CSF cytology. De-identified counterpart to cytology_observed_at; NULL precisely when no cytology exists."
+          },
+          {
+            "name": "afp_display",
+            "description": "Most recent CSF alpha-fetoprotein (AFP) pre-composed as comparator + value + unit, e.g. '<1.0 ng/mL'. READ THIS RATHER THAN afp_value: the comparator is on the MAJORITY of these results and '<' means UNDETECTABLE, not a concentration at the limit. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "afp_value",
+            "description": "Numeric CSF alpha-fetoprotein (AFP) WITHOUT its comparator. Reading it alone reports an undetectable marker as a real concentration - see afp_display."
+          },
+          {
+            "name": "afp_comparator",
+            "description": "Comparator attached to afp_value, '<' for an undetectable marker; NULL when the value is a genuine measurement, which is the case for the clinically elevated results."
+          },
+          {
+            "name": "afp_unit",
+            "description": "Unit of measure for afp_value. Not normalised - AFP appears as both 'ng/mL' and 'NG/ML'."
+          },
+          {
+            "name": "afp_observed_at",
+            "description": "Calendar timestamp of the most recent CSF alpha-fetoprotein (AFP) (UTC). Identified counterpart to age_at_afp_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_afp_days",
+            "description": "Patient age in days at the most recent CSF alpha-fetoprotein (AFP). De-identified counterpart to afp_observed_at; NULL precisely when the marker was never measured."
+          },
+          {
+            "name": "hcg_display",
+            "description": "Most recent CSF beta-hCG pre-composed as comparator + value + unit, e.g. '<1.0 ng/mL'. READ THIS RATHER THAN hcg_value: the comparator is on the MAJORITY of these results and '<' means UNDETECTABLE, not a concentration at the limit. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "hcg_value",
+            "description": "Numeric CSF beta-hCG WITHOUT its comparator. Reading it alone reports an undetectable marker as a real concentration - see hcg_display."
+          },
+          {
+            "name": "hcg_comparator",
+            "description": "Comparator attached to hcg_value, '<' for an undetectable marker; NULL when the value is a genuine measurement, which is the case for the clinically elevated results."
+          },
+          {
+            "name": "hcg_unit",
+            "description": "Unit of measure for hcg_value. Not normalised - AFP appears as both 'ng/mL' and 'NG/ML'."
+          },
+          {
+            "name": "hcg_observed_at",
+            "description": "Calendar timestamp of the most recent CSF beta-hCG (UTC). Identified counterpart to age_at_hcg_days. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "age_at_hcg_days",
+            "description": "Patient age in days at the most recent CSF beta-hCG. De-identified counterpart to hcg_observed_at; NULL precisely when the marker was never measured."
+          },
+          {
+            "name": "cea_display",
+            "description": "Most recent CSF carcinoembryonic antigen pre-composed as comparator + value + unit. Very rare in this cohort. Each component is resolved to ITS OWN most recent result, so this may come from a different lumbar puncture than the other components - compare the paired dates or ages before treating two components as contemporaneous."
+          },
+          {
+            "name": "cea_observed_at",
+            "description": "Calendar timestamp of the most recent CSF CEA (UTC). Identified counterpart to age_at_cea_days."
+          },
+          {
+            "name": "age_at_cea_days",
+            "description": "Patient age in days at the most recent CSF CEA. De-identified counterpart to cea_observed_at."
+          },
+          {
+            "name": "cell_free_dna_observed_at",
+            "description": "Calendar timestamp of the most recent CSF cell-free DNA order (UTC). A send-out assay, so no scalar result is returned here - the date evidences that it was done. Identified counterpart to age_at_cell_free_dna_days."
+          },
+          {
+            "name": "age_at_cell_free_dna_days",
+            "description": "Patient age in days at the most recent CSF cell-free DNA. De-identified counterpart to cell_free_dna_observed_at."
+          },
+          {
+            "name": "malignant_cell_panel_observed_at",
+            "description": "Calendar timestamp of the most recent CSF acute-leukaemia panel (UTC), a flow-cytometry assay for malignant cells. Identified counterpart to age_at_malignant_cell_panel_days."
+          },
+          {
+            "name": "age_at_malignant_cell_panel_days",
+            "description": "Patient age in days at the most recent CSF acute-leukaemia panel. De-identified counterpart to malignant_cell_panel_observed_at."
+          },
+          {
+            "name": "pathology_review_text",
+            "description": "Narrative from the most recent pathologist or MD review of the CSF differential, verbatim. FREE CLINICAL TEXT CONTAINING PHI. Gated behind PHI access and masked whole."
+          },
+          {
+            "name": "pathology_review_observed_at",
+            "description": "Calendar timestamp of the most recent pathologist review of the CSF differential (UTC). Identified counterpart to age_at_pathology_review_days."
+          },
+          {
+            "name": "age_at_pathology_review_days",
+            "description": "Patient age in days at the most recent pathologist review of the CSF differential. De-identified counterpart to pathology_review_observed_at."
+          },
+          {
+            "name": "components_present",
+            "description": "Count of the eleven CSF components that resolved for this patient (1-11). A completeness indicator, not clinical content."
+          },
+          {
+            "name": "csf_reports_total",
+            "description": "Total distinct CSF reports contributing to this row across all components."
+          },
+          {
+            "name": "first_csf_result_at",
+            "description": "Calendar timestamp of the patient's EARLIEST CSF result of any component (UTC). Identified counterpart to age_at_first_csf_result_days."
+          },
+          {
+            "name": "age_at_first_csf_result_days",
+            "description": "Patient age in days at the earliest CSF result of any component. With age_at_last_csf_result_days it gives the span of CSF surveillance without exposing either date."
+          },
+          {
+            "name": "last_csf_result_at",
+            "description": "Calendar timestamp of the patient's LATEST CSF result of any component (UTC). Identified counterpart to age_at_last_csf_result_days."
+          },
+          {
+            "name": "age_at_last_csf_result_days",
+            "description": "Patient age in days at the latest CSF result of any component. De-identified counterpart to last_csf_result_at."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "csf_tumor_analysis_latest": {
+        "description": "Latest cerebrospinal fluid (CSF) tumor cytology analysis per patient.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data, from stg_cbtn_enrollment_final."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, from pcx_30_organization_ref. This is the vocabulary auth.pii_grant keys on; NULL for 6 of 814 patients, who consequently fail closed to de-identified with their free text hidden. 190 patients resolve to SCH, the org currently granted for tenant cbtn, so this view does release identified values and clinical text to the current grant holder."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. NULL when the patient has no portal record, which is the common case: the portal currently holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "patient_best_evidence",
+            "description": "Strongest evidence anywhere for this patient that the analysis was on CSF: 'named' (a report name states CSF), 'text_confirmed' (the result text states CSF and no competing source), or 'same_day_only' (no source stated; CSF drawn the same day). Filter to 'named' for the strictly defensible subset. No specimen-to-report link exists in the source data, which is why this tiering is necessary."
+          },
+          {
+            "name": "evidence_tier",
+            "description": "Evidence tier of THE RETURNED (most recent) analysis specifically, same vocabulary as patient_best_evidence. Can be weaker than patient_best_evidence: a patient's best-evidenced analysis is not necessarily their latest."
+          },
+          {
+            "name": "latest_test_family",
+            "description": "Which tumour-relevant CSF assay the most recent analysis was: cytology, tumor_marker_afp, tumor_marker_hcg, tumor_marker_cea, cell_free_dna, malignant_cell_panel, or pathology_review."
+          },
+          {
+            "name": "latest_test_name",
+            "description": "Local order name of the most recent analysis as recorded by the contributing system, retained verbatim for provenance."
+          },
+          {
+            "name": "latest_analyzed_at",
+            "description": "Calendar timestamp of the most recent CSF analysis, from DiagnosticReport.effective_date_time (UTC). Identified counterpart to age_at_latest_analysis_days. A genuine clinical date, 100% populated for these reports."
+          },
+          {
+            "name": "age_at_latest_analysis_days",
+            "description": "Patient age in days at the most recent CSF analysis, derived from date of birth. De-identified counterpart to latest_analyzed_at. Exact to the day and reaching ~59 years, so not automatically anonymous when combined with a known diagnosis. Populated for all 814 rows."
+          },
+          {
+            "name": "malignant_cells",
+            "description": "DERIVED finding classified from the pathology narrative: positive, suspicious, negative, non_diagnostic, no_malignancy_statement, or NULL where the analysis carries no narrative (mostly quantitative markers). Deliberately visible to all callers as the de-identified stand-in for the gated free text - it is a clinical finding, not an identifier. A deterministic keyword classifier with negation handling, so treat it as a screening aid and confirm against final_diagnosis for case-by-case use."
+          },
+          {
+            "name": "multi_specimen_report",
+            "description": "1 when the underlying report covered more than one specimen, so the malignant_cells finding may pertain to a non-CSF part and needs confirmation. Read alongside malignant_cells; suppressing this flag while showing the label would present a reviewable inference as settled fact."
+          },
+          {
+            "name": "result_display",
+            "description": "Quantitative result pre-composed as comparator + value + unit, e.g. '<1.0 ng/mL'. READ THIS RATHER THAN result_value: the comparator is load-bearing, and most tumour-marker results are '<' i.e. UNDETECTABLE. Dropping it would report an undetectable marker as a real concentration."
+          },
+          {
+            "name": "result_value",
+            "description": "Numeric quantitative result WITHOUT its comparator. Do not read in isolation - see result_display. Units are not normalised."
+          },
+          {
+            "name": "result_comparator",
+            "description": "Comparator attached to result_value, typically '<' for an undetectable marker, NULL when the value is an absolute measurement."
+          },
+          {
+            "name": "result_unit",
+            "description": "Unit of measure for result_value (ng/mL for AFP, IU/L for beta-hCG). NOT normalised - both 'ng/mL' and 'NG/ML' occur."
+          },
+          {
+            "name": "final_diagnosis",
+            "description": "The pathologist's Final Diagnosis / Impression section, verbatim. FREE CLINICAL TEXT CONTAINING PHI: the specimen label quoted in these reports includes the patient name and medical record number. Gated behind PHI access in the tenant view and masked whole - there is no partial or redacted form. Non-PHI callers get malignant_cells instead."
+          },
+          {
+            "name": "result_text",
+            "description": "All diagnostic narrative sections of the report stitched together (Final Diagnosis, Impression, Microscopic Description, Gross Description, Clinical Information and others), verbatim. FREE CLINICAL TEXT CONTAINING PHI - patient name, medical record number and provider names appear. Gated behind PHI access and masked whole. Up to 10,805 characters; assembled once when the base table was materialised under a raised group_concat_max_len, since the 1024-byte default truncates silently."
+          },
+          {
+            "name": "result_sections",
+            "description": "Count of narrative sections that carried text for the most recent analysis. A structural count, not clinical content."
+          },
+          {
+            "name": "csf_analyses_total",
+            "description": "Total tumour-relevant CSF analyses recorded for this patient across all evidence tiers, not just the most recent one."
+          },
+          {
+            "name": "first_analyzed_at",
+            "description": "Calendar timestamp of the patient's EARLIEST tumour-relevant CSF analysis. Identified counterpart to age_at_first_analysis_days."
+          },
+          {
+            "name": "age_at_first_analysis_days",
+            "description": "Patient age in days at the earliest tumour-relevant CSF analysis. De-identified counterpart to first_analyzed_at. With age_at_latest_analysis_days it gives the span of CSF surveillance without exposing either date."
+          },
+          {
+            "name": "distinct_families",
+            "description": "Count of distinct tumour-relevant assay families recorded for this patient (1-7)."
+          },
+          {
+            "name": "families_ever",
+            "description": "Comma-separated list of every tumour-relevant CSF assay family recorded for this patient, so a caller can see that e.g. both AFP and beta-hCG were done without reading per-analysis rows."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      },
+      "lansky_karnofsky_latest": {
+        "description": "Latest Lansky or Karnofsky performance status score per patient.",
+        "fields": [
+          {
+            "name": "organization_name",
+            "description": "Name of the institution that contributed the patient's data, from stg_cbtn_enrollment_final."
+          },
+          {
+            "name": "organization_code",
+            "description": "Short code for the contributing institution, from pcx_30_organization_ref. This is the vocabulary auth.pii_grant keys on; NULL for 14 of 1,627 patients, who consequently fail closed to de-identified. No patient in this view resolves to SCH, the only org currently granted for tenant cbtn, so every current grant holder sees a fully de-identified result."
+          },
+          {
+            "name": "patient_id",
+            "description": "Patient identifier: the medical record number (MRN) when you may read this patient's PHI, otherwise the research id. Same value in every entity, so it links them."
+          },
+          {
+            "name": "patient_id_type",
+            "description": "Which identifier patient_id holds: mrn or research_id."
+          },
+          {
+            "name": "radiant_patient_id",
+            "description": "Portal surrogate patient key (radiant_jdbc.public.patient.id), joined on organization_code plus MRN with leading zeros stripped from both sides because the portal zero-pads to a fixed width and pcx_30 does not. Currently NULL on every row: this view's patient set has no overlap with the portal's, which holds cbtn patients for SCH only. Deliberately projected to every caller rather than gated behind can_read_phi, unlike patient_fhir_id in the other views -- it is treated as a non-identifying surrogate. Note it does resolve to a portal record carrying name, date of birth and MRN, so it is a re-linking key for anyone who can also reach that table."
+          },
+          {
+            "name": "scale",
+            "description": "Which performance-status instrument produced the score: 'lansky' (pediatric) or 'karnofsky' (adult). One row per patient, carrying whichever scale was recorded most recently, so a patient who transitioned between instruments appears under the later one only."
+          },
+          {
+            "name": "score",
+            "description": "Performance-status score, 10-100 where higher is better function. Parsed from the leading number of the source free-text answer; observed values land on 10-100 in steps of ten. Lansky and Karnofsky are NOT interchangeable scales - read with the scale column."
+          },
+          {
+            "name": "scored_at",
+            "description": "Calendar timestamp of the score, from Observation.issued, in UTC. Identified counterpart to age_at_score_days. This is a result-release time, not the assessment time: both FHIR clinical date columns are unpopulated for these two scales. NULL for 104 of 1,627 patients for whom no date exists upstream at all."
+          },
+          {
+            "name": "age_at_score_days",
+            "description": "Patient age in days at the score, derived from date of birth. De-identified counterpart to scored_at. Exact to the day and reaching ~35 years, so not automatically anonymous when combined with a known diagnosis. NULL for the 104 patients with no scored_at - unlike the other views here, the age is not an always-present substitute for the gated timestamp, so those rows cannot be placed in time by any means."
+          },
+          {
+            "name": "score_text",
+            "description": "Source free-text answer the score was parsed from, e.g. '90 - Minor restrictions in strenuous activity', retained verbatim so the parse is auditable. Describes function only and carries no patient identifier."
+          },
+          {
+            "name": "scale_code",
+            "description": "Coded identity of the instrument as recorded by the source system: EPIC#1501 (Lansky) or MEDCIN#124024 (Karnofsky). Used to select these observations in preference to the verbose local code_text."
+          },
+          {
+            "name": "source_code_text",
+            "description": "Local observation name as recorded by the contributing system, retained verbatim for provenance."
+          },
+          {
+            "name": "component_line",
+            "description": "Source flowsheet line label ('Line 1' to 'Line 4') the score was read from. Where one observation carries more than one scored line (75 of 42,380), the lowest line wins."
+          },
+          {
+            "name": "date_semantic",
+            "description": "How this row's date was obtained: 'administrative' (from Observation.issued, a release-time proxy) or 'undated' (no date exists upstream). Never 'clinical' in this view - no clinical-dated alternative exists for these two scales."
+          },
+          {
+            "name": "can_read_phi",
+            "description": "True when you may read this patient's PHI (MRN and calendar dates); dates are empty otherwise."
+          }
+        ],
+        "foreignKeys": [
+          {
+            "fields": [
+              "patient_id"
+            ],
+            "reference": {
+              "resource": "patient",
+              "fields": [
+                "patient_id"
+              ]
+            }
+          }
+        ]
+      }
+    }
   }
 }
