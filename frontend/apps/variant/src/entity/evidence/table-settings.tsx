@@ -1,10 +1,10 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import { type ClinvarRCV, type GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -20,7 +20,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
   return [
     pathogenicEvidenceColumnHelper.accessor(row => row.date_last_evaluated, {
       id: 'date_last_evaluated',
-      cell: info => <DateCell date={info.getValue()} />,
+      cell: info => <DateCell date={info.getValue()} asDate />,
       header: () => (
         <TooltipHeader tooltip={t('variant_entity.evidence.clin_var.table.headers.evaluated.tooltip')}>
           {t('variant_entity.evidence.clin_var.table.headers.evaluated')}
