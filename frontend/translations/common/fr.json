@@ -11,6 +11,9 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "date_picker": {
+      "open_calendar": "Ouvrir le calendrier"
+    },
     "message_scroller": {
       "scroll_to_end": "Défiler vers la fin",
       "scroll_to_start": "Défiler vers le début"
@@ -336,7 +339,11 @@
       "month_day_hour": "d MMMM, HH'h'mm",
       "year_month_day": "yyyy-MM-dd",
       "year_month_day_hour": "d MMMM yyyy, HH'h'mm'",
-      "year_month_day_at_hour": "{{date}} à {{time}}"
+      "year_month_day_at_hour": "{{date}} à {{time}}",
+      "month_day_year": "dd MMM yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Choisir une date"
     },
     "empty_section": "Aucune donnée {{title}} signalée",
     "unspecified": "Indéterminée",
