@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -46,3 +47,25 @@ func (r *PcxPatientsRepository) SearchPatients(ctx context.Context, query types.
 	}
 	return patients, count, nil
 }
+
+// AutocompletePatients suggests identifiers and, where the caller can read PHI, full names that start with prefix
+// (case-insensitive). The prefix is matched literally: % and _ are escaped.
+func (r *PcxPatientsRepository) AutocompletePatients(ctx context.Context, prefix string, limit int) ([]types.AutocompleteResult, error) {
+	db := r.db.WithContext(ctx)
+	view := types.PcxPatientListTable.TenantQualifiedName(ctx)
+	pattern := likeEscaper.Replace(strings.ToLower(prefix)) + "%"
+
+	ids := db.Table(view).Select("'patient_id' AS type, patient_id AS value").
+		Where("lower(patient_id) LIKE ?", pattern)
+	names := db.Table(view).Select("'patient_name' AS type, concat(given_name, ' ', family_name) AS value").
+		Where("can_read_phi AND lower(concat(given_name, ' ', family_name)) LIKE ?", pattern)
+
+	results := []types.AutocompleteResult{}
+	tx := db.Table("(? UNION ?) suggestions", ids, names).Order("value asc, type asc").Limit(limit)
+	if err := tx.Find(&results).Error; err != nil {
+		return nil, fmt.Errorf("error autocompleting patients: %w", err)
+	}
+	return results, nil
+}
+
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
