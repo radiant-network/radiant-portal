@@ -1,0 +1,20 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_patient_key  (VIEW, one row per PCX patient: the key of its URL)
+
+   Built on the secured demographics view: the caller gets the key under the identifier they can see (MRN with PHI
+   access, research id without), and the view adds no PHI rule of its own. The source join only maps that identifier
+   back to the MRN the key is stored under; the view returns neither the MRN nor the research id beyond what the
+   secured view already shows.
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_patient_key AS
+SELECT d.organization_code,
+       d.patient_id_type,
+       d.patient_id,
+       k.patient_key
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+JOIN radiant_data_dev.v_pcx_30_demographics_combined src
+  ON src.organization_code = d.organization_code
+ AND d.patient_id = CASE d.patient_id_type WHEN 'mrn' THEN src.mrn ELSE src.research_id END
+JOIN radiant_data_dev.pcx_30_patient_key k
+  ON k.organization_code = src.organization_code
+ AND k.mrn = src.mrn

@@ -24,7 +24,8 @@ views/*.sql.tmpl                                     out/starrocks_views.sql
 | `genomics.py` | Portal patients (`data_type_cohort = 'radiant'`), one somatic tumor-normal case and one germline case each, variants and occurrences driven by the diagnosis, CNVs, Exomiser, interpretations, notes and flags. |
 | `build_seed.py` | Assembles the three SQL files. |
 | `sql/starrocks_schema.sql` | StarRocks DDL: `{shared}` = `radiant` (`SHARED_DATABASE`), `{tenant}` = `cbtn_tenant` (the `PerTenant` tables). |
-| `views/` | Radiant's own views over the secured views (`v_pcx_30_patient_list`). |
+| `views/` | Radiant's own views over the secured views: `v_pcx_30_patient_key` (the URL key, as the caller sees the patient) and `v_pcx_30_patient_list`. |
+| `sql/pcx_30_patient_key.sql` | The URL key table of the source database, in PRD's names, and how to fill it: the contract for the other team. After loading the source tables, the seed adds a `uuid4()` key for each patient without one (StarRocks' `uuid()` is a time and counter value, guessable); it never drops the table, so keys survive a re-run. |
 
 ```bash
 python3 fake_deid.py                                  # regenerate the fake CSVs

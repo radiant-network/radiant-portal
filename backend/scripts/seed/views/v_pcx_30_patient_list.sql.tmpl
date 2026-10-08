@@ -9,13 +9,17 @@
    and its radiant_patient_id (lab grant), both identical in every view of the same patient. An
    identifier missing from one view (patient_id NULL) simply leaves that view's columns NULL.
 
+   patient_key comes from v_pcx_30_patient_key, itself on the secured demographics view: the same key for every
+   caller, matched on the identifier this caller sees.
+
    Unknown ages (-1 sentinel) become NULL; survival_days needs both a vital-status age and a known
    initial-diagnosis age. vital_status and gender become the API codes (lowercase, "not reported" ->
    "not_reported"). The diagnosis and its source come from ONE initial event, the earliest with a known
    age: a -1 (unknown date) sorts last instead of winning the minimum.
  */
 CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_patient_list AS
-SELECT d.organization_code,
+SELECT pk.patient_key,
+       d.organization_code,
        d.organization_name,
        d.patient_id,
        d.patient_id_type,
@@ -37,6 +41,10 @@ SELECT d.organization_code,
        COALESCE(c.case_count, 0) AS case_count,
        d.can_read_phi
 FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_key pk
+  ON pk.organization_code = d.organization_code
+ AND pk.patient_id_type = d.patient_id_type
+ AND pk.patient_id = d.patient_id
 LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_level_combined pl
   ON pl.organization_code = d.organization_code
  AND pl.patient_id_type = d.patient_id_type

@@ -8,6 +8,7 @@ keeps passing when the real CSVs replace the fake ones:
   PCX views    patient_id is the MRN exactly where the user can read PHI (organization grant, or diagnosis-lab grant
                for patients with a portal case), calendar dates are NULL elsewhere
   portal       Ranger masks the patient's identifiers for a user without PHI access (API case page)
+  patient_key  every patient of the list view has one key, unique, and the same keys for every user
 Needs docker on the host and the stack started with STARROCKS_PROXY_READ_ENABLED on (the default).
 """
 import base64, json, os, subprocess, sys, urllib.parse, urllib.request
@@ -47,6 +48,7 @@ def api(jwt, path, body=None):
 
 
 failures = []
+keys_by_user = {}
 for user, scope in EXPECTED.items():
     jwt = token(user)
     # Filtering on radiant_patient_id breaks on StarRocks 4.0.16 (upstream views), so count it instead of filtering.
@@ -63,13 +65,20 @@ for user, scope in EXPECTED.items():
         ok = ok and dated == (n if id_type == "mrn" else 0)
         if not ok:
             failures.append(f"{user}: {org} {id_type} rows={n} portal={portal} dated={dated}")
+    keys = [k for (k,) in sql(jwt, "SELECT patient_key FROM cbtn_tenant.v_pcx_30_patient_list")]
+    if "NULL" in keys or len(set(keys)) != len(keys):
+        failures.append(f"{user}: {keys.count('NULL')} patients without a key, {len(keys) - len(set(keys))} duplicate keys")
+    keys_by_user[user] = set(keys)
     cases = api(jwt, "/cases/search", {"limit": 200})["list"]
     case = next(c for c in cases if c.get("ordering_organization_code") == "CHOP")
     member = api(jwt, f"/cases/{case['case_id']}")["members"][0]
     masked = member["submitter_patient_id"] == "***"
     if masked != (scope == set() or (isinstance(scope, set) and "CHOP" not in scope)):
         failures.append(f"{user}: CHOP case {case['case_id']} patient masked={masked}")
-    print(f"{user:15} pcx {', '.join(f'{o}:{t}' for o, t, *_ in sorted(rows))} | portal CHOP patient masked={masked}")
+    print(f"{user:15} pcx {', '.join(f'{o}:{t}' for o, t, *_ in sorted(rows))} | {len(keys)} keys | portal CHOP patient masked={masked}")
 
+first = next(iter(keys_by_user.values()))
+if any(keys != first for keys in keys_by_user.values()):
+    failures.append("patient_key differs between users: " + ", ".join(f"{u}={len(k)}" for u, k in keys_by_user.items()))
 print("\n" + ("PHI matrix OK" if not failures else "FAILED\n  " + "\n  ".join(failures)))
 sys.exit(1 if failures else 0)

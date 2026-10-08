@@ -8,9 +8,9 @@ Writes, in load order:
                       `cbtn_pcx_source` PCX source tables (`radiant_data_dev` in PRD)
   starrocks_views.sql the secured PCX views and the patient list view; needs the auth.* and cbtn_tenant.* views
                       the API creates at startup (VIEW_REFRESH_ON_STARTUP_ENABLED)
-Everything is derived from the CSVs and hashes of the research ids: the same input gives the same SQL.
+Everything is derived from the CSVs and hashes of the research ids: the same input gives the same SQL, except the\npatient URL keys (uuid4), which are only inserted for patients without one.
 """
-import argparse, datetime as dt, json, os, re, sys
+import argparse, datetime as dt, json, os, re, sys, uuid
 
 import genomics, pcx
 
@@ -338,6 +338,18 @@ for name, (cols, rows) in pcx_tables.items():
     S.append(f"CREATE TABLE {SOURCE_DB}.`{name}` (\n    {coldefs}\n)\nDUPLICATE KEY(`{cols[0][0]}`)\n"
              f"DISTRIBUTED BY HASH(`{cols[0][0]}`) BUCKETS 1\nPROPERTIES (\"replication_num\" = \"1\");")
     S.append(insert(f"{SOURCE_DB}.`{name}`", [f"`{c}`" for c, _ in cols], rows))
+# The URL keys (sql/pcx_30_patient_key.sql): the table is never dropped and only gets keys for patients without one,
+# so a re-run keeps every link. Keys are uuid4 (cryptographic): the one part of the output that differs between builds.
+key_ddl = open(os.path.join(HERE, "sql", "pcx_30_patient_key.sql"), encoding="utf-8").read()
+key_ddl = key_ddl[key_ddl.index("CREATE TABLE"):].replace(f"{TEMPLATE_SOURCE_DB}.", f"{SOURCE_DB}.").rstrip()
+key_table, candidates = f"{SOURCE_DB}.pcx_30_patient_key", f"{SOURCE_DB}.pcx_30_patient_key_candidate"
+S += [key_ddl, f"DROP TABLE IF EXISTS {candidates};", key_ddl.replace(key_table, candidates),
+      insert(candidates, ["organization_code", "mrn", "patient_key"],
+             [[p.org, p.mrn, str(uuid.uuid4())] for p in patients.values() if p.org and p.mrn]),
+      f"INSERT INTO {key_table} (organization_code, mrn, patient_key)\nSELECT c.organization_code, c.mrn, c.patient_key "
+      f"FROM {candidates} c\nLEFT JOIN {key_table} k ON k.organization_code = c.organization_code AND k.mrn = c.mrn\n"
+      f"WHERE k.patient_key IS NULL;",
+      f"DROP TABLE {candidates};"]
 
 # ---------------------------------------------------------------- StarRocks: views
 V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tables/access_controlled_views (owned by the
@@ -367,7 +379,8 @@ V.append(f"CREATE OR REPLACE VIEW {TENANT_DB}.v_pcx_30_data_dictionary AS\n"
          f"SELECT display_order, table_name, source_file, field_name, description FROM {SOURCE_DB}.v_pcx_30_data_dictionary;")
 for file in sorted(os.listdir(os.path.join(HERE, "views"))):
     if file.endswith(".sql.tmpl"):
-        sql = open(os.path.join(HERE, "views", file), encoding="utf-8").read().replace("{{.TenantCode}}", TENANT)
+        sql = (open(os.path.join(HERE, "views", file), encoding="utf-8").read().replace("{{.TenantCode}}", TENANT)
+               .replace(f"{TEMPLATE_SOURCE_DB}.", f"{SOURCE_DB}."))
         V.append(sql[sql.index("CREATE OR REPLACE VIEW"):].rstrip().rstrip(";") + ";")
 
 # Provisioning through the real tools, as in QA: roles and Ranger policies (create-tenant, refresh-tenants), then each
