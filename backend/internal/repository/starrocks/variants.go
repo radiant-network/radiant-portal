@@ -489,7 +489,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 				JOIN %s seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs' AND analysis_type = 'germline'
 				LEFT JOIN %s se ON se.id = chse.sequencing_experiment_id
 				LEFT JOIN %s spl ON spl.id = se.sample_id
-				LEFT JOIN %s g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt > 3
+				LEFT JOIN %s g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt >= 3
 			),
 			result AS (
 				SELECT
