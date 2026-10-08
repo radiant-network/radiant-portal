@@ -503,6 +503,51 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"polyphen2_hvar_pred": "D",
 		"polyphen2_hvar_score":0.991,
 		"germline_pn_wgs_affected":3, 
+		"germline_pc_wgs":3,
+		"germline_hom_wgs":2,
+		"germline_af_wgs":0.5,
+		"germline_hom_wgs_affected":3,
+		"germline_af_wgs_affected":1,
+		"germline_pc_wgs_not_affected":0,
+		"germline_pn_wgs_not_affected":0,
+		"germline_pf_wgs_not_affected":0,
+		"germline_hom_wgs_not_affected":0,
+		"germline_af_wgs_not_affected":0,
+		"germline_pc_wxs":4,
+		"germline_pn_wxs":10,
+		"germline_pf_wxs":0.4,
+		"germline_hom_wxs":2,
+		"germline_af_wxs":0.3,
+		"germline_pc_wxs_affected":3,
+		"germline_pn_wxs_affected":5,
+		"germline_pf_wxs_affected":0.6,
+		"germline_hom_wxs_affected":1,
+		"germline_af_wxs_affected":0.4,
+		"germline_pc_wxs_not_affected":1,
+		"germline_pn_wxs_not_affected":5,
+		"germline_pf_wxs_not_affected":0.2,
+		"germline_hom_wxs_not_affected":1,
+		"germline_af_wxs_not_affected":0.2,
+		"somatic_pn_tn_wgs":11,
+		"somatic_hom_tn_wgs":5,
+		"somatic_af_tn_wgs":0.5,
+		"somatic_pc_tn_wxs":2,
+		"somatic_pn_tn_wxs":8,
+		"somatic_pf_tn_wxs":0.25,
+		"somatic_hom_tn_wxs":0,
+		"somatic_af_tn_wxs":0.125,
+		"somatic_hom_to_wgs":4,
+		"somatic_af_to_wgs":0.25,
+		"somatic_pc_to_wxs":3,
+		"somatic_pn_to_wxs":12,
+		"somatic_pf_to_wxs":0.25,
+		"somatic_hom_to_wxs":3,
+		"somatic_af_to_wxs":0.25,
+		"somatic_pc_tn_wgs":6,
+		"somatic_pf_tn_wgs":0.55,
+		"somatic_pc_to_wgs":21,
+		"somatic_pn_to_wgs":50,
+		"somatic_pf_to_wgs":0.42,
 		"qd":0.1, 
 		"revel_score":0.1, 
 		"rsnumber":"rs111111111", 
@@ -594,5 +639,17 @@ func Test_SNVOccurrence_Statistics_Cmc_Sample_Ratio(t *testing.T) {
 			}
 		}`
 	expected := `{"min": 0.0003, "max": 0.0028, "type": "decimal"}`
+	testStatistics(t, "pagination", body, expected)
+}
+
+func Test_SNVOccurrence_Statistics_Germline_Af_Wgs_Affected(t *testing.T) {
+	body := `{
+			"field": "germline_af_wgs_affected",
+			"sqon": {
+				"op": "and",
+				"content": []
+			}
+		}`
+	expected := `{"min": 0.05, "max": 0.5, "type": "decimal"}`
 	testStatistics(t, "pagination", body, expected)
 }

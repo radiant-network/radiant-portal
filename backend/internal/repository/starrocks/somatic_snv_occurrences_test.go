@@ -266,6 +266,31 @@ func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, 21, *expandedOccurrence.SomaticPcToWgs)
 		assert.Equal(t, 50, *expandedOccurrence.SomaticPnToWgs)
 		assert.Equal(t, float64(0.42), *expandedOccurrence.SomaticPfToWgs)
+		assert.Equal(t, 11, *expandedOccurrence.SomaticPnTnWgs)
+		assert.Equal(t, 5, *expandedOccurrence.SomaticHomTnWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.SomaticAfTnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.SomaticPcTnWxs)
+		assert.Equal(t, 8, *expandedOccurrence.SomaticPnTnWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticPfTnWxs)
+		assert.Equal(t, 0, *expandedOccurrence.SomaticHomTnWxs)
+		assert.Equal(t, 0.125, *expandedOccurrence.SomaticAfTnWxs)
+		assert.Equal(t, 4, *expandedOccurrence.SomaticHomToWgs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWgs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticPcToWxs)
+		assert.Equal(t, 12, *expandedOccurrence.SomaticPnToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticPfToWxs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticHomToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWxs)
+		assert.Equal(t, float64(0.99), *expandedOccurrence.GermlinePfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgs)
+		assert.Nil(t, expandedOccurrence.GermlinePnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.GermlineAfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgsAffected)
+		assert.Equal(t, 1.0, *expandedOccurrence.GermlineAfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePnWgsNotAffected)
+		assert.Equal(t, 0.6, *expandedOccurrence.GermlinePfWxsAffected)
+		assert.Equal(t, 0.4, *expandedOccurrence.GermlineAfWxsAffected)
 		assert.Equal(t, float64(0.001), *expandedOccurrence.GnomadV3Af)
 		assert.Equal(t, float32(0.66), *expandedOccurrence.AdRatio)
 		assert.Equal(t, float32(31.5), *expandedOccurrence.Sq)
@@ -528,5 +553,55 @@ func Test_Somatic_SNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_H
 		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
 		require.NoError(t, err)
 		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 1}, {Bucket: "ONCO", Count: 2}}, aggregate)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("germline_af_wgs_affected", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.05, statistics.Min)
+		assert.EqualValues(t, 0.5, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Somatic_Hom_To_Wxs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("somatic_hom_to_wxs", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, statistics.Min)
+		assert.EqualValues(t, 6, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Filter_By_Somatic_Hom_To_Wxs_Returns_The_Selected_Field(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: ">", Content: &types.LeafContent{Field: "somatic_hom_to_wxs", Value: []interface{}{5}}}
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, []string{"somatic_hom_to_wxs"}, sqon, &types.Pagination{Limit: 50}, nil)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []string{"1006", "1013", "1020", "1027"}, somaticLocusIds(occurrences))
+		for _, o := range occurrences {
+			assert.Equal(t, 6, *o.SomaticHomToWxs)
+			assert.Nil(t, o.GermlineAfWgsAffected)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Germline_Af_Wgs_Affected_Asc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "germline_af_wgs_affected", Order: "asc"}}
+		occurrences := getSomaticCmcOccurrences(t, env, nil, &types.Pagination{Limit: 3}, sorted)
+		assert.ElementsMatch(t, []string{"1000", "1010", "1020"}, somaticLocusIds(occurrences))
 	})
 }

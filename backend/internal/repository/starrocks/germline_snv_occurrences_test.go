@@ -798,12 +798,32 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
 		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
 		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expandedOccurrence.ExomiserAcmgEvidence)
-		assert.Equal(t, 3, expandedOccurrence.GermlinePcWgsAffected)
-		assert.Equal(t, 3, expandedOccurrence.GermlinePnWgsAffected)
-		assert.Equal(t, float64(1.0), expandedOccurrence.GermlinePfWgsAffected)
-		assert.Equal(t, 0, expandedOccurrence.GermlinePcWgsNotAffected)
-		assert.Equal(t, 0, expandedOccurrence.GermlinePnWgsNotAffected)
-		assert.Equal(t, float64(0), expandedOccurrence.GermlinePfWgsNotAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgsAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePnWgsAffected)
+		assert.Equal(t, float64(1.0), *expandedOccurrence.GermlinePfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePcWgsNotAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePnWgsNotAffected)
+		assert.Equal(t, float64(0), *expandedOccurrence.GermlinePfWgsNotAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgs)
+		assert.Nil(t, expandedOccurrence.GermlinePnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.GermlineAfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlineHomWgsAffected)
+		assert.Equal(t, 1.0, *expandedOccurrence.GermlineAfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlineHomWgsNotAffected)
+		assert.Equal(t, 0.0, *expandedOccurrence.GermlineAfWgsNotAffected)
+		assert.Equal(t, 4, *expandedOccurrence.GermlinePcWxs)
+		assert.Equal(t, 10, *expandedOccurrence.GermlinePnWxs)
+		assert.Equal(t, 0.4, *expandedOccurrence.GermlinePfWxs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWxs)
+		assert.Equal(t, 0.3, *expandedOccurrence.GermlineAfWxs)
+		assert.Equal(t, 1, *expandedOccurrence.GermlineHomWxsNotAffected)
+		assert.Equal(t, 0.2, *expandedOccurrence.GermlineAfWxsNotAffected)
+		assert.Equal(t, 11, *expandedOccurrence.SomaticPnTnWgs)
+		assert.Equal(t, 5, *expandedOccurrence.SomaticHomTnWgs)
+		assert.Equal(t, 0.125, *expandedOccurrence.SomaticAfTnWxs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticHomToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWxs)
 		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
 		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
@@ -1278,5 +1298,50 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Cmc_Sample_Ratio(t *testing.T) {
 		assert.EqualValues(t, 0.0003, statistics.Min)
 		assert.EqualValues(t, 0.0028, statistics.Max)
 		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("germline_af_wgs_affected", nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.05, statistics.Min)
+		assert.EqualValues(t, 0.5, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Somatic_Hom_To_Wxs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("somatic_hom_to_wxs", nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, statistics.Min)
+		assert.EqualValues(t, 6, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Filter_By_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: ">=", Content: &types.LeafContent{Field: "germline_af_wgs_affected", Value: []interface{}{0.5}}}
+		occurrences := getGermlineCmcOccurrences(t, env, sqon, &types.Pagination{Limit: 50}, nil)
+		assert.ElementsMatch(t, []string{"1009", "1019"}, germlineLocusIds(occurrences))
+		for _, o := range occurrences {
+			assert.Equal(t, 0.5, *o.GermlineAfWgsAffected)
+		}
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Sort_By_Somatic_Hom_To_Wxs_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "somatic_hom_to_wxs", Order: "desc"}}
+		occurrences := getGermlineCmcOccurrences(t, env, nil, &types.Pagination{Limit: 4}, sorted)
+		assert.ElementsMatch(t, []string{"1006", "1013", "1020", "1027"}, germlineLocusIds(occurrences))
 	})
 }
