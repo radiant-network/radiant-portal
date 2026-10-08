@@ -95,6 +95,10 @@ type ExpandedSomaticSNVOccurrence struct {
 	Filter                             string                   `json:"filter,omitempty"`
 	InterpretationClassificationCounts JsonMap[string, int]     `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
 	EnsemblGeneId                      string                   `json:"ensembl_gene_id,omitempty"`
+	CmcSampleMutated                   *int                     `json:"cmc_sample_mutated,omitempty"`
+	CmcSampleRatio                     *float64                 `json:"cmc_sample_ratio,omitempty"`
+	CmcTier                            *string                  `json:"cmc_tier,omitempty"`
+	CmcMutationUrl                     *string                  `json:"cmc_mutation_url,omitempty"`
 }
 
 var SomaticSNVOccurrenceTable = Table{

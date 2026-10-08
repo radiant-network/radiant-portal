@@ -110,7 +110,21 @@ class Variant:
         self.consequence, self.impact, self.aa, self.hgvsc = consequence, impact, aa, hgvsc
         self.clinvar, self.af, self.rs, self.hotspot = clinvar, af, rs, hotspot
         self.transcript = GENES[symbol][4]
+        self.real = None
         self.germline_seqs, self.somatic_seqs = set(), set()
+
+    @classmethod
+    def from_export(cls, r):
+        """A real locus of the environment (read_loci): its id and annotation are kept as they are."""
+        v = cls.__new__(cls)
+        v.symbol, v.chrom, v.pos, v.ref, v.alt = r["symbol"], r["chr"], int(r["start"]), r["ref"], r["alt"]
+        v.locus_id = int(r["locus_id"])
+        v.consequence, v.impact, v.aa, v.hgvsc = r["consequence"], r["vep_impact"] or "MODIFIER", r["aa_change"], r["dna_change"]
+        v.clinvar, v.rs, v.hotspot = r["clinvar"], r["rsnumber"], False
+        v.af = float(r["af"]) if r["af"] else None
+        v.transcript, v.real = r["transcript_id"], r
+        v.germline_seqs, v.somatic_seqs = set(), set()
+        return v
 
     @property
     def locus(self):
@@ -136,15 +150,32 @@ def mutate(rng, symbol, consequence):
     return Variant(symbol, pos, ref, alt, consequence, impact, aa, f"c.{codon * 3 - 2 + rng.randrange(3)}{ref}>{alt}")
 
 
+def read_loci(path):
+    """The loci export of sql/qa_loci_export.sql: mysql -B output (tab-separated), or the result table of an interactive
+    mysql session copied into a file (| separated, +---+ borders). NULL is the string NULL in both."""
+    with open(path, encoding="utf-8") as f:
+        lines = [l.rstrip("\n") for l in f if l.strip() and not l.startswith("+")]
+    if any(l.startswith("|") for l in lines):
+        rows = [[c.strip() for c in l.strip().strip("|").split("|")] for l in lines if l.startswith("|")]
+    else:
+        rows = [l.split("\t") for l in lines]
+    header = rows[0]
+    return [dict(zip(header, (None if x == "NULL" else x for x in r))) for r in rows[1:] if r != header and len(r) == len(header)]
+
+
 def match(diagnosis, table):
     return [v for k, v in table if k.lower() in (diagnosis or "").lower()]
 
 
 class Genomics:
-    def __init__(self):
+    def __init__(self, loci=None):
         rng = random.Random(4242)
         self.variants = {}
         self.named = {}
+        self.pool = None
+        if loci:
+            self.use_real(rng, loci)
+            return
         for key, symbol, pos, ref, alt, csq, impact, aa, hgvsc, clinvar, af, rs, hotspot in NAMED:
             v = Variant(symbol, pos, ref, alt, csq, impact, aa, hgvsc, clinvar, af, rs, hotspot)
             self.named[key] = self.variants[v.locus_id] = v
@@ -157,23 +188,44 @@ class Genomics:
             self.common.append(self.variants.setdefault(v.locus_id, v))
         self.rng = rng
 
+    def use_real(self, rng, loci):
+        """Every variant is a real locus of the export, so the environment's own annotations apply to it."""
+        self.pool = sorted((Variant.from_export(r) for r in loci), key=lambda v: v.locus_id)
+        by_locus = {v.locus: v for v in self.pool}
+        for key, symbol, pos, ref, alt, csq, *_, hotspot in NAMED:
+            v = by_locus.get(f"{GENES[symbol][0]}-{pos}-{ref}-{alt}") or self.pick(rng, [symbol], [csq])
+            v.hotspot = hotspot
+            self.named[key] = self.variants.setdefault(v.locus_id, v)
+        frequent = sorted((v for v in self.pool if v.af and v.af >= 0.01), key=lambda v: -v.af)[:70]
+        rest = [v for v in self.pool if v not in frequent]
+        self.common = [self.variants.setdefault(v.locus_id, v) for v in frequent + rng.sample(rest, max(0, 70 - len(frequent)))]
+        self.rng = rng
+
+    def pick(self, rng, symbols, consequences):
+        in_genes = [v for v in self.pool if v.symbol in symbols]
+        return rng.choice([v for v in in_genes if v.consequence in consequences] or in_genes or self.pool)
+
     def rare(self, rng, symbols, consequences):
+        if self.pool:
+            v = self.pick(rng, symbols, consequences)
+            return self.variants.setdefault(v.locus_id, v)
         v = mutate(rng, rng.choice(symbols), rng.choice(consequences))
         v.af = rng.choice([None, None, round(rng.uniform(0.00001, 0.001), 6)])
         v.clinvar = rng.choice([None, None, "Uncertain significance"])
         return self.variants.setdefault(v.locus_id, v)
 
 
-def build(patients, pcx_data, orgs):
-    """patients: pcx.Patient by rid. Returns (postgres rows by table, starrocks rows by table, users)."""
-    g = Genomics()
+def build(patients, pcx_data, id_base=0, loci=None):
+    """patients: pcx.Patient by rid. Every integer id starts after id_base, so the tenant's rows cannot collide with an
+    environment that already holds data (QA). Returns (genomics, postgres rows by table, starrocks rows by table, ids)."""
+    g = Genomics(loci)
     pg = {t: [] for t in ["patient", "sample", "sequencing_experiment", "cases", "family", "case_has_sequencing_experiment", "task",
                           "task_context", "document", "task_has_document", "obs_categorical", "interpretation_germline",
                           "interpretation_somatic", "occurrence_flag", "occurrence_note"]}
     sr = {t: [] for t in ["germline__snv__occurrence", "somatic__snv__occurrence", "germline__cnv__occurrence", "somatic__cnv__occurrence",
                           "exomiser", "staging_sequencing_experiment"]}
     diagnosis = {r["research_id"]: r["cns_integrated_diagnosis"] for r in pcx_data["event_level"] if r["event_type"] == "Initial CNS Tumor"}
-    ids = {"patient": 0, "sample": 0, "seq": 0, "case": 0, "family": 0, "task": 0, "document": 0, "obs": 0, "cnv": 0}
+    ids = dict.fromkeys(["patient", "sample", "seq", "case", "family", "task", "document", "obs", "cnv"], id_base)
 
     def nid(kind):
         ids[kind] += 1
@@ -246,7 +298,7 @@ def build(patients, pcx_data, orgs):
         for ext, fmt, size in [("cram", "cram", 98_000_000_000 + h("cram", n_seq) % 9_000_000_000), ("cram.crai", "crai", 2_400_000)]:
             did = nid("document")
             pg["document"].append([did, f"{p.rid}-N.{ext}", "genomic", "alignment", fmt, size,
-                                   f"s3://cbtn-local-genomics/{p.rid}/{p.rid}-N.{ext}", hashlib.md5(f"{did}".encode()).hexdigest(), made])
+                                   f"s3://radiant-fake-genomics/{p.rid}/{p.rid}-N.{ext}", hashlib.md5(f"{did}".encode()).hexdigest(), made])
             pg["task_has_document"].append([g_align, did, "output"])
 
         # Phenotypes of the germline proband.
@@ -258,8 +310,9 @@ def build(patients, pcx_data, orgs):
         carried = rng.sample(g.common, 26)
         rare = [g.rare(rng, BACKGROUND, ["missense_variant", "synonymous_variant", "intron_variant"]) for _ in range(4)]
         predisposition = [g.named[key] for diag, key, prob in PREDISPOSITION if diag.lower() in dx.lower() and rng.random() < prob][:1]
-        for v in carried + rare + predisposition:
-            hom = v in carried and v.af > 0.3 and rng.random() < 0.3
+        # A small --loci pool can draw a locus twice; one occurrence per locus and sequencing.
+        for v in dict.fromkeys(carried + rare + predisposition):
+            hom = v in carried and (v.af or 0) > 0.3 and rng.random() < 0.3
             total = rng.randrange(28, 60)
             alt = total if hom else rng.randrange(int(total * 0.35), int(total * 0.6))
             exo = v in predisposition or (v in rare and rng.random() < 0.5)
@@ -313,7 +366,7 @@ def build(patients, pcx_data, orgs):
             drivers = [drivers[h("atrt", p.rid) % 2]]
         passengers = [g.rare(rng, BACKGROUND, ["missense_variant", "missense_variant", "synonymous_variant", "stop_gained"])
                       for _ in range(rng.randrange(8, 20))]
-        for v in drivers + passengers:
+        for v in dict.fromkeys(drivers + passengers):
             t_total, n_total = rng.randrange(60, 140), rng.randrange(30, 60)
             vaf = rng.uniform(0.3, 0.55) if v in drivers else rng.uniform(0.05, 0.35)
             t_alt = max(3, int(t_total * vaf))

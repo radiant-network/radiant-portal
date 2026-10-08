@@ -671,7 +671,8 @@ func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctI
 		// Locus 3000 is reached only by case 72: once via seq_exp 75 (fetus 1) and once via
 		// seq_exp 78 (the mother's own sequencing). Both share patient_id 63 but differ by
 		// sample.fetus_id, so they must count as 2. pn covers every sequenced individual in the
-		// project, hence baseline 5 plus these 2; only pc/hom are locus-specific.
+		// project, hence baseline 5 plus these 2; only pc/hom are locus-specific. The mother's call
+		// has ad_alt = 3, the lowest value that counts (RAD-57: it used to take ad_alt > 3).
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 3000, types.SPLIT_BY_PROJECT)
 		assert.NoError(t, err)
 		require.NotNil(t, splitRows)

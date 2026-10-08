@@ -106,6 +106,14 @@ The stack runs the multi-tenant layout, as QA does:
 - Reads go through `mysql-proxy` as the user (`STARROCKS_PROXY_READ_ENABLED`, on by default), so Ranger and PHI masking apply locally.
 - `scripts/seed/verify_phi.py` checks the PHI matrix per demo user.
 
+`scripts/seed/README.md` has the recipe to add a fake tenant to an environment that already holds data (QA's `cbtn` was seeded this way). `build_seed.py --env qa` leaves the shared `radiant` database alone, except staging rows for its own cases:
+- `--loci` takes the variants from an export of an existing tenant, so the environment's own annotations apply.
+- `--like-tenant` copies that tenant's tables, so they get the pipeline's layout.
+
+Things to know when changing the seed:
+- `sql/starrocks_schema.sql` is the local stack's DDL, kept in sync with `test/data/sql`. It differs slightly from the pipeline's (`radiant-portal-pipeline`, `radiant/dags/sql/radiant/init`), for example the pipeline's `phased` is `NOT NULL` and it has extra `snv__variant` columns. Every column the seed inserts must exist there.
+- The seed adds `[SHUFFLE]` to the JDBC patient join of the upstream PCX views when it renders them. StarRocks 4.0.16 fails with "slot_id not found" when it broadcasts that JDBC table against a `regexp_replace` join key; QA hits it.
+
 Keycloak realm `radiant` (`scripts/init-keycloak/radiant.json`) holds the demo users (`cbtn-admin`, `cbtn-phi-chop`, `cbtn-phi-sch`, `cbtn-lab`, `cbtn-nophi`; password = username).
 
 ## API Server

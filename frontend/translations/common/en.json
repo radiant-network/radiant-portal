@@ -11,6 +11,9 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "date_picker": {
+      "open_calendar": "Open calendar"
+    },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
@@ -336,7 +339,11 @@
       "month_day_hour": "MMMM d, h:mm a",
       "year_month_day": "yyyy-MM-dd",
       "year_month_day_hour": "MMMM d yyyy, h:mm a",
-      "year_month_day_at_hour": "{{date}} at {{time}}"
+      "year_month_day_at_hour": "{{date}} at {{time}}",
+      "month_day_year": "MMM dd, yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Pick a date"
     },
     "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
@@ -508,7 +515,9 @@
       "csv": "CSV File",
       "pdf": "PDF File",
       "txt": "Text File",
-      "gvcf": "GVCF File"
+      "gvcf": "GVCF File",
+      "zip": "ZIP Archive File",
+      "xlsx": "XLSX File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",
@@ -526,7 +535,12 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
-      "clinical_report": "Clinical Report"
+      "clinical_report": "Clinical Report",
+      "aggqc": "Aggregate Quality Control Report",
+      "chrmr": "Mitochondrial Report",
+      "nrrv": "Annotated Variant Report",
+      "snvpg": "Germline SNV (masked/filtered)",
+      "alirpg": "Aligned Reads (masked)"
     },
     "query_bar": {
       "selector": "Q{{index}}",

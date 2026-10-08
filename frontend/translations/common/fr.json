@@ -11,6 +11,9 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "date_picker": {
+      "open_calendar": "Ouvrir le calendrier"
+    },
     "message_scroller": {
       "scroll_to_end": "Défiler vers la fin",
       "scroll_to_start": "Défiler vers le début"
@@ -336,7 +339,11 @@
       "month_day_hour": "d MMMM, HH'h'mm",
       "year_month_day": "yyyy-MM-dd",
       "year_month_day_hour": "d MMMM yyyy, HH'h'mm'",
-      "year_month_day_at_hour": "{{date}} à {{time}}"
+      "year_month_day_at_hour": "{{date}} à {{time}}",
+      "month_day_year": "dd MMM yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Choisir une date"
     },
     "empty_section": "Aucune donnée {{title}} signalée",
     "unspecified": "Indéterminée",
@@ -508,7 +515,9 @@
       "csv": "Fichier CSV",
       "pdf": "Fichier PDF",
       "txt": "Fichier texte",
-      "gvcf": "Fichier GVCF"
+      "gvcf": "Fichier GVCF",
+      "zip": "Fichier archive ZIP",
+      "xlsx": "Fichier XLSX"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
@@ -526,7 +535,12 @@
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
       "exomiser": "Rapport Exomiser",
-      "clinical_report": "Rapport clinique"
+      "clinical_report": "Rapport clinique",
+      "aggqc": "Rapport de contrôle qualité agrégé",
+      "chrmr": "Rapport mitochondrial",
+      "nrrv": "Rapport de variants annotés",
+      "snvpg": "SNV constitutionnel (masqué/filtré)",
+      "alirpg": "Lectures alignées (masquées)"
     },
     "query_bar": {
       "selector": "Q{{index}}",

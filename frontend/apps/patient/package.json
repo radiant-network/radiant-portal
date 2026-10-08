@@ -26,7 +26,8 @@
     "axios": "^1.20.0",
     "components": "file:../../components",
     "lucide-react": "^1.18.0",
-    "swr": "^2.4.1"
+    "swr": "^2.4.1",
+    "udi-yac": "^0.5.0"
   },
   "devDependencies": {
     "@types/node": "^22",

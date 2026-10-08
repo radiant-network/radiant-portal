@@ -1519,6 +1519,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        cmc_mutation_url:
+          type: string
+        cmc_sample_mutated:
+          type: integer
+        cmc_sample_ratio:
+          type: number
+        cmc_tier:
+          type: string
         dann_score:
           type: number
         dna_change:
