@@ -1949,6 +1949,7 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
           "hotspot": "Hotspot",
           "no_data": "No classification data reported"
         },
@@ -1957,6 +1958,8 @@
           "affected": "Affected",
           "to": "Tumor-only",
           "tn": "Tumor-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
           "gnomad": "gnomAD"
         },
         "functional_scores": {

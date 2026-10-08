@@ -1953,6 +1953,7 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
           "hotspot": "Hotspot",
           "no_data": "Aucune donnée de classification rapportée"
         },
@@ -1961,6 +1962,8 @@
           "affected": "Affectés",
           "to": "Tumeur seule",
           "tn": "Tumeur-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
           "gnomad": "gnomAD"
         },
         "functional_scores": {

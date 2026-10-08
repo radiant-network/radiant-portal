@@ -1,10 +1,10 @@
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import CmcCell from '@/components/base/data-table/cells/cmc-cell';
-import CmcTierCell from '@/components/base/data-table/cells/cmc-tier-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -19,6 +19,7 @@ import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
+import { getFranklinSnvUrl } from '@/components/base/variant/utils';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -190,9 +191,11 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
     columnHelper.accessor(row => row, {
       id: 'cmc_tier',
       cell: info => (
-        <CmcTierCell
-          tier={info.getValue().cmc_tier}
-          locus={`${info.getValue().chromosome}-${info.getValue().start}-${info.getValue().reference}-${info.getValue().alternate}`}
+        <CmcTierBadge
+          value={info.getValue().cmc_tier}
+          href={getFranklinSnvUrl(
+            `${info.getValue().chromosome}-${info.getValue().start}-${info.getValue().reference}-${info.getValue().alternate}`,
+          )}
         />
       ),
       header: () => (
