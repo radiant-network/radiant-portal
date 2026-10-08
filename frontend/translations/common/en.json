@@ -11,6 +11,14 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "cmc": {
+      "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
+      "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "No data",
+      "open_franklin": "{{tier}}, open in Franklin (new tab)"
+    },
     "date_picker": {
       "open_calendar": "Open calendar"
     },

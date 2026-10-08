@@ -1,7 +1,6 @@
 import { Badge, type BadgeProps, badgeVariants } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-// dico.snv.cmc.tier
 const CmcTierColorMap: Record<string, BadgeProps['variant']> = {
   '1': 'red',
   '2': 'orange',
@@ -21,10 +20,25 @@ function CmcTierBadge({ value, href }: CmcTierBadgeProps) {
   const variant = CmcTierColorMap[key] ?? 'neutral';
   const label = t(`variant.cmc_tiers.${key}`);
 
-  if (!value || !href) return <Badge variant={variant}>{label}</Badge>;
+  if (!value) {
+    return (
+      <Badge variant={variant}>
+        <span aria-hidden="true">{label}</span>
+        <span className="sr-only">{t('a11y.cmc_tier_badge.no_data')}</span>
+      </Badge>
+    );
+  }
+
+  if (!href) return <Badge variant={variant}>{label}</Badge>;
 
   return (
-    <a href={href} target="_blank" rel="noreferrer" className={badgeVariants({ variant, clickable: true }).base()}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={t('a11y.cmc_tier_badge.open_franklin', { tier: label })}
+      className={badgeVariants({ variant, clickable: true }).base()}
+    >
       {label}
     </a>
   );

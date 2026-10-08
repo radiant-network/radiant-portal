@@ -446,7 +446,13 @@ export const PredictionCard = ({
         {cmc_sample_mutated ? (
           <span className="inline-flex gap-1 font-mono text-sm">
             {cmc_mutation_url ? (
-              <AnchorLink size="sm" href={cmc_mutation_url} target="_blank" mono>
+              <AnchorLink
+                size="sm"
+                href={cmc_mutation_url}
+                target="_blank"
+                mono
+                aria-label={t('a11y.cmc.open_cosmic', { count: cmc_sample_mutated })}
+              >
                 {cmc_sample_mutated}
               </AnchorLink>
             ) : (

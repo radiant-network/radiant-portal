@@ -11,6 +11,14 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "cmc": {
+      "open_cosmic_one": "{{count}} échantillon COSMIC, ouvrir dans COSMIC (nouvel onglet)",
+      "open_cosmic_other": "{{count}} échantillons COSMIC, ouvrir dans COSMIC (nouvel onglet)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "Aucune donnée",
+      "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
+    },
     "date_picker": {
       "open_calendar": "Ouvrir le calendrier"
     },
