@@ -1,14 +1,14 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// The PCX patient handlers only publish the API contract for now: they answer 501 and are not
-// registered yet. Each story replaces its handler body and registers the route.
+// The PCX patient handlers not implemented yet answer 501; each story replaces its handler body.
 
 func notImplemented(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, types.ApiError{Status: http.StatusNotImplemented, Message: "Not Implemented"})
@@ -31,8 +31,33 @@ func notImplemented(c *gin.Context) {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/search [post]
-func SearchPatientsHandler() gin.HandlerFunc {
-	return notImplemented
+func SearchPatientsHandler(repo pcxPatientsSearcher) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body types.ListBodyWithCriteria
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if body.Limit == 0 {
+			body.Limit = types.PcxPatientListDefaultLimit
+		}
+		pagination := types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromCriteria(types.PcxPatientsQueryConfig, body.AdditionalFields, body.SearchCriteria, pagination, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		patients, count, err := repo.SearchPatients(c.Request.Context(), query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, types.PatientsSearchResponse{List: patients, Count: count})
+	}
+}
+
+type pcxPatientsSearcher interface {
+	SearchPatients(ctx context.Context, query types.ListQuery) ([]types.PatientListItem, int64, error)
 }
 
 // PatientsAutocompleteHandler handles retrieving PCX patient suggestions by prefix
