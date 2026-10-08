@@ -11,6 +11,9 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "date_picker": {
+      "open_calendar": "Open calendar"
+    },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
@@ -336,7 +339,11 @@
       "month_day_hour": "MMMM d, h:mm a",
       "year_month_day": "yyyy-MM-dd",
       "year_month_day_hour": "MMMM d yyyy, h:mm a",
-      "year_month_day_at_hour": "{{date}} at {{time}}"
+      "year_month_day_at_hour": "{{date}} at {{time}}",
+      "month_day_year": "MMM dd, yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Pick a date"
     },
     "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
