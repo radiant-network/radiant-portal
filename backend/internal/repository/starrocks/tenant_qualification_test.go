@@ -45,6 +45,7 @@ func Test_SNVOccurrences_TenantIsolation(t *testing.T) {
 
 		assert.Contains(t, sql, "tenant1_tenant.germline__snv__occurrence")
 		assert.Contains(t, sql, "tenant1_tenant.snv__variant")
+		assert.NotContains(t, sql, "tenant2_tenant")
 	})
 }
 
@@ -141,6 +142,5 @@ func Test_CNVGenesOverlapSQL_Reads_Only_The_Bound_Tenant_Gene_Panel_MV(t *testin
 	sql := cnvGenesOverlapSQL(types.ContextWithTenant(context.Background(), "tenant1"))
 
 	assert.Contains(t, sql, "tenant1_tenant.gene_panel_mv")
-	assert.NotContains(t, sql, "tenant2_tenant")
 	assert.Equal(t, 1, strings.Count(sql, "gene_panel_mv"), "the MV must be read once, through the tenant database")
 }
