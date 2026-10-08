@@ -2,6 +2,7 @@ package starrocks
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -22,6 +23,15 @@ func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId in
 
 func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.TenantQualifiedName(utils.CtxOf(tx)), types.VariantTable.Alias, types.VariantTable.Alias, snvTable.Alias))
+}
+
+// SNVVariantFrequencyColumns returns the select list of the internal frequency columns of the variant table
+func SNVVariantFrequencyColumns() string {
+	columns := make([]string, len(types.SNVVariantFrequencyFields))
+	for i, field := range types.SNVVariantFrequencyFields {
+		columns[i] = fmt.Sprintf("%s.%s", field.Table.Alias, field.Name)
+	}
+	return strings.Join(columns, ", ")
 }
 
 func JoinSNVOccurrencesWithTopMedBravo(snvTable types.Table, tx *gorm.DB) *gorm.DB {

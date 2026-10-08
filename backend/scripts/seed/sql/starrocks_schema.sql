@@ -232,7 +232,27 @@ CREATE TABLE IF NOT EXISTS {tenant}.`snv__variant`(
                                              cmc_mutation_url VARCHAR(255),
                                              cmc_sample_mutated INT,
                                              cmc_sample_ratio DOUBLE,
-                                             cmc_tier VARCHAR(8)
+                                             cmc_tier VARCHAR(8),
+                                             germline_hom_wgs INT(11),
+                                             germline_af_wgs DOUBLE,
+                                             germline_hom_wgs_affected INT(11),
+                                             germline_af_wgs_affected DOUBLE,
+                                             germline_hom_wgs_not_affected INT(11),
+                                             germline_af_wgs_not_affected DOUBLE,
+                                             germline_hom_wxs INT(11),
+                                             germline_af_wxs DOUBLE,
+                                             germline_hom_wxs_affected INT(11),
+                                             germline_af_wxs_affected DOUBLE,
+                                             germline_hom_wxs_not_affected INT(11),
+                                             germline_af_wxs_not_affected DOUBLE,
+                                             somatic_hom_tn_wgs INT(11),
+                                             somatic_af_tn_wgs DOUBLE,
+                                             somatic_hom_tn_wxs INT(11),
+                                             somatic_af_tn_wxs DOUBLE,
+                                             somatic_hom_to_wgs INT(11),
+                                             somatic_af_to_wgs DOUBLE,
+                                             somatic_hom_to_wxs INT(11),
+                                             somatic_af_to_wxs DOUBLE
 ) PRIMARY KEY(locus_id);
 
 CREATE TABLE IF NOT EXISTS {shared}.`hpo_gene_panel`

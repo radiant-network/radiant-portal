@@ -16,6 +16,53 @@ type GermlineSNVOccurrence struct {
 	GermlinePfWgs              float64            `json:"germline_pf_wgs" validate:"required"`
 	GermlinePcWgs              int                `json:"germline_pc_wgs,omitempty"`
 	GermlinePnWgs              int                `json:"germline_pn_wgs,omitempty"`
+	GermlineHomWgs             *int               `json:"germline_hom_wgs,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWgs              *float64           `json:"germline_af_wgs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWgsAffected      *int               `json:"germline_pc_wgs_affected,omitempty"`
+	GermlinePnWgsAffected      *int               `json:"germline_pn_wgs_affected,omitempty"`
+	GermlinePfWgsAffected      *float64           `json:"germline_pf_wgs_affected,omitempty"`
+	GermlineHomWgsAffected     *int               `json:"germline_hom_wgs_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWgsAffected      *float64           `json:"germline_af_wgs_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWgsNotAffected   *int               `json:"germline_pc_wgs_not_affected,omitempty"`
+	GermlinePnWgsNotAffected   *int               `json:"germline_pn_wgs_not_affected,omitempty"`
+	GermlinePfWgsNotAffected   *float64           `json:"germline_pf_wgs_not_affected,omitempty"`
+	GermlineHomWgsNotAffected  *int               `json:"germline_hom_wgs_not_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWgsNotAffected   *float64           `json:"germline_af_wgs_not_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxs              *int               `json:"germline_pc_wxs,omitempty"`
+	GermlinePnWxs              *int               `json:"germline_pn_wxs,omitempty"`
+	GermlinePfWxs              *float64           `json:"germline_pf_wxs,omitempty"`
+	GermlineHomWxs             *int               `json:"germline_hom_wxs,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxs              *float64           `json:"germline_af_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxsAffected      *int               `json:"germline_pc_wxs_affected,omitempty"`
+	GermlinePnWxsAffected      *int               `json:"germline_pn_wxs_affected,omitempty"`
+	GermlinePfWxsAffected      *float64           `json:"germline_pf_wxs_affected,omitempty"`
+	GermlineHomWxsAffected     *int               `json:"germline_hom_wxs_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxsAffected      *float64           `json:"germline_af_wxs_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxsNotAffected   *int               `json:"germline_pc_wxs_not_affected,omitempty"`
+	GermlinePnWxsNotAffected   *int               `json:"germline_pn_wxs_not_affected,omitempty"`
+	GermlinePfWxsNotAffected   *float64           `json:"germline_pf_wxs_not_affected,omitempty"`
+	GermlineHomWxsNotAffected  *int               `json:"germline_hom_wxs_not_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxsNotAffected   *float64           `json:"germline_af_wxs_not_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	SomaticPcTnWgs             *int               `json:"somatic_pc_tn_wgs,omitempty"`
+	SomaticPnTnWgs             *int               `json:"somatic_pn_tn_wgs,omitempty"`
+	SomaticPfTnWgs             *float64           `json:"somatic_pf_tn_wgs,omitempty"`
+	SomaticHomTnWgs            *int               `json:"somatic_hom_tn_wgs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfTnWgs             *float64           `json:"somatic_af_tn_wgs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcTnWxs             *int               `json:"somatic_pc_tn_wxs,omitempty"`
+	SomaticPnTnWxs             *int               `json:"somatic_pn_tn_wxs,omitempty"`
+	SomaticPfTnWxs             *float64           `json:"somatic_pf_tn_wxs,omitempty"`
+	SomaticHomTnWxs            *int               `json:"somatic_hom_tn_wxs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfTnWxs             *float64           `json:"somatic_af_tn_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcToWgs             *int               `json:"somatic_pc_to_wgs,omitempty"`
+	SomaticPnToWgs             *int               `json:"somatic_pn_to_wgs,omitempty"`
+	SomaticPfToWgs             *float64           `json:"somatic_pf_to_wgs,omitempty"`
+	SomaticHomToWgs            *int               `json:"somatic_hom_to_wgs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfToWgs             *float64           `json:"somatic_af_to_wgs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcToWxs             *int               `json:"somatic_pc_to_wxs,omitempty"`
+	SomaticPnToWxs             *int               `json:"somatic_pn_to_wxs,omitempty"`
+	SomaticPfToWxs             *float64           `json:"somatic_pf_to_wxs,omitempty"`
+	SomaticHomToWxs            *int               `json:"somatic_hom_to_wxs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfToWxs             *float64           `json:"somatic_af_to_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
 	GnomadV3Af                 float64            `json:"gnomad_v3_af" validate:"required"`
 	Hgvsg                      string             `json:"hgvsg" validate:"required"`
 	OmimInheritanceCode        JsonArray[string]  `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
@@ -70,14 +117,56 @@ type ExpandedGermlineSNVOccurrence = struct {
 	GnomadLoeuf                        float32                  `json:"gnomad_loeuf,omitempty"`
 	SpliceaiType                       JsonArray[string]        `gorm:"type:json" json:"spliceai_type,omitempty"`
 	SpliceaiDs                         float32                  `json:"spliceai_ds,omitempty"`
-	Af                                 float64                  `json:"af,omitempty"` // TODO
-	GermlinePfWgs                      float64                  `json:"germline_pf_wgs,omitempty"`
-	GermlinePcWgsAffected              int                      `json:"germline_pc_wgs_affected,omitempty"`
-	GermlinePnWgsAffected              int                      `json:"germline_pn_wgs_affected,omitempty"`
-	GermlinePfWgsAffected              float64                  `json:"germline_pf_wgs_affected,omitempty"`
-	GermlinePcWgsNotAffected           int                      `json:"germline_pc_wgs_not_affected,omitempty"`
-	GermlinePnWgsNotAffected           int                      `json:"germline_pn_wgs_not_affected,omitempty"`
-	GermlinePfWgsNotAffected           float64                  `json:"germline_pf_wgs_not_affected,omitempty"`
+	GermlinePfWgs                      *float64                 `json:"germline_pf_wgs,omitempty"`
+	GermlinePcWgsAffected              *int                     `json:"germline_pc_wgs_affected,omitempty"`
+	GermlinePnWgsAffected              *int                     `json:"germline_pn_wgs_affected,omitempty"`
+	GermlinePfWgsAffected              *float64                 `json:"germline_pf_wgs_affected,omitempty"`
+	GermlinePcWgsNotAffected           *int                     `json:"germline_pc_wgs_not_affected,omitempty"`
+	GermlinePnWgsNotAffected           *int                     `json:"germline_pn_wgs_not_affected,omitempty"`
+	GermlinePfWgsNotAffected           *float64                 `json:"germline_pf_wgs_not_affected,omitempty"`
+	GermlinePcWgs                      *int                     `json:"germline_pc_wgs,omitempty"`
+	GermlinePnWgs                      *int                     `json:"germline_pn_wgs,omitempty"`
+	GermlineHomWgs                     *int                     `json:"germline_hom_wgs,omitempty"`              // Number of patients with a HOM or HEM call
+	GermlineAfWgs                      *float64                 `json:"germline_af_wgs,omitempty"`               // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlineHomWgsAffected             *int                     `json:"germline_hom_wgs_affected,omitempty"`     // Number of patients with a HOM or HEM call
+	GermlineAfWgsAffected              *float64                 `json:"germline_af_wgs_affected,omitempty"`      // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlineHomWgsNotAffected          *int                     `json:"germline_hom_wgs_not_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWgsNotAffected           *float64                 `json:"germline_af_wgs_not_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxs                      *int                     `json:"germline_pc_wxs,omitempty"`
+	GermlinePnWxs                      *int                     `json:"germline_pn_wxs,omitempty"`
+	GermlinePfWxs                      *float64                 `json:"germline_pf_wxs,omitempty"`
+	GermlineHomWxs                     *int                     `json:"germline_hom_wxs,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxs                      *float64                 `json:"germline_af_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxsAffected              *int                     `json:"germline_pc_wxs_affected,omitempty"`
+	GermlinePnWxsAffected              *int                     `json:"germline_pn_wxs_affected,omitempty"`
+	GermlinePfWxsAffected              *float64                 `json:"germline_pf_wxs_affected,omitempty"`
+	GermlineHomWxsAffected             *int                     `json:"germline_hom_wxs_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxsAffected              *float64                 `json:"germline_af_wxs_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	GermlinePcWxsNotAffected           *int                     `json:"germline_pc_wxs_not_affected,omitempty"`
+	GermlinePnWxsNotAffected           *int                     `json:"germline_pn_wxs_not_affected,omitempty"`
+	GermlinePfWxsNotAffected           *float64                 `json:"germline_pf_wxs_not_affected,omitempty"`
+	GermlineHomWxsNotAffected          *int                     `json:"germline_hom_wxs_not_affected,omitempty"` // Number of patients with a HOM or HEM call
+	GermlineAfWxsNotAffected           *float64                 `json:"germline_af_wxs_not_affected,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+	SomaticPcTnWgs                     *int                     `json:"somatic_pc_tn_wgs,omitempty"`
+	SomaticPnTnWgs                     *int                     `json:"somatic_pn_tn_wgs,omitempty"`
+	SomaticPfTnWgs                     *float64                 `json:"somatic_pf_tn_wgs,omitempty"`
+	SomaticHomTnWgs                    *int                     `json:"somatic_hom_tn_wgs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfTnWgs                     *float64                 `json:"somatic_af_tn_wgs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcTnWxs                     *int                     `json:"somatic_pc_tn_wxs,omitempty"`
+	SomaticPnTnWxs                     *int                     `json:"somatic_pn_tn_wxs,omitempty"`
+	SomaticPfTnWxs                     *float64                 `json:"somatic_pf_tn_wxs,omitempty"`
+	SomaticHomTnWxs                    *int                     `json:"somatic_hom_tn_wxs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfTnWxs                     *float64                 `json:"somatic_af_tn_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcToWgs                     *int                     `json:"somatic_pc_to_wgs,omitempty"`
+	SomaticPnToWgs                     *int                     `json:"somatic_pn_to_wgs,omitempty"`
+	SomaticPfToWgs                     *float64                 `json:"somatic_pf_to_wgs,omitempty"`
+	SomaticHomToWgs                    *int                     `json:"somatic_hom_to_wgs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfToWgs                     *float64                 `json:"somatic_af_to_wgs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+	SomaticPcToWxs                     *int                     `json:"somatic_pc_to_wxs,omitempty"`
+	SomaticPnToWxs                     *int                     `json:"somatic_pn_to_wxs,omitempty"`
+	SomaticPfToWxs                     *float64                 `json:"somatic_pf_to_wxs,omitempty"`
+	SomaticHomToWxs                    *int                     `json:"somatic_hom_to_wxs,omitempty"` // Number of patients with a HOM or HEM tumor call
+	SomaticAfToWxs                     *float64                 `json:"somatic_af_to_wxs,omitempty"`  // Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
 	GnomadV3Af                         float64                  `json:"gnomad_v3_af" validate:"required"`
 	SiftPred                           string                   `json:"sift_pred,omitempty"`
 	SiftScore                          float32                  `json:"sift_score,omitempty"`
@@ -314,11 +403,56 @@ var GermlineSNVOccurrencesFields = []Field{
 	GermlineSNVInfoQdField,
 
 	// Frequencies
-	GermlinePfWgsField,
-	GermlinePnWgsField,
 	GermlinePcWgsField,
+	GermlinePnWgsField,
+	GermlinePfWgsField,
+	GermlineHomWgsField,
+	GermlineAfWgsField,
+	GermlinePcWgsAffectedField,
+	GermlinePnWgsAffectedField,
 	GermlinePfWgsAffectedField,
+	GermlineHomWgsAffectedField,
+	GermlineAfWgsAffectedField,
+	GermlinePcWgsNotAffectedField,
+	GermlinePnWgsNotAffectedField,
 	GermlinePfWgsNotAffectedField,
+	GermlineHomWgsNotAffectedField,
+	GermlineAfWgsNotAffectedField,
+	GermlinePcWxsField,
+	GermlinePnWxsField,
+	GermlinePfWxsField,
+	GermlineHomWxsField,
+	GermlineAfWxsField,
+	GermlinePcWxsAffectedField,
+	GermlinePnWxsAffectedField,
+	GermlinePfWxsAffectedField,
+	GermlineHomWxsAffectedField,
+	GermlineAfWxsAffectedField,
+	GermlinePcWxsNotAffectedField,
+	GermlinePnWxsNotAffectedField,
+	GermlinePfWxsNotAffectedField,
+	GermlineHomWxsNotAffectedField,
+	GermlineAfWxsNotAffectedField,
+	SomaticPcTnWgsField,
+	SomaticPnTnWgsField,
+	SomaticPfTnWgsField,
+	SomaticHomTnWgsField,
+	SomaticAfTnWgsField,
+	SomaticPcTnWxsField,
+	SomaticPnTnWxsField,
+	SomaticPfTnWxsField,
+	SomaticHomTnWxsField,
+	SomaticAfTnWxsField,
+	SomaticPcToWgsField,
+	SomaticPnToWgsField,
+	SomaticPfToWgsField,
+	SomaticHomToWgsField,
+	SomaticAfToWgsField,
+	SomaticPcToWxsField,
+	SomaticPnToWxsField,
+	SomaticPfToWxsField,
+	SomaticHomToWxsField,
+	SomaticAfToWxsField,
 	GnomadV3AfField,
 	TopmedAfField,
 	ThousandGenomesAfField,

@@ -2391,12 +2391,6 @@ export interface ExpandedGermlineSNVOccurrence {
      */
     'ad_total'?: number;
     /**
-     * TODO
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'af'?: number;
-    /**
      * 
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
@@ -2511,6 +2505,84 @@ export interface ExpandedGermlineSNVOccurrence {
      */
     'genotype_quality': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wgs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
@@ -2522,6 +2594,24 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -2545,6 +2635,30 @@ export interface ExpandedGermlineSNVOccurrence {
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
      */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'germline_pn_wgs_affected'?: number;
     /**
      * 
@@ -2552,6 +2666,24 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -2690,6 +2822,126 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'sift_score'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -2880,6 +3132,186 @@ export interface ExpandedSomaticSNVOccurrence {
      */
     'filter'?: string;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
@@ -3006,11 +3438,65 @@ export interface ExpandedSomaticSNVOccurrence {
      */
     'sift_score'?: number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
     'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -3022,7 +3508,19 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -3034,13 +3532,31 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_tn_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -3622,11 +4138,113 @@ export interface GermlineSNVOccurrence {
      */
     'genotype_quality': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
     'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -3638,7 +4256,67 @@ export interface GermlineSNVOccurrence {
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -3723,6 +4401,126 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'seq_id': number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -6866,6 +7664,78 @@ export interface SomaticSNVOccurrence {
      */
     'flag_type'?: OccurrenceFlagType;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
@@ -6876,7 +7746,103 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'germline_pf_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -6962,11 +7928,65 @@ export interface SomaticSNVOccurrence {
      */
     'seq_id': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
     'somatic_pc_tn_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -6978,13 +7998,55 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs': number;
     /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}

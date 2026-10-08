@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.vep_impact import VepImpact
@@ -50,6 +50,36 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     fathmm_pred: Optional[StrictStr] = None
     fathmm_score: Optional[Union[StrictFloat, StrictInt]] = None
     filter: Optional[StrictStr] = None
+    germline_af_wgs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_af_wgs_affected: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_af_wgs_not_affected: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_af_wxs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_af_wxs_affected: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_af_wxs_not_affected: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.")
+    germline_hom_wgs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_hom_wgs_affected: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_hom_wgs_not_affected: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_hom_wxs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_hom_wxs_affected: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_hom_wxs_not_affected: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM call")
+    germline_pc_wgs: Optional[StrictInt] = None
+    germline_pc_wgs_affected: Optional[StrictInt] = None
+    germline_pc_wgs_not_affected: Optional[StrictInt] = None
+    germline_pc_wxs: Optional[StrictInt] = None
+    germline_pc_wxs_affected: Optional[StrictInt] = None
+    germline_pc_wxs_not_affected: Optional[StrictInt] = None
+    germline_pf_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pn_wgs: Optional[StrictInt] = None
+    germline_pn_wgs_affected: Optional[StrictInt] = None
+    germline_pn_wgs_not_affected: Optional[StrictInt] = None
+    germline_pn_wxs: Optional[StrictInt] = None
+    germline_pn_wxs_affected: Optional[StrictInt] = None
+    germline_pn_wxs_not_affected: Optional[StrictInt] = None
     gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_v3_af: Optional[Union[StrictFloat, StrictInt]] = None
@@ -71,12 +101,26 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     rsnumber: Optional[StrictStr] = None
     sift_pred: Optional[StrictStr] = None
     sift_score: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_af_tn_wgs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.")
+    somatic_af_tn_wxs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.")
+    somatic_af_to_wgs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.")
+    somatic_af_to_wxs: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.")
+    somatic_hom_tn_wgs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM tumor call")
+    somatic_hom_tn_wxs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM tumor call")
+    somatic_hom_to_wgs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM tumor call")
+    somatic_hom_to_wxs: Optional[StrictInt] = Field(default=None, description="Number of patients with a HOM or HEM tumor call")
     somatic_pc_tn_wgs: Optional[StrictInt] = None
+    somatic_pc_tn_wxs: Optional[StrictInt] = None
     somatic_pc_to_wgs: Optional[StrictInt] = None
+    somatic_pc_to_wxs: Optional[StrictInt] = None
     somatic_pf_tn_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pf_tn_wxs: Optional[Union[StrictFloat, StrictInt]] = None
     somatic_pf_to_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pf_to_wxs: Optional[Union[StrictFloat, StrictInt]] = None
     somatic_pn_tn_wgs: Optional[StrictInt] = None
+    somatic_pn_tn_wxs: Optional[StrictInt] = None
     somatic_pn_to_wgs: Optional[StrictInt] = None
+    somatic_pn_to_wxs: Optional[StrictInt] = None
     spliceai_ds: Optional[Union[StrictFloat, StrictInt]] = None
     spliceai_type: Optional[List[StrictStr]] = None
     sq: Optional[Union[StrictFloat, StrictInt]] = None
@@ -84,7 +128,7 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     symbol: Optional[StrictStr] = None
     transcript_id: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "aq", "cadd_phred", "cadd_score", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_pc_tn_wgs", "somatic_pc_to_wgs", "somatic_pf_tn_wgs", "somatic_pf_to_wgs", "somatic_pn_tn_wgs", "somatic_pn_to_wgs", "spliceai_ds", "spliceai_type", "sq", "start", "symbol", "transcript_id", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "aq", "cadd_phred", "cadd_score", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "spliceai_ds", "spliceai_type", "sq", "start", "symbol", "transcript_id", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -166,6 +210,36 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
             "fathmm_pred": obj.get("fathmm_pred"),
             "fathmm_score": obj.get("fathmm_score"),
             "filter": obj.get("filter"),
+            "germline_af_wgs": obj.get("germline_af_wgs"),
+            "germline_af_wgs_affected": obj.get("germline_af_wgs_affected"),
+            "germline_af_wgs_not_affected": obj.get("germline_af_wgs_not_affected"),
+            "germline_af_wxs": obj.get("germline_af_wxs"),
+            "germline_af_wxs_affected": obj.get("germline_af_wxs_affected"),
+            "germline_af_wxs_not_affected": obj.get("germline_af_wxs_not_affected"),
+            "germline_hom_wgs": obj.get("germline_hom_wgs"),
+            "germline_hom_wgs_affected": obj.get("germline_hom_wgs_affected"),
+            "germline_hom_wgs_not_affected": obj.get("germline_hom_wgs_not_affected"),
+            "germline_hom_wxs": obj.get("germline_hom_wxs"),
+            "germline_hom_wxs_affected": obj.get("germline_hom_wxs_affected"),
+            "germline_hom_wxs_not_affected": obj.get("germline_hom_wxs_not_affected"),
+            "germline_pc_wgs": obj.get("germline_pc_wgs"),
+            "germline_pc_wgs_affected": obj.get("germline_pc_wgs_affected"),
+            "germline_pc_wgs_not_affected": obj.get("germline_pc_wgs_not_affected"),
+            "germline_pc_wxs": obj.get("germline_pc_wxs"),
+            "germline_pc_wxs_affected": obj.get("germline_pc_wxs_affected"),
+            "germline_pc_wxs_not_affected": obj.get("germline_pc_wxs_not_affected"),
+            "germline_pf_wgs": obj.get("germline_pf_wgs"),
+            "germline_pf_wgs_affected": obj.get("germline_pf_wgs_affected"),
+            "germline_pf_wgs_not_affected": obj.get("germline_pf_wgs_not_affected"),
+            "germline_pf_wxs": obj.get("germline_pf_wxs"),
+            "germline_pf_wxs_affected": obj.get("germline_pf_wxs_affected"),
+            "germline_pf_wxs_not_affected": obj.get("germline_pf_wxs_not_affected"),
+            "germline_pn_wgs": obj.get("germline_pn_wgs"),
+            "germline_pn_wgs_affected": obj.get("germline_pn_wgs_affected"),
+            "germline_pn_wgs_not_affected": obj.get("germline_pn_wgs_not_affected"),
+            "germline_pn_wxs": obj.get("germline_pn_wxs"),
+            "germline_pn_wxs_affected": obj.get("germline_pn_wxs_affected"),
+            "germline_pn_wxs_not_affected": obj.get("germline_pn_wxs_not_affected"),
             "gnomad_loeuf": obj.get("gnomad_loeuf"),
             "gnomad_pli": obj.get("gnomad_pli"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
@@ -187,12 +261,26 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
             "rsnumber": obj.get("rsnumber"),
             "sift_pred": obj.get("sift_pred"),
             "sift_score": obj.get("sift_score"),
+            "somatic_af_tn_wgs": obj.get("somatic_af_tn_wgs"),
+            "somatic_af_tn_wxs": obj.get("somatic_af_tn_wxs"),
+            "somatic_af_to_wgs": obj.get("somatic_af_to_wgs"),
+            "somatic_af_to_wxs": obj.get("somatic_af_to_wxs"),
+            "somatic_hom_tn_wgs": obj.get("somatic_hom_tn_wgs"),
+            "somatic_hom_tn_wxs": obj.get("somatic_hom_tn_wxs"),
+            "somatic_hom_to_wgs": obj.get("somatic_hom_to_wgs"),
+            "somatic_hom_to_wxs": obj.get("somatic_hom_to_wxs"),
             "somatic_pc_tn_wgs": obj.get("somatic_pc_tn_wgs"),
+            "somatic_pc_tn_wxs": obj.get("somatic_pc_tn_wxs"),
             "somatic_pc_to_wgs": obj.get("somatic_pc_to_wgs"),
+            "somatic_pc_to_wxs": obj.get("somatic_pc_to_wxs"),
             "somatic_pf_tn_wgs": obj.get("somatic_pf_tn_wgs"),
+            "somatic_pf_tn_wxs": obj.get("somatic_pf_tn_wxs"),
             "somatic_pf_to_wgs": obj.get("somatic_pf_to_wgs"),
+            "somatic_pf_to_wxs": obj.get("somatic_pf_to_wxs"),
             "somatic_pn_tn_wgs": obj.get("somatic_pn_tn_wgs"),
+            "somatic_pn_tn_wxs": obj.get("somatic_pn_tn_wxs"),
             "somatic_pn_to_wgs": obj.get("somatic_pn_to_wgs"),
+            "somatic_pn_to_wxs": obj.get("somatic_pn_to_wxs"),
             "spliceai_ds": obj.get("spliceai_ds"),
             "spliceai_type": obj.get("spliceai_type"),
             "sq": obj.get("sq"),
