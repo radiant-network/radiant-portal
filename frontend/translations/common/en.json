@@ -779,6 +779,12 @@
         "chromosome": "Chromosome",
         "clinvar": "ClinVar",
         "clinvar_interpretation": "ClinVar",
+        "cmc_sample_mutated": "COSMIC CMC",
+        "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation",
+        "cmc_sample_ratio": "COSMIC CMC (Ratio)",
+        "cmc_sample_ratio_tooltip": "Ratio of samples in COSMIC with this mutation compared to the variant compared to all the samples",
+        "cmc_tier": "COSMIC CMC Tier",
+        "cmc_tier_tooltip": "Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
         "cn": "Copy Number",
         "cnv_end": "CNV End",
         "cnv_exomiser_gene_combined_score": "Exomiser Score",
@@ -900,6 +906,13 @@
           "tr_v_pseudogene": "TR V Pseudogene",
           "unitary_pseudogene": "Unitary Pseudogene",
           "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "": "No Data"
+        },
+        "cmc_tier": {
+          "1": "Tier 1",
+          "2": "Tier 2",
+          "3": "Tier 3",
+          "other": "Other",
           "": "No Data"
         },
         "consequence": {
