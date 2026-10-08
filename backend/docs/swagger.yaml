@@ -1348,9 +1348,6 @@ components:
           type: integer
         ad_total:
           type: integer
-        af:
-          description: TODO
-          type: number
         cadd_phred:
           type: number
         cadd_score:
@@ -1398,9 +1395,59 @@ components:
           type: string
         genotype_quality:
           type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
         germline_pc_wgs_affected:
           type: integer
         germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
@@ -1408,9 +1455,23 @@ components:
           type: number
         germline_pf_wgs_not_affected:
           type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
         germline_pn_wgs_affected:
           type: integer
         germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
           type: integer
         gnomad_loeuf:
           type: number
@@ -1467,6 +1528,62 @@ components:
           type: string
         sift_score:
           type: number
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         spliceai_ds:
           type: number
         spliceai_type:
@@ -1545,6 +1662,84 @@ components:
           type: number
         filter:
           type: string
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_loeuf:
           type: number
         gnomad_pli:
@@ -1593,17 +1788,61 @@ components:
           type: string
         sift_score:
           type: number
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
         somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
           type: integer
         somatic_pc_to_wgs:
           type: integer
+        somatic_pc_to_wxs:
+          type: integer
         somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
           type: number
         somatic_pf_to_wgs:
           type: number
+        somatic_pf_to_wxs:
+          type: number
         somatic_pn_tn_wgs:
           type: integer
+        somatic_pn_tn_wxs:
+          type: integer
         somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
           type: integer
         spliceai_ds:
           type: number
@@ -1898,11 +2137,83 @@ components:
           $ref: '#/components/schemas/OccurrenceFlagType'
         genotype_quality:
           type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
         germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
         germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
           type: integer
         gnomad_v3_af:
           type: number
@@ -1937,6 +2248,62 @@ components:
         rsnumber:
           type: string
         seq_id:
+          type: integer
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
           type: integer
         start:
           type: integer
@@ -3532,10 +3899,84 @@ components:
           type: integer
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
         germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_v3_af:
           type: number
         has_interpretation:
@@ -3570,14 +4011,62 @@ components:
           type: string
         seq_id:
           type: integer
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
         somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
           type: integer
         somatic_pc_to_wgs:
           type: integer
+        somatic_pc_to_wxs:
+          type: integer
         somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
           type: number
         somatic_pf_to_wgs:
           type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         sq:
           type: number
         start:
