@@ -4,6 +4,8 @@ import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
+import CmcTierCell from '@/components/base/data-table/cells/cmc-tier-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -172,6 +174,34 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
       minSize: 40,
       enableSorting: false,
     }),
+    // Tier
+    columnHelper.accessor(row => row, {
+      id: 'cmc_tier',
+      cell: info => <CmcTierCell tier={info.getValue().cmc_tier} locus={info.getValue().locus} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_tier_tooltip')}>{t('variant.headers.cmc_tier')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // CMC
+    columnHelper.accessor(row => row, {
+      id: 'cmc_sample_mutated',
+      cell: info => (
+        <CmcCell
+          sampleMutated={info.getValue().cmc_sample_mutated}
+          sampleRatio={info.getValue().cmc_sample_ratio}
+          mutationUrl={info.getValue().cmc_mutation_url}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_sample_mutated_tooltip')}>
+          {t('variant.headers.cmc_sample_mutated')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
@@ -326,6 +356,18 @@ const defaultGermlineSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.omim_inheritance_code',
     additionalFields: ['omim_inheritance_code'],
+  },
+  {
+    id: 'cmc_tier',
+    visible: false,
+    label: 'variant.headers.cmc_tier',
+    additionalFields: ['cmc_tier'],
+  },
+  {
+    id: 'cmc_sample_mutated',
+    visible: false,
+    label: 'variant.headers.cmc_sample_mutated',
+    additionalFields: ['cmc_sample_mutated', 'cmc_sample_ratio', 'cmc_mutation_url'],
   },
   {
     id: 'clinvar',
