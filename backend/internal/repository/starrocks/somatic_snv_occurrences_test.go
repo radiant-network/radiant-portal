@@ -271,6 +271,10 @@ func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, float32(31.5), *expandedOccurrence.Sq)
 		assert.Equal(t, float32(4.2), *expandedOccurrence.Aq)
 		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
+		assert.Equal(t, 12, *expandedOccurrence.CmcSampleMutated)
+		assert.Equal(t, 0.0012, *expandedOccurrence.CmcSampleRatio)
+		assert.Equal(t, "1", *expandedOccurrence.CmcTier)
+		assert.Equal(t, "https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000", *expandedOccurrence.CmcMutationUrl)
 	})
 }
 

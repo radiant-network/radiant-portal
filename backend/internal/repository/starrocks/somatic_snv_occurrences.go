@@ -94,7 +94,8 @@ func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Cont
 		"c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, " +
 		"s_snv_o.info_qd, s_snv_o.tumor_sq as sq, s_snv_o.info_aq as aq, " +
 		"s_snv_o.tumor_ad_alt as ad_alt, s_snv_o.tumor_ad_total as ad_total, s_snv_o.tumor_ad_ratio as ad_ratio, s_snv_o.filter, " +
-		"g.gene_id as ensembl_gene_id")
+		"g.gene_id as ensembl_gene_id, " +
+		"v.cmc_sample_mutated, v.cmc_sample_ratio, v.cmc_tier, v.cmc_mutation_url")
 
 	var expandedOccurrence ExpandedSomaticSNVOccurrence
 	if err := tx.Take(&expandedOccurrence).Error; err != nil {
