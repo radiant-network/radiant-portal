@@ -37,6 +37,10 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     cadd_score: Optional[Union[StrictFloat, StrictInt]] = None
     chromosome: StrictStr
     clinvar: Optional[List[StrictStr]] = None
+    cmc_mutation_url: Optional[StrictStr] = None
+    cmc_sample_mutated: Optional[StrictInt] = None
+    cmc_sample_ratio: Optional[Union[StrictFloat, StrictInt]] = None
+    cmc_tier: Optional[StrictStr] = None
     dann_score: Optional[Union[StrictFloat, StrictInt]] = None
     dna_change: Optional[StrictStr] = None
     end: StrictInt
@@ -80,7 +84,7 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
     symbol: Optional[StrictStr] = None
     transcript_id: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "aq", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_pc_tn_wgs", "somatic_pc_to_wgs", "somatic_pf_tn_wgs", "somatic_pf_to_wgs", "somatic_pn_tn_wgs", "somatic_pn_to_wgs", "spliceai_ds", "spliceai_type", "sq", "start", "symbol", "transcript_id", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_ratio", "ad_total", "aq", "cadd_phred", "cadd_score", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "dann_score", "dna_change", "end", "ensembl_gene_id", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "filter", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "omim_conditions", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "somatic_pc_tn_wgs", "somatic_pc_to_wgs", "somatic_pf_tn_wgs", "somatic_pf_to_wgs", "somatic_pn_tn_wgs", "somatic_pn_to_wgs", "spliceai_ds", "spliceai_type", "sq", "start", "symbol", "transcript_id", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -149,6 +153,10 @@ class ExpandedSomaticSNVOccurrence(BaseModel):
             "cadd_score": obj.get("cadd_score"),
             "chromosome": obj.get("chromosome"),
             "clinvar": obj.get("clinvar"),
+            "cmc_mutation_url": obj.get("cmc_mutation_url"),
+            "cmc_sample_mutated": obj.get("cmc_sample_mutated"),
+            "cmc_sample_ratio": obj.get("cmc_sample_ratio"),
+            "cmc_tier": obj.get("cmc_tier"),
             "dann_score": obj.get("dann_score"),
             "dna_change": obj.get("dna_change"),
             "end": obj.get("end"),
