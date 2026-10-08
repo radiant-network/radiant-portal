@@ -1635,6 +1635,10 @@
       "clinical_interpretation": "Interprétation clinique",
       "clingen": "ClinGen",
       "clinvar": "ClinVar",
+      "cmc_sample_mutated": "CMC",
+      "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
+      "cmc_tier": "Tier",
+      "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
       "cn": "CN",
       "cn_tooltip": "Nombre de copies estimé",
       "cytoband": "Cytobande",
@@ -1767,6 +1771,13 @@
       "phylop17way": "PhyloP17Way",
       "pli": "pLI",
       "no_prediction": "Aucune prédiction"
+    },
+    "cmc_tiers": {
+      "1": "Tier 1",
+      "2": "Tier 2",
+      "3": "Tier 3",
+      "other": "Other",
+      "no_data": "ND"
     },
     "classes": {
       "indel": "Indel",
