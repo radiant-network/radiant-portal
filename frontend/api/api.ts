@@ -333,6 +333,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'symbol': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CNVGeneOverlap
+     */
+    'tenant_gene_panels': Array<string>;
 }
 /**
  * User assigned to a case, as shown in the cases list and on the case entity page. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.

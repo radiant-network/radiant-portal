@@ -12,4 +12,5 @@ type CNVGeneOverlap struct {
 	OverlappingGenePercent float32           `json:"overlapping_gene_percent" validate:"required"`
 	OverlappingCNVPercent  float32           `json:"overlapping_cnv_percent" validate:"required"`
 	OverlapType            string            `json:"overlap_type" enum:"full_gene,full_cnv,partial" validate:"required"`
+	TenantGenePanels       JsonArray[string] `json:"tenant_gene_panels" validate:"required"`
 }

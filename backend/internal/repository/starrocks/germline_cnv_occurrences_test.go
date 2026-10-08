@@ -10,6 +10,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var allGermlineCnvFields = sliceutils.Map(types.GermlineCNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -624,4 +625,90 @@ func Test_GermlineCNV_GetOccurrences_WithInterpretation_Still_Keeps_Noted_Occurr
 			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})
+}
+
+func listGermlineCNVNamesMatching(t *testing.T, env *testutils.Env, sqon *types.Sqon) []string {
+	t.Helper()
+	repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	sort := []types.SortBody{{Field: "name", Order: "asc"}}
+	query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, sort)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 1, 2, 2, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o GermlineCNVOccurrence, _ int, _ []GermlineCNVOccurrence) string {
+		return o.Name
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Return_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP"}}}
+		assert.Equal(t, []string{"CNV3", "CNV4"}, listGermlineCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Return_Occurrences_Matching_Multiple_Tenant_Gene_Panels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP", "ONCO"}}}
+		// CNV4 overlaps BRAF and TP53, both in ONCO and BRAF also in EPILEP: it is listed once.
+		assert.Equal(t, []string{"CNV3", "CNV4", "CNV5"}, listGermlineCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Return_Empty_List_When_Unknown_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"UNKNOWN"}}}
+		assert.Empty(t, listGermlineCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_Count_Each_Occurrence_Once_When_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.GermlineCNVOccurrencesFields)
+		require.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 1, 2, 2, query)
+		require.NoError(t, err)
+		// CNV4 overlaps two ONCO genes (BRAF, TP53) and is counted once.
+		assert.EqualValues(t, 3, count.Count)
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_Hits(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.GermlineCNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
+		require.NoError(t, err)
+		// CARDIO (MYH7) overlaps no CNV of the case, so it is not a bucket. CNV4 counts once in ONCO.
+		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 2}, {Bucket: "ONCO", Count: 3}}, aggregate)
+	})
+}
+
+func Test_GermlineCNV_GetGenesOverlap_Return_Tenant_Gene_Panels_Of_Each_Gene(t *testing.T) {
+	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly: the multi-tenant loader
+	// builds globally named databases, so a different Need recreates them under the other tests.
+	testutils.RunTest(t, testutils.Need{
+		Starrocks:        "simple",
+		Tenants:          []string{"tenant1", "tenant2"},
+		TenantKeyColumns: []string{"seq_id"},
+	},
+		func(t *testing.T, env *testutils.Env) {
+			repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+			overlaps, err := repo.GetGenesOverlap(env.TenantCtx("tenant1"), 1, 1, 1, 1)
+			require.NoError(t, err)
+			panelsBySymbol := map[string]types.JsonArray[string]{}
+			for _, overlap := range overlaps {
+				panelsBySymbol[overlap.Symbol] = overlap.TenantGenePanels
+			}
+			// One row per gene: a gene in two panels is not duplicated.
+			assert.Len(t, overlaps, 3)
+			assert.Equal(t, map[string]types.JsonArray[string]{
+				"TSPAN6": {"EPILEP", "ONCO"},
+				"DPM1":   {"ONCO"},
+				"TNMD":   {},
+			}, panelsBySymbol)
+		})
 }

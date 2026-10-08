@@ -144,6 +144,11 @@ components:
           type: number
         symbol:
           type: string
+        tenant_gene_panels:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
       required:
       - cytoband
       - gene_id
@@ -154,6 +159,7 @@ components:
       - overlapping_cnv_percent
       - overlapping_gene_percent
       - symbol
+      - tenant_gene_panels
       type: object
     CaseAssignee:
       description: User assigned to a case, as shown in the cases list and on the

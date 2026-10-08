@@ -1,7 +1,9 @@
 package starrocks
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
@@ -133,4 +135,12 @@ func Test_SNVOccurrences_TenantIsolation_Executes(t *testing.T) {
 			assert.Empty(t, runGermlineSNVJoin(t, t1, offsetSeqID),
 				"tenant1 must NOT see tenant2's offset rows")
 		})
+}
+
+func Test_CNVGenesOverlapSQL_Reads_Only_The_Bound_Tenant_Gene_Panel_MV(t *testing.T) {
+	t.Parallel()
+	sql := cnvGenesOverlapSQL(types.ContextWithTenant(context.Background(), "tenant1"))
+
+	assert.Contains(t, sql, "tenant1_tenant.gene_panel_mv")
+	assert.Equal(t, 1, strings.Count(sql, "gene_panel_mv"), "the MV must be read once, through the tenant database")
 }

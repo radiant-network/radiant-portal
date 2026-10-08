@@ -29,10 +29,10 @@ func Test_SNVOccurrencesFields_Contain_TenantGenePanelField(t *testing.T) {
 	assert.Contains(t, SomaticSNVOccurrencesFields, TenantGenePanelField)
 }
 
-func Test_CNVOccurrencesFields_Do_Not_Contain_TenantGenePanelField(t *testing.T) {
+func Test_CNVOccurrencesFields_Contain_TenantGenePanelField(t *testing.T) {
 	t.Parallel()
-	assert.NotContains(t, GermlineCNVOccurrencesFields, TenantGenePanelField)
-	assert.NotContains(t, SomaticCNVOccurrencesFields, TenantGenePanelField)
+	assert.Contains(t, GermlineCNVOccurrencesFields, TenantGenePanelField)
+	assert.Contains(t, SomaticCNVOccurrencesFields, TenantGenePanelField)
 }
 
 func Test_NewOccurrenceCountQueryFromSqon_Accept_TenantGenePanel(t *testing.T) {
