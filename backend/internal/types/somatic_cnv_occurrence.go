@@ -429,6 +429,7 @@ var SomaticCNVOccurrencesFields = []Field{
 	CosmicGenePanelField,
 	OmimInheritanceField,
 	OrphanetGenePanelField,
+	TenantGenePanelField,
 }
 
 var SomaticCNVOccurrencesDefaultFields = []Field{

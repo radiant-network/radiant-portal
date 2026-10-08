@@ -327,6 +327,7 @@ var GermlineCNVOccurrencesFields = []Field{
 	CosmicGenePanelField,
 	OmimInheritanceField,
 	OrphanetGenePanelField,
+	TenantGenePanelField,
 }
 
 var GermlineCNVOccurrencesDefaultFields = []Field{

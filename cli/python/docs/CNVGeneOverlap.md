@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **overlapping_cnv_percent** | **float** |  | 
 **overlapping_gene_percent** | **float** |  | 
 **symbol** | **str** |  | 
+**tenant_gene_panels** | **List[str]** |  | 
 
 ## Example
 
