@@ -217,28 +217,11 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	return overlaps, nil
 }
 
-// cnvGenesOverlapSQL builds the genes overlap query; table names are resolved from ctx, so the
-// tenant gene panel MV is the bound tenant's.
 func cnvGenesOverlapSQL(ctx context.Context) string {
 	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
 	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
 	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
-	// The tenant gene panel MV exists only in a tenant database, so with no tenant bound (tenant
-	// views off) the genes get no panel rather than the query failing on an unknown table.
-	tenantPanelsCTE, tenantPanelsColumn, tenantPanelsJoin := "", "NULL AS tenant_gene_panels", ""
-	if _, ok := types.TenantFromContext(ctx); ok {
-		tenantPanelsCTE = fmt.Sprintf(`,
-     gene_tenant_panels AS (
-         SELECT
-             tgp.symbol,
-             array_agg(distinct tgp.panel order by tgp.panel asc) AS panels
-         FROM %s tgp
-         WHERE tgp.symbol IN (SELECT symbol FROM gene_overlap)
-         GROUP BY tgp.symbol
-     )`, types.TenantGenePanelTable.TenantQualifiedName(ctx))
-		tenantPanelsColumn = "gtp.panels AS tenant_gene_panels"
-		tenantPanelsJoin = "LEFT JOIN gene_tenant_panels gtp ON go.symbol = gtp.symbol"
-	}
+	tenantGenePanels := types.TenantGenePanelTable.TenantQualifiedName(ctx)
 	return fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT
     	    g.gene_id,
@@ -273,7 +256,15 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
                            AND cb.start <= go.gene_end
                            AND cb.end >= go.gene_start
          GROUP BY go.gene_id
-     )%s
+     ),
+     gene_tenant_panels AS (
+         SELECT
+             tgp.symbol,
+             array_agg(distinct tgp.panel order by tgp.panel asc) AS panels
+         FROM %s tgp
+         WHERE tgp.symbol IN (SELECT symbol FROM gene_overlap)
+         GROUP BY tgp.symbol
+     )
 	SELECT
     	gc.cytoband,
     	go.symbol,
@@ -288,11 +279,11 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	    WHEN @cnv_start >= go.gene_start AND @cnv_end <= go.gene_end THEN 'full_cnv'
     	    ELSE 'partial'
     	    END AS overlap_type,
-    	%s
+    	gtp.panels AS tenant_gene_panels
 		FROM gene_overlap go
     	     LEFT JOIN exon_overlap eo ON go.gene_id = eo.gene_id
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
-    	     %s
+    	     LEFT JOIN gene_tenant_panels gtp ON go.symbol = gtp.symbol
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
-		ensemblGene, ensemblExon, cytoband, tenantPanelsCTE, tenantPanelsColumn, tenantPanelsJoin)
+		ensemblGene, ensemblExon, cytoband, tenantGenePanels)
 }

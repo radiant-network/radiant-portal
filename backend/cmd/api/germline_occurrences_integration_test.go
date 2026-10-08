@@ -531,7 +531,7 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"overlapping_cnv_percent": 40,
 			"overlapping_gene_percent": 100,
 			"symbol": "TSPAN6",
-			"tenant_gene_panels": []
+			"tenant_gene_panels": ["EPILEP", "ONCO"]
 		  },
 		  {
 			"cytoband": ["p1.2"],
@@ -543,7 +543,7 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"overlapping_cnv_percent": 50,
 			"overlapping_gene_percent": 50,
 			"symbol": "DPM1",
-			"tenant_gene_panels": []
+			"tenant_gene_panels": ["ONCO"]
 		  },
 		  {
 			"cytoband": ["p1.1", "p1.2"],

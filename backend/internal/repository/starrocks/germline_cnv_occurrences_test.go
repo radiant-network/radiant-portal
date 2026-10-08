@@ -687,18 +687,6 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_H
 	})
 }
 
-func Test_GermlineCNV_GetGenesOverlap_Return_Empty_Tenant_Gene_Panels_When_No_Tenant_Bound(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		overlaps, err := repo.GetGenesOverlap(t.Context(), 1, 1, 1, 1)
-		require.NoError(t, err)
-		require.Len(t, overlaps, 3)
-		for _, overlap := range overlaps {
-			assert.Equal(t, types.JsonArray[string]{}, overlap.TenantGenePanels, overlap.Symbol)
-		}
-	})
-}
-
 func Test_GermlineCNV_GetGenesOverlap_Return_Tenant_Gene_Panels_Of_Each_Gene(t *testing.T) {
 	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly: the multi-tenant loader
 	// builds globally named databases, so a different Need recreates them under the other tests.
