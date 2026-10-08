@@ -508,7 +508,9 @@
       "csv": "Fichier CSV",
       "pdf": "Fichier PDF",
       "txt": "Fichier texte",
-      "gvcf": "Fichier GVCF"
+      "gvcf": "Fichier GVCF",
+      "zip": "Fichier archive ZIP",
+      "xlsx": "Fichier XLSX"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
@@ -526,7 +528,12 @@
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
       "exomiser": "Rapport Exomiser",
-      "clinical_report": "Rapport clinique"
+      "clinical_report": "Rapport clinique",
+      "aggqc": "Rapport de contrôle qualité agrégé",
+      "chrmr": "Rapport mitochondrial",
+      "nrrv": "Rapport de variants annotés",
+      "snvpg": "SNV constitutionnel (masqué/filtré)",
+      "alirpg": "Lectures alignées (masquées)"
     },
     "query_bar": {
       "selector": "Q{{index}}",

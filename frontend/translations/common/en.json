@@ -508,7 +508,9 @@
       "csv": "CSV File",
       "pdf": "PDF File",
       "txt": "Text File",
-      "gvcf": "GVCF File"
+      "gvcf": "GVCF File",
+      "zip": "ZIP Archive File",
+      "xlsx": "XLSX File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",
@@ -526,7 +528,12 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
-      "clinical_report": "Clinical Report"
+      "clinical_report": "Clinical Report",
+      "aggqc": "Aggregate Quality Control Report",
+      "chrmr": "Mitochondrial Report",
+      "nrrv": "Annotated Variant Report",
+      "snvpg": "Germline SNV (masked/filtered)",
+      "alirpg": "Aligned Reads (masked)"
     },
     "query_bar": {
       "selector": "Q{{index}}",
