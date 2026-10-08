@@ -14,6 +14,10 @@ Name | Type | Description | Notes
 **cadd_score** | **float** |  | [optional] 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | [optional] 
+**cmc_mutation_url** | **str** |  | [optional] 
+**cmc_sample_mutated** | **int** |  | [optional] 
+**cmc_sample_ratio** | **float** |  | [optional] 
+**cmc_tier** | **str** |  | [optional] 
 **dann_score** | **float** |  | [optional] 
 **dna_change** | **str** |  | [optional] 
 **end** | **int** |  | 

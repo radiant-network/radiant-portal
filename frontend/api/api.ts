@@ -2797,6 +2797,30 @@ export interface ExpandedSomaticSNVOccurrence {
     'clinvar'?: Array<string>;
     /**
      * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_mutation_url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_sample_mutated'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_sample_ratio'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_tier'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
