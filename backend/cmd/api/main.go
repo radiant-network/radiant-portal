@@ -74,6 +74,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoSomaticCNVOccurrences := starrocks.NewSomaticCNVOccurrencesRepository(starrocksDB)
 	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
 	repoTerms := starrocks.NewTermsRepository(starrocksDB)
+	repoPcxPatients := starrocks.NewPcxPatientsRepository(starrocksDB)
 	repoCases := starrocks.NewCasesRepository(starrocksDB)
 	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
 	pubmedClient := client.NewPubmedClient()
@@ -328,7 +329,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	patientsGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
 	patientsGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
 	if patientViewEnabled {
-		patientsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchPatientsHandler())
+		patientsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchPatientsHandler(repoPcxPatients))
 		patientsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.PatientsAutocompleteHandler())
 		patientsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.PatientsFiltersHandler())
 		patientsGroup.GET("/statistics", requireAction(types.ActionSearchCase), server.PatientsStatisticsHandler())

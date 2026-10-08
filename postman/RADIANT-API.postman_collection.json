@@ -4403,6 +4403,49 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"sort\": [\n        {\"field\": \"can_read_phi\", \"order\": \"desc\"},\n        {\"field\": \"organization_code\", \"order\": \"asc\"},\n        {\"field\": \"patient_id\", \"order\": \"asc\"}\n    ],\n    \"search_criteria\": [\n        {\"field\": \"vital_status\", \"value\": [\"deceased\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
