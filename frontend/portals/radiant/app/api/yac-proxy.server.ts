@@ -2,7 +2,16 @@ import type { AxiosResponseHeaders, RawAxiosResponseHeaders } from 'axios';
 import axios, { HttpStatusCode } from 'axios';
 import * as process from 'node:process';
 
-import { getSessionAccessToken } from '~/utils/auth.server';
+import { isTokenValid } from '../utils/tokens';
+
+import { getSessionAccessToken, refreshAccessToken } from '~/utils/auth.server';
+
+// Refresh a token this close to expiry, so it cannot expire on its way to the agent.
+const TOKEN_MIN_VALIDITY_SECONDS = 30;
+
+// Refreshes in flight, keyed by the expired access token: the dashboard's cards query in
+// parallel, and one refresh serves them all instead of one each.
+const refreshing = new Map<string, ReturnType<typeof refreshAccessToken>>();
 
 // Request headers the YAC agent reads, relayed as-is. Authorization is never taken from the
 // browser: it is always the session's token. X-Conversation-Id groups the turns of one chat,
@@ -23,8 +32,8 @@ function forwardRequestHeaders(request: Request, accessToken: string): Record<st
   return headers;
 }
 
-function forwardResponseHeaders(from: RawAxiosResponseHeaders | AxiosResponseHeaders): Headers {
-  const headers = new Headers();
+function forwardResponseHeaders(from: RawAxiosResponseHeaders | AxiosResponseHeaders, cookies: string[]): Headers {
+  const headers = cookieHeaders(cookies);
   for (const [key, value] of Object.entries(from)) {
     if (value == null || SKIP_RESPONSE_HEADERS.has(key.toLowerCase())) continue;
     if (Array.isArray(value)) {
@@ -36,11 +45,34 @@ function forwardResponseHeaders(from: RawAxiosResponseHeaders | AxiosResponseHea
   return headers;
 }
 
-function jsonError(status: number, detail: string): Response {
-  return new Response(JSON.stringify({ detail }), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+/**
+ * The session's access token, refreshed when it is about to expire. The portal's axios client
+ * refreshes on a 401, but the chat calls the agent with its own fetch, so the proxy does it here.
+ * The cookies carry the refreshed tokens back to the browser.
+ */
+async function sessionAccessToken(request: Request): Promise<{ accessToken: string; cookies: string[] } | null> {
+  const accessToken = await getSessionAccessToken(request);
+  if (!accessToken) return null;
+  if (isTokenValid(accessToken, TOKEN_MIN_VALIDITY_SECONDS)) return { accessToken, cookies: [] };
+
+  let refresh = refreshing.get(accessToken);
+  if (!refresh) {
+    refresh = refreshAccessToken(request).finally(() => refreshing.delete(accessToken));
+    refreshing.set(accessToken, refresh);
+  }
+  return refresh;
+}
+
+function cookieHeaders(cookies: string[]): Headers {
+  const headers = new Headers();
+  cookies.forEach(cookie => headers.append('Set-Cookie', cookie));
+  return headers;
+}
+
+function jsonError(status: number, detail: string, cookies: string[] = []): Response {
+  const headers = cookieHeaders(cookies);
+  headers.set('Content-Type', 'application/json');
+  return new Response(JSON.stringify({ detail }), { status, headers });
 }
 
 export function transformUrl(url: string): string {
@@ -63,11 +95,12 @@ export function transformUrl(url: string): string {
  * returned as-is so the browser sees the agent's own 401/403/404 and its X-Usage-* headers.
  */
 export const proxyYac = async (request: Request) => {
-  const accessToken = await getSessionAccessToken(request);
-  if (!accessToken) {
-    // 401 lets the frontend's axios interceptor run its refresh-token flow.
+  const session = await sessionAccessToken(request);
+  if (!session) {
+    // No session, or one Keycloak no longer refreshes: the user has to log in again.
     return jsonError(HttpStatusCode.Unauthorized, 'no session');
   }
+  const { accessToken, cookies } = session;
 
   const hasBody = !['GET', 'HEAD'].includes(request.method.toUpperCase());
   const body = hasBody ? Buffer.from(await request.arrayBuffer()) : undefined;
@@ -84,11 +117,11 @@ export const proxyYac = async (request: Request) => {
     });
     return new Response(response.status === HttpStatusCode.NoContent ? null : response.data, {
       status: response.status,
-      headers: forwardResponseHeaders(response.headers),
+      headers: forwardResponseHeaders(response.headers, cookies),
     });
   } catch (error: unknown) {
     // Only reached when the agent could not be reached at all (no HTTP response).
     const message = error instanceof Error ? error.message : String(error);
-    return jsonError(HttpStatusCode.BadGateway, `YAC agent unreachable: ${message}`);
+    return jsonError(HttpStatusCode.BadGateway, `YAC agent unreachable: ${message}`, cookies);
   }
 };

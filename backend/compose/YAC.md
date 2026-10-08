@@ -1,15 +1,24 @@
 # YAC agent (local dev, POC)
 
 [YAC](https://github.com/hms-dbmi/udi-yac) is HIDIVE's agentic chat (chat UI + agent back-end). This
-runs its agent back-end (`packages/agent`, FastAPI) in the local compose stack, with a local Ollama
-as the LLM. Service definition: `yac-compose.yml`.
+runs its agent back-end (`packages/agent`, FastAPI) in the local compose stack. Service definition:
+`yac-compose.yml`. The chat sits above the patient exploration table (`/patient`).
 
-## Start
+Which LLM answers depends on the user:
+
+- **OpenAI**, for a user who enters their own OpenAI key in the chat (the key icon in the chat
+  header). The key is stored in the browser and sent per request as `X-OpenAI-Key`. Ollama is not
+  needed.
+- **Local Ollama** (`qwen3:14b`), for a user without a key. It needs Ollama on the host:
 
 ```bash
 ollama serve                 # on the host (GPU); skip if the Ollama app is already running
 ollama pull qwen3:14b
+```
 
+## Start
+
+```bash
 cd backend
 YAC_ENABLED=true make docker-run   # without YAC_ENABLED=true the agent is not started
 ```
@@ -47,8 +56,8 @@ points at the local StarRocks, and that StarRocks doesn't know remote users.
 | Variable | Default | Purpose |
 |---|---|---|
 | `YAC_ENABLED` | unset | `true` adds the `yac` profile in `make docker-run` |
-| `YAC_MODEL` | `qwen3:14b` | Ollama model. Needs tool calling and strict JSON-schema output |
-| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint |
+| `YAC_MODEL` | `qwen3:14b` | Model for requests without a user key. Needs tool calling and strict JSON-schema output |
+| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint, for requests without a user key. Requests with a user key always go to OpenAI |
 | `YAC_PORT` | `8007` | Host port |
 | `YAC_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins |
 | `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#main` | Git ref or local clone path (relative to `compose/`) |

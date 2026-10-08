@@ -17,6 +17,7 @@ import { useLocalPath } from '@/components/hooks/use-local-path';
 
 import { fetchPatientsList, type Patient, type PatientsSearchResponse } from '../api/patient';
 
+import PatientExplorationChat from './patient-exploration-chat';
 import PatientExplorationTableFilters from './patient-exploration-table-filters';
 
 const COLUMN_KEYS = [
@@ -70,7 +71,12 @@ function PatientExploration() {
           },
         ]}
       />
-      <main className="bg-muted h-screen overflow-auto p-3">
+      <main className="bg-muted h-screen overflow-auto p-3 space-y-3">
+        <Card className="w-full">
+          <CardContent>
+            <PatientExplorationChat />
+          </CardContent>
+        </Card>
         <Card className="h-auto size-max w-full">
           <CardContent>
             <div className="flex flex-col gap-3 py-4">

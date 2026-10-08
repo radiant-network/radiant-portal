@@ -1,6 +1,7 @@
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 
-export const isTokenValid = (token: string) => {
+/** `minValiditySeconds`: count a token expiring within that delay as already expired. */
+export const isTokenValid = (token: string, minValiditySeconds = 0) => {
   if (!token) return false;
 
   try {
@@ -11,7 +12,7 @@ export const isTokenValid = (token: string) => {
     }
 
     const currentTime = Date.now() / 1000;
-    return decoded.exp > currentTime;
+    return decoded.exp > currentTime + minValiditySeconds;
   } catch (error) {
     return false;
   }
