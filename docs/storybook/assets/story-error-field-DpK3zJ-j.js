@@ -1,0 +1,10 @@
+import{n as e}from"./rolldown-runtime-C0FnF6B9.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import{i as n,o as r,r as i,t as a}from"./field-GP5kKCeP.js";function o({label:e,invalid:t=!0,required:r=!0,error:o=`This field is required`,width:c=300,layout:l=`stacked`,children:u}){let d=(0,s.jsxs)(n,{className:t?`gap-1 text-destructive`:`gap-1`,children:[e,r&&(0,s.jsx)(`span`,{className:`text-destructive`,children:`*`})]});return(0,s.jsx)(`div`,{style:{width:c},children:(0,s.jsxs)(a,{children:[l===`stacked`?(0,s.jsxs)(s.Fragment,{children:[d,u]}):(0,s.jsxs)(`div`,{className:`flex items-center gap-2`,children:[u,d]}),t&&(0,s.jsx)(i,{children:o})]})})}var s;function c(){return(c=e((()=>{r(),s=t(),o.__docgenInfo={description:`Shows a control in its error state, the way the \`Form*\` layer renders it in the
+app: red label, red message, and — for controls that have a border — a red
+border coming from the control's own \`aria-invalid\` styling.
+
+Pass \`aria-invalid={invalid}\` on the control yourself. Leave it out for checkbox,
+radio and switch, which by design show the label and the message only.
+
+The red label is the one hardcoded class here, and it mirrors what \`FormLabel\`
+applies on error. Everything else must come from the components, so that a
+story cannot show an error state the app is unable to produce.`,methods:[],displayName:`StoryErrorField`,props:{label:{required:!0,tsType:{name:`ReactNode`},description:``},invalid:{required:!1,tsType:{name:`boolean`},description:``,defaultValue:{value:`true`,computed:!1}},required:{required:!1,tsType:{name:`boolean`},description:``,defaultValue:{value:`true`,computed:!1}},error:{required:!1,tsType:{name:`ReactNode`},description:``,defaultValue:{value:`'This field is required'`,computed:!1}},width:{required:!1,tsType:{name:`number`},description:``,defaultValue:{value:`300`,computed:!1}},layout:{required:!1,tsType:{name:`union`,raw:`'stacked' | 'inline'`,elements:[{name:`literal`,value:`'stacked'`},{name:`literal`,value:`'inline'`}]},description:``,defaultValue:{value:`'stacked'`,computed:!1}},children:{required:!0,tsType:{name:`ReactNode`},description:``}}}})))()}export{c as n,o as t};
