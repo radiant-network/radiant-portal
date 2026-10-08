@@ -135,7 +135,7 @@ Jira tickets, timeline and milestones: [Realisation](03-realisation.md).
 | Reverse link from the case page: in or out? | Product owner |
 | When will the tumor board view be ready, and with which columns? | Product owner |
 | Who creates the 4 demo users in QA? | Dev team |
-| Who runs the patient-key insert after each source load (QA seed, PRD), and does `v_pcx_30_patient_key` live in RADIANT-Timeline-Abstraction with the other views? | Dev team / other team |
+| Who runs the patient-key insert after each source load in PRD, and does `v_pcx_30_patient_key` move to RADIANT-Timeline-Abstraction with the other views? The seed owns both for local and QA (`backend/scripts/seed/sql/pcx_30_patient_key.sql`, `views/v_pcx_30_patient_key.sql.tmpl`), which are the contract to hand over. | Other team |
 | Where are tumor board reports stored (S3 bucket, which view holds the URL), and are they PHI? | Other team |
 | What does the BRIM evidence link look like, and does it need its own login? | Other team |
 | How does D.A.V.I.D integrate with LibreChat (embed, API, SSO), and which patient data may it receive? | Product owner / dev team |

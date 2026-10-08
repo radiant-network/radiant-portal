@@ -8,12 +8,12 @@ About 15 to 19 dev days remain across 20 new stories, plus D.A.V.I.D (L1, not es
 | --- | --- | --- | --- | --- | --- |
 | SJRA-1956 | 4 | Patient app scaffold, routes, beta flag "Patient View" | done | | Done |
 | SJRA-1977 | 5 | Shared entity sidebar: key dates, external records (PR #1677) | done | | In review |
-| D1 | 1 | Fake PCX data generator and `radiant` seed | done | | In progress |
-| D2 | 1 | Secured list view `v_pcx_30_patient_list`, built on the secured views (template in `backend/scripts/pcx-30/views`, tested locally) | 1 d | D1 | In review |
+| SJRA-1997 (D1) | 1 | Fake PCX data generator and `cbtn` seed | done | | Done |
+| SJRA-1997 (D2) | 1 | Secured list view `v_pcx_30_patient_list`, built on the secured views (`backend/scripts/seed/views`) | done | D1 | Done |
 | D3 | 1 | Rebuild the 8 real CBTN views: `radiant_patient_id`, lab path in `can_read_phi` | 0.5 d | | Done |
-| D4 | 1 | Run the seed in QA, provision the 4 demo users, check the PHI matrix | 0.5 to 1 d | D1, D2 | Not started |
-| B1 | 2 | API types, swagger annotations, generated TS client (contract) | 0.5 to 1 d | | Not started |
-| B2 | 3 | Patient key lookup table (`pcx_30_patient_key`, insert of missing keys) and secured view `v_pcx_30_patient_key`; `patient_key` in the list view | 0.5 d | B1 | Not started |
+| SJRA-1997 (D4) | 1 | Run the seed in QA, provision the demo users, check the PHI matrix | done | D1, D2 | Done |
+| SJRA-1998 (B1) | 2 | API types, swagger annotations, generated TS client (contract) | done | | Done |
+| SJRA-2000 (B2) | 3 | Patient key lookup table (`pcx_30_patient_key`, `uuid4()` keys for patients without one) and secured view `v_pcx_30_patient_key`; `patient_key` in the list view | 0.5 d | B1 | In progress |
 | B3 | 3 | `POST /patients/search`, `GET /patients/autocomplete` and `GET /patients/filters` | 1.25 d | B1, D2 | Not started |
 | B4 | 3 | `GET /patients/statistics` | 0.5 d | B3 | Not started |
 | B5 | 3 | `GET /patients/{patient_key}` with portal cases | 1 to 1.5 d | B2 | Not started |
@@ -25,7 +25,7 @@ About 15 to 19 dev days remain across 20 new stories, plus D.A.V.I.D (L1, not es
 | F5 | 5 | Treatments, Imaging and Genomics tabs | 1.5 d | F1 | Not started |
 | F6 | 5 | Tumor Board (empty state until its view exists), Laboratory CBC, empty states for missing data | 1 d | F1 | Not started |
 | X1 | 6 | i18n en/fr, polish, demo script, dry run with the product owner | 1 to 2 d | D4, B6, F3, F6 | Not started |
-| B7 | 3 | Backend feature flag `PATIENT_VIEW_ENABLED` registering the /patients routes | 0.25 d | B1 | Not started |
+| SJRA-1999 (B7) | 3 | Backend feature flag `PATIENT_VIEW_ENABLED` registering the /patients routes | done | B1 | Done |
 | F7 | 4 | Frontend toggle: nav entry and routes hidden unless the beta feature is on and the backend answers | 0.25 d | B7 | Not started |
 | B8 | 3 | Tumor board report download: presigned S3 URL behind the entity check (unclear: where the report lives) | 0.5 to 1 d | B5, other team | Not started |
 | F8 | 5 | Evidence link to BRIM on the initial diagnosis (unclear: link format) | 0.25 d | B5, other team | Not started |
