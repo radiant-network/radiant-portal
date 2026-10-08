@@ -204,6 +204,22 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 		return nil, fmt.Errorf("failed to fetch CNV info: %w", err)
 	}
 
+	var overlaps []types.CNVGeneOverlap
+	query := db.Raw(cnvGenesOverlapSQL(ctx), map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
+	if err = query.Find(&overlaps).Error; err != nil {
+		return nil, fmt.Errorf("error query gene overlap: %w", err)
+	}
+	for i := range overlaps {
+		if overlaps[i].TenantGenePanels == nil {
+			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
+		}
+	}
+	return overlaps, nil
+}
+
+// cnvGenesOverlapSQL builds the genes overlap query; table names are resolved from ctx, so the
+// tenant gene panel MV is the bound tenant's.
+func cnvGenesOverlapSQL(ctx context.Context) string {
 	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
 	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
 	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
@@ -223,7 +239,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 		tenantPanelsColumn = "gtp.panels AS tenant_gene_panels"
 		tenantPanelsJoin = "LEFT JOIN gene_tenant_panels gtp ON go.symbol = gtp.symbol"
 	}
-	sql := fmt.Sprintf(`WITH gene_overlap AS (
+	return fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT
     	    g.gene_id,
     	    g.name AS symbol,
@@ -279,15 +295,4 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
     	     %s
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
 		ensemblGene, ensemblExon, cytoband, tenantPanelsCTE, tenantPanelsColumn, tenantPanelsJoin)
-	var overlaps []types.CNVGeneOverlap
-	query := db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
-	if err = query.Find(&overlaps).Error; err != nil {
-		return nil, fmt.Errorf("error query gene overlap: %w", err)
-	}
-	for i := range overlaps {
-		if overlaps[i].TenantGenePanels == nil {
-			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
-		}
-	}
-	return overlaps, nil
 }
