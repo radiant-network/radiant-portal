@@ -202,6 +202,8 @@ func Test_GetDocumentsFilters(t *testing.T) {
 		"data_type_code":[
 			{"key":"aggqc", "label":"Aggregate Quality Control Report"},
 			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"alirpg", "label":"Aligned Reads (masked)"},
+			{"key":"chrmr", "label":"Mitochondrial Report"},
 			{"key":"clinical_report", "label":"Clinical Report"},
 			{"key":"cnvvis", "label":"CNV Visualization"},
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
@@ -210,9 +212,11 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"gcnv", "label":"Germline CNV"}, 
 			{"key":"gsv", "label":"Germline SV"}, 
 			{"key":"igv", "label":"IGV Track"}, 
+			{"key":"nrrv", "label":"Annotated Variant Report"},
 			{"key":"qcrun", "label":"Sequencing Run QC Report"}, 
 			{"key":"scnv", "label":"Somatic CNV"}, 
 			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"snvpg", "label":"Germline SNV (masked/filtered)"},
 			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
 			{"key":"ssnv", "label":"Somatic SNV"}, 
 			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
@@ -232,6 +236,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"tsv", "label":"TSV File"}, 
 			{"key":"txt", "label":"Text File"},
 			{"key":"vcf", "label":"VCF File"},
+			{"key":"xlsx", "label":"XLSX File"},
 			{"key":"zip", "label":"ZIP Archive File"}
 		], 
 		"diagnosis_lab_code":[
