@@ -1,5 +1,6 @@
 import {
   type FiltersValue,
+  type ListBodyWithCriteria,
   type PatientEntity,
   PatientEntityGenderEnum,
   PatientEntityPatientIdTypeEnum,
@@ -890,10 +891,14 @@ const PATIENTS_MOCK: Patient[] = [
 
 const MOCK_LATENCY_MS = 300;
 
-export async function fetchPatientsList(): Promise<PatientsSearchResponse> {
+// TODO: replace with a call to the generated patient API client; fall back to the mock only on 404
+export async function fetchPatientsList(body: ListBodyWithCriteria = {}): Promise<PatientsSearchResponse> {
   await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
+  const limit = body.limit ?? PATIENTS_MOCK.length;
+  const pageIndex = body.page_index ?? 0;
+  const start = pageIndex * limit;
   return {
-    list: PATIENTS_MOCK,
+    list: PATIENTS_MOCK.slice(start, start + limit),
     count: PATIENTS_MOCK.length,
   };
 }
