@@ -151,3 +151,5 @@ When suggesting UI components, follow this priority:
 - **Commit format**: `type(scope): SJRA-### message` (enforced by CommitLint + Husky)
 - **Tailwind**: use semantic color names (`warning-bg`, `primary-text`), avoid dynamic class generation
 - **Test files**: co-located with the component they test
+
+Universal coding rules that apply to every frontend change live in [.claude/rules/universal.md](.claude/rules/universal.md).

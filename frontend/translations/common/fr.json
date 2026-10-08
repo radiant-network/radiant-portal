@@ -1227,6 +1227,11 @@
     "actions": {
       "visualize_survival": "Visualiser la survie de la cohorte"
     },
+    "chat": {
+      "title": "Analyse de cohorte",
+      "description": "État actuel du registre · dérivé des données de la cohorte",
+      "source": "Roster en direct"
+    },
     "columns": {
       "patient": "Patient",
       "mrn": "Dossier",

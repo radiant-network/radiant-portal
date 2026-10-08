@@ -12,7 +12,7 @@ import DataTableFilters, {
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 
-import { fetchPatientFilters, type PatientFilters } from '../api/patient';
+import { fetchPatientFilters, type PatientFilters } from '../../api/patient';
 
 type FiltersGroupFormProps = {
   loading?: boolean;

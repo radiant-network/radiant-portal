@@ -1226,6 +1226,11 @@
     "actions": {
       "visualize_survival": "Visualize Cohort Survival"
     },
+    "chat": {
+      "title": "Cohort analytics",
+      "description": "Current registry snapshot · derived from roster fields",
+      "source": "Live roster"
+    },
     "columns": {
       "patient": "Patient",
       "mrn": "MRN",
