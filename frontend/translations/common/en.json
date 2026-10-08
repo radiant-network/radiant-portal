@@ -1177,6 +1177,37 @@
         "cancer_predisposition": "Predisposition list"
       }
     },
+    "genomics": {
+      "day": "Day {{day}}",
+      "origin": {
+        "germline": "Germline",
+        "somatic": "Somatic"
+      },
+      "interpretations": {
+        "title": "Variant interpretations",
+        "headers": {
+          "gene": "Gene",
+          "variant": "Variant",
+          "classification": "Classification",
+          "origin": "Origin",
+          "case": "Case",
+          "assay": "Assay",
+          "reported": "Reported"
+        }
+      },
+      "cases": {
+        "title": "Genomic cases",
+        "headers": {
+          "case": "Case",
+          "priority": "Priority",
+          "status": "Status",
+          "sample_scope": "Sample scope",
+          "assay": "Assay",
+          "requested_by": "Requested by",
+          "updated": "Updated"
+        }
+      }
+    },
     "sidebar": {
       "key_dates": {
         "title": "Key Dates",
