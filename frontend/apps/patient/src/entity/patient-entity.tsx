@@ -110,7 +110,7 @@ export default function App() {
 
   return (
     <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-      <Header patientId={patientId} />
+      <Header patient={data} isLoading={isLoading} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           {TAB_ORDER.map(({ value, i18nKey }) => (

@@ -1152,7 +1152,18 @@
   },
   "patient_entity": {
     "header": {
-      "title": "Patient {{id}}"
+      "title": "Patient {{id}}",
+      "research_id": "ID: {{id}}",
+      "born": "Born {{year}}",
+      "phi_restricted": "Restricted",
+      "phi_restricted_tooltip": "Identity restricted outside your organisation",
+      "vital_status": {
+        "alive": "Alive",
+        "deceased": "Deceased"
+      },
+      "actions": {
+        "visualize_survival": "Visualize Cohort Survival"
+      }
     },
     "tabs": {
       "overview": "Overview",
