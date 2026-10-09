@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // The PCX patient handlers not implemented yet answer 501; each story replaces its handler body.
@@ -76,8 +78,28 @@ type pcxPatientsSearcher interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/autocomplete [get]
-func PatientsAutocompleteHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientsAutocompleteHandler(repo pcxPatientsAutocompleter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		if prefix == "" {
+			c.JSON(http.StatusOK, []types.AutocompleteResult{})
+			return
+		}
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil || limit <= 0 {
+			limit = types.PcxPatientListDefaultLimit
+		}
+		results, err := repo.AutocompletePatients(c.Request.Context(), prefix, min(limit, utils.MaxLimit))
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, results)
+	}
+}
+
+type pcxPatientsAutocompleter interface {
+	AutocompletePatients(ctx context.Context, prefix string, limit int) ([]types.AutocompleteResult, error)
 }
 
 // PatientsFiltersHandler handles retrieving the patient list filters
