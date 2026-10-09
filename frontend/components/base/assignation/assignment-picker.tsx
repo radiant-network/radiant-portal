@@ -1,4 +1,4 @@
-import { type ComponentProps, useRef, useState } from 'react';
+import { type ComponentProps, type KeyboardEvent, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 
 import { Avatar as AssigneesAvatar } from '@/components/base/avatar/avatar';
@@ -81,6 +81,12 @@ function AssignmentPicker({
     setDraft([]);
     setSearch('');
     inputRef.current?.focus();
+  }
+
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace' && !search && hasSelection) {
+      setDraft(draft.slice(0, -1));
+    }
   }
 
   function handleApply() {
@@ -181,6 +187,7 @@ function AssignmentPicker({
               ref={inputRef}
               value={search}
               onChange={event => setSearch(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               placeholder={hasSelection ? undefined : t('common.assignment_picker.search_placeholder')}
               aria-label={t('common.assignment_picker.search_placeholder')}
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
