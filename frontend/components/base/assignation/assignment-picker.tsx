@@ -146,7 +146,13 @@ function AssignmentPicker({
           aria-label={t('a11y.assignment_picker.open')}
           className="rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <AssigneesAvatar users={assignees} size={size} showDetails={!open} buttonVariant={buttonVariant} />
+          <AssigneesAvatar
+            users={assignees}
+            size={size}
+            showDetails={!open}
+            buttonVariant={buttonVariant}
+            onEdit={() => handleOpenChange(true)}
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent

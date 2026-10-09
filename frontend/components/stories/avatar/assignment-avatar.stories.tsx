@@ -200,6 +200,11 @@ export const AssignmentStates: Story = {
               <Avatar users={sampleUsers.slice(0, 4)} size="md" />
               <span className="text-xs text-muted-foreground">Multiple Users</span>
             </div>
+
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" onEdit={() => alert('Edit clicked!')} />
+              <span className="text-xs text-muted-foreground">With Edit</span>
+            </div>
           </div>
         </div>
       </div>
