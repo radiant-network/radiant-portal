@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **index_url_expire_at** | **int** |  | [optional] 
 **name** | **str** |  | [optional] 
 **patient_id** | **int** |  | [optional] 
+**sequencing_experiment_id** | **int** |  | 
 **sex** | **str** |  | [optional] 
 **type** | **str** |  | [optional] 
 **url** | **str** |  | [optional] 

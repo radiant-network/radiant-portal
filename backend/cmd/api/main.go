@@ -120,6 +120,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 		os.Exit(1)
 	}
 
+	igvPublicTracksPrefix, err := utils.IGVPublicTracksPrefixFromEnv()
+	if err != nil {
+		slog.Error("failed to read IGV public tracks prefix", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	// Initialize public routes explicitly
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates))
 	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
@@ -196,7 +202,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	hpoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetHPOTermAutoComplete(repoTerms))
 
 	igvGroup := tenantRoutes.Group("/igv")
-	igvGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.GetIGVHandler(repoIGV, repoCases, s3Presigner))
+	igvGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.GetIGVHandler(repoIGV, repoCases, s3Presigner, igvPublicTracksPrefix))
 
 	interpretationsGroup := tenantRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", requireAction(types.ActionSearchCase), server.GetPubmedCitation(pubmedClient))

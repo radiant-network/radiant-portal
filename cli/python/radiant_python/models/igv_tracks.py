@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
+from radiant_python.models.igv_public_track import IGVPublicTrack
 from radiant_python.models.igv_track_enriched import IGVTrackEnriched
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,7 +29,13 @@ class IGVTracks(BaseModel):
     IGVTracks
     """ # noqa: E501
     alignment: Optional[List[IGVTrackEnriched]] = None
-    __properties: ClassVar[List[str]] = ["alignment"]
+    baf: Optional[List[IGVTrackEnriched]] = None
+    capture_targets: Optional[List[IGVTrackEnriched]] = None
+    cnv: Optional[List[IGVTrackEnriched]] = None
+    public_tracks: Dict[str, IGVPublicTrack]
+    roh: Optional[List[IGVTrackEnriched]] = None
+    seg: Optional[List[IGVTrackEnriched]] = None
+    __properties: ClassVar[List[str]] = ["alignment", "baf", "capture_targets", "cnv", "public_tracks", "roh", "seg"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,6 +83,48 @@ class IGVTracks(BaseModel):
                 if _item_alignment:
                     _items.append(_item_alignment.to_dict())
             _dict['alignment'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in baf (list)
+        _items = []
+        if self.baf:
+            for _item_baf in self.baf:
+                if _item_baf:
+                    _items.append(_item_baf.to_dict())
+            _dict['baf'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in capture_targets (list)
+        _items = []
+        if self.capture_targets:
+            for _item_capture_targets in self.capture_targets:
+                if _item_capture_targets:
+                    _items.append(_item_capture_targets.to_dict())
+            _dict['capture_targets'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in cnv (list)
+        _items = []
+        if self.cnv:
+            for _item_cnv in self.cnv:
+                if _item_cnv:
+                    _items.append(_item_cnv.to_dict())
+            _dict['cnv'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each value in public_tracks (dict)
+        _field_dict = {}
+        if self.public_tracks:
+            for _key_public_tracks in self.public_tracks:
+                if self.public_tracks[_key_public_tracks]:
+                    _field_dict[_key_public_tracks] = self.public_tracks[_key_public_tracks].to_dict()
+            _dict['public_tracks'] = _field_dict
+        # override the default output from pydantic by calling `to_dict()` of each item in roh (list)
+        _items = []
+        if self.roh:
+            for _item_roh in self.roh:
+                if _item_roh:
+                    _items.append(_item_roh.to_dict())
+            _dict['roh'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in seg (list)
+        _items = []
+        if self.seg:
+            for _item_seg in self.seg:
+                if _item_seg:
+                    _items.append(_item_seg.to_dict())
+            _dict['seg'] = _items
         return _dict
 
     @classmethod
@@ -88,7 +137,18 @@ class IGVTracks(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "alignment": [IGVTrackEnriched.from_dict(_item) for _item in obj["alignment"]] if obj.get("alignment") is not None else None
+            "alignment": [IGVTrackEnriched.from_dict(_item) for _item in obj["alignment"]] if obj.get("alignment") is not None else None,
+            "baf": [IGVTrackEnriched.from_dict(_item) for _item in obj["baf"]] if obj.get("baf") is not None else None,
+            "capture_targets": [IGVTrackEnriched.from_dict(_item) for _item in obj["capture_targets"]] if obj.get("capture_targets") is not None else None,
+            "cnv": [IGVTrackEnriched.from_dict(_item) for _item in obj["cnv"]] if obj.get("cnv") is not None else None,
+            "public_tracks": dict(
+                (_k, IGVPublicTrack.from_dict(_v))
+                for _k, _v in obj["public_tracks"].items()
+            )
+            if obj.get("public_tracks") is not None
+            else None,
+            "roh": [IGVTrackEnriched.from_dict(_item) for _item in obj["roh"]] if obj.get("roh") is not None else None,
+            "seg": [IGVTrackEnriched.from_dict(_item) for _item in obj["seg"]] if obj.get("seg") is not None else None
         })
         return _obj
 

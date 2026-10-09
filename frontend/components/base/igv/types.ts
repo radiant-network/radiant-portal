@@ -1,6 +1,8 @@
 import type { IGVTrackEnriched } from '@/api/api';
 
-export type IGVTrack = IGVTrackEnriched & {
+// igv.js track config. API case tracks (IGVTrackEnriched) fit it as is; tracks built here, such as
+// the reference gene track, set only the igv.js fields and none of the API ones.
+export type IGVTrack = Partial<IGVTrackEnriched> & {
   /**
    * Integer value specifying relative order of track position on the screen. To pin a track to the bottom use Number.MAX_VALUE. If no order is specified, tracks appear in order of their addition.
    */

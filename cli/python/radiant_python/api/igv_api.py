@@ -58,7 +58,7 @@ class IgvApi:
     ) -> IGVTracks:
         """Get IGV
 
-        Get IGV tracks for a case
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -133,7 +133,7 @@ class IgvApi:
     ) -> ApiResponse[IGVTracks]:
         """Get IGV
 
-        Get IGV tracks for a case
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -208,7 +208,7 @@ class IgvApi:
     ) -> RESTResponseType:
         """Get IGV
 
-        Get IGV tracks for a case
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
 
         :param tenant: Tenant code (required)
         :type tenant: str
