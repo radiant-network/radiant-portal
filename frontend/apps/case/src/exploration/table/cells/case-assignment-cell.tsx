@@ -16,6 +16,7 @@ function CaseAssignmentCell({ row, onSaved }: CaseAssignmentCellProps) {
       diagnosisLabCode={diagnosis_lab_code}
       assignees={assignees}
       size="xs"
+      align="start"
       onSaved={onSaved}
     />
   );

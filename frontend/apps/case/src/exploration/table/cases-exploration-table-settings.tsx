@@ -33,6 +33,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
       ),
       size: 80,
       minSize: 80,
+      maxSize: 80,
+      enableResizing: false,
       enableSorting: false,
     }),
     // case

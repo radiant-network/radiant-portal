@@ -1,5 +1,7 @@
 import type { AvatarSize } from '@/components/base/shadcn/avatar';
+import { Button } from '@/components/base/shadcn/button';
 import { HoverCard, HoverCardContent, HoverCardPortal, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
+import { useI18n } from '@/components/hooks/i18n';
 
 import type { AvatarUser } from './avatar.types';
 import { AvatarUserItem } from './avatar-user-item';
@@ -8,11 +10,13 @@ interface AvatarPopoverProps {
   users: AvatarUser | AvatarUser[];
   size?: AvatarSize;
   title?: string;
+  onEdit?: () => void;
   className?: string;
   children: React.ReactNode;
 }
 
-export function AvatarPopover({ users, title, children }: AvatarPopoverProps) {
+export function AvatarPopover({ users, title, onEdit, children }: AvatarPopoverProps) {
+  const { t } = useI18n();
   // Normalize users to always be an array
   const usersArray = Array.isArray(users) ? users : [users];
 
@@ -40,7 +44,16 @@ export function AvatarPopover({ users, title, children }: AvatarPopoverProps) {
           side="top"
           onClick={event => event.stopPropagation()}
         >
-          {title && <h3 className="text-xs font-medium leading-none truncate mb-4">{title}</h3>}
+          {(title || onEdit) && (
+            <div className="mb-4 flex items-center gap-2">
+              {title && <h3 className="text-xs font-medium leading-none truncate">{title}</h3>}
+              {onEdit && (
+                <Button variant="link" size="xs" className="h-auto p-0" onClick={onEdit}>
+                  {t('common.edit')}
+                </Button>
+              )}
+            </div>
+          )}
           <div className={isSingleUser ? '' : 'space-y-3'}>
             {sortedUsers.map(user => (
               <AvatarUserItem key={user.id} user={user} size="sm" />
