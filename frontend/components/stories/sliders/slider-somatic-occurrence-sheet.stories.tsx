@@ -82,6 +82,12 @@ const occurrenceMock = {
   chromosome: '1',
   start: 10276319,
   end: 10276319,
+  reference: 'A',
+  alternate: 'G',
+  cmc_sample_mutated: 3,
+  cmc_sample_ratio: 0.0000693,
+  cmc_tier: '1',
+  cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000',
 } as SomaticSNVOccurrence;
 
 const meta = {

@@ -1,9 +1,10 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -14,9 +15,11 @@ import SomaticFrequencyCell from '@/components/base/data-table/cells/somatic-fre
 import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/somatic-germline-frequency-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
+import { getFranklinSnvUrl } from '@/components/base/variant/utils';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -184,8 +187,41 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
       minSize: 40,
       enableSorting: true,
     }),
-    // @TODO: Tier is missing in somatic api
-    // @TODO: CMC is missing in somatic api
+    // Tier
+    columnHelper.accessor(row => row, {
+      id: 'cmc_tier',
+      cell: info => (
+        <CmcTierBadge
+          value={info.getValue().cmc_tier}
+          href={getFranklinSnvUrl(
+            `${info.getValue().chromosome}-${info.getValue().start}-${info.getValue().reference}-${info.getValue().alternate}`,
+          )}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_tier_tooltip')}>{t('variant.headers.cmc_tier')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // CMC
+    columnHelper.accessor(row => row, {
+      id: 'cmc_sample_mutated',
+      cell: info => (
+        <CmcCell
+          sampleMutated={info.getValue().cmc_sample_mutated}
+          sampleRatio={info.getValue().cmc_sample_ratio}
+          mutationUrl={info.getValue().cmc_mutation_url}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_sample_mutated_tooltip')}>
+          {t('variant.headers.cmc_sample_mutated')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
@@ -352,6 +388,16 @@ const defaultSomaticSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.hotspot',
     additionalFields: ['hotspot'],
+  },
+  {
+    id: 'cmc_tier',
+    visible: true,
+    label: 'variant.headers.cmc_tier',
+  },
+  {
+    id: 'cmc_sample_mutated',
+    visible: true,
+    label: 'variant.headers.cmc_sample_mutated',
   },
   {
     id: 'clinvar',

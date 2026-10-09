@@ -94,6 +94,23 @@ export const getClass = (classification: string) => {
 };
 
 /**
+ * Returns the color and display text for a given CMC tier.
+ * @param tier The CMC tier key (e.g., '1', '2', '3', 'Other', 'no_data').
+ * @returns An object containing { color, display } for the tier.
+ */
+export const getTier = (tier: string) => {
+  const mapping: Record<string, { color: string; display: string }> = {
+    '1': { color: 'red', display: 'Tier 1' },
+    '2': { color: 'orange', display: 'Tier 2' },
+    '3': { color: 'amber', display: 'Tier 3' },
+    Other: { color: 'neutral', display: 'Other' },
+    no_data: { color: 'neutral', display: 'ND' },
+  };
+
+  return mapping[tier];
+};
+
+/**
  * Gets the column name from a columns array by column ID.
  * @param columns The array of column objects.
  * @param columnID The ID of the column.
@@ -296,6 +313,8 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return undefined;
     case 'clinvar':
       return data.clinvar_name ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data.clinvar_name}` : undefined;
+    case 'cmc':
+      return data.cmc_id ? `https://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=37&id=${data.cmc_id}` : undefined;
     case 'cnv_variant':
       const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
       return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
@@ -317,6 +336,8 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return undefined;
     case 'omim_phenotype':
       return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
+    case 'tier':
+      return data.locus ? `https://franklin.genoox.com/clinical-db/variant/snpTumor/chr${data.locus}-hg38` : undefined;
     case 'rcv_link':
       return data.rcv_link ? `https://www.ncbi.nlm.nih.gov/clinvar/${data.rcv_link}.${data.version}` : undefined;
     case 'transcript_id':

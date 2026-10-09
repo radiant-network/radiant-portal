@@ -11,6 +11,14 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "cmc": {
+      "open_cosmic_one": "{{count}} échantillon COSMIC, ouvrir dans COSMIC (nouvel onglet)",
+      "open_cosmic_other": "{{count}} échantillons COSMIC, ouvrir dans COSMIC (nouvel onglet)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "Aucune donnée",
+      "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
+    },
     "date_picker": {
       "open_calendar": "Ouvrir le calendrier"
     },
@@ -780,6 +788,12 @@
         "chromosome": "Chromosome",
         "clinvar": "ClinVar",
         "clinvar_interpretation": "ClinVar",
+        "cmc_sample_mutated": "COSMIC CMC",
+        "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation",
+        "cmc_sample_ratio": "COSMIC CMC (ratio)",
+        "cmc_sample_ratio_tooltip": "Ratio des échantillons dans COSMIC avec cette mutation par rapport au variant par rapport à l’ensemble des échantillons",
+        "cmc_tier": "COSMIC CMC tier",
+        "cmc_tier_tooltip": "Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
         "cn": "Nombre de copies",
         "cnv_end": "Fin du CNV",
         "cnv_exomiser_gene_combined_score": "Score Exomiser",
@@ -901,6 +915,13 @@
           "tr_v_pseudogene": "Pseudogène TR V",
           "unitary_pseudogene": "Pseudogène unitaire",
           "unprocessed_pseudogene": "Pseudogène non traité",
+          "": "Aucune donnée"
+        },
+        "cmc_tier": {
+          "1": "Tier 1",
+          "2": "Tier 2",
+          "3": "Tier 3",
+          "other": "Other",
           "": "Aucune donnée"
         },
         "consequence": {
@@ -1658,6 +1679,10 @@
       "clinical_interpretation": "Interprétation clinique",
       "clingen": "ClinGen",
       "clinvar": "ClinVar",
+      "cmc_sample_mutated": "CMC",
+      "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
+      "cmc_tier": "Tier",
+      "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
       "cn": "CN",
       "cn_tooltip": "Nombre de copies estimé",
       "cytoband": "Cytobande",
@@ -1790,6 +1815,13 @@
       "phylop17way": "PhyloP17Way",
       "pli": "pLI",
       "no_prediction": "Aucune prédiction"
+    },
+    "cmc_tiers": {
+      "1": "Tier 1",
+      "2": "Tier 2",
+      "3": "Tier 3",
+      "other": "Other",
+      "no_data": "ND"
     },
     "classes": {
       "indel": "Indel",
@@ -1965,6 +1997,7 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
           "hotspot": "Hotspot",
           "no_data": "Aucune donnée de classification rapportée"
         },
@@ -1973,6 +2006,8 @@
           "affected": "Affectés",
           "to": "Tumeur seule",
           "tn": "Tumeur-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
