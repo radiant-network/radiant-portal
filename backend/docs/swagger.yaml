@@ -2369,6 +2369,22 @@ components:
         username:
           type: string
       type: object
+    IGVPublicTrack:
+      properties:
+        indexURL:
+          type: string
+        indexURLExpireAt:
+          type: integer
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      required:
+      - indexURL
+      - indexURLExpireAt
+      - url
+      - urlExpireAt
+      type: object
     IGVTrackEnriched:
       properties:
         family_role:
@@ -2385,6 +2401,8 @@ components:
           type: string
         patient_id:
           type: integer
+        sequencing_experiment_id:
+          type: integer
         sex:
           type: string
         type:
@@ -2393,6 +2411,8 @@ components:
           type: string
         urlExpireAt:
           type: integer
+      required:
+      - sequencing_experiment_id
       type: object
     IGVTracks:
       properties:
@@ -2401,6 +2421,37 @@ components:
             $ref: '#/components/schemas/IGVTrackEnriched'
           type: array
           uniqueItems: false
+        baf:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        capture_targets:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        cnv:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        public_tracks:
+          additionalProperties:
+            $ref: '#/components/schemas/IGVPublicTrack'
+          type: object
+        roh:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        seg:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+      required:
+      - public_tracks
       type: object
     InputDocumentBatch:
       properties:
@@ -6646,7 +6697,9 @@ paths:
       - hpo
   /{tenant}/igv/{case_id}:
     get:
-      description: Get IGV tracks for a case
+      description: |-
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+        and the public reference tracks, all presigned
       operationId: getIGV
       parameters:
       - description: Tenant code

@@ -84,6 +84,7 @@ from radiant_python.models.gene_search_body import GeneSearchBody
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.get_batch_response import GetBatchResponse
+from radiant_python.models.igv_public_track import IGVPublicTrack
 from radiant_python.models.igv_track_enriched import IGVTrackEnriched
 from radiant_python.models.igv_tracks import IGVTracks
 from radiant_python.models.input_document_batch import InputDocumentBatch

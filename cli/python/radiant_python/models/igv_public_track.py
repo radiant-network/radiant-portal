@@ -18,27 +18,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class IGVTrackEnriched(BaseModel):
+class IGVPublicTrack(BaseModel):
     """
-    IGVTrackEnriched
+    IGVPublicTrack
     """ # noqa: E501
-    family_role: Optional[StrictStr] = None
-    fetus_id: Optional[StrictInt] = None
-    format: Optional[StrictStr] = None
-    index_url: Optional[StrictStr] = Field(default=None, alias="indexURL")
-    index_url_expire_at: Optional[StrictInt] = Field(default=None, alias="indexURLExpireAt")
-    name: Optional[StrictStr] = None
-    patient_id: Optional[StrictInt] = None
-    sequencing_experiment_id: StrictInt
-    sex: Optional[StrictStr] = None
-    type: Optional[StrictStr] = None
-    url: Optional[StrictStr] = None
-    url_expire_at: Optional[StrictInt] = Field(default=None, alias="urlExpireAt")
-    __properties: ClassVar[List[str]] = ["family_role", "fetus_id", "format", "indexURL", "indexURLExpireAt", "name", "patient_id", "sequencing_experiment_id", "sex", "type", "url", "urlExpireAt"]
+    index_url: StrictStr = Field(alias="indexURL")
+    index_url_expire_at: StrictInt = Field(alias="indexURLExpireAt")
+    url: StrictStr
+    url_expire_at: StrictInt = Field(alias="urlExpireAt")
+    __properties: ClassVar[List[str]] = ["indexURL", "indexURLExpireAt", "url", "urlExpireAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -58,7 +50,7 @@ class IGVTrackEnriched(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of IGVTrackEnriched from a JSON string"""
+        """Create an instance of IGVPublicTrack from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -83,7 +75,7 @@ class IGVTrackEnriched(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of IGVTrackEnriched from a dict"""
+        """Create an instance of IGVPublicTrack from a dict"""
         if obj is None:
             return None
 
@@ -91,16 +83,8 @@ class IGVTrackEnriched(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "family_role": obj.get("family_role"),
-            "fetus_id": obj.get("fetus_id"),
-            "format": obj.get("format"),
             "indexURL": obj.get("indexURL"),
             "indexURLExpireAt": obj.get("indexURLExpireAt"),
-            "name": obj.get("name"),
-            "patient_id": obj.get("patient_id"),
-            "sequencing_experiment_id": obj.get("sequencing_experiment_id"),
-            "sex": obj.get("sex"),
-            "type": obj.get("type"),
             "url": obj.get("url"),
             "urlExpireAt": obj.get("urlExpireAt")
         })
