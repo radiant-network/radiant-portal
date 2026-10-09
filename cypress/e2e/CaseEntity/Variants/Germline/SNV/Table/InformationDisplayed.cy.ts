@@ -51,6 +51,16 @@ describe('Case Entity - Variants - Germline - SNV - Table - Information displaye
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('omim', data.variantGermline);
   });
 
+  it('Tier', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('tier', data.variantGermline);
+  });
+
+  it('CMC', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('cmc', data.variantGermline);
+  });
+
   it('ClinVar', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('clinvar', data.variantGermline);

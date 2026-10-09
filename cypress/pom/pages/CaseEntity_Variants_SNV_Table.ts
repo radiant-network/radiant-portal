@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getUrlLink, shouldHaveTableResultsCount, stringToRegExp } from '../shared/Utils';
+import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getTier, getUrlLink, shouldHaveTableResultsCount, stringToRegExp } from '../shared/Utils';
 
 const tableGermlineSNVColumns = [
   {
@@ -125,6 +125,28 @@ const tableGermlineSNVColumns = [
     tooltip: 'MIM inheritance modes',
   },
   {
+    id: 'tier',
+    name: 'Tier',
+    apiField: 'cmc_tier',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 9,
+    tooltip: 'CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
+  },
+  {
+    id: 'cmc',
+    name: 'CMC',
+    apiField: 'cmc_sample_mutated',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 10,
+    tooltip: 'Number of samples in COSMIC with this mutation followed by its ratio',
+  },
+  {
     id: 'clinvar',
     name: 'ClinVar',
     apiField: 'clinvar',
@@ -132,7 +154,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 9,
+    position: 11,
     tooltip: null,
   },
   {
@@ -143,7 +165,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 12,
     tooltip: 'Exomiser score based on variant properties and patient phenotypes',
   },
   {
@@ -154,7 +176,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 13,
     tooltip: 'Exomiser ACMG',
   },
   {
@@ -165,7 +187,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 14,
     tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
@@ -176,7 +198,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 15,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -187,7 +209,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 16,
     tooltip: 'Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -198,7 +220,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 17,
     tooltip: 'Zygosity',
   },
   {
@@ -209,7 +231,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 18,
     tooltip: null,
   },
   {
@@ -220,7 +242,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 17,
+    position: 19,
     tooltip: null,
   },
 ];
@@ -359,6 +381,28 @@ const tableSomaticSNVColumns = [
     tooltip: 'Hotspot Cancer',
   },
   {
+    id: 'tier',
+    name: 'Tier',
+    apiField: 'cmc_tier',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 10,
+    tooltip: 'CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
+  },
+  {
+    id: 'cmc',
+    name: 'CMC',
+    apiField: 'cmc_sample_mutated',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 11,
+    tooltip: 'Number of samples in COSMIC with this mutation followed by its ratio',
+  },
+  {
     id: 'clinvar',
     name: 'ClinVar',
     apiField: 'clinvar',
@@ -366,7 +410,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 10,
+    position: 12,
     tooltip: null,
   },
   {
@@ -377,7 +421,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 13,
     tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
@@ -388,7 +432,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 14,
     tooltip: 'Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -399,7 +443,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 15,
     tooltip: 'Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -410,7 +454,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 16,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -421,7 +465,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 15,
+    position: 17,
     tooltip: 'Somatic Quality',
   },
   {
@@ -432,7 +476,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 18,
     tooltip: 'Systematic noise score (AQ)',
   },
   {
@@ -443,7 +487,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 17,
+    position: 19,
     tooltip: 'Allele depth ratio ALT/(ALT+REF)',
   },
   {
@@ -454,7 +498,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 18,
+    position: 20,
     tooltip: null,
   },
 ];
@@ -502,6 +546,18 @@ const sharedContentHandlers: Record<string, ContentHandler> = {
   gnomad: ({ position, dataVariant }) => {
     cy.validateTableFirstRowContent(dataVariant.gnomad, position);
     cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
+  },
+  cmc: ({ position, dataVariant }) => {
+    if (dataVariant.cmc) {
+      cy.validateTableFirstRowContent(dataVariant.cmc.sample_mutated, position);
+      cy.validateTableFirstRowContent(dataVariant.cmc.sample_ratio, position);
+    } else {
+      cy.validateTableFirstRowContent(null, position);
+    }
+  },
+  tier: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(getTier(dataVariant.tier).display, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tag(getTier(dataVariant.tier).color), position);
   },
   actions: ({ position }) => {
     cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);

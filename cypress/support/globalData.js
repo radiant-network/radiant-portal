@@ -180,6 +180,24 @@ const globalData = {
           op: 'in',
           count: /\d{1}/,
         },
+        {
+          field: 'cmc_sample_mutated',
+          value: '10',
+          op: '<',
+          count: /\d{1}/,
+        },
+        {
+          field: 'cmc_sample_ratio',
+          value: '0.0001',
+          op: '<',
+          count: /\d{1}/,
+        },
+        {
+          field: 'cmc_tier',
+          value: '3',
+          op: 'in',
+          count: /\d{1}/,
+        },
       ],
       Frequency: [
         {
@@ -367,7 +385,7 @@ const globalData = {
           field: 'nb_snv',
           value: '10000',
           op: '<',
-          count: 500,
+          count: 477,
         },
       ],
       Gene: [
@@ -636,6 +654,24 @@ const globalData = {
         {
           field: 'sift_pred',
           value: 'T',
+          op: 'in',
+          count: /\d{1}/,
+        },
+        {
+          field: 'cmc_sample_mutated',
+          value: '10',
+          op: '<',
+          count: /\d{1}/,
+        },
+        {
+          field: 'cmc_sample_ratio',
+          value: '0.0001',
+          op: '<',
+          count: /\d{1}/,
+        },
+        {
+          field: 'cmc_tier',
+          value: 'Other',
           op: 'in',
           count: /\d{1}/,
         },

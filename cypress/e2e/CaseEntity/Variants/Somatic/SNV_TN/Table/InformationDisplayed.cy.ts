@@ -59,6 +59,16 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information disp
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('hotspot', data.variantSomatic);
   });
 
+  it('Tier', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('tier', data.variantSomatic);
+  });
+
+  it('CMC', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('cmc', data.variantSomatic);
+  });
+
   it('ClinVar', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('clinvar', data.variantSomatic);

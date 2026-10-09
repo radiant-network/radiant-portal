@@ -36,6 +36,16 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowResultsCount(resultCount, false /*beEqual*/);
   });
 
+  it('Tier', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'tier');
+  });
+
+  it('CMC', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'cmc');
+  });
+
   it('Freq. TO', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.actions.clickTableCellLink(data.variantSomatic, 'freq_to');
