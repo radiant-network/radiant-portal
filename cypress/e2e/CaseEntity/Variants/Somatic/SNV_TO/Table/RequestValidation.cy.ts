@@ -1,0 +1,29 @@
+/// <reference types="cypress"/>
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
+import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
+
+describe('Case Entity - Variants - Somatic - SNV (TO) - Table - Request Validation', () => {
+  const setupTest = () => {
+    cy.login();
+  };
+
+  it('Task', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnCohortTask(data.caseSomatic, 'TO');
+  });
+
+  it('Sort', () => {
+    setupTest();
+    cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', { cohort: 'TO' });
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Apply a filter for a cleaner query builder
+    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnSort('variant');
+  });
+
+  it('Paging', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnPageChange(data.caseSomatic, 'TO');
+  });
+});

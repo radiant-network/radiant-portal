@@ -1139,6 +1139,43 @@ export const CaseEntity_Variants_SNV_Table = {
   somatic: (() => {
     const actions = generateSNVTableActions(somaticConfig);
     const validations = generateSNVTableValidations(somaticConfig, actions);
-    return { actions, validations };
+    const { selectors } = somaticConfig;
+    const cohortToggle = (cohort: 'TN' | 'TO') => CommonSelectors.tabsTrigger(`SNV_${cohort}`);
+    return {
+      actions: {
+        ...actions,
+        /**
+         * Clicks the sub-tab of the given cohort.
+         * @param cohort The cohort to select.
+         */
+        selectCohort(cohort: 'TN' | 'TO') {
+          cy.get(cohortToggle(cohort)).clickAndWait({ force: true });
+        },
+      },
+      validations: {
+        ...validations,
+        /**
+         * Checks that the tab and the sub-tab of the given cohort are active.
+         * @param cohort The cohort expected to be active.
+         */
+        shouldHaveActiveCohort(cohort: 'TN' | 'TO') {
+          cy.get(selectors.tab).shouldBeActiveTab();
+          cy.get(cohortToggle(cohort)).shouldBeDataState('active');
+        },
+        /**
+         * Validates that every list request sent on page load targets the task of the given cohort.
+         * @param dataCase The case object.
+         * @param cohort The cohort to open.
+         */
+        shouldRequestOnCohortTask(dataCase: any, cohort: 'TN' | 'TO') {
+          const taskId = dataCase[`task_${cohort.toLowerCase()}`].task_id;
+          cy.intercept('POST', '**/list', req => {
+            expect(req.url).to.include(`/${dataCase.case}/${dataCase.seq.seq_id}/${taskId}/list`);
+          }).as('cohortListRequest');
+          cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV', { cohort });
+          cy.wait('@cohortListRequest');
+        },
+      },
+    };
   })(),
 };
