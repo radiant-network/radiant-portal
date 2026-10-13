@@ -26,6 +26,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/notification"
 	"github.com/radiant-network/radiant-api/internal/provisioning"
+	"github.com/radiant-network/radiant-api/internal/report"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
@@ -80,6 +81,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := postgres.NewPostgresRepository(postgresDB)
 	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
+	repoTranscriptReport := starrocks.NewTranscriptReportRepository(starrocksDB)
+	germlineReportBuilder := report.NewGermlineBuilder(repoTranscriptReport, repoInterpretations)
 	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
@@ -243,6 +246,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/report", requireAction(types.ActionSearchCase), server.GetGermlineSNVTranscriptReport(germlineReportBuilder))
 	occurrencesGermlineSNVGroup.GET("/dictionary", requireAction(types.ActionSearchCase), server.GetGermlineSNVDictionary(repoFacets))
 
 	occurrencesSomaticCNVGroup := occurrencesSomaticGroup.Group("/cnv")
