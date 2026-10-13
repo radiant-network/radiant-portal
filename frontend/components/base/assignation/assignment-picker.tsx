@@ -1,4 +1,4 @@
-import { type ComponentProps, useRef, useState } from 'react';
+import { type ComponentProps, type KeyboardEvent, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 
 import { Avatar as AssigneesAvatar } from '@/components/base/avatar/avatar';
@@ -83,6 +83,12 @@ function AssignmentPicker({
     inputRef.current?.focus();
   }
 
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace' && !search && hasSelection) {
+      setDraft(draft.slice(0, -1));
+    }
+  }
+
   function handleApply() {
     onApply(draft);
     handleOpenChange(false);
@@ -140,70 +146,77 @@ function AssignmentPicker({
           aria-label={t('a11y.assignment_picker.open')}
           className="rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <AssigneesAvatar users={assignees} size={size} showDetails={!open} buttonVariant={buttonVariant} />
+          <AssigneesAvatar
+            users={assignees}
+            size={size}
+            showDetails={!open}
+            buttonVariant={buttonVariant}
+            onEdit={() => handleOpenChange(true)}
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align={align}
-        className="w-72 p-0"
+        className="flex w-95 flex-col gap-4 p-4"
         onOpenAutoFocus={event => {
           event.preventDefault();
           inputRef.current?.focus();
         }}
       >
-        <div className="border-b">
-          {hasSelection && (
-            <div className="flex flex-col gap-1 px-2 pt-2">
-              {draft.map(user => (
-                <div key={user.id} className="flex items-center gap-1.5 rounded-md bg-muted p-1 text-sm">
-                  <Avatar size="2xs" className="shrink-0">
-                    <AvatarFallback color={getUserColor(user.id)}>{getInitials(user)}</AvatarFallback>
-                  </Avatar>
-                  <span className="shrink-0 font-medium">{user.name}</span>
-                  {user.email && <span className="min-w-0 truncate text-muted-foreground">{user.email}</span>}
-                  <Button
-                    variant="ghost"
-                    size="3xs"
-                    iconOnly
-                    className="ml-auto shrink-0 text-muted-foreground"
-                    aria-label={t('a11y.assignment_picker.remove_user', { name: user.name })}
-                    onClick={() => handleRemove(user)}
-                  >
-                    <X />
-                  </Button>
-                </div>
-              ))}
+        <div className="flex min-h-7 items-center justify-between gap-2">
+          <h3 className="truncate text-sm font-semibold">{t('common.user_selection.case_assignment')}</h3>
+          <div className="flex shrink-0 items-center gap-4">
+            {hasSelection && (
+              <Button variant="link" size="xs" className="h-auto p-0" onClick={handleRemoveAll}>
+                {t('common.assignment_picker.remove_all')}
+              </Button>
+            )}
+            {isDirty && (
+              <Button size="xs" onClick={handleApply}>
+                {t('common.assignment_picker.apply')}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div
+          onClick={() => inputRef.current?.focus()}
+          className="flex cursor-text flex-col items-start gap-1.5 rounded-md border border-input bg-background px-2.5 py-2 shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+        >
+          {draft.map(user => (
+            <div key={user.id} className="flex w-fit max-w-full items-center gap-1.5 rounded-md bg-muted p-1 text-sm">
+              <Avatar size="2xs" className="shrink-0">
+                <AvatarFallback color={getUserColor(user.id)}>{getInitials(user)}</AvatarFallback>
+              </Avatar>
+              <span className="shrink-0 font-medium">{user.name}</span>
+              {user.email && <span className="min-w-0 truncate text-muted-foreground">{user.email}</span>}
+              <Button
+                variant="ghost"
+                size="3xs"
+                iconOnly
+                className="shrink-0 text-muted-foreground"
+                aria-label={t('a11y.assignment_picker.remove_user', { name: user.name })}
+                onClick={() => handleRemove(user)}
+              >
+                <X />
+              </Button>
             </div>
-          )}
-          <div className="flex h-10 items-center gap-2 px-3">
+          ))}
+          <div className="flex w-full items-center gap-2">
             {!hasSelection && <Search className="size-4 shrink-0 text-muted-foreground" />}
             <input
               ref={inputRef}
               value={search}
               onChange={event => setSearch(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               placeholder={hasSelection ? undefined : t('common.assignment_picker.search_placeholder')}
               aria-label={t('common.assignment_picker.search_placeholder')}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="h-6 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
-          {hasSelection && (
-            <div className="px-3 pb-2">
-              <Button variant="link" size="xs" className="h-auto p-0" onClick={handleRemoveAll}>
-                {t('common.assignment_picker.remove_all')}
-              </Button>
-            </div>
-          )}
         </div>
 
-        <div className="max-h-72 overflow-y-auto p-1">{renderResults()}</div>
-
-        {isDirty && (
-          <div className="flex justify-end border-t p-2">
-            <Button size="sm" onClick={handleApply}>
-              {t('common.assignment_picker.apply')}
-            </Button>
-          </div>
-        )}
+        <div className="-mx-2 max-h-72 overflow-y-auto">{renderResults()}</div>
       </PopoverContent>
     </Popover>
   );
