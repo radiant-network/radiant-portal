@@ -190,7 +190,7 @@ function SequencingVariantFilters({
             value={selectedTaskId ? `${selectedTaskId}` : undefined}
             onValueChange={value => onTaskChange?.(Number(value))}
           >
-            <SelectTrigger className="min-w-[125px] max-w-[150px]" size="xs">
+            <SelectTrigger className="min-w-[125px] max-w-[150px]" size="xs" data-cy="task-select">
               <SelectValue>
                 {selectedTask && formatDate(selectedTask.created_on, t('common.date.year_month_day'))}
               </SelectValue>
@@ -202,11 +202,13 @@ function SequencingVariantFilters({
                 </SelectLabel>
                 <SelectSeparator />
                 {tasks.map(task => (
-                  <SelectItem key={`task-${task.id}`} value={`${task.id}`}>
+                  <SelectItem key={`task-${task.id}`} value={`${task.id}`} data-cy={`task-option-${task.id}`}>
                     <span className="inline-flex items-center gap-2">
                       {formatDate(task.created_on, t('common.date.year_month_day'))}
                       {task.id === latestTaskId && (
-                        <Badge variant="outline">{t('case_entity.variants.filters.latest')}</Badge>
+                        <Badge variant="outline" data-cy="task-latest-badge">
+                          {t('case_entity.variants.filters.latest')}
+                        </Badge>
                       )}
                     </span>
                   </SelectItem>
