@@ -36,6 +36,7 @@ function getTypeIcon(type: string) {
   const iconMap: { [key: string]: any } = {
     case_id: FolderOpen,
     patient_id: User,
+    patient_name: User,
     submitter_patient_id: Barcode,
     sequencing_experiment_id: TestTubeDiagonal,
   };

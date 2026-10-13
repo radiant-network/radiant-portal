@@ -1,7 +1,7 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
 type SurvivalCellProps = {
-  days: number | null;
+  days?: number;
 };
 
 function SurvivalCell({ days }: SurvivalCellProps) {
