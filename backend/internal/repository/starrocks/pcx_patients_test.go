@@ -135,3 +135,61 @@ func Test_SearchPcxPatients_SortSurvivalDaysPutsUnknownLast(t *testing.T) {
 		assert.Equal(t, []string{pcxPatientKey("4"), pcxPatientKey("1"), pcxPatientKey("2"), pcxPatientKey("3"), pcxPatientKey("5")}, pcxPatientKeys(patients))
 	})
 }
+
+func autocompletePcxPatients(t *testing.T, env *testutils.Env, prefix string, limit int) []types.AutocompleteResult {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	results, err := repo.AutocompletePatients(t.Context(), prefix, limit)
+	require.NoError(t, err)
+	return results
+}
+
+func Test_AutocompletePcxPatients_IdentifierPrefixIsCaseInsensitive(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []types.AutocompleteResult{
+			{Type: "patient_id", Value: "MRN-0001"},
+			{Type: "patient_id", Value: "MRN-0002"},
+		}, autocompletePcxPatients(t, env, "mrn-000", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_ResearchIdsOfRestrictedPatients(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []types.AutocompleteResult{
+			{Type: "patient_id", Value: "C100004"},
+			{Type: "patient_id", Value: "C100005"},
+		}, autocompletePcxPatients(t, env, "C1", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_NamesOnlyOfIdentifiablePatients(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		// Patient 5 is also named Ada Lovelace but restricted; patient 4's placeholder name is never suggested.
+		assert.Equal(t, []types.AutocompleteResult{
+			{Type: "patient_name", Value: "Ada Lovelace"},
+			{Type: "patient_name", Value: "Alan Turing"},
+		}, autocompletePcxPatients(t, env, "a", 10))
+		assert.Empty(t, autocompletePcxPatients(t, env, "C100004_", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_LikeWildcardsAreLiteral(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Empty(t, autocompletePcxPatients(t, env, "MRN_", 10))
+		assert.Empty(t, autocompletePcxPatients(t, env, "%", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_OrderedByValueAndCapped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []types.AutocompleteResult{{Type: "patient_id", Value: "MRN-0001"}}, autocompletePcxPatients(t, env, "MRN", 1))
+	})
+}
+
+func Test_AutocompletePcxPatients_NoMatch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		results := autocompletePcxPatients(t, env, "zzz", 10)
+		assert.Empty(t, results)
+		assert.NotNil(t, results)
+	})
+}

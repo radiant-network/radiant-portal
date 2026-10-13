@@ -127,3 +127,19 @@ func Test_SearchPatients_UnfilterableField_400(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
+
+func Test_PatientsAutocomplete_SuggestsIdsAndIdentifiableNames(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/patients/autocomplete", server.PatientsAutocompleteHandler(repo))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/autocomplete?prefix=a&limit=5", nil))
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[
+			{"type": "patient_name", "value": "Ada Lovelace"},
+			{"type": "patient_name", "value": "Alan Turing"}
+		]`, w.Body.String())
+	})
+}

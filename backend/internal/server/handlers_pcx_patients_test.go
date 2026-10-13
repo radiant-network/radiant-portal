@@ -16,10 +16,9 @@ import (
 
 func Test_PcxPatientHandlers_NotImplementedYet(t *testing.T) {
 	handlers := map[string]gin.HandlerFunc{
-		"autocomplete": PatientsAutocompleteHandler(),
-		"filters":      PatientsFiltersHandler(),
-		"statistics":   PatientsStatisticsHandler(),
-		"entity":       PatientEntityHandler(),
+		"filters":    PatientsFiltersHandler(),
+		"statistics": PatientsStatisticsHandler(),
+		"entity":     PatientEntityHandler(),
 	}
 	for name, handler := range handlers {
 		router := gin.Default()
@@ -145,6 +144,83 @@ func Test_SearchPatientsHandler_MalformedBody_400(t *testing.T) {
 
 func Test_SearchPatientsHandler_RepositoryError_500(t *testing.T) {
 	w := postPatientsSearch(&pcxPatientsSearcherMock{err: errors.New("boom")}, `{}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type pcxPatientsAutocompleterMock struct {
+	results []types.AutocompleteResult
+	err     error
+	called  bool
+	prefix  string
+	limit   int
+}
+
+func (m *pcxPatientsAutocompleterMock) AutocompletePatients(_ context.Context, prefix string, limit int) ([]types.AutocompleteResult, error) {
+	m.called, m.prefix, m.limit = true, prefix, limit
+	return m.results, m.err
+}
+
+func getPatientsAutocomplete(repo pcxPatientsAutocompleter, query string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/patients/autocomplete", PatientsAutocompleteHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/autocomplete"+query, nil))
+	return w
+}
+
+func Test_PatientsAutocompleteHandler_ReturnsSuggestions(t *testing.T) {
+	repo := &pcxPatientsAutocompleterMock{results: []types.AutocompleteResult{
+		{Type: "patient_name", Value: "Ada Lovelace"},
+		{Type: "patient_id", Value: "MRN-0001"},
+	}}
+
+	w := getPatientsAutocomplete(repo, "?prefix=a&limit=5")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{"type":"patient_name","value":"Ada Lovelace"},{"type":"patient_id","value":"MRN-0001"}]`, w.Body.String())
+	assert.Equal(t, "a", repo.prefix)
+	assert.Equal(t, 5, repo.limit)
+}
+
+func Test_PatientsAutocompleteHandler_EmptyPrefixReturnsNothing(t *testing.T) {
+	repo := &pcxPatientsAutocompleterMock{}
+
+	w := getPatientsAutocomplete(repo, "?prefix=")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[]`, w.Body.String())
+	assert.False(t, repo.called)
+}
+
+func Test_PatientsAutocompleteHandler_MissingOrInvalidLimitDefaultsToTen(t *testing.T) {
+	for _, query := range []string{"?prefix=a", "?prefix=a&limit=ten", "?prefix=a&limit=0", "?prefix=a&limit=-3"} {
+		repo := &pcxPatientsAutocompleterMock{}
+
+		getPatientsAutocomplete(repo, query)
+
+		assert.Equal(t, 10, repo.limit, query)
+	}
+}
+
+func Test_PatientsAutocompleteHandler_LimitIsCapped(t *testing.T) {
+	repo := &pcxPatientsAutocompleterMock{}
+
+	getPatientsAutocomplete(repo, "?prefix=a&limit=100000")
+
+	assert.Equal(t, 200, repo.limit)
+}
+
+func Test_PatientsAutocompleteHandler_NoMatchReturnsEmptyArray(t *testing.T) {
+	w := getPatientsAutocomplete(&pcxPatientsAutocompleterMock{results: []types.AutocompleteResult{}}, "?prefix=zzz")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[]`, w.Body.String())
+}
+
+func Test_PatientsAutocompleteHandler_RepositoryError_500(t *testing.T) {
+	w := getPatientsAutocomplete(&pcxPatientsAutocompleterMock{err: errors.New("boom")}, "?prefix=a")
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
