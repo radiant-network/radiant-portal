@@ -19,7 +19,7 @@ describe('VariantEntity - EvidCond - ClinVar - Sort', () => {
     VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification', true /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
-  it('Multiple [SJRA-719]', () => {
+  it('Multiple', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('classification');
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');

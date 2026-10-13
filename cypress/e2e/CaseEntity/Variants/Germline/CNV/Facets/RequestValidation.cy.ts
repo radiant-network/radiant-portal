@@ -12,7 +12,7 @@ describe('Case Entity - Variants - Germline - CNV - Facets - Request Validation'
     CaseEntity_Variants_SavedFilters.cnv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
-  it('MultiSelect [SJRA-1390]', () => {
+  it('MultiSelect', () => {
     setupTest();
     CaseEntity_Variants_Facets.cnv.validations.shouldRequestOnApply('Variant', 'variant_type');
   });
