@@ -27,9 +27,10 @@ class CaseGroupResponse(BaseModel):
     A named set of cases within a tenant.
     """ # noqa: E501
     case_ids: List[StrictInt]
+    created_on: StrictStr
     name: StrictStr
     tenant_code: StrictStr
-    __properties: ClassVar[List[str]] = ["case_ids", "name", "tenant_code"]
+    __properties: ClassVar[List[str]] = ["case_ids", "created_on", "name", "tenant_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,6 +84,7 @@ class CaseGroupResponse(BaseModel):
 
         _obj = cls.model_validate({
             "case_ids": obj.get("case_ids"),
+            "created_on": obj.get("created_on"),
             "name": obj.get("name"),
             "tenant_code": obj.get("tenant_code")
         })

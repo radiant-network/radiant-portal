@@ -88,13 +88,50 @@ func (r CaseGroupRequest) Validate() error {
 
 // @Description A named set of cases within a tenant.
 type CaseGroupResponse struct {
-	Name       string `json:"name" validate:"required"`
-	TenantCode string `json:"tenant_code" validate:"required"`
-	CaseIDs    []int  `json:"case_ids" validate:"required"`
+	Name       string    `json:"name" validate:"required"`
+	TenantCode string    `json:"tenant_code" validate:"required"`
+	CaseIDs    []int     `json:"case_ids" validate:"required"`
+	CreatedOn  time.Time `json:"created_on" validate:"required"`
 } // @name CaseGroupResponse
 
 func NewCaseGroupResponse(group CaseGroup, caseIDs []int) CaseGroupResponse {
-	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs)}
+	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs), CreatedOn: group.CreatedOn}
+}
+
+// CaseGroupCriterionField is the cases search criterion that scopes the list to one or more case
+// groups. It is not a column of cases: the handler resolves it to a case_id filter.
+const CaseGroupCriterionField = "case_group"
+
+// SplitCaseGroupCriteria pulls the case_group criteria out of a search body and returns their
+// names (in order, deduplicated) with the remaining criteria untouched. Only the default `in`
+// operator makes sense for a membership scope, any other is a validation error.
+func SplitCaseGroupCriteria(criteria []SearchCriterion) ([]string, []SearchCriterion, error) {
+	var names []string
+	seen := map[string]bool{}
+	rest := make([]SearchCriterion, 0, len(criteria))
+	for _, criterion := range criteria {
+		if criterion.FieldName != CaseGroupCriterionField {
+			rest = append(rest, criterion)
+			continue
+		}
+		if criterion.Operator != "" && criterion.Operator != "in" {
+			return nil, nil, fmt.Errorf("operation %s is not supported on %s, only in", criterion.Operator, CaseGroupCriterionField)
+		}
+		if len(criterion.Value) == 0 {
+			return nil, nil, fmt.Errorf("value must be defined: %s", CaseGroupCriterionField)
+		}
+		for _, value := range criterion.Value {
+			name, ok := value.(string)
+			if !ok {
+				return nil, nil, fmt.Errorf("%s values must be strings, got %v", CaseGroupCriterionField, value)
+			}
+			if !seen[name] {
+				seen[name] = true
+				names = append(names, name)
+			}
+		}
+	}
+	return names, rest, nil
 }
 
 const (

@@ -167,7 +167,7 @@ func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) err
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/:tenant/cases/search", SearchCasesHandler(repo, repo))
+	router.POST("/:tenant/cases/search", SearchCasesHandler(repo, repo, &mockCaseGroupStore{}))
 	body := `{
 			"additional_fields":[]
 	}`

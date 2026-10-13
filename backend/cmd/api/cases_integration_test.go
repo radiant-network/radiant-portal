@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -11,8 +12,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
@@ -20,7 +23,7 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo, assignmentsRepo))
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo, assignmentsRepo, postgres.NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})))
 
 		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
@@ -29,6 +32,38 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, expected, w.Body.String())
 	})
+}
+
+// Seeded cases 1 and 2 (test/data/clinical/03_cases.sql) are federated to StarRocks, so a group
+// holding them scopes the search to exactly those two.
+func Test_SearchCasesHandler_WithCaseGroup_ScopesToGroup(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		trackCaseGroup(t, env, "it_search_cg")
+		pg := database.PostgresDB{DB: env.Postgres}
+		groupsRepo := postgres.NewCaseGroupsRepository(pg)
+		_, _, err := groupsRepo.UpsertCaseGroup(t.Context(), "radiant", "it_search_cg", []int{2, 1}, "it")
+		require.NoError(t, err)
+		router := tenantRouter()
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}), postgres.NewCaseAssignmentsRepository(pg), groupsRepo))
+
+		w := serve(router, "POST", "/radiant/cases/search", `{"search_criteria":[{"field":"case_group","operator":"in","value":["it_search_cg"]}], "sort":[{"field":"case_id","order":"asc"}]}`)
+
+		require.Equal(t, http.StatusOK, w.Code, w.Body.String())
+		var resp types.CasesSearchResponse
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		assert.Equal(t, int64(2), resp.Count)
+		ids := make([]int, 0, len(resp.List))
+		for _, c := range resp.List {
+			ids = append(ids, c.CaseID)
+		}
+		assert.Equal(t, []int{1, 2}, ids)
+	})
+}
+
+func Test_SearchCasesHandler_WithUnknownCaseGroup_EmptyPage(t *testing.T) {
+	expected := `{"list": [], "count": 0}`
+	body := `{"search_criteria":[{"field":"case_group","value":["it_search_cg_missing"]}]}`
+	assertSearchCasesHandler(t, "simple", body, expected)
 }
 
 func Test_SearchCasesHandler_WithCriteria(t *testing.T) {

@@ -1053,6 +1053,12 @@ export interface CaseGroupResponse {
      * @type {string}
      * @memberof CaseGroupResponse
      */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupResponse
+     */
     'name': string;
     /**
      * 

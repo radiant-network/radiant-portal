@@ -39,12 +39,42 @@ func assigneesOf(byCase map[int][]types.CaseAssignee, caseID int) types.JsonArra
 	return types.JsonArray[types.CaseAssignee]{}
 }
 
+// caseGroupReader resolves a case group name into case ids. Groups live in PostgreSQL while
+// cases are searched in StarRocks, so the case_group criterion is turned into a case_id filter
+// here rather than in the query.
+type caseGroupReader interface {
+	GetCaseGroupByName(ctx context.Context, tenantCode, name string) (*types.CaseGroup, []int, error)
+}
+
 type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
 type casePatcher interface {
 	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
+}
+
+// caseGroupCaseIDs is the union of the case ids of the named groups, in first-seen order.
+// A name that is invalid or unknown contributes nothing rather than failing the search.
+func caseGroupCaseIDs(ctx context.Context, groups caseGroupReader, tenantCode string, names []string) ([]interface{}, error) {
+	var ids []interface{}
+	seen := map[int]bool{}
+	for _, name := range names {
+		if types.ValidateCaseGroupName(name) != nil {
+			continue
+		}
+		_, caseIDs, err := groups.GetCaseGroupByName(ctx, tenantCode, name)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range caseIDs {
+			if !seen[id] {
+				seen[id] = true
+				ids = append(ids, id)
+			}
+		}
+	}
+	return ids, nil
 }
 
 // SearchCasesHandler handles search of cases
@@ -64,7 +94,7 @@ type casePatcher interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/search [post]
-func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader) gin.HandlerFunc {
+func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader, groups caseGroupReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -76,8 +106,32 @@ func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader)
 			HandleValidationError(c, err)
 			return
 		}
+		groupNames, criteria, err := types.SplitCaseGroupCriteria(body.SearchCriteria)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if len(groupNames) > 0 {
+			tenant, err := GetTenant(c)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			ids, err := caseGroupCaseIDs(c.Request.Context(), groups, *tenant, groupNames)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			// The case_group criterion is already stripped from criteria: with no id to filter
+			// on, the query would return every case, and `case_id IN ()` is a SQL error.
+			if len(ids) == 0 {
+				c.JSON(http.StatusOK, types.SearchResponse[types.CaseResult]{List: types.JsonArray[types.CaseResult]{}, Count: 0})
+				return
+			}
+			criteria = append(criteria, types.SearchCriterion{FieldName: types.CaseIdField.Alias, Operator: "in", Value: ids})
+		}
 		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
-		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, body.AdditionalFields, body.SearchCriteria, p, body.Sort)
+		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, body.AdditionalFields, criteria, p, body.Sort)
 		if err != nil {
 			HandleValidationError(c, err)
 			return
