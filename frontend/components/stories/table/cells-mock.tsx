@@ -565,7 +565,7 @@ export const secondSetCellData = [
     omim_inheritance_code: ['NRT', 'SMo', 'Smu', 'XL'],
     germline_pf_wgs: 100,
     locus_id: '-7485572602358923261',
-    zygosity: 'HET',
+    zygosity: 'HOM',
   },
   {
     clinvar: [
@@ -589,7 +589,7 @@ export const secondSetCellData = [
     omim_inheritance_code: ['XLD', 'XLR', 'YL'],
     germline_pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
-    zygosity: 'HEM',
+    zygosity: 'WT',
   },
   {
     clinvar: [
@@ -612,7 +612,7 @@ export const secondSetCellData = [
     omim_inheritance_code: ['NRT', 'SMo'],
     germline_pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
-    zygosity: 'HEM',
+    zygosity: 'UNK',
   },
   {
     clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity', ''],
