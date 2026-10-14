@@ -54,10 +54,19 @@ deceased_dx as (
         roster.research_id,
         roster.dob,
         roster.organization_name,
-        case
-            when dx.age_at_event_days = -1 then null
-            else dx.age_at_event_days
-        end as age_at_vital_status_days,
+        -- cast to int: diagnosis.age_at_event_days is FLOAT, and this was the ONLY
+        -- stream not casting it (B, C and D all do), so the union promoted the whole
+        -- column to decimal(38,9) and the published age rendered as '5541.000000000'
+        -- in pcx_30_patient_level_deid, v_pcx_30_patient_level_combined and (as
+        -- double) the tenant view. Lossless -- verified 2026-10-14 that 0 of 1,216
+        -- non-null values carry a fractional part, range 0..14,756 days. Mirrors the
+        -- same fix already present in pcx_30_event_level_deid.
+        cast(
+            case
+                when dx.age_at_event_days = -1 then null
+                else dx.age_at_event_days
+            end as int
+        ) as age_at_vital_status_days,
         'deceased' as vital_status
     from {{ source('dwh_source', 'diagnosis') }} dx
     inner join roster
@@ -152,7 +161,9 @@ select
     research_id,
     dob,
     organization_name,
-    max(age_at_vital_status_days) as age_at_vital_status_days,
+    -- explicit cast so the PUBLISHED type is INT regardless of how the engine types
+    -- the union and the max(); belt-and-braces with the per-stream cast above
+    cast(max(age_at_vital_status_days) as int) as age_at_vital_status_days,
     vital_status,
     min(priority_score) as priority_score
 from all_status_events

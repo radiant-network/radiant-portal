@@ -25,7 +25,11 @@
 with grouped_events as (
     select
         research_id,
-        max(age_at_vital_status_days) as age_at_vital_status_days,
+        -- cast kept explicit: this is the PUBLISHED column, and an age in days is an
+        -- integer. Without it the FLOAT source propagated through to decimal(38,9)
+        -- and rendered as '5541.000000000'. Fixed at source in
+        -- int_pcx_30_vital_status_events; this guarantees the published type.
+        cast(max(age_at_vital_status_days) as int) as age_at_vital_status_days,
         vital_status,
         min(priority_score) as priority_score
     from {{ ref('int_pcx_30_vital_status_events') }}
