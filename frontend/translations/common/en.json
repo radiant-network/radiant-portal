@@ -691,6 +691,7 @@
       "filters": {
         "more": "More",
         "more_placeholder": "Filters",
+        "min_search_length": "Minimum {{count}} characters",
         "no_values_found": "No values found",
         "search": {
           "case_id": "Case",
