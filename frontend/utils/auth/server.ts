@@ -2,7 +2,7 @@ import { createCookie, createCookieSessionStorage, redirect } from 'react-router
 import { Authenticator } from 'remix-auth';
 import { OAuth2Strategy } from 'remix-auth-oauth2';
 
-import { AuthStrategyName, type IAuthUser, type IAuthUserWithToken } from './auth.types';
+import { AuthStrategyName, type IAuthUser, type IAuthUserWithToken } from './types';
 import { isTokenValid } from './tokens';
 
 const createSessionStorage = (cookieName: string) =>

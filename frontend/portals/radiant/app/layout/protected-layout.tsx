@@ -11,8 +11,8 @@ import type { Route } from '../+types/root';
 
 import ProtectedNavbar from './protected-navbar';
 
-import { authenticateAndReturn, getSessionUser, requireAuth } from '~/utils/auth.server';
-import type { IAuthUser } from '~/utils/auth.types';
+import { authenticateAndReturn, getSessionUser, requireAuth } from '@/utils/auth/server';
+import type { IAuthUser } from '@/utils/auth/types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {

@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 const session = vi.hoisted(() => ({ token: undefined as string | undefined }));
 const refreshAccessToken = vi.hoisted(() => vi.fn());
-vi.mock('~/utils/auth.server', () => ({
+vi.mock('../auth/server', () => ({
   getSessionAccessToken: async () => session.token,
   refreshAccessToken,
 }));

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { deepMerge } from '../../components/lib/merge';
+import { deepMerge } from '../components/lib/merge';
 import chokidar from 'chokidar';
 import type { ResolvedConfig, ViteDevServer } from 'vite';
 import type { FSWatcher } from 'chokidar';
@@ -53,10 +53,6 @@ export const mergeTranslationsForTheme = (currentTheme: string, rootDir: string)
   }
 };
 
-// Global flag to prevent multiple plugin executions across all Vite instances
-const getLockFilePath = (rootDir: string, theme: string) =>
-  path.resolve(rootDir, `../../translations/.merge-lock-${theme}`);
-
 // Vite plugin factory
 export const createMergeTranslationsPlugin = (theme: string, rootDir: string) => {
   let watcher: FSWatcher | undefined;
@@ -87,6 +83,6 @@ export const createMergeTranslationsPlugin = (theme: string, rootDir: string) =>
     },
     closeBundle() {
       if (watcher) watcher.close();
-    }
+    },
   };
-}; 
+};

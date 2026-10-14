@@ -6,7 +6,7 @@ import { usePreferredTenant } from '@/components/hooks/use-tenant';
 
 import type { Route } from './+types/tenant-redirect';
 
-import { authenticateRequest, requireAuth } from '~/utils/auth.server';
+import { authenticateRequest, requireAuth } from '@/utils/auth/server';
 
 // This route sits outside the protected layout, so it carries its own auth gate.
 export async function loader({ request }: Route.LoaderArgs) {

@@ -1,0 +1,14 @@
+@import '@styles/theme.css';
+@import '@styles/tailwind.css';
+
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+  @media (prefers-color-scheme: light) {
+    color-scheme: light;
+  }
+}
