@@ -64,6 +64,9 @@ func (d *recordingTenantDeps) EnsureMaskPolicy(ctx context.Context, name string,
 func (d *recordingTenantDeps) AddRoleToRole(ctx context.Context, parent, child string) error {
 	return d.record("AddRoleToRole")
 }
+func (d *recordingTenantDeps) EnsureWarehouseAccessPolicy(ctx context.Context, name string, warehouses, users []string) error {
+	return d.record("EnsureWarehouseAccessPolicy")
+}
 
 func (d *recordingTenantDeps) deps() TenantDeps {
 	return TenantDeps{Store: d, Columns: d, Starrocks: d, Ranger: d}
@@ -79,8 +82,8 @@ func Test_CreateTenant_RunsAllStepsInPostgresStarrocksRangerOrder(t *testing.T) 
 		"EnsureTenant", "SeedDefaultRoles", // Phase A — Postgres
 		"EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews", "EnsureGenePanelMV", // Phase B — StarRocks
 		// Phase C — Ranger: global masking bootstrap (marker role + auth grant/row-filter +
-		// shared-DB grant + 2 masks)...
-		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "EnsureRowFilterPolicy", "EnsureRowFilterPolicy", "EnsureAccessPolicy", "EnsureMaskPolicy", "EnsureMaskPolicy",
+		// shared-DB grant + warehouse grant + 2 masks)...
+		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "EnsureRowFilterPolicy", "EnsureRowFilterPolicy", "EnsureAccessPolicy", "EnsureWarehouseAccessPolicy", "EnsureMaskPolicy", "EnsureMaskPolicy",
 		// ...then this tenant's role + table/view/MV access policies + nesting under the marker.
 		"EnsureRole", "EnsureAccessPolicy", "EnsureViewAccessPolicy", "EnsureMaterializedViewAccessPolicy", "AddRoleToRole",
 	}, d.calls)
