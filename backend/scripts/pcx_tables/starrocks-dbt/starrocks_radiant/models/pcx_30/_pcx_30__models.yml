@@ -1,0 +1,241 @@
+version: 2
+
+models:
+  - name: int_pcx_30_cohort_roster
+    description: >
+      PCX-30 cohort definition: CBTN enrollees with an ATRT or Medulloblastoma CNS
+      diagnosis, tagged radiant vs cbtn-non-radiant. Extracted from the subj +
+      pt_roster CTEs that were duplicated across the prelim_30_sql/prod scripts so
+      the cohort lives in one place. NOT patient-grain -- see the model header for
+      the two deliberate fan-outs (multi-diagnosis, multi-MRN).
+    columns:
+      - name: research_id
+        description: "De-identified patient identifier; join key for all downstream pcx_30 models."
+        data_tests:
+          - not_null
+
+      - name: mrn
+        description: "Identified MRN from CBTN enrollment. PHI -- do not propagate into _deid models."
+
+      - name: dob
+        description: "Date of birth, cast to date. PHI -- used only to derive day offsets."
+
+      - name: diagnosis_type_cohort
+        description: "Which of the two PCX-30 diagnosis cohorts this row represents."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Atypical teratoid/rhabdoid tumor'
+                  - 'Medulloblastoma'
+
+      - name: data_type_cohort
+        description: "Whether the patient is in the RADIANT MRN list or CBTN-only."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['radiant', 'cbtn-non-radiant']
+
+  - name: int_pcx_30_vital_status_events
+    description: >
+      All candidate vital-status records per patient, de-identified (age in days, no
+      MRN, no calendar dates). Union of four source streams collapsed to the latest
+      day-count per status. Ranking happens in pcx_30_patient_level_deid.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+      - name: age_at_vital_status_days
+        description: >
+          Days from birth to the status observation. Nullable: the source uses
+          age_at_event_days = -1 as an unknown sentinel, which becomes NULL here.
+
+      - name: vital_status
+        description: >
+          'deceased', 'alive', or a raw lowercased clinical_status passed through
+          from the updates table by stream C.
+        data_tests:
+          - not_null
+
+      - name: priority_score
+        description: "Precedence for the downstream pick: 1 = deceased, 2 = alive/other."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2]
+                quote: false
+
+  - name: pcx_30_patient_level_deid
+    description: >
+      One vital-status record per patient, de-identified. De-identified replacement
+      for radiant_data_dev.pcx_30_patient_level_deid as built by
+      prelim_30_sql/prod/patient_level_prod.sql. The identified twin
+      (pcx_30_patient_level) is intentionally not modelled here.
+    columns:
+      - name: research_id
+        description: "De-identified patient identifier. One row per patient."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: age_at_vital_status_days
+        description: >
+          Days from birth to the winning status observation. Nullable -- an undated
+          deceased record still wins its tier on priority_score.
+
+      - name: vital_status
+        description: "The winning status: deceased outranks alive/other."
+        data_tests:
+          - not_null
+
+  # ---------------------------------------------------------------------------
+  # GRAIN TESTS ONLY on the models below, by request. not_null on every join key;
+  # `unique` ONLY where the grain genuinely is one row per key.
+  #
+  # Deliberately NOT asserting `unique` on research_id for demographics, event_level
+  # or the three treatment-level models -- all five legitimately carry multiple rows
+  # per patient, so a unique test there would be a false alarm, not a guard.
+  # ---------------------------------------------------------------------------
+
+  - name: int_pcx_30_diagnosis_cohort
+    description: >
+      The `subj` CTE, lifted out of the five prod scripts that each carried a verbatim
+      copy: distinct (subject, cns_diagnosis_category) pairs defining the PCX-30
+      cohort. One row per (subject, diagnosis) -- a patient with both diagnoses
+      appears twice, so NOT unique on subject.
+    columns:
+      - name: subject
+        description: "CBTN research id of the cohort member."
+        data_tests:
+          - not_null
+
+  - name: int_pcx_30_openpedcan_subtype
+    description: >
+      The `opc_specific` CTE: one row per sample_id carrying only an allowlisted
+      OpenPedCan molecular subtype, mapped into the CBTN cns_integrated_diagnosis
+      vocabulary. Closed positive allowlist by design -- a bare non-null test would
+      ship 'Not Reported' as a diagnosis. Pre-aggregation to one row per sample_id is
+      load-bearing: the source is assay-level with up to 23 rows per sample.
+    columns:
+      - name: sample_id
+        description: >
+          Biospecimen id. One row per sample_id -- this is the pre-aggregation that
+          stops the downstream group_concat/min aggregates from multiplying.
+        data_tests:
+          - not_null
+          - unique
+
+  - name: int_pcx_30_fhir_patient_attributes
+    description: >
+      The `pts` CTE from demographics: FHIR patient attributes resolved through the
+      site-specific MRN identifier types (EPI@chop, SCHMRN@seattle, MRN@ucsf). PHI --
+      carries names, birth_date and full postal code; consumed only by
+      pcx_30_demographics_deid, which projects none of them unmasked. Grain is one row
+      per distinct column combination and is not asserted.
+    columns:
+      - name: identifier_value
+        description: "The site MRN. Join key to CBTN enrollment."
+
+  - name: int_pcx_30_initial_events
+    description: >
+      The `initial_events` CTE, previously three byte-identical copies across the
+      therapy, surgery and radiation scripts. Defines the frontline window per patient
+      (initial diagnosis .. first subsequent disease event). The `>= 0` anchor guard is
+      load-bearing -- it stops the -1 unknown-date sentinel from winning the min() and
+      inverting is_initial_treatment. Deliberately NOT consumed by
+      pcx_30_treatment_summary_deid, which needs the unguarded form.
+    columns:
+      - name: research_id
+        description: >
+          THE HIGHEST-VALUE GRAIN TEST IN THIS SET. The model groups by (research_id,
+          organization_name), but all three treatment models join it on research_id
+          ALONE -- so this is a real assertion, not a tautology. It encodes the
+          2026-10-01 profiling result that 0 research_ids carry more than one
+          organization_name. If that ever stops holding, this test fails here instead
+          of silently fanning out the therapy, radiation and surgery tables.
+        data_tests:
+          - not_null
+          - unique
+
+  - name: pcx_30_event_level_deid
+    description: >
+      De-identified disease-event level table. Upgrades NOS/NEC and non-WNT/non-SHH
+      cns_integrated_diagnosis values with a more specific OpenPedCan molecular
+      subtype; cns_integrated_diagnosis_source marks which rows were upgraded. No
+      cross-event broadcast except a deliberate whole-group lift on partially-matched
+      Initial CNS Tumor groups -- test at the per-row grain, not per-(patient,
+      event_type). Event grain: many rows per patient.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+  - name: pcx_30_medical_therapy_level_deid
+    description: >
+      De-identified chemotherapy regimen level table with the is_initial_treatment
+      frontline flag. NOTE 'no' conflates "not frontline" with "cannot tell" -- ~30% of
+      'no' rows are an unavailable source presented as a clinical negative. See the
+      model header before counting non-frontline regimens off this column. Regimen
+      grain: many rows per patient.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+  - name: pcx_30_radiation_level_deid
+    description: >
+      De-identified radiation course level table with the is_initial_treatment
+      frontline flag. Worst affected of the three treatment tables by the 'no'
+      conflation -- 37% of 'no' rows are indeterminate rather than genuinely
+      non-frontline. See the model header. Course grain: many rows per patient.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+  - name: pcx_30_surgery_level_deid
+    description: >
+      De-identified surgery level table with the is_initial_treatment frontline flag.
+      age_at_surgery carries BOTH unknown conventions (string sentinels AND negative
+      numbers), so catching indeterminate rows needs two predicates. See the model
+      header. Procedure grain: many rows per patient.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+  - name: pcx_30_demographics_deid
+    description: >
+      De-identified patient demographics: synthetic names derived from research_id,
+      birth year instead of birth date, ZIP3 postal code with HIPAA low-population
+      prefixes suppressed, and no MRN. Deliberately does not use
+      int_pcx_30_cohort_roster -- the source script resolves data_type_cohort from the
+      FHIR identifier rather than the RADIANT MRN list. NOT patient-unique: the subj
+      join duplicates a patient carrying both cohort diagnoses.
+    columns:
+      - name: research_id
+        data_tests:
+          - not_null
+
+  - name: pcx_30_treatment_summary_deid
+    description: >
+      Per-patient frontline treatment summary: diagnosis/first-event anchors, first-ever
+      and first-initial treatment ages, three had_initial_* flags, and the
+      radiation-vs-chemotherapy ordering label. Flags read the per-row
+      is_initial_treatment column from the treatment models rather than re-deriving the
+      window, so the two definitions cannot drift. Publishes age_at_initial_dx_days and
+      age_at_first_event_days with -1 passed through as the documented unknown-date
+      marker.
+    columns:
+      - name: research_id
+        description: >
+          One row per patient. Grouped by (research_id, organization_name) upstream, so
+          like int_pcx_30_initial_events this `unique` test is a real assertion that no
+          patient carries two organization_names.
+        data_tests:
+          - not_null
+          - unique
