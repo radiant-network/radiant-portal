@@ -173,6 +173,27 @@ func Test_AutocompletePcxPatients_NamesOnlyOfIdentifiablePatients(t *testing.T) 
 	})
 }
 
+func Test_AutocompletePcxPatients_NameMatchesTheStartOfAnyWord(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []types.AutocompleteResult{{Type: "patient_name", Value: "Grace Hopper"}}, autocompletePcxPatients(t, env, "HOP", 10))
+		assert.Equal(t, []types.AutocompleteResult{{Type: "patient_name", Value: "Ada Lovelace"}}, autocompletePcxPatients(t, env, "ada lov", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_FamilyNameOnlyOfIdentifiablePatients(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		// Patient 5 is also named Ada Lovelace but restricted.
+		assert.Equal(t, []types.AutocompleteResult{{Type: "patient_name", Value: "Ada Lovelace"}}, autocompletePcxPatients(t, env, "lovelace", 10))
+	})
+}
+
+func Test_AutocompletePcxPatients_NameDoesNotMatchInsideAWord(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		assert.Empty(t, autocompletePcxPatients(t, env, "velace", 10))
+		assert.Empty(t, autocompletePcxPatients(t, env, "ace", 10))
+	})
+}
+
 func Test_AutocompletePcxPatients_LikeWildcardsAreLiteral(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		assert.Empty(t, autocompletePcxPatients(t, env, "MRN_", 10))
