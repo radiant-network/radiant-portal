@@ -10,7 +10,9 @@ import DataTableFilters, {
   sortOptions,
 } from '@/components/base/data-table/filters/data-table-filters';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import { patientsApi } from '@/utils/api';
 
 import { fetchPatientFilters, type PatientFilters } from '../../api/patient';
 
@@ -21,24 +23,31 @@ type FiltersGroupFormProps = {
 
 const CRITERIAS = {
   vital_status: { key: 'vital_status', weight: 1, visible: true },
-  organization_name: { key: 'organization_name', weight: 2, visible: true },
+  organization_code: { key: 'organization_code', weight: 2, visible: true },
   cns_integrated_diagnosis: { key: 'cns_integrated_diagnosis', weight: 3, visible: true },
-  age_at_initial_dx_days: { key: 'age_at_initial_dx_days', weight: 4, visible: true },
-  had_initial_methotrexate: { key: 'had_initial_methotrexate', weight: 5, visible: true },
+  protocol: { key: 'protocol', weight: 4, visible: true },
+  molecular_subtype: { key: 'molecular_subtype', weight: 5, visible: true },
+  age_at_initial_dx_days: { key: 'age_at_initial_dx_days', weight: 6, visible: true },
+  had_initial_methotrexate: { key: 'had_initial_methotrexate', weight: 7, visible: true },
+  had_initial_radiation: { key: 'had_initial_radiation', weight: 8, visible: true },
   diagnosis_type_cohort: { key: 'diagnosis_type_cohort', visible: false },
 };
 
 export const FILTER_DEFAULTS: StringArrayRecord = {
   vital_status: [],
-  organization_name: [],
+  organization_code: [],
   cns_integrated_diagnosis: [],
+  protocol: [],
+  molecular_subtype: [],
   age_at_initial_dx_days: [],
   had_initial_methotrexate: [],
+  had_initial_radiation: [],
   diagnosis_type_cohort: [],
 };
 
 function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('patient-exploration-filters', {
@@ -86,6 +95,10 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
 
   return (
     <DataTableFilters
+      filterSearch={{
+        placeholder: t('patient_exploration.search_placeholder'),
+        api: (prefix: string) => patientsApi.autocompletePatients(tenant, prefix, '10'),
+      }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
       setChangedFilterButtons={setChangedFilterButtons}

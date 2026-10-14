@@ -1,9 +1,11 @@
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -18,6 +20,7 @@ import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
+import { getFranklinSnvUrl } from '@/components/base/variant/utils';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -171,6 +174,34 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
       size: 124,
       minSize: 40,
       enableSorting: false,
+    }),
+    // Tier
+    columnHelper.accessor(row => row, {
+      id: 'cmc_tier',
+      cell: info => <CmcTierBadge value={info.getValue().cmc_tier} href={getFranklinSnvUrl(info.getValue().locus)} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_tier_tooltip')}>{t('variant.headers.cmc_tier')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // CMC
+    columnHelper.accessor(row => row, {
+      id: 'cmc_sample_mutated',
+      cell: info => (
+        <CmcCell
+          sampleMutated={info.getValue().cmc_sample_mutated}
+          sampleRatio={info.getValue().cmc_sample_ratio}
+          mutationUrl={info.getValue().cmc_mutation_url}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_sample_mutated_tooltip')}>
+          {t('variant.headers.cmc_sample_mutated')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
     }),
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
@@ -326,6 +357,18 @@ const defaultGermlineSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.omim_inheritance_code',
     additionalFields: ['omim_inheritance_code'],
+  },
+  {
+    id: 'cmc_tier',
+    visible: false,
+    label: 'variant.headers.cmc_tier',
+    additionalFields: ['cmc_tier'],
+  },
+  {
+    id: 'cmc_sample_mutated',
+    visible: false,
+    label: 'variant.headers.cmc_sample_mutated',
+    additionalFields: ['cmc_sample_mutated', 'cmc_sample_ratio', 'cmc_mutation_url'],
   },
   {
     id: 'clinvar',

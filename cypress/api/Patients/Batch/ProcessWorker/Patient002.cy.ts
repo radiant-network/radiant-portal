@@ -54,18 +54,18 @@ describe('Patients - Batch - Process worker - Patient002', () => {
   });
 
   it('Validate report patient[0].date_of_birth', () => {
-    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'date_of_birth', '1973-03-23 00:00:00 +0000 UTC', '1974-04-24 00:00:00 +0000 UTC', 'CHUSJ', 'MRN-283775'), 'patient[0].date_of_birth');
+    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'date_of_birth', '1985-06-12 00:00:00 +0000 UTC', '1974-04-24 00:00:00 +0000 UTC', 'CHUSJ', 'MRN-283775'), 'patient[0].date_of_birth');
   });
 
   it('Validate report patient[0].last_name', () => {
-    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'last_name', 'Lambert', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].last_name');
+    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'last_name', 'Lefebvre', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].last_name');
   });
 
   it('Validate report patient[0].first_name', () => {
-    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'first_name', 'Marie', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].first_name');
+    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'first_name', 'Antoine', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].first_name');
   });
 
   it('Validate report patient[0].jhn', () => {
-    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'jhn', 'LAM7303233380', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].jhn');
+    cy.validateReport(response, 'warn', 'PATIENT-002', apiMessages.ProcessWorkerErrorDiffField('patient', 'jhn', 'LEFA85061203', 'Diff', 'CHUSJ', 'MRN-283775'), 'patient[0].jhn');
   });
 });

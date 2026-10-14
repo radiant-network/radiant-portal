@@ -131,6 +131,30 @@ const somaticSNVAggregations = {
         },
       },
       { key: 'sift_pred', translation_key: 'sift_pred', type: FilterTypes.MULTIPLE },
+      {
+        key: 'pathogenicity_oncology_divider',
+        translation_key: 'pathogenicity_oncology_divider',
+        type: FilterTypes.DIVIDER,
+      },
+      {
+        key: 'cmc_sample_mutated',
+        translation_key: 'cmc_sample_mutated',
+        type: FilterTypes.NUMERICAL,
+        defaults: { min: 0, max: undefined, defaultOperator: RangeOperators.LessThan },
+      },
+      {
+        key: 'cmc_sample_ratio',
+        translation_key: 'cmc_sample_ratio',
+        type: FilterTypes.NUMERICAL,
+        defaults: {
+          min: 0,
+          max: 1,
+          defaultOperator: RangeOperators.LessThan,
+          defaultMin: 0,
+          defaultMax: 1,
+        },
+      },
+      { key: 'cmc_tier', translation_key: 'cmc_tier', type: FilterTypes.MULTIPLE },
     ],
   },
   frequency: {
@@ -477,6 +501,30 @@ export const radiantConfig = {
             },
           },
           { key: 'sift_pred', translation_key: 'sift_pred', type: FilterTypes.MULTIPLE },
+          {
+            key: 'pathogenicity_oncology_divider',
+            translation_key: 'pathogenicity_oncology_divider',
+            type: FilterTypes.DIVIDER,
+          },
+          {
+            key: 'cmc_sample_mutated',
+            translation_key: 'cmc_sample_mutated',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: undefined, defaultOperator: RangeOperators.LessThan },
+          },
+          {
+            key: 'cmc_sample_ratio',
+            translation_key: 'cmc_sample_ratio',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 1,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 1,
+            },
+          },
+          { key: 'cmc_tier', translation_key: 'cmc_tier', type: FilterTypes.MULTIPLE },
         ],
       },
       frequency: {

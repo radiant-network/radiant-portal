@@ -5,6 +5,7 @@ declare namespace Cypress {
   interface Chainable {
     // apiCommands
     apiCall(method: string, query: string, body: string, token: string, retries?: number): Cypress.Chainable;
+    apiCallInTenant(tenant: string, method: string, query: string, body: string, token: string, retries?: number): Cypress.Chainable;
     getToken(): Chainable<string>;
     resetTablePreferences(): cy & CyEventEmitter;
     validateAcceptedBatchResponse(response: any, batch_type: string): cy & CyEventEmitter;

@@ -1781,6 +1781,44 @@
           "response": []
         },
         {
+          "name": "Search by case group",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [],\n    \"search_criteria\": [\n        {\n            \"field\": \"case_group\",\n            \"operator\": \"in\",\n            \"value\": [\n                \"run_1\"\n            ]\n        },\n        {\n            \"field\": \"priority_code\",\n            \"operator\": \"in\",\n            \"value\": [\n                \"stat\"\n            ]\n        }\n    ],\n    \"limit\": 20,\n    \"page_index\": 0,\n    \"sort\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Entity",
           "request": {
             "auth": {
@@ -4397,6 +4435,88 @@
                 "1",
                 "1",
                 "10000"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"sort\": [\n        {\"field\": \"can_read_phi\", \"order\": \"desc\"},\n        {\"field\": \"organization_code\", \"order\": \"asc\"},\n        {\"field\": \"patient_id\", \"order\": \"asc\"}\n    ],\n    \"search_criteria\": [\n        {\"field\": \"vital_status\", \"value\": [\"deceased\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/autocomplete?prefix=C1&limit=10",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "C1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
               ]
             }
           },

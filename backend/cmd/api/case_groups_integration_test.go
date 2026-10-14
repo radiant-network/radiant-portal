@@ -95,6 +95,21 @@ func serve(router *gin.Engine, method, path, body string) *httptest.ResponseReco
 	return w
 }
 
+// withoutCreatedOn checks created_on is a recent timestamp and strips it, so the rest of the
+// body can be compared to a literal.
+func withoutCreatedOn(t *testing.T, body string) string {
+	t.Helper()
+	var fields map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal([]byte(body), &fields))
+	var createdOn time.Time
+	require.NoError(t, json.Unmarshal(fields["created_on"], &createdOn))
+	assert.WithinDuration(t, time.Now(), createdOn, time.Minute)
+	delete(fields, "created_on")
+	stripped, err := json.Marshal(fields)
+	require.NoError(t, err)
+	return string(stripped)
+}
+
 func trackCaseGroup(t *testing.T, env *testutils.Env, name string) {
 	t.Helper()
 	t.Cleanup(func() { env.Postgres.Exec("DELETE FROM case_group WHERE tenant_code = 'radiant' AND name = ?", name) })
@@ -110,7 +125,7 @@ func Test_PostCaseGroup_DataManager_CreatesAndReturnsIds(t *testing.T) {
 		w := serve(router, "POST", "/radiant/case_groups", `{"name":"it_cg_create","case_ids":[2,1]}`)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, `{"name":"it_cg_create","tenant_code":"radiant","case_ids":[1,2]}`, w.Body.String())
+		assert.JSONEq(t, `{"name":"it_cg_create","tenant_code":"radiant","case_ids":[1,2]}`, withoutCreatedOn(t, w.Body.String()))
 	})
 }
 
@@ -126,7 +141,7 @@ func Test_PostCaseGroup_SameName_Overwrites(t *testing.T) {
 		// data_manager alone does not carry can_search_case; reads go through a member.
 		got := serve(caseGroupsRouter(env, mikeID), "GET", "/radiant/case_groups/it_cg_overwrite", "")
 		assert.Equal(t, http.StatusOK, got.Code)
-		assert.JSONEq(t, `{"name":"it_cg_overwrite","tenant_code":"radiant","case_ids":[2]}`, got.Body.String())
+		assert.JSONEq(t, `{"name":"it_cg_overwrite","tenant_code":"radiant","case_ids":[2]}`, withoutCreatedOn(t, got.Body.String()))
 	})
 }
 
@@ -161,7 +176,7 @@ func Test_GetCaseGroup_Member_CanRead(t *testing.T) {
 		w := serve(caseGroupsRouter(env, mikeID), "GET", "/radiant/case_groups/it_cg_member_read", "")
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.JSONEq(t, `{"name":"it_cg_member_read","tenant_code":"radiant","case_ids":[1]}`, w.Body.String())
+		assert.JSONEq(t, `{"name":"it_cg_member_read","tenant_code":"radiant","case_ids":[1]}`, withoutCreatedOn(t, w.Body.String()))
 	})
 }
 
@@ -205,7 +220,10 @@ func Test_NotifyCaseGroup_DataManager_ReportsPerLab(t *testing.T) {
 		require.Equal(t, http.StatusOK, w.Code, w.Body.String())
 		var resp types.NotifyCaseGroupResponse
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
-		assert.Equal(t, types.CaseGroupResponse{Name: "it_cg_notify", TenantCode: "radiant", CaseIDs: []int{1, 1226}}, resp.Group)
+		assert.Equal(t, "it_cg_notify", resp.Group.Name)
+		assert.Equal(t, "radiant", resp.Group.TenantCode)
+		assert.Equal(t, []int{1, 1226}, resp.Group.CaseIDs)
+		assert.False(t, resp.Group.CreatedOn.IsZero())
 		require.Len(t, resp.Emails, 2)
 
 		cqgc, ldm := resp.Emails[0], resp.Emails[1]

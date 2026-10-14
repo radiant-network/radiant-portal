@@ -12,7 +12,7 @@ describe('Samples - Batch - Process worker - Trim', () => {
           "submitter_patient_id": "  MRN-283775  ",
           "patient_organization_code": "CHUSJ",
           "type_code": "dna",
-          "submitter_parent_sample_id": "  S13224  ",
+          "submitter_parent_sample_id": "  S13226  ",
           "tissue_site": "  dna  ",
           "histology_code": "normal",
           "submitter_sample_id": "  Cypress0001  ",

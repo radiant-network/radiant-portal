@@ -312,6 +312,10 @@ function SomaticInterpretationDialog({
                     gnomad_v3_af={occurrenceExpand?.data?.gnomad_v3_af}
                     locus={occurrenceExpand?.data?.locus}
                     locusId={locusId}
+                    cmc_sample_mutated={occurrenceExpand?.data?.cmc_sample_mutated}
+                    cmc_sample_ratio={occurrenceExpand?.data?.cmc_sample_ratio}
+                    cmc_tier={occurrenceExpand?.data?.cmc_tier}
+                    cmc_mutation_url={occurrenceExpand?.data?.cmc_mutation_url}
                   />
                   <ClinicalAssociationCard
                     omim_conditions={occurrenceExpand?.data?.omim_conditions}

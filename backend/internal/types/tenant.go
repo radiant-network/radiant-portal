@@ -35,9 +35,9 @@ var ViewTables = []string{
 	"interpretation_germline", "interpretation_germline_history",
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
-	"panel", "project", "task",
+	"panel", "project", "task", "case_group",
 	// Junctions.
-	"case_has_sequencing_experiment", "task_context", "task_has_document",
+	"case_has_sequencing_experiment", "case_group_case", "task_context", "task_has_document",
 	// Reference / value-set tables.
 	"affected_status", "ancestry", "case_category", "case_type", "consanguinity", "data_category",
 	"data_type", "experimental_strategy", "family_relationship", "file_format",

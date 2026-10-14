@@ -27,6 +27,7 @@ export function Avatar({
   onAssignClick,
   showDetails = true,
   buttonVariant,
+  onEdit,
 }: AvatarProps) {
   const { t } = useI18n();
   const popoverTitle = t('common.user_selection.case_assignment');
@@ -54,6 +55,7 @@ export function Avatar({
         className={className}
         popoverTitle={popoverTitle}
         showDetails={showDetails}
+        onEdit={onEdit}
       />
     );
   }
@@ -78,7 +80,7 @@ export function Avatar({
 
   if (shouldShowPopover) {
     return (
-      <AvatarPopover users={validUsers} size={size} title={popoverTitle}>
+      <AvatarPopover users={validUsers} size={size} title={popoverTitle} onEdit={onEdit}>
         {avatarElement}
       </AvatarPopover>
     );

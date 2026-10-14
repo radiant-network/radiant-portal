@@ -576,12 +576,15 @@ components:
             type: integer
           type: array
           uniqueItems: false
+        created_on:
+          type: string
         name:
           type: string
         tenant_code:
           type: string
       required:
       - case_ids
+      - created_on
       - name
       - tenant_code
       type: object

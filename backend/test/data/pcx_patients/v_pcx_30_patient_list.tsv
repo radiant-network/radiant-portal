@@ -1,0 +1,6 @@
+patient_key	organization_code	organization_name	patient_id	patient_id_type	radiant_patient_id	given_name	family_name	birth_year	gender	diagnosis_type_cohort	data_type_cohort	cns_integrated_diagnosis	cns_integrated_diagnosis_source	vital_status	age_at_vital_status_days	age_at_initial_dx_days	survival_days	has_imaging	case_count	can_read_phi
+00000000-0000-4000-8000-000000000001	CHOP	Children's Hospital of Philadelphia	MRN-0002	mrn	11	Ada	Lovelace	2015	female	Brain tumor	radiant	ATRT	CBTN	alive	4000	1000	3000	true	2	true
+00000000-0000-4000-8000-000000000002	CHOP	Children's Hospital of Philadelphia	MRN-0001	mrn	12	Grace	Hopper	2012	male	Brain tumor	radiant	Medulloblastoma	OpenPedCan	deceased	5000	2000	3000	false	1	true
+00000000-0000-4000-8000-000000000003	SCH	Seattle Children's Hospital	MRN-0100	mrn	NULL	Alan	Turing	NULL	male	Brain tumor	clinical	Ependymoma	CBTN	alive	NULL	NULL	NULL	false	0	true
+00000000-0000-4000-8000-000000000004	BCH	Boston Children's Hospital	C100004	research_id	NULL	C100004_given_name	C100004_family_name	2010	female	Brain tumor	clinical	ATRT	CBTN	deceased	3000	1000	2000	true	0	false
+00000000-0000-4000-8000-000000000005	CHOP	Children's Hospital of Philadelphia	C100005	research_id	NULL	Ada	Lovelace	2018	not_reported	Brain tumor	clinical	NULL	NULL	alive	NULL	NULL	NULL	false	0	false

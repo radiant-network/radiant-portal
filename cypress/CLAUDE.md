@@ -100,6 +100,7 @@ Shared POM utilities in `pom/shared/`:
 |---|---|
 | `cy.getToken()` | Password grant → returns access_token |
 | `cy.apiCall(method, path, body, token)` | Authenticated request with auto-retry on 500. `path` is tenant-scoped without the tenant prefix (e.g. `cases/search`); the tenant segment (`api_tenant`) is prepended automatically |
+| `cy.apiCallInTenant(tenant, method, path, body, token)` | Same as `apiCall`, against an explicit tenant. Only for data that does not exist in `api_tenant` (assignment candidates need cases in two diagnostic labs, which only `radiant` has) |
 | `cy.validateAcceptedBatchResponse(resp, type)` | Assert batch creation response structure |
 | `cy.validateSuccessBatchProcessed(resp)` | Assert completed batch (status=SUCCESS) |
 | `cy.validateReport(resp, level, code, msg, path)` | Assert error/warning/info in report |
@@ -238,7 +239,7 @@ shouldShowField(fieldId: string, dataVariant: any) {
 
 - Build hrefs via `getUrlLink(fieldId, data)` in `pom/shared/Utils.ts` rather than hardcoding URLs in the POM. Add a new `case` to `getUrlLink` for any new link source — keep all variant-URL construction in one switch.
 - Same `fieldId` convention as `shouldShowField`: snake_case key that matches the data field.
-- Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place. Prefix them with `/${Cypress.expose('api_tenant')}`: every protected route carries a tenant segment, so the rendered `href` is `/radiant/variants/entity/…`.
+- Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place. Prefix them with `/${Cypress.expose('api_tenant')}`: every protected route carries a tenant segment, so the rendered `href` is `/<api_tenant>/variants/entity/…`.
 
 ### Source code instrumentation
 

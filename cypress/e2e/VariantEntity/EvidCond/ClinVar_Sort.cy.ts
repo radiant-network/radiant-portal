@@ -16,14 +16,14 @@ describe('VariantEntity - EvidCond - ClinVar - Sort', () => {
 
   it('Tag', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification', true /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
-  it('Multiple [SJRA-719]', () => {
+  it('Multiple', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('classification');
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
-    VariantEntity_EvidCond.clinvarCard.validations.shouldHaveFirstRowValue('HPSE2-Related Disorder', 'condition');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldHaveFirstRowValue('Usher syndrome type 2C', 'condition');
   });
 });

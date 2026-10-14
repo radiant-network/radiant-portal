@@ -12,12 +12,12 @@ describe('VariantEntity - Frequency - MyNetwork - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_Frequency.myNetwork.validations.shouldSortColumn('primary_condition', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+    VariantEntity_Frequency.myNetwork.validations.shouldSortColumn('primary_condition', true /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Frequency', () => {
     setupTest();
-    VariantEntity_Frequency.myNetwork.validations.shouldSortColumn('freq_all', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+    VariantEntity_Frequency.myNetwork.validations.shouldSortColumn('freq_all', true /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Number', () => {

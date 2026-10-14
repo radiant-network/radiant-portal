@@ -194,18 +194,16 @@ export const VariantEntity_Overview = {
        * @param dataVariant The variant object.
        */
       shouldShowScores(dataVariant: any) {
-        Object.entries(dataVariant.predictionScores).forEach(([key, value]) => {
-          switch (key) {
-            case 'loeuf':
-            case 'pli':
-            case 'revel':
-            case 'spliceai':
-              cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(value == null ? `${key}-empty` : key)}`).should('contain', getPredictionDisplay(key));
-              cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(value == null ? `${key}-empty` : key)}`).should('contain', value == null ? '-' : value);
-              break;
-            default:
-              cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(key)}`).should('not.exist');
-              break;
+        // The card shows the first 4 scores of the frontend order, non-empty ones first.
+        const order = ['revel', 'sift', 'loeuf', 'spliceai', 'fathmm', 'caddraw', 'caddphred', 'dann', 'lrt', 'polyphen2_hvar', 'phylop17way', 'pli'];
+        const scores = dataVariant.predictionScores;
+        const visibleKeys = [...order.filter(key => scores[key] != null), ...order.filter(key => scores[key] == null)].slice(0, 4);
+        Object.entries(scores).forEach(([key, value]) => {
+          if (visibleKeys.includes(key)) {
+            cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(value == null ? `${key}-empty` : key)}`).should('contain', getPredictionDisplay(key));
+            cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(value == null ? `${key}-empty` : key)}`).should('contain', value == null ? '-' : value);
+          } else {
+            cy.get(`${selectors.predictionScores.card} ${CommonSelectors.datacy(key)}`).should('not.exist');
           }
         });
       },

@@ -350,6 +350,10 @@ export function SomaticOccurrenceSheetContent({
         somatic_pc_tn_wgs={expandResult.data.somatic_pc_tn_wgs}
         somatic_pn_tn_wgs={expandResult.data.somatic_pn_tn_wgs}
         somatic_pf_tn_wgs={expandResult.data.somatic_pf_tn_wgs}
+        cmc_sample_mutated={expandResult.data.cmc_sample_mutated}
+        cmc_sample_ratio={expandResult.data.cmc_sample_ratio}
+        cmc_tier={expandResult.data.cmc_tier}
+        cmc_mutation_url={expandResult.data.cmc_mutation_url}
         locusId={occurrence.locus_id}
       />
     </div>

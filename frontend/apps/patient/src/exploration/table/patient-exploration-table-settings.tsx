@@ -1,29 +1,30 @@
 import type { TFunction } from 'i18next';
 
+import type { PatientListItem } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 
-import type { Patient } from '../../api/patient';
-
+import GenderCell from './cells/gender-cell';
+import MrnCell from './cells/mrn-cell';
 import PatientLinkCell from './cells/patient-link-cell';
 import SurvivalCell from './cells/survival-cell';
 import VitalStatusCell from './cells/vital-status-cell';
 
-const columnHelper = createAppColumnHelper<Patient>();
+const columnHelper = createAppColumnHelper<PatientListItem>();
 
 function getPatientExplorationColumns(t: TFunction<string, undefined>) {
   return [
-    columnHelper.accessor(row => row.name, {
+    columnHelper.accessor(row => row.family_name, {
       id: 'patient',
       cell: info => <PatientLinkCell patient={info.row.original} />,
       header: t('patient_exploration.columns.patient'),
       size: 180,
       minSize: 120,
     }),
-    columnHelper.accessor(row => row.mrn, {
+    columnHelper.accessor(row => row.patient_id, {
       id: 'mrn',
-      cell: info => <span className="font-mono text-xs">{info.getValue()}</span>,
+      cell: info => <MrnCell patient={info.row.original} />,
       header: t('patient_exploration.columns.mrn'),
       size: 140,
       minSize: 80,
@@ -35,14 +36,14 @@ function getPatientExplorationColumns(t: TFunction<string, undefined>) {
       size: 96,
       minSize: 60,
     }),
-    columnHelper.accessor(row => row.sex, {
+    columnHelper.accessor(row => row.gender, {
       id: 'sex',
-      cell: info => info.getValue(),
+      cell: info => <GenderCell value={info.getValue()} />,
       header: t('patient_exploration.columns.sex'),
       size: 80,
       minSize: 60,
     }),
-    columnHelper.accessor(row => row.site, {
+    columnHelper.accessor(row => row.organization_code, {
       id: 'site',
       cell: info => <BadgeCell variant="secondary">{info.getValue()}</BadgeCell>,
       header: t('patient_exploration.columns.site'),
@@ -70,7 +71,7 @@ function getPatientExplorationColumns(t: TFunction<string, undefined>) {
       size: 112,
       minSize: 80,
     }),
-  ] as TableColumnDef<Patient, any>[];
+  ] as TableColumnDef<PatientListItem, any>[];
 }
 
 const defaultSettings = createColumnSettings([
