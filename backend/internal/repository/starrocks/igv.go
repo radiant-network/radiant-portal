@@ -20,6 +20,26 @@ type IGVRepository struct {
 	joiner joins.Joiner
 }
 
+type igvTrackKind string
+
+const (
+	igvTrackAlignment      igvTrackKind = "Reads"
+	igvTrackCNV            igvTrackKind = "CNVs"
+	igvTrackSeg            igvTrackKind = "Seg"
+	igvTrackBAF            igvTrackKind = "BAF"
+	igvTrackROH            igvTrackKind = "ROH"
+	igvTrackCaptureTargets igvTrackKind = "Capture targets"
+)
+
+type igvTrackKey struct {
+	kind                   igvTrackKind
+	sequencingExperimentId int
+}
+
+type igvTaskFiles struct {
+	data, index bool
+}
+
 func NewIGVRepository(db database.StarrocksDB) *IGVRepository {
 	return &IGVRepository{db: db.DB, joiner: joins.Starrocks()}
 }
@@ -90,17 +110,6 @@ func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*typ
 		func(t IGVTrack) bool { return t.HistologyCode == "tumoral" })
 }
 
-type igvTrackKind string
-
-const (
-	igvTrackAlignment      igvTrackKind = "Reads"
-	igvTrackCNV            igvTrackKind = "CNVs"
-	igvTrackSeg            igvTrackKind = "Seg"
-	igvTrackBAF            igvTrackKind = "BAF"
-	igvTrackROH            igvTrackKind = "ROH"
-	igvTrackCaptureTargets igvTrackKind = "Capture targets"
-)
-
 // igvTrackKindOf tells the track of a document. Seg and BAF share igv/bw, ROH and capture
 // targets share igv/bed: the document name suffix tells them apart. An igv document with
 // another name gives no track.
@@ -133,15 +142,6 @@ func HasIgvTracks(tracks []IGVTrack) bool {
 		kind, ok := igvTrackKindOf(r)
 		return ok && kind != igvTrackCaptureTargets
 	})
-}
-
-type igvTrackKey struct {
-	kind                   igvTrackKind
-	sequencingExperimentId int
-}
-
-type igvTaskFiles struct {
-	data, index bool
 }
 
 // complete tells whether a task gives a usable track: the data file, plus its index for the
