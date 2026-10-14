@@ -695,6 +695,7 @@
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
+          "patient_name": "Patient",
           "submitter_patient_id": "MRN",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
@@ -1294,6 +1295,12 @@
       "description": "Current registry snapshot · derived from roster fields",
       "source": "Live roster"
     },
+    "cells": {
+      "patient": {
+        "research_id": "ID: {{id}}",
+        "masked_aria": "PHI masked"
+      }
+    },
     "columns": {
       "patient": "Patient",
       "mrn": "MRN",
@@ -1306,10 +1313,13 @@
     },
     "filters": {
       "vital_status": "Vital status",
-      "organization_name": "Site",
+      "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnosis",
+      "protocol": "Protocol",
+      "molecular_subtype": "Molecular subtype",
       "age_at_initial_dx_days": "Age at diagnosis",
       "had_initial_methotrexate": "Treatment exposure",
+      "had_initial_radiation": "Radiation",
       "diagnosis_type_cohort": "Cohort"
     },
     "pagination": {

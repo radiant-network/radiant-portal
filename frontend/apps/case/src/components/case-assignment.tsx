@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import useSWR from 'swr';
 
 import type { CaseAssignee } from '@/api/api';
+import type { AssignmentPickerProps } from '@/components/base/assignation/assignment-picker';
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
 import type { AvatarButtonVariant, AvatarUser } from '@/components/base/avatar/avatar.types';
 import type { AvatarSize } from '@/components/base/shadcn/avatar';
@@ -37,10 +38,19 @@ type CaseAssignmentProps = {
   assignees: CaseAssignee[];
   size?: AvatarSize;
   buttonVariant?: AvatarButtonVariant;
+  align?: AssignmentPickerProps['align'];
   onSaved?: () => void;
 };
 
-function CaseAssignment({ caseId, diagnosisLabCode, assignees, size, buttonVariant, onSaved }: CaseAssignmentProps) {
+function CaseAssignment({
+  caseId,
+  diagnosisLabCode,
+  assignees,
+  size,
+  buttonVariant,
+  align,
+  onSaved,
+}: CaseAssignmentProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const canEdit = useCanEditCase(diagnosisLabCode);
@@ -70,6 +80,7 @@ function CaseAssignment({ caseId, diagnosisLabCode, assignees, size, buttonVaria
       canEdit={canEdit}
       size={size}
       buttonVariant={buttonVariant}
+      align={align}
       currentUserId={sessionUser?.sub}
       isLoading={isLoading}
       onApply={handleApply}

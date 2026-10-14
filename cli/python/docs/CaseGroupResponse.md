@@ -7,6 +7,7 @@ A named set of cases within a tenant.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **case_ids** | **List[int]** |  | 
+**created_on** | **str** |  | 
 **name** | **str** |  | 
 **tenant_code** | **str** |  | 
 

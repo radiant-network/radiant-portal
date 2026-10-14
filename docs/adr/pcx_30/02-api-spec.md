@@ -55,7 +55,7 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 }
 ```
 
-**Autocomplete.** Same behaviour as the case list search box (`DataTableFilters` with `filterSearch`, `minSearchLength` 1, 10 results grouped by type): a case-insensitive prefix match on `patient_id` (type `patient_id`) and on the full name (type `patient_name`, only where `can_read_phi` is true), read from `v_pcx_30_patient_list` as the user, ordered by value, capped by `limit`. It returns the shared `AutocompleteResult` so the existing component works unchanged.
+**Autocomplete.** Same behaviour as the case list search box (`DataTableFilters` with `filterSearch`, `minSearchLength` 1, 10 results grouped by type): a case-insensitive prefix match on `patient_id` (type `patient_id`, MRN or research ID) and on the start of any word of the name (type `patient_name`, value "given family", only where `can_read_phi` is true: "pat" finds William Patel), read from `v_pcx_30_patient_list` as the user, ordered by value, capped by `limit`. It returns the shared `AutocompleteResult` so the existing component works unchanged.
 
 **Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts.
 
