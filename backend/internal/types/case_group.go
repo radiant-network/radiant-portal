@@ -26,13 +26,23 @@ type CaseGroupCase struct {
 }
 
 var CaseGroupTable = Table{
-	Name:  "case_group",
-	Alias: "cg",
+	Name:           "case_group",
+	Alias:          "cg",
+	FederationName: "radiant_jdbc.public.case_group",
 }
 
 var CaseGroupCaseTable = Table{
-	Name:  "case_group_case",
-	Alias: "cgc",
+	Name:           "case_group_case",
+	Alias:          "cgc",
+	FederationName: "radiant_jdbc.public.case_group_case",
+}
+
+// CaseGroupField scopes a cases search to the members of one or more groups.
+var CaseGroupField = Field{
+	Name:          "name",
+	Alias:         "case_group",
+	CanBeFiltered: true,
+	Table:         CaseGroupTable,
 }
 
 func (CaseGroup) TableName() string {
@@ -88,13 +98,14 @@ func (r CaseGroupRequest) Validate() error {
 
 // @Description A named set of cases within a tenant.
 type CaseGroupResponse struct {
-	Name       string `json:"name" validate:"required"`
-	TenantCode string `json:"tenant_code" validate:"required"`
-	CaseIDs    []int  `json:"case_ids" validate:"required"`
+	Name       string    `json:"name" validate:"required"`
+	TenantCode string    `json:"tenant_code" validate:"required"`
+	CaseIDs    []int     `json:"case_ids" validate:"required"`
+	CreatedOn  time.Time `json:"created_on" validate:"required"`
 } // @name CaseGroupResponse
 
 func NewCaseGroupResponse(group CaseGroup, caseIDs []int) CaseGroupResponse {
-	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs)}
+	return CaseGroupResponse{Name: group.Name, TenantCode: group.TenantCode, CaseIDs: NormalizeCaseIDs(caseIDs), CreatedOn: group.CreatedOn}
 }
 
 const (

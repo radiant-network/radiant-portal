@@ -92,6 +92,12 @@ func (j Joiner) CaseWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.id=%s.case_id", j.name(types.CaseHasSequencingExperimentTable, tx), types.CaseHasSequencingExperimentTable.Alias, types.CaseTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
 }
 
+func (j Joiner) CaseWithCaseGroup(tx *gorm.DB) *gorm.DB {
+	joinMembership := fmt.Sprintf("INNER JOIN %s %s ON %s.case_id=%s.id", j.name(types.CaseGroupCaseTable, tx), types.CaseGroupCaseTable.Alias, types.CaseGroupCaseTable.Alias, types.CaseTable.Alias)
+	joinGroup := fmt.Sprintf("INNER JOIN %s %s ON %s.id=%s.case_group_id", j.name(types.CaseGroupTable, tx), types.CaseGroupTable.Alias, types.CaseGroupTable.Alias, types.CaseGroupCaseTable.Alias)
+	return tx.Joins(joinMembership).Joins(joinGroup)
+}
+
 func (j Joiner) SeqExpWithSample(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", j.name(types.SampleTable, tx), types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }

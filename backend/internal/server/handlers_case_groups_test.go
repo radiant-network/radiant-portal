@@ -8,12 +8,15 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/notification"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
+
+var groupCreatedOn = time.Date(2026, 9, 29, 14, 0, 0, 0, time.UTC)
 
 type mockCaseGroupStore struct {
 	upsertErr error
@@ -30,7 +33,7 @@ func (m *mockCaseGroupStore) UpsertCaseGroup(_ context.Context, tenantCode, name
 	if m.upsertErr != nil {
 		return nil, nil, m.upsertErr
 	}
-	return &types.CaseGroup{ID: 7, TenantCode: tenantCode, Name: name, CreatedBy: createdBy}, types.NormalizeCaseIDs(caseIDs), nil
+	return &types.CaseGroup{ID: 7, TenantCode: tenantCode, Name: name, CreatedBy: createdBy, CreatedOn: groupCreatedOn}, types.NormalizeCaseIDs(caseIDs), nil
 }
 
 func (m *mockCaseGroupStore) GetCaseGroupByName(_ context.Context, _, _ string) (*types.CaseGroup, []int, error) {
@@ -53,7 +56,7 @@ func Test_PostCaseGroupHandler_Success(t *testing.T) {
 	w := serveCaseGroups(store, "POST", "/radiant/case_groups", `{"name":"run_1","case_ids":[3,1,3]}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[3,1]}`, w.Body.String())
+	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[3,1],"created_on":"2026-09-29T14:00:00Z"}`, w.Body.String())
 	assert.Equal(t, "radiant", store.gotTenant)
 	assert.Equal(t, "run_1", store.gotName)
 	assert.Equal(t, []int{3, 1, 3}, store.gotCaseIDs)
@@ -64,7 +67,7 @@ func Test_PostCaseGroupHandler_EmptyCaseIds(t *testing.T) {
 	w := serveCaseGroups(&mockCaseGroupStore{}, "POST", "/radiant/case_groups", `{"name":"run_1","case_ids":[]}`)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[]}`, w.Body.String())
+	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[],"created_on":"2026-09-29T14:00:00Z"}`, w.Body.String())
 }
 
 func Test_PostCaseGroupHandler_MissingCaseIds_400(t *testing.T) {
@@ -97,11 +100,11 @@ func Test_PostCaseGroupHandler_StoreError_500Generic(t *testing.T) {
 }
 
 func Test_GetCaseGroupHandler_Success(t *testing.T) {
-	store := &mockCaseGroupStore{stored: &types.CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1"}, storedIDs: []int{1, 3}}
+	store := &mockCaseGroupStore{stored: &types.CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1", CreatedOn: groupCreatedOn}, storedIDs: []int{1, 3}}
 	w := serveCaseGroups(store, "GET", "/radiant/case_groups/run_1", "")
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[1,3]}`, w.Body.String())
+	assert.JSONEq(t, `{"name":"run_1","tenant_code":"radiant","case_ids":[1,3],"created_on":"2026-09-29T14:00:00Z"}`, w.Body.String())
 }
 
 func Test_GetCaseGroupHandler_NotFound_404(t *testing.T) {
@@ -145,7 +148,7 @@ func serveNotify(svc caseGroupNotifier, name string) *httptest.ResponseRecorder 
 
 func Test_PostCaseGroupNotifyHandler_Report(t *testing.T) {
 	svc := &mockCaseGroupNotifier{report: &types.NotifyCaseGroupResponse{
-		Group: types.CaseGroupResponse{Name: "run-a", TenantCode: "radiant", CaseIDs: []int{1, 2}},
+		Group: types.CaseGroupResponse{Name: "run-a", TenantCode: "radiant", CaseIDs: []int{1, 2}, CreatedOn: groupCreatedOn},
 		Emails: []types.CaseGroupEmailReport{
 			{OrganizationCode: "LDM-CHUSJ", Status: types.CaseGroupEmailSent, Recipients: []string{"a@lab.invalid"}, CaseCount: 1, DocumentCount: 3, Template: "manifest_radiant.tmpl",
 				Context: types.CaseGroupEmailContext{HasStat: true, AnalysisCodes: []string{"WGS"}, CaseIDs: []int{1}, ManifestFilename: "run-a_20260924_manifest.tsv"}},
@@ -159,7 +162,7 @@ func Test_PostCaseGroupNotifyHandler_Report(t *testing.T) {
 	assert.Equal(t, "radiant", svc.gotTenant)
 	assert.Equal(t, "run-a", svc.gotName)
 	assert.JSONEq(t, `{
-		"group": {"name":"run-a","tenant_code":"radiant","case_ids":[1,2]},
+		"group": {"name":"run-a","tenant_code":"radiant","case_ids":[1,2],"created_on":"2026-09-29T14:00:00Z"},
 		"emails": [
 			{"organization_code":"LDM-CHUSJ","status":"sent","recipients":["a@lab.invalid"],"case_count":1,"document_count":3,"template":"manifest_radiant.tmpl",
 			 "context":{"has_stat":true,"analysis_codes":["WGS"],"case_ids":[1],"manifest_filename":"run-a_20260924_manifest.tsv"}},

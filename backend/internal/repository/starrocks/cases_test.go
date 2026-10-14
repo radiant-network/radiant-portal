@@ -961,3 +961,47 @@ func Test_subjectKey_NeitherSetDoesNotPanic(t *testing.T) {
 	assert.NotEqual(t, subjectKey(utils.IntPtr(0), nil), key)
 	assert.NotEqual(t, subjectKey(nil, utils.IntPtr(0)), key)
 }
+
+func insertCaseGroup(t *testing.T, env *testutils.Env, name string, caseIDs ...int) {
+	t.Helper()
+	var id int
+	require.NoError(t, env.Postgres.Raw("INSERT INTO case_group (tenant_code, name, created_by) VALUES ('radiant', ?, 'it') RETURNING id", name).Scan(&id).Error)
+	for _, caseID := range caseIDs {
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_group_case (case_group_id, case_id) VALUES (?, ?)", id, caseID).Error)
+	}
+	t.Cleanup(func() { env.Postgres.Exec("DELETE FROM case_group WHERE tenant_code = 'radiant' AND name = ?", name) })
+}
+
+func Test_SearchCases_OnCaseGroup(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		insertCaseGroup(t, env, "it_repo_cg_a", 1, 2)
+		insertCaseGroup(t, env, "it_repo_cg_b", 1)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		search := func(names ...interface{}) ([]int, int64) {
+			criteria := []types.SearchCriterion{{FieldName: types.CaseGroupField.GetAlias(), Value: names}}
+			sort := []types.SortBody{{Field: types.CaseIdField.GetAlias(), Order: "asc"}}
+			query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, sort)
+			require.NoError(t, err)
+			cases, count, err := repo.SearchCases(t.Context(), query)
+			require.NoError(t, err)
+			ids := make([]int, len(*cases))
+			for i, c := range *cases {
+				ids[i] = c.CaseID
+			}
+			return ids, *count
+		}
+
+		ids, count := search("it_repo_cg_a")
+		assert.Equal(t, []int{1, 2}, ids)
+		assert.Equal(t, int64(2), count)
+
+		// Case 1 is in both groups: one row, counted once.
+		ids, count = search("it_repo_cg_a", "it_repo_cg_b")
+		assert.Equal(t, []int{1, 2}, ids)
+		assert.Equal(t, int64(2), count)
+
+		ids, count = search("it_repo_cg_missing")
+		assert.Empty(t, ids)
+		assert.Equal(t, int64(0), count)
+	})
+}
