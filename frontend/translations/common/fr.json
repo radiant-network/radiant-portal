@@ -695,6 +695,7 @@
         "search": {
           "case_id": "Cas",
           "patient_id": "Patient",
+          "patient_name": "Patient",
           "submitter_patient_id": "MRN",
           "run_name": "Nom du lot",
           "sample_id": "ID Échantillon",
@@ -1295,6 +1296,12 @@
       "description": "État actuel du registre · dérivé des données de la cohorte",
       "source": "Roster en direct"
     },
+    "cells": {
+      "patient": {
+        "research_id": "ID : {{id}}",
+        "masked_aria": "PHI masqué"
+      }
+    },
     "columns": {
       "patient": "Patient",
       "mrn": "Dossier",
@@ -1307,10 +1314,13 @@
     },
     "filters": {
       "vital_status": "Statut vital",
-      "organization_name": "Site",
+      "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnostic",
+      "protocol": "Protocole",
+      "molecular_subtype": "Sous-type moléculaire",
       "age_at_initial_dx_days": "Âge au diagnostic",
       "had_initial_methotrexate": "Exposition au traitement",
+      "had_initial_radiation": "Radiothérapie",
       "diagnosis_type_cohort": "Cohorte"
     },
     "pagination": {

@@ -1,9 +1,8 @@
+import type { PatientListItemVitalStatusEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 
-import type { PatientVitalStatus } from '../../../api/patient';
-
 type VitalStatusCellProps = {
-  value: PatientVitalStatus;
+  value: PatientListItemVitalStatusEnum;
 };
 
 function VitalStatusCell({ value }: VitalStatusCellProps) {
