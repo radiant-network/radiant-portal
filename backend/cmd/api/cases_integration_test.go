@@ -23,7 +23,7 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo, assignmentsRepo, postgres.NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})))
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo, assignmentsRepo))
 
 		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
@@ -34,17 +34,16 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 	})
 }
 
-// Seeded cases 1 and 2 (test/data/clinical/03_cases.sql) are federated to StarRocks, so a group
-// holding them scopes the search to exactly those two.
+// Seeded cases 1 and 2 (test/data/clinical/03_cases.sql) and the group written here are both read
+// through the federation, so the group scopes the search to exactly those two.
 func Test_SearchCasesHandler_WithCaseGroup_ScopesToGroup(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		trackCaseGroup(t, env, "it_search_cg")
 		pg := database.PostgresDB{DB: env.Postgres}
-		groupsRepo := postgres.NewCaseGroupsRepository(pg)
-		_, _, err := groupsRepo.UpsertCaseGroup(t.Context(), "radiant", "it_search_cg", []int{2, 1}, "it")
+		_, _, err := postgres.NewCaseGroupsRepository(pg).UpsertCaseGroup(t.Context(), "radiant", "it_search_cg", []int{2, 1}, "it")
 		require.NoError(t, err)
 		router := tenantRouter()
-		router.POST("/:tenant/cases/search", server.SearchCasesHandler(starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}), postgres.NewCaseAssignmentsRepository(pg), groupsRepo))
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}), postgres.NewCaseAssignmentsRepository(pg)))
 
 		w := serve(router, "POST", "/radiant/cases/search", `{"search_criteria":[{"field":"case_group","operator":"in","value":["it_search_cg"]}], "sort":[{"field":"case_id","order":"asc"}]}`)
 

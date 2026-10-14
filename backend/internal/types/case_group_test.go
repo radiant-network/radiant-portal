@@ -57,38 +57,3 @@ func Test_NewCaseGroupResponse(t *testing.T) {
 func Test_NewCaseGroupResponse_NoCases_EmptyList(t *testing.T) {
 	assert.Equal(t, []int{}, NewCaseGroupResponse(CaseGroup{Name: "run_1"}, nil).CaseIDs)
 }
-
-func Test_SplitCaseGroupCriteria_NoneLeavesCriteriaUntouched(t *testing.T) {
-	criteria := []SearchCriterion{{FieldName: "priority_code", Value: []interface{}{"stat"}}}
-	names, rest, err := SplitCaseGroupCriteria(criteria)
-	assert.NoError(t, err)
-	assert.Nil(t, names)
-	assert.Equal(t, criteria, rest)
-}
-
-func Test_SplitCaseGroupCriteria_ExtractsNamesKeepsOthers(t *testing.T) {
-	criteria := []SearchCriterion{
-		{FieldName: "case_group", Value: []interface{}{"run_1", "run_2", "run_1"}},
-		{FieldName: "priority_code", Operator: "in", Value: []interface{}{"stat"}},
-		{FieldName: "case_group", Operator: "in", Value: []interface{}{"run_3"}},
-	}
-	names, rest, err := SplitCaseGroupCriteria(criteria)
-	assert.NoError(t, err)
-	assert.Equal(t, []string{"run_1", "run_2", "run_3"}, names)
-	assert.Equal(t, []SearchCriterion{{FieldName: "priority_code", Operator: "in", Value: []interface{}{"stat"}}}, rest)
-}
-
-func Test_SplitCaseGroupCriteria_UnsupportedOperator(t *testing.T) {
-	_, _, err := SplitCaseGroupCriteria([]SearchCriterion{{FieldName: "case_group", Operator: "not-in", Value: []interface{}{"run_1"}}})
-	assert.EqualError(t, err, "operation not-in is not supported on case_group, only in")
-}
-
-func Test_SplitCaseGroupCriteria_EmptyValue(t *testing.T) {
-	_, _, err := SplitCaseGroupCriteria([]SearchCriterion{{FieldName: "case_group", Value: []interface{}{}}})
-	assert.EqualError(t, err, "value must be defined: case_group")
-}
-
-func Test_SplitCaseGroupCriteria_NonStringValue(t *testing.T) {
-	_, _, err := SplitCaseGroupCriteria([]SearchCriterion{{FieldName: "case_group", Value: []interface{}{float64(7)}}})
-	assert.EqualError(t, err, "case_group values must be strings, got 7")
-}

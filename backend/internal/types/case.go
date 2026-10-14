@@ -368,6 +368,7 @@ var CasesFields = []Field{
 	ProbandLifeStatusCodeField,
 	ProbandFirstNameField,
 	ProbandLastNameField,
+	CaseGroupField,
 }
 
 var CasesDefaultFields = []Field{

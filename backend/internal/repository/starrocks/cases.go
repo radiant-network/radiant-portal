@@ -57,6 +57,10 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 	columns = append(columns, "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type")
 	columns = append(columns, "stg.case_id IS NOT NULL AS has_variants")
+	// Group membership is many-to-many: a case in two of the requested groups would come back twice.
+	if userQuery.HasFieldFromTables(types.CaseGroupTable) {
+		tx = tx.Distinct(fmt.Sprintf("%s.id", types.CaseTable.Alias))
+	}
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
@@ -240,6 +244,10 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 
 		if userQuery.HasFieldFromTables(types.CaseHasSequencingExperimentTable) {
 			tx = r.joiner.CaseWithCaseHasSeqExp(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.CaseGroupTable) {
+			tx = r.joiner.CaseWithCaseGroup(tx)
 		}
 	}
 	return tx, nil
