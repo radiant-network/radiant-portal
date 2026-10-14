@@ -47,7 +47,7 @@ func init() {
 // batches). Off by default: the routes are not registered, so they answer 404.
 const patientViewEnabledEnv = "PATIENT_VIEW_ENABLED"
 
-func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool) *gin.Engine {
+func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool, igvPublicTracksPrefix string) *gin.Engine {
 	// Auth service
 	auth := utils.NewKeycloakAuth()
 
@@ -118,12 +118,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	authMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
 		slog.Error("failed to initialize authorizer", slog.Any("error", err))
-		os.Exit(1)
-	}
-
-	igvPublicTracksPrefix, err := utils.IGVPublicTracksPrefixFromEnv()
-	if err != nil {
-		slog.Error("failed to read IGV public tracks prefix", slog.Any("error", err))
 		os.Exit(1)
 	}
 
@@ -434,7 +428,13 @@ func main() {
 		}
 	}
 
-	r := setupRouter(dbStarrocks, dbPostgres, utils.GetBoolEnvOrDefault(patientViewEnabledEnv, false))
+	igvPublicTracksPrefix, err := utils.IGVPublicTracksPrefixFromEnv()
+	if err != nil {
+		slog.Error("failed to read IGV public tracks prefix", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	r := setupRouter(dbStarrocks, dbPostgres, utils.GetBoolEnvOrDefault(patientViewEnabledEnv, false), igvPublicTracksPrefix)
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {
