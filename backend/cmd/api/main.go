@@ -331,7 +331,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	if patientViewEnabled {
 		patientsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchPatientsHandler(repoPcxPatients))
 		patientsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.PatientsAutocompleteHandler(repoPcxPatients))
-		patientsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.PatientsFiltersHandler())
+		patientsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.PatientsFiltersHandler(repoPcxPatients))
 		patientsGroup.GET("/statistics", requireAction(types.ActionSearchCase), server.PatientsStatisticsHandler())
 		patientsGroup.GET("/:patient_key", requireAction(types.ActionSearchCase), server.PatientEntityHandler())
 	}

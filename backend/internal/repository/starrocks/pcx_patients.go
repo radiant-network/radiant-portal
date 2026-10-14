@@ -69,3 +69,31 @@ func (r *PcxPatientsRepository) AutocompletePatients(ctx context.Context, prefix
 }
 
 var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+
+// GetPatientsFilters returns the values of the list filters among the patients the caller can see.
+func (r *PcxPatientsRepository) GetPatientsFilters(ctx context.Context) (*types.PatientFilters, error) {
+	db := r.db.WithContext(ctx)
+	view := types.PcxPatientListTable.TenantQualifiedName(ctx)
+	filters := types.PatientFilters{VitalStatus: []types.FiltersValue{}, OrganizationCode: []types.FiltersValue{}, CnsIntegratedDiagnosis: []types.FiltersValue{}}
+
+	for _, column := range []struct {
+		name string
+		dest *[]types.FiltersValue
+	}{
+		{"vital_status", &filters.VitalStatus},
+		{"cns_integrated_diagnosis", &filters.CnsIntegratedDiagnosis},
+	} {
+		tx := db.Table(view).Distinct(fmt.Sprintf("%s AS `key`", column.name)).
+			Where(fmt.Sprintf("%s IS NOT NULL", column.name)).Order("`key` asc")
+		if err := tx.Find(column.dest).Error; err != nil {
+			return nil, fmt.Errorf("error fetching patient filter %s: %w", column.name, err)
+		}
+	}
+
+	tx := db.Table(view).Select("organization_code AS `key`, max(organization_name) AS label").
+		Where("organization_code IS NOT NULL").Group("organization_code").Order("label asc, `key` asc")
+	if err := tx.Find(&filters.OrganizationCode).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient filter organization_code: %w", err)
+	}
+	return &filters, nil
+}

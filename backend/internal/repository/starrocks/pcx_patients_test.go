@@ -214,3 +214,22 @@ func Test_AutocompletePcxPatients_NoMatch(t *testing.T) {
 		assert.NotNil(t, results)
 	})
 }
+
+func Test_GetPcxPatientsFilters_DistinctValuesWithoutNulls(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		filters, err := repo.GetPatientsFilters(t.Context())
+
+		require.NoError(t, err)
+		assert.Equal(t, types.PatientFilters{
+			VitalStatus: []types.FiltersValue{{Key: "alive"}, {Key: "deceased"}},
+			OrganizationCode: []types.FiltersValue{
+				{Key: "BCH", Label: "Boston Children's Hospital"},
+				{Key: "CHOP", Label: "Children's Hospital of Philadelphia"},
+				{Key: "SCH", Label: "Seattle Children's Hospital"},
+			},
+			CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}, {Key: "Ependymoma"}, {Key: "Medulloblastoma"}},
+		}, *filters)
+	})
+}
