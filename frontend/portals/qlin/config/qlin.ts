@@ -834,20 +834,6 @@ export const qlinConfig = {
     saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: somaticSNVAggregations,
   },
-  study: {
-    app_id: ApplicationId.study,
-    aggregations: {
-      study: {
-        items: [
-          { key: 'program', translation_key: 'program', type: FilterTypes.MULTIPLE },
-          { key: 'domain', translation_key: 'domain', type: FilterTypes.MULTIPLE },
-          { key: 'data_category', translation_key: 'data_category', type: FilterTypes.MULTIPLE },
-          { key: 'experimental_strategy', translation_key: 'experimental_strategy', type: FilterTypes.MULTIPLE },
-          { key: 'family_data', translation_key: 'family_data', type: FilterTypes.BOOLEAN },
-        ],
-      },
-    },
-  },
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
