@@ -208,6 +208,7 @@ export type TableProps<TData extends RowData> = {
   pagination: PaginationSettings;
   serverOptions?: ServerOptions;
   extras?: React.ReactElement[];
+  emptyState?: React.ReactNode;
 };
 
 export interface BaseColumnSettings {
@@ -709,6 +710,7 @@ function DataTable<T extends RowData>({
   onRowSelectionChange,
   serverOptions,
   extras,
+  emptyState,
 }: TableProps<T>) {
   const { t } = useI18n();
 
@@ -1110,13 +1112,15 @@ function DataTable<T extends RowData>({
       {/* Empty State */}
       {tableState === DataTableState.EMPTY && (
         <Card className="shadow-none">
-          <Empty
-            title={t('common.table.no_result')}
-            description={t('common.table.no_result_description')}
-            iconType="custom"
-            icon={SearchIcon}
-            size="mini"
-          />
+          {emptyState ?? (
+            <Empty
+              title={t('common.table.no_result')}
+              description={t('common.table.no_result_description')}
+              iconType="custom"
+              icon={SearchIcon}
+              size="mini"
+            />
+          )}
         </Card>
       )}
 

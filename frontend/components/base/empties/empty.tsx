@@ -73,6 +73,7 @@ function Empty({
   icon: Icon,
   size,
   className,
+  children,
   ...props
 }: EmptyProps) {
   const styles = emptyVariants({ size, bordered });
@@ -92,6 +93,7 @@ function Empty({
         {title && <h1 className={styles.title()}>{title}</h1>}
         {description && <div className={styles.description()}>{description}</div>}
       </div>
+      {children && <div className="flex justify-center">{children}</div>}
     </div>
   );
 }

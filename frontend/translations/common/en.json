@@ -11,6 +11,10 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "case_group_tag": {
+      "copy_name": "Copy group name",
+      "remove": "Remove the New data filter"
+    },
     "cmc": {
       "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
       "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"
@@ -1370,6 +1374,17 @@
       "revoked": "Cancelled",
       "submitted": "Pending",
       "unresolved": "Unresolved"
+    },
+    "case_group": {
+      "label": "New data • {{date}}",
+      "count_one": "{{count}} case",
+      "count_other": "{{count}} cases",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "No cases found for this notification",
+        "description": "The link may be outdated, or you may not have access to these cases.",
+        "show_all": "Show all cases"
+      }
     },
     "case": {
       "title": "{{total}} Cases",

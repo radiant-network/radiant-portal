@@ -11,6 +11,10 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "case_group_tag": {
+      "copy_name": "Copier le nom du groupe",
+      "remove": "Retirer le filtre Nouvelles données"
+    },
     "cmc": {
       "open_cosmic_one": "{{count}} échantillon COSMIC, ouvrir dans COSMIC (nouvel onglet)",
       "open_cosmic_other": "{{count}} échantillons COSMIC, ouvrir dans COSMIC (nouvel onglet)"
@@ -1371,6 +1375,17 @@
       "revoked": "Annulé",
       "submitted": "En attente",
       "unresolved": "Non résolu"
+    },
+    "case_group": {
+      "label": "Nouvelles données • {{date}}",
+      "count_one": "{{count}} cas",
+      "count_other": "{{count}} cas",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "Aucun cas trouvé pour cette notification",
+        "description": "Le lien est peut-être périmé, ou vous n’avez pas accès à ces cas.",
+        "show_all": "Afficher tous les cas"
+      }
     },
     "case": {
       "title": "{{total}} Cas",
