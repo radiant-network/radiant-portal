@@ -883,6 +883,7 @@
         "study_code": "Code d'étude",
         "study_id": "ID de l'étude",
         "symbol": "Symbole",
+        "tenant_gene_panel": "Mon réseau",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -1688,6 +1689,7 @@
       "expand": "Développer",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gène",
         "frequency": "Fréquence",

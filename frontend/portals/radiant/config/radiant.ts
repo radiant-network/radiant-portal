@@ -7,12 +7,18 @@ import {
   type PortalConfig,
 } from '../../../components/cores/applications-config';
 
+// TODO: remove from radiant once each instance has its own QA environment, the panel facet is qlin only
+const panelAggregation = {
+  items: [{ key: 'tenant_gene_panel', translation_key: 'tenant_gene_panel', type: FilterTypes.MULTIPLE }],
+};
+
 /**
  * Facets shared by both somatic SNV cohorts. The analysis defines a single somatic facet set:
  * the facet database carries no TN/TO discriminator, and saved filters are shared between the
  * two sub-tabs, so both must expose the same fields.
  */
 const somaticSNVAggregations = {
+  panel: panelAggregation,
   variant: {
     items: [
       { key: 'variant_class', translation_key: 'variant_class', type: FilterTypes.MULTIPLE, withDictionary: true },
@@ -360,6 +366,7 @@ export const radiantConfig = {
     app_id: ApplicationId.germline_snv_occurrence,
     saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     aggregations: {
+      panel: panelAggregation,
       variant: {
         items: [
           { key: 'variant_class', translation_key: 'variant_class', type: FilterTypes.MULTIPLE, withDictionary: true },
