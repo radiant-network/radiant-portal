@@ -45,7 +45,6 @@ const (
 	authLabPatientRowFilterPol = "sr_rowfilter_auth_lab_patient"
 	maskRedactPolicy           = "sr_mask_pii_redact"
 	maskDobPolicy              = "sr_mask_dob"
-	warehouseAccessPolicy      = "sr_access_warehouse"
 )
 
 // current_user() returns '<user_id>'@'%'; drop the leading quote and take up to the next
@@ -65,10 +64,6 @@ const (
 
 var maskRedactColumns = []string{"submitter_patient_id", "first_name", "last_name", "jhn"}
 
-// Warehouse management runs as a specific account, not a tenant role: the control plane
-// resumes a suspended warehouse as root; admin is kept as a second break-glass identity.
-var warehouseAdminUsers = []string{"root", "admin"}
-
 // RangerMaskingProvisioner is the Ranger surface the masking bootstrap needs.
 type RangerMaskingProvisioner interface {
 	EnsureRole(ctx context.Context, name string) error
@@ -76,7 +71,6 @@ type RangerMaskingProvisioner interface {
 	EnsureViewAccessPolicy(ctx context.Context, name string, databases, views, roles []string) error
 	EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error
 	EnsureMaskPolicy(ctx context.Context, name string, databases []string, table string, columns []string, maskExpr string, roles []string) error
-	EnsureWarehouseAccessPolicy(ctx context.Context, name string, warehouses, users []string) error
 }
 
 // BootstrapMaskingPolicies ensures the global, tenant-independent Ranger objects that
@@ -115,12 +109,6 @@ func BootstrapMaskingPolicies(ctx context.Context, ranger RangerMaskingProvision
 	// tenant DB grant in EnsureTenantRangerConfig.
 	if err := ranger.EnsureAccessPolicy(ctx, sharedAccessPolicy, []string{types.SharedDatabase}, []string{"*"}, roles); err != nil {
 		return fmt.Errorf("ranger: ensure access policy %q: %w", sharedAccessPolicy, err)
-	}
-
-	// Lets root/admin resume a suspended warehouse. With Ranger on, "resume" needs the
-	// ALTER permission on the warehouse — without this grant, a suspended warehouse is stuck.
-	if err := ranger.EnsureWarehouseAccessPolicy(ctx, warehouseAccessPolicy, []string{"*"}, warehouseAdminUsers); err != nil {
-		return fmt.Errorf("ranger: ensure warehouse access policy %q: %w", warehouseAccessPolicy, err)
 	}
 
 	dbs := []string{tenantDatabaseGlob}

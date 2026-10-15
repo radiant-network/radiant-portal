@@ -27,12 +27,10 @@ type maskingRecorder struct {
 	failAtViewPolicy string              // EnsureViewAccessPolicy returns an error for this policy name
 	failAtMVPolicy   string              // EnsureMaterializedViewAccessPolicy returns an error for this policy name
 	failRole         string              // EnsureRole returns an error for this role name
-	warehouseNames   []string            // names passed to EnsureWarehouseAccessPolicy
-	warehouseUsers   map[string][]string // policy name -> users
 }
 
 func newMaskingRecorder() *maskingRecorder {
-	return &maskingRecorder{accessTables: map[string][]string{}, viewDBs: map[string][]string{}, mvDBs: map[string][]string{}, mvObjects: map[string][]string{}, rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}, warehouseUsers: map[string][]string{}}
+	return &maskingRecorder{accessTables: map[string][]string{}, viewDBs: map[string][]string{}, mvDBs: map[string][]string{}, mvObjects: map[string][]string{}, rowFilters: map[string]string{}, masks: map[string][]string{}, maskExprs: map[string]string{}}
 }
 
 func (m *maskingRecorder) EnsureRole(ctx context.Context, name string) error {
@@ -78,11 +76,6 @@ func (m *maskingRecorder) EnsureMaskPolicy(ctx context.Context, name string, dat
 }
 func (m *maskingRecorder) AddRoleToRole(ctx context.Context, parent, child string) error {
 	m.nested = append(m.nested, parent+"/"+child)
-	return nil
-}
-func (m *maskingRecorder) EnsureWarehouseAccessPolicy(ctx context.Context, name string, warehouses, users []string) error {
-	m.warehouseNames = append(m.warehouseNames, name)
-	m.warehouseUsers[name] = users
 	return nil
 }
 
@@ -194,14 +187,4 @@ func Test_EnsureTenantRangerConfig_WrapsMaterializedViewPolicyFailureWithPolicyN
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), TenantMaterializedViewAccessPolicy("cbtn"))
 	assert.Empty(t, m.nested, "a failed MV grant must not leave the role nested as if access were complete")
-}
-
-func Test_BootstrapMaskingPolicies_GrantsWarehouseAccessToControlPlaneUsers(t *testing.T) {
-	m := newMaskingRecorder()
-
-	require.NoError(t, BootstrapMaskingPolicies(context.Background(), m))
-
-	assert.Equal(t, []string{warehouseAccessPolicy}, m.warehouseNames,
-		"warehouse USAGE/ALTER is granted so a suspended warehouse can be resumed under Ranger")
-	assert.Equal(t, []string{"root", "admin"}, m.warehouseUsers[warehouseAccessPolicy])
 }
