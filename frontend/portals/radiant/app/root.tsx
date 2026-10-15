@@ -9,9 +9,10 @@ import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
 
-import { radiantFeatureDefinitions } from './beta-features';
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
+import { radiantFeatureDefinitions } from './beta-features';
+
 declare const __PROJECT__: PortalConfig;
 
 export async function loader({ request }: Route.LoaderArgs) {
