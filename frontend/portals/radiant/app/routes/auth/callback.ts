@@ -1,4 +1,4 @@
-import { login, requireAuth } from "~/utils/auth.server";
+import { login, requireAuth } from "@/utils/auth/server";
 import type { Route } from "./+types/callback";
 import { redirect } from "react-router";
 

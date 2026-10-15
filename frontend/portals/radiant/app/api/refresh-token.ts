@@ -2,7 +2,7 @@ import { HttpStatusCode } from 'axios';
 
 import type { Route } from './+types/refresh-token';
 
-import { refreshAccessToken } from '~/utils/auth.server';
+import { refreshAccessToken } from '@/utils/auth/server';
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method === 'POST') {
