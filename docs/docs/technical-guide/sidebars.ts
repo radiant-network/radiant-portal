@@ -24,6 +24,7 @@ const sidebars: SidebarsConfig = {
             label: 'Architecture',
             items: [
                 'technical-guide/architecture/overview',
+                'technical-guide/architecture/partitioning',
             ],
         },
         {
