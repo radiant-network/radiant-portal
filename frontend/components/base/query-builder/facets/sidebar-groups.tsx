@@ -25,6 +25,7 @@ import { cn } from '@/components/lib/utils';
 // Icon mapping for different aggregation groups
 const iconMap = {
   organization: Droplet,
+  panel: Droplet,
   variant: VariantIcon,
   gene: GeneIcon,
   pathogenicity: PathogenicityIcon,

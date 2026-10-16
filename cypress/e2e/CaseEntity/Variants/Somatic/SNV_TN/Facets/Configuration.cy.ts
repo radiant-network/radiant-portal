@@ -14,6 +14,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Facets - Configuration',
 
   it('Order', () => {
     setupTest();
+    CaseEntity_Variants_Facets.somatic.validations.shouldShowAllFacets('Panel');
     CaseEntity_Variants_Facets.somatic.validations.shouldShowAllFacets('Variant');
     CaseEntity_Variants_Facets.somatic.validations.shouldShowAllFacets('Gene');
     CaseEntity_Variants_Facets.somatic.validations.shouldShowAllFacets('Pathogenicity');

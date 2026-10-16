@@ -5,6 +5,20 @@ import { buildBilingualRegExp, findFacetData, findSectionData, getTextOperator }
 
 export const tableSNVFacets = [
   {
+    section: 'Panel',
+    facets: [
+      {
+        id: 'my_network',
+        name: 'My Network',
+        apiField: 'tenant_gene_panel',
+        position: 0,
+        tooltip: null,
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+    ],
+  },
+  {
     section: 'Variant',
     facets: [
       {
@@ -649,6 +663,20 @@ export const tableCNVFacets = [
 ];
 
 export const tableSomaticFacets = [
+  {
+    section: 'Panel',
+    facets: [
+      {
+        id: 'my_network',
+        name: 'My Network',
+        apiField: 'tenant_gene_panel',
+        position: 0,
+        tooltip: null,
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+    ],
+  },
   {
     section: 'Variant',
     facets: [

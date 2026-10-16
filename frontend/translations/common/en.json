@@ -882,6 +882,7 @@
         "study_code": "Study Code",
         "study_id": "Study ID",
         "symbol": "Gene Symbol",
+        "tenant_gene_panel": "My Network",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -1687,6 +1688,7 @@
       "expand": "Expand",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gene",
         "frequency": "Frequency",
