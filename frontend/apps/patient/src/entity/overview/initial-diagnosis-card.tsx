@@ -53,21 +53,15 @@ function InitialDiagnosisCard({
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
-        {cns_diagnosis_category && (
-          <InformationField label={t('patient_entity.overview.initial_diagnosis.cns_diagnosis_category')}>
-            {cns_diagnosis_category}
-          </InformationField>
-        )}
-        {cns_integrated_diagnosis && (
-          <InformationField label={t('patient_entity.overview.initial_diagnosis.cns_integrated_diagnosis')}>
-            {cns_integrated_diagnosis}
-          </InformationField>
-        )}
-        {event_day !== undefined && (
-          <InformationField label={t('patient_entity.overview.initial_diagnosis.event_date')}>
-            {t('patient_entity.overview.initial_diagnosis.day', { day: event_day })}
-          </InformationField>
-        )}
+        <InformationField label={t('patient_entity.overview.initial_diagnosis.cns_diagnosis_category')}>
+          {cns_diagnosis_category}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.initial_diagnosis.cns_integrated_diagnosis')}>
+          {cns_integrated_diagnosis}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.initial_diagnosis.event_date')}>
+          {event_day !== undefined ? t('patient_entity.overview.initial_diagnosis.day', { day: event_day }) : undefined}
+        </InformationField>
       </CardContent>
     </Card>
   );
