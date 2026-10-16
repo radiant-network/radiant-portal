@@ -4585,6 +4585,35 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Entity",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -4593,6 +4622,11 @@
     {
       "key": "tenant",
       "value": "radiant",
+      "type": "string"
+    },
+    {
+      "key": "patient_key",
+      "value": "",
       "type": "string"
     }
   ]

@@ -58,3 +58,13 @@ var PcxPatientsQueryConfig = QueryConfig{
 	},
 	IdField: PcxPatientKeyField,
 }
+
+// The secured PCX views the patient page reads, one per tenant database (upstream's, scripts/pcx_tables).
+var PcxDemographicsTable = Table{Name: "v_pcx_30_demographics_combined", Alias: "d", PerTenant: true}
+var PcxPatientLevelTable = Table{Name: "v_pcx_30_patient_level_combined", Alias: "pv", PerTenant: true}
+var PcxEventLevelTable = Table{Name: "v_pcx_30_event_level_combined", Alias: "ev", PerTenant: true}
+var PcxSurgeryLevelTable = Table{Name: "v_pcx_30_surgery_level_combined", Alias: "su", PerTenant: true}
+var PcxRadiationLevelTable = Table{Name: "v_pcx_30_radiation_level_combined", Alias: "ra", PerTenant: true}
+var PcxMedicalTherapyTable = Table{Name: "v_pcx_30_medical_therapy_level_combined", Alias: "mt", PerTenant: true}
+var PcxMriImagesTable = Table{Name: "v_pcx_30_mri_images_combined", Alias: "mri", PerTenant: true}
+var PcxTreatmentSummaryTable = Table{Name: "v_pcx_30_treatment_summary_combined", Alias: "ts", PerTenant: true}

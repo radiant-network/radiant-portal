@@ -61,7 +61,9 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
-**Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set. Returns 404 when the demographics row is not found.
+**Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set (as proband or family member). Returns 404 for a malformed key or one that matches no row of the list view.
+
+**Key dates.** Initial diagnosis: the treatment summary's initial diagnosis when its day is known, else the first `Initial CNS Tumor` event with a known day, the same rule as the list's `age_at_initial_dx_days`. Latest encounter: the last known vital status (`vital_status_at`), which the source records at an encounter (confirmed by the data team, 2026-10-14). Sources are hard-coded `clinical` and `registry`.
 
 ## Models
 
