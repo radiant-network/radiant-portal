@@ -13,6 +13,14 @@ const globalData = {
     seq_id: 1044,
     snv: {
       task_id: 1187,
+      Panel: [
+        {
+          field: 'tenant_gene_panel',
+          value: 'TUPED_V3',
+          op: 'in',
+          count: 14720,
+        },
+      ],
       Variant: [
         {
           field: 'variant_class',
@@ -508,6 +516,14 @@ const globalData = {
       case_id: 1226,
       seq_id: 1047,
       task_id: 1185,
+      Panel: [
+        {
+          field: 'tenant_gene_panel',
+          value: 'TUPED_V3',
+          op: 'in',
+          count: 537,
+        },
+      ],
       Variant: [
         {
           field: 'variant_class',
