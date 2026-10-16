@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
@@ -165,6 +166,26 @@ func PatientsStatisticsHandler() gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/{patient_key} [get]
-func PatientEntityHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientEntityHandler(repo pcxPatientReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.Param("patient_key")
+		if _, err := uuid.Parse(key); err != nil {
+			HandleNotFoundError(c, "patient")
+			return
+		}
+		patient, err := repo.GetPatient(c.Request.Context(), key)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if patient == nil {
+			HandleNotFoundError(c, "patient")
+			return
+		}
+		c.JSON(http.StatusOK, patient)
+	}
+}
+
+type pcxPatientReader interface {
+	GetPatient(ctx context.Context, patientKey string) (*types.PatientEntity, error)
 }

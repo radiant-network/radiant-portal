@@ -83,7 +83,7 @@ func Test_SearchPatients_NameCriterionReturnsTheIdentifiablePatient(t *testing.T
 				"patient_id": "MRN-0002",
 				"patient_id_type": "mrn",
 				"can_read_phi": true,
-				"radiant_patient_id": 11,
+				"radiant_patient_id": 3,
 				"organization_code": "CHOP",
 				"organization_name": "Children's Hospital of Philadelphia",
 				"given_name": "Ada",
@@ -162,5 +162,37 @@ func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
 			],
 			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}]
 		}`, w.Body.String())
+	})
+}
+
+func getPatientEntityIntegration(t *testing.T, env *testutils.Env, key string) *httptest.ResponseRecorder {
+	t.Helper()
+	repo := starrocks.NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	router := tenantRouter()
+	router.GET("/:tenant/patients/:patient_key", server.PatientEntityHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key, nil))
+	return w
+}
+
+func Test_PatientEntity_ReturnsThePatientPage(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000002")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var patient types.PatientEntity
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &patient))
+		assert.Equal(t, "MRN-0001", patient.PatientID)
+		require.Len(t, patient.Cases, 1)
+		assert.Equal(t, "father", patient.Cases[0].Relationship)
+	})
+}
+
+func Test_PatientEntity_UnknownKey_404(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000999")
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String())
 	})
 }
