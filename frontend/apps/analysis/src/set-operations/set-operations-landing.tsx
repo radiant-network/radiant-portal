@@ -49,6 +49,7 @@ function SetOperationsLanding({
               i18nKey="analysis.set_operations.get_started_dashboard"
               components={{
                 // TODO: dead link, no /dashboard route exists; wrap with localPath once the page is known
+                // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
                 dashboard: <AnchorLink size="sm" href="/dashboard" />,
               }}
             />

@@ -108,6 +108,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
                         i18nKey="variant.interpretation_form.somatic.oncogenicity_popover.full_text"
                         components={{
                           guides: (
+                            // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
                             <AnchorLink
                               className="inline-flex no-underline hover:underline"
                               href="https://pubmed.ncbi.nlm.nih.gov/35101336/"

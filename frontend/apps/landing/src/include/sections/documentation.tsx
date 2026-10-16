@@ -24,12 +24,14 @@ function Documentation() {
           footer={
             <>
               <Button asChild>
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
                 <a href="#">
                   {t(`landing.include.documentation.${item.key}.cta`)} <SquareArrowOutUpRight />
                 </a>
               </Button>
               {item.citation && (
                 <Button asChild variant="outline">
+                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
                   <a href="#">{t('landing.include.documentation.center.citation')}</a>
                 </Button>
               )}

@@ -79,6 +79,7 @@ function AcceleratingResearch() {
             />
             <p className="text-xl text-white/90">{t('landing.kidsfirst.accelerating_research.description')}</p>
             <Button asChild className="bg-[var(--cyan-6)] text-white hover:brightness-95">
+              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
               <a href="#">{t('landing.kidsfirst.accelerating_research.get_started')}</a>
             </Button>
           </div>

@@ -15,6 +15,9 @@
       "copy_name": "Copy group name",
       "remove": "Remove the New data filter"
     },
+    "clingen_cell": {
+      "open": "Open in ClinGen (new tab)"
+    },
     "cmc": {
       "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
       "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"

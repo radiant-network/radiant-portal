@@ -24,7 +24,7 @@ function InterpretedCasePreviewCell({ caseId, patiendId, relationshipToProband }
 
   return (
     <RelationshipToProbandCell relationship={relationshipToProband}>
-      <AnchorLink mono size="xs" onClick={handleClick}>
+      <AnchorLink component="button" type="button" mono size="xs" onClick={handleClick}>
         {caseId}
       </AnchorLink>
     </RelationshipToProbandCell>

@@ -30,7 +30,7 @@ export const AllVariants: Story = {
             description="For information on accessing, submitting and uploading data, visit our Documentation Center."
             footer={
               <Button asChild>
-                <a href="#">
+                <a href="https://example.com">
                   Documentation <SquareArrowOutUpRight />
                 </a>
               </Button>
@@ -52,7 +52,7 @@ export const AllVariants: Story = {
                 variant="outline"
                 className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
               >
-                <a href="#">
+                <a href="https://example.com">
                   View publications <SquareArrowOutUpRight />
                 </a>
               </Button>
