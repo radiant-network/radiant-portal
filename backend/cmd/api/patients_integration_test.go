@@ -123,7 +123,7 @@ func Test_SearchPatients_DefaultSortAndPage(t *testing.T) {
 
 func Test_SearchPatients_BooleanCriterionMatchesOnlyThatValue(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
-		w := postPatientsSearchIntegration(t, env, `{"search_criteria": [{"field": "had_initial_radiation", "value": [false]}]}`)
+		w := postPatientsSearchIntegration(t, env, `{"search_criteria": [{"field": "got_radiation_ever", "value": [false]}]}`)
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var resp types.PatientsSearchResponse
@@ -132,7 +132,7 @@ func Test_SearchPatients_BooleanCriterionMatchesOnlyThatValue(t *testing.T) {
 		for i, p := range resp.List {
 			ids[i] = p.PatientID
 		}
-		assert.Equal(t, []string{"MRN-0001", "C100005"}, ids)
+		assert.Equal(t, []string{"MRN-0001", "MRN-0100", "C100005"}, ids)
 	})
 }
 
@@ -178,9 +178,12 @@ func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
 			],
 			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
 			"diagnosis_type_cohort": [{"key": "Atypical teratoid/rhabdoid tumor"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
-			"age_at_initial_dx_group": [{"key": "under_36_months"}, {"key": "36_months_and_over"}, {"key": "unknown"}],
-			"had_initial_radiation": [{"key": "true", "label": "Yes"}, {"key": "false", "label": "No"}],
-			"had_initial_methotrexate": [{"key": "true", "label": "Yes"}, {"key": "false", "label": "No"}]
+			"age_at_initial_dx_group": [
+				{"key": "congenital"}, {"key": "neonatal"}, {"key": "infantile"}, {"key": "childhood"}, {"key": "juvenile"},
+				{"key": "young_adult"}, {"key": "middle_age"}, {"key": "senior"}, {"key": "unknown"}
+			],
+			"chemotherapy_agents": [{"key": "carboplatin"}, {"key": "cisplatin"}, {"key": "methotrexate"}, {"key": "vincristine"}],
+			"got_radiation_ever": [{"key": "true", "label": "Yes"}, {"key": "false", "label": "No"}]
 		}`, w.Body.String())
 	})
 }

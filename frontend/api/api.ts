@@ -6209,11 +6209,17 @@ export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof t
  */
 export interface PatientFilters {
     /**
-     * Keys under_36_months, 36_months_and_over, unknown
+     * Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
     'age_at_initial_dx_group': Array<FiltersValue>;
+    /**
+     * Lowercase, as recorded
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'chemotherapy_agents': Array<FiltersValue>;
     /**
      * 
      * @type {Array<FiltersValue>}
@@ -6231,13 +6237,7 @@ export interface PatientFilters {
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
-    'had_initial_methotrexate': Array<FiltersValue>;
-    /**
-     * Keys true, false; labels Yes, No
-     * @type {Array<FiltersValue>}
-     * @memberof PatientFilters
-     */
-    'had_initial_radiation': Array<FiltersValue>;
+    'got_radiation_ever': Array<FiltersValue>;
     /**
      * label = organization name
      * @type {Array<FiltersValue>}

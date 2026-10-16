@@ -39,20 +39,25 @@ func Test_PcxPatientsQuery_DefaultSortEndsWithPatientKey(t *testing.T) {
 }
 
 func Test_PcxPatientsQuery_FilterOnlyFieldsAreNotSelected(t *testing.T) {
-	query, err := NewListQueryFromCriteria(PcxPatientsQueryConfig, []string{"age_at_initial_dx_group", "had_initial_radiation", "had_initial_methotrexate"},
+	query, err := NewListQueryFromCriteria(PcxPatientsQueryConfig, []string{"age_at_initial_dx_group", "got_radiation_ever", "chemotherapy_agents"},
 		[]SearchCriterion{
-			{FieldName: "age_at_initial_dx_group", Value: []interface{}{"under_36_months"}},
-			{FieldName: "had_initial_radiation", Value: []interface{}{true}},
-			{FieldName: "had_initial_methotrexate", Value: []interface{}{false}},
+			{FieldName: "age_at_initial_dx_group", Value: []interface{}{"childhood"}},
+			{FieldName: "got_radiation_ever", Value: []interface{}{true}},
+			{FieldName: "chemotherapy_agents", Value: []interface{}{"methotrexate"}},
 		}, &Pagination{Limit: 10}, nil)
 	require.NoError(t, err)
 	assert.NotContains(t, query.SelectedFields(), PcxPatientAgeAtInitialDxGroupField)
-	assert.NotContains(t, query.SelectedFields(), PcxPatientHadInitialRadiationField)
-	assert.NotContains(t, query.SelectedFields(), PcxPatientHadInitialMethotrexateField)
+	assert.NotContains(t, query.SelectedFields(), PcxPatientGotRadiationEverField)
+	assert.NotContains(t, query.SelectedFields(), PcxPatientChemotherapyAgentsField)
 }
 
 func Test_PcxPatientsQuery_DiagnosisTypeCohortIsSelectedByDefault(t *testing.T) {
 	query, err := NewListQueryFromCriteria(PcxPatientsQueryConfig, nil, nil, &Pagination{Limit: 10}, nil)
 	require.NoError(t, err)
 	assert.Contains(t, query.SelectedFields(), PcxPatientDiagnosisTypeCohortField)
+}
+
+func Test_PcxDemographicsTable_TenantBound_ReadsTenantDatabase(t *testing.T) {
+	ctx := ContextWithTenant(context.Background(), "cbtn")
+	assert.Equal(t, "cbtn_tenant.v_pcx_30_demographics_combined", PcxDemographicsTable.TenantQualifiedName(ctx))
 }
