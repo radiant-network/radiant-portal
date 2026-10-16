@@ -16,6 +16,9 @@
    initial-diagnosis age. vital_status and gender become the API codes (lowercase, "not reported" ->
    "not_reported"). The diagnosis and its source come from ONE initial event, the earliest with a known
    age: a -1 (unknown date) sorts last instead of winning the minimum.
+
+   had_initial_radiation and had_initial_methotrexate turn the treatment summary's yes/no into a boolean,
+   NULL for a patient without a summary row.
  */
 CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_patient_list AS
 SELECT pk.patient_key,
@@ -39,6 +42,8 @@ SELECT pk.patient_key,
             THEN CAST(pl.age_at_vital_status_days AS INT) - dx.age_at_initial_dx_days END AS survival_days,
        mri.patient_id IS NOT NULL AS has_imaging,
        COALESCE(c.case_count, 0) AS case_count,
+       lower(ts.had_initial_radiation) = 'yes' AS had_initial_radiation,
+       lower(ts.had_initial_methotrexate) = 'yes' AS had_initial_methotrexate,
        d.can_read_phi
 FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
 LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_key pk
@@ -80,6 +85,10 @@ LEFT JOIN (SELECT DISTINCT organization_code, patient_id_type, patient_id
   ON mri.organization_code = d.organization_code
  AND mri.patient_id_type = d.patient_id_type
  AND mri.patient_id = d.patient_id
+LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_treatment_summary_combined ts
+  ON ts.organization_code = d.organization_code
+ AND ts.patient_id_type = d.patient_id_type
+ AND ts.patient_id = d.patient_id
 LEFT JOIN (SELECT patient_id, count(DISTINCT case_id) AS case_count
            FROM (SELECT id AS case_id, proband_id AS patient_id FROM {{.TenantCode}}_tenant.cases
                  UNION ALL

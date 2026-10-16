@@ -20,5 +20,7 @@ create table v_pcx_30_patient_list
     survival_days                   int          NULL,
     has_imaging                     boolean      NULL,
     case_count                      bigint       NULL,
+    had_initial_radiation           boolean      NULL,
+    had_initial_methotrexate        boolean      NULL,
     can_read_phi                    boolean      NULL
 );

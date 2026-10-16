@@ -50,7 +50,7 @@ func Test_SearchPcxPatients_MapsEveryColumn(t *testing.T) {
 		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "patient_id", Value: []interface{}{"MRN-0002"}}}, nil, nil)
 
 		require.Len(t, patients, 1)
-		radiantID, birthYear, dx, source := 3, 2015, "ATRT", "CBTN"
+		radiantID, birthYear, cohort, dx, source := 3, 2015, "Atypical teratoid/rhabdoid tumor", "ATRT", "CBTN"
 		vitalDays, dxDays, survival := 4000, 1000, 3000
 		assert.Equal(t, types.PatientListItem{
 			PatientIdentity: types.PatientIdentity{
@@ -58,7 +58,7 @@ func Test_SearchPcxPatients_MapsEveryColumn(t *testing.T) {
 				RadiantPatientID: &radiantID, OrganizationCode: "CHOP", OrganizationName: "Children's Hospital of Philadelphia",
 				GivenName: "Ada", FamilyName: "Lovelace",
 			},
-			BirthYear: &birthYear, Gender: "female", CnsIntegratedDiagnosis: &dx, CnsIntegratedDiagnosisSource: &source,
+			BirthYear: &birthYear, Gender: "female", DiagnosisTypeCohort: &cohort, CnsIntegratedDiagnosis: &dx, CnsIntegratedDiagnosisSource: &source,
 			VitalStatus: "alive", AgeAtVitalStatusDays: &vitalDays, AgeAtInitialDxDays: &dxDays, SurvivalDays: &survival,
 			HasImaging: true, CaseCount: 2,
 		}, patients[0])
@@ -72,6 +72,7 @@ func Test_SearchPcxPatients_NullColumnsStayNil(t *testing.T) {
 		require.Len(t, patients, 1)
 		p := patients[0]
 		assert.Nil(t, p.RadiantPatientID)
+		assert.Nil(t, p.DiagnosisTypeCohort)
 		assert.Nil(t, p.CnsIntegratedDiagnosis)
 		assert.Nil(t, p.SurvivalDays)
 		assert.False(t, p.CanReadPhi)
@@ -84,6 +85,56 @@ func Test_SearchPcxPatients_FilterOnVitalStatus(t *testing.T) {
 
 		assert.Equal(t, int64(2), count)
 		assert.Equal(t, []string{pcxPatientKey("2"), pcxPatientKey("4")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_FilterOnDiagnosisTypeCohort(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, count := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "diagnosis_type_cohort", Value: []interface{}{"Medulloblastoma", "Ependymoma"}}}, nil, nil)
+
+		assert.Equal(t, int64(2), count)
+		assert.Equal(t, []string{pcxPatientKey("2"), pcxPatientKey("3")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_AgeUnder36Months(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "age_at_initial_dx_group", Value: []interface{}{"under_36_months"}}}, nil, nil)
+
+		assert.Equal(t, []string{pcxPatientKey("1"), pcxPatientKey("4")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_Age36MonthsAndOver(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "age_at_initial_dx_group", Value: []interface{}{"36_months_and_over"}}}, nil, nil)
+
+		assert.Equal(t, []string{pcxPatientKey("2")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_UnknownAgeGroupMatchesPatientsWithoutAge(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "age_at_initial_dx_group", Value: []interface{}{"unknown"}}}, nil, nil)
+
+		assert.Equal(t, []string{pcxPatientKey("3"), pcxPatientKey("5")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_FilterOnInitialRadiation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "had_initial_radiation", Value: []interface{}{true}}}, nil, nil)
+
+		assert.Equal(t, []string{pcxPatientKey("1"), pcxPatientKey("4")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_NoInitialMethotrexateExcludesPatientsWithoutSummary(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		// Patients 3 and 5 have no treatment summary.
+		patients, _ := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "had_initial_methotrexate", Value: []interface{}{false}}}, nil, nil)
+
+		assert.Equal(t, []string{pcxPatientKey("1"), pcxPatientKey("4")}, pcxPatientKeys(patients))
 	})
 }
 
@@ -231,6 +282,10 @@ func Test_GetPcxPatientsFilters_DistinctValuesWithoutNulls(t *testing.T) {
 				{Key: "SCH", Label: "Seattle Children's Hospital"},
 			},
 			CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}, {Key: "Ependymoma"}, {Key: "Medulloblastoma"}},
+			DiagnosisTypeCohort:    []types.FiltersValue{{Key: "Atypical teratoid/rhabdoid tumor"}, {Key: "Ependymoma"}, {Key: "Medulloblastoma"}},
+			AgeAtInitialDxGroup:    []types.FiltersValue{{Key: "under_36_months"}, {Key: "36_months_and_over"}, {Key: "unknown"}},
+			HadInitialRadiation:    []types.FiltersValue{{Key: "true", Label: "Yes"}, {Key: "false", Label: "No"}},
+			HadInitialMethotrexate: []types.FiltersValue{{Key: "true", Label: "Yes"}, {Key: "false", Label: "No"}},
 		}, *filters)
 	})
 }
