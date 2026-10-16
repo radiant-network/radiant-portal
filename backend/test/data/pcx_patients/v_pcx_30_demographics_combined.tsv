@@ -3,3 +3,4 @@ Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	Ada	Lovelace	2015-03-04	
 Children's Hospital of Philadelphia	CHOP	MRN-0001	mrn	11	Grace	Hopper	2012-06-01	2012	Asian	Unavailable	male	19103	Medulloblastoma	radiant	true
 Seattle Children's Hospital	SCH	MRN-0100	mrn	NULL	Alan	Turing	2011-01-01	NULL	White	Unknown	male	98105	Medulloblastoma	cbtn-non-radiant	true
 Boston Children's Hospital	BCH	C100004	research_id	NULL	C100004_given_name	C100004_family_name	NULL	2010	White	Unavailable	female	021XX	Atypical teratoid/rhabdoid tumor	cbtn-non-radiant	false
+Children's Hospital of Philadelphia	CHOP	C100005	research_id	NULL	Ada	Lovelace	NULL	2018	Unavailable	Unavailable	Not Reported	NULL	NULL	clinical	false

@@ -49,9 +49,9 @@ type PatientFilters struct {
 	OrganizationCode       []FiltersValue `json:"organization_code" validate:"required"` // label = organization name
 	CnsIntegratedDiagnosis []FiltersValue `json:"cns_integrated_diagnosis" validate:"required"`
 	DiagnosisTypeCohort    []FiltersValue `json:"diagnosis_type_cohort" validate:"required"`
-	AgeAtInitialDxGroup    []FiltersValue `json:"age_at_initial_dx_group" validate:"required"`  // Keys under_36_months, 36_months_and_over, unknown
-	HadInitialRadiation    []FiltersValue `json:"had_initial_radiation" validate:"required"`    // Keys true, false; labels Yes, No
-	HadInitialMethotrexate []FiltersValue `json:"had_initial_methotrexate" validate:"required"` // Keys true, false; labels Yes, No
+	AgeAtInitialDxGroup    []FiltersValue `json:"age_at_initial_dx_group" validate:"required"` // Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown
+	ChemotherapyAgents     []FiltersValue `json:"chemotherapy_agents" validate:"required"`     // Lowercase, as recorded
+	GotRadiationEver       []FiltersValue `json:"got_radiation_ever" validate:"required"`      // Keys true, false; labels Yes, No
 }
 
 // PatientStatistics - Cohort analytics of the patient list
