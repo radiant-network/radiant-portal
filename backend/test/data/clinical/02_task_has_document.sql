@@ -319,5 +319,25 @@ VALUES (1, 27, 'output'),
 
        -- prenatal fixture: alignment for the fetus's own sequencing (case 72).
        (83, 272, 'output'),
-       (83, 273, 'output')
+       (83, 273, 'output'),
+       -- RAD-30 IGV case tracks of cases 70 and 71.
+       (71, 274, 'output'),
+       (71, 275, 'output'),
+       (71, 276, 'output'),
+       (71, 277, 'output'),
+       (71, 278, 'output'),
+       (71, 279, 'output'),
+       (71, 280, 'output'),
+       (72, 281, 'output'),
+       (72, 282, 'output'),
+       (72, 283, 'output'),
+       (72, 284, 'output'),
+       (72, 285, 'output'),
+       (86, 286, 'output'),
+       (85, 287, 'output'),
+       (85, 288, 'output'),
+       (76, 289, 'output'),
+       (76, 290, 'output'),
+       (75, 291, 'output'),
+       (75, 292, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;

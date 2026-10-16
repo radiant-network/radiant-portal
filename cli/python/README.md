@@ -279,6 +279,7 @@ Class | Method | HTTP request | Description
  - [GermlineCNVOccurrence](docs/GermlineCNVOccurrence.md)
  - [GermlineSNVOccurrence](docs/GermlineSNVOccurrence.md)
  - [GetBatchResponse](docs/GetBatchResponse.md)
+ - [IGVPublicTrack](docs/IGVPublicTrack.md)
  - [IGVTrackEnriched](docs/IGVTrackEnriched.md)
  - [IGVTracks](docs/IGVTracks.md)
  - [InputDocumentBatch](docs/InputDocumentBatch.md)

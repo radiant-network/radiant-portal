@@ -18,7 +18,7 @@ func Test_SecureRoutes(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(env.Starrocks, env.Postgres, true)
+		router := setupRouter(env.Starrocks, env.Postgres, true, "")
 		randomPort := 10000 + rand.Intn(50000)
 
 		srv := &http.Server{

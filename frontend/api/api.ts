@@ -4642,6 +4642,37 @@ export interface GetBatchResponse {
 /**
  * 
  * @export
+ * @interface IGVPublicTrack
+ */
+export interface IGVPublicTrack {
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'indexURL': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'indexURLExpireAt': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'url': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'urlExpireAt': number;
+}
+/**
+ * 
+ * @export
  * @interface IGVTrackEnriched
  */
 export interface IGVTrackEnriched {
@@ -4689,6 +4720,12 @@ export interface IGVTrackEnriched {
     'patient_id'?: number;
     /**
      * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'sequencing_experiment_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof IGVTrackEnriched
      */
@@ -4724,6 +4761,42 @@ export interface IGVTracks {
      * @memberof IGVTracks
      */
     'alignment'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'baf'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'capture_targets'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'cnv'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {{ [key: string]: IGVPublicTrack; }}
+     * @memberof IGVTracks
+     */
+    'public_tracks': { [key: string]: IGVPublicTrack; };
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'roh'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'seg'?: Array<IGVTrackEnriched>;
 }
 /**
  * 
@@ -12490,7 +12563,7 @@ export class HpoApi extends BaseAPI {
 export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12542,7 +12615,7 @@ export const IgvApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12566,7 +12639,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
     const localVarFp = IgvApiFp(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12587,7 +12660,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
  */
 export class IgvApi extends BaseAPI {
     /**
-     * Get IGV tracks for a case
+     * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
      * @summary Get IGV
      * @param {string} tenant Tenant code
      * @param {string} caseId Case ID

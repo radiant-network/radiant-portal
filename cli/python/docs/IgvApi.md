@@ -12,7 +12,8 @@ Method | HTTP request | Description
 
 Get IGV
 
-Get IGV tracks for a case
+Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+and the public reference tracks, all presigned
 
 ### Example
 

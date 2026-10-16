@@ -161,7 +161,7 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(env.Starrocks, env.Postgres, true)
+		router := setupRouter(env.Starrocks, env.Postgres, true, "")
 
 		actual := map[string]bool{}
 		for _, route := range router.Routes() {

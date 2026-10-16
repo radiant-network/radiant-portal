@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var allDocumentsFields = sliceutils.Map(types.DocumentFields, func(value types.Field, index int, slice []types.Field) string {
@@ -32,10 +33,29 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(149), *count)
+		assert.Equal(t, int64(167), *count)
 
-		// CLIN-6117 prenatal fixture: document 272 (case 72's fetus alignment) now has the
-		// highest id, so it sorts first under the default document_id DESC.
+		// Default sort is document_id DESC.
+		assert.Equal(t, 292, (*documents)[0].DocumentID)
+	})
+}
+
+func Test_SearchDocumentsPrenatalDocumentFields(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseIdField.GetAlias(),
+				Value:     []interface{}{72},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, _, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		require.NotEmpty(t, *documents)
+
+		// CLIN-6117 prenatal fixture: document 272 (case 72's fetus alignment) is the highest id of
+		// case 72, so it sorts first under the default document_id DESC.
 		document272 := (*documents)[0]
 		assert.Equal(t, 272, document272.DocumentID)
 		assert.Equal(t, "S-PRENAT-72.recal.cram", document272.Name)
@@ -63,7 +83,7 @@ func Test_SearchDocumentsCustomSort(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(149), *count)
+		assert.Equal(t, int64(167), *count)
 
 		document135 := (*documents)[0]
 		assert.Equal(t, 135, document135.DocumentID)
@@ -243,10 +263,10 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(71), *count)
+		assert.Equal(t, int64(89), *count)
 
-		document272 := (*documents)[0]
-		assert.Equal(t, 272, document272.DocumentID)
+		document292 := (*documents)[0]
+		assert.Equal(t, 292, document292.DocumentID)
 	})
 }
 
@@ -263,10 +283,10 @@ func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(149), *count)
+		assert.Equal(t, int64(167), *count)
 
-		document272 := (*documents)[0]
-		assert.Equal(t, 272, document272.DocumentID)
+		document292 := (*documents)[0]
+		assert.Equal(t, 292, document292.DocumentID)
 	})
 }
 
@@ -283,10 +303,10 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandMother(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(46), *count)
+		assert.Equal(t, int64(51), *count)
 
-		document257 := (*documents)[0]
-		assert.Equal(t, 257, document257.DocumentID)
+		document286 := (*documents)[0]
+		assert.Equal(t, 286, document286.DocumentID)
 	})
 }
 
@@ -303,10 +323,10 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(46), *count)
+		assert.Equal(t, int64(47), *count)
 
-		document257 := (*documents)[0]
-		assert.Equal(t, 257, document257.DocumentID)
+		document286 := (*documents)[0]
+		assert.Equal(t, 286, document286.DocumentID)
 	})
 }
 
@@ -323,10 +343,10 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(56), *count)
+		assert.Equal(t, int64(68), *count)
 
-		document270 := (*documents)[0]
-		assert.Equal(t, 270, document270.DocumentID)
+		document292 := (*documents)[0]
+		assert.Equal(t, 292, document292.DocumentID)
 	})
 }
 
@@ -343,10 +363,10 @@ func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(71), *count)
+		assert.Equal(t, int64(77), *count)
 
-		document266 := (*documents)[0]
-		assert.Equal(t, 266, document266.DocumentID)
+		document287 := (*documents)[0]
+		assert.Equal(t, 287, document287.DocumentID)
 	})
 }
 

@@ -6,6 +6,12 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **alignment** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
+**baf** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
+**capture_targets** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
+**cnv** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
+**public_tracks** | [**Dict[str, IGVPublicTrack]**](IGVPublicTrack.md) |  | 
+**roh** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
+**seg** | [**List[IGVTrackEnriched]**](IGVTrackEnriched.md) |  | [optional] 
 
 ## Example
 

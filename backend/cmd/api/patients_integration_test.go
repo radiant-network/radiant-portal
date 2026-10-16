@@ -39,7 +39,7 @@ func Test_PatientViewRoutes_NotRegisteredWhenDisabled(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, false))
+		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, false, ""))
 
 		for _, route := range patientViewRoutes {
 			assert.Falsef(t, routes[route], "route %q is registered while the patient view is disabled", route)
@@ -54,7 +54,7 @@ func Test_PatientViewRoutes_RegisteredWhenEnabled(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, true))
+		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, true, ""))
 
 		for _, route := range patientViewRoutes {
 			assert.Truef(t, routes[route], "route %q is missing while the patient view is enabled", route)

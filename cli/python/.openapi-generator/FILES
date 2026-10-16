@@ -80,6 +80,7 @@ docs/GermlineCNVOccurrence.md
 docs/GermlineSNVOccurrence.md
 docs/GetBatchResponse.md
 docs/HpoApi.md
+docs/IGVPublicTrack.md
 docs/IGVTrackEnriched.md
 docs/IGVTracks.md
 docs/IgvApi.md
@@ -294,6 +295,7 @@ radiant_python/models/gene_search_body.py
 radiant_python/models/germline_cnv_occurrence.py
 radiant_python/models/germline_snv_occurrence.py
 radiant_python/models/get_batch_response.py
+radiant_python/models/igv_public_track.py
 radiant_python/models/igv_track_enriched.py
 radiant_python/models/igv_tracks.py
 radiant_python/models/input_document_batch.py
