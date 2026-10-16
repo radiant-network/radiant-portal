@@ -2,7 +2,21 @@
 const { defineConfig } = require('eslint-define-config');
 
 module.exports = defineConfig({
-  extends: ['@ferlab'],
+  extends: ['@ferlab', 'plugin:jsx-a11y/strict'],
+  plugins: ['jsx-a11y'],
+  settings: {
+    // our wrappers render these native elements, so the a11y rules can check them
+    'jsx-a11y': {
+      components: {
+        Button: 'button',
+        Input: 'input',
+        Textarea: 'textarea',
+        Label: 'label',
+        Link: 'a',
+        AnchorLink: 'a',
+      },
+    },
+  },
   rules: {
     'react-hooks/exhaustive-deps': 'off', // disable missing deps warnings
     'react/display-name': 'off', // disables missing display name warnings
