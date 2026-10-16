@@ -52,31 +52,21 @@ function TumourAndMetastasisCard({
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
-        {tumor_locations && tumor_locations.length > 0 && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.tumor_locations')}>
-            {tumor_locations.join(', ')}
-          </InformationField>
-        )}
-        {tumor_location_other && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.tumor_location_other')}>
-            {tumor_location_other}
-          </InformationField>
-        )}
-        {metastasis && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis')}>
-            {metastasis}
-          </InformationField>
-        )}
-        {metastasis_locations && metastasis_locations.length > 0 && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_locations')}>
-            {metastasis_locations.join(', ')}
-          </InformationField>
-        )}
-        {metastasis_location_other && (
-          <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_location_other')}>
-            {metastasis_location_other}
-          </InformationField>
-        )}
+        <InformationField label={t('patient_entity.overview.tumour_and_metastasis.tumor_locations')}>
+          {tumor_locations?.join(', ')}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.tumour_and_metastasis.tumor_location_other')}>
+          {tumor_location_other}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis')}>
+          {metastasis}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_locations')}>
+          {metastasis_locations?.join(', ')}
+        </InformationField>
+        <InformationField label={t('patient_entity.overview.tumour_and_metastasis.metastasis_location_other')}>
+          {metastasis_location_other}
+        </InformationField>
       </CardContent>
     </Card>
   );
