@@ -80,7 +80,7 @@ function PatientExploration() {
         ]}
       />
       <main className="bg-muted h-screen overflow-auto p-3 space-y-3">
-        <Card className="w-full">
+        <Card className="w-full gap-0 pb-0 overflow-hidden">
           <CardHeader className="border-b">
             <div className="flex flex-col gap-0.5">
               <CardTitle>{t('patient_exploration.chat.title')}</CardTitle>
@@ -93,9 +93,7 @@ function PatientExploration() {
               </Badge>
             </CardAction>
           </CardHeader>
-          <CardContent>
-            <PatientExplorationChat />
-          </CardContent>
+          <PatientExplorationChat />
         </Card>
         <Card className="h-auto size-max w-full">
           <CardContent>
