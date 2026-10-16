@@ -77,6 +77,7 @@ func Test_SearchPatientsHandler_ReturnsListAndCount(t *testing.T) {
 			"family_name": "C100004_family_name",
 			"birth_year": 2015,
 			"gender": "female",
+			"diagnosis_type_cohort": null,
 			"cns_integrated_diagnosis": null,
 			"cns_integrated_diagnosis_source": null,
 			"vital_status": "deceased",
@@ -247,23 +248,36 @@ func Test_PatientsFiltersHandler_ReturnsFilters(t *testing.T) {
 		VitalStatus:            []types.FiltersValue{{Key: "alive"}, {Key: "deceased"}},
 		OrganizationCode:       []types.FiltersValue{{Key: "CHOP", Label: "Children's Hospital of Philadelphia"}},
 		CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}},
+		DiagnosisTypeCohort:    []types.FiltersValue{{Key: "Medulloblastoma"}},
+		AgeAtInitialDxGroup:    []types.FiltersValue{{Key: "childhood"}},
+		ChemotherapyAgents:     []types.FiltersValue{{Key: "methotrexate"}},
+		GotRadiationEver:       []types.FiltersValue{{Key: "true"}, {Key: "false"}},
 	}})
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"vital_status": [{"key": "alive"}, {"key": "deceased"}],
 		"organization_code": [{"key": "CHOP", "label": "Children's Hospital of Philadelphia"}],
-		"cns_integrated_diagnosis": [{"key": "ATRT"}]
+		"cns_integrated_diagnosis": [{"key": "ATRT"}],
+		"diagnosis_type_cohort": [{"key": "Medulloblastoma"}],
+		"age_at_initial_dx_group": [{"key": "childhood"}],
+		"chemotherapy_agents": [{"key": "methotrexate"}],
+		"got_radiation_ever": [{"key": "true"}, {"key": "false"}]
 	}`, w.Body.String())
 }
 
 func Test_PatientsFiltersHandler_EmptyFiltersAreEmptyArrays(t *testing.T) {
 	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{filters: &types.PatientFilters{
 		VitalStatus: []types.FiltersValue{}, OrganizationCode: []types.FiltersValue{}, CnsIntegratedDiagnosis: []types.FiltersValue{},
+		DiagnosisTypeCohort: []types.FiltersValue{}, AgeAtInitialDxGroup: []types.FiltersValue{},
+		ChemotherapyAgents: []types.FiltersValue{}, GotRadiationEver: []types.FiltersValue{},
 	}})
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"vital_status": [], "organization_code": [], "cns_integrated_diagnosis": []}`, w.Body.String())
+	assert.JSONEq(t, `{
+		"vital_status": [], "organization_code": [], "cns_integrated_diagnosis": [],
+		"diagnosis_type_cohort": [], "age_at_initial_dx_group": [], "chemotherapy_agents": [], "got_radiation_ever": []
+	}`, w.Body.String())
 }
 
 func Test_PatientsFiltersHandler_RepositoryError_500(t *testing.T) {

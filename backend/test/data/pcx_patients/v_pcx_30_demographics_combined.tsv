@@ -1,0 +1,6 @@
+organization_code	patient_id	patient_id_type	given_name	family_name	can_read_phi
+CHOP	MRN-0002	mrn	Ada	Lovelace	true
+CHOP	MRN-0001	mrn	Grace	Hopper	true
+SCH	MRN-0100	mrn	Alan	Turing	true
+BCH	C100004	research_id	C100004_given_name	C100004_family_name	false
+CHOP	C100005	research_id	Ada	Lovelace	false

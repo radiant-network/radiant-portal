@@ -34,6 +34,10 @@ Five read-only routes (plus a tentative sixth for the tumor board report), all g
 | `vital_status` | yes | yes | `in` |
 | `organization_code` | yes | yes | `in` |
 | `cns_integrated_diagnosis` | yes | yes | `in` |
+| `diagnosis_type_cohort` (the "Cohort" column) | yes | yes | `in` |
+| `age_at_initial_dx_group` (virtual: HPO onset group of `age_at_initial_dx_days`, years of 365.25 days: `congenital` day 0, `neonatal` < 28 days, `infantile` < 1 year, `childhood` < 5, `juvenile` < 16, `young_adult` < 40, `middle_age` < 60, `senior`; `unknown` when the age is not a number: -1, Not Reported, Not Available. Antenatal cannot be derived, a negative age being the unknown sentinel) | yes | no | `in` |
+| `chemotherapy_agents` ("Treatment exposure": the agents of every therapy, split on commas, trimmed, lowercased, without the Not Reported / Not Applicable / Not Available sentinels; synonyms and doses are not normalized) | yes, a patient matches when they received any of the values | no | `in` |
+| `got_radiation_ever` (true when the patient has any row in the radiation view, whatever its content, as the data team defines it; never null) | yes, values `true` / `false` | no | `in` |
 | `patient_id` (set by a selected suggestion) | yes | yes | `in` |
 | `patient_name` (virtual: `given_name` + `family_name`, set by a selected suggestion) | yes, only on rows where `can_read_phi` is true | no | `in` |
 | `can_read_phi` | no | yes (default sort) | none |
@@ -57,7 +61,7 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Autocomplete.** Same behaviour as the case list search box (`DataTableFilters` with `filterSearch`, `minSearchLength` 1, 10 results grouped by type): a case-insensitive prefix match on `patient_id` (type `patient_id`, MRN or research ID) and on the start of any word of the name (type `patient_name`, value "given family", only where `can_read_phi` is true: "pat" finds William Patel), read from `v_pcx_30_patient_list` as the user, ordered by value, capped by `limit`. It returns the shared `AutocompleteResult` so the existing component works unchanged.
 
-**Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts.
+**Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts, among the patients the caller can see. `age_at_initial_dx_group` always returns every group, in age order, even when no patient falls in it. Yes/no filters have the keys `true` and `false` (labels `Yes` and `No`) and become a boolean criterion: `{"field": "got_radiation_ever", "value": [true]}`. Protocol and molecular subtype have no data source yet.
 
 **Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
@@ -89,6 +93,7 @@ interface PatientIdentity {
 interface PatientListItem extends PatientIdentity {
   birth_year: number | null;
   gender: Gender;
+  diagnosis_type_cohort: string | null;
   cns_integrated_diagnosis: string | null;        // from the initial event
   cns_integrated_diagnosis_source: string | null; // dataset of that diagnosis, e.g. CBTN or OpenPedCan
   vital_status: VitalStatus;
@@ -106,6 +111,10 @@ interface PatientFilters {
   vital_status: FiltersValue[];
   organization_code: FiltersValue[]; // label = organization_name
   cns_integrated_diagnosis: FiltersValue[];
+  diagnosis_type_cohort: FiltersValue[];
+  age_at_initial_dx_group: FiltersValue[]; // every key, always: congenital … senior, unknown
+  chemotherapy_agents: FiltersValue[];     // lowercase, as recorded
+  got_radiation_ever: FiltersValue[];      // keys true, false; labels Yes, No
 }
 
 // Autocomplete reuses the shared AutocompleteResult { type, value } of the case list:
@@ -135,7 +144,6 @@ interface PatientEntity extends PatientListItem {
   race: string | null;
   ethnicity: string | null;
   postal_code: string | null;      // full when can_read_phi, 3 digits + XX otherwise
-  diagnosis_type_cohort: string | null;
   data_type_cohort: string | null;
   key_dates: PatientKeyDates;
   initial_diagnosis_evidence_url: string | null; // BRIM link, format TBD

@@ -3103,7 +3103,31 @@ components:
     PatientFilters:
       description: Values of the patient list filters
       properties:
+        age_at_initial_dx_group:
+          description: 'Always every key: congenital, neonatal, infantile, childhood,
+            juvenile, young_adult, middle_age, senior, unknown'
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        chemotherapy_agents:
+          description: Lowercase, as recorded
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
         cns_integrated_diagnosis:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        diagnosis_type_cohort:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        got_radiation_ever:
+          description: Keys true, false; labels Yes, No
           items:
             $ref: '#/components/schemas/FiltersValue'
           type: array
@@ -3120,7 +3144,11 @@ components:
           type: array
           uniqueItems: false
       required:
+      - age_at_initial_dx_group
+      - chemotherapy_agents
       - cns_integrated_diagnosis
+      - diagnosis_type_cohort
+      - got_radiation_ever
       - organization_code
       - vital_status
       type: object
@@ -3194,6 +3222,8 @@ components:
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
+        diagnosis_type_cohort:
           type: string
         family_name:
           description: Placeholder when can_read_phi is false

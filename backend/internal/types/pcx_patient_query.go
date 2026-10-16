@@ -1,10 +1,18 @@
 package types
 
 // PcxPatientListTable is the secured PCX patient list view (scripts/seed/views), one per tenant database. The
-// repository reads it through a subquery under this alias, which adds the virtual patient_name column.
+// repository reads it through a subquery under this alias, which adds the virtual patient_name and
+// age_at_initial_dx_group columns.
 var PcxPatientListTable = Table{
 	Name:      "v_pcx_30_patient_list",
 	Alias:     "pl",
+	PerTenant: true,
+}
+
+// PcxDemographicsTable is the secured demographics view, which holds every column the autocomplete needs.
+var PcxDemographicsTable = Table{
+	Name:      "v_pcx_30_demographics_combined",
+	Alias:     "d",
 	PerTenant: true,
 }
 
@@ -21,6 +29,7 @@ var PcxPatientGivenNameField = Field{Name: "given_name", CanBeSelected: true, Ta
 var PcxPatientFamilyNameField = Field{Name: "family_name", CanBeSelected: true, Table: PcxPatientListTable}
 var PcxPatientBirthYearField = Field{Name: "birth_year", CanBeSelected: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientGenderField = Field{Name: "gender", CanBeSelected: true, CanBeSorted: true, Table: PcxPatientListTable}
+var PcxPatientDiagnosisTypeCohortField = Field{Name: "diagnosis_type_cohort", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientCnsIntegratedDiagnosisField = Field{Name: "cns_integrated_diagnosis", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientCnsIntegratedDiagnosisSourceField = Field{Name: "cns_integrated_diagnosis_source", CanBeSelected: true, Table: PcxPatientListTable}
 var PcxPatientVitalStatusField = Field{Name: "vital_status", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, Table: PcxPatientListTable}
@@ -29,17 +38,23 @@ var PcxPatientAgeAtInitialDxDaysField = Field{Name: "age_at_initial_dx_days", Ca
 var PcxPatientSurvivalDaysField = Field{Name: "survival_days", CanBeSelected: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientHasImagingField = Field{Name: "has_imaging", CanBeSelected: true, Table: PcxPatientListTable}
 var PcxPatientCaseCountField = Field{Name: "case_count", CanBeSelected: true, Table: PcxPatientListTable}
+var PcxPatientGotRadiationEverField = Field{Name: "got_radiation_ever", CanBeFiltered: true, Table: PcxPatientListTable}
+var PcxPatientChemotherapyAgentsField = Field{Name: "chemotherapy_agents", CanBeFiltered: true, IsArray: true, Table: PcxPatientListTable}
 
 // PcxPatientNameField is "given_name family_name" where can_read_phi is true and NULL elsewhere, so a
 // restricted patient never matches a name criterion.
 var PcxPatientNameField = Field{Name: "patient_name", CanBeFiltered: true, Table: PcxPatientListTable}
 
+// PcxPatientAgeAtInitialDxGroupField is the HPO onset group of the age at initial diagnosis, or unknown.
+var PcxPatientAgeAtInitialDxGroupField = Field{Name: "age_at_initial_dx_group", CanBeFiltered: true, Table: PcxPatientListTable}
+
 var PcxPatientListFields = []Field{
 	PcxPatientKeyField, PcxPatientIDField, PcxPatientIDTypeField, PcxPatientCanReadPhiField, PcxPatientRadiantPatientIDField,
 	PcxPatientOrganizationCodeField, PcxPatientOrganizationNameField, PcxPatientGivenNameField, PcxPatientFamilyNameField,
-	PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientCnsIntegratedDiagnosisField, PcxPatientCnsIntegratedDiagnosisSourceField,
-	PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField,
-	PcxPatientHasImagingField, PcxPatientCaseCountField, PcxPatientNameField,
+	PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsIntegratedDiagnosisField,
+	PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField,
+	PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField, PcxPatientHasImagingField, PcxPatientCaseCountField,
+	PcxPatientGotRadiationEverField, PcxPatientChemotherapyAgentsField, PcxPatientNameField, PcxPatientAgeAtInitialDxGroupField,
 }
 
 var PcxPatientsQueryConfig = QueryConfig{
@@ -47,8 +62,8 @@ var PcxPatientsQueryConfig = QueryConfig{
 	DefaultFields: []Field{
 		PcxPatientKeyField, PcxPatientIDField, PcxPatientIDTypeField, PcxPatientCanReadPhiField, PcxPatientRadiantPatientIDField,
 		PcxPatientOrganizationCodeField, PcxPatientOrganizationNameField, PcxPatientGivenNameField, PcxPatientFamilyNameField,
-		PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientCnsIntegratedDiagnosisField, PcxPatientCnsIntegratedDiagnosisSourceField,
-		PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField,
+		PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsIntegratedDiagnosisField,
+		PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField,
 		PcxPatientHasImagingField, PcxPatientCaseCountField,
 	},
 	DefaultSort: []SortField{
