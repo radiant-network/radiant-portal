@@ -6124,11 +6124,35 @@ export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof t
  */
 export interface PatientFilters {
     /**
+     * Keys under_36_months, 36_months_and_over, unknown
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'age_at_initial_dx_group': Array<FiltersValue>;
+    /**
      * 
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
     'cns_integrated_diagnosis': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'diagnosis_type_cohort': Array<FiltersValue>;
+    /**
+     * Keys true, false; labels Yes, No
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'had_initial_methotrexate': Array<FiltersValue>;
+    /**
+     * Keys true, false; labels Yes, No
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'had_initial_radiation': Array<FiltersValue>;
     /**
      * label = organization name
      * @type {Array<FiltersValue>}
@@ -6291,6 +6315,12 @@ export interface PatientListItem {
      * @memberof PatientListItem
      */
     'cns_integrated_diagnosis_source'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'diagnosis_type_cohort'?: string;
     /**
      * Placeholder when can_read_phi is false
      * @type {string}
