@@ -17,7 +17,6 @@ import (
 func Test_PcxPatientHandlers_NotImplementedYet(t *testing.T) {
 	handlers := map[string]gin.HandlerFunc{
 		"statistics": PatientsStatisticsHandler(),
-		"entity":     PatientEntityHandler(),
 	}
 	for name, handler := range handlers {
 		router := gin.Default()
@@ -268,6 +267,84 @@ func Test_PatientsFiltersHandler_EmptyFiltersAreEmptyArrays(t *testing.T) {
 
 func Test_PatientsFiltersHandler_RepositoryError_500(t *testing.T) {
 	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{err: errors.New("boom")})
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type pcxPatientReaderMock struct {
+	patient *types.PatientEntity
+	err     error
+	key     string
+}
+
+func (m *pcxPatientReaderMock) GetPatient(_ context.Context, patientKey string) (*types.PatientEntity, error) {
+	m.key = patientKey
+	return m.patient, m.err
+}
+
+func getPatientEntity(repo pcxPatientReader, key string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/patients/:patient_key", PatientEntityHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key, nil))
+	return w
+}
+
+const testPatientKey = "00000000-0000-4000-8000-000000000001"
+
+func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
+	repo := &pcxPatientReaderMock{patient: &types.PatientEntity{
+		PatientListItem: types.PatientListItem{
+			PatientIdentity: types.PatientIdentity{PatientKey: testPatientKey, PatientID: "C100004", PatientIDType: "research_id",
+				OrganizationCode: "BCH", OrganizationName: "Boston Children's Hospital",
+				GivenName: "C100004_given_name", FamilyName: "C100004_family_name"},
+			Gender: "female", VitalStatus: "alive",
+		},
+		KeyDates: types.PatientKeyDates{
+			InitialDiagnosis: types.PatientKeyDate{Source: "clinical"},
+			LatestEncounter:  types.PatientKeyDate{Source: "registry"},
+		},
+		Events: []types.PatientEvent{}, Surgeries: []types.PatientSurgery{}, Radiations: []types.PatientRadiation{},
+		Therapies: []types.PatientTherapy{}, Imaging: []types.PatientImagingSession{}, Cases: []types.PatientCase{},
+	}}
+
+	w := getPatientEntity(repo, testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{
+		"patient_key": "00000000-0000-4000-8000-000000000001", "patient_id": "C100004", "patient_id_type": "research_id",
+		"can_read_phi": false, "radiant_patient_id": null, "organization_code": "BCH", "organization_name": "Boston Children's Hospital",
+		"given_name": "C100004_given_name", "family_name": "C100004_family_name", "birth_year": null, "gender": "female",
+		"cns_integrated_diagnosis": null, "cns_integrated_diagnosis_source": null, "vital_status": "alive",
+		"age_at_vital_status_days": null, "age_at_initial_dx_days": null, "survival_days": null, "has_imaging": false, "case_count": 0,
+		"birth_date": null, "race": null, "ethnicity": null, "postal_code": null, "diagnosis_type_cohort": null, "data_type_cohort": null,
+		"key_dates": {"initial_diagnosis": {"day": null, "date": null, "source": "clinical"}, "latest_encounter": {"day": null, "date": null, "source": "registry"}},
+		"initial_diagnosis_evidence_url": null, "vital_status_at": {"day": null, "date": null},
+		"events": [], "surgeries": [], "radiations": [], "therapies": [], "imaging": [], "treatment_summary": null, "cases": []
+	}`, w.Body.String())
+}
+
+func Test_PatientEntityHandler_UnknownKey_404(t *testing.T) {
+	w := getPatientEntity(&pcxPatientReaderMock{}, testPatientKey)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String())
+}
+
+func Test_PatientEntityHandler_MalformedKey_404WithoutQuery(t *testing.T) {
+	repo := &pcxPatientReaderMock{}
+
+	w := getPatientEntity(repo, "MRN-0002")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String())
+	assert.Empty(t, repo.key)
+}
+
+func Test_PatientEntityHandler_RepositoryError_500(t *testing.T) {
+	w := getPatientEntity(&pcxPatientReaderMock{err: errors.New("boom")}, testPatientKey)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
