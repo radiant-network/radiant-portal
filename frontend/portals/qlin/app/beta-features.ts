@@ -12,18 +12,6 @@ export const qlinFeatureDefinitions: FeatureDefinitions = {
     label: 'Main Menu Orientation',
     description: 'Change the position of the main navigation menu',
   },
-  analysis: {
-    type: 'link',
-    link: '/analysis',
-    label: 'Analysis',
-    description: 'Access analysis page',
-  },
-  study: {
-    type: 'link',
-    link: '/study',
-    label: 'Studies',
-    description: 'Access the new Studies page',
-  },
   onboarding: {
     type: 'boolean',
     defaultValue: false,

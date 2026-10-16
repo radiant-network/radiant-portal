@@ -10,7 +10,6 @@ export default [
     route('case/', './routes/cases/list.tsx'),
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
     route('file/', './routes/files/list.tsx'),
-    route('study/', './routes/studies/list.tsx'),
     route('analysis', './routes/analysis/list.tsx'),
     route('analysis/set-operations', './routes/analysis/set-operations.tsx'),
     route('admin/', './routes/admin/list.tsx'),
@@ -18,13 +17,8 @@ export default [
   ]),
   // The bare domain and the post-login redirect both land here.
   index('./routes/tenant-redirect.tsx'),
-  // QA preview only: two explicit URLs let both landing variants be viewed in a single build.
-  // In prod this should collapse to a single THEME-driven `/landing` (and remove these routes
-  // plus the matching beta-feature links).
-  route('landing/include', './routes/landing/include.tsx'),
-  route('landing/kidsfirst', './routes/landing/kidsfirst.tsx'),
   route('auth/callback', './routes/auth/callback.ts'),
   route('auth/logout', './routes/auth/logout.ts'),
   route('auth/refresh-token', './api/refresh-token.ts'),
-  ...prefix('api', [route('yac/*?', './api/yac-proxy.ts'), route('*?', './api/proxy.ts')]),
+  ...prefix('api', [route('*?', './api/proxy.ts')]),
 ] satisfies RouteConfig;
