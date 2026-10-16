@@ -101,10 +101,14 @@ function AlertContent({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 AlertContent.displayName = 'AlertContent';
 
-function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+function AlertTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   const { variant } = React.useContext(AlertContext);
   const styles = alertVariants({ variant });
-  return <h5 className={styles.title({ className })} {...props} />;
+  return (
+    <h5 className={styles.title({ className })} {...props}>
+      {children}
+    </h5>
+  );
 }
 AlertTitle.displayName = 'AlertTitle';
 
