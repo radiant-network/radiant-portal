@@ -4500,7 +4500,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"search_criteria\": [\n        {\n            \"field\": \"diagnosis_type_cohort\",\n            \"value\": [\n                \"Atypical teratoid/rhabdoid tumor\"\n            ]\n        },\n        {\n            \"field\": \"age_at_initial_dx_group\",\n            \"value\": [\n                \"under_36_months\"\n            ]\n        },\n        {\n            \"field\": \"had_initial_radiation\",\n            \"value\": [\n                true\n            ]\n        },\n        {\n            \"field\": \"had_initial_methotrexate\",\n            \"value\": [\n                false\n            ]\n        }\n    ]\n}",
+              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"search_criteria\": [\n        {\n            \"field\": \"diagnosis_type_cohort\",\n            \"value\": [\n                \"Atypical teratoid/rhabdoid tumor\"\n            ]\n        },\n        {\n            \"field\": \"age_at_initial_dx_group\",\n            \"value\": [\n                \"childhood\"\n            ]\n        },\n        {\n            \"field\": \"got_radiation_ever\",\n            \"value\": [\n                true\n            ]\n        },\n        {\n            \"field\": \"chemotherapy_agents\",\n            \"value\": [\n                \"methotrexate\"\n            ]\n        }\n    ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

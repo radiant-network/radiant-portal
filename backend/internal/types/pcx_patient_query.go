@@ -9,6 +9,13 @@ var PcxPatientListTable = Table{
 	PerTenant: true,
 }
 
+// PcxDemographicsTable is the secured demographics view, which holds every column the autocomplete needs.
+var PcxDemographicsTable = Table{
+	Name:      "v_pcx_30_demographics_combined",
+	Alias:     "d",
+	PerTenant: true,
+}
+
 const PcxPatientListDefaultLimit = 10
 
 var PcxPatientKeyField = Field{Name: "patient_key", CanBeSelected: true, Table: PcxPatientListTable}
@@ -31,14 +38,14 @@ var PcxPatientAgeAtInitialDxDaysField = Field{Name: "age_at_initial_dx_days", Ca
 var PcxPatientSurvivalDaysField = Field{Name: "survival_days", CanBeSelected: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientHasImagingField = Field{Name: "has_imaging", CanBeSelected: true, Table: PcxPatientListTable}
 var PcxPatientCaseCountField = Field{Name: "case_count", CanBeSelected: true, Table: PcxPatientListTable}
-var PcxPatientHadInitialRadiationField = Field{Name: "had_initial_radiation", CanBeFiltered: true, Table: PcxPatientListTable}
-var PcxPatientHadInitialMethotrexateField = Field{Name: "had_initial_methotrexate", CanBeFiltered: true, Table: PcxPatientListTable}
+var PcxPatientGotRadiationEverField = Field{Name: "got_radiation_ever", CanBeFiltered: true, Table: PcxPatientListTable}
+var PcxPatientChemotherapyAgentsField = Field{Name: "chemotherapy_agents", CanBeFiltered: true, IsArray: true, Table: PcxPatientListTable}
 
 // PcxPatientNameField is "given_name family_name" where can_read_phi is true and NULL elsewhere, so a
 // restricted patient never matches a name criterion.
 var PcxPatientNameField = Field{Name: "patient_name", CanBeFiltered: true, Table: PcxPatientListTable}
 
-// PcxPatientAgeAtInitialDxGroupField is under_36_months, 36_months_and_over or unknown.
+// PcxPatientAgeAtInitialDxGroupField is the HPO onset group of the age at initial diagnosis, or unknown.
 var PcxPatientAgeAtInitialDxGroupField = Field{Name: "age_at_initial_dx_group", CanBeFiltered: true, Table: PcxPatientListTable}
 
 var PcxPatientListFields = []Field{
@@ -47,7 +54,7 @@ var PcxPatientListFields = []Field{
 	PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsIntegratedDiagnosisField,
 	PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField,
 	PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField, PcxPatientHasImagingField, PcxPatientCaseCountField,
-	PcxPatientHadInitialRadiationField, PcxPatientHadInitialMethotrexateField, PcxPatientNameField, PcxPatientAgeAtInitialDxGroupField,
+	PcxPatientGotRadiationEverField, PcxPatientChemotherapyAgentsField, PcxPatientNameField, PcxPatientAgeAtInitialDxGroupField,
 }
 
 var PcxPatientsQueryConfig = QueryConfig{
