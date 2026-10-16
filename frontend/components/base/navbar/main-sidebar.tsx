@@ -47,6 +47,7 @@ function MainSidebar({
   return (
     <Sidebar side={placement} collapsible="icon" brand>
       <SidebarHeader>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- hidden developer shortcut */}
         <div
           data-cy="logo-desktop"
           className="h-12 [&_img]:w-auto [&_img]:h-full"

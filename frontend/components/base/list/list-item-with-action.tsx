@@ -30,12 +30,16 @@ const ListItemAction = ({
       <ConditionalWrapper
         condition={!!onClick}
         wrapper={children => (
-          <div onClick={onClick} className="underline hover:no-underline hover:cursor-pointer">
+          <button
+            type="button"
+            onClick={onClick}
+            className="block w-full text-left underline hover:no-underline hover:cursor-pointer"
+          >
             {children}
-          </div>
+          </button>
         )}
       >
-        <div className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">{title}</div>
+        <span className="block text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">{title}</span>
       </ConditionalWrapper>
       <div className="text-xs">{description}</div>
     </div>

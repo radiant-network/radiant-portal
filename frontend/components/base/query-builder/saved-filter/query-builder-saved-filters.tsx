@@ -26,6 +26,7 @@ function QueryBuilderSavedFilters() {
         <div className="text-ellipsis overflow-hidden text-base">
           {selectedSavedFilter ? selectedSavedFilter.name : t('common.saved_filter.untitled_filter')}
         </div>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
         <div className="flex items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
             <UpdateFilterButton />
@@ -34,6 +35,7 @@ function QueryBuilderSavedFilters() {
         </div>
       </div>
       <div className={'flex ml-auto py-4'}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
         <div className="flex gap-4 items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
             <NewFilterButton />
