@@ -37,7 +37,7 @@ export const AllVariants: Story = {
             description="Our variant explorer offers advanced searching capabilities to explore millions of annotated germline variants."
             footer={
               <Button asChild>
-                <a href="#">
+                <a href="https://example.com">
                   Explore variant data <ArrowRight />
                 </a>
               </Button>
@@ -55,7 +55,7 @@ export const AllVariants: Story = {
             description="A cloud-based platform designed for worldwide data analysis and collaboration."
             footer={
               <Button asChild variant="outline">
-                <a href="#">
+                <a href="https://example.com">
                   Get started <SquareArrowOutUpRight />
                 </a>
               </Button>
@@ -83,7 +83,7 @@ export const AllVariants: Story = {
             description="Explore millions of annotated germline variants from participant genomes."
             footer={
               <Button asChild variant="secondary">
-                <a href="#">
+                <a href="https://example.com">
                   Explore variant data <ArrowRight />
                 </a>
               </Button>

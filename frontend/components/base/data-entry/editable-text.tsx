@@ -19,6 +19,7 @@ const EditableText = ({ children, icon = PencilLineIcon, onChangeText, ...props 
       {edit ? (
         <Input
           defaultValue={children}
+          // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the field the user just switched to edit mode
           autoFocus
           onBlur={e => {
             setEdit(false);

@@ -31,17 +31,10 @@ export const Sizes: Story = {
         <div key={size} className="flex flex-col gap-2">
           <StoryLabel>{size}</StoryLabel>
           <div className="flex gap-2">
-            <Input size={size} className="max-w-[300px]" placeholder="Placeholder" autoFocus />
-            <Input size={size} value="loremp ipsum" className="max-w-[300px]" placeholder="Placeholder" autoFocus />
-            <Input endIcon={Car} size={size} className="max-w-[300px]" placeholder="Placeholder" autoFocus />
-            <Input
-              endIcon={Car}
-              value="loremp ipsum"
-              size={size}
-              className="max-w-[300px]"
-              placeholder="Placeholder"
-              autoFocus
-            />
+            <Input size={size} className="max-w-[300px]" placeholder="Placeholder" />
+            <Input size={size} value="loremp ipsum" className="max-w-[300px]" placeholder="Placeholder" />
+            <Input endIcon={Car} size={size} className="max-w-[300px]" placeholder="Placeholder" />
+            <Input endIcon={Car} value="loremp ipsum" size={size} className="max-w-[300px]" placeholder="Placeholder" />
           </div>
         </div>
       ))}

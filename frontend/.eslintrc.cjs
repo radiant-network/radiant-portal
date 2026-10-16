@@ -2,8 +2,28 @@
 const { defineConfig } = require('eslint-define-config');
 
 module.exports = defineConfig({
-  extends: ['@ferlab'],
+  extends: ['@ferlab', 'plugin:jsx-a11y/strict'],
+  plugins: ['jsx-a11y'],
+  settings: {
+    // our wrappers render these native elements, so the a11y rules can check them
+    'jsx-a11y': {
+      polymorphicPropName: 'component',
+      components: {
+        Button: 'button',
+        Input: 'input',
+        Textarea: 'textarea',
+        Label: 'label',
+        Link: 'a',
+        AnchorLink: 'a',
+      },
+    },
+  },
   rules: {
+    // react-router's Link navigates with `to`, not `href`
+    'jsx-a11y/anchor-is-valid': [
+      'error',
+      { components: ['Link'], specialLink: ['to'], aspects: ['noHref', 'invalidHref', 'preferButton'] },
+    ],
     'react-hooks/exhaustive-deps': 'off', // disable missing deps warnings
     'react/display-name': 'off', // disables missing display name warnings
     'no-nested-ternary': 'error', // disallow nested ternaries

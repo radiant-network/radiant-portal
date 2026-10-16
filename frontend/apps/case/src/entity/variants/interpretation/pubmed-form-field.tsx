@@ -104,6 +104,7 @@ function PubmedFormField() {
                       loading: pubmedFetch.isValidating,
                       disabled: !!error,
                     }}
+                    // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the citation the user just added
                     autoFocus
                     placeholder={t('variant.interpretation_form.generic.citation_placeholder')}
                     onSearch={searchValue =>

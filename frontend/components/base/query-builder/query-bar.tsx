@@ -193,6 +193,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- TODO(SJRA-2024): keyboard activation of a query
     <div
       className="flex flex-1 group/query"
       data-query-active={active}

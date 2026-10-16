@@ -96,6 +96,7 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 
 function FieldLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
   return (
+    // eslint-disable-next-line jsx-a11y/label-has-associated-control -- htmlFor is passed by the caller
     <Label
       data-slot="field-label"
       className={cn(

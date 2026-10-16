@@ -56,6 +56,7 @@ function CaseGroupTag({ name, createdOn, loading = false, criterion, onRemove }:
       <HoverCard openDelay={200} closeDelay={200}>
         <HoverCardTrigger asChild>
           <span
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can open the hover card
             tabIndex={0}
             className="flex items-center gap-2 rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >

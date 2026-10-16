@@ -95,6 +95,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           )}
           {/* Desktop NavBar */}
           <div className={navbarStyles.base()}>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- hidden developer shortcut */}
             <div
               data-cy="logo-desktop"
               className="flex mr-2 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
