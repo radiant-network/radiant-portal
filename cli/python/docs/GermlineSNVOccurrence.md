@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **cmc_sample_mutated** | **int** |  | [optional] 
 **cmc_sample_ratio** | **float** |  | [optional] 
 **cmc_tier** | **str** |  | [optional] 
+**comphet_genes** | [**List[ComphetGene]**](ComphetGene.md) | Number of compound heterozygous partners per gene | [optional] 
 **end** | **int** |  | 
 **exomiser_acmg_classification** | **str** |  | 
 **exomiser_acmg_evidence** | **List[str]** |  | 
@@ -54,6 +55,7 @@ Name | Type | Description | Notes
 **germline_pn_wxs_affected** | **int** |  | [optional] 
 **germline_pn_wxs_not_affected** | **int** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
+**has_comphet** | **bool** | True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed | [optional] 
 **has_interpretation** | **bool** |  | 
 **has_note** | **bool** |  | 
 **hgvsg** | **str** |  | 

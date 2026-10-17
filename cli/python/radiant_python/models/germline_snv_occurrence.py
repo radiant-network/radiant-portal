@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from radiant_python.models.comphet_gene import ComphetGene
 from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.vep_impact import VepImpact
 from typing import Optional, Set
@@ -36,6 +37,7 @@ class GermlineSNVOccurrence(BaseModel):
     cmc_sample_mutated: Optional[StrictInt] = None
     cmc_sample_ratio: Optional[Union[StrictFloat, StrictInt]] = None
     cmc_tier: Optional[StrictStr] = None
+    comphet_genes: Optional[List[ComphetGene]] = Field(default=None, description="Number of compound heterozygous partners per gene")
     end: StrictInt
     exomiser_acmg_classification: StrictStr
     exomiser_acmg_evidence: List[StrictStr]
@@ -76,6 +78,7 @@ class GermlineSNVOccurrence(BaseModel):
     germline_pn_wxs_affected: Optional[StrictInt] = None
     germline_pn_wxs_not_affected: Optional[StrictInt] = None
     gnomad_v3_af: Union[StrictFloat, StrictInt]
+    has_comphet: Optional[StrictBool] = Field(default=None, description="True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed")
     has_interpretation: StrictBool
     has_note: StrictBool
     hgvsg: StrictStr
@@ -116,7 +119,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "comphet_genes", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_comphet", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -157,6 +160,13 @@ class GermlineSNVOccurrence(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in comphet_genes (list)
+        _items = []
+        if self.comphet_genes:
+            for _item_comphet_genes in self.comphet_genes:
+                if _item_comphet_genes:
+                    _items.append(_item_comphet_genes.to_dict())
+            _dict['comphet_genes'] = _items
         return _dict
 
     @classmethod
@@ -177,6 +187,7 @@ class GermlineSNVOccurrence(BaseModel):
             "cmc_sample_mutated": obj.get("cmc_sample_mutated"),
             "cmc_sample_ratio": obj.get("cmc_sample_ratio"),
             "cmc_tier": obj.get("cmc_tier"),
+            "comphet_genes": [ComphetGene.from_dict(_item) for _item in obj["comphet_genes"]] if obj.get("comphet_genes") is not None else None,
             "end": obj.get("end"),
             "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
             "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
@@ -217,6 +228,7 @@ class GermlineSNVOccurrence(BaseModel):
             "germline_pn_wxs_affected": obj.get("germline_pn_wxs_affected"),
             "germline_pn_wxs_not_affected": obj.get("germline_pn_wxs_not_affected"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
+            "has_comphet": obj.get("has_comphet"),
             "has_interpretation": obj.get("has_interpretation"),
             "has_note": obj.get("has_note"),
             "hgvsg": obj.get("hgvsg"),
