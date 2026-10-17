@@ -49,6 +49,21 @@ func Test_SNVOccurrences_TenantIsolation(t *testing.T) {
 	})
 }
 
+func Test_SNVOccurrences_Comphet_Join_TenantIsolation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		db := env.Starrocks.Session(&gorm.Session{DryRun: true}).
+			WithContext(types.ContextWithTenant(env.Ctx, "tenant1"))
+
+		tx := AddImplicitSNVOccurrencesFilters(types.GermlineSNVOccurrenceTable, 1, 5, db, 0)
+		tx = JoinSNVOccurrencesWithComphet(types.GermlineSNVOccurrenceTable, 1, 5, 0, tx)
+		var dest []map[string]any
+		sql := tx.Find(&dest).Statement.SQL.String()
+
+		assert.Contains(t, sql, "tenant1_tenant.germline__snv__comphet")
+		assert.NotContains(t, sql, "tenant2_tenant")
+	})
+}
+
 func Test_SNVOccurrences_NoTenant_KeepsBareNames(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		db := env.Starrocks.Session(&gorm.Session{DryRun: true}).WithContext(env.Ctx)
