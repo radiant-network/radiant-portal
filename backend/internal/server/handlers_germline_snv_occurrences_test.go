@@ -14,6 +14,7 @@ import (
 )
 
 func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error) {
+	hasComphet := true
 	return []types.GermlineSNVOccurrence{
 		{
 			SeqId:              1,
@@ -40,6 +41,8 @@ func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.Oc
 			FlagType:           "pin",
 			MaxImpactScore:     4,
 			TranscriptId:       "T001",
+			HasComphet:         &hasComphet,
+			ComphetGenes:       types.JsonArray[types.ComphetGene]{{Symbol: "BRCA2", Nb: 2}},
 		},
 	}, nil
 }
@@ -142,7 +145,9 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"exomiser_acmg_evidence": null,
 		"exomiser_gene_combined_score": 0,
         "exomiser_variant_score": 0,
-		"transcript_id": "T001"
+		"transcript_id": "T001",
+		"has_comphet": true,
+		"comphet_genes": [{"symbol": "BRCA2", "nb": 2}]
     }]`, w.Body.String())
 }
 

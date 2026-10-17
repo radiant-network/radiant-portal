@@ -56,6 +56,8 @@ CREATE TABLE `germline__snv__occurrence`
     exomiser_acmg_classification    VARCHAR(300),
     exomiser_acmg_evidence          ARRAY<VARCHAR (10)>,
     exomiser_variant_score          FLOAT,
-    exomiser_gene_combined_score    FLOAT
+    exomiser_gene_combined_score    FLOAT,
+    has_comphet                     BOOLEAN,
+    comphet_genes                   ARRAY<STRUCT<symbol VARCHAR(200), nb INT>>
 ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`)

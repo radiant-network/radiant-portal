@@ -1345,3 +1345,100 @@ func Test_Germline_SNV_GetOccurrences_Sort_By_Somatic_Hom_To_Wxs_Desc(t *testing
 		assert.ElementsMatch(t, []string{"1006", "1013", "1020", "1027"}, germlineLocusIds(occurrences))
 	})
 }
+
+// gene_panels fixture, seq 1 / task 1: 1000 is paired with 1001 (in TP53 and TML1) and with 1003 (TML1), 1004 with
+// 1005 (TML1). The other sample (seq 2) pairs 1000 with 1004.
+func comphetOf(locusIds ...interface{}) *types.Sqon {
+	return &types.Sqon{Op: "in", Content: types.LeafContent{Field: "comphet_of", Value: locusIds}}
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Partners_Of_A_Variant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []string{"1001", "1003"}, listGermlineSNVLociMatching(t, env, comphetOf("1000")))
+		// The pair 1000-1004 of the other sample is ignored.
+		assert.Equal(t, []string{"1005"}, listGermlineSNVLociMatching(t, env, comphetOf("1004")))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_No_Comphet_Partner_For_A_Variant_Without_Pair(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		assert.Empty(t, listGermlineSNVLociMatching(t, env, comphetOf("1002")))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Partners_Of_A_Variant_In_A_Gene(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		// The symbol filter goes through the consequence semi-join, with the partner filter in its ON clause.
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: types.SqonArray{
+				*comphetOf("1000"),
+				{Op: "in", Content: types.LeafContent{Field: "symbol", Value: []interface{}{"TP53"}}},
+			},
+		}
+		assert.Equal(t, []string{"1001"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Summary(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "locus_id", Order: "asc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, []string{"locus_id", "has_comphet", "comphet_genes"}, comphetOf("1003", "1009"), nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "1000", occurrences[0].LocusId)
+			assert.True(t, *occurrences[0].HasComphet)
+			assert.Equal(t, types.JsonArray[types.ComphetGene]{{Symbol: "TML1", Nb: 2}, {Symbol: "TP53", Nb: 1}}, occurrences[0].ComphetGenes)
+		}
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_Return_Comphet_Partners_Once(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// 1001 is paired with 1000 in two genes: counted once.
+		query, err := types.NewOccurrenceCountQueryFromSqon(comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, c.Count)
+	})
+}
+
+func Test_Germline_SNV_AggregateOccurrences_By_Has_Comphet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("has_comphet", nil, types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		// 1010 has no summary (NULL) and is not counted.
+		assert.ElementsMatch(t, []Aggregation{{Bucket: "1", Count: 5}, {Bucket: "0", Count: 6}}, aggregate)
+	})
+}
+
+func Test_Germline_SNV_AggregateOccurrences_Filtered_On_Comphet_Partners(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("filter", comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.Equal(t, []Aggregation{{Bucket: "PASS", Count: 2}}, aggregate)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Filtered_On_Comphet_Partners(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("genotype_quality", comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 30, statistics.Min)
+		assert.EqualValues(t, 80, statistics.Max)
+	})
+}

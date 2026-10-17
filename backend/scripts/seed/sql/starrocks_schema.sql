@@ -168,7 +168,19 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__occurrence`
     exomiser_acmg_evidence        ARRAY<VARCHAR (10)>,
     exomiser_variant_score        FLOAT,
     exomiser_gene_combined_score  FLOAT,
+    has_comphet                   BOOLEAN,
+    comphet_genes                 ARRAY<STRUCT<symbol VARCHAR(200), nb INT>>,
     INDEX locus_id_index (`locus_id`) USING BITMAP COMMENT ''
+    ) ENGINE=OLAP
+    DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
+
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__comphet`(
+    part              INT          NOT NULL,
+    seq_id            INT          NOT NULL,
+    task_id           INT          NOT NULL,
+    locus_id          BIGINT       NOT NULL,
+    partner_locus_id  BIGINT       NOT NULL,
+    symbol            VARCHAR(200) NOT NULL
     ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 
