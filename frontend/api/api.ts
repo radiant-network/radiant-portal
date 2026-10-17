@@ -1914,6 +1914,25 @@ export interface ClinvarVariantConditions {
     'conditions'?: Array<ClinvarRCV>;
 }
 /**
+ * ComphetGene is the number of compound heterozygous partners of a variant in one gene
+ * @export
+ * @interface ComphetGene
+ */
+export interface ComphetGene {
+    /**
+     * 
+     * @type {number}
+     * @memberof ComphetGene
+     */
+    'nb': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ComphetGene
+     */
+    'symbol': string;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -4090,6 +4109,12 @@ export interface GermlineSNVOccurrence {
      */
     'cmc_tier'?: string;
     /**
+     * Number of compound heterozygous partners per gene
+     * @type {Array<ComphetGene>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'comphet_genes'?: Array<ComphetGene>;
+    /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
@@ -4329,6 +4354,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'gnomad_v3_af': number;
+    /**
+     * True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_comphet'?: boolean;
     /**
      * 
      * @type {boolean}
