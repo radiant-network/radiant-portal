@@ -54,6 +54,7 @@ from radiant_python.models.client_auth_config import ClientAuthConfig
 from radiant_python.models.client_config import ClientConfig
 from radiant_python.models.clinvar_rcv import ClinvarRCV
 from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
+from radiant_python.models.comphet_gene import ComphetGene
 from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.create_batch_response import CreateBatchResponse

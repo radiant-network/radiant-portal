@@ -250,6 +250,7 @@ Class | Method | HTTP request | Description
  - [ClientConfig](docs/ClientConfig.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
  - [ClinvarVariantConditions](docs/ClinvarVariantConditions.md)
+ - [ComphetGene](docs/ComphetGene.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
