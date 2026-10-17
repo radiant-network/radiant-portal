@@ -1,0 +1,5 @@
+locus_id	hgvsg	rsnumber	chromosome	start	reference	alternate	symbol	clinvar_name	clinvar_interpretation
+1000	chr7:g.140753336A>T	rs113488022	7	140753336	A	T	BRAF	13961	["Pathogenic","Likely_pathogenic"]
+2000	chr1:g.1000A>G	NULL	1	1000	A	G	NULL	NULL	NULL
+3000	chr2:g.2000C>T	rs3	2	2000	C	T	TP53	NULL	NULL
+4000	chr3:g.3000G>A	rs4	3	3000	G	A	TP53	NULL	NULL

@@ -33,7 +33,7 @@ CREATE TABLE `germline__snv__occurrence`
     info_dp                         INT,
     info_haplotype_score            FLOAT,
     phased                          BOOLEAN,
-    parental_origin                 VARCHAR(10),
+    parental_origin                 VARCHAR(25),
     father_dp                       INT,
     father_gq                       INT,
     father_ad_ref                   INT,

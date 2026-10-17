@@ -132,6 +132,14 @@ docs/PatientsApi.md
 docs/PatientsSearchResponse.md
 docs/PubmedCitation.md
 docs/PubmedCitationDetails.md
+docs/ReportCase.md
+docs/ReportGene.md
+docs/ReportGermlineInterpretation.md
+docs/ReportGnomad.md
+docs/ReportOccurrence.md
+docs/ReportOmim.md
+docs/ReportTranscript.md
+docs/ReportVariant.md
 docs/RoleActionResult.md
 docs/RoleResult.md
 docs/RolesApi.md
@@ -158,6 +166,7 @@ docs/TaskOccurrenceType.md
 docs/TenantMembership.md
 docs/Term.md
 docs/Transcript.md
+docs/TranscriptReport.md
 docs/UpdateCaseAssignmentsRequest.md
 docs/UpdateCaseBatch.md
 docs/UpdateCaseBatchBody.md
@@ -338,6 +347,14 @@ radiant_python/models/patient_treatment_summary.py
 radiant_python/models/patients_search_response.py
 radiant_python/models/pubmed_citation.py
 radiant_python/models/pubmed_citation_details.py
+radiant_python/models/report_case.py
+radiant_python/models/report_gene.py
+radiant_python/models/report_germline_interpretation.py
+radiant_python/models/report_gnomad.py
+radiant_python/models/report_occurrence.py
+radiant_python/models/report_omim.py
+radiant_python/models/report_transcript.py
+radiant_python/models/report_variant.py
 radiant_python/models/role_action_result.py
 radiant_python/models/role_result.py
 radiant_python/models/sample_batch.py
@@ -359,6 +376,7 @@ radiant_python/models/task_occurrence_type.py
 radiant_python/models/tenant_membership.py
 radiant_python/models/term.py
 radiant_python/models/transcript.py
+radiant_python/models/transcript_report.py
 radiant_python/models/update_case_assignments_request.py
 radiant_python/models/update_case_batch.py
 radiant_python/models/update_case_batch_body.py
