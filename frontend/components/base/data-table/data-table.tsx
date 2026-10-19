@@ -747,12 +747,15 @@ function DataTable<T extends RowData>({
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [sorting, setSorting] = useState<SortingState>(
-    (serverOptions?.defaultSorting?.map(serverSorting => ({
-      id: serverSorting.field,
-      desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState) || [],
+  const defaultSortingState = useMemo<SortingState>(
+    () =>
+      (serverOptions?.defaultSorting?.map(serverSorting => ({
+        id: serverSorting.field,
+        desc: serverSorting.order === SortBodyOrderEnum.Desc,
+      })) as SortingState) ?? [],
+    [serverOptions?.defaultSorting],
   );
+  const [sorting, setSorting] = useState<SortingState>(defaultSortingState);
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
@@ -819,7 +822,12 @@ function DataTable<T extends RowData>({
     ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
-    onSortingChange: setSorting,
+    // clearing the sort falls back to the default one, so the header icon always shows the applied sort
+    onSortingChange: updater =>
+      setSorting(previous => {
+        const next = typeof updater === 'function' ? updater(previous) : updater;
+        return next.length === 0 ? defaultSortingState : next;
+      }),
     pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
     state: {
       columnOrder,
