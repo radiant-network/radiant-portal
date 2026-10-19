@@ -12,6 +12,7 @@ import {
   type ColumnPinningState,
   columnResizingFeature,
   columnSizingFeature,
+  type ColumnSort,
   columnVisibilityFeature,
   createExpandedRowModel,
   createFilteredRowModel,
@@ -474,6 +475,7 @@ function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, T
 function getHeaderFlexRender<TData extends RowData>(
   table: ReactTable<AppFeatures, TData>,
   header: Header<AppFeatures, TData, unknown>,
+  defaultSort?: ColumnSort,
 ) {
   if (header.isPlaceholder) return null;
   return (
@@ -485,7 +487,7 @@ function getHeaderFlexRender<TData extends RowData>(
         </div>
 
         {/* Table Header Actions, only display on hover */}
-        <TableHeaderActions header={header} />
+        <TableHeaderActions header={header} defaultSort={defaultSort} />
       </div>
 
       {/* Resize Grip */}
@@ -755,7 +757,7 @@ function DataTable<T extends RowData>({
       })) as SortingState) ?? [],
     [serverOptions?.defaultSorting],
   );
-  const [sorting, setSorting] = useState<SortingState>(defaultSortingState);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
@@ -822,12 +824,7 @@ function DataTable<T extends RowData>({
     ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
-    // clearing the sort falls back to the default one, so the header icon always shows the applied sort
-    onSortingChange: updater =>
-      setSorting(previous => {
-        const next = typeof updater === 'function' ? updater(previous) : updater;
-        return next.length === 0 ? defaultSortingState : next;
-      }),
+    onSortingChange: setSorting,
     pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
     state: {
       columnOrder,
@@ -1163,7 +1160,13 @@ function DataTable<T extends RowData>({
                       colSpan={header.colSpan}
                       variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
                     >
-                      {getHeaderFlexRender(table, header)}
+                      {getHeaderFlexRender(
+                        table,
+                        header,
+                        sorting.length === 0
+                          ? defaultSortingState.find(sort => sort.id === header.column.id)
+                          : undefined,
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
