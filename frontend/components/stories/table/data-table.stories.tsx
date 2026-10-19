@@ -113,6 +113,23 @@ export const Loading: Story = {
   render: args => <DataTableStory args={args} title="Loading" />,
 };
 
+export const DefaultSorting: Story = {
+  args: {
+    data: [...data].sort((a, b) => b.age - a.age).slice(0, 10),
+    serverOptions: {
+      defaultSorting: [{ field: 'age', order: SortBodyOrderEnum.Desc }],
+      onSortingChange: () => {},
+    },
+  },
+  render: args => (
+    <DataTableStory
+      args={args}
+      title="Default sorting"
+      description="The sort icon shows on the default-sorted column on load, and comes back when another column's sort is cleared."
+    />
+  ),
+};
+
 export const Empty: Story = {
   args: {
     loadingStates: {

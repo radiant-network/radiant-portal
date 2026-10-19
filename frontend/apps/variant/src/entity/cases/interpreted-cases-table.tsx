@@ -21,6 +21,8 @@ import InterpretedCasesFilters, { type InterpretedCasesFiltersState } from './ta
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
 import { INTERPRETED_CASE_ID_PARAM, INTERPRETED_PATIENT_ID_PARAM } from './constants';
 
+const INTERPRETED_CASES_DEFAULT_SORTING: SortBody[] = [{ field: 'interpretation_updated_on', order: 'desc' }];
+
 type InterpretedCasesSearchInput = {
   key: string;
   locusId: string;
@@ -42,7 +44,7 @@ function InterpretedCasesTable() {
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
-  const [sorting, setSorting] = useState<SortBody[]>([{ field: 'interpretation_updated_on', order: 'desc' }]);
+  const [sorting, setSorting] = useState<SortBody[]>(INTERPRETED_CASES_DEFAULT_SORTING);
 
   const [initialFilters, setInitialFilters] = useState<InterpretedCasesFiltersState>({
     mondo: '',
@@ -136,7 +138,7 @@ function InterpretedCasesTable() {
         onRowSelectionChange={setRowSelection}
         serverOptions={{
           onSortingChange: setSorting,
-          defaultSorting: [{ field: 'interpretation_updated_on', order: 'desc' }],
+          defaultSorting: INTERPRETED_CASES_DEFAULT_SORTING,
         }}
       />
       <SliderInterpretedCaseSheet

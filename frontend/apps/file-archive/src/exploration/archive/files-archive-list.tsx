@@ -15,6 +15,11 @@ type DocumentInput = {
   body: ListBodyWithCriteria;
 };
 
+const FILES_ARCHIVE_DEFAULT_SORTING: SortBody[] = [
+  { field: 'document_id', order: 'desc' },
+  { field: 'seq_id', order: 'desc' },
+];
+
 async function fetchDocuments(input: DocumentInput, tenant: string) {
   const response = await documentApi.searchDocuments(tenant, input.body);
   return response.data;
@@ -24,7 +29,7 @@ function FilesArchiveList() {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
-  const [sorting, setSorting] = useState<SortBody[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(FILES_ARCHIVE_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -69,6 +74,7 @@ function FilesArchiveList() {
       tableIndexResultPosition="bottom"
       serverOptions={{
         setAdditionalFields,
+        defaultSorting: FILES_ARCHIVE_DEFAULT_SORTING,
         onSortingChange: setSorting,
       }}
     />

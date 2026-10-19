@@ -12,6 +12,7 @@ import {
   type ColumnPinningState,
   columnResizingFeature,
   columnSizingFeature,
+  type ColumnSort,
   columnVisibilityFeature,
   createExpandedRowModel,
   createFilteredRowModel,
@@ -474,6 +475,7 @@ function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, T
 function getHeaderFlexRender<TData extends RowData>(
   table: ReactTable<AppFeatures, TData>,
   header: Header<AppFeatures, TData, unknown>,
+  defaultSort?: ColumnSort,
 ) {
   if (header.isPlaceholder) return null;
   return (
@@ -485,7 +487,7 @@ function getHeaderFlexRender<TData extends RowData>(
         </div>
 
         {/* Table Header Actions, only display on hover */}
-        <TableHeaderActions header={header} />
+        <TableHeaderActions header={header} defaultSort={defaultSort} />
       </div>
 
       {/* Resize Grip */}
@@ -747,12 +749,15 @@ function DataTable<T extends RowData>({
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [sorting, setSorting] = useState<SortingState>(
-    (serverOptions?.defaultSorting?.map(serverSorting => ({
-      id: serverSorting.field,
-      desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState) || [],
+  const defaultSortingState = useMemo<SortingState>(
+    () =>
+      (serverOptions?.defaultSorting?.map(serverSorting => ({
+        id: serverSorting.field,
+        desc: serverSorting.order === SortBodyOrderEnum.Desc,
+      })) as SortingState) ?? [],
+    [serverOptions?.defaultSorting],
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
@@ -1155,7 +1160,13 @@ function DataTable<T extends RowData>({
                       colSpan={header.colSpan}
                       variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
                     >
-                      {getHeaderFlexRender(table, header)}
+                      {getHeaderFlexRender(
+                        table,
+                        header,
+                        sorting.length === 0
+                          ? defaultSortingState.find(sort => sort.id === header.column.id)
+                          : undefined,
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
