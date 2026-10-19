@@ -41,7 +41,7 @@ describe('Case Entity - Variants - Germline - SNV - Table - Information displaye
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('consequence', data.variantGermline);
   });
 
-  it('MANE', () => {
+  it('MANE [RAD-100]', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('mane', data.variantGermline);
   });
