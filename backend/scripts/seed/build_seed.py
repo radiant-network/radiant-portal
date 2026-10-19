@@ -234,9 +234,17 @@ for v in variants:
         continue
     deleterious = v.impact in ("HIGH", "MODERATE")
     scores = (genomics.h("cadd", v.locus_id) % 300) / 10 + (15 if deleterious else 0)
-    csq_rows.append([v.locus_id, v.symbol, v.transcript, [v.consequence], genomics.IMPACT[v.impact], "protein_coding", True, True, True, False,
-                     v.transcript, "D" if deleterious else "T", "D" if deleterious else "B", round(scores, 2), round(scores / 40, 3),
-                     v.impact, v.aa, v.hgvsc, 0.98 if v.symbol in omim_symbols else 0.12, 0.2 if v.symbol in omim_symbols else 0.9])
+    # The MANE pair of the gene: the Ensembl row carries the versioned RefSeq id, the RefSeq row points back.
+    refseq = f"NM_{genomics.h('refseq', v.symbol) % 900000 + 100000:06d}"
+    ens_version, refseq_version = str(genomics.h("version", v.transcript) % 9 + 1), str(genomics.h("version", refseq) % 9 + 1)
+    exon_rank = genomics.h("exon", v.locus_id) % 20 + 1
+    exon_total = exon_rank + genomics.h("exon_total", v.symbol) % 15
+    annotation = [[v.consequence], genomics.IMPACT[v.impact], "protein_coding", "D" if deleterious else "T", "D" if deleterious else "B",
+                  round(scores, 2), round(scores / 40, 3), v.impact, v.aa, v.hgvsc, 0.98 if v.symbol in omim_symbols else 0.12,
+                  0.2 if v.symbol in omim_symbols else 0.9, exon_rank, exon_total]
+    csq_rows.append([v.locus_id, v.symbol, v.transcript, ens_version, "Ensembl", True, True, True, False, f"{refseq}.{refseq_version}", refseq]
+                    + annotation)
+    csq_rows.append([v.locus_id, v.symbol, refseq, refseq_version, "RefSeq", False, False, True, False, None, v.transcript] + annotation)
     cf_rows.append([genomics.PART, v.locus_id, deleterious, genomics.IMPACT[v.impact], v.symbol, v.consequence, "protein_coding",
                     "D" if deleterious else "T", round(scores, 2), v.impact])
     if v.clinvar:
@@ -265,10 +273,11 @@ if QA and not LOCI:
     S.append(delete_in(f"{SHARED_DB}.gnomad_genomes_v3", "locus_id", loci))
 # With --loci the variants are real loci: their annotations are already in the shared database.
 if not LOCI:
-    S.append(insert(f"{SHARED_DB}.snv__consequence", ["locus_id", "symbol", "transcript_id", "consequences", "impact_score", "biotype",
-                                                       "is_canonical", "is_picked", "is_mane_select", "is_mane_plus", "mane_select", "sift_pred",
-                                                       "polyphen2_hvar_pred", "cadd_phred", "revel_score", "vep_impact", "aa_change",
-                                                       "dna_change", "gnomad_pli", "gnomad_loeuf"], csq_rows))
+    S.append(insert(f"{SHARED_DB}.snv__consequence", ["locus_id", "symbol", "transcript_id", "transcript_version", "source", "is_canonical",
+                                                       "is_picked", "is_mane_select", "is_mane_plus", "mane_select", "mane_pair_transcript_id",
+                                                       "consequences", "impact_score", "biotype", "sift_pred", "polyphen2_hvar_pred",
+                                                       "cadd_phred", "revel_score", "vep_impact", "aa_change", "dna_change", "gnomad_pli",
+                                                       "gnomad_loeuf", "exon_rank", "exon_total"], csq_rows))
     S.append(insert(f"{SHARED_DB}.snv__consequence_filter_partitioned", ["part", "locus_id", "is_deleterious", "impact_score", "symbol",
                                                                           "consequence", "biotype", "sift_pred", "cadd_phred", "vep_impact"], cf_rows))
     S.append(insert(f"{SHARED_DB}.clinvar", ["locus_id", "chromosome", "start", "end", "reference", "alternate", "interpretations", "name",
@@ -297,7 +306,8 @@ S.append(insert(f"{SHARED_DB}.staging_sequencing_experiment",
 S.append(insert(f"{TENANT_DB}.germline__snv__occurrence",
                 ["part", "seq_id", "task_id", "locus_id", "ad_ratio", "gq", "dp", "ad_total", "ad_ref", "ad_alt", "zygosity", "calls",
                  "quality", "filter", "info_qd", "exomiser_moi", "exomiser_acmg_classification", "exomiser_acmg_evidence",
-                 "exomiser_variant_score", "exomiser_gene_combined_score", "phased"],
+                 "exomiser_variant_score", "exomiser_gene_combined_score", "parental_origin", "father_zygosity", "mother_zygosity",
+                 "transmission_mode", "phased"],
                 [r + [False] for r in sr["germline__snv__occurrence"]]))
 S.append(insert(f"{TENANT_DB}.somatic__snv__occurrence",
                 ["part", "task_id", "tumor_seq_id", "locus_id", "normal_seq_id", "quality", "filter", "info_hotspot", "info_qd", "info_aq",

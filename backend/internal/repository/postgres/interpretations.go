@@ -35,6 +35,12 @@ func addWhere(tx *gorm.DB, caseId string, sequencingId string, locusId string, t
 
 // mappers, could be moved to a separate file
 func (r *InterpretationsRepository) mapToInterpretationCommon(ctx context.Context, dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
+	return r.mapToInterpretationCommonWith(ctx, dao, true)
+}
+
+// strictCitations fails on a PubMed id the client cannot resolve; the report path reads with
+// strictCitations false and gets the id with an empty citation instead.
+func (r *InterpretationsRepository) mapToInterpretationCommonWith(_ context.Context, dao *types.InterpretationCommonDAO, strictCitations bool) (*types.InterpretationCommon, error) {
 	pubmeds := utils.SplitRemoveEmptyString(dao.Pubmed, ",")
 	interpretation := &types.InterpretationCommon{
 		ID:             dao.ID,
@@ -61,7 +67,11 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(ctx context.Contex
 	for i, v := range pubmeds {
 		citation, _ := r.pubmedClient.GetCitationById(v)
 		if citation == nil {
-			return nil, fmt.Errorf("pubmed citation not found: %s", v)
+			if strictCitations {
+				return nil, fmt.Errorf("pubmed citation not found: %s", v)
+			}
+			interpretation.Pubmed[i] = types.InterpretationPubmed{CitationID: v}
+			continue
 		}
 		interpretation.Pubmed[i] = types.InterpretationPubmed{CitationID: v, Citation: citation.Nlm.Format}
 	}
@@ -103,7 +113,11 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(ctx context.Con
 }
 
 func (r *InterpretationsRepository) mapToInterpretationGermline(ctx context.Context, dao *types.InterpretationGermlineDAO) (*types.InterpretationGermline, error) {
-	common, err := r.mapToInterpretationCommon(ctx, &dao.InterpretationCommonDAO)
+	return r.mapToInterpretationGermlineWith(ctx, dao, true)
+}
+
+func (r *InterpretationsRepository) mapToInterpretationGermlineWith(ctx context.Context, dao *types.InterpretationGermlineDAO, strictCitations bool) (*types.InterpretationGermline, error) {
+	common, err := r.mapToInterpretationCommonWith(ctx, &dao.InterpretationCommonDAO, strictCitations)
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +196,30 @@ func (r *InterpretationsRepository) FirstGermline(ctx context.Context, caseId st
 		return nil, err
 	}
 	return mapped, nil
+}
+
+// ListGermlineForReport returns the germline interpretations of the loci on that case and
+// sequencing, any transcript, ordered by locus then transcript. A citation PubMed cannot
+// resolve comes back with an empty Citation: the report must not fail on PubMed.
+func (r *InterpretationsRepository) ListGermlineForReport(ctx context.Context, caseId string, sequencingId string, locusIds []string) ([]types.InterpretationGermline, error) {
+	var daos []types.InterpretationGermlineDAO
+	tx := r.db.WithContext(ctx).
+		Table(types.InterpretationGermlineTable.Name).
+		Scopes(WithTenant(ctx)).
+		Where("case_id = ? AND sequencing_id = ? AND locus_id IN (?)", caseId, sequencingId, locusIds).
+		Order("locus_id ASC, transcript_id ASC")
+	if err := tx.Find(&daos).Error; err != nil {
+		return nil, fmt.Errorf("list germline interpretations: %w", err)
+	}
+	interpretations := make([]types.InterpretationGermline, 0, len(daos))
+	for i := range daos {
+		mapped, err := r.mapToInterpretationGermlineWith(ctx, &daos[i], false)
+		if err != nil {
+			return nil, err
+		}
+		interpretations = append(interpretations, *mapped)
+	}
+	return interpretations, nil
 }
 
 func (r *InterpretationsRepository) CreateOrUpdateGermline(ctx context.Context, interpretation *types.InterpretationGermline) error {
