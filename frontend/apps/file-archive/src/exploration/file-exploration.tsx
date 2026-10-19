@@ -11,8 +11,8 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 import { documentApi } from '@/utils/api';
 
-import FilesTableFilters from './archive/files-archive-list-table-filters';
-import { defaultSettings, getFilesArchiveColumns } from './archive/files-archive-table-settings';
+import FilesTableFilters from './table/files-archive-list-table-filters';
+import { defaultSettings, getFilesArchiveColumns } from './table/files-archive-table-settings';
 
 type DocumentInput = {
   body: ListBodyWithCriteria;
