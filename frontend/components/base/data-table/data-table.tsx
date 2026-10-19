@@ -490,6 +490,7 @@ function getHeaderFlexRender<TData extends RowData>(
 
       {/* Resize Grip */}
       {header.column.getCanResize() && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mouse-only column resize
         <div
           onDoubleClick={() => header.column.resetSize()}
           onMouseDown={header.getResizeHandler()}

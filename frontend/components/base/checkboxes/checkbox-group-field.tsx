@@ -98,13 +98,7 @@ function CheckboxGroupField({
   };
 
   return (
-    <div
-      role="group"
-      data-slot="checkbox-group"
-      aria-invalid={ariaInvalid}
-      className={styles.base({ className })}
-      {...props}
-    >
+    <div role="group" data-slot="checkbox-group" className={styles.base({ className })} {...props}>
       {data.map(item => {
         const isChecked = selectedValues.includes(item.id);
         const isDisabled = item.disabled;

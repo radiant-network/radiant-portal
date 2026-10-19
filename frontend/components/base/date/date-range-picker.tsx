@@ -62,6 +62,7 @@ function DateRangePicker({
           onSelect={onChange}
           defaultMonth={value?.from}
           numberOfMonths={numberOfMonths}
+          // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the calendar the user just opened
           autoFocus
         />
       </PopoverContent>
