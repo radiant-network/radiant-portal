@@ -1,19 +1,97 @@
+import { useMemo, useState } from 'react';
+import useSWR from 'swr';
+
+import type { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { thousandNumberFormat } from '@/components/lib/number-format';
+import { documentApi } from '@/utils/api';
 
-import FilesArchiveList from './archive/files-archive-list';
+import FilesTableFilters from './archive/files-archive-list-table-filters';
+import { defaultSettings, getFilesArchiveColumns } from './archive/files-archive-table-settings';
+
+type DocumentInput = {
+  body: ListBodyWithCriteria;
+};
+
+const FILES_ARCHIVE_DEFAULT_SORTING: SortBody[] = [
+  { field: 'document_id', order: 'desc' },
+  { field: 'seq_id', order: 'desc' },
+];
+
+async function fetchDocuments(input: DocumentInput, tenant: string) {
+  const response = await documentApi.searchDocuments(tenant, input.body);
+  return response.data;
+}
 
 export default function App() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(FILES_ARCHIVE_DEFAULT_SORTING);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
+
+  const columns = useMemo(() => getFilesArchiveColumns(t), [t]);
+
+  const { data, error, isLoading } = useSWR<DocumentsSearchResponse, ApiError, DocumentInput>(
+    {
+      body: {
+        additional_fields: additionalFields,
+        sort: sorting,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        search_criteria: searchCriteria,
+      },
+    },
+    input => fetchDocuments(input, tenant),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const count = data?.count ?? 0;
 
   return (
     <>
-      <HeaderNavigation isLoading={false} title={t('file_entity.title')} variant="info" />
+      <HeaderNavigation
+        isLoading={false}
+        title={t('file_entity.count', { count, total: thousandNumberFormat(count) })}
+        variant="info"
+      />
       <main className={`bg-muted h-screen overflow-auto p-3`}>
         <Card className="h-auto size-max w-full ">
           <CardContent>
-            <FilesArchiveList />
+            <DataTable
+              id="files-archive-list"
+              columns={columns}
+              TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} />}
+              data={data?.list ?? []}
+              defaultColumnSettings={defaultSettings}
+              hasError={!!error}
+              loadingStates={{
+                total: isLoading,
+                list: isLoading,
+              }}
+              pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+              total={count}
+              enableColumnOrdering
+              enableFullscreen
+              tableIndexResultPosition="bottom"
+              serverOptions={{
+                setAdditionalFields,
+                defaultSorting: FILES_ARCHIVE_DEFAULT_SORTING,
+                onSortingChange: setSorting,
+              }}
+            />
           </CardContent>
         </Card>
       </main>
