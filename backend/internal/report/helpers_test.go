@@ -177,3 +177,44 @@ func Test_Citations_SkipsUnresolved(t *testing.T) {
 func Test_Citations_Empty(t *testing.T) {
 	assert.Equal(t, "", citations(nil))
 }
+
+func Test_Percent_Rounded(t *testing.T) {
+	assert.Equal(t, "7", percent(0.0661764705882353))
+	assert.Equal(t, "50", percent(0.5))
+	assert.Equal(t, "0", percent(0))
+}
+
+func Test_ClinicalUtility_Translated(t *testing.T) {
+	assert.Equal(t, "Tier IB", en.clinicalUtility(&types.ReportSomaticInterpretation{ClinicalUtility: "category_ib"}))
+	assert.Equal(t, "Tier III", en.clinicalUtility(&types.ReportSomaticInterpretation{ClinicalUtility: "category_iii"}))
+}
+
+func Test_ClinicalUtility_NilOrUnknownIsEmpty(t *testing.T) {
+	assert.Equal(t, "", en.clinicalUtility(nil))
+	assert.Equal(t, "", en.clinicalUtility(&types.ReportSomaticInterpretation{ClinicalUtility: "tier_1"}))
+}
+
+func Test_Oncogenicity_Translated(t *testing.T) {
+	assert.Equal(t, "Likely oncogenic", en.oncogenicity(&types.ReportSomaticInterpretation{Oncogenicity: "LA26332-9"}))
+	assert.Equal(t, "Oncogenic", en.oncogenicity(&types.ReportSomaticInterpretation{Oncogenicity: "LA6668-3"}))
+}
+
+func Test_Oncogenicity_ArrangerStringsAccepted(t *testing.T) {
+	assert.Equal(t, "Oncogenic", en.oncogenicity(&types.ReportSomaticInterpretation{Oncogenicity: "oncogenic"}))
+	assert.Equal(t, "Variant of uncertain significance", en.oncogenicity(&types.ReportSomaticInterpretation{Oncogenicity: "uncertain_significance"}))
+}
+
+func Test_Oncogenicity_NilOrUnknownIsEmpty(t *testing.T) {
+	assert.Equal(t, "", en.oncogenicity(nil))
+	assert.Equal(t, "", en.oncogenicity(&types.ReportSomaticInterpretation{Oncogenicity: "Oncogenic"}))
+}
+
+func Test_CosmicTier_Translated(t *testing.T) {
+	assert.Equal(t, "Tier 3", en.cosmicTier(&types.ReportCosmic{Tier: "3"}))
+	assert.Equal(t, "Other", en.cosmicTier(&types.ReportCosmic{Tier: "Other"}))
+}
+
+func Test_CosmicTier_NilOrUnknownIsEmpty(t *testing.T) {
+	assert.Equal(t, "", en.cosmicTier(nil))
+	assert.Equal(t, "", en.cosmicTier(&types.ReportCosmic{Tier: "4"}))
+}

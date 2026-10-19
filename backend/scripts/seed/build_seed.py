@@ -464,7 +464,7 @@ CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc PROPERTIES (
 variants = sorted(g.variants.values(), key=lambda v: v.locus_id)
 germline_seqs = {r[1] for r in sr["germline__snv__occurrence"]}
 tumor_seqs = {r[2] for r in sr["somatic__snv__occurrence"]}
-var_rows, csq_rows, cf_rows, clinvar_rows, gnomad_rows = [], [], [], [], []
+var_rows, csq_rows, cf_rows, clinvar_rows, gnomad_rows, cosmic_rows = [], [], [], [], [], []
 for v in variants:
     var_rows.append(variant_row(v, len(v.germline_seqs), len(germline_seqs), len(v.somatic_seqs), len(tumor_seqs)))
     if v.real:
@@ -489,6 +489,12 @@ for v in variants:
                              v.locus, str(genomics.h("locus", v.locus))])
     if v.af:
         gnomad_rows.append([v.locus_id, v.af, int(v.af * 152000), 152000, int(v.af * v.af * 76000)])
+    # One variant in three is in the COSMIC Cancer Mutation Census; one of those in four has no mutated sample.
+    cosmic = genomics.h("cosmic", v.locus_id) % 12
+    if cosmic < 4:
+        mutated = 0 if cosmic == 3 else 5 + genomics.h("cosmic_n", v.locus_id) % 300
+        cosmic_rows.append([v.locus_id, f"https://cancer.sanger.ac.uk/cosmic/mutation/overview?id={v.locus_id % 1000000}", None,
+                            f"COSV{v.locus_id % 100000000:08d}", mutated, 1000, ["1", "2", "3", "Other"][cosmic], mutated / 1000])
 
 S.append(insert(f"{TENANT_DB}.snv__variant", VAR_COLS, var_rows))
 
@@ -508,6 +514,7 @@ if QA and not LOCI:
     S.append(delete_in(f"{SHARED_DB}.snv__consequence_filter_partitioned", "locus_id", loci, f"part = {genomics.PART} AND "))
     S.append(delete_in(f"{SHARED_DB}.clinvar", "locus_id", loci))
     S.append(delete_in(f"{SHARED_DB}.gnomad_genomes_v3", "locus_id", loci))
+    S.append(delete_in(f"{SHARED_DB}.cosmic_mutation_set", "locus_id", loci))
 # With --loci the variants are real loci: their annotations are already in the shared database.
 if not LOCI:
     S.append(insert(f"{SHARED_DB}.snv__consequence", ["locus_id", "symbol", "transcript_id", "transcript_version", "source", "is_canonical",
@@ -520,6 +527,8 @@ if not LOCI:
     S.append(insert(f"{SHARED_DB}.clinvar", ["locus_id", "chromosome", "start", "end", "reference", "alternate", "interpretations", "name",
                                               "clin_sig", "locus", "locus_hash"], clinvar_rows))
     S.append(insert(f"{SHARED_DB}.gnomad_genomes_v3", ["locus_id", "af", "ac", "an", "hom"], gnomad_rows))
+    S.append(insert(f"{SHARED_DB}.cosmic_mutation_set", ["locus_id", "mutation_url", "shared_aa", "cosmic_id", "sample_mutated", "sample_tested",
+                                                          "tier", "sample_ratio"], cosmic_rows))
 # QA's shared database holds the real genes, terms and panels: the seed's reference rows would duplicate them.
 REFERENCE = [] if QA else [
     insert(f"{SHARED_DB}.ensembl_gene", ["gene_id", "chromosome", "start", "end", "type", "strand", "name", "biotype", "description",

@@ -34,6 +34,12 @@ var labelKeys = []string{
 	"omim.mim", "omim.pmid",
 	"classification.LA6668-3", "classification.LA26332-9", "classification.LA26333-7",
 	"classification.LA26334-5", "classification.LA6675-8",
+	"oncogenicity.LA6668-3", "oncogenicity.LA26332-9", "oncogenicity.LA26333-7", "oncogenicity.LA26334-5",
+	"oncogenicity.LA6675-8", "oncogenicity.oncogenic", "oncogenicity.likely_oncogenic",
+	"oncogenicity.uncertain_significance", "oncogenicity.likely_benign", "oncogenicity.benign",
+	"clinical_utility.category_ia", "clinical_utility.category_ib", "clinical_utility.category_iic",
+	"clinical_utility.category_iid", "clinical_utility.category_iii",
+	"cosmic_tier.1", "cosmic_tier.2", "cosmic_tier.3", "cosmic_tier.other",
 }
 
 type labels map[string]string

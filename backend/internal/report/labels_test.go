@@ -36,7 +36,7 @@ func Test_DefaultLabels_HoldEveryKeyAndNothingElse(t *testing.T) {
 
 func Test_LabelKeys_LowerCaseUnlessCode(t *testing.T) {
 	for _, k := range labelKeys {
-		assert.Regexp(t, `^[a-z_]+\.[a-z_]+$|^zygosity\.[A-Z]+$|^classification\.LA[0-9-]+$`, k)
+		assert.Regexp(t, `^[a-z_]+\.[a-z_0-9]+$|^zygosity\.[A-Z]+$|^(classification|oncogenicity)\.LA[0-9-]+$`, k)
 	}
 }
 

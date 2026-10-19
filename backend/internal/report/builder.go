@@ -10,31 +10,118 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-type germlineDataReader interface {
-	GetGermlineReportContext(ctx context.Context, caseId int, seqId int, taskId int) (*types.ReportContext, error)
+type dataReader interface {
+	GetReportContext(ctx context.Context, caseId int, seqId int, taskId int) (*types.ReportContext, error)
 	ListGermlineReportOccurrences(ctx context.Context, part int, seqId int, taskId int, locusIds []int) ([]types.ReportOccurrenceRow, error)
+	ListSomaticReportOccurrences(ctx context.Context, part int, seqId int, taskId int, locusIds []int) ([]types.ReportOccurrenceRow, error)
 	ListReportConsequences(ctx context.Context, locusIds []int) ([]types.ReportConsequenceRow, error)
 	ListReportOmim(ctx context.Context, symbols []string) ([]types.ReportOmimRow, error)
 }
 
-type germlineInterpretationLister interface {
+type interpretationLister interface {
 	ListGermlineForReport(ctx context.Context, caseId string, sequencingId string, locusIds []string) ([]types.InterpretationGermline, error)
+	ListSomaticForReport(ctx context.Context, caseId string, sequencingId string, locusIds []string) ([]types.InterpretationSomatic, error)
 }
 
-type GermlineBuilder struct {
-	data            germlineDataReader
-	interpretations germlineInterpretationLister
+type Builder struct {
+	data            dataReader
+	interpretations interpretationLister
 }
 
-func NewGermlineBuilder(data germlineDataReader, interpretations germlineInterpretationLister) *GermlineBuilder {
-	return &GermlineBuilder{data: data, interpretations: interpretations}
+func NewBuilder(data dataReader, interpretations interpretationLister) *Builder {
+	return &Builder{data: data, interpretations: interpretations}
 }
 
-// Build returns one report per locus that is an occurrence of the sequencing and task, in the
-// order of locusIds; a locus with no occurrence is absent. It returns nil when the task is not a
-// task of that sequencing of that case.
-func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, taskId int, locusIds []int) ([]types.TranscriptReport, error) {
-	reportContext, err := b.data.GetGermlineReportContext(ctx, caseId, seqId, taskId)
+// occurrenceLister reads the occurrences of one report kind; interpretationAttacher sets the
+// interpretation of that kind on the transcript rows of one locus.
+type occurrenceLister func(ctx context.Context, part int, seqId int, taskId int, locusIds []int) ([]types.ReportOccurrenceRow, error)
+type interpretationAttacher func(ctx context.Context, caseId string, seqId string, locusIds []string) (interpretationSet, error)
+
+// interpretationSet knows which transcripts of a locus carry an interpretation (they stay in the
+// report even without MANE Select) and sets the interpretation on the rows kept.
+type interpretationSet struct {
+	interpreted map[string]map[string]bool
+	attach      func(locusId string, transcripts []types.ReportTranscript)
+}
+
+func (s *interpretationSet) mark(locusId, transcriptId string) {
+	if s.interpreted == nil {
+		s.interpreted = map[string]map[string]bool{}
+	}
+	if s.interpreted[locusId] == nil {
+		s.interpreted[locusId] = map[string]bool{}
+	}
+	s.interpreted[locusId][transcriptId] = true
+}
+
+// BuildGermline returns one report per locus that is a germline occurrence of the sequencing and
+// task, in the order of locusIds; a locus with no occurrence is absent. It returns nil when the
+// task is not a task of that sequencing of that case.
+func (b *Builder) BuildGermline(ctx context.Context, caseId int, seqId int, taskId int, locusIds []int) ([]types.TranscriptReport, error) {
+	return b.build(ctx, caseId, seqId, taskId, locusIds, b.data.ListGermlineReportOccurrences, b.germlineInterpretations)
+}
+
+// BuildSomatic is the somatic twin of BuildGermline: seqId is the tumor sequencing.
+func (b *Builder) BuildSomatic(ctx context.Context, caseId int, seqId int, taskId int, locusIds []int) ([]types.TranscriptReport, error) {
+	return b.build(ctx, caseId, seqId, taskId, locusIds, b.data.ListSomaticReportOccurrences, b.somaticInterpretations)
+}
+
+func (b *Builder) germlineInterpretations(ctx context.Context, caseId string, seqId string, locusIds []string) (interpretationSet, error) {
+	interpretations, err := b.interpretations.ListGermlineForReport(ctx, caseId, seqId, locusIds)
+	if err != nil {
+		return interpretationSet{}, fmt.Errorf("list germline interpretations: %w", err)
+	}
+	var set interpretationSet
+	byTranscript := make(map[string]types.InterpretationGermline, len(interpretations))
+	for _, interpretation := range interpretations {
+		byTranscript[interpretation.LocusId+"/"+interpretation.TranscriptId] = interpretation
+		set.mark(interpretation.LocusId, interpretation.TranscriptId)
+	}
+	set.attach = func(locusId string, transcripts []types.ReportTranscript) {
+		for i := range transcripts {
+			if interpretation, found := byTranscript[locusId+"/"+transcripts[i].TranscriptID]; found {
+				transcripts[i].Interpretation = &types.ReportGermlineInterpretation{
+					Classification:          interpretation.Classification,
+					ClassificationCriterias: interpretation.ClassificationCriterias,
+					Condition:               interpretation.Condition,
+					TransmissionModes:       interpretation.TransmissionModes,
+					Pubmed:                  interpretation.Pubmed,
+				}
+			}
+		}
+	}
+	return set, nil
+}
+
+func (b *Builder) somaticInterpretations(ctx context.Context, caseId string, seqId string, locusIds []string) (interpretationSet, error) {
+	interpretations, err := b.interpretations.ListSomaticForReport(ctx, caseId, seqId, locusIds)
+	if err != nil {
+		return interpretationSet{}, fmt.Errorf("list somatic interpretations: %w", err)
+	}
+	var set interpretationSet
+	byTranscript := make(map[string]types.InterpretationSomatic, len(interpretations))
+	for _, interpretation := range interpretations {
+		byTranscript[interpretation.LocusId+"/"+interpretation.TranscriptId] = interpretation
+		set.mark(interpretation.LocusId, interpretation.TranscriptId)
+	}
+	set.attach = func(locusId string, transcripts []types.ReportTranscript) {
+		for i := range transcripts {
+			if interpretation, found := byTranscript[locusId+"/"+transcripts[i].TranscriptID]; found {
+				transcripts[i].SomaticInterpretation = &types.ReportSomaticInterpretation{
+					TumoralType:                         interpretation.TumoralType,
+					Oncogenicity:                        interpretation.Oncogenicity,
+					OncogenicityClassificationCriterias: interpretation.OncogenicityClassificationCriterias,
+					ClinicalUtility:                     interpretation.ClinicalUtility,
+					Pubmed:                              interpretation.Pubmed,
+				}
+			}
+		}
+	}
+	return set, nil
+}
+
+func (b *Builder) build(ctx context.Context, caseId int, seqId int, taskId int, locusIds []int, listOccurrences occurrenceLister, attachInterpretations interpretationAttacher) ([]types.TranscriptReport, error) {
+	reportContext, err := b.data.GetReportContext(ctx, caseId, seqId, taskId)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +129,7 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 		return nil, nil
 	}
 
-	occurrences, err := b.data.ListGermlineReportOccurrences(ctx, reportContext.Part, seqId, taskId, locusIds)
+	occurrences, err := listOccurrences(ctx, reportContext.Part, seqId, taskId, locusIds)
 	if err != nil {
 		return nil, err
 	}
@@ -60,18 +147,9 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 		foundLociAsStrings = append(foundLociAsStrings, strconv.FormatInt(occurrence.LocusID, 10))
 	}
 
-	interpretations, err := b.interpretations.ListGermlineForReport(ctx, strconv.Itoa(caseId), strconv.Itoa(seqId), foundLociAsStrings)
+	interpretations, err := attachInterpretations(ctx, strconv.Itoa(caseId), strconv.Itoa(seqId), foundLociAsStrings)
 	if err != nil {
-		return nil, fmt.Errorf("list germline interpretations: %w", err)
-	}
-	interpretationByTranscript := make(map[string]types.InterpretationGermline, len(interpretations))
-	interpretedByLocus := make(map[string]map[string]bool)
-	for _, interpretation := range interpretations {
-		interpretationByTranscript[interpretation.LocusId+"/"+interpretation.TranscriptId] = interpretation
-		if interpretedByLocus[interpretation.LocusId] == nil {
-			interpretedByLocus[interpretation.LocusId] = map[string]bool{}
-		}
-		interpretedByLocus[interpretation.LocusId][interpretation.TranscriptId] = true
+		return nil, err
 	}
 
 	consequences, err := b.data.ListReportConsequences(ctx, foundLoci)
@@ -85,7 +163,7 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 	}
 	symbols := map[string]bool{}
 	for locusId, rows := range rowsByLocus {
-		transcripts := buildTranscripts(rows, interpretedByLocus[strconv.FormatInt(locusId, 10)])
+		transcripts := buildTranscripts(rows, interpretations.interpreted[strconv.FormatInt(locusId, 10)])
 		transcriptsByLocus[locusId] = transcripts
 		for _, transcript := range transcripts {
 			symbols[transcript.Symbol] = true
@@ -115,17 +193,7 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 		if transcripts == nil {
 			transcripts = []types.ReportTranscript{}
 		}
-		for i := range transcripts {
-			if interpretation, found := interpretationByTranscript[locus+"/"+transcripts[i].TranscriptID]; found {
-				transcripts[i].Interpretation = &types.ReportGermlineInterpretation{
-					Classification:          interpretation.Classification,
-					ClassificationCriterias: interpretation.ClassificationCriterias,
-					Condition:               interpretation.Condition,
-					TransmissionModes:       interpretation.TransmissionModes,
-					Pubmed:                  interpretation.Pubmed,
-				}
-			}
-		}
+		interpretations.attach(locus, transcripts)
 		reports = append(reports, types.TranscriptReport{
 			Case: types.ReportCase{
 				CaseID:             caseId,
@@ -166,6 +234,10 @@ func buildVariant(row types.ReportOccurrenceRow) types.ReportVariant {
 			Hom: deref(row.GnomadHom),
 		}
 	}
+	// COSMIC counts as known only with an id and at least one mutated sample, the arranger rule.
+	if row.CosmicID != "" && deref(row.CosmicSampleMutated) > 0 {
+		variant.Cosmic = &types.ReportCosmic{CosmicID: row.CosmicID, SampleMutated: deref(row.CosmicSampleMutated), Tier: row.CosmicTier}
+	}
 	return variant
 }
 
@@ -179,6 +251,10 @@ func buildOccurrence(row types.ReportOccurrenceRow) types.ReportOccurrence {
 		AdRatio:          row.AdRatio,
 		AdAlt:            row.AdAlt,
 		AdTotal:          row.AdTotal,
+		TumorAdRatio:     row.TumorAdRatio,
+		TumorAdAlt:       row.TumorAdAlt,
+		TumorAdTotal:     row.TumorAdTotal,
+		NormalSeqID:      deref(row.NormalSeqID),
 	}
 }
 

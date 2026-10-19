@@ -33,13 +33,11 @@ const (
 	KindSomatic  Kind = "somatic"
 )
 
-// samples holds the dry-run input per report kind; a kind without one has no engine yet and its
-// files are ignored at load, not reported as broken.
+// samples holds the dry-run input per report kind and doubles as the list of known kinds.
 var samples = map[Kind]func() types.TranscriptReport{
 	KindGermline: sampleReport,
+	KindSomatic:  sampleSomaticReport,
 }
-
-var knownKinds = map[Kind]bool{KindGermline: true, KindSomatic: true}
 
 type cellTemplate struct {
 	col  int
@@ -162,7 +160,7 @@ func templateFromFilename(name string) (Kind, string, bool) {
 		return "", "", false
 	}
 	kind, tenant, found := strings.Cut(strings.TrimSuffix(strings.TrimPrefix(name, templatePrefix), templateExt), "_")
-	if !found || tenant == "" || !knownKinds[Kind(kind)] {
+	if !found || tenant == "" || samples[Kind(kind)] == nil {
 		return "", "", false
 	}
 	return Kind(kind), tenant, true
@@ -307,4 +305,13 @@ func (t *Templates) Files() []string {
 	}
 	sort.Strings(files)
 	return files
+}
+
+// Render fills the template of that tenant and kind; ErrTemplateMissing when none loaded.
+func (t *Templates) Render(tenant string, kind Kind, reports []types.TranscriptReport) ([]byte, error) {
+	tmpl, err := t.For(tenant, kind)
+	if err != nil {
+		return nil, err
+	}
+	return tmpl.Render(reports)
 }

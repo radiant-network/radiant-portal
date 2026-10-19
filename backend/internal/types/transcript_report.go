@@ -39,7 +39,16 @@ type ReportVariant struct {
 	ClinvarID             string        `json:"clinvar_id,omitempty"`
 	ClinvarInterpretation []string      `json:"clinvar_interpretation,omitempty"`
 	Gnomad                *ReportGnomad `json:"gnomad,omitempty"`
+	Cosmic                *ReportCosmic `json:"cosmic,omitempty"`
 } // @name ReportVariant
+
+// @Description COSMIC Cancer Mutation Census entry of the variant; absent when COSMIC reports no sample for it.
+// @Name ReportCosmic
+type ReportCosmic struct {
+	CosmicID      string `json:"cosmic_id" validate:"required"`
+	SampleMutated int    `json:"sample_mutated" validate:"required"`
+	Tier          string `json:"tier,omitempty"`
+} // @name ReportCosmic
 
 // @Description gnomAD joint frequency of the variant; absent when the variant is not in gnomAD.
 // @Name ReportGnomad
@@ -61,6 +70,11 @@ type ReportOccurrence struct {
 	AdRatio          float32 `json:"ad_ratio,omitempty"`
 	AdAlt            int     `json:"ad_alt,omitempty"`
 	AdTotal          int     `json:"ad_total,omitempty"`
+	// Somatic call: tumor reads, and the normal sequencing when the analysis was tumor-normal (0 when tumor-only).
+	TumorAdRatio float32 `json:"tumor_ad_ratio,omitempty"`
+	TumorAdAlt   int     `json:"tumor_ad_alt,omitempty"`
+	TumorAdTotal int     `json:"tumor_ad_total,omitempty"`
+	NormalSeqID  int     `json:"normal_seq_id,omitempty"`
 } // @name ReportOccurrence
 
 // @Description A gene of the variant with its OMIM phenotypes.
@@ -81,23 +95,24 @@ type ReportOmim struct {
 // @Description One row of the report: an Ensembl transcript with its RefSeq pair, or a RefSeq transcript of a gene that has no Ensembl transcript.
 // @Name ReportTranscript
 type ReportTranscript struct {
-	TranscriptID   string                        `json:"transcript_id" validate:"required"`
-	Source         string                        `json:"source,omitempty"`
-	Version        string                        `json:"version,omitempty"`
-	Symbol         string                        `json:"symbol,omitempty"`
-	IsManeSelect   bool                          `json:"is_mane_select" validate:"required"`
-	IsManePlus     bool                          `json:"is_mane_plus" validate:"required"`
-	IsCanonical    bool                          `json:"is_canonical" validate:"required"`
-	RefseqIDs      []string                      `json:"refseq_ids,omitempty"`
-	DnaChange      string                        `json:"dna_change,omitempty"`
-	AaChange       string                        `json:"aa_change,omitempty"`
-	ExonRank       string                        `json:"exon_rank,omitempty"`
-	ExonTotal      string                        `json:"exon_total,omitempty"`
-	RevelScore     *float32                      `json:"revel_score,omitempty"`
-	CaddPhred      *float32                      `json:"cadd_phred,omitempty"`
-	Consequences   []string                      `json:"consequences,omitempty"`
-	VepImpact      string                        `json:"vep_impact,omitempty"`
-	Interpretation *ReportGermlineInterpretation `json:"interpretation,omitempty"`
+	TranscriptID          string                        `json:"transcript_id" validate:"required"`
+	Source                string                        `json:"source,omitempty"`
+	Version               string                        `json:"version,omitempty"`
+	Symbol                string                        `json:"symbol,omitempty"`
+	IsManeSelect          bool                          `json:"is_mane_select" validate:"required"`
+	IsManePlus            bool                          `json:"is_mane_plus" validate:"required"`
+	IsCanonical           bool                          `json:"is_canonical" validate:"required"`
+	RefseqIDs             []string                      `json:"refseq_ids,omitempty"`
+	DnaChange             string                        `json:"dna_change,omitempty"`
+	AaChange              string                        `json:"aa_change,omitempty"`
+	ExonRank              string                        `json:"exon_rank,omitempty"`
+	ExonTotal             string                        `json:"exon_total,omitempty"`
+	RevelScore            *float32                      `json:"revel_score,omitempty"`
+	CaddPhred             *float32                      `json:"cadd_phred,omitempty"`
+	Consequences          []string                      `json:"consequences,omitempty"`
+	VepImpact             string                        `json:"vep_impact,omitempty"`
+	Interpretation        *ReportGermlineInterpretation `json:"interpretation,omitempty"`
+	SomaticInterpretation *ReportSomaticInterpretation  `json:"somatic_interpretation,omitempty"`
 } // @name ReportTranscript
 
 // @Description The germline interpretation of the case on this transcript. Citations are empty when PubMed could not resolve the id.
@@ -109,6 +124,16 @@ type ReportGermlineInterpretation struct {
 	TransmissionModes       []string               `json:"transmission_modes,omitempty"`
 	Pubmed                  []InterpretationPubmed `json:"pubmed,omitempty"`
 } // @name ReportGermlineInterpretation
+
+// @Description The somatic interpretation of the case on this transcript. Oncogenicity is a LOINC code, clinical utility an AMP tier code.
+// @Name ReportSomaticInterpretation
+type ReportSomaticInterpretation struct {
+	TumoralType                         string                 `json:"tumoral_type,omitempty"`
+	Oncogenicity                        string                 `json:"oncogenicity,omitempty"`
+	OncogenicityClassificationCriterias []string               `json:"oncogenicity_classification_criterias,omitempty"`
+	ClinicalUtility                     string                 `json:"clinical_utility,omitempty"`
+	Pubmed                              []InterpretationPubmed `json:"pubmed,omitempty"`
+} // @name ReportSomaticInterpretation
 
 // Row types of the report repositories. Not API types.
 
@@ -143,6 +168,14 @@ type ReportOccurrenceRow struct {
 	GnomadAc              *int
 	GnomadAn              *int
 	GnomadHom             *int
+	// Somatic occurrence only.
+	NormalSeqID         *int
+	TumorAdRatio        float32
+	TumorAdAlt          int
+	TumorAdTotal        int
+	CosmicID            string
+	CosmicSampleMutated *int
+	CosmicTier          string
 }
 
 type ReportConsequenceRow struct {

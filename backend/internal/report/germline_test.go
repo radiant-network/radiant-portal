@@ -20,11 +20,15 @@ type fakeData struct {
 	omimSymbols []string
 }
 
-func (f *fakeData) GetGermlineReportContext(context.Context, int, int, int) (*types.ReportContext, error) {
+func (f *fakeData) GetReportContext(context.Context, int, int, int) (*types.ReportContext, error) {
 	return f.reportContext, f.err
 }
 
 func (f *fakeData) ListGermlineReportOccurrences(context.Context, int, int, int, []int) ([]types.ReportOccurrenceRow, error) {
+	return f.occurrences, nil
+}
+
+func (f *fakeData) ListSomaticReportOccurrences(context.Context, int, int, int, []int) ([]types.ReportOccurrenceRow, error) {
 	return f.occurrences, nil
 }
 
@@ -39,7 +43,12 @@ func (f *fakeData) ListReportOmim(_ context.Context, symbols []string) ([]types.
 
 type fakeInterpretations struct {
 	interpretations []types.InterpretationGermline
+	somatic         []types.InterpretationSomatic
 	err             error
+}
+
+func (f *fakeInterpretations) ListSomaticForReport(context.Context, string, string, []string) ([]types.InterpretationSomatic, error) {
+	return f.somatic, f.err
 }
 
 func (f *fakeInterpretations) ListGermlineForReport(context.Context, string, string, []string) ([]types.InterpretationGermline, error) {
@@ -167,8 +176,8 @@ func occurrenceRow(locusId int64) types.ReportOccurrenceRow {
 	}
 }
 
-func newBuilder(data *fakeData, interpretations *fakeInterpretations) *GermlineBuilder {
-	return NewGermlineBuilder(data, interpretations)
+func newBuilder(data *fakeData, interpretations *fakeInterpretations) *Builder {
+	return NewBuilder(data, interpretations)
 }
 
 func Test_Build_AssemblesReport(t *testing.T) {
@@ -186,7 +195,7 @@ func Test_Build_AssemblesReport(t *testing.T) {
 		Condition:            "MONDO:0000001",
 	}}}
 
-	reports, err := newBuilder(data, interpretations).Build(t.Context(), 1, 1, 5, []int{1000})
+	reports, err := newBuilder(data, interpretations).BuildGermline(t.Context(), 1, 1, 5, []int{1000})
 
 	assert.NoError(t, err)
 	if assert.Len(t, reports, 1) {
@@ -221,7 +230,7 @@ func Test_Build_InterpretedTranscriptWithoutMane_KeptWithInterpretation(t *testi
 		Classification:       "LA6675-8",
 	}}}
 
-	reports, err := newBuilder(data, interpretations).Build(t.Context(), 1, 1, 5, []int{1000})
+	reports, err := newBuilder(data, interpretations).BuildGermline(t.Context(), 1, 1, 5, []int{1000})
 
 	require.NoError(t, err)
 	require.Len(t, reports, 1)
@@ -238,7 +247,7 @@ func Test_Build_IntergenicLocus_EmptyGenesAndTranscripts_NoGnomad(t *testing.T) 
 	row.GnomadAf, row.GnomadAc, row.GnomadAn, row.GnomadHom = nil, nil, nil, nil
 	data := &fakeData{reportContext: &types.ReportContext{Part: 1}, occurrences: []types.ReportOccurrenceRow{row}}
 
-	reports, err := newBuilder(data, &fakeInterpretations{}).Build(t.Context(), 1, 1, 5, []int{2000})
+	reports, err := newBuilder(data, &fakeInterpretations{}).BuildGermline(t.Context(), 1, 1, 5, []int{2000})
 
 	assert.NoError(t, err)
 	if assert.Len(t, reports, 1) {
@@ -254,7 +263,7 @@ func Test_Build_KeepsRequestOrder_SkipsMissingLocus(t *testing.T) {
 		occurrences:   []types.ReportOccurrenceRow{occurrenceRow(1000), occurrenceRow(2000)},
 	}
 
-	reports, err := newBuilder(data, &fakeInterpretations{}).Build(t.Context(), 1, 1, 5, []int{2000, 3000, 1000})
+	reports, err := newBuilder(data, &fakeInterpretations{}).BuildGermline(t.Context(), 1, 1, 5, []int{2000, 3000, 1000})
 
 	assert.NoError(t, err)
 	if assert.Len(t, reports, 2) {
@@ -266,7 +275,7 @@ func Test_Build_KeepsRequestOrder_SkipsMissingLocus(t *testing.T) {
 func Test_Build_NoOccurrence_ReturnsEmpty(t *testing.T) {
 	data := &fakeData{reportContext: &types.ReportContext{Part: 1}}
 
-	reports, err := newBuilder(data, &fakeInterpretations{}).Build(t.Context(), 1, 1, 5, []int{3000})
+	reports, err := newBuilder(data, &fakeInterpretations{}).BuildGermline(t.Context(), 1, 1, 5, []int{3000})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, reports)
@@ -274,7 +283,7 @@ func Test_Build_NoOccurrence_ReturnsEmpty(t *testing.T) {
 }
 
 func Test_Build_TaskNotOfCase_ReturnsNil(t *testing.T) {
-	reports, err := newBuilder(&fakeData{}, &fakeInterpretations{}).Build(t.Context(), 1, 1, 77, []int{1000})
+	reports, err := newBuilder(&fakeData{}, &fakeInterpretations{}).BuildGermline(t.Context(), 1, 1, 77, []int{1000})
 
 	assert.NoError(t, err)
 	assert.Nil(t, reports)
@@ -283,7 +292,7 @@ func Test_Build_TaskNotOfCase_ReturnsNil(t *testing.T) {
 func Test_Build_DataError_Propagates(t *testing.T) {
 	data := &fakeData{err: errors.New("starrocks down")}
 
-	reports, err := newBuilder(data, &fakeInterpretations{}).Build(t.Context(), 1, 1, 5, []int{1000})
+	reports, err := newBuilder(data, &fakeInterpretations{}).BuildGermline(t.Context(), 1, 1, 5, []int{1000})
 
 	assert.Nil(t, reports)
 	assert.EqualError(t, err, "starrocks down")
@@ -293,7 +302,7 @@ func Test_Build_InterpretationError_Propagates(t *testing.T) {
 	data := &fakeData{reportContext: &types.ReportContext{Part: 1}, occurrences: []types.ReportOccurrenceRow{occurrenceRow(1000)}}
 	interpretations := &fakeInterpretations{err: errors.New("postgres down")}
 
-	reports, err := newBuilder(data, interpretations).Build(t.Context(), 1, 1, 5, []int{1000})
+	reports, err := newBuilder(data, interpretations).BuildGermline(t.Context(), 1, 1, 5, []int{1000})
 
 	assert.Nil(t, reports)
 	assert.EqualError(t, err, "list germline interpretations: postgres down")

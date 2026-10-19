@@ -43,3 +43,19 @@ func sampleReport() types.TranscriptReport {
 		}},
 	}
 }
+
+// sampleSomaticReport is the somatic dry-run input: the germline sample with the somatic fields set.
+func sampleSomaticReport() types.TranscriptReport {
+	report := sampleReport()
+	report.Occurrence = types.ReportOccurrence{TumorAdRatio: 0.0661764705882353, TumorAdAlt: 17, TumorAdTotal: 34, NormalSeqID: 2}
+	report.Variant.Cosmic = &types.ReportCosmic{CosmicID: "COSV56056643", SampleMutated: 99, Tier: "1"}
+	report.Transcripts[0].Interpretation = nil
+	report.Transcripts[0].SomaticInterpretation = &types.ReportSomaticInterpretation{
+		TumoralType:                         "MONDO:0000004",
+		Oncogenicity:                        "LA26332-9",
+		OncogenicityClassificationCriterias: []string{"OS1"},
+		ClinicalUtility:                     "category_ib",
+		Pubmed:                              []types.InterpretationPubmed{{CitationID: "1", Citation: "Author A. Title. Journal. 2020."}},
+	}
+	return report
+}

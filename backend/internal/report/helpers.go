@@ -2,6 +2,7 @@ package report
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"text/template"
@@ -25,6 +26,11 @@ func (l labelSet) funcs() template.FuncMap {
 		"classification": l.classification,
 		"mane":           mane,
 		"citations":      citations,
+		// somatic
+		"percent":         percent,
+		"clinicalUtility": l.clinicalUtility,
+		"oncogenicity":    l.oncogenicity,
+		"cosmicTier":      l.cosmicTier,
 	}
 }
 
@@ -210,4 +216,34 @@ func citations(pubmed []types.InterpretationPubmed) string {
 		}
 	}
 	return strings.Join(texts, "\n")
+}
+
+func percent(ratio float32) string {
+	return strconv.Itoa(int(math.Round(float64(ratio) * 100)))
+}
+
+func (l labelSet) clinicalUtility(interpretation *types.ReportSomaticInterpretation) string {
+	if interpretation == nil {
+		return ""
+	}
+	label, _ := l.lookup("clinical_utility." + strings.ToLower(interpretation.ClinicalUtility))
+	return label
+}
+
+// The somatic form stores oncogenicity as the five germline LOINC codes; older rows and the seed
+// carry the arranger strings, both have a key.
+func (l labelSet) oncogenicity(interpretation *types.ReportSomaticInterpretation) string {
+	if interpretation == nil {
+		return ""
+	}
+	label, _ := l.lookup("oncogenicity." + interpretation.Oncogenicity)
+	return label
+}
+
+func (l labelSet) cosmicTier(cosmic *types.ReportCosmic) string {
+	if cosmic == nil {
+		return ""
+	}
+	label, _ := l.lookup("cosmic_tier." + strings.ToLower(cosmic.Tier))
+	return label
 }

@@ -1,0 +1,3 @@
+locus_id	mutation_url	shared_aa	cosmic_id	sample_mutated	sample_tested	tier	sample_ratio
+1000	https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=476	12	COSV56056643	99	1000	1	0.099
+3000	NULL	NULL	COSV99999999	0	10	Other	0
