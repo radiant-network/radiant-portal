@@ -5,11 +5,17 @@
   "type": "module",
   "scripts": {
     "build": "NODE_ENV=production react-router build",
+    "build:include": "THEME=include NODE_ENV=production react-router build",
     "build:kf": "THEME=kf NODE_ENV=production react-router build",
+    "build:qlin": "THEME=qlin NODE_ENV=production react-router build",
     "build:radiant": "THEME=radiant NODE_ENV=production react-router build",
+    "dev:include": "THEME=include vite dev --port 3000 --open",
     "dev:kf": "THEME=kf vite dev --port 3000 --open",
+    "dev:qlin": "THEME=qlin vite dev --port 3000 --open",
     "dev:radiant": "THEME=radiant vite dev --port 3000 --open",
     "start": "PORT=80 NODE_ENV=production react-router-serve ./build/server/index.js",
+    "start:include": "PORT=80 NODE_ENV=production THEME=include react-router-serve ./build/server/index.js",
+    "start:qlin": "PORT=80 NODE_ENV=production THEME=qlin react-router-serve ./build/server/index.js",
     "start:radiant": "PORT=80 NODE_ENV=production THEME=radiant react-router-serve ./build/server/index.js",
     "start:docker": "PORT=3000 NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"

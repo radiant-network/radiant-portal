@@ -20,45 +20,58 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const canAdministerTenant = useCanAdministerTenant();
   const localPath = useLocalPath();
 
-  const adminLinks: MainNavbarEntry[] = canAdministerTenant
-    ? [
-        { separator: true },
-        {
-          title: t('main_navbar.links.admin'),
-          icon: <SettingsIcon />,
-          to: localPath('/admin'),
-          as: Link,
-          active: pathname === localPath('/admin'),
-        },
-      ]
-    : [];
+  const adminLinks: MainNavbarEntry[] =
+    __APPS_ADMIN__ && canAdministerTenant
+      ? [
+          { separator: true },
+          {
+            title: t('main_navbar.links.admin'),
+            icon: <SettingsIcon />,
+            to: localPath('/admin'),
+            as: Link,
+            active: pathname === localPath('/admin'),
+          },
+        ]
+      : [];
 
   return (
     <MainNavbar
       placement={placement}
       logo={<img src={logo} alt="Logo" />}
       links={[
-        {
-          title: t('main_navbar.links.patients'),
-          icon: <UsersIcon />,
-          to: localPath('/patient'),
-          as: Link,
-          active: pathname === localPath('/patient'),
-        },
-        {
-          title: t('main_navbar.links.cases'),
-          icon: <FolderIcon />,
-          to: localPath('/case'),
-          as: Link,
-          active: pathname === localPath('/case'),
-        },
-        {
-          title: t('main_navbar.links.files'),
-          icon: <ArchiveIcon />,
-          to: localPath('/file'),
-          as: Link,
-          active: pathname === localPath('/file'),
-        },
+        ...(__APPS_PATIENT__
+          ? [
+              {
+                title: t('main_navbar.links.patients'),
+                icon: <UsersIcon />,
+                to: localPath('/patient'),
+                as: Link,
+                active: pathname === localPath('/patient'),
+              },
+            ]
+          : []),
+        ...(__APPS_CASE__
+          ? [
+              {
+                title: t('main_navbar.links.cases'),
+                icon: <FolderIcon />,
+                to: localPath('/case'),
+                as: Link,
+                active: pathname === localPath('/case'),
+              },
+            ]
+          : []),
+        ...(__APPS_FILE_ARCHIVE__
+          ? [
+              {
+                title: t('main_navbar.links.files'),
+                icon: <ArchiveIcon />,
+                to: localPath('/file'),
+                as: Link,
+                active: pathname === localPath('/file'),
+              },
+            ]
+          : []),
         ...adminLinks,
       ]}
       actions={
