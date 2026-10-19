@@ -64,6 +64,16 @@ For common cases:
 
 Any user-visible string goes through `useI18n()` — no hardcoded strings in JSX. Keys live in `frontend/translations/`.
 
+## Accessibility
+
+Every change keeps `plugin:jsx-a11y/strict` green and follows `frontend/docs/accessibility.md`:
+
+- Native elements for interactions: `<button>` for actions, `<a href>` / `Link to` for navigation — no `onClick` on `div`/`span`.
+- Every interactive element has an accessible name (text, `aria-label` or `sr-only`); a tooltip is not a name.
+- Nothing is available on hover only.
+- Accessible names are translated under `a11y.<component>.<action>`.
+- Disable an a11y rule only on one line, with a reason after `--`.
+
 ## Storybook
 
 Stories live under `frontend/components/stories/` and are the source of truth for how a primitive is used.

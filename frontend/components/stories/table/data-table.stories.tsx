@@ -1,11 +1,14 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { SearchIcon } from 'lucide-react';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DataTable, { type TableColumnDef } from '@/components/base/data-table/data-table';
+import EmptyState from '@/components/base/empties/empty';
+import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
@@ -119,6 +122,30 @@ export const Empty: Story = {
     data: [],
   },
   render: args => <DataTableStory args={args} title="Empty" />,
+};
+
+export const CustomEmptyState: Story = {
+  args: {
+    loadingStates: {
+      list: false,
+      total: false,
+    },
+    data: [],
+    emptyState: (
+      <EmptyState
+        title="Custom empty state"
+        description="Replaces the default empty state"
+        iconType="custom"
+        icon={SearchIcon}
+        size="mini"
+      >
+        <Button size="sm" variant="outline">
+          Action
+        </Button>
+      </EmptyState>
+    ),
+  },
+  render: args => <DataTableStory args={args} title="Custom empty state" />,
 };
 
 export const Error: Story = {

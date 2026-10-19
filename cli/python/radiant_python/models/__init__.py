@@ -129,6 +129,14 @@ from radiant_python.models.patient_treatment_summary import PatientTreatmentSumm
 from radiant_python.models.patients_search_response import PatientsSearchResponse
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.report_case import ReportCase
+from radiant_python.models.report_gene import ReportGene
+from radiant_python.models.report_germline_interpretation import ReportGermlineInterpretation
+from radiant_python.models.report_gnomad import ReportGnomad
+from radiant_python.models.report_occurrence import ReportOccurrence
+from radiant_python.models.report_omim import ReportOmim
+from radiant_python.models.report_transcript import ReportTranscript
+from radiant_python.models.report_variant import ReportVariant
 from radiant_python.models.role_action_result import RoleActionResult
 from radiant_python.models.role_result import RoleResult
 from radiant_python.models.sample_batch import SampleBatch
@@ -150,6 +158,7 @@ from radiant_python.models.task_occurrence_type import TaskOccurrenceType
 from radiant_python.models.tenant_membership import TenantMembership
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
+from radiant_python.models.transcript_report import TranscriptReport
 from radiant_python.models.update_case_assignments_request import UpdateCaseAssignmentsRequest
 from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody

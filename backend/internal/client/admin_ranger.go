@@ -159,6 +159,31 @@ func (c *RangerAdminClient) EnsureMaterializedViewAccessPolicy(ctx context.Conte
 	}, roles))
 }
 
+// EnsureWarehouseAccessPolicy upserts a StarRocks access policy granting USAGE + ALTER on
+// the `warehouse` resource to the given users. ALTER is what authorizes SUSPEND/RESUME — so
+// under access_control=ranger the control plane (which resumes a suspended warehouse as root)
+// needs this or the warehouse cannot be resumed.
+func (c *RangerAdminClient) EnsureWarehouseAccessPolicy(ctx context.Context, name string, warehouses, users []string) error {
+	policy := map[string]any{
+		"policyType":     0,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"warehouse": map[string]any{"values": warehouses},
+		},
+		"policyItems": []map[string]any{{
+			"users": users,
+			"accesses": []map[string]any{
+				{"type": "usage", "isAllowed": true},
+				{"type": "alter", "isAllowed": true},
+			},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
 func selectPolicy(name string, resources map[string]any, roles []string) map[string]any {
 	return map[string]any{
 		"policyType":     0,

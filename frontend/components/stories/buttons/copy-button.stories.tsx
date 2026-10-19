@@ -48,7 +48,7 @@ export const UsageExamples: Story = {
         <div className="flex items-center gap-2">
           <span className="font-medium">Patient ID:</span>
           <span>PAT123456</span>
-          <CopyButton value="PAT123456" />
+          <CopyButton value="PAT123456" ariaLabel="Copy patient ID" />
         </div>
 
         <div className="flex items-center gap-2">

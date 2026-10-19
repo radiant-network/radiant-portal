@@ -12,6 +12,8 @@ function ZygosityCell({ value }: ZygosityCellProps) {
       {{
         HEM: '1',
         HET: '0/1',
+        HOM: '1/1',
+        WT: '0/0',
       }[value] ?? <EmptyCell />}
     </span>
   );

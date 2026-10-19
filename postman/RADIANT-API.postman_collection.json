@@ -911,6 +911,41 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Report",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/-8318226658347712512/report",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "1",
+                "-8318226658347712512",
+                "report"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -4517,6 +4552,35 @@
                   "key": "limit",
                   "value": "10"
                 }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "filters"
               ]
             }
           },

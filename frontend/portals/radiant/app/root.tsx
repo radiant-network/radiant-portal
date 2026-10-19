@@ -11,6 +11,8 @@ import { I18nProvider } from '@/components/hooks/I18nProvider';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
+import { radiantFeatureDefinitions } from './beta-features';
+
 declare const __PROJECT__: PortalConfig;
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -41,6 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{__PROJECT__.portal.name}</title>
         <meta property="og:title" content={__PROJECT__.portal.name} />
         <meta property="og:description" content="" />
         <meta name="theme-color" content="#FFFFFF" />
@@ -87,7 +90,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
               <TooltipProvider>
                 <AlertDialogProvider>
-                  <BetaFeatureProvider>{children}</BetaFeatureProvider>
+                  <BetaFeatureProvider definitions={radiantFeatureDefinitions} storageKey="betaFeatures:radiant">
+                    {children}
+                  </BetaFeatureProvider>
                 </AlertDialogProvider>
               </TooltipProvider>
               <Toaster position="top-right" />

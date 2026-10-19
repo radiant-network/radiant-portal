@@ -1,9 +1,11 @@
+/* eslint-disable no-console */
+import type { FSWatcher } from 'chokidar';
+import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
-import { deepMerge } from '../../components/lib/merge';
-import chokidar from 'chokidar';
-import type { ResolvedConfig, ViteDevServer } from 'vite';
-import type { FSWatcher } from 'chokidar';
+import type { ViteDevServer } from 'vite';
+
+import { deepMerge } from '../components/lib/merge';
 
 export const mergeTranslationsForTheme = (currentTheme: string, rootDir: string) => {
   console.log(`🔄 Merging translations for theme: ${currentTheme}`);
@@ -53,17 +55,12 @@ export const mergeTranslationsForTheme = (currentTheme: string, rootDir: string)
   }
 };
 
-// Global flag to prevent multiple plugin executions across all Vite instances
-const getLockFilePath = (rootDir: string, theme: string) =>
-  path.resolve(rootDir, `../../translations/.merge-lock-${theme}`);
-
 // Vite plugin factory
 export const createMergeTranslationsPlugin = (theme: string, rootDir: string) => {
   let watcher: FSWatcher | undefined;
   return {
     name: 'merge-translations',
-    configResolved(config: ResolvedConfig) {
-      const isDev = config.command === 'serve';
+    configResolved() {
       mergeTranslationsForTheme(theme, rootDir);
     },
     configureServer(server: ViteDevServer) {
@@ -87,6 +84,6 @@ export const createMergeTranslationsPlugin = (theme: string, rootDir: string) =>
     },
     closeBundle() {
       if (watcher) watcher.close();
-    }
+    },
   };
-}; 
+};

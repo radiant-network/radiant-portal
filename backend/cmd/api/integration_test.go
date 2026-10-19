@@ -71,6 +71,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/interpretations/v2/somatic/1/1/1/1",
 			"radiant/mondo/autocomplete",
 			"radiant/occurrences/germline/snv/1/1/1/1/expanded",
+			"radiant/occurrences/germline/snv/1/1/1/1/report",
 			"radiant/occurrences/somatic/snv/1/1/1/1/expanded",
 			"users/preferences/table_1",
 			"users/sets/1",

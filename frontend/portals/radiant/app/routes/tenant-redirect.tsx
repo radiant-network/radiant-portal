@@ -3,10 +3,9 @@ import { Navigate, useLocation } from 'react-router';
 import Error403 from '@/components/base/errors/403';
 import { Spinner } from '@/components/base/spinner';
 import { usePreferredTenant } from '@/components/hooks/use-tenant';
+import { authenticateRequest, requireAuth } from '@/utils/auth/server';
 
 import type { Route } from './+types/tenant-redirect';
-
-import { authenticateRequest, requireAuth } from '~/utils/auth.server';
 
 // This route sits outside the protected layout, so it carries its own auth gate.
 export async function loader({ request }: Route.LoaderArgs) {

@@ -7,7 +7,7 @@ import type { PortalConfig } from '../../components/cores/applications-config';
 
 import { kfConfig } from './config/kf';
 import { radiantConfig } from './config/radiant';
-import { createMergeTranslationsPlugin } from './merge-translations';
+import { createMergeTranslationsPlugin } from '../../utils/merge-translations';
 
 const configs: Record<string, PortalConfig> = {
   radiant: radiantConfig,

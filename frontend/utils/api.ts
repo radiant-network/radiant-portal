@@ -1,6 +1,7 @@
 import {
   ActionsApi,
   AuthApi,
+  CaseGroupsApi,
   CasesApi,
   Configuration,
   DocumentsApi,
@@ -39,6 +40,7 @@ export const interpretationApi = new InterpretationsApi(config, BASE_PATH, axios
 export const userPreferenceApi = new UserPreferencesApi(config, BASE_PATH, axiosClient);
 export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);
 export const caseApi = new CasesApi(config, BASE_PATH, axiosClient);
+export const caseGroupsApi = new CaseGroupsApi(config, BASE_PATH, axiosClient);
 export const documentApi = new DocumentsApi(config, BASE_PATH, axiosClient);
 export const savedFiltersApi = new SavedFiltersApi(config, BASE_PATH, axiosClient);
 export const sequencingApi = new SequencingApi(config, BASE_PATH, axiosClient);

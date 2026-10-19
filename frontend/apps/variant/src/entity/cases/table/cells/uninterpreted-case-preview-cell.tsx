@@ -29,7 +29,7 @@ function UninterpretedCasePreviewCell({ caseId, patientId, seqId }: CasePreviewC
 
   return (
     <>
-      <AnchorLink mono size="sm" onClick={handleClick}>
+      <AnchorLink component="button" type="button" mono size="sm" onClick={handleClick}>
         {caseId}
       </AnchorLink>
       <div className="text-muted-foreground font-mono text-xs">

@@ -11,6 +11,13 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "case_group_tag": {
+      "copy_name": "Copy group name",
+      "remove": "Remove the New data filter"
+    },
+    "clingen_cell": {
+      "open": "Open in ClinGen (new tab)"
+    },
     "cmc": {
       "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
       "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"
@@ -691,6 +698,7 @@
       "filters": {
         "more": "More",
         "more_placeholder": "Filters",
+        "min_search_length": "Minimum {{count}} characters",
         "no_values_found": "No values found",
         "search": {
           "case_id": "Case",
@@ -877,6 +885,7 @@
         "study_code": "Study Code",
         "study_id": "Study ID",
         "symbol": "Gene Symbol",
+        "tenant_gene_panel": "My Network",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -1370,6 +1379,17 @@
       "submitted": "Pending",
       "unresolved": "Unresolved"
     },
+    "case_group": {
+      "label": "New data • {{date}}",
+      "count_one": "{{count}} case",
+      "count_other": "{{count}} cases",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "No cases found for this notification",
+        "description": "The link may be outdated, or you may not have access to these cases.",
+        "show_all": "Show all cases"
+      }
+    },
     "case": {
       "title": "{{total}} Cases",
       "actions": {
@@ -1671,6 +1691,7 @@
       "expand": "Expand",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gene",
         "frequency": "Frequency",

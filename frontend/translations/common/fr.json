@@ -11,6 +11,13 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "case_group_tag": {
+      "copy_name": "Copier le nom du groupe",
+      "remove": "Retirer le filtre Nouvelles données"
+    },
+    "clingen_cell": {
+      "open": "Ouvrir dans ClinGen (nouvel onglet)"
+    },
     "cmc": {
       "open_cosmic_one": "{{count}} échantillon COSMIC, ouvrir dans COSMIC (nouvel onglet)",
       "open_cosmic_other": "{{count}} échantillons COSMIC, ouvrir dans COSMIC (nouvel onglet)"
@@ -691,6 +698,7 @@
       "filters": {
         "more": "Plus",
         "more_placeholder": "Filtres",
+        "min_search_length": "{{count}} caractères minimum",
         "no_values_found": "Aucune valeur trouvée",
         "search": {
           "case_id": "Cas",
@@ -878,6 +886,7 @@
         "study_code": "Code d'étude",
         "study_id": "ID de l'étude",
         "symbol": "Symbole",
+        "tenant_gene_panel": "Mon réseau",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -1371,6 +1380,17 @@
       "submitted": "En attente",
       "unresolved": "Non résolu"
     },
+    "case_group": {
+      "label": "Nouvelles données • {{date}}",
+      "count_one": "{{count}} cas",
+      "count_other": "{{count}} cas",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "Aucun cas trouvé pour cette notification",
+        "description": "Le lien est peut-être périmé, ou vous n’avez pas accès à ces cas.",
+        "show_all": "Afficher tous les cas"
+      }
+    },
     "case": {
       "title": "{{total}} Cas",
       "actions": {
@@ -1672,6 +1692,7 @@
       "expand": "Développer",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gène",
         "frequency": "Fréquence",

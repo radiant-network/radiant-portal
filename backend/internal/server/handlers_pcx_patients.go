@@ -116,8 +116,19 @@ type pcxPatientsAutocompleter interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/filters [get]
-func PatientsFiltersHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientsFiltersHandler(repo pcxPatientsFiltersReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetPatientsFilters(c.Request.Context())
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}
+
+type pcxPatientsFiltersReader interface {
+	GetPatientsFilters(ctx context.Context) (*types.PatientFilters, error)
 }
 
 // PatientsStatisticsHandler handles retrieving the cohort analytics

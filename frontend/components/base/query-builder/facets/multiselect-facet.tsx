@@ -281,6 +281,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => setSearchValue(e.target.value)}
           value={searchValue}
+          // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the facet search when the facet opens, opt-out via searchAutoFocus
           autoFocus={searchAutoFocus}
         />
 

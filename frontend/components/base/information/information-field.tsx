@@ -28,7 +28,8 @@ function InformationField({
     </Tooltip>
   );
 
-  const contentOrPlaceholder = children !== undefined ? children : <EmptyField />;
+  const isEmptyChildren = children === undefined || children === null || children === '';
+  const contentOrPlaceholder = isEmptyChildren ? <EmptyField /> : children;
   const content = !tooltipText ? (
     contentOrPlaceholder
   ) : (

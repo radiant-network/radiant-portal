@@ -65,6 +65,7 @@ function LinkPopover({ editor }: { editor: Editor }) {
             value={url}
             onChange={e => setUrl(e.target.value)}
             placeholder={t('common.editor.link.popover.url.placeholder')}
+            // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the link popover the user just opened
             autoFocus
           />
           <div className="flex justify-end gap-2">

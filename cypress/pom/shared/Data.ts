@@ -327,4 +327,7 @@ export const data = {
     overlapping_cnv_percent: '75.17',
     overlap_type: 'partial',
   },
+  genePanel: {
+    my_network: 'TUPED_V3',
+  },
 };

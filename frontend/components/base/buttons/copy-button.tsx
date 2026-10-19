@@ -14,6 +14,7 @@ interface CopyButtonProps {
   iconSize?: number;
   successDuration?: number;
   label?: string;
+  ariaLabel?: string;
 }
 
 export function CopyButton({
@@ -24,6 +25,7 @@ export function CopyButton({
   iconSize = 14,
   successDuration = 500,
   label,
+  ariaLabel,
 }: CopyButtonProps) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
@@ -54,6 +56,7 @@ export function CopyButton({
           variant={variant}
           size={size}
           iconOnly={!label}
+          aria-label={ariaLabel}
           className={cn(copied && 'pointer-events-none', label && 'h-auto h-7 px-2 py-0.5 gap-1', className)}
           onClick={onCopy}
         >

@@ -5,7 +5,7 @@ import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base
 /**
  * Item Priority
  */
-const PRIORITY_ORDER = ['routine', 'urgent', 'asap', 'stat'];
+export const PRIORITY_ORDER = ['routine', 'urgent', 'asap', 'stat'];
 
 export default function filterItemPriority(options: FiltersValue[]): IFilterButtonItem[] {
   // Sort options according to the desired order

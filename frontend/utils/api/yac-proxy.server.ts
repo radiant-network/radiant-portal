@@ -2,9 +2,8 @@ import type { AxiosResponseHeaders, RawAxiosResponseHeaders } from 'axios';
 import axios, { HttpStatusCode } from 'axios';
 import * as process from 'node:process';
 
-import { isTokenValid } from '../utils/tokens';
-
-import { getSessionAccessToken, refreshAccessToken } from '~/utils/auth.server';
+import { getSessionAccessToken, refreshAccessToken } from '../auth/server';
+import { isTokenValid } from '../auth/tokens';
 
 // Refresh a token this close to expiry, so it cannot expire on its way to the agent.
 const TOKEN_MIN_VALIDITY_SECONDS = 30;

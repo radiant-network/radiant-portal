@@ -143,3 +143,24 @@ func Test_PatientsAutocomplete_SuggestsIdsAndIdentifiableNames(t *testing.T) {
 		]`, w.Body.String())
 	})
 }
+
+func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/patients/filters", server.PatientsFiltersHandler(repo))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/filters", nil))
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{
+			"vital_status": [{"key": "alive"}, {"key": "deceased"}],
+			"organization_code": [
+				{"key": "BCH", "label": "Boston Children's Hospital"},
+				{"key": "CHOP", "label": "Children's Hospital of Philadelphia"},
+				{"key": "SCH", "label": "Seattle Children's Hospital"}
+			],
+			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}]
+		}`, w.Body.String())
+	})
+}

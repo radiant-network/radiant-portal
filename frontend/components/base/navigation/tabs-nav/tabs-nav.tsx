@@ -44,10 +44,10 @@ export function TabsList({ ref, className, contentClassName, children, ...props 
   );
 }
 
-export type TabsListItemProps<T> = React.HTMLAttributes<HTMLDivElement> & {
+export type TabsListItemProps<T> = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   value: T;
   disabled?: boolean;
-  ref?: React.Ref<HTMLDivElement>;
+  ref?: React.Ref<HTMLButtonElement>;
   children: React.ReactNode;
 };
 
@@ -63,12 +63,14 @@ export function TabsListItem<T extends string | number | symbol = string>({
   const active = tabsContext.value === value;
 
   return (
-    <div
+    <button
+      type="button"
       ref={ref}
+      disabled={disabled}
       data-active={active}
       data-disabled={disabled}
       className={cn(
-        'z-1 group pt-1.5 pb-1 hover:cursor-pointer',
+        'z-1 group flex flex-col pt-1.5 pb-1 hover:cursor-pointer',
         {
           'border-b-2 border-primary font-semibold': active,
           'opacity-50 hover:cursor-not-allowed': disabled,
@@ -85,10 +87,10 @@ export function TabsListItem<T extends string | number | symbol = string>({
         props.onClick?.(e);
       }}
     >
-      <div className="flex items-center has-[svg]:px-4 px-3 py-2 [&_svg]:size-4 gap-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none whitespace-nowrap">
+      <span className="flex items-center has-[svg]:px-4 px-3 py-2 [&_svg]:size-4 gap-2 text-sm text-muted-foreground rounded-sm hover:bg-accent group-data-[active=true]:text-accent-foreground hover:text-accent-foreground transition-all duration-300 group-data-[disabled=true]:pointer-events-none whitespace-nowrap">
         {children}
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 

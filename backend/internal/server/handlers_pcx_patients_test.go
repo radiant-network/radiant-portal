@@ -16,7 +16,6 @@ import (
 
 func Test_PcxPatientHandlers_NotImplementedYet(t *testing.T) {
 	handlers := map[string]gin.HandlerFunc{
-		"filters":    PatientsFiltersHandler(),
 		"statistics": PatientsStatisticsHandler(),
 		"entity":     PatientEntityHandler(),
 	}
@@ -221,6 +220,54 @@ func Test_PatientsAutocompleteHandler_NoMatchReturnsEmptyArray(t *testing.T) {
 
 func Test_PatientsAutocompleteHandler_RepositoryError_500(t *testing.T) {
 	w := getPatientsAutocomplete(&pcxPatientsAutocompleterMock{err: errors.New("boom")}, "?prefix=a")
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type pcxPatientsFiltersReaderMock struct {
+	filters *types.PatientFilters
+	err     error
+}
+
+func (m *pcxPatientsFiltersReaderMock) GetPatientsFilters(_ context.Context) (*types.PatientFilters, error) {
+	return m.filters, m.err
+}
+
+func getPatientsFilters(repo pcxPatientsFiltersReader) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/patients/filters", PatientsFiltersHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/filters", nil))
+	return w
+}
+
+func Test_PatientsFiltersHandler_ReturnsFilters(t *testing.T) {
+	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{filters: &types.PatientFilters{
+		VitalStatus:            []types.FiltersValue{{Key: "alive"}, {Key: "deceased"}},
+		OrganizationCode:       []types.FiltersValue{{Key: "CHOP", Label: "Children's Hospital of Philadelphia"}},
+		CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}},
+	}})
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"vital_status": [{"key": "alive"}, {"key": "deceased"}],
+		"organization_code": [{"key": "CHOP", "label": "Children's Hospital of Philadelphia"}],
+		"cns_integrated_diagnosis": [{"key": "ATRT"}]
+	}`, w.Body.String())
+}
+
+func Test_PatientsFiltersHandler_EmptyFiltersAreEmptyArrays(t *testing.T) {
+	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{filters: &types.PatientFilters{
+		VitalStatus: []types.FiltersValue{}, OrganizationCode: []types.FiltersValue{}, CnsIntegratedDiagnosis: []types.FiltersValue{},
+	}})
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"vital_status": [], "organization_code": [], "cns_integrated_diagnosis": []}`, w.Body.String())
+}
+
+func Test_PatientsFiltersHandler_RepositoryError_500(t *testing.T) {
+	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{err: errors.New("boom")})
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
