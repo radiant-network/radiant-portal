@@ -45,6 +45,8 @@ const PORTAL_THEME = {
   ...Object.fromEntries(THEME_TOKENS.map(token => [`--${token}`, 'inherit'])),
 } as CSSProperties;
 
+const FONT_SCALE = 1.5;
+
 function PatientExplorationChat() {
   // UDIChat renders only in a browser, so it mounts after hydration.
   const [mounted, setMounted] = useState(false);
@@ -57,9 +59,9 @@ function PatientExplorationChat() {
           apiBaseUrl="/api/yac"
           remotePackage={REMOTE_PACKAGE}
           model={OPENAI_MODEL}
-          // udi-yac's pcx demo session (sample-data/pcx/demo-session.json), rebuilt for the cbtn views.
           initialSession={demoSession}
           readOnly
+          fontScale={FONT_SCALE}
           style={PORTAL_THEME}
         />
       )}
