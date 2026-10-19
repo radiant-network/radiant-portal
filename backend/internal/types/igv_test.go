@@ -64,6 +64,8 @@ func Test_IGVTrackEnriched_ToJSON(t *testing.T) {
 		SequencingExperimentId: 7,
 		PatientId:              123,
 		FamilyRole:             "proband",
+		SampleId:               "S0001",
+		HistologyCode:          "normal",
 		Sex:                    "male",
 		Type:                   "alignment",
 		Format:                 "cram",
@@ -74,7 +76,7 @@ func Test_IGVTrackEnriched_ToJSON(t *testing.T) {
 		Name:                   "Sample Track",
 	}
 
-	var expected = []byte(`{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}`)
+	var expected = []byte(`{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sample_id":"S0001","histology_code":"normal","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}`)
 	jsonData, err := json.Marshal(igvTrack)
 	assert.Nil(t, err, "Failed to marshal IGVTrackEnriched to JSON")
 
@@ -85,11 +87,13 @@ func Test_IGVTrackEnriched_ToJSON(t *testing.T) {
 func Test_IGVTrackEnriched_FromJSON(t *testing.T) {
 	t.Parallel()
 
-	var jsonData = []byte(`{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}`)
+	var jsonData = []byte(`{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sample_id":"S0001","histology_code":"normal","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}`)
 	var expected = IGVTrackEnriched{
 		SequencingExperimentId: 7,
 		PatientId:              123,
 		FamilyRole:             "proband",
+		SampleId:               "S0001",
+		HistologyCode:          "normal",
 		Sex:                    "male",
 		Type:                   "alignment",
 		Format:                 "cram",
@@ -115,6 +119,8 @@ func Test_IGVTracks_ToJSON(t *testing.T) {
 				SequencingExperimentId: 7,
 				PatientId:              123,
 				FamilyRole:             "proband",
+				SampleId:               "S0001",
+				HistologyCode:          "normal",
 				Sex:                    "male",
 				Type:                   "alignment",
 				Format:                 "cram",
@@ -130,7 +136,7 @@ func Test_IGVTracks_ToJSON(t *testing.T) {
 		},
 	}
 
-	var expected = []byte(`{"alignment":[{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}],"public_tracks":{"clinvar":{"url":"s3://foo/igv/clinvar.vcf.gz","urlExpireAt":1000,"indexURL":"s3://foo/igv/clinvar.vcf.gz.tbi","indexURLExpireAt":2000}}}`)
+	var expected = []byte(`{"alignment":[{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sample_id":"S0001","histology_code":"normal","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}],"public_tracks":{"clinvar":{"url":"s3://foo/igv/clinvar.vcf.gz","urlExpireAt":1000,"indexURL":"s3://foo/igv/clinvar.vcf.gz.tbi","indexURLExpireAt":2000}}}`)
 	jsonData, err := json.Marshal(igvTracks)
 	assert.Nil(t, err, "Failed to marshal IGVTracks to JSON")
 
@@ -141,13 +147,15 @@ func Test_IGVTracks_ToJSON(t *testing.T) {
 func Test_IGVTracks_FromJSON(t *testing.T) {
 	t.Parallel()
 
-	var jsonData = []byte(`{"alignment":[{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}],"public_tracks":{"clinvar":{"url":"s3://foo/igv/clinvar.vcf.gz","urlExpireAt":1000,"indexURL":"s3://foo/igv/clinvar.vcf.gz.tbi","indexURLExpireAt":2000}}}`)
+	var jsonData = []byte(`{"alignment":[{"sequencing_experiment_id":7,"patient_id":123,"family_role":"proband","sample_id":"S0001","histology_code":"normal","sex":"male","type":"alignment","format":"cram","url":"s3://foo/bar/file.cram","urlExpireAt":1000,"indexURL":"s3://foo/bar/file.cram.crai","indexURLExpireAt":2000,"name":"Sample Track"}],"public_tracks":{"clinvar":{"url":"s3://foo/igv/clinvar.vcf.gz","urlExpireAt":1000,"indexURL":"s3://foo/igv/clinvar.vcf.gz.tbi","indexURLExpireAt":2000}}}`)
 	var expected = IGVTracks{
 		Alignment: []IGVTrackEnriched{
 			{
 				SequencingExperimentId: 7,
 				PatientId:              123,
 				FamilyRole:             "proband",
+				SampleId:               "S0001",
+				HistologyCode:          "normal",
 				Sex:                    "male",
 				Type:                   "alignment",
 				Format:                 "cram",
@@ -195,7 +203,7 @@ func Test_IGVTracks_ToJSON_NewCaseTrackArrays(t *testing.T) {
 		PublicTracks:   map[string]IGVPublicTrack{},
 	}
 
-	item := `{"sequencing_experiment_id":7,"patient_id":1,"family_role":"","sex":"","type":"igv","format":"bw","url":"u","urlExpireAt":0,"indexURL":"","indexURLExpireAt":0,"name":"n"}`
+	item := `{"sequencing_experiment_id":7,"patient_id":1,"family_role":"","sample_id":"","histology_code":"","sex":"","type":"igv","format":"bw","url":"u","urlExpireAt":0,"indexURL":"","indexURLExpireAt":0,"name":"n"}`
 	jsonData, err := json.Marshal(igvTracks)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `{"cnv":[`+item+`],"seg":[`+item+`],"baf":[`+item+`],"roh":[`+item+`],"capture_targets":[`+item+`],"public_tracks":{}}`, string(jsonData))

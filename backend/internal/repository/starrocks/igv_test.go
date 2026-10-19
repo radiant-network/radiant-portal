@@ -64,6 +64,18 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 	})
 }
 
+func Test_IGVInternal_GetIGV_IgvFileFromFamilyTaskGivesNoTrack(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+		igvInternal, err := repo.GetIGV(t.Context(), 70)
+		assert.NoError(t, err)
+		// Document 293 is an igv file of family-level task 86, linked to all three members of case 70.
+		for _, track := range igvInternal {
+			assert.NotEqual(t, "case70.roh.bed", track.DocumentName)
+		}
+	})
+}
+
 func Test_IGVInternal_GetIGV_FetusSample(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -89,12 +101,29 @@ func Test_IGVInternal_GetIGV_SomaticCNVFromTumorOnlyTask(t *testing.T) {
 
 		var scnv []string
 		for _, track := range igvInternal {
-			if track.DataTypeCode == "scnv" {
+			if track.DataTypeCode == "scnv" && track.TaskId == 85 {
 				assert.Equal(t, 74, track.SequencingExperimentId)
 				scnv = append(scnv, track.FormatCode)
 			}
 		}
 		assert.Equal(t, []string{"tbi", "vcf"}, scnv)
+	})
+}
+
+func Test_IGVInternal_GetIGV_SomaticCNVFromAlignmentSomaticTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+		igvInternal, err := repo.GetIGV(t.Context(), 71)
+		assert.NoError(t, err)
+
+		var scnv []string
+		for _, track := range igvInternal {
+			if track.DataTypeCode == "scnv" && track.TaskId == 76 {
+				assert.Equal(t, 74, track.SequencingExperimentId)
+				scnv = append(scnv, track.DocumentName)
+			}
+		}
+		assert.Equal(t, []string{"SRX1091647-T.somatic.cnv.vcf.gz.tbi", "SRX1091647-T.somatic.cnv.vcf.gz"}, scnv)
 	})
 }
 
@@ -130,6 +159,7 @@ func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T
 		{
 			SequencingExperimentId: 1,
 			PatientId:              1,
+			SampleId:               "S0001",
 			FamilyRole:             "proband",
 			Sex:                    "male",
 			Type:                   "alignment",
@@ -143,6 +173,7 @@ func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T
 		{
 			SequencingExperimentId: 2,
 			PatientId:              2,
+			SampleId:               "S0002",
 			FamilyRole:             "mother",
 			Sex:                    "female",
 			Type:                   "alignment",
@@ -156,6 +187,7 @@ func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T
 		{
 			SequencingExperimentId: 3,
 			PatientId:              3,
+			SampleId:               "S0003",
 			FamilyRole:             "father",
 			Sex:                    "male",
 			Type:                   "alignment",
@@ -185,6 +217,8 @@ func Test_PrepareSomaticIgvTracks_mergesPairsAndOrdersTumorFirst(t *testing.T) {
 		{
 			SequencingExperimentId: 2,
 			PatientId:              1,
+			SampleId:               "S0002",
+			HistologyCode:          "tumoral",
 			Sex:                    "male",
 			Type:                   "alignment",
 			Format:                 "cram",
@@ -192,11 +226,13 @@ func Test_PrepareSomaticIgvTracks_mergesPairsAndOrdersTumorFirst(t *testing.T) {
 			URLExpireAt:            1234567890,
 			IndexURL:               "presigned.s3://example.com/tumor.crai",
 			IndexURLExpireAt:       1234567890,
-			Name:                   "Reads: S0002 tumoral",
+			Name:                   "Reads: S0002 tumor",
 		},
 		{
 			SequencingExperimentId: 1,
 			PatientId:              1,
+			SampleId:               "S0001",
+			HistologyCode:          "normal",
 			Sex:                    "male",
 			Type:                   "alignment",
 			Format:                 "cram",
@@ -212,6 +248,7 @@ func Test_PrepareSomaticIgvTracks_mergesPairsAndOrdersTumorFirst(t *testing.T) {
 func Test_prepareIgvTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
 	internalTracks := []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai"},
 	}
 	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
@@ -225,6 +262,7 @@ func Test_prepareIgvTracks_threadsFetusId(t *testing.T) {
 	fetusId := 1
 	internalTracks := []IGVTrack{
 		{PatientId: 63, FetusId: &fetusId, SequencingExperimentId: 1, SampleId: "S-PRENAT-72", FamilyRole: "fetus", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/fetus.cram"},
+		{PatientId: 63, FetusId: &fetusId, SequencingExperimentId: 1, SampleId: "S-PRENAT-72", FamilyRole: "fetus", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/fetus.crai"},
 	}
 	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
@@ -238,6 +276,7 @@ func Test_prepareIgvTracks_threadsFetusId(t *testing.T) {
 func Test_prepareIgvTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 	internalTracks := []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "invalid-url"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "crai", URL: "invalid-url"},
 	}
 	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
@@ -246,6 +285,7 @@ func Test_prepareIgvTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 
 	internalTracks = []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "http://not-an-s3.url"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "crai", URL: "http://not-an-s3.url"},
 	}
 	result, err = PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
@@ -281,6 +321,7 @@ func Test_PrepareGermlineIgvTracks_caseFileTracksPerMember(t *testing.T) {
 		t := types.IGVTrackEnriched{
 			SequencingExperimentId: member.SequencingExperimentId,
 			PatientId:              member.PatientId,
+			SampleId:               member.SampleId,
 			FamilyRole:             member.FamilyRole,
 			Sex:                    member.SexCode,
 			Type:                   dataType,
@@ -322,6 +363,7 @@ func Test_PrepareSomaticIgvTracks_caseFileTracksTumorFirstAndTargetsFromTumor(t 
 		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", DataTypeCode: "igv", FormatCode: "bw", DocumentName: "S0001-N.seg.bw", URL: "s3://example.com/S0001-N.seg.bw"},
 		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", DataTypeCode: "igv", FormatCode: "bed", DocumentName: "S0001-N_targets.bed", URL: "s3://example.com/S0001-N_targets.bed"},
 		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", DataTypeCode: "scnv", FormatCode: "vcf", DocumentName: "S0002-T.cnv.vcf.gz", URL: "s3://example.com/S0002-T.cnv.vcf.gz"},
+		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", DataTypeCode: "scnv", FormatCode: "tbi", DocumentName: "S0002-T.cnv.vcf.gz.tbi", URL: "s3://example.com/S0002-T.cnv.vcf.gz.tbi"},
 		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", DataTypeCode: "igv", FormatCode: "bw", DocumentName: "S0002-T.seg.bw", URL: "s3://example.com/S0002-T.seg.bw"},
 		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", DataTypeCode: "igv", FormatCode: "bed", DocumentName: "S0002-T_targets.bed", URL: "s3://example.com/S0002-T_targets.bed"},
 	}
@@ -330,10 +372,10 @@ func Test_PrepareSomaticIgvTracks_caseFileTracksTumorFirstAndTargetsFromTumor(t 
 
 	require.NoError(t, err)
 	require.Len(t, result.CNV, 1)
-	assert.Equal(t, "CNVs: S0002 tumoral", result.CNV[0].Name)
+	assert.Equal(t, "CNVs: S0002 tumor", result.CNV[0].Name)
 	assert.Equal(t, "scnv", result.CNV[0].Type)
 	require.Len(t, result.Seg, 2)
-	assert.Equal(t, "Seg: S0002 tumoral", result.Seg[0].Name)
+	assert.Equal(t, "Seg: S0002 tumor", result.Seg[0].Name)
 	assert.Equal(t, "Seg: S0001 normal", result.Seg[1].Name)
 	require.Len(t, result.CaptureTargets, 1)
 	assert.Equal(t, 2, result.CaptureTargets[0].SequencingExperimentId)
@@ -405,11 +447,19 @@ func Test_HasIgvTracks_emptyIsFalse(t *testing.T) {
 }
 
 func Test_HasIgvTracks_alignmentIsTrue(t *testing.T) {
-	assert.True(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "alignment", FormatCode: "crai"}}))
+	assert.True(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "alignment", FormatCode: "cram"}, {DataTypeCode: "alignment", FormatCode: "crai"}}))
 }
 
 func Test_HasIgvTracks_cnvOnlyIsTrue(t *testing.T) {
-	assert.True(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "scnv", FormatCode: "vcf"}}))
+	assert.True(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "scnv", FormatCode: "vcf"}, {DataTypeCode: "scnv", FormatCode: "tbi"}}))
+}
+
+func Test_HasIgvTracks_loneIndexIsFalse(t *testing.T) {
+	assert.False(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "gcnv", FormatCode: "tbi"}}))
+}
+
+func Test_HasIgvTracks_alignmentWithoutIndexIsFalse(t *testing.T) {
+	assert.False(t, HasIgvTracks([]IGVTrack{{DataTypeCode: "alignment", FormatCode: "cram"}}))
 }
 
 func Test_HasIgvTracks_knownIgvSuffixIsTrue(t *testing.T) {
@@ -456,6 +506,7 @@ func Test_prepareIgvTracks_rerunPairsDataAndIndexOfLatestTask(t *testing.T) {
 func Test_prepareIgvTracks_latestTaskIsPerTrackKind(t *testing.T) {
 	internalTracks := []IGVTrack{
 		{PatientId: 1, SequencingExperimentId: 1, TaskId: 5, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/S0001.cram"},
+		{PatientId: 1, SequencingExperimentId: 1, TaskId: 5, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/S0001.crai"},
 		{PatientId: 1, SequencingExperimentId: 1, TaskId: 9, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "igv", FormatCode: "bw", DocumentName: "S0001.seg.bw", URL: "s3://example.com/S0001.seg.bw"},
 	}
 
@@ -493,7 +544,7 @@ func Test_prepareIgvTracks_rerunWithoutIndexKeepsOlderCompletePair(t *testing.T)
 	assert.Equal(t, "presigned.s3://example.com/run1.cram.crai", result.Alignment[0].IndexURL)
 }
 
-func Test_prepareIgvTracks_noCompleteTaskKeepsLatest(t *testing.T) {
+func Test_prepareIgvTracks_noCompleteTaskGivesNoTrack(t *testing.T) {
 	internalTracks := []IGVTrack{
 		{PatientId: 1, SequencingExperimentId: 1, TaskId: 5, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "vcf", URL: "s3://example.com/run1.cnv.vcf.gz"},
 		{PatientId: 1, SequencingExperimentId: 1, TaskId: 9, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "vcf", URL: "s3://example.com/run2.cnv.vcf.gz"},
@@ -502,9 +553,31 @@ func Test_prepareIgvTracks_noCompleteTaskKeepsLatest(t *testing.T) {
 	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	require.NoError(t, err)
-	require.Len(t, result.CNV, 1)
-	assert.Equal(t, "presigned.s3://example.com/run2.cnv.vcf.gz", result.CNV[0].URL)
-	assert.Empty(t, result.CNV[0].IndexURL)
+	assert.Empty(t, result.CNV)
+}
+
+func Test_prepareIgvTracks_loneIndexGivesNoTrack(t *testing.T) {
+	internalTracks := []IGVTrack{
+		{PatientId: 1, SequencingExperimentId: 1, TaskId: 5, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", URL: "s3://example.com/run1.cnv.vcf.gz.tbi"},
+		{PatientId: 1, SequencingExperimentId: 1, TaskId: 5, SampleId: "S0001", FamilyRole: "proband", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/run1.crai"},
+	}
+
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+
+	require.NoError(t, err)
+	assert.Equal(t, &types.IGVTracks{}, result)
+}
+
+func Test_somaticIgvLabel_tumoralIsTumor(t *testing.T) {
+	assert.Equal(t, "tumor", somaticIgvLabel("tumoral"))
+}
+
+func Test_somaticIgvLabel_normalIsNormal(t *testing.T) {
+	assert.Equal(t, "normal", somaticIgvLabel("normal"))
+}
+
+func Test_somaticIgvLabel_emptyStaysEmpty(t *testing.T) {
+	assert.Equal(t, "", somaticIgvLabel(""))
 }
 
 func Test_prepareIgvTracks_unindexedKindsNeedOnlyTheDataFile(t *testing.T) {

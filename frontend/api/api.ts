@@ -4699,6 +4699,12 @@ export interface IGVTrackEnriched {
      * @type {string}
      * @memberof IGVTrackEnriched
      */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'indexURL'?: string;
     /**
      * 
@@ -4718,6 +4724,12 @@ export interface IGVTrackEnriched {
      * @memberof IGVTrackEnriched
      */
     'patient_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'sample_id'?: string;
     /**
      * 
      * @type {number}

@@ -47,15 +47,16 @@ func NewIGVRepository(db database.StarrocksDB) *IGVRepository {
 func (r *IGVRepository) GetIGV(ctx context.Context, caseID int) ([]IGVTrack, error) {
 	var tracks []IGVTrack
 
-	// CNV VCFs are taken from the variant-calling task only, as the ETL does
-	// (staging_external_sequencing_experiment): the family-level CNV annotation task also writes a
-	// gcnv VCF, with no index.
+	// CNV VCFs are taken from the variant-calling tasks only: the family-level CNV annotation task
+	// also writes a gcnv VCF, with no index. Somatic CNV VCFs come from both somatic calling tasks.
+	// igv files are taken from the per-sequencing alignment tasks only: a
+	// family-level task is linked to every member, so its files would show on each member.
 	trackFilter := fmt.Sprintf(`%s.case_id=%d AND thd.type='output' AND (
 		(doc.data_type_code = 'alignment' AND doc.format_code IN ('cram', 'crai'))
 		OR (doc.data_type_code = 'gcnv' AND doc.format_code IN ('vcf', 'tbi') AND %s.task_type_code = 'alignment_germline_variant_calling')
-		OR (doc.data_type_code = 'scnv' AND doc.format_code IN ('vcf', 'tbi') AND %s.task_type_code = 'tumor_only_variant_calling')
-		OR (doc.data_type_code = 'igv' AND doc.format_code IN ('bw', 'bed'))
-	)`, types.CaseHasSequencingExperimentTable.Alias, caseID, types.TaskTable.Alias, types.TaskTable.Alias)
+		OR (doc.data_type_code = 'scnv' AND doc.format_code IN ('vcf', 'tbi') AND %s.task_type_code IN ('tumor_only_variant_calling', 'alignment_somatic_variant_calling'))
+		OR (doc.data_type_code = 'igv' AND doc.format_code IN ('bw', 'bed') AND %s.task_type_code IN ('alignment_germline_variant_calling', 'alignment_somatic_variant_calling'))
+	)`, types.CaseHasSequencingExperimentTable.Alias, caseID, types.TaskTable.Alias, types.TaskTable.Alias, types.TaskTable.Alias)
 
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx), types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
@@ -102,12 +103,19 @@ func PrepareGermlineIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*ty
 }
 
 // Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
-// For somatic, the tracks are labelled by histology code (e.g. "tumoral", "normal") and the
-// tumoral tracks are listed first.
+// For somatic, the tracks are labelled "tumor" or "normal" from the histology code and the
+// tumor tracks are listed first.
 func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
 	return prepareIgvTracks(tracks, presigner,
-		func(t IGVTrack) string { return t.HistologyCode },
+		func(t IGVTrack) string { return somaticIgvLabel(t.HistologyCode) },
 		func(t IGVTrack) bool { return t.HistologyCode == "tumoral" })
+}
+
+func somaticIgvLabel(histologyCode string) string {
+	if histologyCode == "tumoral" {
+		return "tumor"
+	}
+	return histologyCode
 }
 
 // igvTrackKindOf tells the track of a document. Seg and BAF share igv/bw, ROH and capture
@@ -138,10 +146,12 @@ func igvTrackKindOf(r IGVTrack) (igvTrackKind, bool) {
 // HasIgvTracks tells whether the documents give at least one member track. Capture targets alone
 // give none: they only frame the member tracks.
 func HasIgvTracks(tracks []IGVTrack) bool {
-	return slices.ContainsFunc(tracks, func(r IGVTrack) bool {
-		kind, ok := igvTrackKindOf(r)
-		return ok && kind != igvTrackCaptureTargets
-	})
+	for key := range latestIgvTaskIds(tracks) {
+		if key.kind != igvTrackCaptureTargets {
+			return true
+		}
+	}
+	return false
 }
 
 // complete tells whether a task gives a usable track: the data file, plus its index for the
@@ -156,7 +166,7 @@ func (f igvTaskFiles) complete(kind igvTrackKind) bool {
 // latestIgvTaskIds gives, per track, the task whose files make the track. A rerun of a task on the
 // same sequencing writes a second data/index pair; mixing the data file of one run with the index
 // of another breaks the track. The latest task (highest id) with a complete set of files wins; when
-// no task is complete, the latest task wins, as before.
+// no task is complete, the track is left out, as igv.js cannot load it.
 func latestIgvTaskIds(internalTracks []IGVTrack) map[igvTrackKey]int {
 	filesByTask := map[igvTrackKey]map[int]igvTaskFiles{}
 	for _, r := range internalTracks {
@@ -180,14 +190,15 @@ func latestIgvTaskIds(internalTracks []IGVTrack) map[igvTrackKey]int {
 
 	latest := map[igvTrackKey]int{}
 	for key, tasks := range filesByTask {
-		chosen, chosenComplete, set := 0, false, false
+		chosen, set := 0, false
 		for taskId, files := range tasks {
-			complete := files.complete(key.kind)
-			if !set || (complete && !chosenComplete) || (complete == chosenComplete && taskId > chosen) {
-				chosen, chosenComplete, set = taskId, complete, true
+			if files.complete(key.kind) && (!set || taskId > chosen) {
+				chosen, set = taskId, true
 			}
 		}
-		latest[key] = chosen
+		if set {
+			latest[key] = chosen
+		}
 	}
 	return latest
 }
@@ -204,7 +215,7 @@ func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, labe
 			continue
 		}
 		key := igvTrackKey{kind: kind, sequencingExperimentId: r.SequencingExperimentId}
-		if r.TaskId != latestTaskIds[key] {
+		if taskId, ok := latestTaskIds[key]; !ok || r.TaskId != taskId {
 			continue
 		}
 		lead := leading(r)
@@ -226,6 +237,8 @@ func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, labe
 				SequencingExperimentId: r.SequencingExperimentId,
 				PatientId:              r.PatientId,
 				FetusId:                r.FetusId,
+				SampleId:               r.SampleId,
+				HistologyCode:          r.HistologyCode,
 				Type:                   r.DataTypeCode,
 				Sex:                    r.SexCode,
 				FamilyRole:             r.FamilyRole,

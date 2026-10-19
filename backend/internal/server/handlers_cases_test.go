@@ -285,6 +285,15 @@ func Test_CaseEntityHandler(t *testing.T) {
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
 			URL:                    "s3://example.com/file.cram",
+		}, {
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "crai",
+			URL:                    "s3://example.com/file.crai",
 		},
 		},
 	}
@@ -429,6 +438,7 @@ func Test_CaseEntityHandler_CNVOnlyHasIGVFiles(t *testing.T) {
 	igvRepo := &MockIGVRepository{
 		igvTracks: []types.IGVTrack{
 			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "vcf", DocumentName: "sample_123.cnv.vcf.gz", URL: "s3://example.com/sample_123.cnv.vcf.gz"},
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
 		},
 	}
 
@@ -444,6 +454,29 @@ func Test_CaseEntityHandler_CNVOnlyHasIGVFiles(t *testing.T) {
 	var resp map[string]interface{}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_CNVWithoutIndexHasNoIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.False(t, resp["has_igv_files"].(bool))
 }
 
 func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {

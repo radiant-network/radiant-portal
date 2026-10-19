@@ -74,11 +74,11 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 		url := func(key string) string {
 			return fmt.Sprintf("http://%s/cqdg-prod-file-workspace/%s", env.ObjectStore.Endpoint, key)
 		}
-		proband := types.IGVTrackEnriched{SequencingExperimentId: 70, PatientId: 3, FamilyRole: "proband", Sex: "male"}
-		mother := types.IGVTrackEnriched{SequencingExperimentId: 71, PatientId: 1, FamilyRole: "mother", Sex: "female"}
-		father := types.IGVTrackEnriched{SequencingExperimentId: 72, PatientId: 2, FamilyRole: "father", Sex: "male"}
-		tumor := types.IGVTrackEnriched{SequencingExperimentId: 74, PatientId: 62, FamilyRole: "proband", Sex: "female"}
-		normal := types.IGVTrackEnriched{SequencingExperimentId: 73, PatientId: 62, FamilyRole: "proband", Sex: "female"}
+		proband := types.IGVTrackEnriched{SequencingExperimentId: 70, PatientId: 3, SampleId: "S13224", HistologyCode: "normal", FamilyRole: "proband", Sex: "male"}
+		mother := types.IGVTrackEnriched{SequencingExperimentId: 71, PatientId: 1, SampleId: "S13225", HistologyCode: "normal", FamilyRole: "mother", Sex: "female"}
+		father := types.IGVTrackEnriched{SequencingExperimentId: 72, PatientId: 2, SampleId: "S13226", HistologyCode: "normal", FamilyRole: "father", Sex: "male"}
+		tumor := types.IGVTrackEnriched{SequencingExperimentId: 74, PatientId: 62, SampleId: "SRX1091647", HistologyCode: "tumoral", FamilyRole: "proband", Sex: "female"}
+		normal := types.IGVTrackEnriched{SequencingExperimentId: 73, PatientId: 62, SampleId: "SRX1091646", HistologyCode: "normal", FamilyRole: "proband", Sex: "female"}
 		track := func(member types.IGVTrackEnriched, dataType, format, name, file, index string) types.IGVTrackEnriched {
 			member.Type, member.Format, member.Name, member.URL = dataType, format, name, url(file)
 			if index != "" {
@@ -122,14 +122,14 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 			actual := getIGV(t, router, 71)
 
 			assertIGVTracks(t, []types.IGVTrackEnriched{
-				track(tumor, "alignment", "cram", "Reads: SRX1091647 tumoral", "sarek/preprocessing/SRX1091647-T.recal.cram", "sarek/preprocessing/SRX1091647-T.recal.cram.crai"),
+				track(tumor, "alignment", "cram", "Reads: SRX1091647 tumor", "sarek/preprocessing/SRX1091647-T.recal.cram", "sarek/preprocessing/SRX1091647-T.recal.cram.crai"),
 				track(normal, "alignment", "cram", "Reads: SRX1091646 normal", "sarek/preprocessing/SRX1091646-N.recal.cram", "sarek/preprocessing/SRX1091646-N.recal.cram.crai"),
 			}, actual.Alignment)
 			assertIGVTracks(t, []types.IGVTrackEnriched{
-				track(tumor, "scnv", "vcf", "CNVs: SRX1091647 tumoral", "dragen/SRX1091647-T/SRX1091647-T.cnv.vcf.gz", "dragen/SRX1091647-T/SRX1091647-T.cnv.vcf.gz.tbi"),
+				track(tumor, "scnv", "vcf", "CNVs: SRX1091647 tumor", "dragen/SRX1091647-T/SRX1091647-T.cnv.vcf.gz", "dragen/SRX1091647-T/SRX1091647-T.cnv.vcf.gz.tbi"),
 			}, actual.CNV)
 			assertIGVTracks(t, []types.IGVTrackEnriched{
-				track(tumor, "igv", "bw", "Seg: SRX1091647 tumoral", "dragen/SRX1091647-T/SRX1091647-T.seg.bw", ""),
+				track(tumor, "igv", "bw", "Seg: SRX1091647 tumor", "dragen/SRX1091647-T/SRX1091647-T.seg.bw", ""),
 				track(normal, "igv", "bw", "Seg: SRX1091646 normal", "dragen/SRX1091646-N/SRX1091646-N.seg.bw", ""),
 			}, actual.Seg)
 			assert.Empty(t, actual.BAF)

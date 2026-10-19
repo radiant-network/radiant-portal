@@ -45,7 +45,7 @@ func Test_IGVGetHandler_germline(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}],"public_tracks":{}}`, w.Body.String())
+	assert.JSONEq(t, `{"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sample_id":"sample_123","histology_code":"","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}],"public_tracks":{}}`, w.Body.String())
 }
 
 func Test_IGVGetHandler_somatic(t *testing.T) {
@@ -82,7 +82,7 @@ func Test_IGVGetHandler_somatic(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sex":"female","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 tumoral"}],"public_tracks":{}}`, w.Body.String())
+	assert.JSONEq(t, `{"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sample_id":"sample_123","histology_code":"tumoral","sex":"female","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 tumor"}],"public_tracks":{}}`, w.Body.String())
 }
 
 func igvProbandCramTracks() []types.IGVTrack {
@@ -95,6 +95,15 @@ func igvProbandCramTracks() []types.IGVTrack {
 		DataTypeCode:           "alignment",
 		FormatCode:             "cram",
 		URL:                    "s3://example.com/file.cram",
+	}, {
+		SequencingExperimentId: 1,
+		SampleId:               "sample_123",
+		PatientId:              1,
+		FamilyRole:             "proband",
+		SexCode:                "male",
+		DataTypeCode:           "alignment",
+		FormatCode:             "crai",
+		URL:                    "s3://example.com/file.crai",
 	}}
 }
 
@@ -123,8 +132,8 @@ func Test_IGVGetHandler_caseFileTracks(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"","indexURLExpireAt":0,"name":"Reads: sample_123 proband"}],
-		"roh":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sex":"male","type":"igv","format":"bed","url":"presigned.s3://example.com/sample_123.roh.bed","urlExpireAt":1234567890,"indexURL":"","indexURLExpireAt":0,"name":"ROH: sample_123 proband"}],
+		"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sample_id":"sample_123","histology_code":"","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}],
+		"roh":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sample_id":"sample_123","histology_code":"","sex":"male","type":"igv","format":"bed","url":"presigned.s3://example.com/sample_123.roh.bed","urlExpireAt":1234567890,"indexURL":"","indexURLExpireAt":0,"name":"ROH: sample_123 proband"}],
 		"public_tracks":{}
 	}`, w.Body.String())
 }
@@ -142,7 +151,7 @@ func Test_IGVGetHandler_publicTracks(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"","indexURLExpireAt":0,"name":"Reads: sample_123 proband"}],
+		"alignment":[{"sequencing_experiment_id":1,"patient_id":1,"family_role":"proband","sample_id":"sample_123","histology_code":"","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}],
 		"public_tracks":{
 			"clinvar":{"url":"presigned.s3://tracks/igv/clinvar.vcf.gz","urlExpireAt":1234567890,"indexURL":"presigned.s3://tracks/igv/clinvar.vcf.gz.tbi","indexURLExpireAt":1234567890},
 			"clinvar_sv":{"url":"presigned.s3://tracks/igv/nstd102.GRCh38.variant_call.vcf.gz","urlExpireAt":1234567890,"indexURL":"presigned.s3://tracks/igv/nstd102.GRCh38.variant_call.vcf.gz.tbi","indexURLExpireAt":1234567890},
@@ -175,6 +184,24 @@ func Test_IGVGetHandler_publicTracksInvalidPrefixReturns500(t *testing.T) {
 
 func Test_IGVGetHandler_noRowsReturns404(t *testing.T) {
 	igvRepo := &MockIGVRepository{}
+	casesRepo := &MockRepository{caseType: "germline"}
+
+	router := gin.Default()
+	router.GET("/:tenant/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner(), ""))
+
+	req, _ := http.NewRequest("GET", "/radiant/igv/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_IGVGetHandler_alignmentWithoutIndexReturns404(t *testing.T) {
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file.cram"},
+		},
+	}
 	casesRepo := &MockRepository{caseType: "germline"}
 
 	router := gin.Default()

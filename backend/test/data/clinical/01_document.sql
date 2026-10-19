@@ -600,7 +600,13 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (291, 'SRX1091646-N.seg.bw', 'genomic', 'igv', 'bw', 1291,
         's3://cqdg-prod-file-workspace/dragen/SRX1091646-N/SRX1091646-N.seg.bw', '5d41402abc4b2a76b9719d911017d291', '2026-04-01T13:08:00-04:00', 'radiant'),
        (292, 'SRX1091646-N_targets.bed', 'genomic', 'igv', 'bed', 1292,
-        's3://cqdg-prod-file-workspace/dragen/SRX1091646-N/SRX1091646-N_targets.bed', '5d41402abc4b2a76b9719d911017d292', '2026-04-01T13:08:00-04:00', 'radiant')
+        's3://cqdg-prod-file-workspace/dragen/SRX1091646-N/SRX1091646-N_targets.bed', '5d41402abc4b2a76b9719d911017d292', '2026-04-01T13:08:00-04:00', 'radiant'),
+       (293, 'case70.roh.bed', 'genomic', 'igv', 'bed', 1293,
+        's3://cqdg-prod-file-workspace/dragen/case70/case70.roh.bed', '5d41402abc4b2a76b9719d911017d293', '2026-04-01T13:08:00-04:00', 'radiant'),
+       (294, 'SRX1091647-T.somatic.cnv.vcf.gz', 'genomic', 'scnv', 'vcf', 1294,
+        's3://cqdg-prod-file-workspace/dragen/SRX1091647-T/SRX1091647-T.somatic.cnv.vcf.gz', '5d41402abc4b2a76b9719d911017d294', '2026-04-01T13:08:00-04:00', 'radiant'),
+       (295, 'SRX1091647-T.somatic.cnv.vcf.gz.tbi', 'genomic', 'scnv', 'tbi', 1295,
+        's3://cqdg-prod-file-workspace/dragen/SRX1091647-T/SRX1091647-T.somatic.cnv.vcf.gz.tbi', '5d41402abc4b2a76b9719d911017d295', '2026-04-01T13:08:00-04:00', 'radiant')
 ON CONFLICT(id) DO NOTHING;
 
 ALTER TABLE document ALTER COLUMN id RESTART WITH 1000;

@@ -2396,6 +2396,8 @@ components:
           type: integer
         format:
           type: string
+        histology_code:
+          type: string
         indexURL:
           type: string
         indexURLExpireAt:
@@ -2404,6 +2406,8 @@ components:
           type: string
         patient_id:
           type: integer
+        sample_id:
+          type: string
         sequencing_experiment_id:
           type: integer
         sex:
