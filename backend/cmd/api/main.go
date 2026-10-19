@@ -58,6 +58,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	// One lab notification template per tenant. A bad file warns and is skipped, never fatal:
 	// only that tenant's notify fails. The load outcome is exposed by GET /status.
 	notificationTemplates := notification.LoadTemplates(utils.GetEnvOrDefault(notification.TemplateDirEnv, ""))
+	reportTemplates := report.LoadTemplates(utils.GetEnvOrDefault(report.TemplateDirEnv, ""))
 
 	// Create repository. The named wrappers make each repo's target database part of its
 	// constructor signature; the dual-purpose repos (cases, sequencing experiment, documents)
@@ -125,7 +126,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	}
 
 	// Initialize public routes explicitly
-	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates))
+	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates, reportTemplates))
 	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
 
 	// Private routes, alphabetically ordered

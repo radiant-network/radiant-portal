@@ -45,8 +45,6 @@ func (f *fakeInterpretations) ListGermlineForReport(context.Context, string, str
 	return f.interpretations, f.err
 }
 
-func ptr[T any](v T) *T { return &v }
-
 func brafRows() []types.ReportConsequenceRow {
 	return []types.ReportConsequenceRow{
 		{LocusID: 1000, Symbol: "BRAF", TranscriptID: "ENST00000288602", TranscriptVersion: "11", Source: "Ensembl", DnaChange: "c.1799T>A"},
