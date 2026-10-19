@@ -1,7 +1,8 @@
 // The proxy lives in a .server module: React Router strips server code only from loader/action,
 // so anything else exported from this route file would be bundled for the client.
-import type { Route } from './+types/yac-proxy';
 import { proxyYac } from '@/utils/api/yac-proxy.server';
+
+import type { Route } from './+types/yac-proxy';
 
 /**
  * Handles GET requests

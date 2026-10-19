@@ -23,7 +23,8 @@ type caseTypeReader interface {
 // GetIGVHandler
 // @Summary Get IGV
 // @Id getIGV
-// @Description Get IGV tracks for a case
+// @Description Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+// @Description and the public reference tracks, all presigned
 // @Tags igv
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -36,7 +37,7 @@ type caseTypeReader interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/igv/{case_id} [get]
-func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.PreSigner) gin.HandlerFunc {
+func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.PreSigner, publicTracksPrefix string) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}
@@ -60,7 +61,7 @@ func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.
 			return
 		}
 
-		if len(internalIgvTracks) == 0 {
+		if !starrocks.HasIgvTracks(internalIgvTracks) {
 			HandleNotFoundError(c, "case_id")
 			return
 		}
@@ -75,6 +76,12 @@ func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.
 			HandleError(c, fmt.Errorf("unsupported case type: %s", caseType))
 			return
 		}
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		igvEnrichedTracks.PublicTracks, err = utils.PrepareIGVPublicTracks(publicTracksPrefix, presigner)
 		if err != nil {
 			HandleError(c, err)
 			return

@@ -28,6 +28,9 @@ type PreSigner interface {
 type S3PreSigner struct {
 	Config *aws.Config
 	Expire time.Duration
+	// One client per presigner: a new session per URL would also resolve the credentials again,
+	// a remote call with a web identity or instance role provider.
+	svc *s3.S3
 }
 
 type S3Location struct {
@@ -54,10 +57,23 @@ func NewS3PreSigner() *S3PreSigner {
 		DisableSSL:       aws.Bool(!useSSL),
 	}
 
+	ps, err := newS3PreSigner(awsConfig, expire)
+	if err != nil {
+		log.Fatalf("Failed to create S3 presigner session: %v", err)
+	}
+	return ps
+}
+
+func newS3PreSigner(awsConfig *aws.Config, expire time.Duration) (*S3PreSigner, error) {
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		return nil, err
+	}
 	return &S3PreSigner{
 		Config: awsConfig,
 		Expire: expire,
-	}
+		svc:    s3.New(sess),
+	}, nil
 }
 
 func ExtractS3BucketAndKey(s3URL string) (*S3Location, error) {
@@ -97,13 +113,7 @@ func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
 		return nil, err
 	}
 
-	sess, err := session.NewSession(ps.Config)
-	if err != nil {
-		return nil, err
-	}
-
-	svc := s3.New(sess)
-	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+	req, _ := ps.svc.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: aws.String(s3location.Bucket),
 		Key:    aws.String(s3location.Key),
 	})

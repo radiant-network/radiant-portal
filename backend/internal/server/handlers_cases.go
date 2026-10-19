@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -201,7 +202,7 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader, assignmentsRepo case
 			HandleError(c, err)
 			return
 		}
-		caseEntity.HasIGVFiles = len(igvTracks) > 0
+		caseEntity.HasIGVFiles = starrocks.HasIgvTracks(igvTracks)
 
 		assigneesByCase, err := assignmentsRepo.ListForCases(c.Request.Context(), []int{caseId})
 		if err != nil {
