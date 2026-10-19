@@ -63,6 +63,7 @@ export const CommonSelectors = {
   labelsSwitch: '[data-cy="labels-switch"]',
   langButton: '[data-cy="lang-button"]',
   link: '[href], a',
+  linkButton: 'button[class*="hover:underline"]',
   listItemAction: (name: string) => `[data-cy="list-item-action-${name}"]`,
   loadIndicator: '[data-cy="load-indicator"]',
   logo: '[data-cy="logo-desktop"]',

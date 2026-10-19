@@ -641,6 +641,8 @@ const generateSNVTableActions = (config: SNVTableConfig) => {
               } else {
                 cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
               }
+            } else if (columnID === 'variant') {
+              cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.linkButton).clickAndWait({ force: true });
             } else {
               cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
             }
@@ -1086,7 +1088,7 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
 const germlineConfig: SNVTableConfig = {
   tableColumns: tableGermlineSNVColumns,
   selectors: { tab: '[data-cy="variants-tab"]', toggle: '[data-cy="tabs-trigger-SNV"]' },
-  newTabLinkColumns: ['variant', 'freq'],
+  newTabLinkColumns: ['freq'],
   contentHandlers: germlineContentHandlers,
   linkResolver: (columnID, dataVariant) => getUrlLink(columnID, dataVariant),
 };
@@ -1094,7 +1096,7 @@ const germlineConfig: SNVTableConfig = {
 const somaticConfig: SNVTableConfig = {
   tableColumns: tableSomaticSNVColumns,
   selectors: { tab: '[data-cy="variants-tab"]' },
-  newTabLinkColumns: ['variant', 'freq_to', 'freq_tn', 'freq_g'],
+  newTabLinkColumns: ['freq_to', 'freq_tn', 'freq_g'],
   contentHandlers: somaticContentHandlers,
   linkResolver: (columnID, dataVariant) => {
     switch (columnID) {
