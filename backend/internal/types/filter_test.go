@@ -504,3 +504,16 @@ func Test_ToSQL_Return_Array_Contains_All_Sql_Filter_When_Array_Field_And_All_Op
 	assert.Equal(t, expectedSQL, sqlQuery)
 	assert.Equal(t, expectedParams, params)
 }
+
+func Test_ToSQL_Return_Array_Contains_On_Comphet_Join_When_Filter_On_Comphet_Of(t *testing.T) {
+	t.Parallel()
+	node := ComparisonNode{Operator: "in", Value: []interface{}{"1000"}, Field: GermlineSNVComphetOfField}
+
+	// Same rendering inside the consequence semi-join: its alias overrides do not touch the comphet join.
+	for _, overrides := range []map[string]string{nil, {"cf": "cf"}} {
+		sqlQuery, params := node.ToSQL(overrides)
+
+		assert.Equal(t, `array_contains(ch.comphet_of, ?)`, sqlQuery)
+		assert.Equal(t, []interface{}{"1000"}, params)
+	}
+}
