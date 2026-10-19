@@ -37,6 +37,9 @@ import {
   rowSelectionFeature,
   type RowSelectionState,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
   type SortingState,
   tableFeatures,
 } from '@tanstack/react-table';
@@ -124,6 +127,8 @@ export const features = tableFeatures({
   rowSelectionFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
+  // sort functions resolved by name when a column's sortFn is 'auto'
+  sortFns: { alphanumeric: sortFn_alphanumeric, datetime: sortFn_datetime, text: sortFn_text },
   filteredRowModel: createFilteredRowModel(),
   expandedRowModel: createExpandedRowModel(),
   groupedRowModel: createGroupedRowModel(),
