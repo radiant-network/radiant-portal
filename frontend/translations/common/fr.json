@@ -2349,7 +2349,8 @@
     }
   },
   "file_entity": {
-    "title": "Fichiers",
+    "count_one": "{{total}} Fichier",
+    "count_other": "{{total}} Fichiers",
     "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou séquençage",
     "name": "Nom du fichier",
     "format_code": "Format",

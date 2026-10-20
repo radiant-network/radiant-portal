@@ -2345,7 +2345,8 @@
     }
   },
   "file_entity": {
-    "title": "Files",
+    "count_one": "{{total}} File",
+    "count_other": "{{total}} Files",
     "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
     "name": "File Name",
     "format_code": "Format",
