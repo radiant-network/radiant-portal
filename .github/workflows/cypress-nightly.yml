@@ -158,7 +158,7 @@ jobs:
           done
           # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-", "CLIN-" or "RAD-"
           attemptMax=3
-          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | grep -v "SJRA-" -e "CLIN-" -e "RAD-" | wc -l | tr -d " ")
+          NEW_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | grep -v -e "SJRA-" -e "CLIN-" -e "RAD-" | wc -l | tr -d " ")
           NEW_FAILS=${NEW_FAILS:-0}
           TOTAL_FAILS=$(find /tmp/all_screenshots -type f -name "*.png" 2>/dev/null | grep -F -e "(attempt ${attemptMax})" -e "before all hook (failed)" | wc -l | tr -d " ")
           TOTAL_FAILS=${TOTAL_FAILS:-0}
