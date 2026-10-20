@@ -100,6 +100,21 @@ func Test_LoadTemplates_TenantLabelsIncomplete_DefaultsAndWarning(t *testing.T) 
 	assert.Equal(t, "Hz\n(Mother het, Father ref)", value)
 }
 
+func Test_LoadTemplates_UnknownValueAtRender_StatusWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", withCell("B2", "{{ clinvar .Variant.ClinvarInterpretation }}"), nil)
+	writeLabels(t, dir, "qlin", fullLabels(nil))
+	templates := LoadTemplates(dir)
+	require.Equal(t, types.TemplateStatusOK, templates.Status())
+	report := sampleReport()
+	report.Variant.ClinvarInterpretation = []string{"Pathogenic/Likely pathogenic"}
+
+	_, err := templates.Render("qlin", KindGermline, []types.TranscriptReport{report})
+
+	require.NoError(t, err)
+	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
+}
+
 func Test_LoadTemplates_TenantLabelsBadJSON_TemplatesSkipped(t *testing.T) {
 	dir := t.TempDir()
 	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)

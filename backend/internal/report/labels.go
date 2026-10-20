@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -44,10 +45,14 @@ var labelKeys = []string{
 
 type labels map[string]string
 
-// labelSet resolves a key in the tenant's file first, then the embedded default.
+// labelSet resolves a key in the tenant's file first, then the embedded default. misses collects
+// the data-driven keys no file knows (a ClinVar term, a zygosity code...), shared by the tenant's
+// templates so Templates.Status can report them after boot.
 type labelSet struct {
+	name     string
 	tenant   labels
 	defaults labels
+	misses   *sync.Map
 }
 
 func (s labelSet) lookup(key string) (string, bool) {
@@ -56,6 +61,24 @@ func (s labelSet) lookup(key string) (string, bool) {
 	}
 	value, ok := s.defaults[key]
 	return value, ok
+}
+
+// translate is lookup for a key derived from data: a miss is logged once per key and process.
+func (s labelSet) translate(key string) (string, bool) {
+	value, ok := s.lookup(key)
+	if ok || s.misses == nil {
+		return value, ok
+	}
+	if _, seen := s.misses.LoadOrStore(key, true); !seen {
+		slog.Warn("report label unknown value, raw value rendered", slog.String("tenant", s.name), slog.String("key", key))
+	}
+	return "", false
+}
+
+func hasMisses(misses *sync.Map) bool {
+	found := false
+	misses.Range(func(_, _ any) bool { found = true; return false })
+	return found
 }
 
 // get falls back to the key so a missing label shows up in the report instead of a blank cell.

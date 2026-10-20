@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -62,6 +63,7 @@ type Template struct {
 type Templates struct {
 	byKey   map[string]*Template
 	skipped int
+	misses  map[string]*sync.Map
 }
 
 func key(tenant string, kind Kind) string { return tenant + "/" + string(kind) }
@@ -70,7 +72,7 @@ func key(tenant string, kind Kind) string { return tenant + "/" + string(kind) }
 // file is logged and skipped so a bad template can't keep the API from booting; a report on that
 // tenant fails with ErrTemplateMissing instead.
 func LoadTemplates(dir string) *Templates {
-	t := &Templates{byKey: map[string]*Template{}}
+	t := &Templates{byKey: map[string]*Template{}, misses: map[string]*sync.Map{}}
 	if dir == "" {
 		slog.Warn("report templates disabled", slog.String("reason", TemplateDirEnv+" unset"))
 		return t
@@ -144,7 +146,8 @@ func (t *Templates) resolveLabels(dir, tenant string, defaults labels) (labelSet
 		slog.Warn("report labels incomplete, defaults used", slog.String("tenant", tenant), slog.Any("keys", missing))
 		t.skipped++
 	}
-	return labelSet{tenant: file, defaults: defaults}, nil
+	t.misses[tenant] = &sync.Map{}
+	return labelSet{name: tenant, tenant: file, defaults: defaults, misses: t.misses[tenant]}, nil
 }
 
 func labelsFromFilename(name string) (string, bool) {
@@ -290,9 +293,14 @@ func (t *Templates) Status() string {
 		return types.TemplateStatusError
 	case t.skipped > 0:
 		return types.TemplateStatusWarning
-	default:
-		return types.TemplateStatusOK
 	}
+	// a data value no label file knows, seen at render: the boot was fine, the reports are not
+	for _, misses := range t.misses {
+		if hasMisses(misses) {
+			return types.TemplateStatusWarning
+		}
+	}
+	return types.TemplateStatusOK
 }
 
 func (t *Templates) Files() []string {

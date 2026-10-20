@@ -123,7 +123,10 @@ func (l labelSet) zygosity(occurrence types.ReportOccurrence, isProband bool) st
 }
 
 func (l labelSet) zygosityLabel(code string) string {
-	if label, ok := l.lookup("zygosity." + code); ok {
+	if code == "" {
+		return ""
+	}
+	if label, ok := l.translate("zygosity." + code); ok {
 		return label
 	}
 	return code
@@ -154,7 +157,8 @@ func (l labelSet) clinvar(interpretations []string) string {
 	}
 	translated := make([]string, len(interpretations))
 	for i, code := range interpretations {
-		if label, ok := l.lookup("clinvar." + strings.ToLower(code)); ok {
+		// ClinVar spells a value either way across sources (Likely_benign, Likely benign)
+		if label, ok := l.translate("clinvar." + strings.ReplaceAll(strings.ToLower(code), " ", "_")); ok {
 			translated[i] = label
 		} else {
 			translated[i] = code
@@ -183,10 +187,10 @@ func (l labelSet) omim(gene *types.ReportGene, interpretation *types.ReportGerml
 }
 
 func (l labelSet) classification(interpretation *types.ReportGermlineInterpretation) string {
-	if interpretation == nil {
+	if interpretation == nil || interpretation.Classification == "" {
 		return ""
 	}
-	label, _ := l.lookup("classification." + interpretation.Classification)
+	label, _ := l.translate("classification." + interpretation.Classification)
 	return label
 }
 
@@ -223,27 +227,27 @@ func percent(ratio float32) string {
 }
 
 func (l labelSet) clinicalUtility(interpretation *types.ReportSomaticInterpretation) string {
-	if interpretation == nil {
+	if interpretation == nil || interpretation.ClinicalUtility == "" {
 		return ""
 	}
-	label, _ := l.lookup("clinical_utility." + strings.ToLower(interpretation.ClinicalUtility))
+	label, _ := l.translate("clinical_utility." + strings.ToLower(interpretation.ClinicalUtility))
 	return label
 }
 
 // The somatic form stores oncogenicity as the five germline LOINC codes; older rows and the seed
 // carry the arranger strings, both have a key.
 func (l labelSet) oncogenicity(interpretation *types.ReportSomaticInterpretation) string {
-	if interpretation == nil {
+	if interpretation == nil || interpretation.Oncogenicity == "" {
 		return ""
 	}
-	label, _ := l.lookup("oncogenicity." + interpretation.Oncogenicity)
+	label, _ := l.translate("oncogenicity." + interpretation.Oncogenicity)
 	return label
 }
 
 func (l labelSet) cosmicTier(cosmic *types.ReportCosmic) string {
-	if cosmic == nil {
+	if cosmic == nil || cosmic.Tier == "" {
 		return ""
 	}
-	label, _ := l.lookup("cosmic_tier." + strings.ToLower(cosmic.Tier))
+	label, _ := l.translate("cosmic_tier." + strings.ToLower(cosmic.Tier))
 	return label
 }

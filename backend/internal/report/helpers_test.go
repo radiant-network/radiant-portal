@@ -109,6 +109,10 @@ func Test_Clinvar_Translated(t *testing.T) {
 	assert.Equal(t, "Pathogenic, Not provided", en.clinvar([]string{"Pathogenic", "not_provided"}))
 }
 
+func Test_Clinvar_SpaceOrUnderscoreSpelling(t *testing.T) {
+	assert.Equal(t, "Likely benign, Likely benign", en.clinvar([]string{"Likely benign", "Likely_benign"}))
+}
+
 func Test_Clinvar_UnknownKeptRaw(t *testing.T) {
 	assert.Equal(t, "test", en.clinvar([]string{"test"}))
 }
