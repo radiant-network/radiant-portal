@@ -119,7 +119,7 @@ export default function App() {
                 <TreatmentsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
-                <GenomicsTab />
+                <GenomicsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.TumorBoard}>
                 <TumorBoardTab />
