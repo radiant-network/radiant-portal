@@ -16,14 +16,14 @@ func Test_ParseMarkup_Empty(t *testing.T) {
 
 func Test_ParseMarkup_Bold(t *testing.T) {
 	assert.Equal(t, []run{
-		{Text: "Gène : "},
+		{Text: "Gene: "},
 		{Text: "TP53", Bold: true},
 		{Text: "\nNM_000546.6"},
-	}, parseMarkup("Gène : **TP53**\nNM_000546.6"))
+	}, parseMarkup("Gene: **TP53**\nNM_000546.6"))
 }
 
 func Test_ParseMarkup_WholeCellBold(t *testing.T) {
-	assert.Equal(t, []run{{Text: "Pathogénique", Bold: true}}, parseMarkup("**Pathogénique**"))
+	assert.Equal(t, []run{{Text: "Pathogenic", Bold: true}}, parseMarkup("**Pathogenic**"))
 }
 
 func Test_ParseMarkup_EmptyBoldRendersNothing(t *testing.T) {
@@ -37,17 +37,17 @@ func Test_ParseMarkup_UnmatchedBoldIsLiteral(t *testing.T) {
 
 func Test_ParseMarkup_Italic(t *testing.T) {
 	assert.Equal(t, []run{
-		{Text: "Prédiction "},
+		{Text: "Prediction "},
 		{Text: "in silico", Italic: true},
 		{Text: "²"},
-	}, parseMarkup("Prédiction _in silico_²"))
+	}, parseMarkup("Prediction _in silico_²"))
 }
 
 func Test_ParseMarkup_ItalicLine(t *testing.T) {
 	assert.Equal(t, []run{
 		{Text: "Gene1", Italic: true},
-		{Text: "\n(MIM : 123456, AD)"},
-	}, parseMarkup("_Gene1_\n(MIM : 123456, AD)"))
+		{Text: "\n(MIM: 123456, AD)"},
+	}, parseMarkup("_Gene1_\n(MIM: 123456, AD)"))
 }
 
 func Test_ParseMarkup_IntrawordUnderscoreIsLiteral(t *testing.T) {

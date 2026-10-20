@@ -53,6 +53,7 @@ type Template struct {
 	Tenant string
 	Kind   Kind
 	raw    []byte
+	labels labelSet
 	sheet  string
 	name   *template.Template
 	header []cellTemplate
@@ -81,9 +82,19 @@ func LoadTemplates(dir string) *Templates {
 		slog.Warn("report template dir unreadable", slog.String("dir", dir), slog.Any("error", err))
 		return t
 	}
+	defaults, err := defaultLabels()
+	if err != nil {
+		slog.Error("report templates disabled", slog.Any("error", err))
+		return t
+	}
+	sets := map[string]labelSet{}
+	setErr := map[string]error{}
 	for _, e := range entries {
 		// Hidden entries are mount plumbing (Kubernetes ConfigMap volumes expose a ..data symlink), not a stray file.
 		if e.IsDir() || strings.HasPrefix(e.Name(), ".") {
+			continue
+		}
+		if _, isLabels := labelsFromFilename(e.Name()); isLabels {
 			continue
 		}
 		kind, tenant, ok := templateFromFilename(e.Name())
@@ -96,7 +107,15 @@ func LoadTemplates(dir string) *Templates {
 			slog.Info("report template kind not supported yet, ignored", slog.String("file", e.Name()))
 			continue
 		}
-		tmpl, err := parseTemplate(filepath.Join(dir, e.Name()), kind, tenant)
+		if _, seen := sets[tenant]; !seen && setErr[tenant] == nil {
+			sets[tenant], setErr[tenant] = t.resolveLabels(dir, tenant, defaults)
+		}
+		if setErr[tenant] != nil {
+			slog.Warn("report template skipped", slog.String("file", e.Name()), slog.Any("error", setErr[tenant]))
+			t.skipped++
+			continue
+		}
+		tmpl, err := parseTemplate(filepath.Join(dir, e.Name()), kind, tenant, sets[tenant])
 		if err != nil {
 			slog.Warn("report template skipped", slog.String("file", e.Name()), slog.Any("error", err))
 			t.skipped++
@@ -112,6 +131,32 @@ func LoadTemplates(dir string) *Templates {
 	return t
 }
 
+// resolveLabels binds a tenant to its label file over the embedded defaults. A missing or incomplete
+// file still serves (defaults fill the holes) but counts as skipped so GET /status shows the warning.
+func (t *Templates) resolveLabels(dir, tenant string, defaults labels) (labelSet, error) {
+	file, missing, err := loadLabelFile(dir, tenant)
+	if err != nil {
+		return labelSet{}, fmt.Errorf("labels %s: %w", labelFileName(tenant), err)
+	}
+	switch {
+	case file == nil && tenant != types.DefaultTenantCode:
+		slog.Warn("report labels missing, defaults used", slog.String("tenant", tenant), slog.String("file", labelFileName(tenant)))
+		t.skipped++
+	case len(missing) > 0:
+		slog.Warn("report labels incomplete, defaults used", slog.String("tenant", tenant), slog.Any("keys", missing))
+		t.skipped++
+	}
+	return labelSet{tenant: file, defaults: defaults}, nil
+}
+
+func labelsFromFilename(name string) (string, bool) {
+	if !strings.HasPrefix(name, templatePrefix) || !strings.HasSuffix(name, labelExt) {
+		return "", false
+	}
+	tenant := strings.TrimSuffix(strings.TrimPrefix(name, templatePrefix), labelExt)
+	return tenant, tenant != ""
+}
+
 func templateFromFilename(name string) (Kind, string, bool) {
 	if !strings.HasPrefix(name, templatePrefix) || !strings.HasSuffix(name, templateExt) {
 		return "", "", false
@@ -123,7 +168,7 @@ func templateFromFilename(name string) (Kind, string, bool) {
 	return Kind(kind), tenant, true
 }
 
-func parseTemplate(path string, kind Kind, tenant string) (*Template, error) {
+func parseTemplate(path string, kind Kind, tenant string, l labelSet) (*Template, error) {
 	raw, err := os.ReadFile(path) // #nosec G304 -- path comes from the operator-controlled template dir
 	if err != nil {
 		return nil, fmt.Errorf("read template: %w", err)
@@ -139,8 +184,9 @@ func parseTemplate(path string, kind Kind, tenant string) (*Template, error) {
 		return nil, fmt.Errorf("template must hold one sheet, found %d", len(sheets))
 	}
 	sheet := sheets[0]
-	t := &Template{File: filepath.Base(path), Tenant: tenant, Kind: kind, raw: raw, sheet: sheet}
-	if t.name, err = parseCell("sheet name", sheet); err != nil {
+	t := &Template{File: filepath.Base(path), Tenant: tenant, Kind: kind, raw: raw, labels: l, sheet: sheet}
+	funcs := l.funcs()
+	if t.name, err = parseCell("sheet name", sheet, funcs); err != nil {
 		return nil, err
 	}
 	if err := rejectLayout(f, sheet); err != nil {
@@ -155,10 +201,10 @@ func parseTemplate(path string, kind Kind, tenant string) (*Template, error) {
 			return nil, fmt.Errorf("row %d: only the header row and the placeholder row are allowed", r+1)
 		}
 	}
-	if t.header, err = parseRow(f, sheet, rows, headerRow); err != nil {
+	if t.header, err = parseRow(f, sheet, rows, headerRow, funcs); err != nil {
 		return nil, err
 	}
-	if t.repeat, err = parseRow(f, sheet, rows, repeatRow); err != nil {
+	if t.repeat, err = parseRow(f, sheet, rows, repeatRow, funcs); err != nil {
 		return nil, err
 	}
 	if len(t.repeat) == 0 {
@@ -193,7 +239,7 @@ func rejectLayout(f *excelize.File, sheet string) error {
 	return nil
 }
 
-func parseRow(f *excelize.File, sheet string, rows [][]string, row int) ([]cellTemplate, error) {
+func parseRow(f *excelize.File, sheet string, rows [][]string, row int, funcs template.FuncMap) ([]cellTemplate, error) {
 	if row > len(rows) {
 		return nil, nil
 	}
@@ -214,7 +260,7 @@ func parseRow(f *excelize.File, sheet string, rows [][]string, row int) ([]cellT
 		if text == "" {
 			continue
 		}
-		tmpl, err := parseCell(cell, text)
+		tmpl, err := parseCell(cell, text, funcs)
 		if err != nil {
 			return nil, err
 		}
@@ -223,8 +269,8 @@ func parseRow(f *excelize.File, sheet string, rows [][]string, row int) ([]cellT
 	return cells, nil
 }
 
-func parseCell(name, text string) (*template.Template, error) {
-	tmpl, err := template.New(name).Funcs(helpers).Parse(text)
+func parseCell(name, text string, funcs template.FuncMap) (*template.Template, error) {
+	tmpl, err := template.New(name).Funcs(funcs).Parse(text)
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", name, err)
 	}

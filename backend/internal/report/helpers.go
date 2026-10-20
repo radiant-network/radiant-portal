@@ -9,64 +9,30 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// helpers are the functions a template cell may call. Values come back translated (the
-// clin-arranger formatters); the fixed French labels around them stay in the template cells.
-var helpers = template.FuncMap{
-	"lines":          lines,
-	"join":           join,
-	"exon":           exon,
-	"score":          score,
-	"af":             af,
-	"zygosity":       zygosity,
-	"gnomad":         gnomad,
-	"clinvar":        clinvar,
-	"omim":           omim,
-	"classification": classification,
-	"mane":           mane,
-	"citations":      citations,
+// funcs are the functions a template cell may call. Values come back translated with the tenant's
+// labels (the clin-arranger formatters); the fixed labels around them stay in the template cells.
+func (l labelSet) funcs() template.FuncMap {
+	return template.FuncMap{
+		"lines":          lines,
+		"join":           join,
+		"exon":           l.exon,
+		"score":          score,
+		"af":             af,
+		"zygosity":       l.zygosity,
+		"gnomad":         gnomad,
+		"clinvar":        l.clinvar,
+		"omim":           l.omim,
+		"classification": l.classification,
+		"mane":           mane,
+		"citations":      citations,
+	}
 }
 
-var zygosityLabels = map[string]string{
-	"HOM": "Homozygote",
-	"HET": "Hétérozygote",
-	"HEM": "Hémizygote",
-}
-
+// zygosityShort is what arranger prints for a parent: the code lowercased, ref when absent.
 var zygosityShortLabels = map[string]string{
 	"HOM": "hom",
 	"HET": "het",
 	"HEM": "hem",
-}
-
-var clinvarLabels = map[string]string{
-	"Affects":               "Affecte",
-	"association":           "Association",
-	"association_not_found": "Association non trouvée",
-	"Benign":                "Bénigne",
-	"confers_sensitivity":   "Confère une sensibilité",
-	"Conflicting_classifications_of_pathogenicity": "Classifications conflictuelles",
-	"Conflicting_interpretations_of_pathogenicity": "Interprétations conflictuelles",
-	"drug_response":                            "Réponse au médicament",
-	"Likely_benign":                            "Probablement bénigne",
-	"Likely_pathogenic":                        "Probablement pathogénique",
-	"Likely_risk_allele":                       "Allèle de risque probable",
-	"low_penetrance":                           "Faible pénétrance",
-	"no_classification_for_the_single_variant": "Pas de classification pour le variant unique",
-	"not_provided":                             "Non fourni",
-	"other":                                    "Autre",
-	"Pathogenic":                               "Pathogénique",
-	"protective":                               "Protecteur",
-	"risk_factor":                              "Facteur de risque",
-	"Uncertain_risk_allele":                    "Allèle à risque incertain",
-	"Uncertain_significance":                   "De signification incertaine",
-}
-
-var classificationLabels = map[string]string{
-	"LA6668-3":  "Pathogénique",
-	"LA26332-9": "Probablement pathogénique",
-	"LA26333-7": "Variant de signification incertaine",
-	"LA26334-5": "Probablement bénigne",
-	"LA6675-8":  "Bénigne",
 }
 
 func lines(parts ...string) string {
@@ -83,12 +49,16 @@ func join(sep string, list []string) string {
 	return strings.Join(list, sep)
 }
 
-func exon(rank, total string) string {
-	ratio := lines(rank, total)
-	if ratio == "" {
-		return ""
+func (l labelSet) exon(rank, total string) string {
+	switch {
+	case rank != "" && total != "":
+		return fmt.Sprintf(l.get("exon.rank_total"), rank, total)
+	case rank != "":
+		return fmt.Sprintf(l.get("exon.rank"), rank)
+	case total != "":
+		return fmt.Sprintf(l.get("exon.rank"), total)
 	}
-	return "Exon : " + strings.ReplaceAll(ratio, "\n", "/")
+	return ""
 }
 
 func score(value *float32) string {
@@ -104,21 +74,22 @@ func af(value float64) string {
 
 // zygosity ports clin-arranger translateZygosityAndParentalOrigins: the proband line carries the
 // parental origin in parentheses, a relative shows the zygosity alone.
-func zygosity(occurrence types.ReportOccurrence, isProband bool) string {
-	parts := []string{zygosityLabel(occurrence.Zygosity)}
+func (l labelSet) zygosity(occurrence types.ReportOccurrence, isProband bool) string {
+	parts := []string{l.zygosityLabel(occurrence.Zygosity)}
 	if !isProband {
 		return parts[0]
 	}
 	father, mother := occurrence.FatherZygosity, occurrence.MotherZygosity
+	fatherLabel, motherLabel := l.get("parent.father"), l.get("parent.mother")
 	switch origin := strings.ToLower(occurrence.ParentalOrigin); origin {
 	case "possible_denovo":
 		if father != "" && mother == "" {
-			parts = append(parts, "(Père ref)")
+			parts = append(parts, "("+fatherLabel+" ref)")
 		} else {
-			parts = append(parts, "(Mère ref)")
+			parts = append(parts, "("+motherLabel+" ref)")
 		}
 	case "denovo":
-		parts = append(parts, "(de novo)")
+		parts = append(parts, "("+l.get("zygosity.denovo")+")")
 	default:
 		fatherIn := origin == "possible_father" || origin == "father" || origin == "both"
 		motherIn := origin == "possible_mother" || origin == "mother" || origin == "both"
@@ -126,27 +97,27 @@ func zygosity(occurrence types.ReportOccurrence, isProband bool) string {
 		case fatherIn || motherIn:
 			var parents []string
 			if fatherIn {
-				parents = append(parents, "Père "+zygosityShort(father))
+				parents = append(parents, fatherLabel+" "+zygosityShort(father))
 			}
 			if motherIn {
-				parents = append(parents, "Mère "+zygosityShort(mother))
+				parents = append(parents, motherLabel+" "+zygosityShort(mother))
 			}
 			if fatherIn && !motherIn {
-				parents = append(parents, "Mère ref")
+				parents = append(parents, motherLabel+" ref")
 			}
 			if motherIn && !fatherIn {
-				parents = append(parents, "Père ref")
+				parents = append(parents, fatherLabel+" ref")
 			}
 			parts = append(parts, "("+strings.Join(parents, ", ")+")")
 		case father != "" || mother != "":
-			parts = append(parts, "(Père "+zygosityShort(father)+", Mère "+zygosityShort(mother)+")")
+			parts = append(parts, "("+fatherLabel+" "+zygosityShort(father)+", "+motherLabel+" "+zygosityShort(mother)+")")
 		}
 	}
 	return strings.Join(parts, "\n")
 }
 
-func zygosityLabel(code string) string {
-	if label, ok := zygosityLabels[code]; ok {
+func (l labelSet) zygosityLabel(code string) string {
+	if label, ok := l.lookup("zygosity." + code); ok {
 		return label
 	}
 	return code
@@ -171,45 +142,46 @@ func gnomad(value *types.ReportGnomad) *types.ReportGnomad {
 	return value
 }
 
-func clinvar(interpretations []string) string {
+func (l labelSet) clinvar(interpretations []string) string {
 	if len(interpretations) == 0 {
-		return "Aucune donnée"
+		return l.get("clinvar.none")
 	}
-	labels := make([]string, len(interpretations))
+	translated := make([]string, len(interpretations))
 	for i, code := range interpretations {
-		if label, ok := clinvarLabels[code]; ok {
-			labels[i] = label
+		if label, ok := l.lookup("clinvar." + strings.ToLower(code)); ok {
+			translated[i] = label
 		} else {
-			labels[i] = code
+			translated[i] = code
 		}
 	}
-	return strings.Join(labels, ", ")
+	return strings.Join(translated, ", ")
 }
 
-func omim(gene *types.ReportGene, interpretation *types.ReportGermlineInterpretation) string {
+func (l labelSet) omim(gene *types.ReportGene, interpretation *types.ReportGermlineInterpretation) string {
 	var blocks []string
 	if gene != nil {
 		for _, phenotype := range gene.Omim {
-			block := "_" + phenotype.Name + "_\n(MIM : " + phenotype.PhenotypeID
+			mim := phenotype.PhenotypeID
 			if len(phenotype.InheritanceCode) > 0 {
-				block += ", " + strings.Join(phenotype.InheritanceCode, ", ")
+				mim += ", " + strings.Join(phenotype.InheritanceCode, ", ")
 			}
-			blocks = append(blocks, block+")")
+			blocks = append(blocks, "_"+phenotype.Name+"_\n("+fmt.Sprintf(l.get("omim.mim"), mim)+")")
 		}
 	}
 	if interpretation != nil {
 		for _, pubmed := range interpretation.Pubmed {
-			blocks = append(blocks, "PMID : "+pubmed.CitationID)
+			blocks = append(blocks, fmt.Sprintf(l.get("omim.pmid"), pubmed.CitationID))
 		}
 	}
 	return strings.Join(blocks, "\n")
 }
 
-func classification(interpretation *types.ReportGermlineInterpretation) string {
+func (l labelSet) classification(interpretation *types.ReportGermlineInterpretation) string {
 	if interpretation == nil {
 		return ""
 	}
-	return classificationLabels[interpretation.Classification]
+	label, _ := l.lookup("classification." + interpretation.Classification)
+	return label
 }
 
 func mane(transcript types.ReportTranscript) string {

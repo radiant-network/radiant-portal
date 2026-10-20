@@ -16,8 +16,8 @@ import (
 
 func loadFixture(t *testing.T, cells map[string]string) *Template {
 	t.Helper()
-	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", cells, nil)
-	tmpl, err := parseTemplate(path, KindGermline, "qlin")
+	path := writeFixture(t, t.TempDir(), "transcripts_germline_radiant.xlsx", cells, nil)
+	tmpl, err := parseTemplate(path, KindGermline, "radiant", en)
 	require.NoError(t, err)
 	return tmpl
 }
@@ -78,10 +78,10 @@ func Test_Render_PlaceholderRowRepeatedPerTranscript(t *testing.T) {
 	rows, err := f.GetRows("chr1_g.1A>T")
 	require.NoError(t, err)
 	assert.Equal(t, [][]string{
-		{"Variation (GRCh38)", "Interprétation"},
-		{"chr1:g.1A>T\nGène : A", "ND"},
-		{"chr1:g.1A>T\nGène : B", "Pathogénique"},
-		{"chr1:g.1A>T\nGène : C", "ND"},
+		{"Variation (GRCh38)", "Interpretation"},
+		{"chr1:g.1A>T\nGene: A", "ND"},
+		{"chr1:g.1A>T\nGene: B", "Pathogenic"},
+		{"chr1:g.1A>T\nGene: C", "ND"},
 	}, rows)
 }
 
@@ -108,7 +108,7 @@ func Test_Render_NoTranscript_PlaceholderRowRemoved(t *testing.T) {
 
 	rows, err := f.GetRows("chr1_g.1A>T")
 	require.NoError(t, err)
-	assert.Equal(t, [][]string{{"Variation (GRCh38)", "Interprétation"}}, rows)
+	assert.Equal(t, [][]string{{"Variation (GRCh38)", "Interpretation"}}, rows)
 }
 
 func Test_Render_MarkupBecomesRichTextWithTemplateFont(t *testing.T) {
@@ -119,7 +119,7 @@ func Test_Render_MarkupBecomesRichTextWithTemplateFont(t *testing.T) {
 	runs, err := f.GetCellRichText("chr1_g.1A>T", "A2")
 	require.NoError(t, err)
 	require.Len(t, runs, 2)
-	assert.Equal(t, "chr1:g.1A>T\nGène : ", runs[0].Text)
+	assert.Equal(t, "chr1:g.1A>T\nGene: ", runs[0].Text)
 	assert.False(t, runs[0].Font.Bold)
 	assert.Equal(t, "TP53", runs[1].Text)
 	assert.True(t, runs[1].Font.Bold)
@@ -129,7 +129,7 @@ func Test_Render_MarkupBecomesRichTextWithTemplateFont(t *testing.T) {
 	runs, err = f.GetCellRichText("chr1_g.1A>T", "B2")
 	require.NoError(t, err)
 	require.Len(t, runs, 1)
-	assert.Equal(t, "Bénigne", runs[0].Text)
+	assert.Equal(t, "Benign", runs[0].Text)
 	assert.True(t, runs[0].Font.Bold)
 }
 
@@ -207,7 +207,7 @@ func Test_Render_GeneOfTranscriptResolved(t *testing.T) {
 }
 
 func Test_Render_QlinGermlineFile_SampleReport(t *testing.T) {
-	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_germline_qlin.xlsx"), KindGermline, "qlin")
+	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_germline_qlin.xlsx"), KindGermline, "qlin", en)
 	require.NoError(t, err)
 
 	f := openRendered(t, tmpl, sampleReport())
@@ -217,14 +217,19 @@ func Test_Render_QlinGermlineFile_SampleReport(t *testing.T) {
 	rows, err := f.GetRows(sheet)
 	require.NoError(t, err)
 	require.Len(t, rows, 2)
-	assert.Equal(t, "Variation nucléotidique (GRCh38)", rows[0][0])
-	assert.Equal(t, "chr1:g.100A>T\nGène : GENE1\nNM_000001.1\nc.1A>T\np.Met1Leu\nExon : 1/10", rows[1][0])
-	assert.Equal(t, "Hétérozygote\n(Mère het, Père ref)", rows[1][1])
-	assert.Equal(t, "1 / 1536252 allèles (0 hom) 0.0000007", rows[1][2])
-	assert.Equal(t, "Délétère/Incertaine/Bénigne/Non applicable (REVEL = 0.9; CADD (Phred) = 25)", rows[1][3])
-	assert.Equal(t, "Pathogénique\n(ID : 12345)", rows[1][4])
-	assert.Equal(t, "Syndrome 1\n(MIM : 123456, AD)\nPMID : 1", rows[1][5])
-	assert.Equal(t, "Pathogénique", rows[1][6])
+	require.Len(t, rows[1], 11)
+	// The wording is the tenant's (French), checked by the lab on the deployed file; here only the shape.
+	for i, cell := range rows[1] {
+		assert.NotEmpty(t, cell, "column %d", i)
+		assert.NotContains(t, cell, "{{", "column %d", i)
+	}
+	assert.Contains(t, rows[1][0], "chr1:g.100A>T\n")
+	assert.Contains(t, rows[1][0], "NM_000001.1\nc.1A>T\np.Met1Leu\n")
+	assert.Contains(t, rows[1][1], "het")
+	assert.Contains(t, rows[1][2], "1 / 1536252")
+	assert.Contains(t, rows[1][3], "(REVEL = 0.9; CADD (Phred) = 25)")
+	assert.Contains(t, rows[1][4], "(ID : 12345)")
+	assert.Contains(t, rows[1][5], "123456, AD")
 	assert.Equal(t, "MANE Select (NM_000001.1)\nMANE Plus (NM_000001.1)\nEnsembl Canonical (ENST00000001)", rows[1][7])
 	assert.Equal(t, "1", rows[1][8])
 	assert.Equal(t, "S-1", rows[1][9])

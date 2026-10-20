@@ -45,15 +45,12 @@ func Test_GetGermlineSNVTranscriptReport_Integration(t *testing.T) {
 				{"symbol": "BRAF", "omim": [
 					{"phenotype_id": "613706", "name": "Noonan syndrome 7", "inheritance_code": ["AD"]},
 					{"phenotype_id": "613707", "name": "LEOPARD syndrome 3", "inheritance_code": ["AD"]}
-				]},
-				{"symbol": "LINC01", "omim": []}
+				]}
 			],
 			"transcripts": [
 				{"transcript_id": "ENST00000646891", "source": "Ensembl", "version": "6", "symbol": "BRAF", "is_mane_select": true, "is_mane_plus": false, "is_canonical": true, "refseq_ids": ["NM_004333.6"], "dna_change": "c.1799T>A", "aa_change": "p.Val600Glu", "exon_rank": "15", "exon_total": "18", "revel_score": 0.931, "cadd_phred": 32, "consequences": ["missense_variant"], "vep_impact": "MODERATE"},
-				{"transcript_id": "ENST00000288602", "source": "Ensembl", "version": "11", "symbol": "BRAF", "is_mane_select": false, "is_mane_plus": false, "is_canonical": false, "dna_change": "c.1799T>A", "aa_change": "p.Val600Glu", "exon_rank": "15", "exon_total": "18", "consequences": ["missense_variant"], "vep_impact": "MODERATE"},
 				{"transcript_id": "T001", "symbol": "BRAF", "is_mane_select": false, "is_mane_plus": false, "is_canonical": false, "consequences": ["intron_variant"], "vep_impact": "MODIFIER",
-				 "interpretation": {"classification": "LA6668-3", "classification_criterias": ["PM1"], "condition": "MONDO:0000001", "transmission_modes": ["autosomal_dominant_de_novo"]}},
-				{"transcript_id": "NR_027010", "source": "RefSeq", "version": "2", "symbol": "LINC01", "is_mane_select": false, "is_mane_plus": false, "is_canonical": false, "refseq_ids": ["NR_027010.2"], "dna_change": "n.100T>A", "consequences": ["non_coding_transcript_exon_variant"], "vep_impact": "MODIFIER"}
+				 "interpretation": {"classification": "LA6668-3", "classification_criterias": ["PM1"], "condition": "MONDO:0000001", "transmission_modes": ["autosomal_dominant_de_novo"]}}
 			]
 		}`, w.Body.String())
 	})

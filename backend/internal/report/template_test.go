@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,8 +16,8 @@ import (
 // placeholder cells. Tests override cells or mutate the workbook before it is saved.
 var fixtureCells = map[string]string{
 	"A1": "Variation ({{ .Case.GenomeBuild }})",
-	"B1": "Interprétation",
-	"A2": `{{ lines .Variant.Hgvsg (printf "Gène : **%s**" .Transcript.Symbol) }}`,
+	"B1": "Interpretation",
+	"A2": `{{ lines .Variant.Hgvsg (printf "Gene: **%s**" .Transcript.Symbol) }}`,
 	"B2": "{{ with classification .Transcript.Interpretation }}**{{ . }}**{{ else }}ND{{ end }}",
 }
 
@@ -41,6 +42,94 @@ func writeFixture(t *testing.T, dir, name string, cells map[string]string, mutat
 	return path
 }
 
+func Test_LoadTemplates_TenantWithoutLabels_DefaultsAndWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", withCell("B2", "{{ zygosity .Occurrence .Case.IsProband }}"), nil)
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, []string{"transcripts_germline_qlin.xlsx"}, templates.Files())
+	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
+	tmpl, err := templates.For("qlin", KindGermline)
+	require.NoError(t, err)
+	f := openRendered(t, tmpl, sampleReport())
+	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
+	require.NoError(t, err)
+	assert.Equal(t, "Heterozygous\n(Mother het, Father ref)", value)
+}
+
+func Test_LoadTemplates_DefaultTenantWithoutLabels_NoWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_radiant.xlsx", fixtureCells, nil)
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, types.TemplateStatusOK, templates.Status())
+}
+
+func Test_LoadTemplates_TenantLabelsOverrideDefaults(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", withCell("B2", "{{ zygosity .Occurrence .Case.IsProband }}"), nil)
+	writeLabels(t, dir, "qlin", fullLabels(map[string]string{"zygosity.HET": "Hz", "parent.mother": "M", "parent.father": "F"}))
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, types.TemplateStatusOK, templates.Status())
+	tmpl, err := templates.For("qlin", KindGermline)
+	require.NoError(t, err)
+	f := openRendered(t, tmpl, sampleReport())
+	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
+	require.NoError(t, err)
+	assert.Equal(t, "Hz\n(M het, F ref)", value)
+}
+
+func Test_LoadTemplates_TenantLabelsIncomplete_DefaultsAndWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", withCell("B2", "{{ zygosity .Occurrence .Case.IsProband }}"), nil)
+	writeLabels(t, dir, "qlin", `{"zygosity.HET": "Hz"}`)
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, []string{"transcripts_germline_qlin.xlsx"}, templates.Files())
+	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
+	tmpl, err := templates.For("qlin", KindGermline)
+	require.NoError(t, err)
+	f := openRendered(t, tmpl, sampleReport())
+	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
+	require.NoError(t, err)
+	assert.Equal(t, "Hz\n(Mother het, Father ref)", value)
+}
+
+func Test_LoadTemplates_TenantLabelsBadJSON_TemplatesSkipped(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)
+	writeFixture(t, dir, "transcripts_germline_radiant.xlsx", fixtureCells, nil)
+	writeLabels(t, dir, "qlin", `{`)
+
+	templates := LoadTemplates(dir)
+
+	assert.Equal(t, []string{"transcripts_germline_radiant.xlsx"}, templates.Files())
+	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
+	_, err := templates.For("qlin", KindGermline)
+	assert.ErrorIs(t, err, ErrTemplateMissing)
+}
+
+// fullLabels is a complete label file built from the defaults with overrides, so no warning fires.
+func fullLabels(overrides map[string]string) string {
+	full := labels{}
+	for k, v := range en.defaults {
+		full[k] = v
+	}
+	for k, v := range overrides {
+		full[k] = v
+	}
+	raw, err := json.Marshal(full)
+	if err != nil {
+		panic(err)
+	}
+	return string(raw)
+}
+
 func Test_LoadTemplates_EmptyDirEnv_NoTemplates(t *testing.T) {
 	templates := LoadTemplates("")
 
@@ -57,6 +146,7 @@ func Test_LoadTemplates_MissingDir_NoTemplates(t *testing.T) {
 
 func Test_LoadTemplates_OneTemplatePerTenantAndKind(t *testing.T) {
 	dir := t.TempDir()
+	writeLabels(t, dir, "qlin", fullLabels(nil))
 	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)
 	writeFixture(t, dir, "transcripts_germline_radiant.xlsx", fixtureCells, nil)
 
@@ -90,6 +180,7 @@ func Test_LoadTemplates_NilTemplates_ErrTemplateMissing(t *testing.T) {
 
 func Test_LoadTemplates_HiddenEntriesIgnored(t *testing.T) {
 	dir := t.TempDir()
+	writeLabels(t, dir, "qlin", fullLabels(nil))
 	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)
 	require.NoError(t, os.Mkdir(filepath.Join(dir, "..data"), 0o750))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".hidden"), []byte("x"), 0o600))
@@ -113,6 +204,7 @@ func Test_LoadTemplates_UnexpectedFile_Warning(t *testing.T) {
 
 func Test_LoadTemplates_SomaticNotSupportedYet_IgnoredWithoutWarning(t *testing.T) {
 	dir := t.TempDir()
+	writeLabels(t, dir, "qlin", fullLabels(nil))
 	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "transcripts_somatic_qlin.xlsx"), []byte("not even xlsx"), 0o600))
 
@@ -154,7 +246,7 @@ func withCell(cell, text string) map[string]string {
 func Test_ParseTemplate_UnknownField_Rejected(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", withCell("A2", "{{ .Transcript.Nope }}"), nil)
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "dry run")
@@ -164,7 +256,7 @@ func Test_ParseTemplate_UnknownField_Rejected(t *testing.T) {
 func Test_ParseTemplate_UnknownFieldInElseBranch_Rejected(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", withCell("B2", "{{ with .Transcript.Interpretation }}ok{{ else }}{{ .Variant.Nope }}{{ end }}"), nil)
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Nope")
@@ -173,7 +265,7 @@ func Test_ParseTemplate_UnknownFieldInElseBranch_Rejected(t *testing.T) {
 func Test_ParseTemplate_UnknownHelper_Rejected(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", withCell("A2", "{{ nope .Variant }}"), nil)
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `parse A2`)
@@ -184,7 +276,7 @@ func Test_ParseTemplate_BadSheetName_Rejected(t *testing.T) {
 		require.NoError(t, f.SetSheetName(sheet, "{{ .Variant.Nope }}"))
 	})
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "sheet name")
@@ -195,7 +287,7 @@ func Test_ParseTemplate_Formula_Rejected(t *testing.T) {
 		require.NoError(t, f.SetCellFormula(sheet, "B2", "=A2"))
 	})
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "formulas are not supported")
@@ -206,7 +298,7 @@ func Test_ParseTemplate_MergedCells_Rejected(t *testing.T) {
 		require.NoError(t, f.MergeCell(sheet, "A2", "B2"))
 	})
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "merged cells are not supported")
@@ -219,7 +311,7 @@ func Test_ParseTemplate_ConditionalFormat_Rejected(t *testing.T) {
 		require.NoError(t, f.SetConditionalFormat(sheet, "A2:B2", []excelize.ConditionalFormatOptions{{Type: "cell", Criteria: "==", Format: &style, Value: "x"}}))
 	})
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "conditional formatting is not supported")
@@ -228,7 +320,7 @@ func Test_ParseTemplate_ConditionalFormat_Rejected(t *testing.T) {
 func Test_ParseTemplate_ContentBelowPlaceholderRow_Rejected(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", withCell("A4", "legend"), nil)
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "row 4")
@@ -240,7 +332,7 @@ func Test_ParseTemplate_SecondSheet_Rejected(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "one sheet")
@@ -249,14 +341,14 @@ func Test_ParseTemplate_SecondSheet_Rejected(t *testing.T) {
 func Test_ParseTemplate_EmptyPlaceholderRow_Rejected(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "transcripts_germline_qlin.xlsx", map[string]string{"A1": "Header"}, nil)
 
-	_, err := parseTemplate(path, KindGermline, "qlin")
+	_, err := parseTemplate(path, KindGermline, "qlin", en)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "placeholder row is empty")
 }
 
 func Test_ParseTemplate_QlinGermlineFile_Loads(t *testing.T) {
-	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_germline_qlin.xlsx"), KindGermline, "qlin")
+	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_germline_qlin.xlsx"), KindGermline, "qlin", en)
 
 	require.NoError(t, err)
 	assert.Len(t, tmpl.header, 11)

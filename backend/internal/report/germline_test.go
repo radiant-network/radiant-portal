@@ -7,6 +7,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type fakeData struct {
@@ -64,63 +65,96 @@ func transcriptIDs(transcripts []types.ReportTranscript) []string {
 	return ids
 }
 
-func Test_BuildTranscripts_OneRowPerEnsemblTranscript_ManeSelectFirst(t *testing.T) {
-	transcripts := buildTranscripts(brafRows())
+func Test_BuildTranscripts_ManeSelectRowsOnly(t *testing.T) {
+	transcripts := buildTranscripts(brafRows(), nil)
 
-	assert.Equal(t, []string{"ENST00000646891", "ENST00000288602", "T001", "NR_027010"}, transcriptIDs(transcripts))
+	assert.Equal(t, []string{"ENST00000646891"}, transcriptIDs(transcripts))
+}
+
+func Test_BuildTranscripts_NoManeSelect_NoRow(t *testing.T) {
+	transcripts := buildTranscripts([]types.ReportConsequenceRow{
+		{LocusID: 1, Symbol: "G", TranscriptID: "ENST1", Source: "Ensembl", IsCanonical: true},
+		{LocusID: 1, Symbol: "G", TranscriptID: "NM_1", Source: "RefSeq"},
+	}, nil)
+
+	assert.NotNil(t, transcripts)
+	assert.Empty(t, transcripts)
+}
+
+func Test_BuildTranscripts_InterpretedTranscriptKeptWithoutMane(t *testing.T) {
+	transcripts := buildTranscripts(brafRows(), map[string]bool{"T001": true})
+
+	assert.Equal(t, []string{"ENST00000646891", "T001"}, transcriptIDs(transcripts))
 }
 
 func Test_BuildTranscripts_RefseqIdFromManePair(t *testing.T) {
-	transcripts := buildTranscripts(brafRows())
+	transcripts := buildTranscripts(brafRows(), nil)
 
 	assert.Equal(t, []string{"NM_004333.6"}, transcripts[0].RefseqIDs)
-	assert.Nil(t, transcripts[1].RefseqIDs)
 }
 
 func Test_BuildTranscripts_RefseqIdFromPairRow_WhenManeSelectEmpty(t *testing.T) {
 	transcripts := buildTranscripts([]types.ReportConsequenceRow{
-		{LocusID: 1, Symbol: "G", TranscriptID: "ENST1", Source: "Ensembl", IsManePlus: true, ManePairTranscriptID: "NM_1"},
-		{LocusID: 1, Symbol: "G", TranscriptID: "NM_1", TranscriptVersion: "3", Source: "RefSeq", IsManePlus: true, ManePairTranscriptID: "ENST1"},
-	})
+		{LocusID: 1, Symbol: "G", TranscriptID: "ENST1", Source: "Ensembl", IsManeSelect: true, ManePairTranscriptID: "NM_1"},
+		{LocusID: 1, Symbol: "G", TranscriptID: "NM_1", TranscriptVersion: "3", Source: "RefSeq", IsManeSelect: true, ManePairTranscriptID: "ENST1"},
+	}, nil)
 
 	if assert.Len(t, transcripts, 1) {
 		assert.Equal(t, []string{"NM_1.3"}, transcripts[0].RefseqIDs)
 	}
 }
 
-func Test_BuildTranscripts_RefseqOnlyGene_KeepsItsRow(t *testing.T) {
-	transcripts := buildTranscripts(brafRows())
+func Test_BuildTranscripts_RefseqOnlyGene_KeepsItsManeSelectRow(t *testing.T) {
+	transcripts := buildTranscripts([]types.ReportConsequenceRow{
+		{LocusID: 1, Symbol: "LINC01", TranscriptID: "NR_027010", TranscriptVersion: "2", Source: "RefSeq", IsManeSelect: true},
+		{LocusID: 1, Symbol: "LINC01", TranscriptID: "NR_000001", TranscriptVersion: "1", Source: "RefSeq"},
+	}, nil)
 
-	refseqOnly := transcripts[3]
-	assert.Equal(t, "LINC01", refseqOnly.Symbol)
-	assert.Equal(t, "RefSeq", refseqOnly.Source)
-	assert.Equal(t, []string{"NR_027010.2"}, refseqOnly.RefseqIDs)
+	if assert.Len(t, transcripts, 1) {
+		assert.Equal(t, "LINC01", transcripts[0].Symbol)
+		assert.Equal(t, "RefSeq", transcripts[0].Source)
+		assert.Equal(t, []string{"NR_027010.2"}, transcripts[0].RefseqIDs)
+	}
+}
+
+func Test_BuildTranscripts_RefseqTwin_HiddenBehindEnsembl(t *testing.T) {
+	transcripts := buildTranscripts([]types.ReportConsequenceRow{
+		{LocusID: 1, Symbol: "G", TranscriptID: "ENST1", Source: "Ensembl", IsManeSelect: true, ManeSelect: "NM_1.3"},
+		{LocusID: 1, Symbol: "G", TranscriptID: "NM_1", TranscriptVersion: "3", Source: "RefSeq", IsManeSelect: true},
+	}, nil)
+
+	assert.Equal(t, []string{"ENST1"}, transcriptIDs(transcripts))
 }
 
 func Test_BuildTranscripts_LegacyNullSource_CountsAsEnsembl(t *testing.T) {
-	transcripts := buildTranscripts(brafRows())
+	transcripts := buildTranscripts([]types.ReportConsequenceRow{
+		{LocusID: 1, Symbol: "G", TranscriptID: "T001", IsManeSelect: true},
+		{LocusID: 1, Symbol: "G", TranscriptID: "NM_1", Source: "RefSeq", IsManeSelect: true},
+	}, nil)
 
-	assert.Equal(t, "T001", transcripts[2].TranscriptID)
-	assert.Equal(t, "", transcripts[2].Source)
+	if assert.Len(t, transcripts, 1) {
+		assert.Equal(t, "T001", transcripts[0].TranscriptID)
+		assert.Equal(t, "", transcripts[0].Source)
+	}
 }
 
 func Test_BuildTranscripts_NoRows(t *testing.T) {
-	transcripts := buildTranscripts(nil)
+	transcripts := buildTranscripts(nil, nil)
 
 	assert.NotNil(t, transcripts)
 	assert.Empty(t, transcripts)
 }
 
-func Test_BuildTranscripts_Order_ManeSelect_ManePlus_Canonical_Symbol_Id(t *testing.T) {
+func Test_BuildTranscripts_Order_ManePlus_Canonical_Symbol_Id(t *testing.T) {
 	transcripts := buildTranscripts([]types.ReportConsequenceRow{
-		{Symbol: "B", TranscriptID: "ENST4", Source: "Ensembl"},
-		{Symbol: "A", TranscriptID: "ENST3", Source: "Ensembl"},
-		{Symbol: "B", TranscriptID: "ENST2", Source: "Ensembl", IsCanonical: true},
-		{Symbol: "B", TranscriptID: "ENST1", Source: "Ensembl", IsManePlus: true},
-		{Symbol: "B", TranscriptID: "ENST0", Source: "Ensembl", IsManeSelect: true},
-	})
+		{Symbol: "B", TranscriptID: "ENST4", Source: "Ensembl", IsManeSelect: true},
+		{Symbol: "A", TranscriptID: "ENST3", Source: "Ensembl", IsManeSelect: true},
+		{Symbol: "B", TranscriptID: "ENST2", Source: "Ensembl", IsManeSelect: true, IsCanonical: true},
+		{Symbol: "B", TranscriptID: "ENST1", Source: "Ensembl", IsManeSelect: true, IsManePlus: true},
+		{Symbol: "B", TranscriptID: "ENST0", Source: "Ensembl"},
+	}, nil)
 
-	assert.Equal(t, []string{"ENST0", "ENST1", "ENST2", "ENST3", "ENST4"}, transcriptIDs(transcripts))
+	assert.Equal(t, []string{"ENST1", "ENST2", "ENST3", "ENST4"}, transcriptIDs(transcripts))
 }
 
 func occurrenceRow(locusId int64) types.ReportOccurrenceRow {
@@ -164,19 +198,37 @@ func Test_Build_AssemblesReport(t *testing.T) {
 		assert.Equal(t, types.ReportOccurrence{Zygosity: "HET", ParentalOrigin: "mother", FatherZygosity: "WT", MotherZygosity: "HET", TransmissionMode: "autosomal_dominant", AdRatio: 0.5, AdAlt: 10, AdTotal: 20}, report.Occurrence)
 		assert.Equal(t, []types.ReportGene{
 			{Symbol: "BRAF", Omim: []types.ReportOmim{{PhenotypeID: "613706", Name: "Noonan syndrome 7", InheritanceCode: []string{"AD"}}}},
-			{Symbol: "LINC01", Omim: []types.ReportOmim{}},
 		}, report.Genes)
-		assert.Equal(t, []string{"BRAF", "LINC01"}, data.omimSymbols)
-		if assert.Len(t, report.Transcripts, 4) {
+		assert.Equal(t, []string{"BRAF"}, data.omimSymbols)
+		if assert.Len(t, report.Transcripts, 1) {
 			if assert.NotNil(t, report.Transcripts[0].Interpretation) {
 				assert.Equal(t, "LA6668-3", report.Transcripts[0].Interpretation.Classification)
 				assert.Equal(t, "MONDO:0000001", report.Transcripts[0].Interpretation.Condition)
 				assert.Equal(t, []types.InterpretationPubmed{{CitationID: "1", Citation: "format1"}}, report.Transcripts[0].Interpretation.Pubmed)
 			}
-			assert.Nil(t, report.Transcripts[1].Interpretation)
-			assert.Nil(t, report.Transcripts[2].Interpretation)
-			assert.Nil(t, report.Transcripts[3].Interpretation)
 		}
+	}
+}
+
+func Test_Build_InterpretedTranscriptWithoutMane_KeptWithInterpretation(t *testing.T) {
+	data := &fakeData{
+		reportContext: &types.ReportContext{Part: 1, IsProband: true},
+		occurrences:   []types.ReportOccurrenceRow{occurrenceRow(1000)},
+		consequences:  brafRows(),
+	}
+	interpretations := &fakeInterpretations{interpretations: []types.InterpretationGermline{{
+		InterpretationCommon: types.InterpretationCommon{LocusId: "1000", TranscriptId: "T001"},
+		Classification:       "LA6675-8",
+	}}}
+
+	reports, err := newBuilder(data, interpretations).Build(t.Context(), 1, 1, 5, []int{1000})
+
+	require.NoError(t, err)
+	require.Len(t, reports, 1)
+	assert.Equal(t, []string{"ENST00000646891", "T001"}, transcriptIDs(reports[0].Transcripts))
+	assert.Nil(t, reports[0].Transcripts[0].Interpretation)
+	if assert.NotNil(t, reports[0].Transcripts[1].Interpretation) {
+		assert.Equal(t, "LA6675-8", reports[0].Transcripts[1].Interpretation.Classification)
 	}
 }
 
