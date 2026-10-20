@@ -44,6 +44,11 @@
     },
     "spinner": {
       "loading": "Chargement en cours"
+    },
+    "timeline": {
+      "filters_group": "Filtrer la chronologie par type",
+      "results_count_one": "{{count}} résultat affiché",
+      "results_count_other": "{{count}} résultats affichés"
     }
   },
   "admin": {
@@ -1266,6 +1271,29 @@
         "connected": "Connecté"
       }
     },
+    "timeline": {
+      "title": "Chronologie clinique",
+      "description": "Événements de maladie, chirurgies, radiothérapie et traitement médical selon l'âge en jours depuis la naissance.",
+      "event_type": {
+        "initial_cns_tumor": "Tumeur SNC initiale",
+        "progressive": "Progression",
+        "recurrence": "Récurrence",
+        "second_malignancy": "Deuxième cancer",
+        "deceased": "Décès",
+        "unavailable": "Non disponible",
+        "not_reported": "Non rapporté"
+      },
+      "event_fields": {
+        "tumor_locations": "Localisations tumorales",
+        "metastasis": "Métastase",
+        "metastasis_locations": "Localisations des métastases"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
+      }
+    },
     "treatments": {
       "title_count_one": "{{count}} traitement",
       "title_count_other": "{{count}} traitements",
@@ -1286,6 +1314,27 @@
         "focal_boost": "Surimpression focale",
         "total_primary": "Total sur la tumeur primitive"
       }
+    }
+  },
+  "timeline": {
+    "evidence": "Preuve",
+    "initial_treatment": "Traitement initial",
+    "marker": {
+      "day": "Jour {{day}}",
+      "day_range": "Jour {{start}} — {{end}}",
+      "day_unknown": "Jour n/a",
+      "years": "{{value}} a"
+    },
+    "filters": {
+      "all": "Tous",
+      "events": "Évolution",
+      "surgery": "Chirurgie",
+      "chemotherapy": "Chimiothérapie",
+      "radiation": "Radiothérapie"
+    },
+    "empty": {
+      "title": "Aucun résultat",
+      "description": "Ajuster vos filtres et essayer à nouveau."
     }
   },
   "patient_exploration": {

@@ -113,7 +113,7 @@ export default function App() {
                 <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
-                <TimelineTab />
+                <TimelineTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
                 <TreatmentsTab patient={data} isLoading={isLoading} />
