@@ -40,6 +40,25 @@ apps/<app>/src/<area>/table/
 - Props are a small named `type <Name>CellProps = { … }` — accept the concrete values the cell needs (`value`, `days`, `patient`), not the whole `CellContext` unless several fields are read.
 - Reuse the shared primitives from `components/base/data-table/cells/` (`BadgeCell`, `AnchorLinkCell`, `TextTooltipCell`, `DateCell`, `EmptyCell`, `NumberCell`, …) inside the extracted cell rather than reaching for raw shadcn components.
 
+## No barrel files
+
+Never add `index.ts` / `index.tsx` barrel files to re-export module contents. The codebase convention is: consumers import directly from the file that defines a component.
+
+```ts
+// ✓ Correct
+import TimelineBadge from '@/components/base/timeline/timeline-badge';
+import { TimeMarker } from '@/components/base/timeline/time-marker';
+
+// ✗ Forbidden — do not create this
+// @/components/base/timeline/index.ts
+export { default as TimelineBadge } from './timeline-badge';
+export { TimeMarker } from './time-marker';
+```
+
+Reasons: tree-shaking is more reliable without wildcard re-exports, import paths stay explicit about which file owns a symbol, and the IDE / autoimport suggests one canonical path per export.
+
+A handful of legacy barrels exist (`components/base/buttons/index.ts`, `components/base/avatar/index.ts`, `components/base/assignation/user-selection/index.ts`). Do not emulate them, do not add new ones, and prefer removing them if you edit the surrounding code.
+
 ## Component selection order
 
 When picking a UI component, follow this priority — do not jump to shadcn first.
