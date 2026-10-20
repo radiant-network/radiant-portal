@@ -166,7 +166,7 @@ export const kfConfig = {
     app_id: ApplicationId.variant_entity,
   },
   portal: {
-    name: 'Radiant',
+    name: 'Kids First',
     navigation: {
       dashboard: true,
       variant: true,

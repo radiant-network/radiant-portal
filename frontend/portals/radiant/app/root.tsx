@@ -11,7 +11,7 @@ import { I18nProvider } from '@/components/hooks/I18nProvider';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
-import { radiantFeatureDefinitions } from './beta-features';
+import { featureDefinitions } from './beta-features';
 
 declare const __PROJECT__: PortalConfig;
 
@@ -50,38 +50,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="application-name" content={__PROJECT__.portal.name} />
         <Meta />
         <Links />
-        <link rel="icon" type="image/x-icon" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon.ico`} />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-16x16.png`}
-          sizes="16x16"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-32x32.png`}
-          sizes="32x32"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-96x96.png`}
-          sizes="96x96"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-128x128.png`}
-          sizes="128x128"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-196x196.png`}
-          sizes="196x196"
-        />
-        <link rel="manifest" href={`/${__PROJECT__.portal.name.toLowerCase()}/site.webmanifest`} />
+        <link rel="icon" type="image/x-icon" href={`/${import.meta.env.THEME}/favicon.ico`} />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-16x16.png`} sizes="16x16" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-32x32.png`} sizes="32x32" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-96x96.png`} sizes="96x96" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-128x128.png`} sizes="128x128" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-196x196.png`} sizes="196x196" />
+        <link rel="manifest" href={`/${import.meta.env.THEME}/site.webmanifest`} />
         <script src="https://cdn.jsdelivr.net/npm/igv@3.7.0/dist/igv.min.js"></script>
       </head>
       <body>
@@ -90,7 +65,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
               <TooltipProvider>
                 <AlertDialogProvider>
-                  <BetaFeatureProvider definitions={radiantFeatureDefinitions} storageKey="betaFeatures:radiant">
+                  <BetaFeatureProvider
+                    definitions={featureDefinitions}
+                    storageKey={`betaFeatures:${import.meta.env.THEME}`}
+                  >
                     {children}
                   </BetaFeatureProvider>
                 </AlertDialogProvider>
