@@ -809,7 +809,7 @@ export const GeneCard = ({
     <div className="@container/gene-card rounded-md border border-border p-3">
       <div className="flex flex-col @md/gene-card:flex-row @md/gene-card:flex-wrap gap-4 @md/gene-card:gap-20 w-full">
         {hasGene && (
-          <div className="flex flex-1 flex-col grow gap-2">
+          <div className="flex flex-1 flex-col grow gap-2 min-w-0">
             <AnchorLink
               className="font-semibold text-lg"
               external
@@ -818,7 +818,14 @@ export const GeneCard = ({
             >
               {symbol}
             </AnchorLink>
-            {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}
+            {aa_change && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="font-mono font-semibold text-sm truncate w-fit max-w-full">{aa_change}</div>
+                </TooltipTrigger>
+                <TooltipContent className="font-mono break-all">{aa_change}</TooltipContent>
+              </Tooltip>
+            )}
             {ensembl_gene_id && (
               <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}
