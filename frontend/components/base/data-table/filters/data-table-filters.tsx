@@ -43,7 +43,7 @@ type DataTableFilters = {
  * Should be used by parent component to order options
  */
 export function sortOptions(options: IFilterButtonItem[]) {
-  return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
+  return options.sort((a, b) => ((a.label as string) ?? a.key).localeCompare((b.label as string) ?? b.key));
 }
 
 /**

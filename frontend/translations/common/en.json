@@ -1164,7 +1164,8 @@
     "header": {
       "title": "Patient {{id}}",
       "research_id": "ID: {{id}}",
-      "born": "Born {{year}}",
+      "born_date": "Born {{date}}",
+      "born_year": "Born {{year}}",
       "phi_restricted": "Restricted",
       "phi_restricted_tooltip": "Identity restricted outside your organisation",
       "vital_status": {
@@ -1191,9 +1192,7 @@
         "cns_diagnosis_category": "CNS diagnosis category",
         "cns_integrated_diagnosis": "CNS integrated diagnosis",
         "event_date": "Date of diagnosis",
-        "day": "Day {{day}}",
-        "events_total": "{{count}} events total",
-        "view_timeline": "View timeline"
+        "day": "Day {{day}}"
       },
       "tumour_and_metastasis": {
         "title": "Tumour and metastasis",
@@ -1201,8 +1200,7 @@
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
-        "metastasis_location_other": "Extraneural site",
-        "most_recent_event": "Most recent event · {{type}} · Day {{day}}"
+        "metastasis_location_other": "Extraneural site"
       },
       "demographics": {
         "title": "Demographics",
@@ -1243,10 +1241,7 @@
           "case": "Case",
           "priority": "Priority",
           "status": "Status",
-          "sample_scope": "Sample scope",
-          "assay": "Assay",
-          "requested_by": "Requested by",
-          "updated": "Updated"
+          "assay": "Assay"
         }
       }
     },
@@ -1324,11 +1319,9 @@
       "vital_status": "Vital status",
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnosis",
-      "protocol": "Protocol",
-      "molecular_subtype": "Molecular subtype",
-      "age_at_initial_dx_days": "Age at diagnosis",
-      "had_initial_methotrexate": "Treatment exposure",
-      "had_initial_radiation": "Radiation",
+      "age_at_initial_dx_group": "Age at diagnosis",
+      "chemotherapy_agents": "Chemotherapy agents",
+      "got_radiation_ever": "Radiation",
       "diagnosis_type_cohort": "Cohort"
     },
     "pagination": {

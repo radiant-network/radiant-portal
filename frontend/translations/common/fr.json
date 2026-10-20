@@ -1165,7 +1165,8 @@
     "header": {
       "title": "Patient {{id}}",
       "research_id": "ID : {{id}}",
-      "born": "Né en {{year}}",
+      "born_date": "Né le {{date}}",
+      "born_year": "Né en {{year}}",
       "phi_restricted": "Restreint",
       "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
       "vital_status": {
@@ -1192,9 +1193,7 @@
         "cns_diagnosis_category": "Catégorie de diagnostic SNC",
         "cns_integrated_diagnosis": "Diagnostic intégré SNC",
         "event_date": "Date du diagnostic",
-        "day": "Jour {{day}}",
-        "events_total": "{{count}} événements au total",
-        "view_timeline": "Voir la chronologie"
+        "day": "Jour {{day}}"
       },
       "tumour_and_metastasis": {
         "title": "Tumeur et métastases",
@@ -1202,8 +1201,7 @@
         "tumor_location_other": "Autre localisation",
         "metastasis": "Métastase",
         "metastasis_locations": "Sites de métastase",
-        "metastasis_location_other": "Site extraneural",
-        "most_recent_event": "Événement le plus récent · {{type}} · Jour {{day}}"
+        "metastasis_location_other": "Site extraneural"
       },
       "demographics": {
         "title": "Données démographiques",
@@ -1244,10 +1242,7 @@
           "case": "Cas",
           "priority": "Priorité",
           "status": "Statut",
-          "sample_scope": "Portée d'échantillon",
-          "assay": "Essai",
-          "requested_by": "Demandé par",
-          "updated": "Mis à jour"
+          "assay": "Essai"
         }
       }
     },
@@ -1325,11 +1320,9 @@
       "vital_status": "Statut vital",
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnostic",
-      "protocol": "Protocole",
-      "molecular_subtype": "Sous-type moléculaire",
-      "age_at_initial_dx_days": "Âge au diagnostic",
-      "had_initial_methotrexate": "Exposition au traitement",
-      "had_initial_radiation": "Radiothérapie",
+      "age_at_initial_dx_group": "Âge au diagnostic",
+      "chemotherapy_agents": "Agents de chimiothérapie",
+      "got_radiation_ever": "Radiothérapie",
       "diagnosis_type_cohort": "Cohorte"
     },
     "pagination": {

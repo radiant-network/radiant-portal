@@ -38,7 +38,7 @@ interface EntityHeaderProps extends VariantProps<typeof headerNavigationVariants
   badges?: HeaderNavigationBadge[];
   buttons?: ButtonProps[];
   statuses?: ReactNode[];
-  title?: string;
+  title?: ReactNode;
   description?: string;
   previousPageUrl?: string;
 }

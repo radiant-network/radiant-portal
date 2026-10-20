@@ -1,24 +1,7 @@
 import type { ListBodyWithCriteria } from '@/api/api';
 
-// TODO: replace with generated types from frontend/api/ once backend exposes
-// /{tenant}/patients/{patient_id}/{cases,interpretations}
-
-export type GenomicCase = {
-  case_id: number;
-  priority_code: 'asap' | 'routine' | 'stat' | 'urgent';
-  status_code: 'draft' | 'in_progress' | 'in_review' | 'completed' | 'processing' | 'submitted';
-  sample_scope: string;
-  assay: string;
-  requested_by: string;
-  requested_by_name?: string;
-  updated_day: number;
-};
-
-export type GenomicCasesSearchResponse = {
-  list: GenomicCase[];
-  count: number;
-};
-
+// TODO: replace with generated types from frontend/api/ once backend exposes a
+// targeted /{tenant}/patients/{patient_id}/interpretations endpoint
 export type VariantInterpretation = {
   gene: string;
   variant: string;
@@ -33,79 +16,6 @@ export type VariantInterpretation = {
 export type VariantInterpretationsSearchResponse = {
   list: VariantInterpretation[];
   count: number;
-};
-
-const CASES_MOCK: Record<string, GenomicCase[]> = {
-  C1032093: [
-    {
-      case_id: 1032093001,
-      priority_code: 'urgent',
-      status_code: 'in_progress',
-      sample_scope: 'Germline + tumour',
-      assay: 'WGS',
-      requested_by: 'CHOP',
-      requested_by_name: "The Children's Hospital of Philadelphia",
-      updated_day: 1026,
-    },
-  ],
-  C974652: [
-    {
-      case_id: 974652001,
-      priority_code: 'urgent',
-      status_code: 'in_progress',
-      sample_scope: 'Germline + tumour',
-      assay: 'WGS',
-      requested_by: 'CHOP',
-      requested_by_name: "The Children's Hospital of Philadelphia",
-      updated_day: 1571,
-    },
-    {
-      case_id: 974652002,
-      priority_code: 'routine',
-      status_code: 'completed',
-      sample_scope: 'Tumour only',
-      assay: 'WES',
-      requested_by: 'CHOP',
-      requested_by_name: "The Children's Hospital of Philadelphia",
-      updated_day: 1589,
-    },
-  ],
-  C7617267: [
-    {
-      case_id: 7617267001,
-      priority_code: 'urgent',
-      status_code: 'completed',
-      sample_scope: 'Germline + tumour',
-      assay: 'WGS',
-      requested_by: 'SCH',
-      requested_by_name: "Seattle Children's Hospital",
-      updated_day: 1190,
-    },
-  ],
-  C886092: [
-    {
-      case_id: 886092001,
-      priority_code: 'routine',
-      status_code: 'completed',
-      sample_scope: 'Tumour only',
-      assay: 'WGS',
-      requested_by: 'UCSF',
-      requested_by_name: "UCSF Benioff Children's Hospital",
-      updated_day: 370,
-    },
-  ],
-  C4261089: [
-    {
-      case_id: 4261089001,
-      priority_code: 'urgent',
-      status_code: 'in_progress',
-      sample_scope: 'Germline + tumour',
-      assay: 'WGS',
-      requested_by: 'CHOP',
-      requested_by_name: "The Children's Hospital of Philadelphia",
-      updated_day: 4160,
-    },
-  ],
 };
 
 const LOCUS = {
@@ -264,23 +174,6 @@ const INTERPRETATIONS_MOCK: Record<string, VariantInterpretation[]> = {
 };
 
 const MOCK_LATENCY_MS = 300;
-
-// TODO: swap for caseApi.searchCases({ search_criteria: [{ field: 'proband_id', value: [patientId] }] })
-// once Hannah adds patient_id to the StarRocks patients table; fall back to mock only on 404
-export async function fetchGenomicCasesForPatient(
-  patientId: string,
-  body: ListBodyWithCriteria = {},
-): Promise<GenomicCasesSearchResponse> {
-  await new Promise(resolve => setTimeout(resolve, MOCK_LATENCY_MS));
-  const all = CASES_MOCK[patientId] ?? [];
-  const limit = body.limit ?? all.length;
-  const pageIndex = body.page_index ?? 0;
-  const start = pageIndex * limit;
-  return {
-    list: all.slice(start, start + limit),
-    count: all.length,
-  };
-}
 
 // TODO: swap for interpretationsApi.searchInterpretationGermline + Somatic, union client-side,
 // filter on case_id ∈ patient's cases; fall back to mock only on 404
