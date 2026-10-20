@@ -216,6 +216,13 @@ func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey strin
 		return nil, err
 	}
 	patient.Cases = cases
+	caseIDs := make([]int, len(cases))
+	for i, c := range cases {
+		caseIDs[i] = c.CaseID
+	}
+	if patient.Interpretations, err = r.patientInterpretations(ctx, caseIDs); err != nil {
+		return nil, err
+	}
 	patient.KeyDates = pcxKeyDates(patient.TreatmentSummary, patient.Events, patient.VitalStatusAt)
 	return &patient, nil
 }
@@ -490,19 +497,60 @@ func (r *PcxPatientsRepository) patientCases(ctx context.Context, radiantPatient
 	}
 	db := r.db.WithContext(ctx)
 	caseTable := fmt.Sprintf("%s c", types.CaseTable.TenantQualifiedName(ctx))
-	catalogJoin := fmt.Sprintf("LEFT JOIN %s ca ON ca.id = c.analysis_catalog_id", types.AnalysisCatalogTable.TenantQualifiedName(ctx))
-	columns := "c.id AS case_id, %s AS relationship, c.status_code, c.priority_code, c.case_type_code, " +
-		"ca.code AS analysis_catalog_code, c.diagnosis_lab_code, c.updated_on"
-	asProband := db.Table(caseTable).Joins(catalogJoin).Select(fmt.Sprintf(columns, "'proband'")).
-		Where("c.proband_id = ?", *radiantPatientID)
-	asMember := db.Table(caseTable).Joins(catalogJoin).
+	asProband := db.Table(caseTable).Select("c.id AS case_id, 'proband' AS relationship").Where("c.proband_id = ?", *radiantPatientID)
+	asMember := db.Table(caseTable).
 		Joins(fmt.Sprintf("JOIN %s f ON f.case_id = c.id", types.FamilyTable.TenantQualifiedName(ctx))).
-		Select(fmt.Sprintf(columns, "f.relationship_to_proband_code")).
+		Select("c.id AS case_id, f.relationship_to_proband_code AS relationship").
 		Where("f.family_member_id = ? AND f.family_member_id <> c.proband_id", *radiantPatientID)
-	if err := db.Table("(? UNION ?) patient_cases", asProband, asMember).Order("updated_on desc, case_id desc").Find(&cases).Error; err != nil {
+	mondo := db.Table(types.MondoTable.TenantQualifiedName(ctx)).Select("id, max(name) AS name").Group("id")
+
+	tx := db.Table("(? UNION ?) pc", asProband, asMember).
+		Joins(fmt.Sprintf("JOIN %s ON c.id = pc.case_id", caseTable)).
+		Joins(fmt.Sprintf("LEFT JOIN %s ca ON ca.id = c.analysis_catalog_id", types.AnalysisCatalogTable.TenantQualifiedName(ctx))).
+		Joins("LEFT JOIN (?) mondo ON mondo.id = c.primary_condition", mondo).
+		Joins(fmt.Sprintf("LEFT JOIN %s org ON org.code = c.ordering_organization_code AND org.tenant_code = c.tenant_code",
+			types.OrganizationTable.TenantQualifiedName(ctx))).
+		Joins("LEFT JOIN (?) members_count ON members_count.case_id = c.id", caseMembersCount(ctx, db)).
+		Select("pc.case_id, pc.relationship, c.status_code, c.priority_code, c.case_type_code, " + caseTypeColumn + ", " +
+			"ca.code AS analysis_catalog_code, ca.name AS analysis_catalog_name, c.primary_condition AS primary_condition_id, " +
+			"mondo.name AS primary_condition_name, c.ordering_organization_code, org.name AS ordering_organization_name, " +
+			"c.diagnosis_lab_code, c.updated_on").
+		Order("c.updated_on desc, pc.case_id desc")
+	if err := tx.Find(&cases).Error; err != nil {
 		return nil, fmt.Errorf("error fetching patient cases: %w", err)
 	}
 	return cases, nil
+}
+
+// patientInterpretations are the germline and somatic interpretations of the given cases, latest first. Gene and
+// amino acid change come from the interpreted transcript, not the picked consequence. The interpretation tables
+// store case, sequencing and locus ids as text.
+func (r *PcxPatientsRepository) patientInterpretations(ctx context.Context, caseIDs []int) ([]types.PatientInterpretation, error) {
+	interpretations := []types.PatientInterpretation{}
+	if len(caseIDs) == 0 {
+		return interpretations, nil
+	}
+	db := r.db.WithContext(ctx)
+	part := func(table types.Table, origin, classification string) *gorm.DB {
+		return db.Table(fmt.Sprintf("%s i", table.TenantQualifiedName(ctx))).
+			Joins(fmt.Sprintf("JOIN %s c ON c.id = CAST(i.case_id AS INT)", types.CaseTable.TenantQualifiedName(ctx))).
+			Joins(fmt.Sprintf("LEFT JOIN %s ca ON ca.id = c.analysis_catalog_id", types.AnalysisCatalogTable.TenantQualifiedName(ctx))).
+			Joins(fmt.Sprintf("LEFT JOIN %s v ON v.locus_id = CAST(i.locus_id AS BIGINT)", types.VariantTable.TenantQualifiedName(ctx))).
+			Joins(fmt.Sprintf("LEFT JOIN %s csq ON csq.locus_id = CAST(i.locus_id AS BIGINT) AND csq.transcript_id = i.transcript_id",
+				types.ConsequenceTable.TenantQualifiedName(ctx))).
+			Select(fmt.Sprintf("'%s' AS origin, CAST(i.case_id AS INT) AS case_id, CAST(i.sequencing_id AS INT) AS sequencing_id, "+
+				"i.locus_id, v.hgvsg, csq.symbol, csq.aa_change, %s AS classification, ca.code AS analysis_catalog_code, "+
+				"ca.name AS analysis_catalog_name, i.updated_at", origin, classification)).
+			Where("CAST(i.case_id AS INT) IN ?", caseIDs)
+	}
+	tx := db.Table("(? UNION ALL ?) interpretations",
+		part(types.InterpretationGermlineTable, "germline", "i.classification"),
+		part(types.InterpretationSomaticTable, "somatic", "i.oncogenicity")).
+		Order("updated_at desc, case_id desc, locus_id, origin")
+	if err := tx.Find(&interpretations).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient interpretations: %w", err)
+	}
+	return interpretations, nil
 }
 
 // pcxKeyDates: the initial diagnosis follows the list's age_at_initial_dx_days, the treatment summary's initial

@@ -6,7 +6,11 @@ Values of the patient list filters
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**age_at_initial_dx_group** | [**List[FiltersValue]**](FiltersValue.md) | Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown | 
+**chemotherapy_agents** | [**List[FiltersValue]**](FiltersValue.md) | Lowercase, as recorded | 
 **cns_integrated_diagnosis** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**diagnosis_type_cohort** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**got_radiation_ever** | [**List[FiltersValue]**](FiltersValue.md) | Keys true, false; labels Yes, No | 
 **organization_code** | [**List[FiltersValue]**](FiltersValue.md) | label &#x3D; organization name | 
 **vital_status** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 

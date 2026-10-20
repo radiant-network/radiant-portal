@@ -2,4 +2,4 @@ organization_name	organization_code	patient_id	patient_id_type	radiant_patient_i
 Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	2026-01-10 00:00:00	4000	alive	true
 Children's Hospital of Philadelphia	CHOP	MRN-0001	mrn	11	2025-08-01 00:00:00	5000	deceased	true
 Seattle Children's Hospital	SCH	MRN-0100	mrn	NULL	NULL	NULL	alive	true
-Boston Children's Hospital	BCH	C100004	research_id	NULL	NULL	3000	deceased	false
+Boston Children's Hospital	BCH	C100004	research_id	22	NULL	3000	deceased	false

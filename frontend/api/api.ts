@@ -5829,10 +5829,22 @@ export interface PatientCase {
     'analysis_catalog_code'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof PatientCase
      */
     'case_id': number;
+    /**
+     * As in the case list: germline_family when the case has more than one member
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'case_type': PatientCaseCaseTypeEnum;
     /**
      * 
      * @type {string}
@@ -5845,6 +5857,30 @@ export interface PatientCase {
      * @memberof PatientCase
      */
     'diagnosis_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_name'?: string;
+    /**
+     * MONDO id
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}
@@ -5870,6 +5906,15 @@ export interface PatientCase {
      */
     'updated_on': string;
 }
+
+export const PatientCaseCaseTypeEnum = {
+    Somatic: 'somatic',
+    Germline: 'germline',
+    GermlineFamily: 'germline_family'
+} as const;
+
+export type PatientCaseCaseTypeEnum = typeof PatientCaseCaseTypeEnum[keyof typeof PatientCaseCaseTypeEnum];
+
 /**
  * Age in days, and the calendar date when the caller can read PHI
  * @export
@@ -6028,6 +6073,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'initial_diagnosis_evidence_url'?: string;
+    /**
+     * Germline and somatic, of the patient\'s cases
+     * @type {Array<PatientInterpretation>}
+     * @memberof PatientEntity
+     */
+    'interpretations': Array<PatientInterpretation>;
     /**
      * 
      * @type {PatientKeyDates}
@@ -6331,6 +6382,87 @@ export interface PatientImagingSession {
      */
     'session_name': string;
 }
+/**
+ * Germline or somatic interpretation recorded on one of the patient\'s portal cases
+ * @export
+ * @interface PatientInterpretation
+ */
+export interface PatientInterpretation {
+    /**
+     * On the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'case_id': number;
+    /**
+     * Germline: LOINC answer code; somatic: oncogenicity, as the case module records them
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'classification'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'hgvsg'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'origin': PatientInterpretationOriginEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'sequencing_id': number;
+    /**
+     * Gene of the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'symbol'?: string;
+    /**
+     * Last interpretation date
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'updated_at': string;
+}
+
+export const PatientInterpretationOriginEnum = {
+    Germline: 'germline',
+    Somatic: 'somatic'
+} as const;
+
+export type PatientInterpretationOriginEnum = typeof PatientInterpretationOriginEnum[keyof typeof PatientInterpretationOriginEnum];
+
 /**
  * Key date of the patient sidebar, with the source it comes from
  * @export

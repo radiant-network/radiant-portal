@@ -132,6 +132,7 @@ type PatientEntity struct {
 	Imaging                     []PatientImagingSession  `json:"imaging" validate:"required"`
 	TreatmentSummary            *PatientTreatmentSummary `json:"treatment_summary"`
 	Cases                       []PatientCase            `json:"cases" validate:"required"`
+	Interpretations             []PatientInterpretation  `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
 }
 
 // PatientEvent - Disease event of a patient
@@ -230,12 +231,35 @@ type PatientTreatmentSummary struct {
 // @Description Portal case the patient is part of
 // @Name PatientCase
 type PatientCase struct {
+	CaseID                   int       `json:"case_id" validate:"required"`
+	Relationship             string    `json:"relationship" validate:"required"` // proband, or the relationship_to_proband code
+	StatusCode               string    `json:"status_code" validate:"required"`
+	PriorityCode             *string   `json:"priority_code"`
+	CaseTypeCode             string    `json:"case_type_code" validate:"required"`
+	CaseType                 string    `json:"case_type" validate:"required" enums:"somatic,germline,germline_family"` // As in the case list: germline_family when the case has more than one member
+	AnalysisCatalogCode      *string   `json:"analysis_catalog_code"`
+	AnalysisCatalogName      *string   `json:"analysis_catalog_name"`
+	PrimaryConditionID       *string   `json:"primary_condition_id"` // MONDO id
+	PrimaryConditionName     *string   `json:"primary_condition_name"`
+	OrderingOrganizationCode *string   `json:"ordering_organization_code"`
+	OrderingOrganizationName *string   `json:"ordering_organization_name"`
+	DiagnosisLabCode         string    `json:"diagnosis_lab_code" validate:"required"`
+	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
+}
+
+// PatientInterpretation - Variant interpretation of a patient
+// @Description Germline or somatic interpretation recorded on one of the patient's portal cases
+// @Name PatientInterpretation
+type PatientInterpretation struct {
+	Origin              string    `json:"origin" validate:"required" enums:"germline,somatic"`
 	CaseID              int       `json:"case_id" validate:"required"`
-	Relationship        string    `json:"relationship" validate:"required"` // proband, or the relationship_to_proband code
-	StatusCode          string    `json:"status_code" validate:"required"`
-	PriorityCode        *string   `json:"priority_code"`
-	CaseTypeCode        string    `json:"case_type_code" validate:"required"`
+	SequencingID        int       `json:"sequencing_id" validate:"required"`
+	LocusID             string    `json:"locus_id" validate:"required"`
+	Hgvsg               *string   `json:"hgvsg"`
+	Symbol              *string   `json:"symbol"`         // Gene of the interpreted transcript
+	AaChange            *string   `json:"aa_change"`      // On the interpreted transcript
+	Classification      *string   `json:"classification"` // Germline: LOINC answer code; somatic: oncogenicity, as the case module records them
 	AnalysisCatalogCode *string   `json:"analysis_catalog_code"`
-	DiagnosisLabCode    string    `json:"diagnosis_lab_code" validate:"required"`
-	UpdatedOn           time.Time `json:"updated_on" validate:"required"`
+	AnalysisCatalogName *string   `json:"analysis_catalog_name"`
+	UpdatedAt           time.Time `json:"updated_at" validate:"required"` // Last interpretation date
 }

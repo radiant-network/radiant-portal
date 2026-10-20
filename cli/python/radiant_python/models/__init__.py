@@ -117,6 +117,7 @@ from radiant_python.models.patient_entity import PatientEntity
 from radiant_python.models.patient_event import PatientEvent
 from radiant_python.models.patient_filters import PatientFilters
 from radiant_python.models.patient_imaging_session import PatientImagingSession
+from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_date import PatientKeyDate
 from radiant_python.models.patient_key_dates import PatientKeyDates
 from radiant_python.models.patient_list_item import PatientListItem

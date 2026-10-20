@@ -2949,11 +2949,30 @@ components:
       properties:
         analysis_catalog_code:
           type: string
+        analysis_catalog_name:
+          type: string
         case_id:
           type: integer
+        case_type:
+          description: 'As in the case list: germline_family when the case has more
+            than one member'
+          enum:
+          - somatic
+          - germline
+          - germline_family
+          type: string
         case_type_code:
           type: string
         diagnosis_lab_code:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_organization_name:
+          type: string
+        primary_condition_id:
+          description: MONDO id
+          type: string
+        primary_condition_name:
           type: string
         priority_code:
           type: string
@@ -2966,6 +2985,7 @@ components:
           type: string
       required:
       - case_id
+      - case_type
       - case_type_code
       - diagnosis_lab_code
       - relationship
@@ -3055,6 +3075,12 @@ components:
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
+        interpretations:
+          description: Germline and somatic, of the patient's cases
+          items:
+            $ref: '#/components/schemas/PatientInterpretation'
+          type: array
+          uniqueItems: false
         key_dates:
           $ref: '#/components/schemas/PatientKeyDates'
         organization_code:
@@ -3117,6 +3143,7 @@ components:
       - given_name
       - has_imaging
       - imaging
+      - interpretations
       - key_dates
       - organization_code
       - organization_name
@@ -3251,6 +3278,47 @@ components:
       required:
       - session_id
       - session_name
+      type: object
+    PatientInterpretation:
+      description: Germline or somatic interpretation recorded on one of the patient's
+        portal cases
+      properties:
+        aa_change:
+          description: On the interpreted transcript
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          description: 'Germline: LOINC answer code; somatic: oncogenicity, as the
+            case module records them'
+          type: string
+        hgvsg:
+          type: string
+        locus_id:
+          type: string
+        origin:
+          enum:
+          - germline
+          - somatic
+          type: string
+        sequencing_id:
+          type: integer
+        symbol:
+          description: Gene of the interpreted transcript
+          type: string
+        updated_at:
+          description: Last interpretation date
+          type: string
+      required:
+      - case_id
+      - locus_id
+      - origin
+      - sequencing_id
+      - updated_at
       type: object
     PatientKeyDate:
       description: Key date of the patient sidebar, with the source it comes from
