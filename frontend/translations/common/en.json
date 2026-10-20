@@ -35,6 +35,19 @@
       "no_data": "No data",
       "open_franklin": "{{tier}}, open in Franklin (new tab)"
     },
+    "data_table": {
+      "collapse_row": "Collapse row",
+      "column_settings": "Column settings",
+      "expand_row": "Expand row",
+      "group_by": "Group by",
+      "grouped_by": "Grouped by {{value}}",
+      "pin_column": "Pin column",
+      "pin_row": "Pin row",
+      "sort": "Sort",
+      "sorted_asc": "Sorted ascending",
+      "sorted_desc": "Sorted descending",
+      "unpin_row": "Unpin row"
+    },
     "date_picker": {
       "open_calendar": "Open calendar"
     },
@@ -44,6 +57,9 @@
     "facets_sidebar": {
       "collapse": "Collapse filters",
       "expand": "Expand filters"
+    },
+    "gene_cell": {
+      "add_to_query": "Add {{symbol}} to the query"
     },
     "lang_switcher": {
       "switch_to_en": "Switch to English (EN)",

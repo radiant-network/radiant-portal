@@ -56,7 +56,14 @@ function DataTableGroupBy<TData extends RowData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" iconOnly={!hasGroupedValue}>
+        <Button
+          variant="ghost"
+          size="sm"
+          iconOnly={!hasGroupedValue}
+          aria-label={
+            hasGroupedValue ? t('a11y.data_table.grouped_by', { value: grouping[0] }) : t('a11y.data_table.group_by')
+          }
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2">

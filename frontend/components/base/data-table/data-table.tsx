@@ -44,6 +44,7 @@ import {
   type SortingState,
   tableFeatures,
 } from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
@@ -522,9 +523,11 @@ function getHeaderFlexRender<TData extends RowData>(
 function getRowFlexRender<T extends RowData>({
   subComponent,
   containerWidth,
+  t,
 }: {
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
+  t: TFunction<string, undefined>;
 }) {
   return (row: Row<AppFeatures, T>) => (
     <Fragment key={row.id}>
@@ -554,6 +557,8 @@ function getRowFlexRender<T extends RowData>({
                   size="xs"
                   variant="ghost"
                   iconOnly
+                  aria-label={row.getIsExpanded() ? t('a11y.data_table.collapse_row') : t('a11y.data_table.expand_row')}
+                  aria-expanded={row.getIsExpanded()}
                   onClick={row.getToggleExpandedHandler()}
                 >
                   {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
@@ -851,8 +856,8 @@ function DataTable<T extends RowData>({
    * Cache our row flexRender method
    */
   const rowFlexRender = useMemo(
-    () => getRowFlexRender<T>({ subComponent, containerWidth }),
-    [subComponent, containerWidth],
+    () => getRowFlexRender<T>({ subComponent, containerWidth, t }),
+    [subComponent, containerWidth, t],
   );
 
   // Table Index display position

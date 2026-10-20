@@ -35,6 +35,19 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "data_table": {
+      "collapse_row": "Replier la ligne",
+      "column_settings": "Paramètres des colonnes",
+      "expand_row": "Déplier la ligne",
+      "group_by": "Regrouper par",
+      "grouped_by": "Regroupé par {{value}}",
+      "pin_column": "Épingler la colonne",
+      "pin_row": "Épingler la ligne",
+      "sort": "Trier",
+      "sorted_asc": "Trié par ordre croissant",
+      "sorted_desc": "Trié par ordre décroissant",
+      "unpin_row": "Désépingler la ligne"
+    },
     "date_picker": {
       "open_calendar": "Ouvrir le calendrier"
     },
@@ -44,6 +57,9 @@
     "facets_sidebar": {
       "collapse": "Réduire les filtres",
       "expand": "Développer les filtres"
+    },
+    "gene_cell": {
+      "add_to_query": "Ajouter {{symbol}} à la requête"
     },
     "lang_switcher": {
       "switch_to_en": "Passer en anglais (EN)",
