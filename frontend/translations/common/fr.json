@@ -95,8 +95,23 @@
     "occurrence_flag": {
       "edit": "Modifier le drapeau"
     },
+    "query_bar": {
+      "delete": "Supprimer la requête",
+      "duplicate": "Dupliquer la requête"
+    },
     "query_builder": {
       "close_facets": "Fermer le panneau des filtres"
+    },
+    "query_pill": {
+      "remove": "Retirer le filtre"
+    },
+    "saved_filter": {
+      "delete": "Supprimer le filtre",
+      "discard": "Annuler les modifications non enregistrées",
+      "duplicate": "Dupliquer le filtre",
+      "edit": "Modifier le filtre",
+      "new": "Nouveau filtre",
+      "save": "Enregistrer le filtre"
     },
     "slider": {
       "next": "Résultat suivant",

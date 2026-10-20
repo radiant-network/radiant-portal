@@ -77,6 +77,7 @@ function DeleteFilterButton() {
             variant="ghost"
             size="sm"
             disabled={!selectedSavedFilter}
+            aria-label={t('a11y.saved_filter.delete')}
             onClick={() => {
               openDeleteSavedFilterAlert(selectedSavedFilter, fetchFilters, t);
             }}

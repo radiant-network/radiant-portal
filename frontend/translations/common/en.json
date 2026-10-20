@@ -95,8 +95,23 @@
     "occurrence_flag": {
       "edit": "Edit flag"
     },
+    "query_bar": {
+      "delete": "Delete query",
+      "duplicate": "Duplicate query"
+    },
     "query_builder": {
       "close_facets": "Close filters panel"
+    },
+    "query_pill": {
+      "remove": "Remove filter"
+    },
+    "saved_filter": {
+      "delete": "Delete filter",
+      "discard": "Discard unsaved changes",
+      "duplicate": "Duplicate filter",
+      "edit": "Edit filter",
+      "new": "New filter",
+      "save": "Save filter"
     },
     "slider": {
       "next": "Next result",

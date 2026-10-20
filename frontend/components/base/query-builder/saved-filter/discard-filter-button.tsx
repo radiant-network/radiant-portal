@@ -29,6 +29,7 @@ function DiscardFilterButton() {
             variant="ghost"
             size="sm"
             disabled={!selectedSavedFilter || !isUnsaved}
+            aria-label={t('a11y.saved_filter.discard')}
             onClick={() => {
               dispatchQB({
                 type: QBActionType.LOAD_QUERIES,

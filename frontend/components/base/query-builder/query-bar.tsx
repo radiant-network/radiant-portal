@@ -256,13 +256,26 @@ function QueryBar({ index, sqon }: QueryBarProps) {
 
           {/* actions */}
           <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
-            <Button data-cy="query-duplicate-button" iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
+            <Button
+              data-cy="query-duplicate-button"
+              iconOnly
+              variant="ghost"
+              size="sm"
+              aria-label={t('a11y.query_bar.duplicate')}
+              onClick={handleDuplicate}
+            >
               <CopyIcon />
             </Button>
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button data-cy="query-delete-button" iconOnly variant="ghost" size="sm">
+                <Button
+                  data-cy="query-delete-button"
+                  iconOnly
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t('a11y.query_bar.delete')}
+                >
                   <TrashIcon />
                 </Button>
               </PopoverTrigger>
