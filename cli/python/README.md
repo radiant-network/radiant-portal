@@ -313,6 +313,7 @@ Class | Method | HTTP request | Description
  - [PatientEvent](docs/PatientEvent.md)
  - [PatientFilters](docs/PatientFilters.md)
  - [PatientImagingSession](docs/PatientImagingSession.md)
+ - [PatientInterpretation](docs/PatientInterpretation.md)
  - [PatientKeyDate](docs/PatientKeyDate.md)
  - [PatientKeyDates](docs/PatientKeyDates.md)
  - [PatientListItem](docs/PatientListItem.md)

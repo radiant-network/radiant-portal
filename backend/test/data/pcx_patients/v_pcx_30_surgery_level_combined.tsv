@@ -1,4 +1,4 @@
 organization_name	organization_code	patient_id	patient_id_type	radiant_patient_id	surgery_date	age_at_surgery_days	extent_of_tumor_resection	is_initial_treatment	can_read_phi
 Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	2017-12-01 00:00:00	1002	Gross/Near total resection	yes	true
 Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	NULL	Not Reported	Partial resection	no	true
-Boston Children's Hospital	BCH	C100004	research_id	NULL	NULL	1003	Biopsy only	yes	false
+Boston Children's Hospital	BCH	C100004	research_id	22	NULL	1003	Biopsy only	yes	false

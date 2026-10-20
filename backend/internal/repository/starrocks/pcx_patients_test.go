@@ -3,6 +3,7 @@ package starrocks
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
@@ -362,7 +363,7 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 		patient := getPcxPatient(t, env, pcxPatientKey("1"))
 
 		require.NotNil(t, patient)
-		patient.Cases = nil // asserted in Test_GetPcxPatient_Cases*
+		patient.Cases, patient.Interpretations = nil, nil // asserted in Test_GetPcxPatient_Cases* and *Interpretations*
 		actual, err := json.Marshal(patient)
 		require.NoError(t, err)
 		assert.JSONEq(t, `{
@@ -425,7 +426,8 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				"had_initial_radiation": true, "had_initial_chemo": true, "had_initial_methotrexate": false,
 				"initial_treatment_order": "chemo_before_radiation"
 			},
-			"cases": null
+			"cases": null,
+			"interpretations": null
 		}`, string(actual))
 	})
 }
@@ -454,14 +456,14 @@ func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 
 		require.NotNil(t, patient)
 		actual, err := json.Marshal(struct {
-			Events, Surgeries, Radiations, Therapies, Imaging, Cases any
-			TreatmentSummary                                         any
-			VitalStatusAt                                            types.PatientDayDate
+			Events, Surgeries, Radiations, Therapies, Imaging, Cases, Interpretations any
+			TreatmentSummary                                                          any
+			VitalStatusAt                                                             types.PatientDayDate
 		}{patient.Events, patient.Surgeries, patient.Radiations, patient.Therapies, patient.Imaging, patient.Cases,
-			patient.TreatmentSummary, patient.VitalStatusAt})
+			patient.Interpretations, patient.TreatmentSummary, patient.VitalStatusAt})
 		require.NoError(t, err)
 		assert.JSONEq(t, `{"Events": [], "Surgeries": [], "Radiations": [], "Therapies": [], "Imaging": [], "Cases": [],
-			"TreatmentSummary": null, "VitalStatusAt": {"day": null, "date": null}}`, string(actual))
+			"Interpretations": [], "TreatmentSummary": null, "VitalStatusAt": {"day": null, "date": null}}`, string(actual))
 	})
 }
 
@@ -482,15 +484,38 @@ func Test_GetPcxPatient_CasesAsProbandAreListedOnce(t *testing.T) {
 		assert.Len(t, patient.Cases, 2)
 		assert.Equal(t, map[int]string{1: "proband", 70: "proband"}, pcxCaseRelationships(patient.Cases))
 		for _, c := range patient.Cases {
-			if c.CaseID == 1 {
+			switch c.CaseID {
+			case 1:
 				assert.Equal(t, "in_progress", c.StatusCode)
 				assert.Equal(t, ptr("routine"), c.PriorityCode)
 				assert.Equal(t, "germline", c.CaseTypeCode)
+				assert.Equal(t, "germline_family", c.CaseType, "case 1 has three members")
 				assert.Equal(t, ptr("WGA"), c.AnalysisCatalogCode)
+				assert.Equal(t, ptr("Whole Genome Analysis"), c.AnalysisCatalogName)
+				assert.Equal(t, ptr("MONDO:0700092"), c.PrimaryConditionID)
+				assert.Equal(t, ptr("neurodevelopmental disorder"), c.PrimaryConditionName)
+				assert.Equal(t, ptr("CHUSJ"), c.OrderingOrganizationCode)
+				assert.Equal(t, ptr("Centre hospitalier universitaire Sainte-Justine"), c.OrderingOrganizationName)
 				assert.Equal(t, "CQGC", c.DiagnosisLabCode)
 				assert.False(t, c.UpdatedOn.IsZero())
+			case 70:
+				assert.Equal(t, "germline_family", c.CaseType, "case 70 is a trio")
+				assert.Equal(t, ptr("CHOP"), c.OrderingOrganizationCode)
+				assert.Equal(t, ptr("Children Hospital of Philadelphia"), c.OrderingOrganizationName)
 			}
 		}
+	})
+}
+
+func Test_GetPcxPatient_SoloGermlineCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// Portal patient 22 is the only member of case 8.
+		patient := getPcxPatient(t, env, pcxPatientKey("4"))
+
+		require.NotNil(t, patient)
+		require.Len(t, patient.Cases, 1)
+		assert.Equal(t, 8, patient.Cases[0].CaseID)
+		assert.Equal(t, "germline", patient.Cases[0].CaseType)
 	})
 }
 
@@ -550,4 +575,39 @@ func Test_OrganizationFilterValues_InvalidJSONIsAnError(t *testing.T) {
 	_, err := organizationFilterValues(ptr(`[1, 2]`))
 
 	assert.Error(t, err)
+}
+
+func Test_GetPcxPatient_InterpretationsOfItsCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		// Case 1 carries 3 germline and 3 somatic interpretations of locus 1000, on transcripts T001 and T002.
+		patient := getPcxPatient(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, patient)
+		actual, err := json.Marshal(patient.Interpretations)
+		require.NoError(t, err)
+		row := func(origin string, seq int, transcript, classification, updatedAt string) string {
+			aa := map[string]string{"T001": "p.Val600Glu", "T002": "p.Val640Glu"}[transcript]
+			return fmt.Sprintf(`{"origin": %q, "case_id": 1, "sequencing_id": %d, "locus_id": "1000", "hgvsg": "chr7:g.140753336A>T",
+				"symbol": "BRAF", "aa_change": %q, "classification": %q, "analysis_catalog_code": "WGA",
+				"analysis_catalog_name": "Whole Genome Analysis", "updated_at": %q}`, origin, seq, aa, classification, updatedAt)
+		}
+		assert.JSONEq(t, "["+strings.Join([]string{
+			row("germline", 1, "T002", "LA6675-8", "2025-06-30T15:51:29Z"),
+			row("somatic", 1, "T002", "Oncogenic", "2025-06-30T15:51:29Z"),
+			row("germline", 2, "T001", "LA26332-9", "2025-06-27T19:51:00Z"),
+			row("somatic", 2, "T001", "Likely Oncogenic", "2025-06-27T19:51:00Z"),
+			row("germline", 1, "T001", "LA6668-3", "2025-05-23T14:57:36Z"),
+			row("somatic", 1, "T001", "Oncogenic", "2025-05-23T14:57:36Z"),
+		}, ",")+"]", string(actual))
+	})
+}
+
+func Test_GetPcxPatient_NoInterpretationsOnItsCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := getPcxPatient(t, env, pcxPatientKey("2"))
+
+		require.NotNil(t, patient)
+		assert.NotEmpty(t, patient.Cases)
+		assert.Equal(t, []types.PatientInterpretation{}, patient.Interpretations)
+	})
 }

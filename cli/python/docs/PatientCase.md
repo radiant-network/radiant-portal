@@ -7,9 +7,15 @@ Portal case the patient is part of
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_catalog_code** | **str** |  | [optional] 
+**analysis_catalog_name** | **str** |  | [optional] 
 **case_id** | **int** |  | 
+**case_type** | **str** | As in the case list: germline_family when the case has more than one member | 
 **case_type_code** | **str** |  | 
 **diagnosis_lab_code** | **str** |  | 
+**ordering_organization_code** | **str** |  | [optional] 
+**ordering_organization_name** | **str** |  | [optional] 
+**primary_condition_id** | **str** | MONDO id | [optional] 
+**primary_condition_name** | **str** |  | [optional] 
 **priority_code** | **str** |  | [optional] 
 **relationship** | **str** | proband, or the relationship_to_proband code | 
 **status_code** | **str** |  | 

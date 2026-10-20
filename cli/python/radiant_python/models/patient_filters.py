@@ -27,10 +27,14 @@ class PatientFilters(BaseModel):
     """
     Values of the patient list filters
     """ # noqa: E501
+    age_at_initial_dx_group: List[FiltersValue] = Field(description="Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown")
+    chemotherapy_agents: List[FiltersValue] = Field(description="Lowercase, as recorded")
     cns_integrated_diagnosis: List[FiltersValue]
+    diagnosis_type_cohort: List[FiltersValue]
+    got_radiation_ever: List[FiltersValue] = Field(description="Keys true, false; labels Yes, No")
     organization_code: List[FiltersValue] = Field(description="label = organization name")
     vital_status: List[FiltersValue]
-    __properties: ClassVar[List[str]] = ["cns_integrated_diagnosis", "organization_code", "vital_status"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_group", "chemotherapy_agents", "cns_integrated_diagnosis", "diagnosis_type_cohort", "got_radiation_ever", "organization_code", "vital_status"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -71,6 +75,20 @@ class PatientFilters(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in age_at_initial_dx_group (list)
+        _items = []
+        if self.age_at_initial_dx_group:
+            for _item_age_at_initial_dx_group in self.age_at_initial_dx_group:
+                if _item_age_at_initial_dx_group:
+                    _items.append(_item_age_at_initial_dx_group.to_dict())
+            _dict['age_at_initial_dx_group'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in chemotherapy_agents (list)
+        _items = []
+        if self.chemotherapy_agents:
+            for _item_chemotherapy_agents in self.chemotherapy_agents:
+                if _item_chemotherapy_agents:
+                    _items.append(_item_chemotherapy_agents.to_dict())
+            _dict['chemotherapy_agents'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in cns_integrated_diagnosis (list)
         _items = []
         if self.cns_integrated_diagnosis:
@@ -78,6 +96,20 @@ class PatientFilters(BaseModel):
                 if _item_cns_integrated_diagnosis:
                     _items.append(_item_cns_integrated_diagnosis.to_dict())
             _dict['cns_integrated_diagnosis'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in diagnosis_type_cohort (list)
+        _items = []
+        if self.diagnosis_type_cohort:
+            for _item_diagnosis_type_cohort in self.diagnosis_type_cohort:
+                if _item_diagnosis_type_cohort:
+                    _items.append(_item_diagnosis_type_cohort.to_dict())
+            _dict['diagnosis_type_cohort'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in got_radiation_ever (list)
+        _items = []
+        if self.got_radiation_ever:
+            for _item_got_radiation_ever in self.got_radiation_ever:
+                if _item_got_radiation_ever:
+                    _items.append(_item_got_radiation_ever.to_dict())
+            _dict['got_radiation_ever'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in organization_code (list)
         _items = []
         if self.organization_code:
@@ -104,7 +136,11 @@ class PatientFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "age_at_initial_dx_group": [FiltersValue.from_dict(_item) for _item in obj["age_at_initial_dx_group"]] if obj.get("age_at_initial_dx_group") is not None else None,
+            "chemotherapy_agents": [FiltersValue.from_dict(_item) for _item in obj["chemotherapy_agents"]] if obj.get("chemotherapy_agents") is not None else None,
             "cns_integrated_diagnosis": [FiltersValue.from_dict(_item) for _item in obj["cns_integrated_diagnosis"]] if obj.get("cns_integrated_diagnosis") is not None else None,
+            "diagnosis_type_cohort": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_type_cohort"]] if obj.get("diagnosis_type_cohort") is not None else None,
+            "got_radiation_ever": [FiltersValue.from_dict(_item) for _item in obj["got_radiation_ever"]] if obj.get("got_radiation_ever") is not None else None,
             "organization_code": [FiltersValue.from_dict(_item) for _item in obj["organization_code"]] if obj.get("organization_code") is not None else None,
             "vital_status": [FiltersValue.from_dict(_item) for _item in obj["vital_status"]] if obj.get("vital_status") is not None else None
         })

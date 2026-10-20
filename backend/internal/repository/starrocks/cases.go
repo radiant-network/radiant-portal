@@ -55,7 +55,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	columns = append(columns, "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type")
+	columns = append(columns, caseTypeColumn)
 	columns = append(columns, "stg.case_id IS NOT NULL AS has_variants")
 	// Group membership is many-to-many: a case in two of the requested groups would come back twice.
 	if userQuery.HasFieldFromTables(types.CaseGroupTable) {
@@ -70,9 +70,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
-	// COUNT DISTINCT ignores NULL, so counting family_member_id alone drops every fetus-only row
-	// and undercounts a prenatal case's members.
-	txMembersCount := db.Table(types.FamilyTable.TenantQualifiedName(ctx)).Select("case_id, count(distinct CASE WHEN fetus_id IS NOT NULL THEN CONCAT('f:', fetus_id) ELSE CONCAT('p:', family_member_id) END) as distinct_members_count").Group("case_id")
+	txMembersCount := caseMembersCount(ctx, db)
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
@@ -554,4 +552,16 @@ func calculateCaseType(caseEntity CaseEntity) string {
 	} else {
 		return fmt.Sprintf("%s_family", caseEntity.CaseTypeCode)
 	}
+}
+
+// caseTypeColumn is the case type of the case list: germline_family for a germline case with more than one
+// member. It needs the caseMembersCount subquery joined as members_count.
+const caseTypeColumn = "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type"
+
+// caseMembersCount counts the members of each case. COUNT DISTINCT ignores NULL, so counting family_member_id
+// alone drops every fetus-only row and undercounts a prenatal case's members.
+func caseMembersCount(ctx context.Context, db *gorm.DB) *gorm.DB {
+	return db.Table(types.FamilyTable.TenantQualifiedName(ctx)).
+		Select("case_id, count(distinct CASE WHEN fetus_id IS NOT NULL THEN CONCAT('f:', fetus_id) ELSE CONCAT('p:', family_member_id) END) as distinct_members_count").
+		Group("case_id")
 }
