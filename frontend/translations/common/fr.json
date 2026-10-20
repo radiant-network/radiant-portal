@@ -1,8 +1,17 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "Plus d'actions"
+    },
     "assignment_picker": {
       "open": "Modifier l'assignation du cas",
       "remove_user": "Retirer {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Effacer"
+    },
+    "badge": {
+      "remove": "Retirer"
     },
     "breadcrumb": {
       "more": "Plus"
@@ -29,9 +38,60 @@
     "date_picker": {
       "open_calendar": "Ouvrir le calendrier"
     },
+    "editable_text": {
+      "edit": "Modifier"
+    },
+    "facets_sidebar": {
+      "collapse": "Réduire les filtres",
+      "expand": "Développer les filtres"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Passer en anglais (EN)",
+      "switch_to_fr": "Passer en français (FR)"
+    },
+    "list_item": {
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "share": "Partager"
+    },
+    "main_navbar": {
+      "close_menu": "Fermer le menu",
+      "open_menu": "Ouvrir le menu"
+    },
+    "main_sidebar": {
+      "collapse": "Réduire le menu",
+      "expand": "Développer le menu"
+    },
     "message_scroller": {
       "scroll_to_end": "Défiler vers la fin",
       "scroll_to_start": "Défiler vers le début"
+    },
+    "multi_selector": {
+      "clear_all": "Tout effacer"
+    },
+    "note": {
+      "actions": "Actions du commentaire"
+    },
+    "notes": {
+      "open_count_one": "{{count}} commentaire",
+      "open_count_other": "{{count}} commentaires"
+    },
+    "occurrence_flag": {
+      "edit": "Modifier le drapeau"
+    },
+    "query_builder": {
+      "close_facets": "Fermer le panneau des filtres"
+    },
+    "slider": {
+      "next": "Résultat suivant",
+      "previous": "Résultat précédent"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Détails du séquençage"
+    },
+    "theme_toggle": {
+      "to_dark": "Passer au thème sombre",
+      "to_light": "Passer au thème clair"
     },
     "sidebar": {
       "description": "Affiche la barre latérale mobile.",

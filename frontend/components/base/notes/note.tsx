@@ -160,7 +160,13 @@ function Note({
           {isOwner && canEdit && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="2xs" iconOnly className="ml-auto shrink-0">
+                <Button
+                  variant="ghost"
+                  size="2xs"
+                  iconOnly
+                  className="ml-auto shrink-0"
+                  aria-label={t('a11y.note.actions')}
+                >
                   <EllipsisVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

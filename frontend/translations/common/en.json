@@ -1,8 +1,17 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "More actions"
+    },
     "assignment_picker": {
       "open": "Edit case assignment",
       "remove_user": "Remove {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Clear"
+    },
+    "badge": {
+      "remove": "Remove"
     },
     "breadcrumb": {
       "more": "More"
@@ -29,9 +38,60 @@
     "date_picker": {
       "open_calendar": "Open calendar"
     },
+    "editable_text": {
+      "edit": "Edit"
+    },
+    "facets_sidebar": {
+      "collapse": "Collapse filters",
+      "expand": "Expand filters"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Switch to English (EN)",
+      "switch_to_fr": "Switch to French (FR)"
+    },
+    "list_item": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "share": "Share"
+    },
+    "main_navbar": {
+      "close_menu": "Close menu",
+      "open_menu": "Open menu"
+    },
+    "main_sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
+    },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
+    },
+    "multi_selector": {
+      "clear_all": "Clear all"
+    },
+    "note": {
+      "actions": "Comment actions"
+    },
+    "notes": {
+      "open_count_one": "{{count}} comment",
+      "open_count_other": "{{count}} comments"
+    },
+    "occurrence_flag": {
+      "edit": "Edit flag"
+    },
+    "query_builder": {
+      "close_facets": "Close filters panel"
+    },
+    "slider": {
+      "next": "Next result",
+      "previous": "Previous result"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Sequencing details"
+    },
+    "theme_toggle": {
+      "to_dark": "Switch to dark theme",
+      "to_light": "Switch to light theme"
     },
     "sidebar": {
       "description": "Displays the mobile sidebar.",

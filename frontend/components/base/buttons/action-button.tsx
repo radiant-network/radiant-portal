@@ -10,6 +10,7 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
 import { actionButtonVariants } from './button.variants';
@@ -47,6 +48,7 @@ function ActionButton({
   dataCy,
   ...btnProps
 }: ActionButtonProps) {
+  const { t } = useI18n();
   const style = actionButtonVariants({ size, variant, disabled: btnProps.disabled });
 
   const defaultButton = (
@@ -71,7 +73,11 @@ function ActionButton({
         {/* Dropdown Button */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild disabled={btnProps.disabled}>
-            <button className={cn(style.base(), style.actionsButton())} {...btnProps}>
+            <button
+              className={cn(style.base(), style.actionsButton())}
+              {...btnProps}
+              aria-label={t('a11y.action_button.more')}
+            >
               <MoreVerticalIcon />
             </button>
           </DropdownMenuTrigger>

@@ -452,6 +452,7 @@ function MultiSelector({
         </div>
         <button
           type="button"
+          aria-label={t('a11y.multi_selector.clear_all')}
           onClick={() => {
             setSelected(selected.filter(s => s.fixed));
             onChange?.(selected.filter(s => s.fixed).map(o => o.value));
