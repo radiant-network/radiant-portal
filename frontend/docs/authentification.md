@@ -54,6 +54,6 @@ export function action({ request }: Route.ActionArgs) {
 
 #### Making the endpoint avaiable
 
-In order to make the endpoint available, add it to the `PROXY_API` (or create a sibling `PROXY_<NAME>`) in `portals/radiant/config/routes.module.ts`, then make sure every theme that needs it spreads the group in its `routes.<theme>.ts`.
+In order to make the endpoint available, add it to the `PROXY_API` in `portals/radiant/config/routes.module.ts`. For a proxy only some themes need, add it to `EXTRA_ROUTES` instead (like `PROXY_YAC`) and list it in the `extras` of those themes' `portals/radiant/config/<theme>/bundle.ts`.
 
-see: `portals/radiant/config/routes.module.ts` and the composition files under `portals/radiant/config/routes.*.ts`.
+see: `portals/radiant/config/routes.module.ts` and `portals/radiant/config/<theme>/bundle.ts`.

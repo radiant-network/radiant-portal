@@ -1,11 +1,11 @@
-import { SavedFilterType } from '../../../api';
-import { RangeOperators } from '../../../components/base/query-builder/type';
+import { SavedFilterType } from '../../../../api';
+import { RangeOperators } from '../../../../components/base/query-builder/type';
 import {
   type AggregationConfig,
   ApplicationId,
   FilterTypes,
   type PortalConfig,
-} from '../../../components/cores/applications-config';
+} from '../../../../components/cores/applications-config';
 
 const panelAggregation = {
   items: [{ key: 'tenant_gene_panel', translation_key: 'tenant_gene_panel', type: FilterTypes.MULTIPLE }],

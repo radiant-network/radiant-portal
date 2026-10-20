@@ -1,11 +1,11 @@
-import { SavedFilterType } from '../../../api';
-import { RangeOperators } from '../../../components/base/query-builder/type';
+import { SavedFilterType } from '../../../../api';
+import { RangeOperators } from '../../../../components/base/query-builder/type';
 import {
   type AggregationConfig,
   ApplicationId,
   FilterTypes,
   type PortalConfig,
-} from '../../../components/cores/applications-config';
+} from '../../../../components/cores/applications-config';
 
 // TODO: remove from radiant once each instance has its own QA environment, the panel facet is qlin only
 const panelAggregation = {
@@ -357,7 +357,7 @@ const somaticSNVAggregations = {
   },
 } satisfies AggregationConfig;
 
-export const radiantConfig = {
+export const includeConfig = {
   admin: {
     app_id: ApplicationId.admin,
     admin_code: 'admin',
@@ -859,7 +859,7 @@ export const radiantConfig = {
     app_id: ApplicationId.variant_entity,
   },
   portal: {
-    name: 'Radiant',
+    name: 'INCLUDE',
     navigation: {
       dashboard: true,
       variant: true,

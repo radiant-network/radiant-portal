@@ -21,7 +21,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const localPath = useLocalPath();
 
   const adminLinks: MainNavbarEntry[] =
-    __APPS_ADMIN__ && canAdministerTenant
+    import.meta.env.APPS_ADMIN && canAdministerTenant
       ? [
           { separator: true },
           {
@@ -39,7 +39,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
       placement={placement}
       logo={<img src={logo} alt="Logo" />}
       links={[
-        ...(__APPS_PATIENT__
+        ...(import.meta.env.APPS_PATIENT
           ? [
               {
                 title: t('main_navbar.links.patients'),
@@ -50,7 +50,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
               },
             ]
           : []),
-        ...(__APPS_CASE__
+        ...(import.meta.env.APPS_CASE
           ? [
               {
                 title: t('main_navbar.links.cases'),
@@ -61,7 +61,7 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
               },
             ]
           : []),
-        ...(__APPS_FILE_ARCHIVE__
+        ...(import.meta.env.APPS_FILE_ARCHIVE
           ? [
               {
                 title: t('main_navbar.links.files'),
