@@ -20,9 +20,15 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "case_actions_menu": {
+      "open": "Actions du cas"
+    },
     "case_group_tag": {
       "copy_name": "Copier le nom du groupe",
       "remove": "Retirer le filtre Nouvelles données"
+    },
+    "classification_section": {
+      "open": "Aller à {{title}}"
     },
     "clingen_cell": {
       "open": "Ouvrir dans ClinGen (nouvel onglet)"
@@ -94,6 +100,12 @@
     },
     "occurrence_flag": {
       "edit": "Modifier le drapeau"
+    },
+    "omim_link": {
+      "open": "Ouvrir {{symbol}} dans OMIM (nouvel onglet)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Retirer la citation"
     },
     "query_bar": {
       "delete": "Supprimer la requête",

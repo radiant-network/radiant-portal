@@ -1,4 +1,3 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 import { EllipsisVertical } from 'lucide-react';
 
@@ -10,6 +9,7 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Button } from '@/components/base/shadcn/button';
@@ -120,7 +120,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row, {
       id: 'action',
       cell: () => (
-        <Button iconOnly variant="outline" className="size-6">
+        <Button iconOnly variant="outline" className="size-6" aria-label={t('a11y.case_actions_menu.open')}>
           <EllipsisVertical />
         </Button>
       ),
