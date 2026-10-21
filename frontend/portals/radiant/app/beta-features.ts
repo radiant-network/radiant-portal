@@ -24,19 +24,19 @@ const radiantFeatureDefinitions: FeatureDefinitions = {
   ...commonFeatures,
   analysis: {
     type: 'link',
-    link: '/analysis',
+    link: '/radiant/analysis',
     label: 'Analysis',
     description: 'Access analysis page',
   },
   study: {
     type: 'link',
-    link: '/study',
+    link: '/radiant/study',
     label: 'Studies',
     description: 'Access the new Studies page',
   },
   community: {
     type: 'link',
-    link: '/community',
+    link: '/radiant/community',
     label: 'Community',
     description: 'Access the new Community exploration page',
   },
