@@ -66,12 +66,12 @@ describe('Case Entity - Variants - Germline - SNV - Table - Information displaye
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('clinvar', data.variantGermline);
   });
 
-  it('Exo.', () => {
+  it('Exo. [RAD-111]', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('exomiser', data.variantGermline);
   });
 
-  it('ACMG Exo.', () => {
+  it('ACMG Exo. [RAD-111]', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('acmg_exomiser', data.variantGermline);
   });
