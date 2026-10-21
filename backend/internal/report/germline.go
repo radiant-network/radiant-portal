@@ -60,6 +60,20 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 		foundLociAsStrings = append(foundLociAsStrings, strconv.FormatInt(occurrence.LocusID, 10))
 	}
 
+	interpretations, err := b.interpretations.ListGermlineForReport(ctx, strconv.Itoa(caseId), strconv.Itoa(seqId), foundLociAsStrings)
+	if err != nil {
+		return nil, fmt.Errorf("list germline interpretations: %w", err)
+	}
+	interpretationByTranscript := make(map[string]types.InterpretationGermline, len(interpretations))
+	interpretedByLocus := make(map[string]map[string]bool)
+	for _, interpretation := range interpretations {
+		interpretationByTranscript[interpretation.LocusId+"/"+interpretation.TranscriptId] = interpretation
+		if interpretedByLocus[interpretation.LocusId] == nil {
+			interpretedByLocus[interpretation.LocusId] = map[string]bool{}
+		}
+		interpretedByLocus[interpretation.LocusId][interpretation.TranscriptId] = true
+	}
+
 	consequences, err := b.data.ListReportConsequences(ctx, foundLoci)
 	if err != nil {
 		return nil, err
@@ -71,7 +85,7 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 	}
 	symbols := map[string]bool{}
 	for locusId, rows := range rowsByLocus {
-		transcripts := buildTranscripts(rows)
+		transcripts := buildTranscripts(rows, interpretedByLocus[strconv.FormatInt(locusId, 10)])
 		transcriptsByLocus[locusId] = transcripts
 		for _, transcript := range transcripts {
 			symbols[transcript.Symbol] = true
@@ -89,15 +103,6 @@ func (b *GermlineBuilder) Build(ctx context.Context, caseId int, seqId int, task
 			Name:            row.Panel,
 			InheritanceCode: row.InheritanceCode,
 		})
-	}
-
-	interpretations, err := b.interpretations.ListGermlineForReport(ctx, strconv.Itoa(caseId), strconv.Itoa(seqId), foundLociAsStrings)
-	if err != nil {
-		return nil, fmt.Errorf("list germline interpretations: %w", err)
-	}
-	interpretationByTranscript := make(map[string]types.InterpretationGermline, len(interpretations))
-	for _, interpretation := range interpretations {
-		interpretationByTranscript[interpretation.LocusId+"/"+interpretation.TranscriptId] = interpretation
 	}
 
 	for _, locusId := range locusIds {
@@ -196,11 +201,11 @@ func buildGenes(transcripts []types.ReportTranscript, omimBySymbol map[string][]
 const sourceRefSeq = "RefSeq"
 
 // buildTranscripts applies the rows rule of the report to the consequence rows of one locus:
-// one row per Ensembl transcript (a NULL source is a row annotated before RefSeq transcripts
-// were loaded, so it counts as Ensembl), the RefSeq transcript shown through the MANE pair,
-// and a RefSeq transcript kept only when its gene has no Ensembl transcript. MANE Select rows
-// come first.
-func buildTranscripts(rows []types.ReportConsequenceRow) []types.ReportTranscript {
+// the MANE Select transcripts and the interpreted ones (a locus with neither gets no row), one
+// row per Ensembl transcript (a NULL source is a row annotated before RefSeq transcripts were
+// loaded, so it counts as Ensembl), the RefSeq transcript shown through the MANE pair, and a
+// RefSeq transcript kept only when its gene has no Ensembl transcript.
+func buildTranscripts(rows []types.ReportConsequenceRow, interpreted map[string]bool) []types.ReportTranscript {
 	refseqByID := map[string]types.ReportConsequenceRow{}
 	ensemblSymbols := map[string]bool{}
 	for _, row := range rows {
@@ -245,6 +250,14 @@ func buildTranscripts(rows []types.ReportConsequenceRow) []types.ReportTranscrip
 			VepImpact:    row.VepImpact,
 		})
 	}
+
+	kept := transcripts[:0]
+	for _, transcript := range transcripts {
+		if transcript.IsManeSelect || interpreted[transcript.TranscriptID] {
+			kept = append(kept, transcript)
+		}
+	}
+	transcripts = kept
 
 	sort.SliceStable(transcripts, func(i, j int) bool {
 		a, b := transcripts[i], transcripts[j]

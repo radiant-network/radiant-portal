@@ -39,9 +39,10 @@ internal/
   service/     - Cross-system orchestration (user provisioning, tenant setup, Ranger policies)
   report/      - Transcript report (RAD-41): builds the tenant-independent TranscriptReport object of
                  N loci from the StarRocks report repository and the Postgres interpretations (rows rule:
-                 one row per Ensembl transcript, MANE Select first, RefSeq shown through the MANE pair,
-                 RefSeq-only genes keep their row). Served raw by GET .../snv/{case}/{seq}/{task}/{locus}/report;
-                 the Excel rendering comes in a later task
+                 MANE Select transcripts plus any interpreted one, RefSeq shown through the MANE pair, a
+                 locus with neither gets no row). Served raw by GET .../snv/{case}/{seq}/{task}/{locus}/report.
+                 Excel engine: per-tenant xlsx templates loaded at boot (`REPORT_TEMPLATE_DIR`, see the
+                 config table), rendered with excelize (`Template.Render`); the xlsx endpoint comes next
   notification/- Lab manifest emails: per-tenant templates (manifest_<tenant>.tmpl, subject + HTML body),
                  TSV manifest writer (header = internal/cli/manifest columns, pinned by a contract
                  test), SMTP mailer (go-mail) and the Notify service behind /case_groups/{name}/notify
@@ -126,7 +127,7 @@ Keycloak realm `radiant` (`scripts/init-keycloak/radiant.json`) holds the demo u
 **Entry point:** `cmd/api/main.go`
 
 Route groups:
-- `GET /status` — health check (public, no auth): DB connections plus `notification_templates` (`ok` / `warning` / `error`, the template load outcome; always HTTP 200)
+- `GET /status` — health check (public, no auth): DB connections plus `notification_templates` and `report_templates` (`ok` / `warning` / `error`, the template load outcome; always HTTP 200)
 - `GET /config` — public client configuration for CLI tools (Keycloak device-flow settings, no secret); handler `internal/server/handlers_config.go`
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `GET /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/report` (`can_search_case`) — the transcript report object of one occurrence (`internal/report`). 404 when the task is not a task of that sequencing of that case or the locus is not an occurrence of it. PubMed citations the client cannot resolve are returned with an empty `citation` (the report must not fail on PubMed), unlike the interpretation endpoints which fail the read
@@ -263,6 +264,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `NOTIFICATION_TIMEZONE` | Timezone of the manifest filename date and the `GeneratedOn` template value. | America/Montreal |
 | `PORTAL_URL` | Portal base URL exposed to templates as `.PortalURL`. | — |
 | `NOTIFICATION_TEMPLATE_DIR` | Directory of lab notification templates, one `manifest_<tenant>.tmpl` per tenant with `{{define "subject"}}` (text, one line) and `{{define "body"}}` (HTML: markup written in the template passes as-is, only `{{.Var}}` values are escaped). Parsed once at boot by `notification.LoadTemplates`: unset dir, unreadable dir, a file missing a define or failing to parse all **warn and skip**, never fatal; an `info` line lists the tenants loaded and `GET /status` reports `notification_templates` as `ok` (all files loaded), `warning` (at least one file skipped or ignored) or `error` (nothing loaded). No embedded default: a tenant without a template can't be notified (`ErrTemplateMissing`). `TemplateData` is the template contract, new variables are API-only changes and templates branch with `{{if}}` (`HasStat`, `HasAnalysis "CODE"`). Deployed as a volume (ConfigMap); a ConfigMap edit alone does not restart pods. | — (disabled) |
+| `REPORT_TEMPLATE_DIR` | Directory of transcript report templates, one `transcripts_<kind>_<tenant>.xlsx` per tenant and report kind (`germline`; `somatic` files are ignored until their report object exists). Same loader shape as the notification templates (`report.LoadTemplates`, warn and skip, `GET /status` reports `report_templates`), plus a boot **dry run** on a full sample report and on the zero report so every cell branch runs once. Template contract: one sheet whose tab name is a template, row 1 header, row 2 placeholder row duplicated per transcript, nothing below; every cell is a Go `text/template` over the row context (`.Case .Variant .Occurrence .Genes .Transcripts` of the report, `.Transcript` the row, `.Gene *ReportGene` of that transcript or nil); no formula, merged cell or conditional format. Rendered text takes a `**bold**` / `_italic_` run markup (underscore only at a word boundary, so `NM_000546.6` stays literal) applied over the cell's own font; everything else (widths, heights, wrap, borders, autofilter) comes from the file. Helpers (`internal/report/helpers.go`) are the clin-arranger formatters ported: `lines`, `join`, `exon`, `score`, `af`, `zygosity`, `gnomad`, `clinvar`, `omim`, `classification`, `mane`, `citations`; fixed French labels (`Non répertorié`, `ND`…) belong in the template cells, not in helpers. The translated values come from the tenant's label file `transcripts_<tenant>.json` in the same directory (flat JSON, keys listed in `labels.go`, lower case except codes: `clinvar.benign`, `zygosity.HOM`, `classification.LA6668-3`); the API embeds `transcripts_radiant.json` (English) as the `radiant` tenant's file, the test fixture and the per-key fallback of every tenant. A missing or incomplete tenant file still renders (defaults fill the holes) but logs a warning and turns `report_templates` to `warning`; a broken one skips that tenant's templates. No French in Go code or tests: wording lives in the label files and the template cells. `transcripts_germline_qlin.xlsx` is the QLIN layout, generated by a script kept out of the repo and then edited in Excel; a copy in `internal/report/testdata/` is the smoke test. | — (disabled) |
 
 ## Testing
 
