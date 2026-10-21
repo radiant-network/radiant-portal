@@ -35,11 +35,16 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
               {/* TODO when vep_impact is added to the api if data.is_picked == true */}
               {/* <ImpactIndicator value="HIGH" size={16} /> */}
               {data.symbol && (
-                <Link to={getOmimOrgUrl({ symbol: data.symbol })} target="_blank" rel="noreferrer">
-                  <Button iconOnly size="xs" variant="ghost">
-                    {<ArrowUpRight className="size-4!" />}
-                  </Button>
-                </Link>
+                <Button asChild iconOnly size="xs" variant="ghost">
+                  <Link
+                    to={getOmimOrgUrl({ symbol: data.symbol })}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={t('a11y.omim_link.open', { symbol: data.symbol })}
+                  >
+                    <ArrowUpRight className="size-4!" />
+                  </Link>
+                </Button>
               )}
             </div>
             <div className="flex flex-1">

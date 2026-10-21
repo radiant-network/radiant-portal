@@ -129,6 +129,7 @@ function OccurrenceFlagDropdown({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            aria-label={selectedFlag ? t('occurrence_flag.tooltip.flagged') : t('occurrence_flag.tooltip.unflagged')}
             {...props}
             variant={variant}
             iconOnly
@@ -148,7 +149,7 @@ function OccurrenceFlagDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button {...props} variant={variant} iconOnly>
+        <Button aria-label={t('a11y.occurrence_flag.edit')} {...props} variant={variant} iconOnly>
           {flagIcon}
         </Button>
       </DropdownMenuTrigger>

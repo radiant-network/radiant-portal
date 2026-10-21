@@ -2,6 +2,7 @@ import * as React from 'react';
 import { XIcon } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import { Separator } from './separator';
@@ -198,6 +199,7 @@ export interface BadgeProps
 }
 
 function Badge({ className, variant, children, iconOnly, size, count, ...props }: BadgeProps) {
+  const { t } = useI18n();
   const showCount = count !== undefined;
   const styles = badgeVariants({
     variant,
@@ -218,7 +220,7 @@ function Badge({ className, variant, children, iconOnly, size, count, ...props }
         </>
       )}
       {props.onClose && (
-        <button className="hover:cursor-pointer" onClick={props.onClose}>
+        <button className="hover:cursor-pointer" aria-label={t('a11y.badge.remove')} onClick={props.onClose}>
           <XIcon className={styles.closeIcon()} />
         </button>
       )}

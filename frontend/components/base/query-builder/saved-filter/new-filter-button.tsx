@@ -43,7 +43,14 @@ function NewFilterButton() {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex">
-          <Button iconOnly variant="ghost" size="sm" onClick={handleNew} disabled={!selectedSavedFilter}>
+          <Button
+            iconOnly
+            variant="ghost"
+            size="sm"
+            aria-label={t('a11y.saved_filter.new')}
+            onClick={handleNew}
+            disabled={!selectedSavedFilter}
+          >
             <PlusIcon />
           </Button>
         </span>

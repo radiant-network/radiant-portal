@@ -87,6 +87,7 @@ function PubmedFormField() {
                     <Button
                       iconOnly
                       variant="link"
+                      aria-label={t('a11y.pubmed_form_field.remove_citation')}
                       onClick={e => {
                         e.preventDefault();
                         remove(index);

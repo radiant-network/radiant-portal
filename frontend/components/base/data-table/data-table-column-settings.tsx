@@ -110,7 +110,13 @@ function TableColumnSettings({
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button id="data-table-column-settings" size="sm" iconOnly variant="ghost">
+              <Button
+                id="data-table-column-settings"
+                size="sm"
+                iconOnly
+                variant="ghost"
+                aria-label={t('a11y.data_table.column_settings')}
+              >
                 <div>
                   <SettingsIcon />
                 </div>

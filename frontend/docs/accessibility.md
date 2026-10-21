@@ -60,3 +60,30 @@ const meta = {
     "clingen_cell": { "open": "Open in ClinGen (new tab)" }
   }
   ```
+
+### Icon-only buttons
+
+An icon alone gives a button no name: Lucide icons are `aria-hidden` and a tooltip is not a name. Add an `aria-label`:
+
+```tsx
+<Button iconOnly variant="ghost" aria-label={t('a11y.list_item.delete')} onClick={onDelete}>
+  <TrashIcon />
+</Button>
+```
+
+- The label says what the button does, not why it is disabled.
+- When the tooltip already says it and changes with the state, reuse the same expression rather than adding a key:
+  `aria-label={hasNotes ? t('notes.variant.tooltip.view') : t('notes.variant.tooltip.add')}`.
+- When the button shows text (a count, a language code, a value), the label contains it: `"{{count}} comments"`, `"Switch to French (FR)"`.
+- Repeated in every row? Put the row's value in the label: `"Add {{symbol}} to the query"`.
+- An icon link styled as a button is a single element, never `<Link><Button /></Link>`:
+
+  ```tsx
+  <Button asChild iconOnly size="xs" variant="ghost">
+    <Link to={href} aria-label={t('a11y.classification_section.open', { title })}>
+      <ArrowUpRight />
+    </Link>
+  </Button>
+  ```
+
+- A wrapper that receives props from its caller sets its default `aria-label` before `{...props}`, so the caller can override it.

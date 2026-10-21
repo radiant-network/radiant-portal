@@ -180,7 +180,13 @@ function MainSidebar({
             'justify-start': placement === 'right',
           })}
         >
-          <Button iconOnly onClick={() => toggleSidebar()} size="sm" variant="ghost">
+          <Button
+            iconOnly
+            onClick={() => toggleSidebar()}
+            size="sm"
+            variant="ghost"
+            aria-label={open ? t('a11y.main_sidebar.collapse') : t('a11y.main_sidebar.expand')}
+          >
             {open ? <PanelLeftClose /> : <PanelLeftOpen />}
           </Button>
         </div>

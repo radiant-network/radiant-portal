@@ -1,8 +1,17 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "Plus d'actions"
+    },
     "assignment_picker": {
       "open": "Modifier l'assignation du cas",
       "remove_user": "Retirer {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Effacer"
+    },
+    "badge": {
+      "remove": "Retirer"
     },
     "breadcrumb": {
       "more": "Plus"
@@ -11,9 +20,15 @@
       "next_slide": "Diapositive suivante",
       "previous_slide": "Diapositive précédente"
     },
+    "case_actions_menu": {
+      "open": "Actions du cas"
+    },
     "case_group_tag": {
       "copy_name": "Copier le nom du groupe",
       "remove": "Retirer le filtre Nouvelles données"
+    },
+    "classification_section": {
+      "open": "Aller à {{title}}"
     },
     "clingen_cell": {
       "open": "Ouvrir dans ClinGen (nouvel onglet)"
@@ -26,12 +41,100 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "data_table": {
+      "collapse_row": "Replier la ligne",
+      "column_settings": "Paramètres des colonnes",
+      "expand_row": "Déplier la ligne",
+      "group_by": "Regrouper par",
+      "grouped_by": "Regroupé par {{value}}",
+      "pin_column": "Épingler la colonne",
+      "pin_row": "Épingler la ligne",
+      "sort": "Trier",
+      "sorted_asc": "Trié par ordre croissant",
+      "sorted_desc": "Trié par ordre décroissant",
+      "unpin_row": "Désépingler la ligne"
+    },
     "date_picker": {
       "open_calendar": "Ouvrir le calendrier"
+    },
+    "editable_text": {
+      "edit": "Modifier"
+    },
+    "facets_sidebar": {
+      "collapse": "Réduire les filtres",
+      "expand": "Développer les filtres"
+    },
+    "gene_cell": {
+      "add_to_query": "Ajouter {{symbol}} à la requête"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Passer en anglais (EN)",
+      "switch_to_fr": "Passer en français (FR)"
+    },
+    "list_item": {
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "share": "Partager"
+    },
+    "main_navbar": {
+      "close_menu": "Fermer le menu",
+      "open_menu": "Ouvrir le menu"
+    },
+    "main_sidebar": {
+      "collapse": "Réduire le menu",
+      "expand": "Développer le menu"
     },
     "message_scroller": {
       "scroll_to_end": "Défiler vers la fin",
       "scroll_to_start": "Défiler vers le début"
+    },
+    "multi_selector": {
+      "clear_all": "Tout effacer"
+    },
+    "note": {
+      "actions": "Actions du commentaire"
+    },
+    "notes": {
+      "open_count_one": "{{count}} commentaire",
+      "open_count_other": "{{count}} commentaires"
+    },
+    "occurrence_flag": {
+      "edit": "Modifier le drapeau"
+    },
+    "omim_link": {
+      "open": "Ouvrir {{symbol}} dans OMIM (nouvel onglet)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Retirer la citation"
+    },
+    "query_bar": {
+      "delete": "Supprimer la requête",
+      "duplicate": "Dupliquer la requête"
+    },
+    "query_builder": {
+      "close_facets": "Fermer le panneau des filtres"
+    },
+    "query_pill": {
+      "remove": "Retirer le filtre"
+    },
+    "saved_filter": {
+      "delete": "Supprimer le filtre",
+      "discard": "Annuler les modifications non enregistrées",
+      "duplicate": "Dupliquer le filtre",
+      "edit": "Modifier le filtre",
+      "new": "Nouveau filtre",
+      "save": "Enregistrer le filtre"
+    },
+    "slider": {
+      "next": "Résultat suivant",
+      "previous": "Résultat précédent"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Détails du séquençage"
+    },
+    "theme_toggle": {
+      "to_dark": "Passer au thème sombre",
+      "to_light": "Passer au thème clair"
     },
     "sidebar": {
       "description": "Affiche la barre latérale mobile.",

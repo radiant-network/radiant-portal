@@ -99,6 +99,7 @@ function TableHeaderActions<TData extends RowData>({ header, defaultSort }: Tabl
             <Button
               variant="ghost"
               iconOnly
+              aria-label={t('a11y.data_table.pin_column')}
               className={cn('size-6 hidden group-hover/header:flex', {
                 flex: isPinningDropdownActive,
               })}
@@ -132,6 +133,12 @@ function TableHeaderActions<TData extends RowData>({ header, defaultSort }: Tabl
             <Button
               variant="ghost"
               iconOnly
+              aria-label={
+                {
+                  asc: t('a11y.data_table.sorted_asc'),
+                  desc: t('a11y.data_table.sorted_desc'),
+                }[isSorted as string] ?? t('a11y.data_table.sort')
+              }
               className={cn('size-6 hidden group-hover/header:flex', {
                 flex: isSorted || isPinningDropdownActive,
               })}

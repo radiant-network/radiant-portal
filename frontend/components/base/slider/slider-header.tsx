@@ -1,5 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { useI18n } from '@/components/hooks/i18n';
+
 import { Button } from '../shadcn/button';
 
 type PreviewHeaderProps = {
@@ -11,14 +13,30 @@ type PreviewHeaderProps = {
 };
 
 function SliderHeader({ children, onPrevious, onNext, hasPrevious = true, hasNext = true }: PreviewHeaderProps) {
+  const { t } = useI18n();
+
   return (
     <div id="slider-header" className="flex flex-row items-center size-full pr-8">
       <div className="flex flex-wrap gap-4 items-center pr-4 w-full min-w-0">{children}</div>
       <div id="slider-header-navigation" className="flex gap-2 items-center justify-end">
-        <Button variant="outline" iconOnly className="size-7 rounded-md" onClick={onPrevious} disabled={!hasPrevious}>
+        <Button
+          variant="outline"
+          iconOnly
+          className="size-7 rounded-md"
+          aria-label={t('a11y.slider.previous')}
+          onClick={onPrevious}
+          disabled={!hasPrevious}
+        >
           <ChevronLeft />
         </Button>
-        <Button variant="outline" iconOnly className="size-7 rounded-md" onClick={onNext} disabled={!hasNext}>
+        <Button
+          variant="outline"
+          iconOnly
+          className="size-7 rounded-md"
+          aria-label={t('a11y.slider.next')}
+          onClick={onNext}
+          disabled={!hasNext}
+        >
           <ChevronRight />
         </Button>
       </div>

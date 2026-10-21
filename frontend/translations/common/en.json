@@ -1,8 +1,17 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "More actions"
+    },
     "assignment_picker": {
       "open": "Edit case assignment",
       "remove_user": "Remove {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Clear"
+    },
+    "badge": {
+      "remove": "Remove"
     },
     "breadcrumb": {
       "more": "More"
@@ -11,9 +20,15 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "case_actions_menu": {
+      "open": "Case actions"
+    },
     "case_group_tag": {
       "copy_name": "Copy group name",
       "remove": "Remove the New data filter"
+    },
+    "classification_section": {
+      "open": "Go to {{title}}"
     },
     "clingen_cell": {
       "open": "Open in ClinGen (new tab)"
@@ -26,12 +41,100 @@
       "no_data": "No data",
       "open_franklin": "{{tier}}, open in Franklin (new tab)"
     },
+    "data_table": {
+      "collapse_row": "Collapse row",
+      "column_settings": "Column settings",
+      "expand_row": "Expand row",
+      "group_by": "Group by",
+      "grouped_by": "Grouped by {{value}}",
+      "pin_column": "Pin column",
+      "pin_row": "Pin row",
+      "sort": "Sort",
+      "sorted_asc": "Sorted ascending",
+      "sorted_desc": "Sorted descending",
+      "unpin_row": "Unpin row"
+    },
     "date_picker": {
       "open_calendar": "Open calendar"
+    },
+    "editable_text": {
+      "edit": "Edit"
+    },
+    "facets_sidebar": {
+      "collapse": "Collapse filters",
+      "expand": "Expand filters"
+    },
+    "gene_cell": {
+      "add_to_query": "Add {{symbol}} to the query"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Switch to English (EN)",
+      "switch_to_fr": "Switch to French (FR)"
+    },
+    "list_item": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "share": "Share"
+    },
+    "main_navbar": {
+      "close_menu": "Close menu",
+      "open_menu": "Open menu"
+    },
+    "main_sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
     },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
+    },
+    "multi_selector": {
+      "clear_all": "Clear all"
+    },
+    "note": {
+      "actions": "Comment actions"
+    },
+    "notes": {
+      "open_count_one": "{{count}} comment",
+      "open_count_other": "{{count}} comments"
+    },
+    "occurrence_flag": {
+      "edit": "Edit flag"
+    },
+    "omim_link": {
+      "open": "Open {{symbol}} in OMIM (new tab)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Remove citation"
+    },
+    "query_bar": {
+      "delete": "Delete query",
+      "duplicate": "Duplicate query"
+    },
+    "query_builder": {
+      "close_facets": "Close filters panel"
+    },
+    "query_pill": {
+      "remove": "Remove filter"
+    },
+    "saved_filter": {
+      "delete": "Delete filter",
+      "discard": "Discard unsaved changes",
+      "duplicate": "Duplicate filter",
+      "edit": "Edit filter",
+      "new": "New filter",
+      "save": "Save filter"
+    },
+    "slider": {
+      "next": "Next result",
+      "previous": "Previous result"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Sequencing details"
+    },
+    "theme_toggle": {
+      "to_dark": "Switch to dark theme",
+      "to_light": "Switch to light theme"
     },
     "sidebar": {
       "description": "Displays the mobile sidebar.",
