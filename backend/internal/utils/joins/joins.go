@@ -108,7 +108,22 @@ func (j Joiner) CaseWithProbandSample(tx *gorm.DB) *gorm.DB {
 
 // ProbandSamples is the subquery behind CaseWithProbandSample: one (case_id, submitter_sample_id) row per case.
 func (j Joiner) ProbandSamples(tx *gorm.DB) string {
-	return fmt.Sprintf("SELECT case_id, submitter_sample_id FROM ("+
+	fmt.Sprintf(
+    `WITH ranked AS (
+        SELECT chseq.case_id, spl.submitter_sample_id,
+               ROW_NUMBER() OVER (PARTITION BY chseq.case_id ORDER BY s.created_on DESC, s.id DESC) AS recency
+        FROM %s chseq
+        INNER JOIN %s c   ON c.id = chseq.case_id
+        INNER JOIN %s s   ON s.id = chseq.sequencing_experiment_id
+        INNER JOIN %s spl ON spl.id = s.sample_id AND spl.patient_id = c.proband_id AND spl.fetus_id IS NULL
+        WHERE c.case_type_code <> 'somatic' OR spl.histology_code = 'tumoral'
+    )
+    SELECT case_id, submitter_sample_id FROM ranked WHERE recency = 1`,
+    j.name(types.CaseHasSequencingExperimentTable, tx),
+    j.name(types.CaseTable, tx),
+    j.name(types.SequencingExperimentTable, tx),
+    j.name(types.SampleTable, tx),
+)
 		"SELECT chseq.case_id, spl.submitter_sample_id, ROW_NUMBER() OVER (PARTITION BY chseq.case_id ORDER BY s.created_on DESC, s.id DESC) AS recency FROM %s chseq "+
 		"INNER JOIN %s c ON c.id=chseq.case_id "+
 		"INNER JOIN %s s ON s.id=chseq.sequencing_experiment_id "+
