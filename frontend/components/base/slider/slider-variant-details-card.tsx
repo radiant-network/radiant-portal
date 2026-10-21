@@ -16,6 +16,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getFranklinSnvUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
@@ -818,14 +819,7 @@ export const GeneCard = ({
             >
               {symbol}
             </AnchorLink>
-            {aa_change && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="font-mono font-semibold text-sm truncate w-fit max-w-full">{aa_change}</div>
-                </TooltipTrigger>
-                <TooltipContent className="font-mono break-all">{aa_change}</TooltipContent>
-              </Tooltip>
-            )}
+            {aa_change && <AminoAcidChange value={aa_change} className="font-semibold text-sm" />}
             {ensembl_gene_id && (
               <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}

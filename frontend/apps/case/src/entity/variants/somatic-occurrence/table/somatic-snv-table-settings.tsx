@@ -2,6 +2,7 @@ import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import CmcCell from '@/components/base/data-table/cells/cmc-cell';
@@ -13,7 +14,6 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import SomaticFrequencyCell from '@/components/base/data-table/cells/somatic-frequency-cell';
 import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/somatic-germline-frequency-cell';
-import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
@@ -94,7 +94,7 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
     // AA Change
     columnHelper.accessor(row => row.aa_change, {
       id: 'aa_change',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <AminoAcidChangeCell value={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
       ),
