@@ -1,5 +1,4 @@
 import type { ComponentType, ReactNode } from 'react';
-import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
 import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
@@ -7,7 +6,6 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { SELECTED_VARIANT_PARAM } from '../constants';
 import { useCaseVariantPermissions } from '../use-case-variant-permissions';
 
 type InterpretationDialogProps = {
@@ -18,6 +16,7 @@ type InterpretationDialogProps = {
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
   isCreation?: boolean;
+  startInViewMode?: boolean;
 };
 
 type InterpretationCellProps = {
@@ -38,16 +37,8 @@ function InterpretationCell({
   InterpretationDialog,
 }: InterpretationCellProps) {
   const { t } = useI18n();
-  const [_, setSearchParams] = useSearchParams();
   const { list, count } = useDataTable();
   const { canInterpret } = useCaseVariantPermissions();
-
-  const handleClick = () => {
-    setSearchParams(prev => {
-      prev.set(SELECTED_VARIANT_PARAM, locusId);
-      return prev;
-    });
-  };
 
   if (!hasInterpretation) {
     if (!canInterpret) {
@@ -102,20 +93,33 @@ function InterpretationCell({
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          className="size-6"
-          iconOnly
-          variant="ghost"
-          aria-label={t('variant.interpretation.tooltip.view')}
-          onClick={handleClick}
-        >
-          <ClipboardList className="text-primary fill-primary/20" size={16} />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{t('variant.interpretation.tooltip.view')}</TooltipContent>
-    </Tooltip>
+    <InterpretationDialog
+      startInViewMode
+      locusId={locusId}
+      taskId={taskId}
+      transcriptId={transcriptId}
+      patientId={patientId}
+      handleSaveCallback={() => {
+        list?.mutate();
+        count?.mutate();
+      }}
+      renderTrigger={handleOpen => (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="size-6"
+              iconOnly
+              variant="ghost"
+              aria-label={t('variant.interpretation.tooltip.view')}
+              onClick={handleOpen}
+            >
+              <ClipboardList className="text-primary fill-primary/20" size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('variant.interpretation.tooltip.view')}</TooltipContent>
+        </Tooltip>
+      )}
+    />
   );
 }
 
