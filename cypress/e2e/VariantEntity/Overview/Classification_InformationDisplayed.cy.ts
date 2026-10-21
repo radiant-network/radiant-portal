@@ -9,7 +9,7 @@ describe('VariantEntity - Overview - Classification - Information displayed', ()
     cy.visitVariantOverviewPage(data.variantGermline.locus_id);
   };
 
-  it('Exomiser', () => {
+  it('Exomiser [RAD-111]', () => {
     setupTest();
     VariantEntity_Overview.classification.validations.shouldShowField('exomiser', data.variantGermline);
   });
