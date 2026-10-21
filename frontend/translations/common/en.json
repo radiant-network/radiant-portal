@@ -44,6 +44,11 @@
     },
     "spinner": {
       "loading": "Loading"
+    },
+    "timeline": {
+      "filters_group": "Filter timeline by type",
+      "results_count_one": "Showing {{count}} result",
+      "results_count_other": "Showing {{count}} results"
     }
   },
   "admin": {
@@ -1265,6 +1270,29 @@
         "connected": "Connected"
       }
     },
+    "timeline": {
+      "title": "Clinical Timeline",
+      "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "event_type": {
+        "initial_cns_tumor": "Initial CNS Tumor",
+        "progressive": "Progressive",
+        "recurrence": "Recurrence",
+        "second_malignancy": "Second Malignancy",
+        "deceased": "Deceased",
+        "unavailable": "Unavailable",
+        "not_reported": "Not Reported"
+      },
+      "event_fields": {
+        "tumor_locations": "Tumor locations",
+        "metastasis": "Metastasis",
+        "metastasis_locations": "Metastasis locations"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
+      }
+    },
     "treatments": {
       "title_count_one": "{{count}} treatment",
       "title_count_other": "{{count}} treatments",
@@ -1285,6 +1313,27 @@
         "focal_boost": "Focal boost",
         "total_primary": "Total to primary"
       }
+    }
+  },
+  "timeline": {
+    "evidence": "Evidence",
+    "initial_treatment": "Initial treatment",
+    "marker": {
+      "day": "Day {{day}}",
+      "day_range": "Day {{start}} — {{end}}",
+      "day_unknown": "Day n/a",
+      "years": "{{value}}y"
+    },
+    "filters": {
+      "all": "All",
+      "events": "Disease events",
+      "surgery": "Surgery",
+      "chemotherapy": "Chemotherapy",
+      "radiation": "Radiation"
+    },
+    "empty": {
+      "title": "No results",
+      "description": "Adjust your filters and try again."
     }
   },
   "patient_exploration": {
