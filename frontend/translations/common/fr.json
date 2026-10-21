@@ -1231,23 +1231,35 @@
       },
       "interpretations": {
         "title": "Interprétations de variants",
+        "aa_tooltip": "Changement d'acide aminé",
+        "date_tooltip": "Dernière date d'interprétation",
         "headers": {
-          "gene": "Gène",
           "variant": "Variant",
+          "gene": "Gène",
+          "aa": "AA",
           "classification": "Classification",
           "origin": "Origine",
           "case": "Cas",
-          "assay": "Essai",
-          "reported": "Rapporté"
+          "analysis": "Analyse",
+          "date": "Date"
         }
       },
       "cases": {
         "title": "Cas génomiques",
+        "type": {
+          "somatic": "Somatique",
+          "germline": "Germinal solo",
+          "germline_family": "Germinal familial"
+        },
         "headers": {
           "case": "Cas",
-          "priority": "Priorité",
+          "type": "Type",
+          "analysis": "Analyse",
+          "primary_condition": "Condition primaire",
           "status": "Statut",
-          "assay": "Essai"
+          "priority": "Priorité",
+          "requested_by": "Demandé par",
+          "updated": "Mis à jour"
         }
       }
     },
