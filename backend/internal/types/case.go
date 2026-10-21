@@ -178,6 +178,7 @@ type CaseResult struct {
 	CaseID                   int                     `json:"case_id" validate:"required"`
 	ProbandID                int                     `json:"proband_id,omitempty"`
 	SubmitterProbandId       string                  `json:"submitter_proband_id,omitempty"`
+	ProbandSubmitterSampleId string                  `json:"proband_submitter_sample_id,omitempty"`
 	PriorityCode             string                  `json:"priority_code,omitempty"`
 	StatusCode               CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	CaseTypeCode             string                  `json:"-"`
@@ -326,6 +327,13 @@ var CaseHasSequencingExperimentTable = Table{
 	Alias:          "chseq",
 }
 
+// CaseProbandSampleTable is not a stored table: it names the per-case subquery that picks the
+// proband's sample, so its fields can be selected, filtered and sorted like any other.
+var CaseProbandSampleTable = Table{
+	Name:  "proband_sample",
+	Alias: "proband_sample",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -356,6 +364,7 @@ var CasesFields = []Field{
 	CaseOrderingPhysicianField,
 	CaseOrderingOrganizationNameField,
 	CaseOrderingOrganizationCodeField,
+	CaseProbandSubmitterSampleIdField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -382,6 +391,7 @@ var CasesDefaultFields = []Field{
 	AnalysisCatalogNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
+	CaseProbandSubmitterSampleIdField,
 	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
@@ -523,6 +533,15 @@ var CaseOrderingOrganizationNameField = Field{
 	Alias:         "ordering_organization_name",
 	CanBeSelected: true,
 	Table:         OrderingOrganizationTable,
+}
+
+var CaseProbandSubmitterSampleIdField = Field{
+	Name:          "submitter_sample_id",
+	Alias:         "proband_submitter_sample_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseProbandSampleTable,
 }
 
 var CaseSequencingExperimentIdField = Field{

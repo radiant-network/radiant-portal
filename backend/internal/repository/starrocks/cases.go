@@ -105,7 +105,11 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	tx := db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId)
+	subQueryProbandSampleId := db.Table(fmt.Sprintf("(%s) %s", r.joiner.ProbandSamples(db), types.CaseProbandSampleTable.Alias))
+	subQueryProbandSampleId = subQueryProbandSampleId.Select(fmt.Sprintf("\"%s\" as type, %s as value", types.CaseProbandSubmitterSampleIdField.GetAlias(), types.CaseProbandSubmitterSampleIdField.Name))
+	subQueryProbandSampleId = subQueryProbandSampleId.Where(fmt.Sprintf("LOWER(%s) LIKE ?", types.CaseProbandSubmitterSampleIdField.Name), strings.ToLower(searchInput))
+
+	tx := db.Table("(? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
@@ -248,6 +252,10 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 
 		if userQuery.HasFieldFromTables(types.CaseGroupTable) {
 			tx = r.joiner.CaseWithCaseGroup(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.CaseProbandSampleTable) {
+			tx = r.joiner.CaseWithProbandSample(tx)
 		}
 	}
 	return tx, nil

@@ -757,6 +757,8 @@ components:
           type: string
         proband_life_status_code:
           type: string
+        proband_submitter_sample_id:
+          type: string
         project_code:
           type: string
         project_name:
