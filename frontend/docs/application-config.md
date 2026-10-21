@@ -1,6 +1,6 @@
 # Application Config
 
-Application config read json file located in `portals/config/{application}.json`. 
+Application config is the `PortalConfig` exported by `portals/radiant/config/{theme}/portal-config.ts`.
 
 
 
@@ -12,7 +12,7 @@ If you need to add new facets for the [QueryBuilder](./query-builder.md). You ne
 We use radiant for this example.
 ```
 
-- Navigate to `portals/config/radiant.json`
+- Navigate to `portals/radiant/config/radiant/portal-config.ts`
 
 - Create a new aggregate or edit an existing one
 

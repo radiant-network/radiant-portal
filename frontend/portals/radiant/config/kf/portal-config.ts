@@ -1,6 +1,6 @@
-import { SavedFilterType } from '../../../api';
-import { RangeOperators } from '../../../components/base/query-builder/type';
-import { ApplicationId, FilterTypes, type PortalConfig } from '../../../components/cores/applications-config';
+import { SavedFilterType } from '../../../../api';
+import { RangeOperators } from '../../../../components/base/query-builder/type';
+import { ApplicationId, FilterTypes, type PortalConfig } from '../../../../components/cores/applications-config';
 
 export const kfConfig = {
   admin: {

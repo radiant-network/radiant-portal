@@ -1,29 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { APP_NAMES } from './config/catalog';
+import { type ThemeName, THEMES } from './config/themes';
 
-const APP_CONSTANTS = [
-  'VARIANT',
-  'CASE',
-  'FILE_ARCHIVE',
-  'ANALYSIS',
-  'ADMIN',
-  'PATIENT',
-  'STUDY',
-  'COMMUNITY',
-] as const;
-
-export function computeApps(theme: string, portalRoot: string): Record<string, boolean> {
-  const path = resolve(portalRoot, `config/routes.${theme}.ts`);
-  const source = readFileSync(path, 'utf8');
-
-  const spreads = new Set<string>();
-  for (const match of source.matchAll(/\.\.\.\s*([A-Z_]+)/g)) {
-    spreads.add(match[1]);
+export function computeApps(theme: string): Record<string, boolean> {
+  const definition = THEMES[theme as ThemeName];
+  if (!definition) {
+    throw new Error(`Unknown THEME "${theme}": add it to THEMES in config/themes.ts`);
   }
 
-  const defines: Record<string, boolean> = {};
-  for (const name of APP_CONSTANTS) {
-    defines[`__APPS_${name}__`] = spreads.has(name);
-  }
-  return defines;
+  const apps: readonly string[] = definition.apps;
+  return Object.fromEntries(APP_NAMES.map(name => [`import.meta.env.APPS_${name}`, apps.includes(name)]));
 }

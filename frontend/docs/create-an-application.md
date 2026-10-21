@@ -49,89 +49,60 @@ const MyNewAppRoute = () => <MyNewApp />;
 export default MyNewAppRoute;
 ```
 
-## 4. Add the app's routes to `routes.module.ts`
+## 4. Declare the app and its routes
 
-Routes are grouped by app. Create a new constant (uppercase, no suffix) in `frontend/portals/radiant/config/routes.module.ts`:
+Add the app name (uppercase, no suffix) to `APP_NAMES` in `frontend/portals/radiant/config/catalog.ts`:
 
 ```ts
-export const MY_NEW_APP = [
-  route('my-new-app/', './routes/my-new-app/list.tsx'),
-  route('my-new-app/entity/:id', './routes/my-new-app/entity.tsx'),
-];
+export const APP_NAMES = [
+  // ...
+  'MY_NEW_APP',
+] as const;
+```
+
+Then add its routes to `APP_ROUTES` in `frontend/portals/radiant/config/routes.module.ts` — `tsc` fails until you do:
+
+```ts
+export const APP_ROUTES = {
+  // ...
+  MY_NEW_APP: [
+    route('my-new-app/', './routes/my-new-app/list.tsx'),
+    route('my-new-app/entity/:id', './routes/my-new-app/entity.tsx'),
+  ],
+} satisfies Record<AppName, RouteConfigEntry[]>;
 ```
 
 The `route(...)` paths are **relative to `app/`** (react-router convention), not to the file that declares them.
 
-## 5. Spread the constant in each theme that should expose the app
+## 5. List the app in each theme that should expose it
 
-Decide per theme whether the app is included. Edit `routes.<theme>.ts` for every theme that needs it:
+Decide per theme whether the app is included, in the `apps` of `config/<theme>/bundle.ts`:
 
 ```ts
-// config/routes.radiant.ts
-import {
-  ADMIN, ANALYSIS, CASE, COMMUNITY, FILE_ARCHIVE, MY_NEW_APP,
-  PATIENT, STUDY, VARIANT,
-  AUTH, PROXY_API, PROXY_YAC,
-} from './routes.module';
-
-export default [
-  route('health-check', './routes/health-check.tsx'),
-  route(':tenant', './layout/protected-layout.tsx', [
-    index('./routes/home.tsx'),
-    ...VARIANT,
-    ...CASE,
-    ...FILE_ARCHIVE,
-    ...ANALYSIS,
-    ...ADMIN,
-    ...PATIENT,
-    ...STUDY,
-    ...COMMUNITY,
-    ...MY_NEW_APP,   // <-- new
-  ]),
-  index('./routes/tenant-redirect.tsx'),
-  ...AUTH,
-  ...PROXY_YAC,
-  ...PROXY_API,
-] satisfies RouteConfig;
+// config/radiant/bundle.ts
+export const radiantBundle = {
+  apps: ['VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN', 'PATIENT', 'STUDY', 'COMMUNITY', 'MY_NEW_APP'],
+  extras: ['PROXY_YAC'],
+} satisfies BundleDefinition;
 ```
 
-A theme that doesn't spread `MY_NEW_APP` ships zero of its code. Verify after build:
+`app/routes.ts` builds the routes from that list. A theme that doesn't list `MY_NEW_APP` ships zero of its code. Verify after build:
 
 ```bash
 THEME=qlin npm run build
 grep -rl "my-new-app" build/client/assets/ || echo clean
 ```
 
-## 6. Register the capability flag
+## 6. Use the capability flag
 
-Each app has a build-time boolean (`__APPS_<NAME>__`) that reflects whether the current theme's `routes.<theme>.ts` includes it. UI code uses that flag to show/hide features without hardcoding theme name checks. See [Portal — Capability flags](./portal.md#capability-flags-for-theme-aware-ui-__apps_name__) for the full mechanism.
-
-Two files to update:
-
-**`portals/radiant/compute-apps.ts`** — add the constant name to `APP_CONSTANTS`:
-
-```ts
-const APP_CONSTANTS = [
-  'VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN',
-  'PATIENT', 'STUDY', 'COMMUNITY',
-  'MY_NEW_APP',   // <-- add
-] as const;
-```
-
-**`portals/radiant/app/types/apps.d.ts`** — declare the flag for TypeScript:
-
-```ts
-declare const __APPS_MY_NEW_APP__: boolean;
-```
-
-The flag is now `true` for every theme whose composition spreads `...MY_NEW_APP`, `false` otherwise.
+Step 4 already created a build-time boolean, `import.meta.env.APPS_MY_NEW_APP`, typed from `APP_NAMES`: `true` for every theme that lists `MY_NEW_APP`, `false` otherwise. UI code uses it to show/hide features without hardcoding theme name checks. See [Portal — Capability flags](./portal.md#capability-flags-for-theme-aware-ui-importmetaenvapps_name) for the full mechanism.
 
 ## 7. Add the nav link (optional)
 
-Edit `frontend/portals/radiant/app/layout/protected-navbar.tsx`. Guard the link on `__APPS_<NAME>__` so it tree-shakes out of themes that don't route the app:
+Edit `frontend/portals/radiant/app/layout/protected-navbar.tsx`. Guard the link on `import.meta.env.APPS_<NAME>` so it tree-shakes out of themes that don't route the app:
 
 ```tsx
-...(__APPS_MY_NEW_APP__ ? [{
+...(import.meta.env.APPS_MY_NEW_APP ? [{
   title: t('main_navbar.links.my_new_app'),
   icon: <SparklesIcon />,
   to: localPath('/my-new-app'),
@@ -143,7 +114,7 @@ Edit `frontend/portals/radiant/app/layout/protected-navbar.tsx`. Guard the link 
 For admin-only features, combine the flag with the permission check:
 
 ```tsx
-...(__APPS_MY_NEW_APP__ && canAdministerTenant ? [{ ... }] : []),
+...(import.meta.env.APPS_MY_NEW_APP && canAdministerTenant ? [{ ... }] : []),
 ```
 
 The flag comes first — if the app isn't routed, no permission check runs and the branch is fully DCE'd.
@@ -166,11 +137,10 @@ apps/my-new-app/src/
 | `apps/<name>/src/*` | app code |
 | `portals/radiant/tsconfig.json` | add `<name>/*` alias |
 | `portals/radiant/app/routes/<area>/*.tsx` | thin route wrapper(s) |
-| `portals/radiant/config/routes.module.ts` | `export const <NAME>` array |
-| `portals/radiant/config/routes.<theme>.ts` | spread `...<NAME>` in each theme that exposes the app |
-| `portals/radiant/compute-apps.ts` | add `'<NAME>'` to `APP_CONSTANTS` |
-| `portals/radiant/app/types/apps.d.ts` | `declare const __APPS_<NAME>__: boolean` |
-| `portals/radiant/app/layout/protected-navbar.tsx` | nav link guarded by `__APPS_<NAME>__` (optional) |
+| `portals/radiant/config/catalog.ts` | add `'<NAME>'` to `APP_NAMES` |
+| `portals/radiant/config/<theme>/bundle.ts` | add `'<NAME>'` to `apps` in each theme that exposes the app |
+| `portals/radiant/config/routes.module.ts` | `<NAME>` entry in `APP_ROUTES` |
+| `portals/radiant/app/layout/protected-navbar.tsx` | nav link guarded by `import.meta.env.APPS_<NAME>` (optional) |
 | `translations/common/*.json` | i18n keys |
 
 ## Verify after build
@@ -178,15 +148,15 @@ apps/my-new-app/src/
 ```bash
 cd portals/radiant
 
-# App should appear in themes that spread the constant:
+# App should appear in themes that list it:
 THEME=radiant npm run build
 grep -ohE "main_navbar\.links\.[a-z_]+" build/client/assets/*.js | sort -u
 
-# App should be absent from themes that don't spread it:
+# App should be absent from themes that don't list it:
 THEME=qlin npm run build
 grep -l "<name>-exploration" build/client/assets/*.js || echo "clean"
 ```
 
-If an app leaks into a theme that doesn't spread it, check for unconditional imports in the navbar, layout, or shared config.
+If an app leaks into a theme that doesn't list it, check for unconditional imports in the navbar, layout, or shared config.
 
 See [portal](./portal.md) for the full routing / dispatcher model and the capability-flag mechanism.
