@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
-import { LineChart } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -16,12 +17,18 @@ import { fetchPatientsList } from '../api/patient';
 import TableFilters from './table/patient-exploration-table-filters';
 import { defaultSettings, getPatientExplorationColumns } from './table/patient-exploration-table-settings';
 import PatientExplorationChat from './patient-exploration-chat';
+import { PatientExplorationTabs } from './patient-exploration-tabs';
 
 type PatientListInput = {
   key: string;
   tenant: string;
   listBodyWithCriteria: ListBodyWithCriteria;
 };
+
+const TAB_ORDER: { value: PatientExplorationTabs; i18nKey: string }[] = [
+  { value: PatientExplorationTabs.CohortAnalytics, i18nKey: 'patient_exploration.tabs.cohort_analytics' },
+  { value: PatientExplorationTabs.PatientList, i18nKey: 'patient_exploration.tabs.patient_list' },
+];
 
 const PATIENTS_DEFAULT_SORTING: SortBody[] = [
   { field: 'can_read_phi', order: 'desc' },
@@ -36,6 +43,10 @@ async function fetchPatients(input: PatientListInput) {
 function PatientExploration() {
   const { t } = useI18n();
   const { tenant } = useTenant();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<PatientExplorationTabs>(
+    (searchParams.get('tab') as PatientExplorationTabs) ?? PatientExplorationTabs.CohortAnalytics,
+  );
   const [sorting, setSorting] = useState<SortBody[]>(PATIENTS_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -64,72 +75,96 @@ function PatientExploration() {
 
   const columns = useMemo(() => getPatientExplorationColumns(t), [t]);
 
+  const handleOnTabChange = useCallback(
+    (value: PatientExplorationTabs) => {
+      setSearchParams({ tab: value });
+      setActiveTab(value);
+    },
+    [setSearchParams],
+  );
+
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as PatientExplorationTabs);
+      return;
+    }
+    setActiveTab(PatientExplorationTabs.CohortAnalytics);
+    setSearchParams({ tab: PatientExplorationTabs.CohortAnalytics });
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as PatientExplorationTabs);
+    }
+  }, [searchParams.get('tab')]);
+
   return (
     <>
       <HeaderNavigation
-        isLoading={false}
+        isLoading={isLoading}
         title={t('patient_exploration.title', { total: data?.count ?? 0 })}
         description={t('patient_exploration.description')}
-        variant="info"
-        buttons={[
-          {
-            variant: 'outline',
-            size: 'sm',
-            disabled: true,
-            children: (
-              <>
-                <LineChart />
-                {t('patient_exploration.actions.visualize_survival')}
-              </>
-            ),
-          },
-        ]}
       />
-      <main className="bg-muted h-screen overflow-auto p-3 space-y-3">
-        <Card className="w-full gap-0 pb-0 overflow-hidden">
-          <CardHeader className="border-b">
-            <div className="flex flex-col gap-0.5">
-              <CardTitle>{t('patient_exploration.chat.title')}</CardTitle>
-              <p className="text-muted-foreground text-xs">{t('patient_exploration.chat.description')}</p>
-            </div>
-            <CardAction>
-              <Badge variant="secondary" className="gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500" />
-                {t('patient_exploration.chat.source')}
-              </Badge>
-            </CardAction>
-          </CardHeader>
-          <PatientExplorationChat />
-        </Card>
-        <Card className="h-auto size-max w-full">
-          <CardContent>
-            <div className="bg-background">
-              <DataTable
-                id="patient-exploration"
-                columns={columns}
-                TableFilters={
-                  <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
-                }
-                data={data?.list ?? []}
-                defaultColumnSettings={defaultSettings}
-                loadingStates={{
-                  total: isLoading,
-                  list: isLoading,
-                }}
-                pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-                total={data?.count ?? 0}
-                enableColumnOrdering
-                enableFullscreen
-                tableIndexResultPosition="bottom"
-                serverOptions={{
-                  setAdditionalFields,
-                  defaultSorting: PATIENTS_DEFAULT_SORTING,
-                  onSortingChange: setSorting,
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <main className="bg-muted h-screen overflow-auto">
+        <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
+          <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
+            {TAB_ORDER.map(({ value, i18nKey }) => (
+              <TabsListItem key={value} value={value}>
+                {t(i18nKey)}
+              </TabsListItem>
+            ))}
+          </TabsList>
+          <div className="p-3 space-y-3">
+            <TabsContent value={PatientExplorationTabs.CohortAnalytics}>
+              <Card className="w-full gap-0 pb-0 overflow-hidden">
+                <CardHeader className="border-b">
+                  <div className="flex flex-col gap-0.5">
+                    <CardTitle>{t('patient_exploration.chat.title')}</CardTitle>
+                    <p className="text-muted-foreground text-xs">{t('patient_exploration.chat.description')}</p>
+                  </div>
+                  <CardAction>
+                    <Badge variant="secondary" className="gap-1.5">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                      {t('patient_exploration.chat.source')}
+                    </Badge>
+                  </CardAction>
+                </CardHeader>
+                <PatientExplorationChat />
+              </Card>
+            </TabsContent>
+            <TabsContent value={PatientExplorationTabs.PatientList}>
+              <Card className="h-auto size-max w-full">
+                <CardContent>
+                  <div className="bg-background">
+                    <DataTable
+                      id="patient-exploration"
+                      columns={columns}
+                      TableFilters={
+                        <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
+                      }
+                      data={data?.list ?? []}
+                      defaultColumnSettings={defaultSettings}
+                      loadingStates={{
+                        total: isLoading,
+                        list: isLoading,
+                      }}
+                      pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+                      total={data?.count ?? 0}
+                      enableColumnOrdering
+                      enableFullscreen
+                      tableIndexResultPosition="bottom"
+                      serverOptions={{
+                        setAdditionalFields,
+                        defaultSorting: PATIENTS_DEFAULT_SORTING,
+                        onSortingChange: setSorting,
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </TabsNav>
       </main>
     </>
   );

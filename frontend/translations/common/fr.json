@@ -1177,9 +1177,6 @@
       "vital_status": {
         "alive": "Vivant",
         "deceased": "Décédé"
-      },
-      "actions": {
-        "visualize_survival": "Visualiser la survie de la cohorte"
       }
     },
     "tabs": {
@@ -1353,8 +1350,9 @@
     "title": "{{total}} Patients",
     "description": "Cohorte ATRT · CHOP, UCSF et Seattle Children's",
     "search_placeholder": "Rechercher par nom, ID de recherche ou dossier",
-    "actions": {
-      "visualize_survival": "Visualiser la survie de la cohorte"
+    "tabs": {
+      "cohort_analytics": "Analyse de cohorte",
+      "patient_list": "Liste des patients"
     },
     "chat": {
       "title": "Analyse de cohorte",
