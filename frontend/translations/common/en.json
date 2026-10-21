@@ -1230,23 +1230,35 @@
       },
       "interpretations": {
         "title": "Variant interpretations",
+        "aa_tooltip": "Amino acid change",
+        "date_tooltip": "Last interpretation date",
         "headers": {
-          "gene": "Gene",
           "variant": "Variant",
+          "gene": "Gene",
+          "aa": "AA",
           "classification": "Classification",
           "origin": "Origin",
           "case": "Case",
-          "assay": "Assay",
-          "reported": "Reported"
+          "analysis": "Analysis",
+          "date": "Date"
         }
       },
       "cases": {
         "title": "Genomic cases",
+        "type": {
+          "somatic": "Somatic",
+          "germline": "Solo germline",
+          "germline_family": "Family germline"
+        },
         "headers": {
           "case": "Case",
-          "priority": "Priority",
+          "type": "Type",
+          "analysis": "Analysis",
+          "primary_condition": "Primary Condition",
           "status": "Status",
-          "assay": "Assay"
+          "priority": "Priority",
+          "requested_by": "Req. By",
+          "updated": "Updated"
         }
       }
     },
