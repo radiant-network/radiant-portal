@@ -1,4 +1,4 @@
-import { LineChart, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 import type { PatientEntity } from '@/api/api';
 import { PatientEntityVitalStatusEnum } from '@/api/api';
@@ -81,18 +81,6 @@ function Header({ patient, isLoading }: HeaderProps) {
       description={description}
       badges={badges}
       previousPageUrl={localPath('/patient')}
-      buttons={[
-        {
-          variant: 'outline',
-          size: 'sm',
-          children: (
-            <>
-              <LineChart />
-              {t('patient_entity.header.actions.visualize_survival')}
-            </>
-          ),
-        },
-      ]}
     />
   );
 }
