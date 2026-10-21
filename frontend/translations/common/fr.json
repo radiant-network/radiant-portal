@@ -10,6 +10,9 @@
     "auto_complete": {
       "clear": "Effacer"
     },
+    "back_link": {
+      "back_to": "Retour à {{page}}"
+    },
     "badge": {
       "remove": "Retirer"
     },
