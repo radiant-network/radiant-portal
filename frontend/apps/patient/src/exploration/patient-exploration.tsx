@@ -23,6 +23,12 @@ type PatientListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
 };
 
+const PATIENTS_DEFAULT_SORTING: SortBody[] = [
+  { field: 'can_read_phi', order: 'desc' },
+  { field: 'organization_code', order: 'asc' },
+  { field: 'patient_id', order: 'asc' },
+];
+
 async function fetchPatients(input: PatientListInput) {
   return fetchPatientsList(input.tenant, input.listBodyWithCriteria);
 }
@@ -30,7 +36,7 @@ async function fetchPatients(input: PatientListInput) {
 function PatientExploration() {
   const { t } = useI18n();
   const { tenant } = useTenant();
-  const [sorting, setSorting] = useState<SortBody[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(PATIENTS_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -80,7 +86,7 @@ function PatientExploration() {
         ]}
       />
       <main className="bg-muted h-screen overflow-auto p-3 space-y-3">
-        <Card className="w-full">
+        <Card className="w-full gap-0 pb-0 overflow-hidden">
           <CardHeader className="border-b">
             <div className="flex flex-col gap-0.5">
               <CardTitle>{t('patient_exploration.chat.title')}</CardTitle>
@@ -93,9 +99,7 @@ function PatientExploration() {
               </Badge>
             </CardAction>
           </CardHeader>
-          <CardContent>
-            <PatientExplorationChat />
-          </CardContent>
+          <PatientExplorationChat />
         </Card>
         <Card className="h-auto size-max w-full">
           <CardContent>
@@ -119,6 +123,7 @@ function PatientExploration() {
                 tableIndexResultPosition="bottom"
                 serverOptions={{
                   setAdditionalFields,
+                  defaultSorting: PATIENTS_DEFAULT_SORTING,
                   onSortingChange: setSorting,
                 }}
               />

@@ -196,6 +196,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can open the tooltip */}
                 <span tabIndex={0}>
                   <Button disabled>
                     <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />

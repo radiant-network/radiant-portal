@@ -81,7 +81,7 @@ export const data = {
     relationship: REL_PROBAND_VALUE,
     patient: PATIENT_GERMLINE_VALUE,
     sample: 'S13224',
-    task: '1187',
+    task: '11226',
     created_on: '2026-',
     sequencing: '1044',
     hash: null,
@@ -229,11 +229,11 @@ export const data = {
       seq_status: 'Closed',
     },
     task_tn: {
-      task_id: '1185',
+      task_id: '1000012',
       type: 'RADIANT Somatic Annotation',
     },
     task_to: {
-      task_id: '1186',
+      task_id: '1000013',
       type: 'RADIANT Somatic Annotation',
     },
   },
@@ -247,7 +247,7 @@ export const data = {
     consequence: 'Missense',
     consequenceImpact: CommonSelectors.colorIndicator('amber'),
     maneC: true,
-    maneM: false,
+    maneM: true,
     maneP: false,
     omim: {
       codes: ['AR'],
@@ -277,7 +277,7 @@ export const data = {
     consequence: 'Missense',
     consequenceImpact: CommonSelectors.colorIndicator('amber'),
     maneC: true,
-    maneM: false,
+    maneM: true,
     maneP: false,
     omim: {
       codes: ['AR'],

@@ -1914,6 +1914,25 @@ export interface ClinvarVariantConditions {
     'conditions'?: Array<ClinvarRCV>;
 }
 /**
+ * ComphetGene is the number of compound heterozygous partners of a variant in one gene
+ * @export
+ * @interface ComphetGene
+ */
+export interface ComphetGene {
+    /**
+     * 
+     * @type {number}
+     * @memberof ComphetGene
+     */
+    'nb': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ComphetGene
+     */
+    'symbol': string;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -4090,6 +4109,12 @@ export interface GermlineSNVOccurrence {
      */
     'cmc_tier'?: string;
     /**
+     * Number of compound heterozygous partners per gene
+     * @type {Array<ComphetGene>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'comphet_genes'?: Array<ComphetGene>;
+    /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
@@ -4329,6 +4354,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'gnomad_v3_af': number;
+    /**
+     * True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_comphet'?: boolean;
     /**
      * 
      * @type {boolean}
@@ -4642,6 +4673,37 @@ export interface GetBatchResponse {
 /**
  * 
  * @export
+ * @interface IGVPublicTrack
+ */
+export interface IGVPublicTrack {
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'indexURL': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'indexURLExpireAt': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'url': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'urlExpireAt': number;
+}
+/**
+ * 
+ * @export
  * @interface IGVTrackEnriched
  */
 export interface IGVTrackEnriched {
@@ -4668,6 +4730,12 @@ export interface IGVTrackEnriched {
      * @type {string}
      * @memberof IGVTrackEnriched
      */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'indexURL'?: string;
     /**
      * 
@@ -4687,6 +4755,18 @@ export interface IGVTrackEnriched {
      * @memberof IGVTrackEnriched
      */
     'patient_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'sample_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'sequencing_experiment_id': number;
     /**
      * 
      * @type {string}
@@ -4724,6 +4804,42 @@ export interface IGVTracks {
      * @memberof IGVTracks
      */
     'alignment'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'baf'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'capture_targets'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'cnv'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {{ [key: string]: IGVPublicTrack; }}
+     * @memberof IGVTracks
+     */
+    'public_tracks': { [key: string]: IGVPublicTrack; };
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'roh'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'seg'?: Array<IGVTrackEnriched>;
 }
 /**
  * 
@@ -5713,10 +5829,22 @@ export interface PatientCase {
     'analysis_catalog_code'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof PatientCase
      */
     'case_id': number;
+    /**
+     * As in the case list: germline_family when the case has more than one member
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'case_type': PatientCaseCaseTypeEnum;
     /**
      * 
      * @type {string}
@@ -5729,6 +5857,30 @@ export interface PatientCase {
      * @memberof PatientCase
      */
     'diagnosis_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_name'?: string;
+    /**
+     * MONDO id
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}
@@ -5754,6 +5906,15 @@ export interface PatientCase {
      */
     'updated_on': string;
 }
+
+export const PatientCaseCaseTypeEnum = {
+    Somatic: 'somatic',
+    Germline: 'germline',
+    GermlineFamily: 'germline_family'
+} as const;
+
+export type PatientCaseCaseTypeEnum = typeof PatientCaseCaseTypeEnum[keyof typeof PatientCaseCaseTypeEnum];
+
 /**
  * Age in days, and the calendar date when the caller can read PHI
  * @export
@@ -5912,6 +6073,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'initial_diagnosis_evidence_url'?: string;
+    /**
+     * Germline and somatic, of the patient\'s cases
+     * @type {Array<PatientInterpretation>}
+     * @memberof PatientEntity
+     */
+    'interpretations': Array<PatientInterpretation>;
     /**
      * 
      * @type {PatientKeyDates}
@@ -6124,11 +6291,35 @@ export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof t
  */
 export interface PatientFilters {
     /**
+     * Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'age_at_initial_dx_group': Array<FiltersValue>;
+    /**
+     * Lowercase, as recorded
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'chemotherapy_agents': Array<FiltersValue>;
+    /**
      * 
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
     'cns_integrated_diagnosis': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'diagnosis_type_cohort': Array<FiltersValue>;
+    /**
+     * Keys true, false; labels Yes, No
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'got_radiation_ever': Array<FiltersValue>;
     /**
      * label = organization name
      * @type {Array<FiltersValue>}
@@ -6191,6 +6382,87 @@ export interface PatientImagingSession {
      */
     'session_name': string;
 }
+/**
+ * Germline or somatic interpretation recorded on one of the patient\'s portal cases
+ * @export
+ * @interface PatientInterpretation
+ */
+export interface PatientInterpretation {
+    /**
+     * On the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'case_id': number;
+    /**
+     * Germline: LOINC answer code; somatic: oncogenicity, as the case module records them
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'classification'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'hgvsg'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'origin': PatientInterpretationOriginEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'sequencing_id': number;
+    /**
+     * Gene of the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'symbol'?: string;
+    /**
+     * Last interpretation date
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'updated_at': string;
+}
+
+export const PatientInterpretationOriginEnum = {
+    Germline: 'germline',
+    Somatic: 'somatic'
+} as const;
+
+export type PatientInterpretationOriginEnum = typeof PatientInterpretationOriginEnum[keyof typeof PatientInterpretationOriginEnum];
+
 /**
  * Key date of the patient sidebar, with the source it comes from
  * @export
@@ -6291,6 +6563,12 @@ export interface PatientListItem {
      * @memberof PatientListItem
      */
     'cns_integrated_diagnosis_source'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'diagnosis_type_cohort'?: string;
     /**
      * Placeholder when can_read_phi is false
      * @type {string}
@@ -6779,6 +7057,404 @@ export interface PubmedCitationDetails {
      * @memberof PubmedCitationDetails
      */
     'format'?: string;
+}
+/**
+ * Case context of the report: identifiers printed in the file name and the sheet.
+ * @export
+ * @interface ReportCase
+ */
+export interface ReportCase {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportCase
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportCase
+     */
+    'genome_build'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ReportCase
+     */
+    'is_proband': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportCase
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportCase
+     */
+    'submitter_patient_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportCase
+     */
+    'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportCase
+     */
+    'task_id': number;
+}
+/**
+ * A gene of the variant with its OMIM pheno
+ * @export
+ * @interface ReportGene
+ */
+export interface ReportGene {
+    /**
+     * 
+     * @type {Array<ReportOmim>}
+     * @memberof ReportGene
+     */
+    'omim': Array<ReportOmim>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportGene
+     */
+    'symbol': string;
+}
+/**
+ * The germline interpretation of the case on this transcript. Citations are empty when PubMed could not resolve the id.
+ * @export
+ * @interface ReportGermlineInterpretation
+ */
+export interface ReportGermlineInterpretation {
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportGermlineInterpretation
+     */
+    'classification'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportGermlineInterpretation
+     */
+    'classification_criterias'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportGermlineInterpretation
+     */
+    'condition'?: string;
+    /**
+     * 
+     * @type {Array<InterpretationPubmed>}
+     * @memberof ReportGermlineInterpretation
+     */
+    'pubmed'?: Array<InterpretationPubmed>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportGermlineInterpretation
+     */
+    'transmission_modes'?: Array<string>;
+}
+/**
+ * gnomAD joint frequency of the variant; absent when the variant is not in gnomAD.
+ * @export
+ * @interface ReportGnomad
+ */
+export interface ReportGnomad {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportGnomad
+     */
+    'ac': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportGnomad
+     */
+    'af': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportGnomad
+     */
+    'an': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportGnomad
+     */
+    'hom': number;
+}
+/**
+ * Occurrence level data of the report (germline call of the sequencing).
+ * @export
+ * @interface ReportOccurrence
+ */
+export interface ReportOccurrence {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportOccurrence
+     */
+    'ad_alt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportOccurrence
+     */
+    'ad_ratio'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportOccurrence
+     */
+    'ad_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOccurrence
+     */
+    'father_zygosity'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOccurrence
+     */
+    'mother_zygosity'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOccurrence
+     */
+    'parental_origin'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOccurrence
+     */
+    'transmission_mode'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOccurrence
+     */
+    'zygosity'?: string;
+}
+/**
+ * An OMIM phenotype of a gene.
+ * @export
+ * @interface ReportOmim
+ */
+export interface ReportOmim {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportOmim
+     */
+    'inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOmim
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportOmim
+     */
+    'phenotype_id': string;
+}
+/**
+ * One row of the report: an Ensembl transcript with its RefSeq pair, or a RefSeq transcript of a gene that has no Ensembl transcript.
+ * @export
+ * @interface ReportTranscript
+ */
+export interface ReportTranscript {
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportTranscript
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportTranscript
+     */
+    'consequences'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'dna_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'exon_rank'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'exon_total'?: string;
+    /**
+     * 
+     * @type {ReportGermlineInterpretation}
+     * @memberof ReportTranscript
+     */
+    'interpretation'?: ReportGermlineInterpretation;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ReportTranscript
+     */
+    'is_canonical': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ReportTranscript
+     */
+    'is_mane_plus': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ReportTranscript
+     */
+    'is_mane_select': boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportTranscript
+     */
+    'refseq_ids'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportTranscript
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'source'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'transcript_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'vep_impact'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTranscript
+     */
+    'version'?: string;
+}
+/**
+ * Variant level data of the report.
+ * @export
+ * @interface ReportVariant
+ */
+export interface ReportVariant {
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'alternate'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'chromosome'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'clinvar_id'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReportVariant
+     */
+    'clinvar_interpretation'?: Array<string>;
+    /**
+     * 
+     * @type {ReportGnomad}
+     * @memberof ReportVariant
+     */
+    'gnomad'?: ReportGnomad;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'hgvsg'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'reference'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReportVariant
+     */
+    'start'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportVariant
+     */
+    'symbol'?: string;
 }
 /**
  * Action granted by a role
@@ -8475,6 +9151,43 @@ export interface Transcript {
 }
 
 
+/**
+ * Report data of one germline SNV occurrence: case context, variant, occurrence, genes and one entry per transcript row.
+ * @export
+ * @interface TranscriptReport
+ */
+export interface TranscriptReport {
+    /**
+     * 
+     * @type {ReportCase}
+     * @memberof TranscriptReport
+     */
+    'case': ReportCase;
+    /**
+     * 
+     * @type {Array<ReportGene>}
+     * @memberof TranscriptReport
+     */
+    'genes': Array<ReportGene>;
+    /**
+     * 
+     * @type {ReportOccurrence}
+     * @memberof TranscriptReport
+     */
+    'occurrence': ReportOccurrence;
+    /**
+     * 
+     * @type {Array<ReportTranscript>}
+     * @memberof TranscriptReport
+     */
+    'transcripts': Array<ReportTranscript>;
+    /**
+     * 
+     * @type {ReportVariant}
+     * @memberof TranscriptReport
+     */
+    'variant': ReportVariant;
+}
 /**
  * 
  * @export
@@ -12490,7 +13203,7 @@ export class HpoApi extends BaseAPI {
 export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12542,7 +13255,7 @@ export const IgvApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12566,7 +13279,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
     const localVarFp = IgvApiFp(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -12587,7 +13300,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
  */
 export class IgvApi extends BaseAPI {
     /**
-     * Get IGV tracks for a case
+     * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
      * @summary Get IGV
      * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
@@ -14788,6 +15501,60 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
+         * @summary Get the transcript report object of a germline SNV occurrence
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVTranscriptReport: async (tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReport', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReport', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReport', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReport', 'taskId', taskId)
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReport', 'locusId', locusId)
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/report`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -15542,6 +16309,23 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
+         * @summary Get the transcript report object of a germline SNV occurrence
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TranscriptReport>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVTranscriptReport']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -15877,6 +16661,20 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getGermlineSNVDictionary(tenant, facets, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
+         * @summary Get the transcript report object of a germline SNV occurrence
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<TranscriptReport> {
+            return localVarFp.getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -16201,6 +16999,22 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getGermlineSNVDictionary(tenant: string, facets?: Array<string>, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(tenant, facets, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
+     * @summary Get the transcript report object of a germline SNV occurrence
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

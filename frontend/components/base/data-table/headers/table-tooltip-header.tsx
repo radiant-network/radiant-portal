@@ -16,7 +16,7 @@ function TooltipHeader({ tooltip, children, iconOnly = false }: TooltipHeaderPro
       <TooltipTrigger
         asChild
         className={cn('underline truncate decoration-dotted underline-offset-4 text-left', {
-          relative: iconOnly,
+          'relative inline-flex': iconOnly,
         })}
       >
         <span>
@@ -26,7 +26,7 @@ function TooltipHeader({ tooltip, children, iconOnly = false }: TooltipHeaderPro
           )}
         </span>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent align={iconOnly ? 'start' : 'center'}>{tooltip}</TooltipContent>
     </Tooltip>
   );
 }

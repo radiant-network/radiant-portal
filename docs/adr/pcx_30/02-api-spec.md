@@ -34,6 +34,10 @@ Five read-only routes (plus a tentative sixth for the tumor board report), all g
 | `vital_status` | yes | yes | `in` |
 | `organization_code` | yes | yes | `in` |
 | `cns_integrated_diagnosis` | yes | yes | `in` |
+| `diagnosis_type_cohort` (the "Cohort" column) | yes | yes | `in` |
+| `age_at_initial_dx_group` (virtual: HPO onset group of `age_at_initial_dx_days`, years of 365.25 days: `congenital` day 0, `neonatal` < 28 days, `infantile` < 1 year, `childhood` < 5, `juvenile` < 16, `young_adult` < 40, `middle_age` < 60, `senior`; `unknown` when the age is not a number: -1, Not Reported, Not Available. Antenatal cannot be derived, a negative age being the unknown sentinel) | yes | no | `in` |
+| `chemotherapy_agents` ("Treatment exposure": the agents of every therapy, split on commas, trimmed, lowercased, without the Not Reported / Not Applicable / Not Available sentinels; synonyms and doses are not normalized) | yes, a patient matches when they received any of the values | no | `in` |
+| `got_radiation_ever` (true when the patient has any row in the radiation view, whatever its content, as the data team defines it; never null) | yes, values `true` / `false` | no | `in` |
 | `patient_id` (set by a selected suggestion) | yes | yes | `in` |
 | `patient_name` (virtual: `given_name` + `family_name`, set by a selected suggestion) | yes, only on rows where `can_read_phi` is true | no | `in` |
 | `can_read_phi` | no | yes (default sort) | none |
@@ -57,11 +61,19 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Autocomplete.** Same behaviour as the case list search box (`DataTableFilters` with `filterSearch`, `minSearchLength` 1, 10 results grouped by type): a case-insensitive prefix match on `patient_id` (type `patient_id`, MRN or research ID) and on the start of any word of the name (type `patient_name`, value "given family", only where `can_read_phi` is true: "pat" finds William Patel), read from `v_pcx_30_patient_list` as the user, ordered by value, capped by `limit`. It returns the shared `AutocompleteResult` so the existing component works unchanged.
 
-**Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts.
+**Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts, among the patients the caller can see. `age_at_initial_dx_group` always returns every group, in age order, even when no patient falls in it. Yes/no filters have the keys `true` and `false` (labels `Yes` and `No`) and become a boolean criterion: `{"field": "got_radiation_ever", "value": [true]}`. Protocol and molecular subtype have no data source yet.
 
 **Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
-**Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set. Returns 404 when the demographics row is not found.
+**Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set (as proband or family member). Returns 404 for a malformed key or one that matches no row of the list view.
+
+**Genomics.** The case module's data, read-only, joined on `radiant_patient_id`; empty for a patient outside the portal.
+- `cases`: every case where the patient is the proband or a family member, latest update first. `case_type` follows the case list's rule (`SearchCases`): `somatic` for a somatic case, `germline` when the case has a single distinct member (a fetus counts as one), `germline_family` otherwise. "Req. By" is the ordering organization only. The primary condition's name comes from `mondo_term`.
+- `interpretations`: the germline and somatic interpretations of those cases, latest `updated_at` first. Gene and amino acid change come from the interpreted transcript (`snv__consequence` on locus and transcript), `hgvsg` from the tenant's `snv__variant`, the analysis from the case. Classifications are returned as the case module records them, so the read-only interpretation badge works unchanged.
+- Every interpretation is listed: there is no default filter on the classification (PO decision, 2026-10-20).
+- These are portal record dates (`updated_on`, `updated_at`), not dates of the patient's history: they are not PHI and are returned to every user.
+
+**Key dates.** Initial diagnosis: the treatment summary's initial diagnosis when its day is known, else the first `Initial CNS Tumor` event with a known day, the same rule as the list's `age_at_initial_dx_days`. Latest encounter: the last known vital status (`vital_status_at`), which the source records at an encounter (confirmed by the data team, 2026-10-14). Sources are hard-coded `clinical` and `registry`.
 
 ## Models
 
@@ -89,6 +101,7 @@ interface PatientIdentity {
 interface PatientListItem extends PatientIdentity {
   birth_year: number | null;
   gender: Gender;
+  diagnosis_type_cohort: string | null;
   cns_integrated_diagnosis: string | null;        // from the initial event
   cns_integrated_diagnosis_source: string | null; // dataset of that diagnosis, e.g. CBTN or OpenPedCan
   vital_status: VitalStatus;
@@ -106,6 +119,10 @@ interface PatientFilters {
   vital_status: FiltersValue[];
   organization_code: FiltersValue[]; // label = organization_name
   cns_integrated_diagnosis: FiltersValue[];
+  diagnosis_type_cohort: FiltersValue[];
+  age_at_initial_dx_group: FiltersValue[]; // every key, always: congenital … senior, unknown
+  chemotherapy_agents: FiltersValue[];     // lowercase, as recorded
+  got_radiation_ever: FiltersValue[];      // keys true, false; labels Yes, No
 }
 
 // Autocomplete reuses the shared AutocompleteResult { type, value } of the case list:
@@ -135,7 +152,6 @@ interface PatientEntity extends PatientListItem {
   race: string | null;
   ethnicity: string | null;
   postal_code: string | null;      // full when can_read_phi, 3 digits + XX otherwise
-  diagnosis_type_cohort: string | null;
   data_type_cohort: string | null;
   key_dates: PatientKeyDates;
   initial_diagnosis_evidence_url: string | null; // BRIM link, format TBD
@@ -147,6 +163,7 @@ interface PatientEntity extends PatientListItem {
   imaging: PatientImagingSession[];
   treatment_summary: PatientTreatmentSummary | null;
   cases: PatientCase[];
+  interpretations: PatientInterpretation[];
 }
 
 interface PatientEvent extends PatientDayDate {
@@ -222,9 +239,29 @@ interface PatientCase {
   status_code: string;
   priority_code: string | null;
   case_type_code: string;
+  case_type: 'somatic' | 'germline' | 'germline_family'; // as in the case list
   analysis_catalog_code: string | null;
+  analysis_catalog_name: string | null;
+  primary_condition_id: string | null;   // MONDO id
+  primary_condition_name: string | null;
+  ordering_organization_code: string | null; // "Req. By"
+  ordering_organization_name: string | null;
   diagnosis_lab_code: string;
-  updated_on: string;              // date-time
+  updated_on: string;              // date-time, "Updated"
+}
+
+interface PatientInterpretation {
+  origin: 'germline' | 'somatic';
+  case_id: number;
+  sequencing_id: number;
+  locus_id: string;                // link to the variant entity
+  hgvsg: string | null;
+  symbol: string | null;           // gene of the interpreted transcript
+  aa_change: string | null;        // on the interpreted transcript
+  classification: string | null;   // germline: LOINC answer code (LA6668-3…); somatic: oncogenicity, as recorded
+  analysis_catalog_code: string | null;
+  analysis_catalog_name: string | null;
+  updated_at: string;              // date-time, last interpretation date
 }
 ```
 

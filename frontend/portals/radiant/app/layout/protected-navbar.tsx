@@ -20,45 +20,58 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const canAdministerTenant = useCanAdministerTenant();
   const localPath = useLocalPath();
 
-  const adminLinks: MainNavbarEntry[] = canAdministerTenant
-    ? [
-        { separator: true },
-        {
-          title: t('main_navbar.links.admin'),
-          icon: <SettingsIcon />,
-          to: localPath('/admin'),
-          as: Link,
-          active: pathname === localPath('/admin'),
-        },
-      ]
-    : [];
+  const adminLinks: MainNavbarEntry[] =
+    import.meta.env.APPS_ADMIN && canAdministerTenant
+      ? [
+          { separator: true },
+          {
+            title: t('main_navbar.links.admin'),
+            icon: <SettingsIcon />,
+            to: localPath('/admin'),
+            as: Link,
+            active: pathname === localPath('/admin'),
+          },
+        ]
+      : [];
 
   return (
     <MainNavbar
       placement={placement}
       logo={<img src={logo} alt="Logo" />}
       links={[
-        {
-          title: t('main_navbar.links.patients'),
-          icon: <UsersIcon />,
-          to: localPath('/patient'),
-          as: Link,
-          active: pathname === localPath('/patient'),
-        },
-        {
-          title: t('main_navbar.links.cases'),
-          icon: <FolderIcon />,
-          to: localPath('/case'),
-          as: Link,
-          active: pathname === localPath('/case'),
-        },
-        {
-          title: t('main_navbar.links.files'),
-          icon: <ArchiveIcon />,
-          to: localPath('/file'),
-          as: Link,
-          active: pathname === localPath('/file'),
-        },
+        ...(import.meta.env.APPS_PATIENT
+          ? [
+              {
+                title: t('main_navbar.links.patients'),
+                icon: <UsersIcon />,
+                to: localPath('/patient'),
+                as: Link,
+                active: pathname === localPath('/patient'),
+              },
+            ]
+          : []),
+        ...(import.meta.env.APPS_CASE
+          ? [
+              {
+                title: t('main_navbar.links.cases'),
+                icon: <FolderIcon />,
+                to: localPath('/case'),
+                as: Link,
+                active: pathname === localPath('/case'),
+              },
+            ]
+          : []),
+        ...(import.meta.env.APPS_FILE_ARCHIVE
+          ? [
+              {
+                title: t('main_navbar.links.files'),
+                icon: <ArchiveIcon />,
+                to: localPath('/file'),
+                as: Link,
+                active: pathname === localPath('/file'),
+              },
+            ]
+          : []),
         ...adminLinks,
       ]}
       actions={

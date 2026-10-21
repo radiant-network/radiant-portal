@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS {shared}.`snv__consequence`
     `locus_id`                bigint(20) NOT NULL COMMENT "",
     `symbol`                  varchar(30)  NOT NULL COMMENT "",
     `transcript_id`           varchar(100) NOT NULL COMMENT "",
+    `transcript_version`      varchar(10) NULL COMMENT "",
+    `source`                  varchar(20) NULL COMMENT "",
     `consequences`            array< varchar (100)> NULL COMMENT "",
     `impact_score`            tinyint(4) NULL COMMENT "",
     `biotype`                 varchar(50) NULL COMMENT "",
@@ -19,6 +21,7 @@ CREATE TABLE IF NOT EXISTS {shared}.`snv__consequence`
     `is_mane_select`          boolean NULL COMMENT "",
     `is_mane_plus`            boolean NULL COMMENT "",
     `mane_select`             varchar(200) NULL COMMENT "",
+    `mane_pair_transcript_id` varchar(100) NULL COMMENT "",
     `sift_score`              float NULL COMMENT "",
     `sift_pred`               varchar(1) NULL COMMENT "",
     `polyphen2_hvar_score`    float NULL COMMENT "",
@@ -141,7 +144,7 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__occurrence`
     info_dp                         INT,
     info_haplotype_score            FLOAT,
     phased                          BOOLEAN,
-    parental_origin                 VARCHAR(10),
+    parental_origin                 VARCHAR(25),
     father_dp                       INT,
     father_gq                       INT,
     father_ad_ref                   INT,
@@ -165,7 +168,19 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__occurrence`
     exomiser_acmg_evidence        ARRAY<VARCHAR (10)>,
     exomiser_variant_score        FLOAT,
     exomiser_gene_combined_score  FLOAT,
+    has_comphet                   BOOLEAN,
+    comphet_genes                 ARRAY<STRUCT<symbol VARCHAR(200), nb INT>>,
     INDEX locus_id_index (`locus_id`) USING BITMAP COMMENT ''
+    ) ENGINE=OLAP
+    DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
+
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__snv__comphet`(
+    part              INT          NOT NULL,
+    seq_id            INT          NOT NULL,
+    task_id           INT          NOT NULL,
+    locus_id          BIGINT       NOT NULL,
+    partner_locus_id  BIGINT       NOT NULL,
+    symbol            VARCHAR(200) NOT NULL
     ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 

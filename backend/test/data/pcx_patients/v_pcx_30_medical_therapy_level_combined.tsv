@@ -1,0 +1,2 @@
+organization_name	organization_code	patient_id	patient_id_type	radiant_patient_id	protocol_name_and_arm	protocol_name	protocol_arm	chemotherapy_type	regimen_start_date	age_at_regimen_start_days	regimen_stop_date	age_at_regimen_stop_days	chemotherapy_agents	is_initial_treatment	can_read_phi
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	ACNS0333: Arm I	ACNS0333	Arm I	Treatment follows a protocol and subject is enrolled on a protocol	2017-12-20 00:00:00	1021	2018-06-01 00:00:00	1184	carboplatin,methotrexate,vincristine	yes	true

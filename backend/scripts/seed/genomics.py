@@ -317,6 +317,8 @@ def build(patients, pcx_data, id_base=0, loci=None):
             alt = total if hom else rng.randrange(int(total * 0.35), int(total * 0.6))
             exo = v in predisposition or (v in rare and rng.random() < 0.5)
             pathogenic = v in predisposition
+            origin = "both" if hom else ["mother", "father", "denovo"][h("origin", n_seq, v.locus_id) % 3]
+            transmission = {"both": "autosomal_recessive", "denovo": "autosomal_dominant_de_novo"}.get(origin, "autosomal_dominant")
             sr["germline__snv__occurrence"].append([
                 PART, n_seq, g_task, v.locus_id, round(alt / total, 3), rng.randrange(40, 99), total, total, total - alt, alt,
                 "HOM" if hom else "HET", [1, 1] if hom else [0, 1], round(rng.uniform(200, 3000), 1), "PASS",
@@ -325,7 +327,8 @@ def build(patients, pcx_data, id_base=0, loci=None):
                 ("PATHOGENIC" if pathogenic else "UNCERTAIN_SIGNIFICANCE") if exo else None,
                 (["PVS1", "PM2"] if pathogenic else ["PM2"]) if exo else None,
                 round(rng.uniform(0.85, 0.99) if pathogenic else rng.uniform(0.3, 0.7), 3) if exo else None,
-                round(rng.uniform(0.8, 0.98) if pathogenic else rng.uniform(0.2, 0.6), 3) if exo else None])
+                round(rng.uniform(0.8, 0.98) if pathogenic else rng.uniform(0.2, 0.6), 3) if exo else None,
+                origin, "HET" if origin in ("father", "both") else "WT", "HET" if origin in ("mother", "both") else "WT", transmission])
             v.germline_seqs.add(n_seq)
             if exo:
                 sr["exomiser"].append([PART, n_seq, v.locus_id, f"{v.locus}-{n_seq}", hashlib.md5(v.locus.encode()).hexdigest(), "AD",

@@ -1,10 +1,9 @@
+import type { PatientInterpretationOriginEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import { useI18n } from '@/components/hooks/i18n';
 
-import type { VariantInterpretation } from '../../../../api/patient-genomics';
-
 type OriginCellProps = {
-  value: VariantInterpretation['origin'];
+  value: PatientInterpretationOriginEnum;
 };
 
 function OriginCell({ value }: OriginCellProps) {

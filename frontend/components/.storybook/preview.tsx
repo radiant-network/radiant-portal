@@ -84,6 +84,9 @@ initialize(options);
 
 const preview: Preview = {
   parameters: {
+    a11y: {
+      test: 'todo',
+    },
     options: {
       storySort: {
         method: 'alphabetical',

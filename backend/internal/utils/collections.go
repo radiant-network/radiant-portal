@@ -29,7 +29,10 @@ func SortIgvTracksByLeadingThenName(tracks []types.IGVTrackEnriched, leading fun
 			}
 			return 1
 		}
-		return strings.Compare(a.Name, b.Name)
+		if c := strings.Compare(a.Name, b.Name); c != 0 {
+			return c
+		}
+		return a.SequencingExperimentId - b.SequencingExperimentId
 	})
 }
 

@@ -15,7 +15,14 @@
    Unknown ages (-1 sentinel) become NULL; survival_days needs both a vital-status age and a known
    initial-diagnosis age. vital_status and gender become the API codes (lowercase, "not reported" ->
    "not_reported"). The diagnosis and its source come from ONE initial event, the earliest with a known
-   age: a -1 (unknown date) sorts last instead of winning the minimum.
+   age: a -1 (unknown date) sorts last instead of winning the minimum. Its age backs up the treatment
+   summary's age at initial diagnosis.
+
+   Each secured view re-runs its grant lookups on every read, so each one is read once.
+
+   got_radiation_ever is true when the patient has any row in the radiation view, whatever its content.
+   chemotherapy_agents holds the distinct agents of every therapy of the patient, split on
+   commas, trimmed and lowercased, without the Not Reported / Not Applicable / Not Available sentinels.
  */
 CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_patient_list AS
 SELECT pk.patient_key,
@@ -34,11 +41,12 @@ SELECT pk.patient_key,
        e.cns_integrated_diagnosis_source,
        lower(pl.vital_status) AS vital_status,
        CAST(pl.age_at_vital_status_days AS INT) AS age_at_vital_status_days,
-       dx.age_at_initial_dx_days,
-       CASE WHEN pl.age_at_vital_status_days IS NOT NULL AND dx.age_at_initial_dx_days IS NOT NULL
-            THEN CAST(pl.age_at_vital_status_days AS INT) - dx.age_at_initial_dx_days END AS survival_days,
+       COALESCE(ts.age_at_initial_dx_days, e.age_at_initial_event_days) AS age_at_initial_dx_days,
+       CAST(pl.age_at_vital_status_days AS INT) - COALESCE(ts.age_at_initial_dx_days, e.age_at_initial_event_days) AS survival_days,
        mri.patient_id IS NOT NULL AS has_imaging,
        COALESCE(c.case_count, 0) AS case_count,
+       rad.patient_id IS NOT NULL AS got_radiation_ever,
+       mt.chemotherapy_agents,
        d.can_read_phi
 FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
 LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_key pk
@@ -49,8 +57,10 @@ LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_level_combined pl
   ON pl.organization_code = d.organization_code
  AND pl.patient_id_type = d.patient_id_type
  AND pl.patient_id = d.patient_id
-LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source
+LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
+                  CASE WHEN age_at_event_days >= 0 THEN age_at_event_days END AS age_at_initial_event_days
            FROM (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
+                        age_at_event_days,
                         row_number() OVER (PARTITION BY organization_code, patient_id_type, patient_id
                                            ORDER BY age_at_event_days < 0, age_at_event_days, cns_integrated_diagnosis) AS rn
                  FROM {{.TenantCode}}_tenant.v_pcx_30_event_level_combined
@@ -59,27 +69,31 @@ LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_integrated
   ON e.organization_code = d.organization_code
  AND e.patient_id_type = d.patient_id_type
  AND e.patient_id = d.patient_id
-LEFT JOIN (SELECT d2.organization_code, d2.patient_id_type, d2.patient_id,
-                  COALESCE(ts2.age_at_initial_dx_days, e2.age_at_initial_event_days) AS age_at_initial_dx_days
-           FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d2
-           LEFT JOIN (SELECT organization_code, patient_id_type, patient_id,
-                             CASE WHEN age_at_initial_dx_days >= 0 THEN age_at_initial_dx_days END AS age_at_initial_dx_days
-                      FROM {{.TenantCode}}_tenant.v_pcx_30_treatment_summary_combined) ts2
-             ON ts2.organization_code = d2.organization_code AND ts2.patient_id_type = d2.patient_id_type AND ts2.patient_id = d2.patient_id
-           LEFT JOIN (SELECT organization_code, patient_id_type, patient_id,
-                             CAST(min(CASE WHEN age_at_event_days >= 0 THEN age_at_event_days END) AS INT) AS age_at_initial_event_days
-                      FROM {{.TenantCode}}_tenant.v_pcx_30_event_level_combined
-                      WHERE event_type = 'Initial CNS Tumor'
-                      GROUP BY organization_code, patient_id_type, patient_id) e2
-             ON e2.organization_code = d2.organization_code AND e2.patient_id_type = d2.patient_id_type AND e2.patient_id = d2.patient_id) dx
-  ON dx.organization_code = d.organization_code
- AND dx.patient_id_type = d.patient_id_type
- AND dx.patient_id = d.patient_id
+LEFT JOIN (SELECT organization_code, patient_id_type, patient_id,
+                  CASE WHEN age_at_initial_dx_days >= 0 THEN age_at_initial_dx_days END AS age_at_initial_dx_days
+           FROM {{.TenantCode}}_tenant.v_pcx_30_treatment_summary_combined) ts
+  ON ts.organization_code = d.organization_code
+ AND ts.patient_id_type = d.patient_id_type
+ AND ts.patient_id = d.patient_id
 LEFT JOIN (SELECT DISTINCT organization_code, patient_id_type, patient_id
            FROM {{.TenantCode}}_tenant.v_pcx_30_mri_images_combined) mri
   ON mri.organization_code = d.organization_code
  AND mri.patient_id_type = d.patient_id_type
  AND mri.patient_id = d.patient_id
+LEFT JOIN (SELECT DISTINCT organization_code, patient_id_type, patient_id
+           FROM {{.TenantCode}}_tenant.v_pcx_30_radiation_level_combined) rad
+  ON rad.organization_code = d.organization_code
+ AND rad.patient_id_type = d.patient_id_type
+ AND rad.patient_id = d.patient_id
+LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, array_agg(DISTINCT agent) AS chemotherapy_agents
+           FROM (SELECT m.organization_code, m.patient_id_type, m.patient_id, lower(trim(u.agent)) AS agent
+                 FROM {{.TenantCode}}_tenant.v_pcx_30_medical_therapy_level_combined m,
+                      unnest(split(m.chemotherapy_agents, ',')) AS u(agent)) a
+           WHERE agent NOT IN ('', 'not reported', 'not applicable', 'not available')
+           GROUP BY organization_code, patient_id_type, patient_id) mt
+  ON mt.organization_code = d.organization_code
+ AND mt.patient_id_type = d.patient_id_type
+ AND mt.patient_id = d.patient_id
 LEFT JOIN (SELECT patient_id, count(DISTINCT case_id) AS case_count
            FROM (SELECT id AS case_id, proband_id AS patient_id FROM {{.TenantCode}}_tenant.cases
                  UNION ALL

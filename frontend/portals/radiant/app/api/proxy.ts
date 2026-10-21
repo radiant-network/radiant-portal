@@ -1,6 +1,6 @@
-import type { Route } from './+types/proxy';
-
 import { proxyApi } from '@/utils/api/proxy.server';
+
+import type { Route } from './+types/proxy';
 
 /**
  * Handles GET requests

@@ -98,6 +98,7 @@ from radiant_python.models.client_auth_config import ClientAuthConfig
 from radiant_python.models.client_config import ClientConfig
 from radiant_python.models.clinvar_rcv import ClinvarRCV
 from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
+from radiant_python.models.comphet_gene import ComphetGene
 from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.create_batch_response import CreateBatchResponse
@@ -128,6 +129,7 @@ from radiant_python.models.gene_search_body import GeneSearchBody
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.get_batch_response import GetBatchResponse
+from radiant_python.models.igv_public_track import IGVPublicTrack
 from radiant_python.models.igv_track_enriched import IGVTrackEnriched
 from radiant_python.models.igv_tracks import IGVTracks
 from radiant_python.models.input_document_batch import InputDocumentBatch
@@ -159,6 +161,7 @@ from radiant_python.models.patient_entity import PatientEntity
 from radiant_python.models.patient_event import PatientEvent
 from radiant_python.models.patient_filters import PatientFilters
 from radiant_python.models.patient_imaging_session import PatientImagingSession
+from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_date import PatientKeyDate
 from radiant_python.models.patient_key_dates import PatientKeyDates
 from radiant_python.models.patient_list_item import PatientListItem
@@ -172,6 +175,14 @@ from radiant_python.models.patient_treatment_summary import PatientTreatmentSumm
 from radiant_python.models.patients_search_response import PatientsSearchResponse
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
+from radiant_python.models.report_case import ReportCase
+from radiant_python.models.report_gene import ReportGene
+from radiant_python.models.report_germline_interpretation import ReportGermlineInterpretation
+from radiant_python.models.report_gnomad import ReportGnomad
+from radiant_python.models.report_occurrence import ReportOccurrence
+from radiant_python.models.report_omim import ReportOmim
+from radiant_python.models.report_transcript import ReportTranscript
+from radiant_python.models.report_variant import ReportVariant
 from radiant_python.models.role_action_result import RoleActionResult
 from radiant_python.models.role_result import RoleResult
 from radiant_python.models.sample_batch import SampleBatch
@@ -193,6 +204,7 @@ from radiant_python.models.task_occurrence_type import TaskOccurrenceType
 from radiant_python.models.tenant_membership import TenantMembership
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
+from radiant_python.models.transcript_report import TranscriptReport
 from radiant_python.models.update_case_assignments_request import UpdateCaseAssignmentsRequest
 from radiant_python.models.update_case_batch import UpdateCaseBatch
 from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody

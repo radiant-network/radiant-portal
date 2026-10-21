@@ -95,6 +95,34 @@ Recipe, for tenant `demo`. Toolbox commands run with the environment's settings 
 
 For QA's `cbtn`, use `--tenant cbtn --name "Children's Brain Tumor Network"`. Before running it, check that the MONDO codes of `genomics.py` exist in QA's `mondo_term`.
 
+### A new data release, without a reseed
+
+A reseed from new CSVs would change most fake MRNs, because an MRN depends on how many patients sort before it. That would break every patient URL and recreate the portal patients. `--migrate-from` instead writes two scripts that bring a tenant from the CSVs it was seeded with to the new ones:
+
+- **Existing patients keep their MRN and birth date.** A birth date changes only when it no longer fits the new ages.
+- **The PCX source tables are reloaded whole.** Each table is loaded next to the live one and then swapped in, so the views never read an empty table.
+- **Portal patients:**
+  - Added patients are created with ids after `--new-id-base`.
+  - Removed patients are deleted.
+  - A patient whose genomics would now come out differently (for example, the initial diagnosis changed) is replaced: deleted, then created again with new ids.
+  - A patient whose patient row alone changed (for example, vital status) is updated in place.
+  - Deleting a patient also deletes what users added to its cases (notes, flags, interpretations, assignments), as a reseed would.
+- **`snv__variant` frequencies are recounted from the tenant's occurrences.** So `--loci` can be any current export; it does not have to be the file of the original seed.
+
+1. Pick `--new-id-base` with the query of step 0.
+2. Build, with the arguments of the original seed plus the old CSVs:
+   ```bash
+   python3 build_seed.py --env qa --tenant cbtn --id-base 10000 --loci qa_loci.txt \
+     --deid <new release> --migrate-from <CSVs the tenant was seeded with> --new-id-base <N> --out out/cbtn_migrate
+   ```
+   It prints the patients added, removed, replaced and updated.
+3. `psql -v ON_ERROR_STOP=1 -f out/cbtn_migrate/migrate_postgres.sql`. This script runs once. It stops before any change if the tenant does not hold the portal patients the old CSVs give (wrong CSVs, wrong `--id-base`, or already migrated), or if an id it would add is taken.
+4. `mysql … < out/cbtn_migrate/migrate_starrocks.sql`. This script can be run again.
+
+No `create-tenant`, `refresh-tenants` or view reload is needed: no table or view is added.
+
+Migrations do not chain yet. After one, the tenant no longer matches what any single CSV directory builds, so a second `--migrate-from` would be refused by the Postgres check.
+
 ## Demo users
 
 The users live in Keycloak realm `radiant` (`scripts/init-keycloak/radiant.json`). The password is the username.

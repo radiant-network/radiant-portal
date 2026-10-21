@@ -1070,6 +1070,18 @@ components:
           type: array
           uniqueItems: false
       type: object
+    ComphetGene:
+      description: ComphetGene is the number of compound heterozygous partners of
+        a variant in one gene
+      properties:
+        nb:
+          type: integer
+        symbol:
+          type: string
+      required:
+      - nb
+      - symbol
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -2121,6 +2133,12 @@ components:
           type: number
         cmc_tier:
           type: string
+        comphet_genes:
+          description: Number of compound heterozygous partners per gene
+          items:
+            $ref: '#/components/schemas/ComphetGene'
+          type: array
+          uniqueItems: false
         end:
           type: integer
         exomiser_acmg_classification:
@@ -2222,6 +2240,10 @@ components:
           type: integer
         gnomad_v3_af:
           type: number
+        has_comphet:
+          description: True when the variant has a compound heterozygous partner (slivar),
+            false otherwise, absent when not computed
+          type: boolean
         has_interpretation:
           type: boolean
         has_note:
@@ -2374,6 +2396,22 @@ components:
         username:
           type: string
       type: object
+    IGVPublicTrack:
+      properties:
+        indexURL:
+          type: string
+        indexURLExpireAt:
+          type: integer
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      required:
+      - indexURL
+      - indexURLExpireAt
+      - url
+      - urlExpireAt
+      type: object
     IGVTrackEnriched:
       properties:
         family_role:
@@ -2381,6 +2419,8 @@ components:
         fetus_id:
           type: integer
         format:
+          type: string
+        histology_code:
           type: string
         indexURL:
           type: string
@@ -2390,6 +2430,10 @@ components:
           type: string
         patient_id:
           type: integer
+        sample_id:
+          type: string
+        sequencing_experiment_id:
+          type: integer
         sex:
           type: string
         type:
@@ -2398,6 +2442,8 @@ components:
           type: string
         urlExpireAt:
           type: integer
+      required:
+      - sequencing_experiment_id
       type: object
     IGVTracks:
       properties:
@@ -2406,6 +2452,37 @@ components:
             $ref: '#/components/schemas/IGVTrackEnriched'
           type: array
           uniqueItems: false
+        baf:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        capture_targets:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        cnv:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        public_tracks:
+          additionalProperties:
+            $ref: '#/components/schemas/IGVPublicTrack'
+          type: object
+        roh:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        seg:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+      required:
+      - public_tracks
       type: object
     InputDocumentBatch:
       properties:
@@ -2874,11 +2951,30 @@ components:
       properties:
         analysis_catalog_code:
           type: string
+        analysis_catalog_name:
+          type: string
         case_id:
           type: integer
+        case_type:
+          description: 'As in the case list: germline_family when the case has more
+            than one member'
+          enum:
+          - somatic
+          - germline
+          - germline_family
+          type: string
         case_type_code:
           type: string
         diagnosis_lab_code:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_organization_name:
+          type: string
+        primary_condition_id:
+          description: MONDO id
+          type: string
+        primary_condition_name:
           type: string
         priority_code:
           type: string
@@ -2891,6 +2987,7 @@ components:
           type: string
       required:
       - case_id
+      - case_type
       - case_type_code
       - diagnosis_lab_code
       - relationship
@@ -2980,6 +3077,12 @@ components:
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
+        interpretations:
+          description: Germline and somatic, of the patient's cases
+          items:
+            $ref: '#/components/schemas/PatientInterpretation'
+          type: array
+          uniqueItems: false
         key_dates:
           $ref: '#/components/schemas/PatientKeyDates'
         organization_code:
@@ -3042,6 +3145,7 @@ components:
       - given_name
       - has_imaging
       - imaging
+      - interpretations
       - key_dates
       - organization_code
       - organization_name
@@ -3105,7 +3209,31 @@ components:
     PatientFilters:
       description: Values of the patient list filters
       properties:
+        age_at_initial_dx_group:
+          description: 'Always every key: congenital, neonatal, infantile, childhood,
+            juvenile, young_adult, middle_age, senior, unknown'
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        chemotherapy_agents:
+          description: Lowercase, as recorded
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
         cns_integrated_diagnosis:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        diagnosis_type_cohort:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        got_radiation_ever:
+          description: Keys true, false; labels Yes, No
           items:
             $ref: '#/components/schemas/FiltersValue'
           type: array
@@ -3122,7 +3250,11 @@ components:
           type: array
           uniqueItems: false
       required:
+      - age_at_initial_dx_group
+      - chemotherapy_agents
       - cns_integrated_diagnosis
+      - diagnosis_type_cohort
+      - got_radiation_ever
       - organization_code
       - vital_status
       type: object
@@ -3148,6 +3280,47 @@ components:
       required:
       - session_id
       - session_name
+      type: object
+    PatientInterpretation:
+      description: Germline or somatic interpretation recorded on one of the patient's
+        portal cases
+      properties:
+        aa_change:
+          description: On the interpreted transcript
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          description: 'Germline: LOINC answer code; somatic: oncogenicity, as the
+            case module records them'
+          type: string
+        hgvsg:
+          type: string
+        locus_id:
+          type: string
+        origin:
+          enum:
+          - germline
+          - somatic
+          type: string
+        sequencing_id:
+          type: integer
+        symbol:
+          description: Gene of the interpreted transcript
+          type: string
+        updated_at:
+          description: Last interpretation date
+          type: string
+      required:
+      - case_id
+      - locus_id
+      - origin
+      - sequencing_id
+      - updated_at
       type: object
     PatientKeyDate:
       description: Key date of the patient sidebar, with the source it comes from
@@ -3196,6 +3369,8 @@ components:
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
+        diagnosis_type_cohort:
           type: string
         family_name:
           description: Placeholder when can_read_phi is false
@@ -3468,6 +3643,203 @@ components:
       properties:
         format:
           type: string
+      type: object
+    ReportCase:
+      description: 'Case context of the report: identifiers printed in the file name
+        and the sheet.'
+      properties:
+        case_id:
+          type: integer
+        genome_build:
+          type: string
+        is_proband:
+          type: boolean
+        seq_id:
+          type: integer
+        submitter_patient_id:
+          type: string
+        submitter_sample_id:
+          type: string
+        task_id:
+          type: integer
+      required:
+      - case_id
+      - is_proband
+      - seq_id
+      - task_id
+      type: object
+    ReportGene:
+      description: A gene of the variant with its OMIM pheno
+      properties:
+        omim:
+          items:
+            $ref: '#/components/schemas/ReportOmim'
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+      required:
+      - omim
+      - symbol
+      type: object
+    ReportGermlineInterpretation:
+      description: The germline interpretation of the case on this transcript. Citations
+        are empty when PubMed could not resolve the id.
+      properties:
+        classification:
+          type: string
+        classification_criterias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        condition:
+          type: string
+        pubmed:
+          items:
+            $ref: '#/components/schemas/InterpretationPubmed'
+          type: array
+          uniqueItems: false
+        transmission_modes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    ReportGnomad:
+      description: gnomAD joint frequency of the variant; absent when the variant
+        is not in gnomAD.
+      properties:
+        ac:
+          type: integer
+        af:
+          type: number
+        an:
+          type: integer
+        hom:
+          type: integer
+      required:
+      - ac
+      - af
+      - an
+      - hom
+      type: object
+    ReportOccurrence:
+      description: Occurrence level data of the report (germline call of the sequencing).
+      properties:
+        ad_alt:
+          type: integer
+        ad_ratio:
+          type: number
+        ad_total:
+          type: integer
+        father_zygosity:
+          type: string
+        mother_zygosity:
+          type: string
+        parental_origin:
+          type: string
+        transmission_mode:
+          type: string
+        zygosity:
+          type: string
+      type: object
+    ReportOmim:
+      description: An OMIM phenotype of a gene.
+      properties:
+        inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        phenotype_id:
+          type: string
+      required:
+      - name
+      - phenotype_id
+      type: object
+    ReportTranscript:
+      description: 'One row of the report: an Ensembl transcript with its RefSeq pair,
+        or a RefSeq transcript of a gene that has no Ensembl transcript.'
+      properties:
+        aa_change:
+          type: string
+        cadd_phred:
+          type: number
+        consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dna_change:
+          type: string
+        exon_rank:
+          type: string
+        exon_total:
+          type: string
+        interpretation:
+          $ref: '#/components/schemas/ReportGermlineInterpretation'
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        refseq_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        revel_score:
+          type: number
+        source:
+          type: string
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+        vep_impact:
+          type: string
+        version:
+          type: string
+      required:
+      - is_canonical
+      - is_mane_plus
+      - is_mane_select
+      - transcript_id
+      type: object
+    ReportVariant:
+      description: Variant level data of the report.
+      properties:
+        alternate:
+          type: string
+        chromosome:
+          type: string
+        clinvar_id:
+          type: string
+        clinvar_interpretation:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        gnomad:
+          $ref: '#/components/schemas/ReportGnomad'
+        hgvsg:
+          type: string
+        locus_id:
+          type: string
+        reference:
+          type: string
+        rsnumber:
+          type: string
+        start:
+          type: integer
+        symbol:
+          type: string
+      required:
+      - locus_id
       type: object
     RoleActionResult:
       description: Action granted by a role
@@ -4279,6 +4651,33 @@ components:
           type: string
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
+      type: object
+    TranscriptReport:
+      description: 'Report data of one germline SNV occurrence: case context, variant,
+        occurrence, genes and one entry per transcript row.'
+      properties:
+        case:
+          $ref: '#/components/schemas/ReportCase'
+        genes:
+          items:
+            $ref: '#/components/schemas/ReportGene'
+          type: array
+          uniqueItems: false
+        occurrence:
+          $ref: '#/components/schemas/ReportOccurrence'
+        transcripts:
+          items:
+            $ref: '#/components/schemas/ReportTranscript'
+          type: array
+          uniqueItems: false
+        variant:
+          $ref: '#/components/schemas/ReportVariant'
+      required:
+      - case
+      - genes
+      - occurrence
+      - transcripts
+      - variant
       type: object
     UpdateCaseAssignmentsRequest:
       properties:
@@ -6651,7 +7050,9 @@ paths:
       - hpo
   /{tenant}/igv/{case_id}:
     get:
-      description: Get IGV tracks for a case
+      description: |-
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+        and the public reference tracks, all presigned
       operationId: getIGV
       parameters:
       - description: Tenant code
@@ -8261,6 +8662,86 @@ paths:
       security:
       - bearerauth: []
       summary: Get a germline ExpandedGermlineSNVOccurrence
+      tags:
+      - occurrences
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/report:
+    get:
+      description: 'Retrieve the data behind the transcript report of one germline
+        SNV occurrence of a case: case context, variant, occurrence, genes with OMIM
+        and one entry per transcript row (one row per Ensembl transcript, MANE Select
+        first, RefSeq transcript shown through the MANE pair).'
+      operationId: getGermlineSNVTranscriptReport
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptReport'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get the transcript report object of a germline SNV occurrence
       tags:
       - occurrences
   /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate:

@@ -31,17 +31,17 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
       size: 100,
       enableSorting: false,
     }),
-    pathogenicEvidenceColumnHelper.accessor(row => row.traits, {
+    pathogenicEvidenceColumnHelper.accessor(row => row.traits?.[0], {
       id: 'traits',
-      cell: info => <div className="font-medium capitalize">{info.getValue()?.[0]}</div>,
+      cell: info => <div className="font-medium capitalize">{info.getValue()}</div>,
       header: t('variant_entity.evidence.clin_var.table.headers.condition'),
       minSize: 85,
       maxSize: 150,
       size: 120,
     }),
-    pathogenicEvidenceColumnHelper.accessor(row => row.clinical_significance, {
+    pathogenicEvidenceColumnHelper.accessor(row => row.clinical_significance?.[0], {
       id: 'clinical_significance',
-      cell: info => <ClassificationCell codes={[info.getValue()?.[0]?.replace(/\s+/g, '_')]} />,
+      cell: info => <ClassificationCell codes={[info.getValue()?.replace(/\s+/g, '_')]} />,
       header: t('variant_entity.evidence.clin_var.table.headers.classification'),
       minSize: 75,
       maxSize: 150,

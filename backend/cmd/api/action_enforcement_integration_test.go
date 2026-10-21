@@ -161,7 +161,7 @@ func Test_TenantRoutesAreMappedToActions(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		router := setupRouter(env.Starrocks, env.Postgres, true)
+		router := setupRouter(env.Starrocks, env.Postgres, true, "")
 
 		actual := map[string]bool{}
 		for _, route := range router.Routes() {
@@ -349,6 +349,7 @@ var expectedTenantActions = map[string]string{
 	"POST /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate":            types.ActionSearchCase,
 	"POST /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics":           types.ActionSearchCase,
 	"GET /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded":    types.ActionSearchCase,
+	"GET /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/report":      types.ActionSearchCase,
 	"GET /:tenant/occurrences/germline/snv/dictionary":                                      types.ActionSearchCase,
 	"POST /:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/count":                 types.ActionSearchCase,
 	"POST /:tenant/occurrences/somatic/cnv/:case_id/:seq_id/:task_id/list":                  types.ActionSearchCase,

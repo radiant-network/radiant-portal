@@ -50,26 +50,11 @@ export const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
-  // QA preview only: two links to view both landing variants in a single build.
-  // In prod the variant should be driven by the build THEME on a single `/landing`
-  // route, so these links and the `/landing/*` preview routes should be removed.
   analysis: {
     type: 'link',
     link: '/analysis',
     label: 'Analysis',
     description: 'Access analysis page',
-  },
-  landingInclude: {
-    type: 'link',
-    link: '/landing/include',
-    label: 'Landing (Include)',
-    description: 'Access the Include landing page',
-  },
-  landingKidsfirst: {
-    type: 'link',
-    link: '/landing/kidsfirst',
-    label: 'Landing (Kids First)',
-    description: 'Access the Kids First landing page',
   },
   study: {
     type: 'link',

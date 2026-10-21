@@ -45,6 +45,7 @@ function Collaboration() {
           description={t('landing.kidsfirst.collaboration.germline_variants.description')}
           footer={
             <Button asChild className="bg-[var(--cyan-6)] text-white hover:brightness-95">
+              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
               <a href="#">{t('landing.kidsfirst.collaboration.germline_variants.button')}</a>
             </Button>
           }

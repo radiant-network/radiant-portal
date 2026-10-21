@@ -78,6 +78,7 @@ function CheckboxFilter({
   const name = typeof label === 'string' ? label.toLowerCase().replaceAll(' ', '-') : undefined;
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the checkbox is keyboard accessible
     <div
       className={styles.base({ className })}
       onClick={() => {

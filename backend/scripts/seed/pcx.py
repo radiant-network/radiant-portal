@@ -47,12 +47,14 @@ class Patient:
         self.org = org_code
         self.ages = []
 
-    def finish(self, used_mrns):
-        """Fake identity, fitted to the patient's oldest recorded age so that no date falls after today."""
+    def finish(self, used_mrns, pin=None):
+        """Fake identity, fitted to the patient's oldest recorded age so that no date falls after today. A pin (mrn, birth
+        date) of an environment already loaded is kept, the birth date only while it still fits the CSVs."""
         rid = self.rid
-        self.mrn = None
-        while self.mrn is None or self.mrn in used_mrns:
-            self.mrn = str(10_000_000 + h("mrn", rid, len(used_mrns)) % 90_000_000)
+        self.mrn, retry = (pin[0] if pin else None), 0
+        while self.mrn is None or (not pin and self.mrn in used_mrns):
+            self.mrn = str(10_000_000 + h("mrn", rid, len(used_mrns) + retry) % 90_000_000)
+            retry += 1
         used_mrns.add(self.mrn)
         gender = self.demo["gender"] or "not reported"
         self.sex = gender if gender in ("female", "male") else "unknown"
@@ -64,6 +66,8 @@ class Patient:
         last_dob = min(dt.date(year, 12, 31), TODAY - dt.timedelta(days=oldest))
         span = max((last_dob - dt.date(year, 1, 1)).days, 0)
         self.dob = dt.date(year, 1, 1) + dt.timedelta(days=h("dob", rid) % (span + 1))
+        if pin and pin[1].year == year and pin[1] <= last_dob:
+            self.dob = pin[1]
         deid = self.demo["address_postal_code"]
         self.zip = None if not deid or deid == "XXXXX" else deid[:3] + f"{h('zip', rid) % 100:02d}"
 
@@ -113,12 +117,13 @@ def identified(name, header):
 
 
 # Organizations the de-identified CSVs reference that organization_ref_table.sql does not carry yet
-# (reported to the data team 2026-10-06). Added only while still absent upstream, so this list stops
-# having any effect once they land — delete it then, and keep the codes if upstream picks different
+# (reported to the data team 2026-10-06; CHLA since the 2026-10-19 export). Added only while still absent upstream, so this list
+# stops having any effect once they land — delete it then, and keep the codes if upstream picks different
 # ones only after checking nothing is already seeded against these.
 PENDING_ORGS = [
     {"code": "NCH", "name": "Nicklaus Children's Hospital", "category_code": "healthcare_provider", "tenant_code": "radiant"},
     {"code": "NYU", "name": "NYU Langone Health", "category_code": "healthcare_provider", "tenant_code": "radiant"},
+    {"code": "CHLA", "name": "Children's Hospital Los Angeles", "category_code": "healthcare_provider", "tenant_code": "radiant"},
 ]
 
 
@@ -134,8 +139,10 @@ def read_organization_ref(pcx_dir):
     return rows + [o for o in PENDING_ORGS if o["name"] not in names]
 
 
-def build(deid_dir, organizations):
-    """Read the deid CSVs, give every patient a fake identity. Returns (patients by rid, {table: (cols, rows)})."""
+def build(deid_dir, organizations, pins=None):
+    """Read the deid CSVs, give every patient a fake identity. Returns (patients by rid, {table: (cols, rows)}).
+    pins: (mrn, birth date) by research id, the identities an environment already holds; the MRN of a patient seen before
+    never changes, and a new patient never gets the MRN of another one, even one the CSVs dropped."""
     codes = {r["name"]: r["code"] for r in organizations}
     demo = read_csv(os.path.join(deid_dir, "pcx_30_demographics_deid.csv"))
     patients = {}
@@ -148,9 +155,10 @@ def build(deid_dir, organizations):
         for r in rows:
             p = patients[r["research_id"]]
             p.ages += [a for c, v in r.items() if c.startswith("age_at") and (a := age(v)) is not None]
-    used = set()
+    pins = pins or {}
+    used = {mrn for mrn, _ in pins.values()}
     for rid in sorted(patients):
-        patients[rid].finish(used)
+        patients[rid].finish(used, pins.get(rid))
 
     tables = {}
     demo_cols = IDENT + [("given_name", S), ("given_name_deid", S), ("family_name", S), ("family_name_deid", S), ("birth_date", S),

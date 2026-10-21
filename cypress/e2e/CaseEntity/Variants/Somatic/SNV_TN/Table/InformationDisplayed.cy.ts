@@ -79,12 +79,12 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information disp
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gnomad', data.variantSomatic);
   });
 
-  it('Freq. TO', () => {
+  it('Freq. TO [RAD-112]', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_to', data.variantSomatic);
   });
 
-  it('Freq. TN', () => {
+  it('Freq. TN [RAD-112]', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_tn', data.variantSomatic);
   });

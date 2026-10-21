@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,14 +27,27 @@ class PatientCase(BaseModel):
     Portal case the patient is part of
     """ # noqa: E501
     analysis_catalog_code: Optional[StrictStr] = None
+    analysis_catalog_name: Optional[StrictStr] = None
     case_id: StrictInt
+    case_type: StrictStr = Field(description="As in the case list: germline_family when the case has more than one member")
     case_type_code: StrictStr
     diagnosis_lab_code: StrictStr
+    ordering_organization_code: Optional[StrictStr] = None
+    ordering_organization_name: Optional[StrictStr] = None
+    primary_condition_id: Optional[StrictStr] = Field(default=None, description="MONDO id")
+    primary_condition_name: Optional[StrictStr] = None
     priority_code: Optional[StrictStr] = None
     relationship: StrictStr = Field(description="proband, or the relationship_to_proband code")
     status_code: StrictStr
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "case_id", "case_type_code", "diagnosis_lab_code", "priority_code", "relationship", "status_code", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_id", "case_type", "case_type_code", "diagnosis_lab_code", "ordering_organization_code", "ordering_organization_name", "primary_condition_id", "primary_condition_name", "priority_code", "relationship", "status_code", "updated_on"]
+
+    @field_validator('case_type')
+    def case_type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['somatic', 'germline', 'germline_family']):
+            raise ValueError("must be one of enum values ('somatic', 'germline', 'germline_family')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,9 +101,15 @@ class PatientCase(BaseModel):
 
         _obj = cls.model_validate({
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
+            "analysis_catalog_name": obj.get("analysis_catalog_name"),
             "case_id": obj.get("case_id"),
+            "case_type": obj.get("case_type"),
             "case_type_code": obj.get("case_type_code"),
             "diagnosis_lab_code": obj.get("diagnosis_lab_code"),
+            "ordering_organization_code": obj.get("ordering_organization_code"),
+            "ordering_organization_name": obj.get("ordering_organization_name"),
+            "primary_condition_id": obj.get("primary_condition_id"),
+            "primary_condition_name": obj.get("primary_condition_name"),
             "priority_code": obj.get("priority_code"),
             "relationship": obj.get("relationship"),
             "status_code": obj.get("status_code"),
