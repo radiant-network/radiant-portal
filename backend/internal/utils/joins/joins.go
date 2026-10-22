@@ -98,6 +98,45 @@ func (j Joiner) CaseWithCaseGroup(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(joinMembership).Joins(joinGroup)
 }
 
+// CaseWithProbandSample joins, per case, the array of its proband samples' submitter ids, the most
+// recently sequenced first: by run date, then sequencing id, as the case page orders its sequencings.
+// A sample whose sequencing has no run date comes last. Every case gets a row, with an empty array when it
+// has no proband sample: a NULL would make a not-in filter on the field drop the case.
+func (j Joiner) CaseWithProbandSample(tx *gorm.DB) *gorm.DB {
+	// The empty array is the aggregate of the case's one NULL row, filtered out. An ifnull(..., []) literal
+	// instead breaks array_contains on StarRocks 3.4 (NULL or "get state failed"), which a single-value
+	// not-in filter uses.
+	perCase := fmt.Sprintf("SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(samples.submitter_sample_id ORDER BY samples.run_date DESC NULLS LAST, samples.seq_id DESC)) AS %[2]s "+
+		"FROM %[3]s %[1]s LEFT JOIN (%[4]s) samples ON samples.case_id = %[1]s.id GROUP BY %[1]s.id",
+		types.CaseTable.Alias, types.CaseProbandSubmitterSampleIdsField.Name, j.name(types.CaseTable, tx), j.ProbandSamples(tx))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, types.CaseProbandSampleTable.Alias, types.CaseProbandSampleTable.Alias, types.CaseTable.Alias))
+}
+
+// ProbandSamples returns one (case_id, submitter_sample_id) row per proband sample the case sequenced, with
+// the run_date and seq_id of its latest sequencing, to order them. A somatic case keeps the tumoral samples
+// only. A prenatal case's proband is the mother, and a fetus's sample also carries her patient_id, so fetus
+// samples (fetus_id set) are left out.
+func (j Joiner) ProbandSamples(tx *gorm.DB) string {
+	// Indexed verbs: %[1]s chseq, %[2]s c, %[3]s s, %[4]s spl, then their table names.
+	return fmt.Sprintf(
+		`SELECT %[1]s.case_id, %[4]s.submitter_sample_id, MAX(%[3]s.run_date) AS run_date, MAX(%[3]s.id) AS seq_id
+        FROM %[5]s %[1]s
+        INNER JOIN %[6]s %[2]s ON %[2]s.id = %[1]s.case_id
+        INNER JOIN %[7]s %[3]s ON %[3]s.id = %[1]s.sequencing_experiment_id
+        INNER JOIN %[8]s %[4]s ON %[4]s.id = %[3]s.sample_id AND %[4]s.patient_id = %[2]s.proband_id AND %[4]s.fetus_id IS NULL
+        WHERE %[2]s.case_type_code <> 'somatic' OR %[4]s.histology_code = 'tumoral'
+        GROUP BY %[1]s.case_id, %[4]s.submitter_sample_id`,
+		types.CaseHasSequencingExperimentTable.Alias,
+		types.CaseTable.Alias,
+		types.SequencingExperimentTable.Alias,
+		types.SampleTable.Alias,
+		j.name(types.CaseHasSequencingExperimentTable, tx),
+		j.name(types.CaseTable, tx),
+		j.name(types.SequencingExperimentTable, tx),
+		j.name(types.SampleTable, tx),
+	)
+}
+
 func (j Joiner) SeqExpWithSample(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", j.name(types.SampleTable, tx), types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }

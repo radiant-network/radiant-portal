@@ -412,6 +412,59 @@ func Test_SearchById_CaseInsensitive(t *testing.T) {
 	})
 }
 
+func Test_Cases_SearchById_ProbandSubmitterSampleIds_SomaticSuggestsTumoralSamples(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "srx109164", 10)
+		require.NoError(t, err)
+		// The normal SRX1091646 is not a proband sample of somatic case 71, so it is not suggested.
+		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "SRX1091647"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_ProbandSubmitterSampleIds_SharedByCases_SuggestedOnce(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// S13224 is the proband sample of cases 1 and 70; S13225 and S13226 are the parents'.
+		autocompleteResult, err := repo.SearchById(t.Context(), "S1322", 10)
+		require.NoError(t, err)
+		assert.Contains(t, *autocompleteResult, AutocompleteResult{Type: "proband_submitter_sample_ids", Value: "S13224"})
+		assert.NotContains(t, *autocompleteResult, AutocompleteResult{Type: "proband_submitter_sample_ids", Value: "S13225"})
+		assert.NotContains(t, *autocompleteResult, AutocompleteResult{Type: "proband_submitter_sample_ids", Value: "S13226"})
+		count := 0
+		for _, r := range *autocompleteResult {
+			if r.Value == "S13224" {
+				count++
+			}
+		}
+		assert.Equal(t, 1, count)
+	})
+}
+
+func Test_Cases_SearchById_ProbandSubmitterSampleIds_SkipsFetusSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "S-PRENAT-72", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S-PRENAT-72-MOTHER"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_ProbandSubmitterSampleIds_SuggestsEverySample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1102, "S99999-SECOND", "2026-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		second, err := repo.SearchById(t.Context(), "S99999", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S99999-SECOND"}}, *second)
+
+		first, err := repo.SearchById(t.Context(), "S13224", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S13224"}}, *first)
+	})
+}
+
 func Test_GetCasesFilters(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -1002,6 +1055,221 @@ func Test_SearchCases_OnCaseGroup(t *testing.T) {
 
 		ids, count = search("it_repo_cg_missing")
 		assert.Empty(t, ids)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func searchCaseById(t *testing.T, repo *CasesRepository, caseID int) CaseResult {
+	t.Helper()
+	criteria := []types.SearchCriterion{{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{caseID}}}
+	query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+	require.NoError(t, err)
+	cases, _, err := repo.SearchCases(t.Context(), query)
+	require.NoError(t, err)
+	require.Len(t, *cases, 1)
+	return (*cases)[0]
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_GermlineShowsOnlyProbandSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Case 1 is a trio: S13225 (mother) and S13226 (father) are left out.
+		assert.Equal(t, types.JsonArray[string]{"S13224"}, searchCaseById(t, repo, 1).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_SomaticShowsTumoralSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Case 71 sequenced the proband's normal SRX1091646 and tumoral SRX1091647.
+		assert.Equal(t, types.JsonArray[string]{"SRX1091647"}, searchCaseById(t, repo, 71).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_PrenatalShowsMotherSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Case 72 sequenced the mother's S-PRENAT-72-MOTHER and the fetus's S-PRENAT-72, which also
+		// carries the mother's patient_id.
+		assert.Equal(t, types.JsonArray[string]{"S-PRENAT-72-MOTHER"}, searchCaseById(t, repo, 72).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_EmptyArrayWithoutProbandSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1100, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'germline', 'postnatal', 'CHUSJ', 'PROBAND-SAMPLE-NONE'),
+			       (1101, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'somatic', 'postnatal', 'CHUSJ', 'PROBAND-SAMPLE-NORMAL-ONLY')
+		`).Error)
+		// Case 1101 sequenced only the proband's normal sample.
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (73, 1101)").Error)
+		// The shared cleanUp deletes cases before their sequencing links, which the FK refuses.
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id IN (1100, 1101)")
+		defer env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = 1101")
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		assert.Equal(t, types.JsonArray[string]{}, searchCaseById(t, repo, 1100).ProbandSubmitterSampleIds)
+		assert.Equal(t, types.JsonArray[string]{}, searchCaseById(t, repo, 1101).ProbandSubmitterSampleIds)
+	})
+}
+
+// insertProbandSampleCase adds a germline case whose proband (patient 3) has S13224, run in 2021 (seq 1), and
+// a second sample sequenced with runDate (nil for none). Case, sample and sequencing all take id. It returns
+// the cleanup to defer.
+func insertProbandSampleCase(t *testing.T, env *testutils.Env, id int, submitterSampleID string, runDate any) func() {
+	t.Helper()
+	require.NoError(t, env.Postgres.Exec(`
+		INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+		VALUES (?, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'germline', 'postnatal', 'CHUSJ', ?)
+	`, id, submitterSampleID).Error)
+	require.NoError(t, env.Postgres.Exec(`
+		INSERT INTO sample (id, type_code, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+		VALUES (?, 'dna', 'normal', ?, 3, 'CQGC', 'radiant')
+	`, id, submitterSampleID).Error)
+	require.NoError(t, env.Postgres.Exec(`
+		INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
+		VALUES (?, ?, 'completed', ?, 'CQGC', 'radiant', 9999, ?, ?, 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+	`, id, id, submitterSampleID, submitterSampleID, runDate).Error)
+	require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (1, ?), (?, ?)", id, id, id).Error)
+	return func() {
+		env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = ?", id)
+		env.Postgres.Exec("DELETE FROM sequencing_experiment WHERE id = ?", id)
+		env.Postgres.Exec("DELETE FROM sample WHERE id = ?", id)
+		env.Postgres.Exec("DELETE FROM cases WHERE id = ?", id)
+	}
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_SeveralSamples_MostRecentFirst(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1102, "S99999-SECOND", "2026-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// S99999-SECOND sorts after S13224, so an alphabetical order would fail.
+		assert.Equal(t, types.JsonArray[string]{"S99999-SECOND", "S13224"}, searchCaseById(t, repo, 1102).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_OrderedByRunDateNotLoadDate(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// Loaded into the portal now, but run before S13224's 2021 run.
+		defer insertProbandSampleCase(t, env, 1104, "S99999-OLD-RUN", "2020-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		assert.Equal(t, types.JsonArray[string]{"S13224", "S99999-OLD-RUN"}, searchCaseById(t, repo, 1104).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_NoRunDateComesLast(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1105, "S99999-NO-RUN-DATE", nil)()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		assert.Equal(t, types.JsonArray[string]{"S13224", "S99999-NO-RUN-DATE"}, searchCaseById(t, repo, 1105).ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_ProbandSubmitterSampleIds_SomaticShowsEveryTumoralSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1103")
+		defer env.Postgres.Exec("DELETE FROM sample WHERE id = 1103")
+		defer env.Postgres.Exec("DELETE FROM sequencing_experiment WHERE id = 1103")
+		defer env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = 1103")
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1103, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'somatic', 'postnatal', 'CHUSJ', 'PROBAND-SAMPLE-TWO-TUMORS')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sample (id, type_code, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1103, 'dna', 'tumoral', 'SRX9999999-RELAPSE', 62, 'LDM-CHUSJ', 'radiant')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
+			VALUES (1103, 1103, 'completed', 'RELAPSE', 'CQGC', 'radiant', 9998, 'RELAPSE_9998', '2026-09-01', 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+		`).Error)
+		// Seq 73 is the proband's normal SRX1091646, seq 74 its tumoral SRX1091647, run on 2026-03-08 before the relapse.
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (73, 1103), (74, 1103), (1103, 1103)").Error)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		assert.Equal(t, types.JsonArray[string]{"SRX9999999-RELAPSE", "SRX1091647"}, searchCaseById(t, repo, 1103).ProbandSubmitterSampleIds)
+	})
+}
+
+func searchCasesByProbandSubmitterSampleIds(t *testing.T, repo *CasesRepository, sampleIDs ...interface{}) (*[]CaseResult, int64) {
+	t.Helper()
+	criteria := []types.SearchCriterion{{FieldName: types.CaseProbandSubmitterSampleIdsField.GetAlias(), Value: sampleIDs}}
+	query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+	require.NoError(t, err)
+	cases, count, err := repo.SearchCases(t.Context(), query)
+	require.NoError(t, err)
+	return cases, *count
+}
+
+func Test_SearchCases_OnProbandSubmitterSampleIds(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Cases 1 and 70 both sequenced the proband's S13224.
+		cases, count := searchCasesByProbandSubmitterSampleIds(t, repo, "S13224")
+		assert.Equal(t, int64(2), count)
+		require.Len(t, *cases, 2)
+		assert.ElementsMatch(t, []int{1, 70}, []int{(*cases)[0].CaseID, (*cases)[1].CaseID})
+	})
+}
+
+func Test_SearchCases_OnProbandSubmitterSampleIds_SeveralValues(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		cases, count := searchCasesByProbandSubmitterSampleIds(t, repo, "S13224", "SRX1091647")
+		assert.Equal(t, int64(3), count)
+		require.Len(t, *cases, 3)
+		caseIDs := []int{(*cases)[0].CaseID, (*cases)[1].CaseID, (*cases)[2].CaseID}
+		assert.ElementsMatch(t, []int{1, 70, 71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_OnProbandSubmitterSampleIds_AnySampleMatches(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1102, "S99999-SECOND", "2026-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// Case 1102 has S99999-SECOND too, and its S13224 still matches.
+		cases, count := searchCasesByProbandSubmitterSampleIds(t, repo, "S13224")
+		assert.Equal(t, int64(3), count)
+		require.Len(t, *cases, 3)
+		assert.ElementsMatch(t, []int{1, 70, 1102}, []int{(*cases)[0].CaseID, (*cases)[1].CaseID, (*cases)[2].CaseID})
+	})
+}
+
+func Test_SearchCases_NotInProbandSubmitterSampleIds_KeepsCasesWithoutSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1100, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'germline', 'postnatal', 'CHUSJ', 'PROBAND-SAMPLE-NONE')
+		`).Error)
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1100")
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		criteria := []types.SearchCriterion{
+			{FieldName: types.CaseProbandSubmitterSampleIdsField.GetAlias(), Operator: "not-in", Value: []interface{}{"S13224"}},
+			{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1, 1100}},
+		}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		// Case 1 has S13224 and is excluded; case 1100 has no proband sample and stays.
+		assert.Equal(t, int64(1), *count)
+		require.Len(t, *cases, 1)
+		assert.Equal(t, 1100, (*cases)[0].CaseID)
+		assert.Equal(t, types.JsonArray[string]{}, (*cases)[0].ProbandSubmitterSampleIds)
+	})
+}
+
+func Test_SearchCases_OnProbandSubmitterSampleIds_NonProbandSample_NoResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// SRX1091646 is case 71's normal sample and S-PRENAT-72 its fetus's: neither is a proband sample.
+		_, count := searchCasesByProbandSubmitterSampleIds(t, repo, "SRX1091646", "S-PRENAT-72")
 		assert.Equal(t, int64(0), count)
 	})
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -158,4 +159,20 @@ func Test_CNVGenesOverlapSQL_Reads_Only_The_Bound_Tenant_Gene_Panel_MV(t *testin
 
 	assert.Contains(t, sql, "tenant1_tenant.gene_panel_mv")
 	assert.Equal(t, 1, strings.Count(sql, "gene_panel_mv"), "the MV must be read once, through the tenant database")
+}
+
+func Test_CaseWithProbandSample_BoundTenant_QualifiesSubqueryTables(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		ctx := types.ContextWithTenant(env.Ctx, "tenant1")
+		db := env.Starrocks.Session(&gorm.Session{DryRun: true}).WithContext(ctx)
+		tx := db.Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(ctx), types.CaseTable.Alias))
+		tx = joins.Starrocks().CaseWithProbandSample(tx)
+		var dest []map[string]any
+		sql := tx.Find(&dest).Statement.SQL.String()
+
+		assert.Contains(t, sql, "tenant1_tenant.case_has_sequencing_experiment chseq")
+		assert.Contains(t, sql, "tenant1_tenant.sequencing_experiment s")
+		assert.Contains(t, sql, "tenant1_tenant.sample spl")
+		assert.NotContains(t, sql, "radiant_jdbc")
+	})
 }

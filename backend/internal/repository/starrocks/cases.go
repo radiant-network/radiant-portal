@@ -103,7 +103,11 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	tx := db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId)
+	subQueryProbandSampleId := db.Table(fmt.Sprintf("(%s) %s", r.joiner.ProbandSamples(db), types.CaseProbandSampleTable.Alias))
+	subQueryProbandSampleId = subQueryProbandSampleId.Select(fmt.Sprintf("\"%s\" as type, submitter_sample_id as value", types.CaseProbandSubmitterSampleIdsField.GetAlias()))
+	subQueryProbandSampleId = subQueryProbandSampleId.Where("LOWER(submitter_sample_id) LIKE ?", strings.ToLower(searchInput))
+
+	tx := db.Table("(? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
@@ -217,6 +221,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProband(tx, userQuery)
 	tx = r.joiner.CaseWithAnalysisCatalog(tx)
 	tx = r.joiner.CaseWithProject(tx)
+	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
