@@ -31,15 +31,14 @@ function mapEvent(event: PatientEvent, t: TFunction): ComponentProps<typeof Even
   const tumorLocs = joinNonEmpty([...event.tumor_locations, event.tumor_location_other]);
   if (tumorLocs)
     description.push({ label: t('patient_entity.timeline.event_fields.tumor_locations'), value: tumorLocs });
-  if (event.metastasis) {
-    description.push({ label: t('patient_entity.timeline.event_fields.metastasis'), value: event.metastasis });
-  }
   const metastasisLocs = joinNonEmpty([...event.metastasis_locations, event.metastasis_location_other]);
   if (metastasisLocs) {
     description.push({
       label: t('patient_entity.timeline.event_fields.metastasis_locations'),
       value: metastasisLocs,
     });
+  } else if (event.metastasis) {
+    description.push({ label: t('patient_entity.timeline.event_fields.metastasis'), value: event.metastasis });
   }
 
   return {
