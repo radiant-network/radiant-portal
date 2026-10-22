@@ -9,6 +9,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, type CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
@@ -26,7 +27,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
     <Card data-cy="most-deleterious-consequence-card" {...props}>
       <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
         <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 min-w-0">
             <div className="text-2xl font-semibold">
               {data.symbol && (
                 <a
@@ -44,7 +45,9 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               {!data.symbol && t('common.no_gene')}
             </div>
             <div data-cy={data.aa_change ? 'aa-change' : undefined} className="text-xs font-mono">
-              <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
+              <ConditionalField condition={!!data.aa_change}>
+                <AminoAcidChange value={data.aa_change!} />
+              </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">

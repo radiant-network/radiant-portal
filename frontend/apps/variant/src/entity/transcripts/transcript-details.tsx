@@ -5,6 +5,7 @@ import ConsequenceIndicator from '@/components/base/indicators/consequence-indic
 import EmptyField from '@/components/base/information/empty-field';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -38,12 +39,13 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
               <TooltipContent className="font-mono break-all">{data.dna_change}</TooltipContent>
             </Tooltip>
           )}
-          <div>
-            <Tooltip>
-              <TooltipTrigger>{data.aa_change && <span>{data.aa_change}</span>}</TooltipTrigger>
-              <TooltipContent>{t('variant_entity.transcripts.amino_acid_substitution')}</TooltipContent>
-            </Tooltip>
-          </div>
+          {data.aa_change && (
+            <AminoAcidChange
+              value={data.aa_change}
+              description={t('variant_entity.transcripts.amino_acid_substitution')}
+              className="max-w-56"
+            />
+          )}
         </div>
       </div>
       <div>

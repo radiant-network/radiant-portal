@@ -2,6 +2,7 @@ import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
@@ -13,7 +14,6 @@ import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/m
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
-import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
@@ -93,7 +93,7 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
     // AA Change
     columnHelper.accessor(row => row.aa_change, {
       id: 'aa_change',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <AminoAcidChangeCell value={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
       ),
