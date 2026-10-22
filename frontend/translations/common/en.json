@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
       "remove_user": "Remove {{name}}"
     },
     "auto_complete": {
