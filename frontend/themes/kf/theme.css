@@ -11,6 +11,7 @@
   --accent-foreground: oklch(0.308 0.061 235.721);
   --muted: var(--color-slate-100);
   --muted-foreground: var(--color-slate-500);
+  --muted-subdued: var(--color-slate-50);
   --neutral: var(--color-slate-400);
   --neutral-foreground: var(--color-slate-800);
   --card: var(--color-white);
@@ -66,6 +67,7 @@
   --accent-foreground: var(--color-slate-50);
   --muted: var(--color-slate-800);
   --muted-foreground: var(--color-slate-400);
+  --muted-subdued: var(--color-slate-900);
   --neutral: var(--color-slate-500);
   --neutral-foreground: var(--color-slate-400);
   --card: var(--color-slate-950);
