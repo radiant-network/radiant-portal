@@ -1429,6 +1429,16 @@
         "focal_boost": "Focal boost",
         "total_primary": "Total to primary"
       }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} imaging session",
+      "title_count_other": "{{count}} imaging sessions",
+      "day_age": "Day {{day}} · age {{age}}y",
+      "columns": {
+        "date": "Date",
+        "modality": "Modality",
+        "viewer": "Viewer"
+      }
     }
   },
   "timeline": {
