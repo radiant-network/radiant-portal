@@ -81,9 +81,9 @@ type TableHeaderActionsProps<TData extends RowData> = {
 };
 
 const VISIBLE_ACTION = 'size-6 ml-0.5';
-// Not display:none, so the button stays reachable with Tab and shows when it gets focus
+// Not display:none, so the button stays reachable with Tab and shows on keyboard focus
 const HIDDEN_UNTIL_HOVER_OR_FOCUS =
-  'h-6 w-0 opacity-0 overflow-hidden group-hover/header:w-6 group-hover/header:ml-0.5 group-hover/header:opacity-100 group-focus-within/header:w-6 group-focus-within/header:ml-0.5 group-focus-within/header:opacity-100';
+  'h-6 w-0 opacity-0 overflow-hidden group-hover/header:w-6 group-hover/header:ml-0.5 group-hover/header:opacity-100 group-has-[:focus-visible]/header:w-6 group-has-[:focus-visible]/header:ml-0.5 group-has-[:focus-visible]/header:opacity-100';
 
 function TableHeaderActions<TData extends RowData>({ header, defaultSort }: TableHeaderActionsProps<TData>) {
   const { t } = useI18n();

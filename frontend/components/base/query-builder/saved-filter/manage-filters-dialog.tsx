@@ -35,7 +35,14 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[550px]">
+      <DialogContent
+        className="w-full max-w-[550px]"
+        onOpenAutoFocus={event => {
+          // Focusing the first row would reveal its hover-only actions
+          event.preventDefault();
+          (event.currentTarget as HTMLElement).focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{t('common.saved_filter.manage_dialog.title')}</DialogTitle>
         </DialogHeader>
