@@ -757,8 +757,11 @@ components:
           type: string
         proband_life_status_code:
           type: string
-        proband_submitter_sample_id:
-          type: string
+        proband_submitter_sample_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         project_code:
           type: string
         project_name:
@@ -775,6 +778,7 @@ components:
       - created_on
       - diagnosis_lab_code
       - has_variants
+      - proband_submitter_sample_ids
       - status_code
       - updated_on
       type: object
