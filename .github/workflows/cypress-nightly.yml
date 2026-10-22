@@ -68,6 +68,9 @@ jobs:
 
           NIGHTLY_SHARD_CMD='
           set -e
+          # Node.js security release of 2026-10-21: the container must run a patched version
+          echo "Node.js $(node --version)"
+          node -e "const [a,b,c]=process.versions.node.split(\".\").map(Number);process.exit(a>26||(a===26&&(b>12||(b===12&&c>=1)))?0:1)" || { echo "Node.js $(node --version) is not patched (>= v26.12.1 required)"; exit 1; }
           S3_PREFIX="s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$SHARD_ID"
           aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz" /tmp/source.tar.gz
           mkdir -p /app && tar -xzf /tmp/source.tar.gz -C /app
