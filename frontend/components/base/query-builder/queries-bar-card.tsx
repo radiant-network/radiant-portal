@@ -123,14 +123,20 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
   return (
     <Card id="query-builder-card" className="py-0">
       <Accordion type="multiple" defaultValue={['query-builder']}>
-        <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger
+        <AccordionItem value="query-builder" className="border-none group/qb-item">
+          {/* The trigger stretches over the whole header; the filter actions sit above it with z-10 */}
+          <div
             data-cy="query-builder-header"
-            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none"
-            asChild
+            className="relative flex border-b px-6 group-data-[state=closed]/qb-item:rounded-sm group-data-[state=closed]/qb-item:border-none"
           >
-            <QueryBuilderSavedFilters />
-          </AccordionTrigger>
+            <QueryBuilderSavedFilters
+              renderTitle={title => (
+                <AccordionTrigger className="w-auto min-w-0 py-0 after:absolute after:inset-0">
+                  {title}
+                </AccordionTrigger>
+              )}
+            />
+          </div>
           <AccordionContent className="py-4 px-6 space-y-4">
             <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
