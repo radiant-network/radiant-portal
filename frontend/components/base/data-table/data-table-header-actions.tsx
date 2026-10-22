@@ -13,7 +13,6 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { cn } from '@/lib/utils';
 
 import type { AppFeatures } from './data-table';
 
@@ -58,6 +57,18 @@ function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: So
   return t('common.table.sort.clear');
 }
 
+function getSortingAriaLabel(t: TFunction<string, undefined>, sortingOrder: SortDirection | boolean): string {
+  if (sortingOrder === 'asc') {
+    return t('a11y.data_table.sorted_asc');
+  }
+
+  if (sortingOrder === 'desc') {
+    return t('a11y.data_table.sorted_desc');
+  }
+
+  return t('a11y.data_table.sort');
+}
+
 /**
  * TableHeaderActions
  * Display a list of actions a header can do
@@ -68,6 +79,11 @@ type TableHeaderActionsProps<TData extends RowData> = {
   header: Header<AppFeatures, TData, unknown>;
   defaultSort?: ColumnSort;
 };
+
+const VISIBLE_ACTION = 'size-6 ml-0.5';
+// Not display:none, so the button stays reachable with Tab and shows when it gets focus
+const HIDDEN_UNTIL_HOVER_OR_FOCUS =
+  'h-6 w-0 opacity-0 overflow-hidden group-hover/header:w-6 group-hover/header:ml-0.5 group-hover/header:opacity-100 group-focus-within/header:w-6 group-focus-within/header:ml-0.5 group-focus-within/header:opacity-100';
 
 function TableHeaderActions<TData extends RowData>({ header, defaultSort }: TableHeaderActionsProps<TData>) {
   const { t } = useI18n();
@@ -91,7 +107,7 @@ function TableHeaderActions<TData extends RowData>({ header, defaultSort }: Tabl
    * This is required because the action items needs to be hidden when the header is not hovered so the title can have more space..
    */
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center">
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
@@ -100,9 +116,7 @@ function TableHeaderActions<TData extends RowData>({ header, defaultSort }: Tabl
               variant="ghost"
               iconOnly
               aria-label={t('a11y.data_table.pin_column')}
-              className={cn('size-6 hidden group-hover/header:flex', {
-                flex: isPinningDropdownActive,
-              })}
+              className={isPinningDropdownActive ? VISIBLE_ACTION : HIDDEN_UNTIL_HOVER_OR_FOCUS}
             >
               <Pin />
             </Button>
@@ -133,15 +147,8 @@ function TableHeaderActions<TData extends RowData>({ header, defaultSort }: Tabl
             <Button
               variant="ghost"
               iconOnly
-              aria-label={
-                {
-                  asc: t('a11y.data_table.sorted_asc'),
-                  desc: t('a11y.data_table.sorted_desc'),
-                }[isSorted as string] ?? t('a11y.data_table.sort')
-              }
-              className={cn('size-6 hidden group-hover/header:flex', {
-                flex: isSorted || isPinningDropdownActive,
-              })}
+              aria-label={getSortingAriaLabel(t, isSorted)}
+              className={isSorted || isPinningDropdownActive ? VISIBLE_ACTION : HIDDEN_UNTIL_HOVER_OR_FOCUS}
               onClick={header.column.getToggleSortingHandler()}
             >
               {{
