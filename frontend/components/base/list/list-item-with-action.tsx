@@ -47,7 +47,7 @@ const ListItemAction = ({
         </ConditionalWrapper>
         <div className="text-xs">{description}</div>
       </div>
-      <div className="hidden items-start group-hover:flex gap-1.5 ml-2">
+      <div className="flex items-start gap-1.5 w-0 opacity-0 overflow-hidden group-hover:w-auto group-hover:ml-2 group-hover:opacity-100 group-hover:overflow-visible group-has-[:focus-visible]:w-auto group-has-[:focus-visible]:ml-2 group-has-[:focus-visible]:opacity-100 group-has-[:focus-visible]:overflow-visible">
         {onShare && (
           <Button
             iconOnly
