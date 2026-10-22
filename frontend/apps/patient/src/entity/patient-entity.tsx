@@ -132,7 +132,7 @@ export default function App({ onAskAssistant }: PatientEntityProps = {}) {
                 <LaboratoryTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Imaging}>
-                <ImagingTab />
+                <ImagingTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
                 <ClinicalTrialsTab />

@@ -1430,6 +1430,16 @@
         "focal_boost": "Surimpression focale",
         "total_primary": "Total sur la tumeur primitive"
       }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} examen d'imagerie",
+      "title_count_other": "{{count}} examens d'imagerie",
+      "day_age": "Jour {{day}} · âge {{age}} ans",
+      "columns": {
+        "date": "Date",
+        "modality": "Modalité",
+        "viewer": "Visionneuse"
+      }
     }
   },
   "timeline": {
