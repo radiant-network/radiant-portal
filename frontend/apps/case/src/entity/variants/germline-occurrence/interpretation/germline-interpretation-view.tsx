@@ -35,10 +35,7 @@ function GermlineInterpretationView({ interpretation }: GermlineInterpretationVi
       <InterpretationViewField label={t('variant.interpretation_form.germline.classification')}>
         <ClassificationBadge value={interpretation?.classification ?? ''} size="lg" />
       </InterpretationViewField>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.germline.classification_criteria')}
-        className={criterias.length > 0 ? 'min-h-[38px]' : undefined}
-      >
+      <InterpretationViewField label={t('variant.interpretation_form.germline.classification_criteria')}>
         {criterias.length > 0 ? (
           criterias.map(criteria => (
             <Badge key={criteria} variant={getClassificationCriteriaColor(criteria)}>
@@ -49,10 +46,7 @@ function GermlineInterpretationView({ interpretation }: GermlineInterpretationVi
           <EmptyField />
         )}
       </InterpretationViewField>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.germline.mode_of_transmission')}
-        className={transmissionModes.length > 0 ? 'min-h-[38px]' : undefined}
-      >
+      <InterpretationViewField label={t('variant.interpretation_form.germline.mode_of_transmission')}>
         {transmissionModes.length > 0 ? (
           transmissionModes.map(mode => <TransmissionModeBadge value={mode} key={mode} />)
         ) : (

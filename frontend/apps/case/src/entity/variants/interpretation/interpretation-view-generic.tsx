@@ -21,15 +21,8 @@ function InterpretationViewGeneric({ interpretation }: InterpretationViewGeneric
 
   return (
     <>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.generic.interpretation')}
-        matchControlHeight={false}
-      >
-        <RichTextViewer
-          className="min-h-9"
-          wrapperClassName="bg-transparent w-full"
-          value={interpretation?.interpretation ?? ''}
-        />
+      <InterpretationViewField label={t('variant.interpretation_form.generic.interpretation')}>
+        <RichTextViewer wrapperClassName="bg-transparent w-full" value={interpretation?.interpretation ?? ''} />
       </InterpretationViewField>
       <InterpretationViewField label={t('variant.interpretation_form.generic.pub_med_publication')}>
         {pubmeds.length > 0 ? (

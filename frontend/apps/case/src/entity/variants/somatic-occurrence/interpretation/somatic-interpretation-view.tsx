@@ -43,10 +43,7 @@ function SomaticInterpretationView({ interpretation }: SomaticInterpretationView
           <EmptyField />
         )}
       </InterpretationViewField>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.somatic.classification_criteria')}
-        className={criterias.length > 0 ? 'min-h-[38px]' : undefined}
-      >
+      <InterpretationViewField label={t('variant.interpretation_form.somatic.classification_criteria')}>
         {criterias.length > 0 ? (
           criterias.map(criteria => (
             <Badge key={criteria} variant={getOncogenicityClassificationCriteriaColor(criteria)}>
