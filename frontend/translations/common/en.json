@@ -112,7 +112,8 @@
     },
     "query_bar": {
       "delete": "Delete query",
-      "duplicate": "Duplicate query"
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
     },
     "query_builder": {
       "close_facets": "Close filters panel"
