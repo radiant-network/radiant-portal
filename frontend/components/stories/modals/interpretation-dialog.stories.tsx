@@ -71,10 +71,12 @@ async function mockApis(kind: 'germline' | 'somatic') {
     spyOn(interpretationApi, 'getInterpretationGermline').mockResolvedValue({
       data: await germlineInterpretation(),
     } as any);
+    spyOn(interpretationApi, 'postInterpretationGermline').mockResolvedValue({ data: {} } as any);
   } else {
     const expanded = await json(httpSomaticOccurrenceExpandResponse());
     spyOn(occurrencesApi, 'getExpandedSomaticSNVOccurrence').mockResolvedValue({ data: expanded } as any);
     spyOn(interpretationApi, 'getInterpretationSomatic').mockResolvedValue({ data: somaticInterpretation() } as any);
+    spyOn(interpretationApi, 'postInterpretationSomatic').mockResolvedValue({ data: {} } as any);
   }
 }
 

@@ -167,7 +167,19 @@ function GermlineInterpretationDialog({
     (url, opts) => saveGermlineInterpretation(url, opts, tenant),
     {
       onSuccess: () => {
-        setOpen(false);
+        if (startInViewMode) {
+          // Back to the read-only view, with the saved values.
+          setMode('view');
+          setIsDirty(false);
+          interpretation.trigger({
+            caseId: caseId.toString(),
+            seqId: seqId.toString(),
+            locusId,
+            transcriptId: transcriptId ?? '',
+          });
+        } else {
+          setOpen(false);
+        }
         handleSaveCallback && handleSaveCallback();
 
         if (isCreation) {
