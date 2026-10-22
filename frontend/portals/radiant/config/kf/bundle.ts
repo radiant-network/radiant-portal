@@ -1,7 +1,7 @@
 import type { BundleDefinition } from '../catalog';
 
 export const kfBundle = {
-  apps: ['VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN', 'PATIENT', 'STUDY', 'COMMUNITY'],
+  apps: ['VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN', 'PATIENT', 'STUDY', 'COMMUNITY', 'LIBRECHAT'],
   landing: 'KIDSFIRST',
   extras: [],
 } satisfies BundleDefinition;

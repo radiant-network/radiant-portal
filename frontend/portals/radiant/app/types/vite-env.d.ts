@@ -7,5 +7,6 @@ declare global {
 
   interface ImportMetaEnv extends Readonly<Record<`APPS_${AppName}`, boolean>> {
     readonly THEME: string;
+    readonly APPS_LIBRECHAT_DAVID_URL: string;
   }
 }

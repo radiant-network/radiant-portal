@@ -17,6 +17,7 @@ export const APP_ROUTES = {
   ],
   STUDY: [route('study/', './routes/studies/list.tsx')],
   COMMUNITY: [route('community/', './routes/community/list.tsx')],
+  LIBRECHAT: [],
 } satisfies Record<AppName, RouteConfigEntry[]>;
 
 export const LANDING_PAGES = {

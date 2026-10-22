@@ -1,8 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router';
 import logo from '@assets/logo/header.svg';
-import { ArchiveIcon, FolderIcon, SettingsIcon, UsersIcon } from 'lucide-react';
+import { useOpenLibrechatDavid } from 'librechat/librechat-david-modal';
+import { ArchiveIcon, FolderIcon, SettingsIcon, SparklesIcon, UsersIcon } from 'lucide-react';
 
 import MainNavbar from '@/components/base/navbar/main-navbar';
+import type { MainNavbarItemProps } from '@/components/base/navbar/main-navbar-item';
 import type { MainNavbarEntry } from '@/components/base/navbar/main-navbar-types';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLocalPath } from '@/components/hooks/use-local-path';
@@ -19,6 +21,19 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
   const navigate = useNavigate();
   const canAdministerTenant = useCanAdministerTenant();
   const localPath = useLocalPath();
+  const openDavid = useOpenLibrechatDavid();
+
+  const davidAction: MainNavbarItemProps[] = import.meta.env.APPS_LIBRECHAT
+    ? [
+        {
+          title: t('main_navbar.actions.david'),
+          icon: <SparklesIcon />,
+          as: 'button',
+          iconOnly: false,
+          onClick: openDavid,
+        },
+      ]
+    : [];
 
   const adminLinks: MainNavbarEntry[] =
     import.meta.env.APPS_ADMIN && canAdministerTenant
@@ -74,42 +89,41 @@ const ProtectedNavbar = ({ placement, userDetails }: ProtectedNavbarProps) => {
           : []),
         ...adminLinks,
       ]}
-      actions={
-        [
-          // SJRA-389
-          // {
-          //   title: t('main_navbar.actions.community'),
-          //   icon: <UsersIcon />,
-          //   as: 'button',
-          // },
-          // {
-          //   title: t('main_navbar.actions.resources'),
-          //   icon: <LightbulbIcon />,
-          //   as: 'button',
-          //   subItems: [
-          //     {
-          //       title: t('main_navbar.actions.website'),
-          //       icon: <ExternalLink />,
-          //       as: 'a',
-          //       href: 'https://www.radiant-genomics.com',
-          //     },
-          //     {
-          //       title: t('main_navbar.actions.documentation'),
-          //       icon: <ExternalLink />,
-          //       as: 'button',
-          //     },
-          //     {
-          //       separator: true,
-          //     },
-          //     {
-          //       title: t('main_navbar.actions.contact'),
-          //       icon: <MailIcon />,
-          //       as: 'button',
-          //     },
-          //   ],
-          // },
-        ]
-      }
+      actions={[
+        ...davidAction,
+        // SJRA-389
+        // {
+        //   title: t('main_navbar.actions.community'),
+        //   icon: <UsersIcon />,
+        //   as: 'button',
+        // },
+        // {
+        //   title: t('main_navbar.actions.resources'),
+        //   icon: <LightbulbIcon />,
+        //   as: 'button',
+        //   subItems: [
+        //     {
+        //       title: t('main_navbar.actions.website'),
+        //       icon: <ExternalLink />,
+        //       as: 'a',
+        //       href: 'https://www.radiant-genomics.com',
+        //     },
+        //     {
+        //       title: t('main_navbar.actions.documentation'),
+        //       icon: <ExternalLink />,
+        //       as: 'button',
+        //     },
+        //     {
+        //       separator: true,
+        //     },
+        //     {
+        //       title: t('main_navbar.actions.contact'),
+        //       icon: <MailIcon />,
+        //       as: 'button',
+        //     },
+        //   ],
+        // },
+      ]}
       userDetails={userDetails}
       onLogoutClick={() => navigate('/auth/logout')}
     />
