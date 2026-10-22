@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { SquarePen } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
@@ -35,8 +36,10 @@ import { SELECTED_VARIANT_PARAM } from '../../constants';
 import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
 import type { Interpretation, InterpretationFormRef } from '../../interpretation/types';
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import SomaticInterpretationForm from './somatic-interpretation-form';
+import SomaticInterpretationView from './somatic-interpretation-view';
 
 type SomaticInterpretationDialogProps = {
   locusId: string;
@@ -46,6 +49,8 @@ type SomaticInterpretationDialogProps = {
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
   isCreation?: boolean;
+  // Open on a read-only view with an Edit button instead of straight on the form.
+  startInViewMode?: boolean;
 };
 
 type CaseEntityInput = {
@@ -126,12 +131,15 @@ function SomaticInterpretationDialog({
   handleSaveCallback,
   renderTrigger,
   isCreation = false,
+  startInViewMode = false,
 }: SomaticInterpretationDialogProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [mode, setMode] = useState<'view' | 'edit'>(startInViewMode ? 'view' : 'edit');
+  const { canInterpret } = useCaseVariantPermissions();
   const somaticFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -155,7 +163,19 @@ function SomaticInterpretationDialog({
     (url, opts) => saveSomaticInterpretation(url, opts, tenant),
     {
       onSuccess: () => {
-        setOpen(false);
+        if (startInViewMode) {
+          // Back to the read-only view, with the saved values.
+          setMode('view');
+          setIsDirty(false);
+          interpretation.trigger({
+            caseId: caseId.toString(),
+            seqId: seqId.toString(),
+            locusId,
+            transcriptId: transcriptId ?? '',
+          });
+        } else {
+          setOpen(false);
+        }
         handleSaveCallback && handleSaveCallback();
 
         if (isCreation) {
@@ -200,6 +220,8 @@ function SomaticInterpretationDialog({
   }, [somaticFormRef]);
 
   const handleOpen = useCallback(async () => {
+    setMode(startInViewMode ? 'view' : 'edit');
+    setIsDirty(false);
     setOpen(true);
     caseEntity.trigger({ key: 'case-entity', caseId });
     interpretation.trigger({
@@ -221,7 +243,7 @@ function SomaticInterpretationDialog({
       {renderTrigger(handleOpen)}
       <DialogContent
         size="lg"
-        onEscapeKeyDown={e => e.preventDefault()}
+        onEscapeKeyDown={e => mode === 'edit' && e.preventDefault()}
         variant="stickyBoth"
         className="overflow-hidden flex flex-col"
       >
@@ -245,26 +267,32 @@ function SomaticInterpretationDialog({
         ) : (
           <>
             <DialogBody className="flex-1 min-h-0 overflow-y-auto space-y-6 max-h-none">
-              <InterpretationLastUpdatedBanner
-                updated_by_name={interpretation.data?.updated_by_name}
-                updated_at={interpretation.data?.updated_at}
-              />
               <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  <SomaticInterpretationForm
-                    ref={somaticFormRef}
-                    interpretation={interpretation.data}
-                    saveInterpretation={interpretation =>
-                      saveInterpretation.trigger({
-                        caseId: caseId.toString(),
-                        seqId: seqId.toString(),
-                        locusId,
-                        transcriptId: transcriptId ?? '',
-                        interpretationSomatic: interpretation,
-                      })
-                    }
-                    onDirtyChange={setIsDirty}
+                <div className="rounded-sm col-span-7 border bg-muted overflow-hidden">
+                  <InterpretationLastUpdatedBanner
+                    updated_by_name={interpretation.data?.updated_by_name}
+                    updated_at={interpretation.data?.updated_at}
                   />
+                  <div className="p-6">
+                    {mode === 'view' ? (
+                      <SomaticInterpretationView interpretation={interpretation.data as InterpretationSomatic} />
+                    ) : (
+                      <SomaticInterpretationForm
+                        ref={somaticFormRef}
+                        interpretation={interpretation.data}
+                        saveInterpretation={interpretation =>
+                          saveInterpretation.trigger({
+                            caseId: caseId.toString(),
+                            seqId: seqId.toString(),
+                            locusId,
+                            transcriptId: transcriptId ?? '',
+                            interpretationSomatic: interpretation,
+                          })
+                        }
+                        onDirtyChange={setIsDirty}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="col-span-5 flex flex-col gap-3">
                   <GeneCard
@@ -324,41 +352,67 @@ function SomaticInterpretationDialog({
                 </div>
               </div>
             </DialogBody>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                color="primary"
-                loading={saveInterpretation.isMutating}
-                onClick={() => {
-                  // Do not warn use if the interpretation is created. Only show if edited
-                  if (isCreation) {
-                    handleSave();
-                    return;
-                  }
-                  alertDialog.open({
-                    type: 'warning',
-                    title: t('variant.interpretation_form.alert.title'),
-                    description: t('variant.interpretation_form.alert.description'),
-                    actionProps: {
-                      children: t('variant.interpretation_form.alert.save'),
-                      onClick: e => {
-                        e.preventDefault();
-                        handleSave();
+            {mode === 'view' ? (
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">{t('common.close')}</Button>
+                </DialogClose>
+                {canInterpret && (
+                  <Button color="primary" onClick={() => setMode('edit')}>
+                    <SquarePen />
+                    {t('common.edit')}
+                  </Button>
+                )}
+              </DialogFooter>
+            ) : (
+              <DialogFooter>
+                {startInViewMode ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsDirty(false);
+                      setMode('view');
+                    }}
+                  >
+                    {t('variant.interpretation_form.cancel_text')}
+                  </Button>
+                ) : (
+                  <DialogClose asChild>
+                    <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
+                  </DialogClose>
+                )}
+                <Button
+                  type="submit"
+                  color="primary"
+                  loading={saveInterpretation.isMutating}
+                  onClick={() => {
+                    // Do not warn use if the interpretation is created. Only show if edited
+                    if (isCreation) {
+                      handleSave();
+                      return;
+                    }
+                    alertDialog.open({
+                      type: 'warning',
+                      title: t('variant.interpretation_form.alert.title'),
+                      description: t('variant.interpretation_form.alert.description'),
+                      actionProps: {
+                        children: t('variant.interpretation_form.alert.save'),
+                        onClick: e => {
+                          e.preventDefault();
+                          handleSave();
+                        },
                       },
-                    },
-                    cancelProps: {
-                      children: t('variant.interpretation_form.alert.cancel'),
-                    },
-                  });
-                }}
-                disabled={!isDirty}
-              >
-                {t('variant.interpretation_form.ok_text')}
-              </Button>
-            </DialogFooter>
+                      cancelProps: {
+                        children: t('variant.interpretation_form.alert.cancel'),
+                      },
+                    });
+                  }}
+                  disabled={!isDirty}
+                >
+                  {t('variant.interpretation_form.ok_text')}
+                </Button>
+              </DialogFooter>
+            )}
           </>
         )}
       </DialogContent>

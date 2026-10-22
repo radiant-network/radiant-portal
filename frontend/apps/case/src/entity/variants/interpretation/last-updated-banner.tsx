@@ -14,11 +14,11 @@ function InterpretationLastUpdatedBanner({ updated_by_name, updated_at }: Interp
   if (!updated_by_name || !updated_at) return null;
 
   return (
-    <Alert className="flex gap-2 items-center mb-3">
+    <Alert variant="info" className="flex gap-2 items-center">
       <div>
         <History size={20} />
       </div>
-      <AlertDescription className="text-foreground">
+      <AlertDescription>
         <span className="flex gap-1">
           {t('variant.interpretation_form.last_update')}
           <strong>{updated_by_name}</strong>({format(new Date(updated_at), t('common.date.year_month_day_hour'))})
