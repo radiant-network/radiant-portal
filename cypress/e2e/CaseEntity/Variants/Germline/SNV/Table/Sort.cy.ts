@@ -17,12 +17,12 @@ describe('Case Entity - Variants - Germline - SNV - Table - Sort', () => {
     CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('variant', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
-  it('Number [RAD-111]', () => {
+  it('Number', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('exomiser', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
-  it('Tag [RAD-111]', () => {
+  it('Tag', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('acmg_exomiser', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
