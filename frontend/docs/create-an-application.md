@@ -9,7 +9,7 @@ A page application is a self-contained domain under `frontend/apps/`. It owns it
 ```
 
 - Name must be kebab-case (`variant`, `file-archive`, `my-new-app`).
-- Node v20.18.0+.
+- Node v26.12.1+ (see the repo's `.nvmrc`).
 
 A new folder `frontend/apps/<my-new-app>/` is created with:
 - `components/` — composed UI (tables, tabs, dialogs)
