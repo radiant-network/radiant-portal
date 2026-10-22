@@ -44,7 +44,11 @@ async function fetchPatientEntity(input: PatientEntityInput) {
   return response.data;
 }
 
-export default function App() {
+type PatientEntityProps = {
+  onAskAssistant?: () => void;
+};
+
+export default function App({ onAskAssistant }: PatientEntityProps = {}) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const patientId = usePatientIdFromParam();
@@ -96,7 +100,7 @@ export default function App() {
 
   return (
     <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-      <Header patient={data} isLoading={isLoading} />
+      <Header patient={data} isLoading={isLoading} onAskAssistant={onAskAssistant} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           {TAB_ORDER.map(({ value, i18nKey }) => (

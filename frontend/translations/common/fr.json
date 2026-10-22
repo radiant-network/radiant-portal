@@ -1280,6 +1280,7 @@
       "born_year": "Né en {{year}}",
       "phi_restricted": "Restreint",
       "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
+      "ask_assistant": "Interroger l'IA sur ce patient",
       "vital_status": {
         "alive": "Vivant",
         "deceased": "Décédé"
@@ -2833,7 +2834,8 @@
       "resources": "Ressources",
       "website": "Site web",
       "documentation": "Documentation",
-      "contact": "Contact"
+      "contact": "Contact",
+      "david": "D.A.V.I.D"
     },
     "tenant_switcher": {
       "title": "Changer de tenant"
@@ -2852,6 +2854,15 @@
       "title": "Vous n'avez pas accès à RADIANT",
       "body": "Pour obtenir l'accès, communiquez avec l'administrateur RADIANT de votre organisation.",
       "cta": "Retour à la connexion"
+    }
+  },
+  "librechat": {
+    "david": {
+      "title": "D.A.V.I.D",
+      "badge": "Assistant IA",
+      "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
+      "frame_title": "Assistant D.A.V.I.D",
+      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement."
     }
   }
 }
