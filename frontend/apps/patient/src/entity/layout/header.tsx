@@ -5,7 +5,6 @@ import { PatientEntityVitalStatusEnum } from '@/api/api';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-local-path';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
 import { derivePatientMrn } from '../patient-mrn';
@@ -17,7 +16,6 @@ type HeaderProps = {
 
 function Header({ patient, isLoading }: HeaderProps) {
   const { t } = useI18n();
-  const localPath = useLocalPath();
 
   let title: React.ReactNode;
   if (patient) {
@@ -80,7 +78,7 @@ function Header({ patient, isLoading }: HeaderProps) {
       title={title}
       description={description}
       badges={badges}
-      previousPageUrl={localPath('/patient')}
+      backLink={{ label: t('main_navbar.links.patients'), to: '/patient' }}
     />
   );
 }

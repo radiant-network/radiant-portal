@@ -25,6 +25,7 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
   return (
     <HeaderNavigation
       isLoading={isLoading}
+      backLink={{ label: t('main_navbar.links.cases'), to: '/case' }}
       title={`${t('case_entity.header.case')} ${data?.case_id}`}
       badges={[
         {

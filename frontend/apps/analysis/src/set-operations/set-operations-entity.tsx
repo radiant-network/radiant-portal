@@ -89,7 +89,7 @@ function SetOperationsEntity() {
         title={t('analysis.set_operations.title')}
         variant="info"
         isLoading={false}
-        previousPageUrl="/analysis"
+        backLink={{ label: t('main_navbar.links.analysis'), to: '/analysis' }}
       />
       <main className="bg-muted min-h-0 flex-1 overflow-auto p-6">
         {/* @TODO: To remove, it just a quick debug menu */}
