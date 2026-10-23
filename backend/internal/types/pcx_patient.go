@@ -117,22 +117,25 @@ type PatientKeyDates struct {
 // @Name PatientEntity
 type PatientEntity struct {
 	PatientListItem
-	BirthDate                   *DateISO8601             `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
-	Race                        *string                  `json:"race"`
-	Ethnicity                   *string                  `json:"ethnicity"`
-	PostalCode                  *string                  `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
-	DataTypeCohort              *string                  `json:"data_type_cohort"`
-	KeyDates                    PatientKeyDates          `json:"key_dates" validate:"required"`
-	InitialDiagnosisEvidenceURL *string                  `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
-	VitalStatusAt               PatientDayDate           `json:"vital_status_at" validate:"required"`
-	Events                      []PatientEvent           `json:"events" validate:"required"`
-	Surgeries                   []PatientSurgery         `json:"surgeries" validate:"required"`
-	Radiations                  []PatientRadiation       `json:"radiations" validate:"required"`
-	Therapies                   []PatientTherapy         `json:"therapies" validate:"required"`
-	Imaging                     []PatientImagingSession  `json:"imaging" validate:"required"`
-	TreatmentSummary            *PatientTreatmentSummary `json:"treatment_summary"`
-	Cases                       []PatientCase            `json:"cases" validate:"required"`
-	Interpretations             []PatientInterpretation  `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
+	BirthDate                   *DateISO8601              `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
+	Race                        *string                   `json:"race"`
+	Ethnicity                   *string                   `json:"ethnicity"`
+	PostalCode                  *string                   `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
+	DataTypeCohort              *string                   `json:"data_type_cohort"`
+	KeyDates                    PatientKeyDates           `json:"key_dates" validate:"required"`
+	InitialDiagnosisEvidenceURL *string                   `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
+	VitalStatusAt               PatientDayDate            `json:"vital_status_at" validate:"required"`
+	Events                      []PatientEvent            `json:"events" validate:"required"`
+	Surgeries                   []PatientSurgery          `json:"surgeries" validate:"required"`
+	Radiations                  []PatientRadiation        `json:"radiations" validate:"required"`
+	Therapies                   []PatientTherapy          `json:"therapies" validate:"required"`
+	Imaging                     []PatientImagingSession   `json:"imaging" validate:"required"`
+	TreatmentSummary            *PatientTreatmentSummary  `json:"treatment_summary"`
+	Cbc                         *PatientCbc               `json:"cbc"`
+	PerformanceStatus           []PatientPerformanceScore `json:"performance_status" validate:"required"`
+	Csf                         *PatientCsf               `json:"csf"`
+	Cases                       []PatientCase             `json:"cases" validate:"required"`
+	Interpretations             []PatientInterpretation   `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
 }
 
 // PatientEvent - Disease event of a patient
@@ -225,6 +228,69 @@ type PatientTreatmentSummary struct {
 	HadInitialChemo        bool           `json:"had_initial_chemo" validate:"required"`
 	HadInitialMethotrexate bool           `json:"had_initial_methotrexate" validate:"required"`
 	InitialTreatmentOrder  *string        `json:"initial_treatment_order"`
+}
+
+// PatientLabResult - Lab result of a patient
+// @Description Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+// @Name PatientLabResult
+type PatientLabResult struct {
+	PatientDayDate
+	Value *float64 `json:"value"`
+	Unit  *string  `json:"unit"`
+}
+
+// PatientCbc - Latest complete blood count of a patient
+// @Description Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+// @Name PatientCbc
+type PatientCbc struct {
+	Wbc        PatientLabResult `json:"wbc" validate:"required"`
+	Hemoglobin PatientLabResult `json:"hemoglobin" validate:"required"`
+	Platelets  PatientLabResult `json:"platelets" validate:"required"`
+	Anc        PatientLabResult `json:"anc" validate:"required"`
+}
+
+// PatientPerformanceScore - Performance status score of a patient
+// @Description Lansky or Karnofsky score. The date is when the result was released, not when it was assessed.
+// @Name PatientPerformanceScore
+type PatientPerformanceScore struct {
+	PatientDayDate
+	Scale     string  `json:"scale" validate:"required" enums:"lansky,karnofsky"`
+	Score     int     `json:"score" validate:"required"`
+	ScoreText *string `json:"score_text"` // As recorded, e.g. "90 - Minor restrictions in strenuous physical activity"
+}
+
+// PatientCsfResult - CSF lab result of a patient
+// @Description Latest result of one CSF component. Read display: the comparator is load-bearing ("<1.0" is undetectable).
+// @Name PatientCsfResult
+type PatientCsfResult struct {
+	PatientDayDate
+	Display    *string  `json:"display"` // Comparator, value and unit
+	Value      *float64 `json:"value"`
+	Comparator *string  `json:"comparator"`
+	Unit       *string  `json:"unit"`
+}
+
+// PatientCsfCytology - Latest CSF cytology of a patient
+// @Description Latest CSF cytology, with the finding derived from the report
+// @Name PatientCsfCytology
+type PatientCsfCytology struct {
+	PatientDayDate
+	TestName            *string `json:"test_name"`
+	MalignantCells      *string `json:"malignant_cells" enums:"positive,suspicious,negative,non_diagnostic,no_malignancy_statement"`
+	EvidenceTier        *string `json:"evidence_tier" enums:"named,text_confirmed,same_day_only"` // How the report was attributed to CSF
+	MultiSpecimenReport *bool   `json:"multi_specimen_report"`                                    // The finding may pertain to a non-CSF specimen
+}
+
+// PatientCsf - Latest CSF analysis of a patient
+// @Description Latest result of each CSF component. Each component is its own latest, so they may come from different punctures.
+// @Name PatientCsf
+type PatientCsf struct {
+	Protein     PatientCsfResult   `json:"protein" validate:"required"`
+	Glucose     PatientCsfResult   `json:"glucose" validate:"required"`
+	Wbc         PatientCsfResult   `json:"wbc" validate:"required"` // Nucleated cells
+	Rbc         PatientCsfResult   `json:"rbc" validate:"required"`
+	Cytology    PatientCsfCytology `json:"cytology" validate:"required"`
+	CellFreeDna PatientDayDate     `json:"cell_free_dna" validate:"required"` // Only when the test was done; the source has no value
 }
 
 // PatientCase - Portal case of a patient
