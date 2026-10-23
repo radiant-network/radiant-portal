@@ -248,6 +248,9 @@ function GermlineInterpretationDialog({
         onEscapeKeyDown={e => {
           if (!isReadOnly) e.preventDefault();
         }}
+        onInteractOutside={e => {
+          if ((e.target as Element | null)?.closest('[role="alertdialog"]')) e.preventDefault();
+        }}
         variant="stickyBoth"
         className="overflow-hidden flex flex-col"
       >
