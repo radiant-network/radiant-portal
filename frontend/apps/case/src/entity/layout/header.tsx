@@ -60,8 +60,8 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
           : []),
         <Tooltip key="priority">
           <TooltipTrigger>
-            <Badge variant="outline" className="px-3 py-2">
-              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} />
+            <Badge variant="outline" size="lg">
+              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} size="sm" />
             </Badge>
           </TooltipTrigger>
           <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
@@ -73,7 +73,7 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
                 caseId={data.case_id}
                 status={data.status_code}
                 canEdit={canEditCase}
-                className="px-3 py-2"
+                size="sm"
                 readOnlyTooltip={t('case_entity.header.status_tooltip')}
                 onSaved={onStatusChange}
               />,
