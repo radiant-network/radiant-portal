@@ -270,30 +270,32 @@ function SomaticInterpretationDialog({
         ) : (
           <>
             <DialogBody className="flex-1 min-h-0 overflow-y-auto space-y-6 max-h-none">
-              <InterpretationLastUpdatedBanner
-                updated_by_name={interpretation.data?.updated_by_name}
-                updated_at={interpretation.data?.updated_at}
-              />
               <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  {isReadOnly ? (
-                    <SomaticInterpretationView interpretation={interpretation.data} />
-                  ) : (
-                    <SomaticInterpretationForm
-                      ref={somaticFormRef}
-                      interpretation={interpretation.data}
-                      saveInterpretation={interpretation =>
-                        saveInterpretation.trigger({
-                          caseId: caseId.toString(),
-                          seqId: seqId.toString(),
-                          locusId,
-                          transcriptId: transcriptId ?? '',
-                          interpretationSomatic: interpretation,
-                        })
-                      }
-                      onDirtyChange={setIsDirty}
-                    />
-                  )}
+                <div className="rounded-sm col-span-7 border bg-muted overflow-hidden">
+                  <InterpretationLastUpdatedBanner
+                    updated_by_name={interpretation.data?.updated_by_name}
+                    updated_at={interpretation.data?.updated_at}
+                  />
+                  <div className="p-6">
+                    {isReadOnly ? (
+                      <SomaticInterpretationView interpretation={interpretation.data} />
+                    ) : (
+                      <SomaticInterpretationForm
+                        ref={somaticFormRef}
+                        interpretation={interpretation.data}
+                        saveInterpretation={interpretation =>
+                          saveInterpretation.trigger({
+                            caseId: caseId.toString(),
+                            seqId: seqId.toString(),
+                            locusId,
+                            transcriptId: transcriptId ?? '',
+                            interpretationSomatic: interpretation,
+                          })
+                        }
+                        onDirtyChange={setIsDirty}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="col-span-5 flex flex-col gap-3">
                   <GeneCard

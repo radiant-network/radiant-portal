@@ -2056,7 +2056,7 @@
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
       "ok_text": "Sauvegarder l'interprétation",
-      "last_update": "Dernière mise à jour :",
+      "last_update": "<strong>Dernière mise à jour :</strong> {{name}} le <date/>",
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
