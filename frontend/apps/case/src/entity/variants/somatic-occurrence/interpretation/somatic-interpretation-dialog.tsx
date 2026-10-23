@@ -271,7 +271,7 @@ function SomaticInterpretationDialog({
           <>
             <DialogBody className="flex-1 min-h-0 overflow-y-auto space-y-6 max-h-none">
               <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border bg-muted overflow-hidden">
+                <div className="rounded-sm col-span-7 border bg-muted-subdued overflow-hidden">
                   <InterpretationLastUpdatedBanner
                     updated_by_name={interpretation.data?.updated_by_name}
                     updated_at={interpretation.data?.updated_at}
