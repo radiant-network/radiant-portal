@@ -20,9 +20,10 @@ func NewTranscriptReportRepository(db database.StarrocksDB) *TranscriptReportRep
 	return &TranscriptReportRepository{db: db.DB}
 }
 
-// GetGermlineReportContext resolves the partition and the identifiers printed in the report.
-// It returns nil when the task is not a task of that sequencing of that case.
-func (r *TranscriptReportRepository) GetGermlineReportContext(ctx context.Context, caseId int, seqId int, taskId int) (*types.ReportContext, error) {
+// GetReportContext resolves the partition and the identifiers printed in the report. It returns
+// nil when the task is not a task of that sequencing of that case. For a somatic report the
+// sequencing is the tumor one.
+func (r *TranscriptReportRepository) GetReportContext(ctx context.Context, caseId int, seqId int, taskId int) (*types.ReportContext, error) {
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s sse", types.SequencingTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("JOIN %s s ON s.id = sse.seq_id", types.SequencingExperimentTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("JOIN %s spl ON spl.id = s.sample_id", types.SampleTable.TenantQualifiedName(ctx)))
@@ -58,6 +59,26 @@ func (r *TranscriptReportRepository) ListGermlineReportOccurrences(ctx context.C
 	var rows []types.ReportOccurrenceRow
 	if err := tx.Find(&rows).Error; err != nil {
 		return nil, fmt.Errorf("fetch report occurrences: %w", err)
+	}
+	return rows, nil
+}
+
+// ListSomaticReportOccurrences is the somatic twin: occurrences of the tumor sequencing, with
+// the variant (COSMIC columns included) and gnomAD.
+func (r *TranscriptReportRepository) ListSomaticReportOccurrences(ctx context.Context, part int, seqId int, taskId int, locusIds []int) ([]types.ReportOccurrenceRow, error) {
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s o", types.SomaticSNVOccurrenceTable.TenantQualifiedName(ctx)))
+	tx = tx.Joins(fmt.Sprintf("JOIN %s v ON v.locus_id = o.locus_id", types.VariantTable.TenantQualifiedName(ctx)))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s gnomad ON gnomad.locus_id = o.locus_id", types.GnomadGenomesV3Table.TenantQualifiedName(ctx)))
+	tx = tx.Select("o.locus_id, v.hgvsg, v.rsnumber, v.chromosome, v.start, v.reference, v.alternate, v.symbol, " +
+		"v.clinvar_name, v.clinvar_interpretation, o.normal_seq_id, o.tumor_ad_ratio, o.tumor_ad_alt, o.tumor_ad_total, " +
+		"gnomad.af AS gnomad_af, gnomad.ac AS gnomad_ac, gnomad.an AS gnomad_an, gnomad.hom AS gnomad_hom, " +
+		"v.cmc_mutation_url AS cosmic_mutation_url, v.cmc_sample_mutated AS cosmic_sample_mutated, v.cmc_tier AS cosmic_tier")
+	tx = tx.Where("o.part = ? AND o.tumor_seq_id = ? AND o.task_id = ? AND o.locus_id IN (?)", part, seqId, taskId, locusIds)
+	tx = tx.Order("o.locus_id ASC")
+
+	var rows []types.ReportOccurrenceRow
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("fetch somatic report occurrences: %w", err)
 	}
 	return rows, nil
 }

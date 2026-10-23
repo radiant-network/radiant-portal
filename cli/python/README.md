@@ -149,7 +149,8 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 *OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
-*OccurrencesApi* | [**get_germline_snv_transcript_report**](docs/OccurrencesApi.md#get_germline_snv_transcript_report) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/report | Get the transcript report object of a germline SNV occurrence
+*OccurrencesApi* | [**get_germline_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_germline_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of germline SNV occurrences of a case
+*OccurrencesApi* | [**get_somatic_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_somatic_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of somatic SNV occurrences of a case
 *OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 *OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
 *OccurrencesApi* | [**list_germline_snv_occurrences**](docs/OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
@@ -327,14 +328,6 @@ Class | Method | HTTP request | Description
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
- - [ReportCase](docs/ReportCase.md)
- - [ReportGene](docs/ReportGene.md)
- - [ReportGermlineInterpretation](docs/ReportGermlineInterpretation.md)
- - [ReportGnomad](docs/ReportGnomad.md)
- - [ReportOccurrence](docs/ReportOccurrence.md)
- - [ReportOmim](docs/ReportOmim.md)
- - [ReportTranscript](docs/ReportTranscript.md)
- - [ReportVariant](docs/ReportVariant.md)
  - [RoleActionResult](docs/RoleActionResult.md)
  - [RoleResult](docs/RoleResult.md)
  - [SampleBatch](docs/SampleBatch.md)
@@ -356,7 +349,6 @@ Class | Method | HTTP request | Description
  - [TenantMembership](docs/TenantMembership.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
- - [TranscriptReport](docs/TranscriptReport.md)
  - [UpdateCaseAssignmentsRequest](docs/UpdateCaseAssignmentsRequest.md)
  - [UpdateCaseBatch](docs/UpdateCaseBatch.md)
  - [UpdateCaseBatchBody](docs/UpdateCaseBatchBody.md)

@@ -4,9 +4,10 @@ import "github.com/radiant-network/radiant-api/internal/types"
 
 func ptr[T any](v T) *T { return &v }
 
-// sampleReport is the boot dry-run input: every pointer set and every slice filled so each
-// template branch that reads a field runs once. The zero TranscriptReport covers the else branches.
-func sampleReport() types.TranscriptReport {
+// dryRunReport is the boot validation input for the deployed templates (a ConfigMap volume, never
+// the repo): every pointer set and every slice filled so each template branch that reads a field
+// runs once. The zero TranscriptReport covers the else branches.
+func dryRunReport() types.TranscriptReport {
 	return types.TranscriptReport{
 		Case: types.ReportCase{
 			CaseID: 1, SeqID: 2, TaskID: 3,
@@ -42,4 +43,20 @@ func sampleReport() types.TranscriptReport {
 			},
 		}},
 	}
+}
+
+// dryRunSomaticReport is the somatic twin: the germline input with the somatic fields set.
+func dryRunSomaticReport() types.TranscriptReport {
+	report := dryRunReport()
+	report.Occurrence = types.ReportOccurrence{TumorAdRatio: 0.0661764705882353, TumorAdAlt: 17, TumorAdTotal: 34, NormalSeqID: 2}
+	report.Variant.Cosmic = &types.ReportCosmic{CosmicID: "COSV56056643", SampleMutated: 99, Tier: "1"}
+	report.Transcripts[0].Interpretation = nil
+	report.Transcripts[0].SomaticInterpretation = &types.ReportSomaticInterpretation{
+		TumoralType:                         "MONDO:0000004",
+		Oncogenicity:                        "LA26332-9",
+		OncogenicityClassificationCriterias: []string{"OS1"},
+		ClinicalUtility:                     "category_ib",
+		Pubmed:                              []types.InterpretationPubmed{{CitationID: "1", Citation: "Author A. Title. Journal. 2020."}},
+	}
+	return report
 }

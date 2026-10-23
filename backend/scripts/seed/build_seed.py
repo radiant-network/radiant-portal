@@ -168,7 +168,8 @@ VAR_COLS = ["locus_id", "chromosome", "start", "end", "reference", "alternate", 
             "vep_impact", "impact_score", "clinvar_interpretation", "clinvar_name", "rsnumber", "gnomad_v3_af", "omim_inheritance_code",
             "germline_pc_wgs", "germline_pn_wgs", "germline_pf_wgs", "germline_pc_wgs_affected", "germline_pn_wgs_affected",
             "germline_pf_wgs_affected", "germline_pc_wgs_not_affected", "germline_pn_wgs_not_affected", "germline_pf_wgs_not_affected",
-            "somatic_pc_tn_wgs", "somatic_pn_tn_wgs", "somatic_pf_tn_wgs"]
+            "somatic_pc_tn_wgs", "somatic_pn_tn_wgs", "somatic_pf_tn_wgs", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio",
+            "cmc_tier"]
 omim_symbols = {o[0] for o in genomics.OMIM}
 # Annotation columns of snv__variant taken from the export as they are; the rest (frequencies) is the fake cohort's.
 REAL_COLS = {"is_mane_select": ("mane", lambda x: x == "1"), "is_canonical": ("canonical", lambda x: x == "1")}
@@ -182,6 +183,14 @@ def variant_row(v, pc, pn, sc, sn):
            f"{v.symbol}({v.hgvsc})" if v.clinvar and v.hgvsc else None, v.rs, v.af, ["AD"] if v.symbol in omim_symbols else None,
            pc, pn, round(pc / pn, 6) if pn else 0.0, pc, pn, round(pc / pn, 6) if pn else 0.0, 0, 0, 0.0,
            sc, sn, round(sc / sn, 6) if sn else 0.0]
+    # One variant in three is in the COSMIC Cancer Mutation Census; one of those in four has no mutated sample.
+    cosmic = genomics.h("cosmic", v.locus_id) % 12
+    if cosmic < 4:
+        mutated = 0 if cosmic == 3 else 5 + genomics.h("cosmic_n", v.locus_id) % 300
+        row += [f"https://cancer.sanger.ac.uk/cosmic/mutation/overview?id={v.locus_id % 1000000}&genome=37", mutated, mutated / 1000,
+                ["1", "2", "3", "Other"][cosmic]]
+    else:
+        row += [None, None, None, None]
     if v.real:
         for col, (key, conv) in REAL_COLS.items():
             row[VAR_COLS.index(col)] = None if v.real[key] is None else conv(v.real[key])

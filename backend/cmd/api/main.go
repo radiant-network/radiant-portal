@@ -83,7 +83,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoPostgres := postgres.NewPostgresRepository(postgresDB)
 	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
 	repoTranscriptReport := starrocks.NewTranscriptReportRepository(starrocksDB)
-	germlineReportBuilder := report.NewGermlineBuilder(repoTranscriptReport, repoInterpretations)
+	reportBuilder := report.NewBuilder(repoTranscriptReport, repoInterpretations)
 	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
@@ -247,7 +247,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
-	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/report", requireAction(types.ActionSearchCase), server.GetGermlineSNVTranscriptReport(germlineReportBuilder))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/reports/transcripts", requireAction(types.ActionSearchCase), server.GetGermlineSNVTranscriptReportsXlsx(reportBuilder, reportTemplates))
 	occurrencesGermlineSNVGroup.GET("/dictionary", requireAction(types.ActionSearchCase), server.GetGermlineSNVDictionary(repoFacets))
 
 	occurrencesSomaticCNVGroup := occurrencesSomaticGroup.Group("/cnv")
@@ -263,6 +263,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoInterpretations))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/reports/transcripts", requireAction(types.ActionSearchCase), server.GetSomaticSNVTranscriptReportsXlsx(reportBuilder, reportTemplates))
 
 	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))

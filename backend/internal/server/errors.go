@@ -69,3 +69,7 @@ func HandleUnprocessableEntityError(c *gin.Context, message string) {
 func HandleRequestEntityTooLargeError(c *gin.Context, message string) {
 	c.JSON(http.StatusRequestEntityTooLarge, types.ApiError{Status: http.StatusRequestEntityTooLarge, Message: message})
 }
+
+func HandleServiceUnavailableError(c *gin.Context, message string) {
+	c.JSON(http.StatusServiceUnavailable, types.ApiError{Status: http.StatusServiceUnavailable, Message: message})
+}

@@ -34,10 +34,6 @@ func addWhere(tx *gorm.DB, caseId string, sequencingId string, locusId string, t
 }
 
 // mappers, could be moved to a separate file
-func (r *InterpretationsRepository) mapToInterpretationCommon(ctx context.Context, dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
-	return r.mapToInterpretationCommonWith(ctx, dao, true)
-}
-
 // strictCitations fails on a PubMed id the client cannot resolve; the report path reads with
 // strictCitations false and gets the id with an empty citation instead.
 func (r *InterpretationsRepository) mapToInterpretationCommonWith(_ context.Context, dao *types.InterpretationCommonDAO, strictCitations bool) (*types.InterpretationCommon, error) {
@@ -147,7 +143,11 @@ func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(ctx context.C
 }
 
 func (r *InterpretationsRepository) mapToInterpretationSomatic(ctx context.Context, dao *types.InterpretationSomaticDAO) (*types.InterpretationSomatic, error) {
-	common, err := r.mapToInterpretationCommon(ctx, &dao.InterpretationCommonDAO)
+	return r.mapToInterpretationSomaticWith(ctx, dao, true)
+}
+
+func (r *InterpretationsRepository) mapToInterpretationSomaticWith(ctx context.Context, dao *types.InterpretationSomaticDAO, strictCitations bool) (*types.InterpretationSomatic, error) {
+	common, err := r.mapToInterpretationCommonWith(ctx, &dao.InterpretationCommonDAO, strictCitations)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func (r *InterpretationsRepository) ListGermlineForReport(ctx context.Context, c
 	for i := range daos {
 		mapped, err := r.mapToInterpretationGermlineWith(ctx, &daos[i], false)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("map germline interpretation %s: %w", daos[i].ID, err)
 		}
 		interpretations = append(interpretations, *mapped)
 	}
@@ -276,6 +276,29 @@ func (r *InterpretationsRepository) FirstSomatic(ctx context.Context, caseId str
 		return nil, err
 	}
 	return mapped, nil
+}
+
+// ListSomaticForReport is the somatic twin of ListGermlineForReport: every interpretation of the
+// loci on that case and sequencing, citations lenient.
+func (r *InterpretationsRepository) ListSomaticForReport(ctx context.Context, caseId string, sequencingId string, locusIds []string) ([]types.InterpretationSomatic, error) {
+	var daos []types.InterpretationSomaticDAO
+	tx := r.db.WithContext(ctx).
+		Table(types.InterpretationSomaticTable.Name).
+		Scopes(WithTenant(ctx)).
+		Where("case_id = ? AND sequencing_id = ? AND locus_id IN (?)", caseId, sequencingId, locusIds).
+		Order("locus_id ASC, transcript_id ASC")
+	if err := tx.Find(&daos).Error; err != nil {
+		return nil, fmt.Errorf("list somatic interpretations: %w", err)
+	}
+	interpretations := make([]types.InterpretationSomatic, 0, len(daos))
+	for i := range daos {
+		mapped, err := r.mapToInterpretationSomaticWith(ctx, &daos[i], false)
+		if err != nil {
+			return nil, fmt.Errorf("map somatic interpretation %s: %w", daos[i].ID, err)
+		}
+		interpretations = append(interpretations, *mapped)
+	}
+	return interpretations, nil
 }
 
 func (r *InterpretationsRepository) CreateOrUpdateSomatic(ctx context.Context, interpretation *types.InterpretationSomatic) error {

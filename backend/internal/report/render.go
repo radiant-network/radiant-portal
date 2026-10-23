@@ -189,5 +189,9 @@ func writeCell(f *excelize.File, sheet, cell, text string) error {
 		font.Italic = base.Italic || r.Italic
 		rich[i] = excelize.RichTextRun{Font: &font, Text: r.Text}
 	}
+	// SetCellRichText keeps a template inline string next to the shared one, Excel shows the stale one
+	if err := f.SetCellStr(sheet, cell, ""); err != nil {
+		return fmt.Errorf("clear cell: %w", err)
+	}
 	return f.SetCellRichText(sheet, cell, rich)
 }

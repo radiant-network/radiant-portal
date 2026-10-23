@@ -7059,404 +7059,6 @@ export interface PubmedCitationDetails {
     'format'?: string;
 }
 /**
- * Case context of the report: identifiers printed in the file name and the sheet.
- * @export
- * @interface ReportCase
- */
-export interface ReportCase {
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportCase
-     */
-    'case_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportCase
-     */
-    'genome_build'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ReportCase
-     */
-    'is_proband': boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportCase
-     */
-    'seq_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportCase
-     */
-    'submitter_patient_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportCase
-     */
-    'submitter_sample_id'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportCase
-     */
-    'task_id': number;
-}
-/**
- * A gene of the variant with its OMIM pheno
- * @export
- * @interface ReportGene
- */
-export interface ReportGene {
-    /**
-     * 
-     * @type {Array<ReportOmim>}
-     * @memberof ReportGene
-     */
-    'omim': Array<ReportOmim>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportGene
-     */
-    'symbol': string;
-}
-/**
- * The germline interpretation of the case on this transcript. Citations are empty when PubMed could not resolve the id.
- * @export
- * @interface ReportGermlineInterpretation
- */
-export interface ReportGermlineInterpretation {
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportGermlineInterpretation
-     */
-    'classification'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportGermlineInterpretation
-     */
-    'classification_criterias'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportGermlineInterpretation
-     */
-    'condition'?: string;
-    /**
-     * 
-     * @type {Array<InterpretationPubmed>}
-     * @memberof ReportGermlineInterpretation
-     */
-    'pubmed'?: Array<InterpretationPubmed>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportGermlineInterpretation
-     */
-    'transmission_modes'?: Array<string>;
-}
-/**
- * gnomAD joint frequency of the variant; absent when the variant is not in gnomAD.
- * @export
- * @interface ReportGnomad
- */
-export interface ReportGnomad {
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportGnomad
-     */
-    'ac': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportGnomad
-     */
-    'af': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportGnomad
-     */
-    'an': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportGnomad
-     */
-    'hom': number;
-}
-/**
- * Occurrence level data of the report (germline call of the sequencing).
- * @export
- * @interface ReportOccurrence
- */
-export interface ReportOccurrence {
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportOccurrence
-     */
-    'ad_alt'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportOccurrence
-     */
-    'ad_ratio'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportOccurrence
-     */
-    'ad_total'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOccurrence
-     */
-    'father_zygosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOccurrence
-     */
-    'mother_zygosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOccurrence
-     */
-    'parental_origin'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOccurrence
-     */
-    'transmission_mode'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOccurrence
-     */
-    'zygosity'?: string;
-}
-/**
- * An OMIM phenotype of a gene.
- * @export
- * @interface ReportOmim
- */
-export interface ReportOmim {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportOmim
-     */
-    'inheritance_code'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOmim
-     */
-    'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportOmim
-     */
-    'phenotype_id': string;
-}
-/**
- * One row of the report: an Ensembl transcript with its RefSeq pair, or a RefSeq transcript of a gene that has no Ensembl transcript.
- * @export
- * @interface ReportTranscript
- */
-export interface ReportTranscript {
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'aa_change'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportTranscript
-     */
-    'cadd_phred'?: number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportTranscript
-     */
-    'consequences'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'dna_change'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'exon_rank'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'exon_total'?: string;
-    /**
-     * 
-     * @type {ReportGermlineInterpretation}
-     * @memberof ReportTranscript
-     */
-    'interpretation'?: ReportGermlineInterpretation;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ReportTranscript
-     */
-    'is_canonical': boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ReportTranscript
-     */
-    'is_mane_plus': boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ReportTranscript
-     */
-    'is_mane_select': boolean;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportTranscript
-     */
-    'refseq_ids'?: Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportTranscript
-     */
-    'revel_score'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'source'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'symbol'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'transcript_id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'vep_impact'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportTranscript
-     */
-    'version'?: string;
-}
-/**
- * Variant level data of the report.
- * @export
- * @interface ReportVariant
- */
-export interface ReportVariant {
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'alternate'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'chromosome'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'clinvar_id'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReportVariant
-     */
-    'clinvar_interpretation'?: Array<string>;
-    /**
-     * 
-     * @type {ReportGnomad}
-     * @memberof ReportVariant
-     */
-    'gnomad'?: ReportGnomad;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'hgvsg'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'locus_id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'reference'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'rsnumber'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ReportVariant
-     */
-    'start'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReportVariant
-     */
-    'symbol'?: string;
-}
-/**
  * Action granted by a role
  * @export
  * @interface RoleActionResult
@@ -9151,43 +8753,6 @@ export interface Transcript {
 }
 
 
-/**
- * Report data of one germline SNV occurrence: case context, variant, occurrence, genes and one entry per transcript row.
- * @export
- * @interface TranscriptReport
- */
-export interface TranscriptReport {
-    /**
-     * 
-     * @type {ReportCase}
-     * @memberof TranscriptReport
-     */
-    'case': ReportCase;
-    /**
-     * 
-     * @type {Array<ReportGene>}
-     * @memberof TranscriptReport
-     */
-    'genes': Array<ReportGene>;
-    /**
-     * 
-     * @type {ReportOccurrence}
-     * @memberof TranscriptReport
-     */
-    'occurrence': ReportOccurrence;
-    /**
-     * 
-     * @type {Array<ReportTranscript>}
-     * @memberof TranscriptReport
-     */
-    'transcripts': Array<ReportTranscript>;
-    /**
-     * 
-     * @type {ReportVariant}
-     * @memberof TranscriptReport
-     */
-    'variant': ReportVariant;
-}
 /**
  * 
  * @export
@@ -15501,33 +15066,32 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
-         * @summary Get the transcript report object of a germline SNV occurrence
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
-         * @param {string} locusId Locus ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineSNVTranscriptReport: async (tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineSNVTranscriptReportsXlsx: async (tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('getGermlineSNVTranscriptReport', 'tenant', tenant)
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
-            assertParamExists('getGermlineSNVTranscriptReport', 'caseId', caseId)
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getGermlineSNVTranscriptReport', 'seqId', seqId)
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'seqId', seqId)
             // verify required parameter 'taskId' is not null or undefined
-            assertParamExists('getGermlineSNVTranscriptReport', 'taskId', taskId)
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getGermlineSNVTranscriptReport', 'locusId', locusId)
-            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/report`
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'taskId', taskId)
+            // verify required parameter 'locusIds' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'locusIds', locusIds)
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
-                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -15542,6 +15106,67 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (locusIds !== undefined) {
+                localVarQueryParameter['locus_ids'] = locusIds;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSomaticSNVTranscriptReportsXlsx: async (tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'taskId', taskId)
+            // verify required parameter 'locusIds' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'locusIds', locusIds)
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (locusIds !== undefined) {
+                localVarQueryParameter['locus_ids'] = locusIds;
+            }
 
 
     
@@ -16309,20 +15934,37 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
-         * @summary Get the transcript report object of a germline SNV occurrence
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
-         * @param {string} locusId Locus ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TranscriptReport>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options);
+        async getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVTranscriptReport']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVTranscriptReportsXlsx']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getSomaticSNVTranscriptReportsXlsx']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -16661,18 +16303,32 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getGermlineSNVDictionary(tenant, facets, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
-         * @summary Get the transcript report object of a germline SNV occurrence
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
-         * @param {string} locusId Locus ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<TranscriptReport> {
-            return localVarFp.getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
+        getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(axios, basePath));
         },
         /**
          * List genes overlapping a CNV with a given ID
@@ -17002,19 +16658,35 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
-     * Retrieve the data behind the transcript report of one germline SNV occurrence of a case: case context, variant, occurrence, genes with OMIM and one entry per transcript row (one row per Ensembl transcript, MANE Select first, RefSeq transcript shown through the MANE pair).
-     * @summary Get the transcript report object of a germline SNV occurrence
+     * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+     * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
-     * @param {string} locusId Locus ID
+     * @param {string} locusIds Comma-separated locus ids, 1 to 100
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getGermlineSNVTranscriptReport(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getGermlineSNVTranscriptReport(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+     * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} locusIds Comma-separated locus ids, 1 to 100
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -1,0 +1,5 @@
+part	task_id	tumor_seq_id	locus_id	normal_seq_id	filter	tumor_ad_alt	tumor_ad_total	tumor_ad_ratio
+1	5	1	1000	2	PASS	17	34	0.5
+1	5	1	2000	NULL	PASS	3	30	0.1
+1	1	1	3000	2	PASS	5	10	0.5
+2	5	1	4000	2	PASS	5	10	0.5
