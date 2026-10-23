@@ -12,7 +12,7 @@ const globalData = {
     case_id: 1225,
     seq_id: 1044,
     snv: {
-      task_id: 11226,
+      task_id: 1000092,
       Panel: [
         {
           field: 'tenant_gene_panel',
@@ -515,7 +515,7 @@ const globalData = {
       //TODO: Waiting for stable data to restore the counts
       case_id: 1226,
       seq_id: 1047,
-      task_id: 1000012,
+      task_id: 1000060,
       Panel: [
         {
           field: 'tenant_gene_panel',
