@@ -7,18 +7,55 @@ seeds:
       institution names and short codes.
 
       WHY A SEED, NOT A VIEW: the canonical source is radiant_jdbc.public.organization
-      (surfaced as radiant_tenant.organization). The QA cluster returns 41 rows, but in
-      PROD that JDBC source holds only 1 row (chusj / CHU Ste-Justine) and
-      cbtn_tenant.organization returns 0 -- so prod has nothing to join to. These 41
-      rows were seeded from QA as of 2026-09-24, and verified unchanged in prod on
-      2026-10-12 before this seed replaced the hand-written INSERT.
+      (surfaced as radiant_tenant.organization). The QA cluster returns 41 rows. When
+      this seed was written, that JDBC source in PROD held only 1 row (chusj / CHU
+      Ste-Justine) and cbtn_tenant.organization returned 0 -- so prod had nothing to
+      join to. The first 41 rows were seeded from QA as of 2026-09-24, and verified
+      unchanged in prod on 2026-10-12 before this seed replaced the hand-written INSERT.
 
-      WHEN PROD'S SOURCE IS POPULATED, replace this seed with a model:
-        select code, name, category_code, tenant_code from radiant_tenant.organization
-      Dependents need no change -- they only reference .name and .code.
+      PROD'S SOURCE IS NOW POPULATED (51 rows, observed 2026-10-23) AND YOU STILL MUST
+      NOT SWAP THIS SEED FOR A MODEL OVER IT. Earlier drafts of this note said to do
+      exactly that once prod filled in. Measured against live prod 2026-10-23, the swap
+      LOSES more than it gains, because stg_cbtn_enrollment_final.organization_name --
+      the only join key -- carries the QA spellings, not the canonical ones:
 
-      name and code are both unique across all 41 rows (verified), so the LEFT JOIN in
-      every pcx_30 combined view cannot fan out.
+        gained:  NYU Langone Health (9 enrollment rows)
+        LOST:    Children's National Medical Center (CNMC)  693 rows  (canonical drops
+                 the " (CNMC)" suffix)
+                 CBTN Non-Consortium Member                 142 rows  (absent upstream)
+                 UAB                                         36 rows  (canonical says
+                 "University of Alabama at Bermingham")
+                 Children's Hospital of Atlanta (CHOA)       23 rows  (suffix dropped)
+
+      894 enrollment rows would fall to a NULL organization_code -- which fails CLOSED,
+      so those patients would go permanently de-identified even for a granted caller,
+      silently. Also absent upstream entirely: PNOC, NA, and the seed's O/Oligo (prod
+      has ON/Oligo Nation). Treat the canonical table as the source of CODES, and
+      stg_cbtn_enrollment_final as the source of NAMES.
+
+      APOSTROPHE TRAP when copying a name from the canonical source. It uses U+2019
+      (RIGHT SINGLE QUOTATION MARK, hex E28099) in "Children's Hospital Los Angeles" and
+      "Nicklaus Children's Hospital"; stg_cbtn_enrollment_final uses the ASCII
+      apostrophe (hex 27), as does every row of this seed. The join is exact equality,
+      so a verbatim copy-paste of the canonical name matches ZERO rows while looking
+      correct in any terminal. Always re-derive the name from the enrollment table.
+
+      2026-10-23: three rows added -- CHLA, NYULH, Nicklaus. Codes taken from the
+      canonical prod table (all three already hold auth.pii_grant rows, so these
+      patients become reachable for a granted caller rather than failing closed);
+      names taken from stg_cbtn_enrollment_final with the ASCII apostrophe. tenant_code
+      is 'radiant' to match the existing 41 rows -- the canonical table says 'cbtn' for
+      all 50 of its real orgs, but nothing downstream reads this column, so internal
+      consistency wins over matching a source nobody joins to.
+
+      One enrollment organization_name is STILL unmatched after this change: "Zurich
+      Children's Hospital" (4 enrollment rows, 0 of them in the ATRT/Medulloblastoma
+      release cohort). It has no row in the canonical prod table and no auth.pii_grant,
+      so no code exists for it anywhere -- inventing one here would be a guess.
+
+      name and code are both unique across all 44 rows (verified on prod 2026-10-23:
+      44 rows, 44 distinct codes, 44 distinct names), so the LEFT JOIN in every pcx_30
+      combined view cannot fan out.
     config:
       column_types:
         code: VARCHAR(64)
