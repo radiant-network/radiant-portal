@@ -1432,6 +1432,12 @@ export interface CaseResult {
     'proband_life_status_code'?: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'proband_submitter_sample_ids': Array<string>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseResult
      */
@@ -3937,6 +3943,114 @@ export interface GermlineCNVOccurrence {
      * @memberof GermlineCNVOccurrence
      */
     'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -8220,6 +8334,42 @@ export interface SomaticCNVOccurrence {
      * @memberof SomaticCNVOccurrence
      */
     'sm'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}

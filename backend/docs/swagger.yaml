@@ -2059,6 +2059,42 @@ components:
           type: string
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_sc:
           type: integer
         gnomad_sf:
@@ -4219,6 +4255,18 @@ components:
           type: integer
         sm:
           type: number
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         start:
           type: integer
         svlen:
