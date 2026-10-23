@@ -48,14 +48,16 @@ func fixtureStateFor(folderName string) *fixtureState {
 }
 
 var perTenantTables = map[string]bool{
-	types.GermlineSNVOccurrenceTable.Name: types.GermlineSNVOccurrenceTable.PerTenant,
-	types.SomaticSNVOccurrenceTable.Name:  types.SomaticSNVOccurrenceTable.PerTenant,
-	types.GermlineCNVOccurrenceTable.Name: types.GermlineCNVOccurrenceTable.PerTenant,
-	types.SomaticCNVOccurrenceTable.Name:  types.SomaticCNVOccurrenceTable.PerTenant,
-	types.ExomiserTable.Name:              types.ExomiserTable.PerTenant,
-	types.VariantTable.Name:               types.VariantTable.PerTenant,
-	types.TenantGenePanelTable.Name:       types.TenantGenePanelTable.PerTenant,
-	types.GermlineSNVComphetTable.Name:    types.GermlineSNVComphetTable.PerTenant,
+	types.GermlineSNVOccurrenceTable.Name:       types.GermlineSNVOccurrenceTable.PerTenant,
+	types.SomaticSNVOccurrenceTable.Name:        types.SomaticSNVOccurrenceTable.PerTenant,
+	types.GermlineCNVOccurrenceTable.Name:       types.GermlineCNVOccurrenceTable.PerTenant,
+	types.SomaticCNVOccurrenceTable.Name:        types.SomaticCNVOccurrenceTable.PerTenant,
+	types.ExomiserTable.Name:                    types.ExomiserTable.PerTenant,
+	types.VariantTable.Name:                     types.VariantTable.PerTenant,
+	types.TenantGenePanelTable.Name:             types.TenantGenePanelTable.PerTenant,
+	types.GermlineSNVComphetTable.Name:          types.GermlineSNVComphetTable.PerTenant,
+	types.GermlineCNVVariantFrequencyTable.Name: types.GermlineCNVVariantFrequencyTable.PerTenant,
+	types.SomaticCNVVariantFrequencyTable.Name:  types.SomaticCNVVariantFrequencyTable.PerTenant,
 }
 
 // TenantKeyOffset is added to each tenant key column, scaled by the tenant's index in Need.Tenants,

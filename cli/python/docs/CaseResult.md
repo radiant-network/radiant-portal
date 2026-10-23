@@ -31,6 +31,7 @@ Name | Type | Description | Notes
 **proband_jhn** | **str** |  | [optional] 
 **proband_last_name** | **str** |  | [optional] 
 **proband_life_status_code** | **str** |  | [optional] 
+**proband_submitter_sample_ids** | **List[str]** |  | 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
 **status_code** | [**CaseStatus**](CaseStatus.md) |  | 
