@@ -205,7 +205,7 @@ func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey strin
 	id := pcxPatientIdentifier{patient.OrganizationCode, patient.PatientIDType, patient.PatientID}
 	for _, fill := range []func(context.Context, *gorm.DB, pcxPatientIdentifier, *types.PatientEntity) error{
 		fillPcxDemographics, fillPcxVitalStatus, fillPcxEvents, fillPcxSurgeries, fillPcxRadiations, fillPcxTherapies,
-		fillPcxImaging, fillPcxTreatmentSummary,
+		fillPcxImaging, fillPcxTreatmentSummary, fillPcxCbc, fillPcxPerformanceStatus, fillPcxCsf,
 	} {
 		if err := fill(ctx, db, id, &patient); err != nil {
 			return nil, err
@@ -484,6 +484,111 @@ func fillPcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIden
 		HadInitialChemo:        yes(row.HadInitialChemo),
 		HadInitialMethotrexate: yes(row.HadInitialMethotrexate),
 		InitialTreatmentOrder:  row.InitialTreatmentOrder,
+	}
+	return nil
+}
+
+// pcxObserved selects the day and date of an analyte observed at <analyte>_observed_at.
+func pcxObserved(analyte string) string {
+	return pcxDayDate("age_at_"+analyte+"_days", analyte+"_observed_at", analyte)
+}
+
+func fillPcxCbc(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+	var rows []struct {
+		WbcDay, HemoglobinDay, PlateletsDay, AncDay         *string
+		WbcDate, HemoglobinDate, PlateletsDate, AncDate     *types.DateISO8601
+		WbcValue, HemoglobinValue, PlateletsValue, AncValue *float64
+		WbcUnit, HemoglobinUnit, PlateletsUnit, AncUnit     *string
+	}
+	selects := []string{}
+	for _, analyte := range []string{"wbc", "hemoglobin", "platelets", "anc"} {
+		selects = append(selects, pcxObserved(analyte), analyte+"_value", analyte+"_unit")
+	}
+	tx := pcxView(ctx, db, types.PcxCbcTable, id).Select(strings.Join(selects, ", ")).Limit(1)
+	if err := tx.Find(&rows).Error; err != nil {
+		return fmt.Errorf("error fetching patient cbc: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil
+	}
+	row := rows[0]
+	p.Cbc = &types.PatientCbc{
+		Wbc:        types.PatientLabResult{PatientDayDate: dayDate(row.WbcDay, row.WbcDate), Value: row.WbcValue, Unit: row.WbcUnit},
+		Hemoglobin: types.PatientLabResult{PatientDayDate: dayDate(row.HemoglobinDay, row.HemoglobinDate), Value: row.HemoglobinValue, Unit: row.HemoglobinUnit},
+		Platelets:  types.PatientLabResult{PatientDayDate: dayDate(row.PlateletsDay, row.PlateletsDate), Value: row.PlateletsValue, Unit: row.PlateletsUnit},
+		Anc:        types.PatientLabResult{PatientDayDate: dayDate(row.AncDay, row.AncDate), Value: row.AncValue, Unit: row.AncUnit},
+	}
+	return nil
+}
+
+// fillPcxPerformanceStatus: the view holds the latest score of either scale, a list so a score per scale fits later.
+func fillPcxPerformanceStatus(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+	var rows []struct {
+		Scale     *string
+		Score     *int
+		ScoreDay  *string
+		ScoreDate *types.DateISO8601
+		ScoreText *string
+	}
+	tx := pcxView(ctx, db, types.PcxPerformanceStatusTable, id).
+		Select("scale, score, " + pcxDayDate("age_at_score_days", "scored_at", "score") + ", score_text").
+		Where("score IS NOT NULL").
+		Order(pcxOrderByDay("age_at_score_days") + ", scale")
+	if err := tx.Find(&rows).Error; err != nil {
+		return fmt.Errorf("error fetching patient performance status: %w", err)
+	}
+	p.PerformanceStatus = make([]types.PatientPerformanceScore, len(rows))
+	for i, row := range rows {
+		scale, err := pcxPerformanceScale(row.Scale)
+		if err != nil {
+			return err
+		}
+		p.PerformanceStatus[i] = types.PatientPerformanceScore{PatientDayDate: dayDate(row.ScoreDay, row.ScoreDate),
+			Scale: scale, Score: *row.Score, ScoreText: row.ScoreText}
+	}
+	return nil
+}
+
+func fillPcxCsf(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+	var rows []struct {
+		ProteinDay, GlucoseDay, WbcDay, RbcDay                 *string
+		ProteinDate, GlucoseDate, WbcDate, RbcDate             *types.DateISO8601
+		ProteinDisplay, GlucoseDisplay, WbcDisplay, RbcDisplay *string
+		ProteinValue, GlucoseValue, WbcValue, RbcValue         *float64
+		ProteinComparator, GlucoseComparator                   *string
+		ProteinUnit, GlucoseUnit, WbcUnit, RbcUnit             *string
+		CytologyDay, CellFreeDnaDay                            *string
+		CytologyDate, CellFreeDnaDate                          *types.DateISO8601
+		CytologyTestName, MalignantCells                       *string
+		CytologyEvidenceTier                                   *string
+		MultiSpecimenReport                                    *bool
+	}
+	selects := []string{}
+	for _, component := range []string{"protein", "glucose", "wbc", "rbc"} {
+		selects = append(selects, pcxObserved(component), component+"_display", component+"_value", component+"_unit")
+	}
+	selects = append(selects, "protein_comparator", "glucose_comparator", pcxObserved("cytology"), pcxObserved("cell_free_dna"),
+		"cytology_test_name", "malignant_cells", "cytology_evidence_tier", "multi_specimen_report")
+	tx := pcxView(ctx, db, types.PcxCsfTable, id).Select(strings.Join(selects, ", ")).Limit(1)
+	if err := tx.Find(&rows).Error; err != nil {
+		return fmt.Errorf("error fetching patient csf: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil
+	}
+	row := rows[0]
+	p.Csf = &types.PatientCsf{
+		Protein: types.PatientCsfResult{PatientDayDate: dayDate(row.ProteinDay, row.ProteinDate), Display: row.ProteinDisplay,
+			Value: row.ProteinValue, Comparator: row.ProteinComparator, Unit: row.ProteinUnit},
+		Glucose: types.PatientCsfResult{PatientDayDate: dayDate(row.GlucoseDay, row.GlucoseDate), Display: row.GlucoseDisplay,
+			Value: row.GlucoseValue, Comparator: row.GlucoseComparator, Unit: row.GlucoseUnit},
+		Wbc: types.PatientCsfResult{PatientDayDate: dayDate(row.WbcDay, row.WbcDate), Display: row.WbcDisplay, Value: row.WbcValue,
+			Unit: row.WbcUnit},
+		Rbc: types.PatientCsfResult{PatientDayDate: dayDate(row.RbcDay, row.RbcDate), Display: row.RbcDisplay, Value: row.RbcValue,
+			Unit: row.RbcUnit},
+		Cytology: types.PatientCsfCytology{PatientDayDate: dayDate(row.CytologyDay, row.CytologyDate), TestName: row.CytologyTestName,
+			MalignantCells: row.MalignantCells, EvidenceTier: row.CytologyEvidenceTier, MultiSpecimenReport: row.MultiSpecimenReport},
+		CellFreeDna: dayDate(row.CellFreeDnaDay, row.CellFreeDnaDate),
 	}
 	return nil
 }

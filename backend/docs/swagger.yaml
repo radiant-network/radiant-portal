@@ -2998,6 +2998,98 @@ components:
       - status_code
       - updated_on
       type: object
+    PatientCbc:
+      description: Latest result of each CBC analyte. Each analyte is its own latest,
+        so they may come from different draws.
+      properties:
+        anc:
+          $ref: '#/components/schemas/PatientLabResult'
+        hemoglobin:
+          $ref: '#/components/schemas/PatientLabResult'
+        platelets:
+          $ref: '#/components/schemas/PatientLabResult'
+        wbc:
+          $ref: '#/components/schemas/PatientLabResult'
+      required:
+      - anc
+      - hemoglobin
+      - platelets
+      - wbc
+      type: object
+    PatientCsf:
+      description: Latest result of each CSF component. Each component is its own
+        latest, so they may come from different punctures.
+      properties:
+        cell_free_dna:
+          $ref: '#/components/schemas/PatientDayDate'
+        cytology:
+          $ref: '#/components/schemas/PatientCsfCytology'
+        glucose:
+          $ref: '#/components/schemas/PatientCsfResult'
+        protein:
+          $ref: '#/components/schemas/PatientCsfResult'
+        rbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+        wbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+      required:
+      - cell_free_dna
+      - cytology
+      - glucose
+      - protein
+      - rbc
+      - wbc
+      type: object
+    PatientCsfCytology:
+      description: Latest CSF cytology, with the finding derived from the report
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        evidence_tier:
+          description: How the report was attributed to CSF
+          enum:
+          - named
+          - text_confirmed
+          - same_day_only
+          type: string
+        malignant_cells:
+          enum:
+          - positive
+          - suspicious
+          - negative
+          - non_diagnostic
+          - no_malignancy_statement
+          type: string
+        multi_specimen_report:
+          description: The finding may pertain to a non-CSF specimen
+          type: boolean
+        test_name:
+          type: string
+      type: object
+    PatientCsfResult:
+      description: 'Latest result of one CSF component. Read display: the comparator
+        is load-bearing ("<1.0" is undetectable).'
+      properties:
+        comparator:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        display:
+          description: Comparator, value and unit
+          type: string
+        unit:
+          type: string
+        value:
+          type: number
+      type: object
     PatientDayDate:
       description: Age in days, and the calendar date when the caller can read PHI
       properties:
@@ -3041,12 +3133,16 @@ components:
             $ref: '#/components/schemas/PatientCase'
           type: array
           uniqueItems: false
+        cbc:
+          $ref: '#/components/schemas/PatientCbc'
         cns_integrated_diagnosis:
           description: From the initial event
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
           type: string
+        csf:
+          $ref: '#/components/schemas/PatientCsf'
         data_type_cohort:
           type: string
         diagnosis_type_cohort:
@@ -3104,6 +3200,11 @@ components:
           description: Opaque key for the patient page URL, the same for every user
           format: uuid
           type: string
+        performance_status:
+          items:
+            $ref: '#/components/schemas/PatientPerformanceScore'
+          type: array
+          uniqueItems: false
         postal_code:
           description: Full with PHI access, 3 digits + XX otherwise
           type: string
@@ -3156,6 +3257,7 @@ components:
       - patient_id
       - patient_id_type
       - patient_key
+      - performance_status
       - radiations
       - surgeries
       - therapies
@@ -3354,6 +3456,21 @@ components:
       - initial_diagnosis
       - latest_encounter
       type: object
+    PatientLabResult:
+      description: 'Latest result of one analyte, raw from the source: units are not
+        normalized (ANC comes in /uL and x10E9/L)'
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        unit:
+          type: string
+        value:
+          type: number
+      type: object
     PatientListItem:
       description: A PCX patient in the patient list
       properties:
@@ -3447,6 +3564,31 @@ components:
       - deceased
       - organization_code
       - organization_name
+      type: object
+    PatientPerformanceScore:
+      description: Lansky or Karnofsky score. The date is when the result was released,
+        not when it was assessed.
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        scale:
+          enum:
+          - lansky
+          - karnofsky
+          type: string
+        score:
+          type: integer
+        score_text:
+          description: As recorded, e.g. "90 - Minor restrictions in strenuous physical
+            activity"
+          type: string
+      required:
+      - scale
+      - score
       type: object
     PatientRadiation:
       description: Radiation course of a patient
