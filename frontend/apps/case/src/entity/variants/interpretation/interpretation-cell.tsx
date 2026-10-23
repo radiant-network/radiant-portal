@@ -10,6 +10,8 @@ import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { useCaseVariantPermissions } from '../use-case-variant-permissions';
 
+import type { InterpretationDialogMode } from './types';
+
 type InterpretationDialogProps = {
   locusId: string;
   taskId: number;
@@ -17,7 +19,7 @@ type InterpretationDialogProps = {
   patientId?: number;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
-  isCreation?: boolean;
+  mode?: InterpretationDialogMode;
 };
 
 type InterpretationCellProps = {
@@ -71,7 +73,7 @@ function InterpretationCell({
 
     return (
       <InterpretationDialog
-        isCreation
+        mode="create"
         locusId={locusId}
         taskId={taskId}
         transcriptId={transcriptId}

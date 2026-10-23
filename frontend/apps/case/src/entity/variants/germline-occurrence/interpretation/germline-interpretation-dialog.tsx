@@ -35,7 +35,7 @@ import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
-import type { Interpretation, InterpretationFormRef } from '../../interpretation/types';
+import type { Interpretation, InterpretationDialogMode, InterpretationFormRef } from '../../interpretation/types';
 import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import GermlineInterpretationForm from './germline-interpretation-form';
@@ -48,8 +48,7 @@ type GermlineInterpretationDialogProps = {
   patientId?: number;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
-  isCreation?: boolean;
-  startReadOnly?: boolean;
+  mode?: InterpretationDialogMode;
 };
 
 type CaseEntityInput = {
@@ -133,15 +132,14 @@ function GermlineInterpretationDialog({
   patientId,
   handleSaveCallback,
   renderTrigger,
-  isCreation = false,
-  startReadOnly = false,
+  mode = 'edit',
 }: GermlineInterpretationDialogProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const { canInterpret } = useCaseVariantPermissions();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
-  const [isReadOnly, setIsReadOnly] = useState(startReadOnly);
+  const [isReadOnly, setIsReadOnly] = useState(mode === 'view');
   const [isDirty, setIsDirty] = useState(false);
   const germlineFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
@@ -174,7 +172,7 @@ function GermlineInterpretationDialog({
     (url, opts) => saveGermlineInterpretation(url, opts, tenant),
     {
       onSuccess: () => {
-        if (startReadOnly) {
+        if (mode === 'view') {
           setIsReadOnly(true);
           setIsDirty(false);
           fetchInterpretation();
@@ -183,7 +181,7 @@ function GermlineInterpretationDialog({
         }
         handleSaveCallback && handleSaveCallback();
 
-        if (isCreation) {
+        if (mode === 'create') {
           toast.success(t('variant.interpretation_form.notification.success.title'), {
             action: {
               label: t('variant.interpretation_form.notification.success.button'),
@@ -231,7 +229,7 @@ function GermlineInterpretationDialog({
 
   const handleOpen = useCallback(async () => {
     setOpen(true);
-    setIsReadOnly(startReadOnly);
+    setIsReadOnly(mode === 'view');
     caseEntity.trigger({ key: 'case-entity', caseId });
     fetchInterpretation();
     occurrenceExpand.trigger({
@@ -368,7 +366,7 @@ function GermlineInterpretationDialog({
                 </>
               ) : (
                 <>
-                  {startReadOnly ? (
+                  {mode === 'view' ? (
                     <Button variant="outline" onClick={handleCancelEdit}>
                       {t('variant.interpretation_form.cancel_text')}
                     </Button>
@@ -383,7 +381,7 @@ function GermlineInterpretationDialog({
                     loading={saveInterpretation.isMutating}
                     onClick={() => {
                       // Do not warn use if the interpretation is created. Only show if edited
-                      if (isCreation) {
+                      if (mode === 'create') {
                         handleSave();
                         return;
                       }
