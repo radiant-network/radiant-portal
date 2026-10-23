@@ -102,8 +102,8 @@ func NewFacetsRepository() *FacetsRepository {
 			Name: "transmission_mode",
 			Values: []string{
 				"autosomal_dominant_de_novo", "autosomal_dominant", "autosomal_recessive", "x_linked_dominant_de_novo", "x_linked_recessive_de_novo",
-				"x_linked_dominant", "x_linked_recessive", "non_carrier_proband", "unknown_parents_genotype", "unknown_father_genotype",
-				"unknown_mother_genotype", "unknown_proband_genotype",
+				"x_linked_dominant", "x_linked_recessive", "uniparental_disomy", "non_carrier_proband", "unknown_parents_genotype",
+				"unknown_father_genotype", "unknown_mother_genotype", "unknown_proband_genotype",
 			},
 		},
 		"type": {

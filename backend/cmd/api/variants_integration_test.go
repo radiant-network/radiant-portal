@@ -259,6 +259,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 			{"key":"x_linked_recessive_de_novo"},
 			{"key":"x_linked_dominant"},
 			{"key":"x_linked_recessive"},
+			{"key":"uniparental_disomy"},
 			{"key":"non_carrier_proband"},
 			{"key":"unknown_parents_genotype"},
 			{"key":"unknown_father_genotype"},

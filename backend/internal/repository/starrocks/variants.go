@@ -339,6 +339,7 @@ func (r *VariantsRepository) GetVariantCasesFilters(ctx context.Context) (*Varia
 		{Key: "x_linked_recessive_de_novo"},
 		{Key: "x_linked_dominant"},
 		{Key: "x_linked_recessive"},
+		{Key: "uniparental_disomy"},
 		{Key: "non_carrier_proband"},
 		{Key: "unknown_parents_genotype"},
 		{Key: "unknown_father_genotype"},

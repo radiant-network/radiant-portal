@@ -1117,6 +1117,8 @@
           "autosomal_recessive_abbrev": "AR",
           "non_carrier_proband": "Non Carrier Proband",
           "non_carrier_proband_abbrev": "NCP",
+          "uniparental_disomy": "Uniparental Disomy",
+          "uniparental_disomy_abbrev": "UPD",
           "unknown_father_genotype": "Unknown Father Genotype",
           "unknown_father_genotype_abbrev": "UFG",
           "unknown_mother_genotype": "Unknown Mother Genotype",
