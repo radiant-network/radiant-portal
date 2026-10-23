@@ -51,6 +51,18 @@ func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *g
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", types.ThousandGenomesTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
+// JoinSNVOccurrencesWithSortedFrequencyTables joins, on the outer query of a TOP-N list, the frequency tables
+// that the inner query joined on demand: the outer query re-applies the sort, which may be on one of them.
+func JoinSNVOccurrencesWithSortedFrequencyTables(snvTable types.Table, userQuery types.ListQuery, tx *gorm.DB) *gorm.DB {
+	if userQuery.HasFieldFromTables(types.TopmedTable) {
+		tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)
+	}
+	if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
+		tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
+	}
+	return tx
+}
+
 // occurrenceQuery is what the list and count builders need from a query: the filter tree, plus the
 // annotation filters. Satisfied by types.OccurrenceListQuery and types.OccurrenceCountQuery; a plain
 // types.ListQuery or types.CountQuery does not qualify.

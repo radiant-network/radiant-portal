@@ -3,7 +3,6 @@ package starrocks
 import (
 	"context"
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -34,28 +33,11 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, fre
 				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.TenantQualifiedName(ctx), panelsTable.Alias, alias, panelsTable.Alias))
 		}
 	}
-	if usesTable(userQuery, frequencyTable) {
+	if userQuery != nil && userQuery.HasFieldFromTables(frequencyTable) {
 		tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.cnv_id = %s.cnv_id", frequencyTable.TenantQualifiedName(ctx), frequencyTable.Alias, frequencyTable.Alias, alias))
 	}
 	utils.AddWhere(userQuery, tx)
 	return tx, nil
-}
-
-// usesTable also looks at the sorted fields: a list query's HasFieldFromTables ignores them, so a
-// sort on a field of a joined-on-demand table that is not selected would reference a missing alias.
-func usesTable(userQuery types.Query, table types.Table) bool {
-	if userQuery == nil {
-		return false
-	}
-	if userQuery.HasFieldFromTables(table) {
-		return true
-	}
-	if listQuery, ok := userQuery.(types.ListQuery); ok {
-		return slices.ContainsFunc(listQuery.SortedFields(), func(sort types.SortField) bool {
-			return sort.Field.Table == table
-		})
-	}
-	return false
 }
 
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the

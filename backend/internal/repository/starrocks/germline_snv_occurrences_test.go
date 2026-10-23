@@ -1442,3 +1442,17 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Filtered_On_Comphet_Partners(t *
 		assert.EqualValues(t, 80, statistics.Max)
 	})
 }
+
+// TOPMed is joined only when the query uses one of its fields: a sort alone must be enough.
+func Test_Germline_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "topmed_af", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		require.NoError(t, err)
+		locusIds := sliceutils.Map(occurrences, func(o GermlineSNVOccurrence, _ int, _ []GermlineSNVOccurrence) string { return o.LocusId })
+		assert.Equal(t, []string{"2000", "1000"}, locusIds)
+	})
+}
