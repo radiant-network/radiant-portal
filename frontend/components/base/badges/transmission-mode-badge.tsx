@@ -60,6 +60,12 @@ export function getTransmissionModeList(t: TFunction): TransmissionModeValue[] {
       title: '',
     },
     {
+      label: t('common.facets.values.transmission_mode.uniparental_disomy'),
+      value: 'uniparental_disomy',
+      abbreviation: t('common.facets.values.transmission_mode.uniparental_disomy_abbrev'),
+      title: '',
+    },
+    {
       label: t('common.facets.values.transmission_mode.non_carrier_proband'),
       value: 'non_carrier_proband',
       abbreviation: t('common.facets.values.transmission_mode.non_carrier_proband_abbrev'),

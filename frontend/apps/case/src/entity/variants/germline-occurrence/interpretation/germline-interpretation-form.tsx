@@ -205,7 +205,7 @@ const GermlineInterpretationForm = forwardRef<InterpretationFormRef, Interpretat
                 <FormLabel>{t('variant.interpretation_form.germline.mode_of_transmission')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
-                    defaultOptions={getTransmissionModeList(t)}
+                    defaultOptions={getTransmissionModeList(t).filter(mode => mode.value !== 'uniparental_disomy')}
                     placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
                     emptyIndicator={<p>{t('variant.interpretation_form.germline.no_results')}</p>}
                     openOnFocus
