@@ -39,7 +39,7 @@ export const Default: Story = {
     <StoryShowcase>
       <StorySection
         title="Interactive"
-        description="User-applied statuses. Selecting one persists it and updates the badge in place."
+        description="User-applied statuses. Selecting one persists it and updates the button in place."
       >
         <div className="flex flex-wrap gap-2">
           {USER_APPLIED.map(status => (
@@ -49,10 +49,10 @@ export const Default: Story = {
       </StorySection>
 
       <StorySection title="Sizes">
-        <StoryLabel>default</StoryLabel>
+        <StoryLabel>3xs</StoryLabel>
         <CaseStatusDropdown {...args} />
-        <StoryLabel>lg</StoryLabel>
-        <CaseStatusDropdown {...args} size="lg" />
+        <StoryLabel>sm</StoryLabel>
+        <CaseStatusDropdown {...args} size="sm" />
       </StorySection>
     </StoryShowcase>
   ),
