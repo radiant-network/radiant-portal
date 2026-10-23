@@ -114,6 +114,10 @@ docs/PatchCase.md
 docs/PatchCaseBatchBody.md
 docs/PatientBatch.md
 docs/PatientCase.md
+docs/PatientCbc.md
+docs/PatientCsf.md
+docs/PatientCsfCytology.md
+docs/PatientCsfResult.md
 docs/PatientDayDate.md
 docs/PatientDose.md
 docs/PatientEntity.md
@@ -123,8 +127,10 @@ docs/PatientImagingSession.md
 docs/PatientInterpretation.md
 docs/PatientKeyDate.md
 docs/PatientKeyDates.md
+docs/PatientLabResult.md
 docs/PatientListItem.md
 docs/PatientOrganizationVitalCount.md
+docs/PatientPerformanceScore.md
 docs/PatientRadiation.md
 docs/PatientStatistics.md
 docs/PatientSurgery.md
@@ -324,6 +330,10 @@ radiant_python/models/patch_case.py
 radiant_python/models/patch_case_batch_body.py
 radiant_python/models/patient_batch.py
 radiant_python/models/patient_case.py
+radiant_python/models/patient_cbc.py
+radiant_python/models/patient_csf.py
+radiant_python/models/patient_csf_cytology.py
+radiant_python/models/patient_csf_result.py
 radiant_python/models/patient_day_date.py
 radiant_python/models/patient_dose.py
 radiant_python/models/patient_entity.py
@@ -333,8 +343,10 @@ radiant_python/models/patient_imaging_session.py
 radiant_python/models/patient_interpretation.py
 radiant_python/models/patient_key_date.py
 radiant_python/models/patient_key_dates.py
+radiant_python/models/patient_lab_result.py
 radiant_python/models/patient_list_item.py
 radiant_python/models/patient_organization_vital_count.py
+radiant_python/models/patient_performance_score.py
 radiant_python/models/patient_radiation.py
 radiant_python/models/patient_statistics.py
 radiant_python/models/patient_surgery.py
@@ -394,4 +406,9 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_patient_interpretation.py
+test/test_patient_cbc.py
+test/test_patient_csf.py
+test/test_patient_csf_cytology.py
+test/test_patient_csf_result.py
+test/test_patient_lab_result.py
+test/test_patient_performance_score.py

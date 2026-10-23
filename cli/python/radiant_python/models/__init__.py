@@ -111,6 +111,10 @@ from radiant_python.models.patch_case import PatchCase
 from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.patient_case import PatientCase
+from radiant_python.models.patient_cbc import PatientCbc
+from radiant_python.models.patient_csf import PatientCsf
+from radiant_python.models.patient_csf_cytology import PatientCsfCytology
+from radiant_python.models.patient_csf_result import PatientCsfResult
 from radiant_python.models.patient_day_date import PatientDayDate
 from radiant_python.models.patient_dose import PatientDose
 from radiant_python.models.patient_entity import PatientEntity
@@ -120,8 +124,10 @@ from radiant_python.models.patient_imaging_session import PatientImagingSession
 from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_date import PatientKeyDate
 from radiant_python.models.patient_key_dates import PatientKeyDates
+from radiant_python.models.patient_lab_result import PatientLabResult
 from radiant_python.models.patient_list_item import PatientListItem
 from radiant_python.models.patient_organization_vital_count import PatientOrganizationVitalCount
+from radiant_python.models.patient_performance_score import PatientPerformanceScore
 from radiant_python.models.patient_radiation import PatientRadiation
 from radiant_python.models.patient_statistics import PatientStatistics
 from radiant_python.models.patient_surgery import PatientSurgery
