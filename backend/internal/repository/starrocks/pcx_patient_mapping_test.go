@@ -70,6 +70,29 @@ func Test_pcxEventType_MissingIsAnError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_pcxPerformanceScale_EveryKnownValue(t *testing.T) {
+	for source, code := range map[string]string{"Lansky": "lansky", "Karnofsky": "karnofsky", " KARNOFSKY ": "karnofsky"} {
+		got, err := pcxPerformanceScale(ptr(source))
+		require.NoError(t, err, source)
+		assert.Equal(t, code, got, source)
+	}
+}
+
+func Test_pcxPerformanceScale_UnknownIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(ptr("ECOG"))
+	assert.ErrorContains(t, err, `unknown performance status scale "ECOG"`)
+}
+
+func Test_pcxPerformanceScale_EmptyIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(ptr(""))
+	assert.ErrorContains(t, err, `unknown performance status scale ""`)
+}
+
+func Test_pcxPerformanceScale_MissingIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(nil)
+	assert.Error(t, err)
+}
+
 func dose(value, unit string) types.PatientDose {
 	return types.PatientDose{Value: &value, Unit: &unit}
 }

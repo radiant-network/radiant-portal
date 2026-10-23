@@ -75,6 +75,19 @@ func pcxEventType(value *string) (string, error) {
 	return code, nil
 }
 
+var pcxPerformanceScales = map[string]string{"lansky": "lansky", "karnofsky": "karnofsky"}
+
+func pcxPerformanceScale(value *string) (string, error) {
+	if value == nil {
+		return "", fmt.Errorf("missing performance status scale")
+	}
+	code, ok := pcxPerformanceScales[strings.ToLower(strings.TrimSpace(*value))]
+	if !ok {
+		return "", fmt.Errorf("unknown performance status scale %q", *value)
+	}
+	return code, nil
+}
+
 // pcxFocalBoost is the total to primary minus the craniospinal dose, only when both are numbers in the same unit.
 func pcxFocalBoost(craniospinal, primary types.PatientDose) *types.PatientDose {
 	if craniospinal.Value == nil || primary.Value == nil || craniospinal.Unit == nil || primary.Unit == nil ||

@@ -1432,6 +1432,12 @@ export interface CaseResult {
     'proband_life_status_code'?: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'proband_submitter_sample_ids': Array<string>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseResult
      */
@@ -5916,6 +5922,184 @@ export const PatientCaseCaseTypeEnum = {
 export type PatientCaseCaseTypeEnum = typeof PatientCaseCaseTypeEnum[keyof typeof PatientCaseCaseTypeEnum];
 
 /**
+ * Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+ * @export
+ * @interface PatientCbc
+ */
+export interface PatientCbc {
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'anc': PatientLabResult;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'hemoglobin': PatientLabResult;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'platelets': PatientLabResult;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'wbc': PatientLabResult;
+}
+/**
+ * Latest result of each CSF component. Each component is its own latest, so they may come from different punctures.
+ * @export
+ * @interface PatientCsf
+ */
+export interface PatientCsf {
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientCsf
+     */
+    'cell_free_dna': PatientDayDate;
+    /**
+     * 
+     * @type {PatientCsfCytology}
+     * @memberof PatientCsf
+     */
+    'cytology': PatientCsfCytology;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'glucose': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'protein': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'rbc': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'wbc': PatientCsfResult;
+}
+/**
+ * Latest CSF cytology, with the finding derived from the report
+ * @export
+ * @interface PatientCsfCytology
+ */
+export interface PatientCsfCytology {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfCytology
+     */
+    'day'?: number;
+    /**
+     * How the report was attributed to CSF
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'evidence_tier'?: PatientCsfCytologyEvidenceTierEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'malignant_cells'?: PatientCsfCytologyMalignantCellsEnum;
+    /**
+     * The finding may pertain to a non-CSF specimen
+     * @type {boolean}
+     * @memberof PatientCsfCytology
+     */
+    'multi_specimen_report'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'test_name'?: string;
+}
+
+export const PatientCsfCytologyEvidenceTierEnum = {
+    Named: 'named',
+    TextConfirmed: 'text_confirmed',
+    SameDayOnly: 'same_day_only'
+} as const;
+
+export type PatientCsfCytologyEvidenceTierEnum = typeof PatientCsfCytologyEvidenceTierEnum[keyof typeof PatientCsfCytologyEvidenceTierEnum];
+export const PatientCsfCytologyMalignantCellsEnum = {
+    Positive: 'positive',
+    Suspicious: 'suspicious',
+    Negative: 'negative',
+    NonDiagnostic: 'non_diagnostic',
+    NoMalignancyStatement: 'no_malignancy_statement'
+} as const;
+
+export type PatientCsfCytologyMalignantCellsEnum = typeof PatientCsfCytologyMalignantCellsEnum[keyof typeof PatientCsfCytologyMalignantCellsEnum];
+
+/**
+ * Latest result of one CSF component. Read display: the comparator is load-bearing (\"<1.0\" is undetectable).
+ * @export
+ * @interface PatientCsfResult
+ */
+export interface PatientCsfResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'comparator'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfResult
+     */
+    'day'?: number;
+    /**
+     * Comparator, value and unit
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'display'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'unit'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfResult
+     */
+    'value'?: number;
+}
+/**
  * Age in days, and the calendar date when the caller can read PHI
  * @export
  * @interface PatientDayDate
@@ -6002,6 +6186,12 @@ export interface PatientEntity {
      */
     'cases': Array<PatientCase>;
     /**
+     * 
+     * @type {PatientCbc}
+     * @memberof PatientEntity
+     */
+    'cbc'?: PatientCbc;
+    /**
      * From the initial event
      * @type {string}
      * @memberof PatientEntity
@@ -6013,6 +6203,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'cns_integrated_diagnosis_source'?: string;
+    /**
+     * 
+     * @type {PatientCsf}
+     * @memberof PatientEntity
+     */
+    'csf'?: PatientCsf;
     /**
      * 
      * @type {string}
@@ -6115,6 +6311,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'patient_key': string;
+    /**
+     * 
+     * @type {Array<PatientPerformanceScore>}
+     * @memberof PatientEntity
+     */
+    'performance_status': Array<PatientPerformanceScore>;
     /**
      * Full with PHI access, 3 digits + XX otherwise
      * @type {string}
@@ -6516,6 +6718,37 @@ export interface PatientKeyDates {
     'latest_encounter': PatientKeyDate;
 }
 /**
+ * Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+ * @export
+ * @interface PatientLabResult
+ */
+export interface PatientLabResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientLabResult
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientLabResult
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientLabResult
+     */
+    'unit'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientLabResult
+     */
+    'value'?: number;
+}
+/**
  * A PCX patient in the patient list
  * @export
  * @interface PatientListItem
@@ -6695,6 +6928,51 @@ export interface PatientOrganizationVitalCount {
      */
     'organization_name': string;
 }
+/**
+ * Lansky or Karnofsky score. The date is when the result was released, not when it was assessed.
+ * @export
+ * @interface PatientPerformanceScore
+ */
+export interface PatientPerformanceScore {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientPerformanceScore
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'scale': PatientPerformanceScoreScaleEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientPerformanceScore
+     */
+    'score': number;
+    /**
+     * As recorded, e.g. \"90 - Minor restrictions in strenuous physical activity\"
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'score_text'?: string;
+}
+
+export const PatientPerformanceScoreScaleEnum = {
+    Lansky: 'lansky',
+    Karnofsky: 'karnofsky'
+} as const;
+
+export type PatientPerformanceScoreScaleEnum = typeof PatientPerformanceScoreScaleEnum[keyof typeof PatientPerformanceScoreScaleEnum];
+
 /**
  * Radiation course of a patient
  * @export
