@@ -87,3 +87,33 @@ An icon alone gives a button no name: Lucide icons are `aria-hidden` and a toolt
   ```
 
 - A wrapper that receives props from its caller sets its default `aria-label` before `{...props}`, so the caller can override it.
+
+### Keyboard access
+
+**Actions shown on hover.** Never hide a focusable control with `hidden` (`display: none`): Tab skips it. Collapse it instead and reveal it on hover or keyboard focus:
+
+```tsx
+'w-0 opacity-0 overflow-hidden group-hover:w-auto group-hover:opacity-100 group-has-[:focus-visible]:w-auto group-has-[:focus-visible]:opacity-100';
+```
+
+- Use `group-has-[:focus-visible]`, not `group-focus-within`: a dialog that autofocuses its first row on open would otherwise reveal that row's actions.
+- When the hidden element is a container, switch it to `overflow-visible` once revealed, or it clips the focus ring of the buttons inside.
+
+**No interactive element inside another.** A button or link must not contain another button or link. For a clickable row or header that also holds links or buttons (accordion headers, the query builder header), stretch the trigger instead:
+
+```tsx
+<div className="relative flex items-center">
+  <AccordionTrigger className="w-auto after:absolute after:inset-0">{name}</AccordionTrigger>
+  <Button asChild className="relative z-10">
+    …
+  </Button>
+</div>
+```
+
+The whole row stays clickable through the trigger's `::after`; the other controls sit above it with `relative z-10`.
+
+**Composite widgets use the arrow keys.** Tabs (`TabsNav`, Radix `Tabs`), menus and radio groups are a single Tab stop: Tab reaches the active item, the arrow keys move between items, Home / End jump to the first / last one.
+
+**A `Select` only holds options.** Its content is navigated with the arrows between `SelectItem`s and Tab is blocked, so an extra button inside (e.g. "Manage filters") can't be reached. Use a `DropdownMenu` when a list mixes choices and actions.
+
+**Focus ring and `overflow-hidden`.** The 3px ring is drawn outside the element: a parent with `overflow-hidden` clips it when the element touches its edge. Give the parent a little padding (`pl-1 -ml-1`).

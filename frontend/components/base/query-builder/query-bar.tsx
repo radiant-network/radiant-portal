@@ -193,13 +193,22 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   );
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- TODO(SJRA-2024): keyboard activation of a query
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, keyboard users use the select query button
     <div
-      className="flex flex-1 group/query"
+      className="relative flex flex-1 group/query"
       data-query-active={active}
       data-cy={active ? 'query-active' : undefined}
       onClick={handleActive}
     >
+      <button
+        type="button"
+        aria-pressed={active}
+        onClick={handleActive}
+        className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-1 focus-visible:left-2 focus-visible:z-10 focus-visible:rounded-md focus-visible:bg-background focus-visible:px-2 focus-visible:py-0.5 focus-visible:text-xs focus-visible:font-medium focus-visible:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+      >
+        {t('a11y.query_bar.select', { index: index + 1 })}
+      </button>
+
       {/* Identifier: color for combined query quick identification */}
       <div
         className={cn('w-1 rounded-s-sm bg-muted-foreground', {

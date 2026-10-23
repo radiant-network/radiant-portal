@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Modifier l'assignation du cas",
+      "open_assigned": "Modifier l'assignation du cas, assigné à {{names}}",
       "remove_user": "Retirer {{name}}"
     },
     "auto_complete": {
@@ -112,7 +113,8 @@
     },
     "query_bar": {
       "delete": "Supprimer la requête",
-      "duplicate": "Dupliquer la requête"
+      "duplicate": "Dupliquer la requête",
+      "select": "Sélectionner la requête {{index}}"
     },
     "query_builder": {
       "close_facets": "Fermer le panneau des filtres"
