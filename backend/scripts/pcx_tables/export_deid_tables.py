@@ -150,12 +150,25 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true",
                     help="report live vs on-disk shape; write nothing")
     ap.add_argument("--stamp", default=time.strftime("%Y%m%d"))
+    ap.add_argument("--allow-unpinned", action="store_true",
+                    help="permit tables outside EXPECTED (prototype/preview builds "
+                         "such as the *_deid_all_cbtn set). Requires an explicit "
+                         "--out-dir so a non-release payload cannot land in the "
+                         "release directory.")
     args = ap.parse_args()
 
     tables = [t.strip() for t in args.tables.split(",") if t.strip()]
     unknown = [t for t in tables if t not in EXPECTED]
+    if unknown and not args.allow_unpinned:
+        sys.exit(f"unknown table(s): {unknown}\nknown: {EXPECTED}\n"
+                 f"pass --allow-unpinned (with --out-dir) to export a preview build")
+    if unknown and Path(args.out_dir).expanduser() == OUT_DIR:
+        sys.exit(f"refusing: --allow-unpinned writes a NON-RELEASE payload, so it "
+                 f"must not target the release dir\n  {OUT_DIR}\n"
+                 f"pass an explicit --out-dir")
     if unknown:
-        sys.exit(f"unknown table(s): {unknown}\nknown: {EXPECTED}")
+        print(f"NOTE  exporting {len(unknown)} unpinned table(s) as a PREVIEW -- "
+              f"not a release payload:\n      {', '.join(unknown)}\n")
     out_dir = Path(args.out_dir).expanduser()
     if not out_dir.is_dir():
         sys.exit(f"out dir does not exist: {out_dir}")

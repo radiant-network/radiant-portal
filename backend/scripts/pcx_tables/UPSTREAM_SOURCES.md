@@ -608,7 +608,17 @@ the `is_initial_treatment` column those tables produce.
    `--skip-comments`, so this is latent rather than live, but any automation MUST pass
    that flag — or the six should be re-punctuated so correctness does not depend on a
    caller-supplied flag. A `grep` guard in CI would stop new ones appearing.
-9. **`pcx_30_medical_therapy_level` reads `protocol_name_unmasked_internal_use`**, while
+9. **A cohort expansion is planned but NOT executed.** `COHORT_EXPANSION_PLAN.md` in
+   this directory specifies widening the release from the curated ATRT /
+   Medulloblastoma cohort (970 patients) to every `stg_cbtn_enrollment_final`
+   patient who also has a `diagnosis` row (6,963, measured 2026-10-23), labelling
+   the newly admitted ones `diagnosis_type_cohort = 'Not Applicable'`. Nothing in
+   it has been applied — every count in §4 and §7 below still describes the
+   970-patient cohort. It carries a governance checkpoint and a default-off
+   `pcx_30_cohort_scope` var specifically so that a routine stage-1-then-rebuild
+   refresh, as instructed in §5, cannot publish the 7x cohort by accident. Read it
+   before any `dbt run` that follows a source refresh.
+10. **`pcx_30_medical_therapy_level` reads `protocol_name_unmasked_internal_use`**, while
    the source also carries `protocol_name_masked_for_release` (`Not Available` on 1,041
    of 42,745 rows). Both the identified and `_deid` builds choose the unmasked column
    explicitly, so the `_deid` release table — and the extracted CSV — publishes protocol

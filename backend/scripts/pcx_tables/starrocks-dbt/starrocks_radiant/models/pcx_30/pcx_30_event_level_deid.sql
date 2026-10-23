@@ -221,3 +221,125 @@ inner join pt_roster on dx.subject = pt_roster.research_id
 where
     research_study_name = 'CBTN'
     and event_type <> 'Initial CNS Tumor'
+
+union distinct
+
+-- Initial CNS Tumor for the NON-ATRT/Medulloblastoma cohort: the patient's FIRST
+-- initial-diagnosis row, taken as-is.
+--
+-- WHY THIS ARM EXISTS. The first arm filters cns_diagnosis_category to ATRT /
+-- Medulloblastoma, and the second filters event_type <> 'Initial CNS Tumor'. So
+-- before this arm, a patient outside those two categories was dropped by BOTH --
+-- silently losing their initial diagnosis, and with it the age_at_initial_dx_days
+-- anchor that is_initial_treatment depends on. Measured on prod 2026-10-23 under
+-- the expanded cohort: 3,313 of 6,963 patients had no event_level row at all
+-- (3,239 of them because an initial diagnosis was their ONLY event), and
+-- is_initial_treatment was 'no' for every newly admitted surgery.
+--
+-- SCOPED BY PATIENT, NOT BY ROW -- this is the load-bearing detail. The predicate is
+-- pt_roster.diagnosis_type_cohort = 'Not Applicable', i.e. "this PATIENT is not an
+-- ATRT/MB patient", NOT "this ROW is not an ATRT/MB diagnosis". 97 ATRT/MB patients
+-- also carry rows in other categories (measured 2026-10-23); a row-level predicate
+-- would give each of them a second Initial CNS Tumor event from arm 1 AND this arm.
+-- The cohort rule is that an ATRT/MB patient is represented by their ATRT/MB
+-- diagnosis, so they must be excluded here as patients.
+--
+-- SELF-GATING: under the default pcx_30_cohort_scope ('atrt_mb') the roster contains
+-- no 'Not Applicable' rows at all, so this arm matches nothing and contributes zero
+-- rows. The published table is unchanged unless the cohort is deliberately expanded.
+-- Verified by row-level comparison against the live table 2026-10-23.
+--
+-- ONE ROW PER PATIENT, NOT A COLLAPSE. Arm 1 aggregates a patient's initial rows
+-- (min age, group_concat of specimens) because they are all the same ATRT/MB
+-- diagnosis. That is wrong here: these patients' initial rows can carry DIFFERENT
+-- diagnoses (71 of 537 multi-row patients do), and group_concat'ing across them
+-- would manufacture a diagnosis the registry never recorded. So this arm picks the
+-- single earliest row and publishes it verbatim.
+--
+-- ORDERING, and its two traps:
+--   * age_at_event_days = -1 is the unknown-date sentinel, not an early date, so
+--     sorting on it naively would elect an undated row as "first". -1 and NULL are
+--     pushed LAST. Only 4 patients carry both a sentinel row and a real-age row, but
+--     for those 4 the naive order picks the wrong diagnosis. 56 patients have ONLY
+--     sentinel rows and still get their row, with the -1 preserved (as arm 1 does).
+--   * 56 patients have more than one row AT their earliest age -- 14 of them with
+--     differing cns_diagnosis_category and 24 with differing integrated diagnosis.
+--     "First" is genuinely ambiguous for those, so the remaining sort keys are
+--     alphabetical and exist ONLY to make the choice deterministic across rebuilds.
+--     They are not a clinical ranking. If which diagnosis wins matters for those 14,
+--     that is a decision to make explicitly rather than inherit from a sort.
+--
+-- 157 patients in this cohort have no 'Initial CNS Tumor' row at all and still get
+-- no initial event -- the registry simply never recorded one. Not fixable here.
+select
+    organization_name,
+    research_id,
+    event_type,
+    -- cast to int on EVERY arm, for the same float->decimal(38,9) promotion reason
+    -- documented on the two arms above.
+    cast(age_at_event_days as int) as age_at_event_days,
+    metastasis,
+    metastasis_location,
+    metastasis_location_other,
+    cns_diagnosis_category,
+    case
+        when
+            cns_integrated_diagnosis_cbtn like '%NOS or NEC%'
+            and opc_cns_integrated_diagnosis is not null
+            then opc_cns_integrated_diagnosis
+        when
+            cns_integrated_diagnosis_cbtn = 'Medulloblastoma, non-WNT/non-SHH'
+            and opc_mb_group is not null
+            then opc_mb_group
+        else cns_integrated_diagnosis_cbtn
+    end as cns_integrated_diagnosis,
+    case
+        when
+            cns_integrated_diagnosis_cbtn like '%NOS or NEC%'
+            and opc_cns_integrated_diagnosis is not null
+            then 'OpenPedCan'
+        when
+            cns_integrated_diagnosis_cbtn = 'Medulloblastoma, non-WNT/non-SHH'
+            and opc_mb_group is not null
+            then 'OpenPedCan'
+        else 'CBTN'
+    end as cns_integrated_diagnosis_source,
+    tumor_locations,
+    tumor_location_other
+from (
+    select
+        pt_roster.organization_name,
+        pt_roster.research_id,
+        dx.event_type,
+        dx.age_at_event_days,
+        dx.metastasis,
+        dx.metastasis_location,
+        dx.metastasis_location_other,
+        dx.cns_diagnosis_category,
+        dx.cns_integrated_diagnosis_cbtn,
+        dx.opc_cns_integrated_diagnosis,
+        dx.opc_mb_group,
+        dx.tumor_locations,
+        dx.tumor_location_other,
+        row_number() over (
+            partition by pt_roster.research_id
+            order by
+                case
+                    when dx.age_at_event_days is null then 1
+                    when dx.age_at_event_days = -1 then 1
+                    else 0
+                end,
+                dx.age_at_event_days,
+                dx.cns_diagnosis_category,
+                dx.cns_integrated_diagnosis_cbtn,
+                dx.tumor_locations,
+                dx.metastasis
+        ) as rn
+    from dx
+    inner join pt_roster on dx.subject = pt_roster.research_id
+    where
+        dx.research_study_name = 'CBTN'
+        and dx.event_type = 'Initial CNS Tumor'
+        and pt_roster.diagnosis_type_cohort = 'Not Applicable'
+) first_initial
+where rn = 1
