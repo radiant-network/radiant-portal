@@ -52,7 +52,7 @@ func Test_LoadTemplates_TenantWithoutLabels_DefaultsAndWarning(t *testing.T) {
 	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
 	tmpl, err := templates.For("qlin", KindGermline)
 	require.NoError(t, err)
-	f := openRendered(t, tmpl, sampleReport())
+	f := openRendered(t, tmpl, dryRunReport())
 	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
 	require.NoError(t, err)
 	assert.Equal(t, "Heterozygous\n(Mother het, Father ref)", value)
@@ -77,7 +77,7 @@ func Test_LoadTemplates_TenantLabelsOverrideDefaults(t *testing.T) {
 	assert.Equal(t, types.TemplateStatusOK, templates.Status())
 	tmpl, err := templates.For("qlin", KindGermline)
 	require.NoError(t, err)
-	f := openRendered(t, tmpl, sampleReport())
+	f := openRendered(t, tmpl, dryRunReport())
 	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
 	require.NoError(t, err)
 	assert.Equal(t, "Hz\n(M het, F ref)", value)
@@ -94,10 +94,25 @@ func Test_LoadTemplates_TenantLabelsIncomplete_DefaultsAndWarning(t *testing.T) 
 	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
 	tmpl, err := templates.For("qlin", KindGermline)
 	require.NoError(t, err)
-	f := openRendered(t, tmpl, sampleReport())
+	f := openRendered(t, tmpl, dryRunReport())
 	value, err := f.GetCellValue("chr1_g.100A>T", "B2")
 	require.NoError(t, err)
 	assert.Equal(t, "Hz\n(Mother het, Father ref)", value)
+}
+
+func Test_LoadTemplates_UnknownValueAtRender_StatusWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", withCell("B2", "{{ clinvar .Variant.ClinvarInterpretation }}"), nil)
+	writeLabels(t, dir, "qlin", fullLabels(nil))
+	templates := LoadTemplates(dir)
+	require.Equal(t, types.TemplateStatusOK, templates.Status())
+	report := dryRunReport()
+	report.Variant.ClinvarInterpretation = []string{"Pathogenic/Likely pathogenic"}
+
+	_, err := templates.Render("qlin", KindGermline, []types.TranscriptReport{report})
+
+	require.NoError(t, err)
+	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
 }
 
 func Test_LoadTemplates_TenantLabelsBadJSON_TemplatesSkipped(t *testing.T) {
@@ -202,18 +217,19 @@ func Test_LoadTemplates_UnexpectedFile_Warning(t *testing.T) {
 	assert.Equal(t, types.TemplateStatusWarning, templates.Status())
 }
 
-func Test_LoadTemplates_SomaticNotSupportedYet_IgnoredWithoutWarning(t *testing.T) {
+func Test_LoadTemplates_SomaticAndGermlineOfOneTenant(t *testing.T) {
 	dir := t.TempDir()
 	writeLabels(t, dir, "qlin", fullLabels(nil))
 	writeFixture(t, dir, "transcripts_germline_qlin.xlsx", fixtureCells, nil)
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "transcripts_somatic_qlin.xlsx"), []byte("not even xlsx"), 0o600))
+	writeFixture(t, dir, "transcripts_somatic_qlin.xlsx", withCell("B2", "{{ oncogenicity .Transcript.SomaticInterpretation }}"), nil)
 
 	templates := LoadTemplates(dir)
 
-	assert.Equal(t, []string{"transcripts_germline_qlin.xlsx"}, templates.Files())
+	assert.Equal(t, []string{"transcripts_germline_qlin.xlsx", "transcripts_somatic_qlin.xlsx"}, templates.Files())
 	assert.Equal(t, types.TemplateStatusOK, templates.Status())
-	_, err := templates.For("qlin", KindSomatic)
-	assert.ErrorIs(t, err, ErrTemplateMissing)
+	tmpl, err := templates.For("qlin", KindSomatic)
+	require.NoError(t, err)
+	assert.Equal(t, KindSomatic, tmpl.Kind)
 }
 
 func Test_LoadTemplates_BrokenFile_SkippedWarning(t *testing.T) {
@@ -353,6 +369,14 @@ func Test_ParseTemplate_QlinGermlineFile_Loads(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, tmpl.header, 11)
 	assert.Len(t, tmpl.repeat, 11)
+}
+
+func Test_ParseTemplate_QlinSomaticFile_Loads(t *testing.T) {
+	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_somatic_qlin.xlsx"), KindSomatic, "qlin", en)
+
+	require.NoError(t, err)
+	assert.Len(t, tmpl.header, 13)
+	assert.Len(t, tmpl.repeat, 13)
 }
 
 func Test_TemplateFromFilename(t *testing.T) {

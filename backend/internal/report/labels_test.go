@@ -1,10 +1,14 @@
 package report
 
 import (
+	"context"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -36,7 +40,7 @@ func Test_DefaultLabels_HoldEveryKeyAndNothingElse(t *testing.T) {
 
 func Test_LabelKeys_LowerCaseUnlessCode(t *testing.T) {
 	for _, k := range labelKeys {
-		assert.Regexp(t, `^[a-z_]+\.[a-z_]+$|^zygosity\.[A-Z]+$|^classification\.LA[0-9-]+$`, k)
+		assert.Regexp(t, `^[a-z_]+\.[a-z_0-9]+$|^zygosity\.[A-Z]+$|^(classification|oncogenicity)\.LA[0-9-]+$`, k)
 	}
 }
 
@@ -83,4 +87,50 @@ func Test_LabelsFromFilename(t *testing.T) {
 		_, ok := labelsFromFilename(name)
 		assert.False(t, ok, name)
 	}
+}
+
+// recordingHandler keeps the warnings emitted while a test runs.
+type recordingHandler struct {
+	slog.Handler
+	records *[]slog.Record
+}
+
+func (h recordingHandler) Handle(_ context.Context, r slog.Record) error {
+	*h.records = append(*h.records, r)
+	return nil
+}
+
+func captureLogs(t *testing.T) *[]slog.Record {
+	t.Helper()
+	records := &[]slog.Record{}
+	previous := slog.Default()
+	slog.SetDefault(slog.New(recordingHandler{Handler: previous.Handler(), records: records}))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+	return records
+}
+
+func Test_LabelSet_UnknownValue_LoggedOnceAndRecorded(t *testing.T) {
+	records := captureLogs(t)
+	set := labelSet{name: "qlin", defaults: en.defaults, misses: &sync.Map{}}
+
+	assert.Equal(t, "weird", set.clinvar([]string{"weird"}))
+	assert.Equal(t, "weird", set.clinvar([]string{"weird"}))
+	assert.Equal(t, "UNK", set.zygosity(proband("UNK", "", "", ""), false))
+
+	require.Len(t, *records, 2)
+	assert.Equal(t, "report label unknown value, raw value rendered", (*records)[0].Message)
+	assert.True(t, hasMisses(set.misses))
+	_, clinvarMissed := set.misses.Load("clinvar.weird")
+	_, zygosityMissed := set.misses.Load("zygosity.UNK")
+	assert.True(t, clinvarMissed)
+	assert.True(t, zygosityMissed)
+}
+
+func Test_LabelSet_KnownValue_NotRecorded(t *testing.T) {
+	set := labelSet{name: "qlin", defaults: en.defaults, misses: &sync.Map{}}
+
+	assert.Equal(t, "Pathogenic", set.clinvar([]string{"Pathogenic"}))
+	assert.Equal(t, "", set.classification(&types.ReportGermlineInterpretation{}))
+
+	assert.False(t, hasMisses(set.misses))
 }

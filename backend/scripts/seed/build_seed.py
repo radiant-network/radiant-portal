@@ -119,15 +119,16 @@ def portal_rows(pg):
                                             "sequencing_read_technology_code", "platform_code", "tenant_code"],
                   [r + [TENANT] for r in pg["sequencing_experiment"]], pg_q)]
     case_rows = []
-    for cid, pid, catalog, status, lab, condition, created, updated, priority, ctype, category, physician, ordering, submitter in pg["cases"]:
+    for (cid, pid, catalog, status, lab, condition, created, updated, priority, ctype, category, physician, ordering, submitter,
+         hypothesis) in pg["cases"]:
         case_rows.append(f"({cid}, {pid}, (SELECT id FROM project WHERE code = 'CBTN' AND tenant_code = '{TENANT}'), "
                          f"(SELECT id FROM analysis_catalog WHERE code = '{catalog}' AND tenant_code = '{TENANT}'), {pg_q(status)}, {pg_q(lab)}, "
                          f"'{TENANT}', {pg_q(condition)}, 'mondo', {pg_q(created)}, {pg_q(updated)}, {pg_q(priority)}, {pg_q(ctype)}, "
-                         f"{pg_q(category)}, {pg_q(physician)}, {pg_q(ordering)}, {pg_q(submitter)})")
+                         f"{pg_q(category)}, {pg_q(physician)}, {pg_q(ordering)}, {pg_q(submitter)}, {pg_q(hypothesis)})")
     out.append("INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, "
                "primary_condition, condition_code_system, created_on, updated_on, priority_code, case_type_code, case_category_code, "
-               "ordering_physician, ordering_organization_code, submitter_case_id) VALUES\n    " + ",\n    ".join(case_rows) + ";"
-               if case_rows else "/* cases: no rows */")
+               "ordering_physician, ordering_organization_code, submitter_case_id, diagnosis_hypothesis) VALUES\n    "
+               + ",\n    ".join(case_rows) + ";" if case_rows else "/* cases: no rows */")
     out += [insert("family", ["id", "case_id", "family_member_id", "relationship_to_proband_code", "affected_status_code", "fetus_id",
                               "tenant_code"],
                    [r + [TENANT] for r in pg["family"]], pg_q),
@@ -139,7 +140,12 @@ def portal_rows(pg):
                                 "tenant_code"], [r + [TENANT] for r in pg["document"]], pg_q),
             insert("task_has_document", ["task_id", "document_id", "type"], pg["task_has_document"], pg_q),
             insert("obs_categorical", ["id", "case_id", "patient_id", "observation_code", "coding_system", "code_value", "onset_code",
-                                       "interpretation_code", "note", "tenant_code"], [r + [TENANT] for r in pg["obs_categorical"]], pg_q),
+                                       "interpretation_code", "note", "fetus_id", "exam_code", "tenant_code"],
+                   [r + [TENANT] for r in pg["obs_categorical"]], pg_q),
+            insert("obs_string", ["id", "case_id", "patient_id", "observation_code", "value", "interpretation_code", "fetus_id", "exam_code",
+                                  "tenant_code"], [r + [TENANT] for r in pg["obs_string"]], pg_q),
+            insert("family_history", ["id", "case_id", "patient_id", "family_member_code", "condition", "tenant_code"],
+                   [r + [TENANT] for r in pg["family_history"]], pg_q),
             insert("interpretation_germline", ["sequencing_id", "case_id", "locus_id", "transcript_id", "condition", "classification",
                                                "classification_criterias", "transmission_modes", "interpretation", "created_by_name",
                                                "created_at", "updated_by_name", "updated_at", "tenant_code"],
@@ -160,7 +166,8 @@ def sequence_resets():
     return [f"SELECT setval('{seq}', GREATEST((SELECT COALESCE(MAX(id), 1) FROM {table}), 1));"
             for seq, table in [("patient_id_seq", "patient"), ("fetus_id_seq", "fetus"), ("sample_id_seq", "sample"), ("sequencing_experiment_id_seq", "sequencing_experiment"),
                                ("case_id_seq", "cases"), ("family_id_seq", "family"), ("task_id_seq", "task"), ("document_id_seq", "document"),
-                               ("observation_coding_id_seq", "obs_categorical"), ("project_id_seq", "project")]]
+                               ("observation_coding_id_seq", "obs_categorical"), ("obs_string_id_seq", "obs_string"),
+                               ("family_history_id_seq", "family_history"), ("project_id_seq", "project")]]
 
 
 VAR_COLS = ["locus_id", "chromosome", "start", "end", "reference", "alternate", "locus", "hgvsg", "hgvsc", "hgvsp", "dna_change", "aa_change",
@@ -168,7 +175,8 @@ VAR_COLS = ["locus_id", "chromosome", "start", "end", "reference", "alternate", 
             "vep_impact", "impact_score", "clinvar_interpretation", "clinvar_name", "rsnumber", "gnomad_v3_af", "omim_inheritance_code",
             "germline_pc_wgs", "germline_pn_wgs", "germline_pf_wgs", "germline_pc_wgs_affected", "germline_pn_wgs_affected",
             "germline_pf_wgs_affected", "germline_pc_wgs_not_affected", "germline_pn_wgs_not_affected", "germline_pf_wgs_not_affected",
-            "somatic_pc_tn_wgs", "somatic_pn_tn_wgs", "somatic_pf_tn_wgs"]
+            "somatic_pc_tn_wgs", "somatic_pn_tn_wgs", "somatic_pf_tn_wgs", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio",
+            "cmc_tier"]
 omim_symbols = {o[0] for o in genomics.OMIM}
 # Annotation columns of snv__variant taken from the export as they are; the rest (frequencies) is the fake cohort's.
 REAL_COLS = {"is_mane_select": ("mane", lambda x: x == "1"), "is_canonical": ("canonical", lambda x: x == "1")}
@@ -182,6 +190,14 @@ def variant_row(v, pc, pn, sc, sn):
            f"{v.symbol}({v.hgvsc})" if v.clinvar and v.hgvsc else None, v.rs, v.af, ["AD"] if v.symbol in omim_symbols else None,
            pc, pn, round(pc / pn, 6) if pn else 0.0, pc, pn, round(pc / pn, 6) if pn else 0.0, 0, 0, 0.0,
            sc, sn, round(sc / sn, 6) if sn else 0.0]
+    # One variant in three is in the COSMIC Cancer Mutation Census; one of those in four has no mutated sample.
+    cosmic = genomics.h("cosmic", v.locus_id) % 12
+    if cosmic < 4:
+        mutated = 0 if cosmic == 3 else 5 + genomics.h("cosmic_n", v.locus_id) % 300
+        row += [f"https://cancer.sanger.ac.uk/cosmic/mutation/overview?id={v.locus_id % 1000000}&genome=37", mutated, mutated / 1000,
+                ["1", "2", "3", "Other"][cosmic]]
+    else:
+        row += [None, None, None, None]
     if v.real:
         for col, (key, conv) in REAL_COLS.items():
             row[VAR_COLS.index(col)] = None if v.real[key] is None else conv(v.real[key])
@@ -402,7 +418,9 @@ if args.migrate_from:
     sys.exit()
 g, pg, sr, ids = genomics.build(patients, data, ID_BASE, LOCI)
 genomics.add_relapse_samples(pg, ids)
-genomics.add_prenatal_case(g, pg, sr, ids, next(p.org for p in sorted(patients.values(), key=lambda p: p.rid) if hasattr(p, "portal_id")))
+prenatal_org = next(p.org for p in sorted(patients.values(), key=lambda p: p.rid) if hasattr(p, "portal_id"))
+genomics.add_prenatal_case(g, pg, sr, ids, prenatal_org)
+genomics.add_prenatal_examples(g, pg, sr, ids, prenatal_org)
 
 # ---------------------------------------------------------------- Postgres
 P = [f"""/* Tenant {TENANT} for the local stack. Generated by scripts/seed/build_seed.py; do not hand-edit.
@@ -411,8 +429,8 @@ P = [f"""/* Tenant {TENANT} for the local stack. Generated by scripts/seed/build
 BEGIN;"""]
 # In QA the tenant's roles and grants are managed by hand (create-tenant, admin UI): never delete them.
 tenant_tables = ["occurrence_note", "occurrence_flag", "interpretation_germline", "interpretation_somatic", "obs_categorical",
-                 "task_has_document", "task_context", "case_has_sequencing_experiment", "family", "cases", "task", "document",
-                 "sequencing_experiment", "sample", "fetus", "patient", "analysis_catalog", "project"]
+                 "obs_string", "task_has_document", "task_context", "case_has_sequencing_experiment", "family_history", "family",
+                 "cases", "task", "document", "sequencing_experiment", "sample", "fetus", "patient", "analysis_catalog", "project"]
 for table in tenant_tables + ([] if QA else ["user_role", "role_action", "role", "organization"]):
     if table == "task_has_document":
         P.append(f"DELETE FROM task_has_document WHERE task_id IN (SELECT id FROM task WHERE tenant_code = '{TENANT}');")
@@ -431,6 +449,9 @@ P.append(insert("project", ["code", "name", "description", "tenant_code"],
                 [["CBTN", "Children's Brain Tumor Network", "Pediatric CNS tumor cohort, tumor-normal and germline", TENANT]], pg_q))
 P.append(insert("analysis_catalog", ["code", "name", "tenant_code"],
                 [["CBTN-SOM", "Pediatric CNS tumor, tumor-normal", TENANT], ["CBTN-GERM", "Pediatric cancer predisposition, germline", TENANT]], pg_q))
+# Never deleted: in QA the tenant's exam catalog may hold more than the seed's exams.
+P.append(insert("exam", ["code", "name_en", "name_fr", "tenant_code"], [[*e, TENANT] for e in genomics.EXAMS], pg_q,
+                " ON CONFLICT (code, tenant_code) DO NOTHING"))
 P += portal_rows(pg)
 P += sequence_resets()
 P.append("COMMIT;")
@@ -534,7 +555,7 @@ REFERENCE = [] if QA else [
                 [["SMARCB1", "Neoplasm (HP:0002664)", "Neoplasm", "HP:0002664"], ["TP53", "Neoplasm (HP:0002664)", "Neoplasm", "HP:0002664"]]),
     insert(f"{SHARED_DB}.mondo_term", ["id", "name", "term"],
                 [[i, n, f"{i} {n}"] for i, n in sorted(set(genomics.MONDO.values()) | set(genomics.EXTRA_MONDO))]),
-    insert(f"{SHARED_DB}.hpo_term", ["id", "name", "term"], [[i, n, f"{i} {n}"] for i, n in genomics.HPO])]
+    insert(f"{SHARED_DB}.hpo_term", ["id", "name", "term"], [[i, n, f"{i} {n}"] for i, n in genomics.HPO + genomics.PRENATAL_HPO])]
 S += REFERENCE
 S += occurrence_rows(sr)
 

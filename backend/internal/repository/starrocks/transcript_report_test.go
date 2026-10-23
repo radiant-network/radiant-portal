@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_TranscriptReport_GetGermlineReportContext(t *testing.T) {
+func Test_TranscriptReport_GetReportContext(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "transcript_report"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTranscriptReportRepository(database.StarrocksDB{DB: env.Starrocks})
-		reportContext, err := repo.GetGermlineReportContext(t.Context(), 1, 1, 5)
+		reportContext, err := repo.GetReportContext(t.Context(), 1, 1, 5)
 		assert.NoError(t, err)
 		if assert.NotNil(t, reportContext) {
 			assert.Equal(t, 1, reportContext.Part)
@@ -23,10 +23,10 @@ func Test_TranscriptReport_GetGermlineReportContext(t *testing.T) {
 	})
 }
 
-func Test_TranscriptReport_GetGermlineReportContext_TaskNotOfCase_ReturnsNil(t *testing.T) {
+func Test_TranscriptReport_GetReportContext_TaskNotOfCase_ReturnsNil(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "transcript_report"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTranscriptReportRepository(database.StarrocksDB{DB: env.Starrocks})
-		reportContext, err := repo.GetGermlineReportContext(t.Context(), 1, 1, 77)
+		reportContext, err := repo.GetReportContext(t.Context(), 1, 1, 77)
 		assert.NoError(t, err)
 		assert.Nil(t, reportContext)
 	})
@@ -163,6 +163,52 @@ func Test_TranscriptReport_ListReportOmim_NoSymbol(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "transcript_report"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTranscriptReportRepository(database.StarrocksDB{DB: env.Starrocks})
 		rows, err := repo.ListReportOmim(t.Context(), nil)
+		assert.NoError(t, err)
+		assert.Empty(t, rows)
+	})
+}
+
+func Test_TranscriptReport_ListSomaticReportOccurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "transcript_report"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTranscriptReportRepository(database.StarrocksDB{DB: env.Starrocks})
+		rows, err := repo.ListSomaticReportOccurrences(t.Context(), 1, 1, 5, []int{1000, 2000, 3000, 9999})
+		assert.NoError(t, err)
+		if assert.Len(t, rows, 2) {
+			tumorNormal := rows[0]
+			assert.Equal(t, int64(1000), tumorNormal.LocusID)
+			assert.Equal(t, "chr7:g.140753336A>T", tumorNormal.Hgvsg)
+			assert.Equal(t, "BRAF", tumorNormal.Symbol)
+			assert.Equal(t, "13961", tumorNormal.ClinvarName)
+			if assert.NotNil(t, tumorNormal.NormalSeqID) {
+				assert.Equal(t, 2, *tumorNormal.NormalSeqID)
+			}
+			assert.Equal(t, float32(0.5), tumorNormal.TumorAdRatio)
+			assert.Equal(t, 17, tumorNormal.TumorAdAlt)
+			assert.Equal(t, 34, tumorNormal.TumorAdTotal)
+			if assert.NotNil(t, tumorNormal.GnomadAc) {
+				assert.Equal(t, 2, *tumorNormal.GnomadAc)
+			}
+			assert.Equal(t, "https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=29491889&genome=37", tumorNormal.CosmicMutationURL)
+			if assert.NotNil(t, tumorNormal.CosmicSampleMutated) {
+				assert.Equal(t, 99, *tumorNormal.CosmicSampleMutated)
+			}
+			assert.Equal(t, "1", tumorNormal.CosmicTier)
+
+			tumorOnly := rows[1]
+			assert.Equal(t, int64(2000), tumorOnly.LocusID)
+			assert.Nil(t, tumorOnly.NormalSeqID)
+			assert.Equal(t, 3, tumorOnly.TumorAdAlt)
+			assert.Nil(t, tumorOnly.GnomadAc)
+			assert.Empty(t, tumorOnly.CosmicMutationURL)
+			assert.Nil(t, tumorOnly.CosmicSampleMutated)
+		}
+	})
+}
+
+func Test_TranscriptReport_ListSomaticReportOccurrences_OtherPartOrTask_NotReturned(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "transcript_report"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewTranscriptReportRepository(database.StarrocksDB{DB: env.Starrocks})
+		rows, err := repo.ListSomaticReportOccurrences(t.Context(), 1, 1, 5, []int{3000, 4000})
 		assert.NoError(t, err)
 		assert.Empty(t, rows)
 	})

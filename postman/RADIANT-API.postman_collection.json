@@ -913,7 +913,7 @@
           "response": []
         },
         {
-          "name": "Report",
+          "name": "Reports (xlsx)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -928,7 +928,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/-8318226658347712512/report",
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/reports/transcripts?locus_ids=-8318226658347712512",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -940,8 +940,14 @@
                 "1",
                 "1",
                 "1",
-                "-8318226658347712512",
-                "report"
+                "reports",
+                "transcripts"
+              ],
+              "query": [
+                {
+                  "key": "locus_ids",
+                  "value": "-8318226658347712512"
+                }
               ]
             }
           },
@@ -3978,6 +3984,47 @@
                 "74",
                 "-8318226658347712512",
                 "expanded"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reports (xlsx)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/reports/transcripts?locus_ids=-8318226658347712512",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "snv",
+                "1",
+                "1",
+                "1",
+                "reports",
+                "transcripts"
+              ],
+              "query": [
+                {
+                  "key": "locus_ids",
+                  "value": "-8318226658347712512"
+                }
               ]
             }
           },

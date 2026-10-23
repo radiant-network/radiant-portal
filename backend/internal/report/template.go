@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -33,13 +34,11 @@ const (
 	KindSomatic  Kind = "somatic"
 )
 
-// samples holds the dry-run input per report kind; a kind without one has no engine yet and its
-// files are ignored at load, not reported as broken.
-var samples = map[Kind]func() types.TranscriptReport{
-	KindGermline: sampleReport,
+// dryRunInputs holds the boot validation input per report kind and doubles as the list of known kinds.
+var dryRunInputs = map[Kind]func() types.TranscriptReport{
+	KindGermline: dryRunReport,
+	KindSomatic:  dryRunSomaticReport,
 }
-
-var knownKinds = map[Kind]bool{KindGermline: true, KindSomatic: true}
 
 type cellTemplate struct {
 	col  int
@@ -64,6 +63,7 @@ type Template struct {
 type Templates struct {
 	byKey   map[string]*Template
 	skipped int
+	misses  map[string]*sync.Map
 }
 
 func key(tenant string, kind Kind) string { return tenant + "/" + string(kind) }
@@ -72,7 +72,7 @@ func key(tenant string, kind Kind) string { return tenant + "/" + string(kind) }
 // file is logged and skipped so a bad template can't keep the API from booting; a report on that
 // tenant fails with ErrTemplateMissing instead.
 func LoadTemplates(dir string) *Templates {
-	t := &Templates{byKey: map[string]*Template{}}
+	t := &Templates{byKey: map[string]*Template{}, misses: map[string]*sync.Map{}}
 	if dir == "" {
 		slog.Warn("report templates disabled", slog.String("reason", TemplateDirEnv+" unset"))
 		return t
@@ -103,7 +103,7 @@ func LoadTemplates(dir string) *Templates {
 			t.skipped++
 			continue
 		}
-		if samples[kind] == nil {
+		if dryRunInputs[kind] == nil {
 			slog.Info("report template kind not supported yet, ignored", slog.String("file", e.Name()))
 			continue
 		}
@@ -146,7 +146,8 @@ func (t *Templates) resolveLabels(dir, tenant string, defaults labels) (labelSet
 		slog.Warn("report labels incomplete, defaults used", slog.String("tenant", tenant), slog.Any("keys", missing))
 		t.skipped++
 	}
-	return labelSet{tenant: file, defaults: defaults}, nil
+	t.misses[tenant] = &sync.Map{}
+	return labelSet{name: tenant, tenant: file, defaults: defaults, misses: t.misses[tenant]}, nil
 }
 
 func labelsFromFilename(name string) (string, bool) {
@@ -162,7 +163,7 @@ func templateFromFilename(name string) (Kind, string, bool) {
 		return "", "", false
 	}
 	kind, tenant, found := strings.Cut(strings.TrimSuffix(strings.TrimPrefix(name, templatePrefix), templateExt), "_")
-	if !found || tenant == "" || !knownKinds[Kind(kind)] {
+	if !found || tenant == "" || dryRunInputs[Kind(kind)] == nil {
 		return "", "", false
 	}
 	return Kind(kind), tenant, true
@@ -212,7 +213,7 @@ func parseTemplate(path string, kind Kind, tenant string, l labelSet) (*Template
 	}
 	// The zero report still carries one (zero) transcript so the placeholder row renders its else branches.
 	zero := types.TranscriptReport{Transcripts: []types.ReportTranscript{{}}}
-	for _, sample := range []types.TranscriptReport{samples[kind](), zero} {
+	for _, sample := range []types.TranscriptReport{dryRunInputs[kind](), zero} {
 		if _, err := t.Render([]types.TranscriptReport{sample}); err != nil {
 			return nil, fmt.Errorf("dry run: %w", err)
 		}
@@ -292,9 +293,14 @@ func (t *Templates) Status() string {
 		return types.TemplateStatusError
 	case t.skipped > 0:
 		return types.TemplateStatusWarning
-	default:
-		return types.TemplateStatusOK
 	}
+	// a data value no label file knows, seen at render: the boot was fine, the reports are not
+	for _, misses := range t.misses {
+		if hasMisses(misses) {
+			return types.TemplateStatusWarning
+		}
+	}
+	return types.TemplateStatusOK
 }
 
 func (t *Templates) Files() []string {
@@ -307,4 +313,13 @@ func (t *Templates) Files() []string {
 	}
 	sort.Strings(files)
 	return files
+}
+
+// Render fills the template of that tenant and kind; ErrTemplateMissing when none loaded.
+func (t *Templates) Render(tenant string, kind Kind, reports []types.TranscriptReport) ([]byte, error) {
+	tmpl, err := t.For(tenant, kind)
+	if err != nil {
+		return nil, fmt.Errorf("render report: %w", err)
+	}
+	return tmpl.Render(reports)
 }
