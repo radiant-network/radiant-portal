@@ -227,7 +227,7 @@ function GermlineInterpretationDialog({
     setIsReadOnly(true);
   };
 
-  const handleOpen = useCallback(async () => {
+  const handleOpen = () => {
     setOpen(true);
     setIsReadOnly(mode === 'view');
     caseEntity.trigger({ key: 'case-entity', caseId });
@@ -238,7 +238,7 @@ function GermlineInterpretationDialog({
       taskId,
       locusId,
     });
-  }, []);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

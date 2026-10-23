@@ -223,7 +223,7 @@ function SomaticInterpretationDialog({
     setIsReadOnly(true);
   };
 
-  const handleOpen = useCallback(async () => {
+  const handleOpen = () => {
     setOpen(true);
     setIsReadOnly(mode === 'view');
     caseEntity.trigger({ key: 'case-entity', caseId });
@@ -234,7 +234,7 @@ function SomaticInterpretationDialog({
       taskId,
       locusId,
     });
-  }, []);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
