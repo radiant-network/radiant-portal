@@ -64,16 +64,15 @@ func (r *TranscriptReportRepository) ListGermlineReportOccurrences(ctx context.C
 }
 
 // ListSomaticReportOccurrences is the somatic twin: occurrences of the tumor sequencing, with
-// the variant, gnomAD and the COSMIC mutation set row of the locus.
+// the variant (COSMIC columns included) and gnomAD.
 func (r *TranscriptReportRepository) ListSomaticReportOccurrences(ctx context.Context, part int, seqId int, taskId int, locusIds []int) ([]types.ReportOccurrenceRow, error) {
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s o", types.SomaticSNVOccurrenceTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("JOIN %s v ON v.locus_id = o.locus_id", types.VariantTable.TenantQualifiedName(ctx)))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s gnomad ON gnomad.locus_id = o.locus_id", types.GnomadGenomesV3Table.TenantQualifiedName(ctx)))
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s cms ON cms.locus_id = o.locus_id", types.CosmicMutationSetTable.TenantQualifiedName(ctx)))
 	tx = tx.Select("o.locus_id, v.hgvsg, v.rsnumber, v.chromosome, v.start, v.reference, v.alternate, v.symbol, " +
 		"v.clinvar_name, v.clinvar_interpretation, o.normal_seq_id, o.tumor_ad_ratio, o.tumor_ad_alt, o.tumor_ad_total, " +
 		"gnomad.af AS gnomad_af, gnomad.ac AS gnomad_ac, gnomad.an AS gnomad_an, gnomad.hom AS gnomad_hom, " +
-		"cms.cosmic_id, cms.sample_mutated AS cosmic_sample_mutated, cms.tier AS cosmic_tier")
+		"v.cmc_mutation_url AS cosmic_mutation_url, v.cmc_sample_mutated AS cosmic_sample_mutated, v.cmc_tier AS cosmic_tier")
 	tx = tx.Where("o.part = ? AND o.tumor_seq_id = ? AND o.task_id = ? AND o.locus_id IN (?)", part, seqId, taskId, locusIds)
 	tx = tx.Order("o.locus_id ASC")
 

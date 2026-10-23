@@ -608,18 +608,6 @@ CREATE TABLE IF NOT EXISTS {shared}.`gnomad_genomes_v3` (
     `hom` INT(11)
 );
 
-CREATE TABLE IF NOT EXISTS {shared}.`cosmic_mutation_set` (
-    `locus_id`       bigint(20)   NOT NULL,
-    `mutation_url`   varchar(255) NULL,
-    `shared_aa`      INT          NULL,
-    `cosmic_id`      varchar(32)  NULL,
-    `sample_mutated` INT          NULL,
-    `sample_tested`  INT          NULL,
-    `tier`           varchar(8)   NULL,
-    `sample_ratio`   double       NULL
-) ENGINE=OLAP
-DUPLICATE KEY(`locus_id`);
-
 CREATE TABLE IF NOT EXISTS {shared}.`topmed_bravo` (
     `locus_id` bigint(20) NOT NULL,
     `af` double NULL,

@@ -115,7 +115,7 @@ func Test_GetSomaticSNVTranscriptReportsXlsx_Integration(t *testing.T) {
 		assert.Equal(t, "50%\n(17/34 lectures)", rows[1][1])
 		assert.Equal(t, "Somatique", rows[1][2])
 		assert.Equal(t, "0.0000123\n(2 / 152000 allèles)", rows[1][3])
-		assert.Equal(t, "99\n(COSV56056643)", rows[1][4])
+		assert.Equal(t, "99\n(29491889)", rows[1][4])
 		assert.Equal(t, "COSMIC : Tier 1", rows[1][6])
 		assert.Equal(t, "Oui", rows[1][8])
 		assert.Equal(t, "Non", rows[2][8])

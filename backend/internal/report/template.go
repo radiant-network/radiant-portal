@@ -34,10 +34,10 @@ const (
 	KindSomatic  Kind = "somatic"
 )
 
-// samples holds the dry-run input per report kind and doubles as the list of known kinds.
-var samples = map[Kind]func() types.TranscriptReport{
-	KindGermline: sampleReport,
-	KindSomatic:  sampleSomaticReport,
+// dryRunInputs holds the boot validation input per report kind and doubles as the list of known kinds.
+var dryRunInputs = map[Kind]func() types.TranscriptReport{
+	KindGermline: dryRunReport,
+	KindSomatic:  dryRunSomaticReport,
 }
 
 type cellTemplate struct {
@@ -103,7 +103,7 @@ func LoadTemplates(dir string) *Templates {
 			t.skipped++
 			continue
 		}
-		if samples[kind] == nil {
+		if dryRunInputs[kind] == nil {
 			slog.Info("report template kind not supported yet, ignored", slog.String("file", e.Name()))
 			continue
 		}
@@ -163,7 +163,7 @@ func templateFromFilename(name string) (Kind, string, bool) {
 		return "", "", false
 	}
 	kind, tenant, found := strings.Cut(strings.TrimSuffix(strings.TrimPrefix(name, templatePrefix), templateExt), "_")
-	if !found || tenant == "" || samples[Kind(kind)] == nil {
+	if !found || tenant == "" || dryRunInputs[Kind(kind)] == nil {
 		return "", "", false
 	}
 	return Kind(kind), tenant, true
@@ -213,7 +213,7 @@ func parseTemplate(path string, kind Kind, tenant string, l labelSet) (*Template
 	}
 	// The zero report still carries one (zero) transcript so the placeholder row renders its else branches.
 	zero := types.TranscriptReport{Transcripts: []types.ReportTranscript{{}}}
-	for _, sample := range []types.TranscriptReport{samples[kind](), zero} {
+	for _, sample := range []types.TranscriptReport{dryRunInputs[kind](), zero} {
 		if _, err := t.Render([]types.TranscriptReport{sample}); err != nil {
 			return nil, fmt.Errorf("dry run: %w", err)
 		}
@@ -319,7 +319,7 @@ func (t *Templates) Files() []string {
 func (t *Templates) Render(tenant string, kind Kind, reports []types.TranscriptReport) ([]byte, error) {
 	tmpl, err := t.For(tenant, kind)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("render report: %w", err)
 	}
 	return tmpl.Render(reports)
 }

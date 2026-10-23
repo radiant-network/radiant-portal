@@ -215,7 +215,7 @@ func (r *InterpretationsRepository) ListGermlineForReport(ctx context.Context, c
 	for i := range daos {
 		mapped, err := r.mapToInterpretationGermlineWith(ctx, &daos[i], false)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("map germline interpretation %s: %w", daos[i].ID, err)
 		}
 		interpretations = append(interpretations, *mapped)
 	}
@@ -294,7 +294,7 @@ func (r *InterpretationsRepository) ListSomaticForReport(ctx context.Context, ca
 	for i := range daos {
 		mapped, err := r.mapToInterpretationSomaticWith(ctx, &daos[i], false)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("map somatic interpretation %s: %w", daos[i].ID, err)
 		}
 		interpretations = append(interpretations, *mapped)
 	}

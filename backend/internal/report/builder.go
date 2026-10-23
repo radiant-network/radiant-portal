@@ -4,6 +4,7 @@ package report
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 
@@ -149,7 +150,7 @@ func (b *Builder) build(ctx context.Context, caseId int, seqId int, taskId int, 
 
 	interpretations, err := attachInterpretations(ctx, strconv.Itoa(caseId), strconv.Itoa(seqId), foundLociAsStrings)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("attach interpretations: %w", err)
 	}
 
 	consequences, err := b.data.ListReportConsequences(ctx, foundLoci)
@@ -235,10 +236,20 @@ func buildVariant(row types.ReportOccurrenceRow) types.ReportVariant {
 		}
 	}
 	// COSMIC counts as known only with an id and at least one mutated sample, the arranger rule.
-	if row.CosmicID != "" && deref(row.CosmicSampleMutated) > 0 {
-		variant.Cosmic = &types.ReportCosmic{CosmicID: row.CosmicID, SampleMutated: deref(row.CosmicSampleMutated), Tier: row.CosmicTier}
+	if cosmicID := cosmicIDFromURL(row.CosmicMutationURL); cosmicID != "" && deref(row.CosmicSampleMutated) > 0 {
+		variant.Cosmic = &types.ReportCosmic{CosmicID: cosmicID, SampleMutated: deref(row.CosmicSampleMutated), Tier: row.CosmicTier}
 	}
 	return variant
+}
+
+// cosmicIDFromURL reads the mutation id out of cmc_mutation_url (`.../overview?id=<id>&genome=37`),
+// the only COSMIC identifier the variant table carries.
+func cosmicIDFromURL(mutationURL string) string {
+	parsed, err := url.Parse(mutationURL)
+	if err != nil {
+		return ""
+	}
+	return parsed.Query().Get("id")
 }
 
 func buildOccurrence(row types.ReportOccurrenceRow) types.ReportOccurrence {

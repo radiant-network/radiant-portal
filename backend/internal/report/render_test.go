@@ -33,7 +33,7 @@ func openRendered(t *testing.T, tmpl *Template, reports ...types.TranscriptRepor
 }
 
 func reportWith(hgvsg string, transcripts ...types.ReportTranscript) types.TranscriptReport {
-	report := sampleReport()
+	report := dryRunReport()
 	report.Variant.Hgvsg = hgvsg
 	report.Transcripts = transcripts
 	return report
@@ -210,7 +210,7 @@ func Test_Render_QlinGermlineFile_SampleReport(t *testing.T) {
 	tmpl, err := parseTemplate(filepath.Join("testdata", "transcripts_germline_qlin.xlsx"), KindGermline, "qlin", en)
 	require.NoError(t, err)
 
-	f := openRendered(t, tmpl, sampleReport())
+	f := openRendered(t, tmpl, dryRunReport())
 
 	sheet := "chr1_g.100A>T"
 	assert.Equal(t, []string{sheet}, f.GetSheetList())

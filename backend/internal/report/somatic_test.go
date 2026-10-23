@@ -13,7 +13,7 @@ func somaticOccurrenceRow(locusId int64) types.ReportOccurrenceRow {
 		LocusID: locusId, Hgvsg: "chr7:g.140753336A>T", Symbol: "BRAF", ClinvarName: "13961",
 		NormalSeqID: ptr(2), TumorAdRatio: 0.5, TumorAdAlt: 17, TumorAdTotal: 34,
 		GnomadAf: ptr(0.0000123), GnomadAc: ptr(2), GnomadAn: ptr(152000), GnomadHom: ptr(0),
-		CosmicID: "COSV56056643", CosmicSampleMutated: ptr(99), CosmicTier: "1",
+		CosmicMutationURL: "https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=29491889&genome=37", CosmicSampleMutated: ptr(99), CosmicTier: "1",
 	}
 }
 
@@ -38,7 +38,7 @@ func Test_BuildSomatic_AssemblesReport(t *testing.T) {
 		report := reports[0]
 		assert.Equal(t, types.ReportCase{CaseID: 1, SeqID: 1, TaskID: 5, SubmitterPatientID: "MRN-1", SubmitterSampleID: "S-1", GenomeBuild: "GRCh38"}, report.Case)
 		assert.Equal(t, types.ReportOccurrence{TumorAdRatio: 0.5, TumorAdAlt: 17, TumorAdTotal: 34, NormalSeqID: 2}, report.Occurrence)
-		assert.Equal(t, &types.ReportCosmic{CosmicID: "COSV56056643", SampleMutated: 99, Tier: "1"}, report.Variant.Cosmic)
+		assert.Equal(t, &types.ReportCosmic{CosmicID: "29491889", SampleMutated: 99, Tier: "1"}, report.Variant.Cosmic)
 		assert.Equal(t, &types.ReportGnomad{Af: 0.0000123, Ac: 2, An: 152000, Hom: 0}, report.Variant.Gnomad)
 		if assert.Len(t, report.Transcripts, 1) {
 			if assert.NotNil(t, report.Transcripts[0].SomaticInterpretation) {
@@ -98,7 +98,7 @@ func Test_BuildSomatic_CosmicWithoutMutatedSample_Absent(t *testing.T) {
 
 func Test_BuildSomatic_NoCosmicRow_Absent(t *testing.T) {
 	row := somaticOccurrenceRow(1000)
-	row.CosmicID, row.CosmicSampleMutated, row.CosmicTier = "", nil, ""
+	row.CosmicMutationURL, row.CosmicSampleMutated, row.CosmicTier = "", nil, ""
 	data := &fakeData{reportContext: &types.ReportContext{Part: 1}, occurrences: []types.ReportOccurrenceRow{row}}
 
 	reports, err := newBuilder(data, &fakeInterpretations{}).BuildSomatic(t.Context(), 1, 1, 5, []int{1000})
@@ -116,4 +116,29 @@ func Test_BuildSomatic_InterpretationError_Propagates(t *testing.T) {
 
 	assert.ErrorIs(t, err, assert.AnError)
 	assert.ErrorContains(t, err, "list somatic interpretations")
+}
+
+func Test_CosmicIDFromURL_ReadsIdParam(t *testing.T) {
+	assert.Equal(t, "29491889", cosmicIDFromURL("https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=29491889&genome=37"))
+}
+
+func Test_CosmicIDFromURL_NoIdParam_Empty(t *testing.T) {
+	assert.Equal(t, "", cosmicIDFromURL("https://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=37"))
+	assert.Equal(t, "", cosmicIDFromURL(""))
+}
+
+func Test_CosmicIDFromURL_Malformed_Empty(t *testing.T) {
+	assert.Equal(t, "", cosmicIDFromURL("://not a url"))
+}
+
+func Test_BuildSomatic_CosmicURLWithoutId_Absent(t *testing.T) {
+	row := somaticOccurrenceRow(1000)
+	row.CosmicMutationURL = "https://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=37"
+	data := &fakeData{reportContext: &types.ReportContext{Part: 1}, occurrences: []types.ReportOccurrenceRow{row}}
+
+	reports, err := newBuilder(data, &fakeInterpretations{}).BuildSomatic(t.Context(), 1, 1, 5, []int{1000})
+	assert.NoError(t, err)
+	if assert.Len(t, reports, 1) {
+		assert.Nil(t, reports[0].Variant.Cosmic)
+	}
 }

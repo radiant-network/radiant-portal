@@ -188,7 +188,7 @@ func Test_TranscriptReport_ListSomaticReportOccurrences(t *testing.T) {
 			if assert.NotNil(t, tumorNormal.GnomadAc) {
 				assert.Equal(t, 2, *tumorNormal.GnomadAc)
 			}
-			assert.Equal(t, "COSV56056643", tumorNormal.CosmicID)
+			assert.Equal(t, "https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=29491889&genome=37", tumorNormal.CosmicMutationURL)
 			if assert.NotNil(t, tumorNormal.CosmicSampleMutated) {
 				assert.Equal(t, 99, *tumorNormal.CosmicSampleMutated)
 			}
@@ -199,7 +199,7 @@ func Test_TranscriptReport_ListSomaticReportOccurrences(t *testing.T) {
 			assert.Nil(t, tumorOnly.NormalSeqID)
 			assert.Equal(t, 3, tumorOnly.TumorAdAlt)
 			assert.Nil(t, tumorOnly.GnomadAc)
-			assert.Empty(t, tumorOnly.CosmicID)
+			assert.Empty(t, tumorOnly.CosmicMutationURL)
 			assert.Nil(t, tumorOnly.CosmicSampleMutated)
 		}
 	})

@@ -173,7 +173,7 @@ type ReportOccurrenceRow struct {
 	TumorAdRatio        float32
 	TumorAdAlt          int
 	TumorAdTotal        int
-	CosmicID            string
+	CosmicMutationURL   string
 	CosmicSampleMutated *int
 	CosmicTier          string
 }

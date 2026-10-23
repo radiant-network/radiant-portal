@@ -305,5 +305,5 @@ func Test_Build_InterpretationError_Propagates(t *testing.T) {
 	reports, err := newBuilder(data, interpretations).BuildGermline(t.Context(), 1, 1, 5, []int{1000})
 
 	assert.Nil(t, reports)
-	assert.EqualError(t, err, "list germline interpretations: postgres down")
+	assert.EqualError(t, err, "attach interpretations: list germline interpretations: postgres down")
 }
