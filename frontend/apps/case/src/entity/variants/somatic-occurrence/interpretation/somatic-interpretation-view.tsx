@@ -6,7 +6,6 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { OncogenicityInfoCard } from '../../interpretation/interpretation-info-cards';
 import InterpretationViewField from '../../interpretation/interpretation-view-field';
 import InterpretationViewGeneric from '../../interpretation/interpretation-view-generic';
 
@@ -27,10 +26,7 @@ function SomaticInterpretationView({ interpretation }: SomaticInterpretationView
           showCode={false}
         />
       </InterpretationViewField>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.somatic.oncogenicity')}
-        infoCardContent={<OncogenicityInfoCard />}
-      >
+      <InterpretationViewField label={t('variant.interpretation_form.somatic.oncogenicity')}>
         {interpretation?.oncogenicity ? (
           <ClassificationBadge value={interpretation.oncogenicity} isSomatic size="lg" />
         ) : (

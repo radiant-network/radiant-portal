@@ -7,7 +7,6 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { GermlineClassificationInfoCard } from '../../interpretation/interpretation-info-cards';
 import InterpretationViewField from '../../interpretation/interpretation-view-field';
 import InterpretationViewGeneric from '../../interpretation/interpretation-view-generic';
 
@@ -29,10 +28,7 @@ function GermlineInterpretationView({ interpretation }: GermlineInterpretationVi
           showCode={false}
         />
       </InterpretationViewField>
-      <InterpretationViewField
-        label={t('variant.interpretation_form.germline.classification')}
-        infoCardContent={<GermlineClassificationInfoCard />}
-      >
+      <InterpretationViewField label={t('variant.interpretation_form.germline.classification')}>
         {interpretation?.classification ? (
           <ClassificationBadge value={interpretation.classification} size="lg" />
         ) : (
