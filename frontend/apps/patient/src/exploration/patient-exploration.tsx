@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { LineChart, X } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -62,23 +63,40 @@ function PatientExploration() {
   const columns = useMemo(() => getPatientExplorationColumns(t), [t]);
 
   // The chat card grows into a modal in place, rather than through a portal-based Dialog, so the
-  // chat inside it is never remounted and loses nothing. ponytail: no scroll lock or animation.
+  // chat inside it is never remounted and loses nothing.
   const [expanded, setExpanded] = useState(false);
   const [chatTab, setChatTab] = useState('yac');
   const chatTitleId = useId();
-  const setChatExpanded = (value: boolean) => {
-    setExpanded(value);
-    if (value) setChatTab('yac');
-  };
+  const setChatExpanded = useCallback((value: boolean) => {
+    const update = () => {
+      setExpanded(value);
+      if (value) setChatTab('yac');
+    };
+    // A view transition morphs the card between its inline spot and the modal. flushSync, so the
+    // new state is in the DOM when the browser snapshots it.
+    if (!('startViewTransition' in document) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      update();
+      return;
+    }
+    document.startViewTransition(() => flushSync(update));
+  }, []);
   useEffect(() => {
     if (!expanded) return;
     // A popup inside the chat stops its own Escape, so this only sees the ones meant for the modal.
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) setExpanded(false);
+      if (event.key === 'Escape' && !event.defaultPrevented) setChatExpanded(false);
     };
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [expanded]);
+    // The page scrolls in <main> below, and may in the document too if the header pushes it past
+    // the viewport. Lock both so the wheel over the backdrop moves nothing.
+    const { documentElement } = document;
+    const overflow = documentElement.style.overflow;
+    documentElement.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      documentElement.style.overflow = overflow;
+    };
+  }, [expanded, setChatExpanded]);
 
   return (
     <>
@@ -103,15 +121,20 @@ function PatientExploration() {
           ]}
         />
       </div>
-      <main className="bg-muted h-screen overflow-auto p-3 space-y-3">
-        {expanded && <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setChatExpanded(false)} />}
+      <main className={cn('bg-muted h-screen p-3 space-y-3', expanded ? 'overflow-hidden' : 'overflow-auto')}>
+        {expanded && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 [view-transition-name:yac-backdrop]"
+            onClick={() => setChatExpanded(false)}
+          />
+        )}
         {/* Every element from here down to the chat renders in both modes, so React keeps it mounted. */}
         <Card
           role={expanded ? 'dialog' : undefined}
           aria-modal={expanded || undefined}
           aria-labelledby={expanded ? chatTitleId : undefined}
           className={cn(
-            'w-full gap-0 pb-0 overflow-hidden',
+            'w-full gap-0 pb-0 overflow-hidden [view-transition-name:yac-chat]',
             expanded && 'fixed inset-x-6 top-14 bottom-6 z-50 w-auto pt-0 shadow-lg',
           )}
         >
