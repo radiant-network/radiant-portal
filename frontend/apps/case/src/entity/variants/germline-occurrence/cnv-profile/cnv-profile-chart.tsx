@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
-import type { PlotDatum, PlotMouseEvent, PlotRelayoutEvent } from 'plotly.js';
+import type { PlotRelayoutEvent } from 'plotly.js';
 
-import type { CNVProfile, CNVProfileSegment, GeneTrackGene } from '@/api/api';
+import type { CNVProfile, GeneTrackGene } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
@@ -13,6 +13,7 @@ import { genesApi } from '@/utils/api';
 import { useGeneTrack } from './hooks/use-gene-track';
 import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
 import { clampView, createGenome, type GenomeView, parseLocus, regionWindow, viewAround } from './libs/genome';
+import { type ClickTarget, cytobandHitAreas, geneHitAreas, hitTest, plotFrame, segmentHitAreas } from './libs/hit-test';
 import { getCNVProfilePalette } from './libs/palette';
 import { withRegion } from './libs/region';
 import {
@@ -24,13 +25,13 @@ import {
   buildSegmentTraces,
   cloudMarker,
   GENE_TRACK_MAX_SPAN,
-  type TraceKind,
+  PLOT_MARGIN,
 } from './libs/traces';
 import CNVGenePanel from './cnv-gene-panel';
 import CNVProfileLegend from './cnv-profile-legend';
 import CNVProfileNavbar, { type DragMode, panView, zoomView } from './cnv-profile-navbar';
 
-const PLOT_MARGIN_PX = 80;
+const PLOT_MARGIN_PX = PLOT_MARGIN.l + PLOT_MARGIN.r;
 const PLOT_CONFIG = { displayModeBar: false, scrollZoom: false, doubleClick: false, responsive: true } as const;
 const FORMAT = { number: (value: number) => thousandNumberFormat(value), size: toKiloBases };
 
@@ -45,8 +46,6 @@ const rangeOf = (event: PlotRelayoutEvent): [number, number] | undefined => {
   }
   return undefined;
 };
-
-const kindOf = (point: PlotDatum) => (point.data as { meta?: TraceKind }).meta;
 
 type CNVProfileChartProps = {
   profile: CNVProfile;
@@ -234,35 +233,54 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
     [goTo],
   );
 
-  const handleClick = useCallback(
-    (event: PlotMouseEvent) => {
-      for (const point of event.points) {
-        const kind = kindOf(point);
-        if (kind === 'cnv') {
-          const segment: CNVProfileSegment = profile.segments[point.customdata as number];
-          zoomOnRegion(segment.chromosome, segment.start, segment.end);
-          return;
-        }
-        if (kind === 'cytoband') {
-          const band = profile.cytobands[point.customdata as number];
-          zoomOnRegion(band.chromosome, band.start, band.end);
-          return;
-        }
-        if (kind === 'gene') {
-          const [geneIndex, exonIndex] = point.customdata as unknown as [number, number];
-          focusGene(genes[geneIndex], exonIndex >= 0 ? exonIndex : undefined);
-          return;
-        }
+  // Clicks hit the whole span of a CNV, a gene, an exon or a cytoband: Plotly only reports the
+  // nearest point, often one of the clouds.
+  const hitAreas = useMemo(
+    () => [
+      ...segmentHitAreas(profile.segments, genome, showFiltered),
+      ...geneHitAreas(showGenes ? genes : [], genome, view, pxPerBase),
+      ...cytobandHitAreas(profile.cytobands, genome, view),
+    ],
+    [profile.segments, profile.cytobands, genome, showFiltered, showGenes, genes, view, pxPerBase],
+  );
+
+  const handleTarget = useCallback(
+    (target: ClickTarget) => {
+      if (target.kind === 'cnv') {
+        const segment = profile.segments[target.index];
+        zoomOnRegion(segment.chromosome, segment.start, segment.end);
+      } else if (target.kind === 'cytoband') {
+        const band = profile.cytobands[target.index];
+        zoomOnRegion(band.chromosome, band.start, band.end);
+      } else {
+        focusGene(genes[target.index], target.exonIndex);
       }
     },
     [profile, genes, zoomOnRegion, focusGene],
   );
 
-  const setCursor = useCallback((cursor: string) => {
-    graphRef.current?.querySelectorAll<HTMLElement>('.nsewdrag').forEach(layer => {
-      layer.style.cursor = cursor;
-    });
-  }, []);
+  useEffect(() => {
+    const graph = graphRef.current;
+    if (!graph || !rendered) return;
+    const targetAt = (event: MouseEvent) => hitTest(hitAreas, view, plotFrame(graph), event.clientX, event.clientY);
+    // Plotly dispatches the click on its drag layer once the mouse is released without a drag.
+    const handleClick = (event: MouseEvent) => {
+      const target = targetAt(event);
+      if (target) handleTarget(target);
+    };
+    const handleMove = (event: MouseEvent) => {
+      const cursor = targetAt(event) ? 'pointer' : '';
+      graph.querySelectorAll<HTMLElement>('.nsewdrag').forEach(layer => {
+        layer.style.cursor = cursor;
+      });
+    };
+    graph.addEventListener('click', handleClick);
+    graph.addEventListener('mousemove', handleMove);
+    return () => {
+      graph.removeEventListener('click', handleClick);
+      graph.removeEventListener('mousemove', handleMove);
+    };
+  }, [rendered, hitAreas, view, handleTarget]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -278,9 +296,9 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
       const moves: Record<string, (current: GenomeView) => GenomeView> = {
         ArrowLeft: current => panView(current, -0.25),
         ArrowRight: current => panView(current, 0.25),
-        '+': current => zoomView(genome, current, (current.x1 - current.x0) / 2),
-        '=': current => zoomView(genome, current, (current.x1 - current.x0) / 2),
-        '-': current => zoomView(genome, current, (current.x1 - current.x0) * 2),
+        '+': current => zoomView(current, (current.x1 - current.x0) / 2),
+        '=': current => zoomView(current, (current.x1 - current.x0) / 2),
+        '-': current => zoomView(current, (current.x1 - current.x0) * 2),
       };
       const move = moves[event.key];
       if (!move) return;
@@ -332,9 +350,6 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
             setRendered(true);
           }}
           onRelayout={handleRelayout}
-          onClick={handleClick}
-          onHover={() => setCursor('pointer')}
-          onUnhover={() => setCursor('')}
         />
         {!rendered && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70">

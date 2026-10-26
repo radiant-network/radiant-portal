@@ -12,6 +12,22 @@ export const EXON_MAX_SPAN = 2_000_000;
 const CYTOBAND_MAX_SPAN = 300_000_000;
 const SEGMENT_MAX_VALUE = 2.5;
 
+export const PLOT_MARGIN = { l: 64, r: 16, t: 30, b: 40 };
+
+export type YAxisName = 'y' | 'y2' | 'y3' | 'y4' | 'y5';
+
+/**
+ * Where each track sits, in paper fraction, and the values it spans: copy ratio, BAF, ROH, genes and
+ * cytobands.
+ */
+export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [number, number] }> = {
+  y: { domain: [0.5, 0.91], range: [-0.12, 2.62] },
+  y2: { domain: [0.26, 0.47], range: [-0.03, 1.03] },
+  y3: { domain: [0.205, 0.235], range: [0, 1] },
+  y4: { domain: [0, 0.17], range: [0, GENE_LANES] },
+  y5: { domain: [0.935, 1], range: [0, 1.3] },
+};
+
 export type TraceKind = 'cloud' | 'cnv' | 'roh' | 'cytoband' | 'gene' | 'exon' | 'decoration';
 
 export type Formatters = {
@@ -58,7 +74,7 @@ const pushSpan = (trace: { x: (number | null)[]; y: (number | null)[] }, x0: num
   trace.y.push(y, y, null);
 };
 
-const isChromosomeLevel = (genome: Genome, view: GenomeView) =>
+export const isChromosomeLevel = (genome: Genome, view: GenomeView) =>
   chromosomesInView(genome, view).length <= 2 && view.x1 - view.x0 < CYTOBAND_MAX_SPAN;
 
 /**
@@ -107,6 +123,11 @@ export const cloudMarker = (genome: Genome, view: GenomeView) => {
 export const segmentValue = (segment: CNVProfileSegment) =>
   Math.min(segment.sm ?? (segment.cn ?? 2) / 2, SEGMENT_MAX_VALUE);
 
+export const isFiltered = (segment: CNVProfileSegment) => segment.filter !== undefined && segment.filter !== 'PASS';
+
+export const isSegmentShown = (segment: CNVProfileSegment, genome: Genome, showFiltered: boolean) =>
+  genome.byName.has(segment.chromosome) && (showFiltered || !isFiltered(segment));
+
 /**
  * A line per called CNV over its span and a marker at its middle that carries the hover and the
  * click, grouped by type and filter status. customdata holds the segment index.
@@ -122,10 +143,8 @@ export function buildSegmentTraces(
 ): Trace[] {
   const groups = new Map<string, number[]>();
   segments.forEach((segment, index) => {
-    if (!genome.byName.has(segment.chromosome)) return;
-    const filtered = segment.filter !== undefined && segment.filter !== 'PASS';
-    if (filtered && !showFiltered) return;
-    const key = `${segment.type === 'GAIN' ? 'gain' : 'loss'}-${filtered}`;
+    if (!isSegmentShown(segment, genome, showFiltered)) return;
+    const key = `${segment.type === 'GAIN' ? 'gain' : 'loss'}-${isFiltered(segment)}`;
     groups.set(key, [...(groups.get(key) ?? []), index]);
   });
 
@@ -296,6 +315,49 @@ export const strandLabel = (gene: GeneTrackGene) => (gene.strand === '-' ? `‹ 
 
 const PROTEIN_CODING = 'protein_coding';
 
+export const isExonView = (view: GenomeView) => view.x1 - view.x0 <= EXON_MAX_SPAN;
+
+export type PlacedGene = {
+  gene: GeneTrackGene;
+  index: number;
+  start: number;
+  end: number;
+  offset: number;
+  y: number;
+  labelled: boolean;
+};
+
+/**
+ * Places the genes in genome coordinates and in their lane, the protein-coding ones first.
+ */
+export function placeGenes(genes: GeneTrackGene[], genome: Genome, pxPerBase: number): PlacedGene[] {
+  const items = genes.flatMap((gene, index) => {
+    const chromosome = genome.byName.get(gene.chromosome);
+    if (!chromosome) return [];
+    return [
+      {
+        gene,
+        index,
+        start: chromosome.offset + gene.start,
+        end: chromosome.offset + gene.end,
+        offset: chromosome.offset,
+        label: strandLabel(gene),
+        primary: gene.biotype === PROTEIN_CODING,
+      },
+    ];
+  });
+  const lanes = assignLanes(items, pxPerBase);
+  return items.map(({ gene, index, start, end, offset }, k) => ({
+    gene,
+    index,
+    start,
+    end,
+    offset,
+    y: GENE_LANES - 1 - lanes[k].lane + 0.25,
+    labelled: lanes[k].labelled,
+  }));
+}
+
 /**
  * Genes packed in lanes, as a bar, or below EXON_MAX_SPAN as exon blocks on an intron line. The
  * protein-coding genes get their labels first; the other biotypes are drawn paler and the
@@ -312,7 +374,7 @@ export function buildGeneTraces(
   format: Formatters,
   highlightedGeneId?: string,
 ): Trace[] {
-  const detailed = view.x1 - view.x0 <= EXON_MAX_SPAN;
+  const detailed = isExonView(view);
   const bars = [
     lineTrace('y4', palette.gene, detailed ? 2 : 8),
     lineTrace('y4', palette.gene, 12),
@@ -324,29 +386,10 @@ export function buildGeneTraces(
   const markers = { x: [] as number[], y: [] as number[], text: [] as string[], customdata: [] as number[][] };
   const names = { x: [] as number[], y: [] as number[], text: [] as string[] };
 
-  const placed = genes.flatMap((gene, index) => {
-    const chromosome = genome.byName.get(gene.chromosome);
-    if (!chromosome) return [];
-    return [
-      {
-        gene,
-        index,
-        start: chromosome.offset + gene.start,
-        end: chromosome.offset + gene.end,
-        label: strandLabel(gene),
-        primary: gene.biotype === PROTEIN_CODING,
-      },
-    ];
-  });
-  const lanes = assignLanes(placed, pxPerBase);
-
-  placed.forEach(({ gene, index, start, end, label }, k) => {
-    const { lane, labelled } = lanes[k];
-    const y = GENE_LANES - 1 - lane + 0.25;
+  placeGenes(genes, genome, pxPerBase).forEach(({ gene, index, start, end, offset, y, labelled }) => {
     const highlighted = gene.gene_id === highlightedGeneId;
     let style = gene.biotype === PROTEIN_CODING ? 0 : 4;
     if (highlighted) style = 2;
-    const offset = start - gene.start;
     pushSpan(bars[style], start, end, y);
     markers.x.push((start + end) / 2);
     markers.y.push(y);
@@ -377,7 +420,7 @@ export function buildGeneTraces(
     if (labelled) {
       names.x.push((start + end) / 2);
       names.y.push(y + 0.42);
-      names.text.push(label);
+      names.text.push(strandLabel(gene));
     }
   });
 
@@ -426,8 +469,8 @@ export function buildLayout(
 ): Partial<Layout> {
   const ticks = computeTicks(genome, view, formatPosition);
   const chromosomeLevel = isChromosomeLevel(genome, view);
-  const yAxis = (domain: [number, number], title: string, extra: object) => ({
-    domain,
+  const yAxis = (name: YAxisName, title: string, extra: object) => ({
+    domain: Y_AXES[name].domain,
     fixedrange: true,
     title: { text: title, font: { size: 12, color: theme.muted } },
     gridcolor: theme.border,
@@ -435,8 +478,8 @@ export function buildLayout(
     tickfont: { color: theme.muted, size: 11 },
     ...extra,
   });
-  const hiddenYAxis = (domain: [number, number], title: string, range: [number, number]) =>
-    yAxis(domain, title, { range, showticklabels: false, showgrid: false });
+  const hiddenYAxis = (name: YAxisName, title: string) =>
+    yAxis(name, title, { range: Y_AXES[name].range, showticklabels: false, showgrid: false });
   const xAxis = {
     tickvals: ticks.tickvals,
     ticktext: ticks.ticktext,
@@ -448,7 +491,7 @@ export function buildLayout(
   return {
     paper_bgcolor: theme.card,
     plot_bgcolor: theme.card,
-    margin: { l: 64, r: 16, t: 30, b: 40 },
+    margin: PLOT_MARGIN,
     hovermode: 'closest',
     showlegend: false,
     hoverlabel: { bgcolor: theme.card, bordercolor: theme.border, font: { color: theme.foreground } },
@@ -460,15 +503,15 @@ export function buildLayout(
       gridcolor: theme.border,
     },
     xaxis2: { ...xAxis, matches: 'x', anchor: 'y5', side: 'top', visible: chromosomeLevel, showgrid: false },
-    yaxis5: hiddenYAxis([0.935, 1], '', [0, 1.3]),
-    yaxis: yAxis([0.5, 0.91], labels.copyRatio, {
-      range: [-0.12, 2.62],
+    yaxis5: hiddenYAxis('y5', ''),
+    yaxis: yAxis('y', labels.copyRatio, {
+      range: Y_AXES.y.range,
       tickvals: [0, 0.5, 1, 1.5, 2, 2.5],
       minor: { tickvals: [0.25, 0.75, 1.25, 1.75, 2.25], showgrid: true, gridcolor: theme.border, griddash: 'dot' },
     }),
-    yaxis2: yAxis([0.26, 0.47], labels.baf, { range: [-0.03, 1.03], tickvals: [0, 0.25, 0.5, 0.75, 1] }),
-    yaxis3: hiddenYAxis([0.205, 0.235], labels.roh, [0, 1]),
-    yaxis4: hiddenYAxis([0, 0.17], labels.genes, [0, GENE_LANES]),
+    yaxis2: yAxis('y2', labels.baf, { range: Y_AXES.y2.range, tickvals: [0, 0.25, 0.5, 0.75, 1] }),
+    yaxis3: hiddenYAxis('y3', labels.roh),
+    yaxis4: hiddenYAxis('y4', labels.genes),
     shapes: [
       ...genome.chromosomes.slice(1).map(c => ({
         type: 'line' as const,

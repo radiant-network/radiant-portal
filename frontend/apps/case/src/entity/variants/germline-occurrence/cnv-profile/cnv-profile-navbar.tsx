@@ -28,7 +28,7 @@ type CNVProfileNavbarProps = {
   pointCount: number;
 };
 
-export const zoomView = (genome: Genome, view: GenomeView, span: number): GenomeView => {
+export const zoomView = (view: GenomeView, span: number): GenomeView => {
   const centre = (view.x0 + view.x1) / 2;
   return { x0: centre - span / 2, x1: centre + span / 2 };
 };
@@ -77,7 +77,7 @@ function CNVProfileNavbar({
             variant="outline"
             iconOnly
             aria-label={t('a11y.cnv_profile.zoom_out')}
-            onClick={() => onViewChange(zoomView(genome, view, span * 2))}
+            onClick={() => onViewChange(zoomView(view, span * 2))}
           >
             <ZoomOut />
           </Button>
@@ -89,7 +89,7 @@ function CNVProfileNavbar({
             value={[zoomLevel]}
             aria-label={t('a11y.cnv_profile.zoom_level')}
             onValueChange={([level]) =>
-              onViewChange(zoomView(genome, view, genome.length / 10 ** ((level / ZOOM_STEPS) * maxZoom)))
+              onViewChange(zoomView(view, genome.length / 10 ** ((level / ZOOM_STEPS) * maxZoom)))
             }
           />
           <Button
@@ -97,7 +97,7 @@ function CNVProfileNavbar({
             variant="outline"
             iconOnly
             aria-label={t('a11y.cnv_profile.zoom_in')}
-            onClick={() => onViewChange(zoomView(genome, view, span / 2))}
+            onClick={() => onViewChange(zoomView(view, span / 2))}
           >
             <ZoomIn />
           </Button>
