@@ -70,7 +70,8 @@ function PatientExploration() {
   const setChatExpanded = useCallback((value: boolean) => {
     const update = () => {
       setExpanded(value);
-      if (value) setChatTab('yac');
+      // Both ways: inline there is no tab strip, so any tab but YAC would leave the card empty.
+      setChatTab('yac');
     };
     // A view transition morphs the card between its inline spot and the modal. flushSync, so the
     // new state is in the DOM when the browser snapshots it.
