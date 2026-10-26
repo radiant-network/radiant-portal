@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => {
       __THEME__: JSON.stringify(project),
       'import.meta.env.THEME': JSON.stringify(project),
       'import.meta.env.APPS_LIBRECHAT_DAVID_URL': JSON.stringify(env.APPS_LIBRECHAT_DAVID_URL ?? ''),
+      'import.meta.env.DEFAULT_LANGUAGE': JSON.stringify(env.DEFAULT_LANGUAGE ?? ''),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'development'),
       ...computeApps(project),
     },
