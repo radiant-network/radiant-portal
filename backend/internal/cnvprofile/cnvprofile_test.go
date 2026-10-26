@@ -27,6 +27,10 @@ func Test_Chromosomes_InGenomeOrderWithoutChrPrefix(t *testing.T) {
 	assert.Equal(t, fixtureChromosomes, Chromosomes(openFixture(t, "tn.bw")))
 }
 
+func Test_Chromosomes_MergesTheChromosomesOfEveryFile(t *testing.T) {
+	assert.Equal(t, fixtureChromosomes, Chromosomes(openFixture(t, "baf.bw"), openFixture(t, "tn.bw")))
+}
+
 func Test_chromosomeName_KeepsMainChromosomes(t *testing.T) {
 	name, ok := chromosomeName("chrX")
 	assert.True(t, ok)

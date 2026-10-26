@@ -256,8 +256,7 @@ func cnvProfileFiles(ctx context.Context, repo cnvProfileReader, seqID int) (sta
 	return files, nil
 }
 
-// exomeTracks reads every point. The contig sizes come from tn.bw: the BAF of a female sample
-// has no chrY.
+// exomeTracks reads every point.
 func exomeTracks(ctx context.Context, store objectReader, files starrocks.CNVProfileFiles, profile *types.CNVProfile) error {
 	tn, err := readBigWig(ctx, store, files.CopyRatio.URL)
 	if err != nil {
@@ -267,7 +266,7 @@ func exomeTracks(ctx context.Context, store objectReader, files starrocks.CNVPro
 	if err != nil {
 		return fmt.Errorf("read baf file: %w", err)
 	}
-	profile.Chromosomes = cnvprofile.Chromosomes(tn)
+	profile.Chromosomes = cnvprofile.Chromosomes(tn, baf)
 	if profile.CopyRatio, err = cnvprofile.CopyRatioTrack(tn, profile.Chromosomes); err != nil {
 		return fmt.Errorf("read copy ratio: %w", err)
 	}
@@ -292,7 +291,7 @@ func genomeOverview(ctx context.Context, store objectReader, overviews *overview
 	if err != nil {
 		return nil, fmt.Errorf("open baf file: %w", err)
 	}
-	tracks := &genomeTracks{chromosomes: cnvprofile.Chromosomes(tn)}
+	tracks := &genomeTracks{chromosomes: cnvprofile.Chromosomes(tn, baf)}
 	tracks.overview.RegionMaxSpan = types.CNVProfileRegionMaxSpan
 	if tracks.copyRatio, tracks.overview.CopyRatioStride, err = cnvprofile.CopyRatioSample(tn, tracks.chromosomes, cnvProfileOverviewPoints); err != nil {
 		return nil, fmt.Errorf("read copy ratio: %w", err)

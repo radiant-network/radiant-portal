@@ -33,12 +33,16 @@ func chromosomeName(name string) (string, bool) {
 	return name, ok
 }
 
-// Chromosomes lists the chromosomes of a bigwig in genome order, with their sizes.
-func Chromosomes(f *bigwig.File) []types.CNVProfileChromosome {
+// Chromosomes lists the chromosomes of any of the bigwigs in genome order, with their sizes: DRAGEN
+// can leave a chromosome out of tn.bw (chrY of an exome) and keep it in baf.bw, or the reverse
+// (chrY of a female sample). The size comes from the first bigwig that has the chromosome.
+func Chromosomes(files ...*bigwig.File) []types.CNVProfileChromosome {
 	byOrder := make([]*types.CNVProfileChromosome, len(chromosomeOrder)+1)
-	for _, c := range f.Chroms() {
-		if name, ok := chromosomeName(c.Name); ok {
-			byOrder[chromosomeOrder[name]] = &types.CNVProfileChromosome{Name: name, Size: int(c.Size)}
+	for _, f := range files {
+		for _, c := range f.Chroms() {
+			if name, ok := chromosomeName(c.Name); ok && byOrder[chromosomeOrder[name]] == nil {
+				byOrder[chromosomeOrder[name]] = &types.CNVProfileChromosome{Name: name, Size: int(c.Size)}
+			}
 		}
 	}
 	chromosomes := []types.CNVProfileChromosome{}
