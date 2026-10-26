@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { formatDate } from 'date-fns';
 import { DotIcon } from 'lucide-react';
 
@@ -81,6 +82,7 @@ type SequencingVariantFiltersProps = {
   tasks?: TaskOccurrenceType[];
   selectedTaskId?: number;
   onTaskChange?: (value: number) => void;
+  actions?: ReactNode;
 };
 
 /**
@@ -102,6 +104,7 @@ function SequencingVariantFilters({
   tasks = [],
   selectedTaskId,
   onTaskChange,
+  actions,
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
@@ -227,6 +230,7 @@ function SequencingVariantFilters({
           <span className="font-mono font-semibold"> {selectedSequencingExperiment.sample_submitter_id}</span>
         </span>
       )}
+      {actions && <div className="ml-auto flex items-center gap-2">{actions}</div>}
     </div>
   );
 }

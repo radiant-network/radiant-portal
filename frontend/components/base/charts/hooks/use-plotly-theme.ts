@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export type PlotlyThemeColors = {
+  isDark: boolean;
   foreground: string;
   muted: string;
   border: string;
@@ -10,6 +11,7 @@ export type PlotlyThemeColors = {
 // Plotly's color parser can't read CSS variables,
 // so we map the theme to known-good hex values here.
 const LIGHT: PlotlyThemeColors = {
+  isDark: false,
   foreground: '#0f172a', // slate-900
   muted: '#64748b', // slate-500
   border: '#e2e8f0', // slate-200
@@ -17,6 +19,7 @@ const LIGHT: PlotlyThemeColors = {
 };
 
 const DARK: PlotlyThemeColors = {
+  isDark: true,
   foreground: '#f8fafc', // slate-50
   muted: '#94a3b8', // slate-400
   border: '#1e293b', // slate-800

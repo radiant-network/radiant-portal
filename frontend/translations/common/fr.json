@@ -155,6 +155,17 @@
       "filters_group": "Filtrer la chronologie par type",
       "results_count_one": "{{count}} résultat affiché",
       "results_count_other": "{{count}} résultats affichés"
+    },
+    "cnv_profile": {
+      "zoom_in": "Zoomer",
+      "zoom_out": "Dézoomer",
+      "zoom_level": "Niveau de zoom",
+      "pan_left": "Vers la gauche",
+      "pan_right": "Vers la droite",
+      "drag_mode": "Action du glisser",
+      "chromosome": "Chromosome",
+      "search": "Gène ou locus",
+      "close_panel": "Fermer le détail du gène"
     }
   },
   "admin": {
@@ -2513,6 +2524,79 @@
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      },
+      "cnv_profile": {
+        "button": "Profil CNV",
+        "exome_only": "Disponible pour les exomes seulement",
+        "title": "Profil CNV",
+        "loading": "Chargement du profil CNV…",
+        "errors": {
+          "not_found": "Les fichiers de copy ratio et de fréquence de l'allèle B de ce séquençage sont absents.",
+          "copy_ratio_missing": "Le fichier de copy ratio (.tn.bw) de ce séquençage est absent.",
+          "baf_missing": "Le fichier de fréquence de l'allèle B (.baf.bw) de ce séquençage est absent.",
+          "too_large": "Ce séquençage est trop gros pour être affiché : seuls les exomes sont pris en charge.",
+          "unknown": "Le profil CNV n'a pas pu être chargé."
+        },
+        "tracks": {
+          "copy_ratio": "Copy ratio",
+          "baf": "BAF",
+          "roh": "ROH",
+          "genes": "Gènes"
+        },
+        "hints": {
+          "zoom_for_genes": "Zoomer sous 20 Mb sur un chromosome pour afficher les gènes",
+          "zoom_for_cytobands": "Zoomer sur un ou deux chromosomes pour afficher les cytobandes et les positions"
+        },
+        "legend": {
+          "gain": "Gain PASS",
+          "loss": "Perte PASS",
+          "filtered": "Filtré",
+          "roh": "ROH",
+          "gene": "Gène codant",
+          "highlighted_gene": "Gène sélectionné"
+        },
+        "hover": {
+          "gain": "Gain",
+          "loss": "Perte",
+          "click_to_zoom": "cliquer pour zoomer",
+          "click_for_details": "cliquer pour le détail",
+          "segment_mean": "Segment mean",
+          "copy_number": "CN",
+          "quality": "Qual",
+          "roh": "ROH",
+          "homozygous": "homozygotes",
+          "heterozygous": "hétérozygotes",
+          "score": "score",
+          "exons": "exons",
+          "exon": "exon"
+        },
+        "navbar": {
+          "genome": "Génome",
+          "whole_genome": "Génome entier",
+          "drag": "Glisser pour",
+          "drag_pan": "déplacer",
+          "drag_zoom": "sélectionner une zone",
+          "show_filtered": "CNV filtrés",
+          "search_placeholder": "Gène (BRCA1) ou chr17:40 000 000-45 000 000",
+          "go_to_locus": "Aller à {{locus}}",
+          "not_found": "Gène ou locus inconnu",
+          "chromosome": "Chromosome",
+          "points": "{{formatted}} points",
+          "keyboard": "Clavier : ← → + −"
+        },
+        "panel": {
+          "strand": "brin {{strand}}",
+          "locus": "Locus",
+          "size": "Taille",
+          "exons": "Exons",
+          "exon": "Exon {{index}} sur {{total}}",
+          "cnvs": "CNV appelés sur ce gène",
+          "no_cnv": "Aucun gain ni perte appelé sur ce gène.",
+          "exons_hit": "{{count}} exons sur {{total}}",
+          "whole_gene": "gène entier",
+          "intronic": "aucun exon (intronique)",
+          "links": "Liens"
+        }
       }
     },
     "files": {

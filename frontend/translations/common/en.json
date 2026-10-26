@@ -155,6 +155,17 @@
       "filters_group": "Filter timeline by type",
       "results_count_one": "Showing {{count}} result",
       "results_count_other": "Showing {{count}} results"
+    },
+    "cnv_profile": {
+      "zoom_in": "Zoom in",
+      "zoom_out": "Zoom out",
+      "zoom_level": "Zoom level",
+      "pan_left": "Move left",
+      "pan_right": "Move right",
+      "drag_mode": "Drag action",
+      "chromosome": "Chromosome",
+      "search": "Gene or locus",
+      "close_panel": "Close the gene details"
     }
   },
   "admin": {
@@ -2509,6 +2520,79 @@
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      },
+      "cnv_profile": {
+        "button": "CNV profile",
+        "exome_only": "Available for exome sequencing only",
+        "title": "CNV profile",
+        "loading": "Loading the CNV profile…",
+        "errors": {
+          "not_found": "The copy ratio and B-allele frequency files of this sequencing are missing.",
+          "copy_ratio_missing": "The copy ratio file (.tn.bw) of this sequencing is missing.",
+          "baf_missing": "The B-allele frequency file (.baf.bw) of this sequencing is missing.",
+          "too_large": "This sequencing is too large to display: only exomes are supported.",
+          "unknown": "The CNV profile could not be loaded."
+        },
+        "tracks": {
+          "copy_ratio": "Copy ratio",
+          "baf": "BAF",
+          "roh": "ROH",
+          "genes": "Genes"
+        },
+        "hints": {
+          "zoom_for_genes": "Zoom below 20 Mb on one chromosome to show the genes",
+          "zoom_for_cytobands": "Zoom on one or two chromosomes to show the cytobands and positions"
+        },
+        "legend": {
+          "gain": "Gain PASS",
+          "loss": "Loss PASS",
+          "filtered": "Filtered",
+          "roh": "ROH",
+          "gene": "Protein-coding gene",
+          "highlighted_gene": "Selected gene"
+        },
+        "hover": {
+          "gain": "Gain",
+          "loss": "Loss",
+          "click_to_zoom": "click to zoom",
+          "click_for_details": "click for details",
+          "segment_mean": "Segment mean",
+          "copy_number": "CN",
+          "quality": "Qual",
+          "roh": "ROH",
+          "homozygous": "homozygous",
+          "heterozygous": "heterozygous",
+          "score": "score",
+          "exons": "exons",
+          "exon": "exon"
+        },
+        "navbar": {
+          "genome": "Genome",
+          "whole_genome": "Whole genome",
+          "drag": "Drag to",
+          "drag_pan": "pan",
+          "drag_zoom": "select a region",
+          "show_filtered": "Filtered CNVs",
+          "search_placeholder": "Gene (BRCA1) or chr17:40,000,000-45,000,000",
+          "go_to_locus": "Go to {{locus}}",
+          "not_found": "Unknown gene or locus",
+          "chromosome": "Chromosome",
+          "points": "{{formatted}} points",
+          "keyboard": "Keyboard: ← → + −"
+        },
+        "panel": {
+          "strand": "strand {{strand}}",
+          "locus": "Locus",
+          "size": "Size",
+          "exons": "Exons",
+          "exon": "Exon {{index}} of {{total}}",
+          "cnvs": "Called CNVs on this gene",
+          "no_cnv": "No gain or loss called on this gene.",
+          "exons_hit": "{{count}} of {{total}} exons",
+          "whole_gene": "whole gene",
+          "intronic": "no exon (intronic)",
+          "links": "Links"
+        }
       }
     },
     "files": {

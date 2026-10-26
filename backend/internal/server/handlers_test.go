@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -153,4 +154,54 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+}
+
+type MockCNVProfileRepository struct {
+	documents []types.CNVProfileDocument
+	segments  []types.CNVProfileSegment
+	cytobands []types.Cytoband
+	err       error
+}
+
+func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID int) ([]types.CNVProfileDocument, error) {
+	return m.documents, m.err
+}
+
+func (m *MockCNVProfileRepository) GetCNVProfileSegments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
+	return m.segments, nil
+}
+
+func (m *MockCNVProfileRepository) GetCytobands(ctx context.Context) ([]types.Cytoband, error) {
+	return m.cytobands, nil
+}
+
+// MockObjectStore serves objects from memory, keyed by S3 URL.
+type MockObjectStore struct {
+	objects map[string][]byte
+	err     error
+}
+
+func (m *MockObjectStore) GetObject(ctx context.Context, url string, maxBytes int64) ([]byte, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	data, ok := m.objects[url]
+	if !ok {
+		return nil, fmt.Errorf("get object %s: not found", url)
+	}
+	return data, nil
+}
+
+type MockGeneTrackRepository struct {
+	genes  []types.GeneTrackGene
+	symbol string
+}
+
+func (m *MockGeneTrackRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	return m.genes, nil
+}
+
+func (m *MockGeneTrackRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
+	m.symbol = symbol
+	return m.genes, nil
 }

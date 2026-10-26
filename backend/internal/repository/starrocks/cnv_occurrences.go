@@ -33,7 +33,9 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.TenantQualifiedName(ctx), panelsTable.Alias, alias, panelsTable.Alias))
 		}
 	}
-	utils.AddWhere(userQuery, tx)
+	if userQuery != nil {
+		utils.AddWhere(userQuery, tx)
+	}
 	return tx, nil
 }
 
@@ -219,8 +221,8 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 
 func cnvGenesOverlapSQL(ctx context.Context) string {
 	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
-	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
-	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
+	ensemblExon := types.EnsemblExonByGeneTable.TenantQualifiedName(ctx)
+	cytoband := types.CytobandTable.TenantQualifiedName(ctx)
 	tenantGenePanels := types.TenantGenePanelTable.TenantQualifiedName(ctx)
 	return fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT

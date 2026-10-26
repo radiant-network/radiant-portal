@@ -125,3 +125,66 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 	}
 	return genes, nil
 }
+
+// GetGeneTrack lists the protein-coding genes overlapping a region, each with its exons merged over
+// all its transcripts (ensembl_exon_by_gene holds no MANE or coding bounds).
+func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ? AND biotype = 'protein_coding'", chromosome, start, end)
+}
+
+// GetGeneTrackBySymbol finds a gene of the gene track by its symbol, ignoring case.
+func (r *GenesRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
+	return r.geneTrack(ctx, "UPPER(name) = ? AND biotype = 'protein_coding'", strings.ToUpper(symbol))
+}
+
+func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...any) ([]types.GeneTrackGene, error) {
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.TenantQualifiedName(ctx))
+	tx = tx.Select("gene_id, name AS symbol, chromosome, start, end, strand, biotype, description")
+	tx = tx.Where(where, args...)
+	tx = tx.Order("start, gene_id")
+
+	var genes []types.GeneTrackGene
+	if err := tx.Find(&genes).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene track genes: %w", err)
+	}
+	if len(genes) == 0 {
+		return []types.GeneTrackGene{}, nil
+	}
+
+	geneIDs := make([]string, len(genes))
+	for i, g := range genes {
+		geneIDs[i] = g.GeneID
+	}
+	var exons []struct {
+		GeneID string
+		Start  int
+		End    int
+	}
+	tx = r.db.WithContext(ctx).Table(types.EnsemblExonByGeneTable.TenantQualifiedName(ctx))
+	tx = tx.Select("DISTINCT gene_id, start, end").Where("gene_id IN ?", geneIDs).Order("gene_id, start, end")
+	if err := tx.Find(&exons).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene track exons: %w", err)
+	}
+
+	exonsByGene := map[string][]types.GeneTrackExon{}
+	for _, e := range exons {
+		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
+	}
+	for i := range genes {
+		genes[i].Exons = mergeExons(exonsByGene[genes[i].GeneID])
+	}
+	return genes, nil
+}
+
+// mergeExons merges overlapping exons, given sorted by start.
+func mergeExons(exons []types.GeneTrackExon) []types.GeneTrackExon {
+	merged := []types.GeneTrackExon{}
+	for _, e := range exons {
+		if n := len(merged); n > 0 && e.Start <= merged[n-1].End {
+			merged[n-1].End = max(merged[n-1].End, e.End)
+			continue
+		}
+		merged = append(merged, e)
+	}
+	return merged
+}

@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"testing"
 
@@ -86,4 +87,56 @@ func Test_GetMetadata_OK(t *testing.T) {
 		assert.NotNil(t, metadata)
 		assert.Equal(t, expected, *metadata)
 	})
+}
+
+func putTestObject(t *testing.T, env *testutils.Env, content []byte) {
+	t.Helper()
+	t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
+	t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+	t.Setenv("AWS_USE_SSL", "false")
+	assert.NoError(t, env.ObjectStore.Client.MakeBucket(env.Ctx, "test-bucket", minio.MakeBucketOptions{}))
+	_, err := env.ObjectStore.Client.PutObject(env.Ctx, "test-bucket", "test-file.txt", bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+	assert.NoError(t, err)
+}
+
+func Test_GetObject_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		data, err := s3fs.GetObject(context.Background(), "s3://test-bucket/test-file.txt", 11)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "hello world", string(data))
+	})
+}
+
+func Test_GetObject_TooLarge(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.GetObject(context.Background(), "s3://test-bucket/test-file.txt", 10)
+
+		assert.ErrorIs(t, err, utils.ErrObjectTooLarge)
+	})
+}
+
+func Test_GetObject_Missing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.GetObject(context.Background(), "s3://test-bucket/missing.txt", 10)
+
+		assert.ErrorContains(t, err, "get object s3://test-bucket/missing.txt")
+	})
+}
+
+func Test_GetObject_NotS3URL(t *testing.T) {
+	s3fs, _ := utils.NewS3Store()
+	_, err := s3fs.GetObject(context.Background(), "https://test-bucket/test-file.txt", 10)
+
+	assert.EqualError(t, err, "URL is not an S3 URL")
 }

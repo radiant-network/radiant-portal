@@ -66,3 +66,71 @@ func Test_SearchGenesHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
+
+func getGeneTrack(query string) *httptest.ResponseRecorder {
+	return getGeneTrackFrom(newGeneTrackRepository(), query)
+}
+
+func newGeneTrackRepository() *MockGeneTrackRepository {
+	return &MockGeneTrackRepository{genes: []types.GeneTrackGene{
+		{GeneID: "ENSG00000012048", Symbol: "BRCA1", Chromosome: "17", Start: 43044295, End: 43125483, Strand: "-", Biotype: "protein_coding",
+			Exons: []types.GeneTrackExon{{Start: 43044295, End: 43045802}}},
+	}}
+}
+
+func getGeneTrackFrom(repo *MockGeneTrackRepository, query string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/genes/track", GetGeneTrackHandler(repo))
+	req, _ := http.NewRequest("GET", "/radiant/genes/track?"+query, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_GetGeneTrackHandler_OK(t *testing.T) {
+	w := getGeneTrack("chromosome=17&start=43000000&end=43200000")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{"gene_id":"ENSG00000012048","symbol":"BRCA1","chromosome":"17","start":43044295,"end":43125483,"strand":"-","biotype":"protein_coding","exons":[{"start":43044295,"end":43045802}]}]`, w.Body.String())
+}
+
+func Test_GetGeneTrackHandler_MissingChromosome(t *testing.T) {
+	w := getGeneTrack("start=0&end=10")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"chromosome is required"}`, w.Body.String())
+}
+
+func Test_GetGeneTrackHandler_InvalidStart(t *testing.T) {
+	w := getGeneTrack("chromosome=17&start=x&end=10")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_GetGeneTrackHandler_InvalidEnd(t *testing.T) {
+	w := getGeneTrack("chromosome=17&start=0")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_GetGeneTrackHandler_EndBeforeStart(t *testing.T) {
+	w := getGeneTrack("chromosome=17&start=10&end=5")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_GetGeneTrackHandler_RegionTooWide(t *testing.T) {
+	w := getGeneTrack("chromosome=17&start=0&end=20000001")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"region must satisfy 0 <= start <= end and span at most 20000000 bases"}`, w.Body.String())
+}
+
+func Test_GetGeneTrackHandler_BySymbol(t *testing.T) {
+	repo := newGeneTrackRepository()
+	w := getGeneTrackFrom(repo, "symbol=brca1")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "brca1", repo.symbol)
+	assert.Contains(t, w.Body.String(), `"symbol":"BRCA1"`)
+}

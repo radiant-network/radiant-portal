@@ -6,6 +6,7 @@ import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
+import CNVProfileDialog from './germline-occurrence/cnv-profile/cnv-profile-dialog';
 import CNVTab from './germline-occurrence/cnv-tab';
 import SNVTab from './germline-occurrence/snv-tab';
 import {
@@ -50,6 +51,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
       : CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv;
   const { tasks, isLoading: isTasksLoading } = useOccurrenceTasks(caseId, seqId, dataType);
   const selectedTaskId = useTaskIdFromSearchParam();
+  const selectedSeqExp = seqExpVariants.find(seqExp => seqExp.seq_id === seqId);
 
   const handlechange = useCallback(
     (value: number) => {
@@ -93,6 +95,17 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         tasks={tasks}
         selectedTaskId={selectedTaskId}
         onTaskChange={handleTaskChange}
+        actions={
+          activeInterface === GermlineVariantInterface.CNV && (
+            <CNVProfileDialog
+              caseId={caseId}
+              seqId={seqId}
+              taskId={selectedTaskId}
+              experimentalStrategy={selectedSeqExp?.experimental_strategy_code}
+              sampleId={selectedSeqExp?.sample_submitter_id}
+            />
+          )
+        }
       />
       {activeInterface == GermlineVariantInterface.SNV && (
         <SNVTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />

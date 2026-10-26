@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
 	"path"
@@ -143,7 +146,7 @@ type S3Store struct {
 	svc *s3.S3
 }
 
-func NewS3Store() (FileMetadataGetter, error) {
+func NewS3Store() (*S3Store, error) {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
 	useSSL := GetBoolEnvOrDefault("AWS_USE_SSL", true)
@@ -185,4 +188,35 @@ func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
 		Size: *out.ContentLength,
 		Hash: strings.Trim(*out.ETag, `"`),
 	}, nil
+}
+
+var ErrObjectTooLarge = errors.New("object too large")
+
+// GetObject reads a whole object, refusing one over maxBytes before downloading it.
+func (s *S3Store) GetObject(ctx context.Context, rawUrl string, maxBytes int64) ([]byte, error) {
+	s3location, err := ExtractS3BucketAndKey(rawUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := s.svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s3location.Bucket),
+		Key:    aws.String(s3location.Key),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get object %s: %w", rawUrl, err)
+	}
+	defer func() { _ = out.Body.Close() }()
+
+	if aws.Int64Value(out.ContentLength) > maxBytes {
+		return nil, fmt.Errorf("%s: %w", rawUrl, ErrObjectTooLarge)
+	}
+	data, err := io.ReadAll(io.LimitReader(out.Body, maxBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("read object %s: %w", rawUrl, err)
+	}
+	if int64(len(data)) > maxBytes {
+		return nil, fmt.Errorf("%s: %w", rawUrl, ErrObjectTooLarge)
+	}
+	return data, nil
 }
