@@ -212,6 +212,9 @@ export type TableProps<TData extends RowData> = {
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  getRowId?: (row: TData) => string;
+  toolbarActions?: React.ReactNode;
+  selectionSummary?: React.ReactNode;
   pagination: PaginationSettings;
   serverOptions?: ServerOptions;
   extras?: React.ReactElement[];
@@ -721,6 +724,9 @@ function DataTable<T extends RowData>({
   tableIndexResultPosition = 'top',
   rowSelection,
   onRowSelectionChange,
+  getRowId,
+  toolbarActions,
+  selectionSummary,
   serverOptions,
   extras,
   emptyState,
@@ -834,6 +840,7 @@ function DataTable<T extends RowData>({
     ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
+    ...(getRowId ? { getRowId: (row: T) => getRowId(row) } : {}),
     onSortingChange: setSorting,
     pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
     state: {
@@ -861,7 +868,8 @@ function DataTable<T extends RowData>({
   );
 
   // Table Index display position
-  const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
+  const hasUpperSettings =
+    tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen || !!toolbarActions;
 
   // Footer, check if any columns have footer definitions
   const footerGroups = table.getFooterGroups();
@@ -1028,20 +1036,7 @@ function DataTable<T extends RowData>({
         {/* Results with TableFilters */}
         {tableIndexResultPosition === 'top' && TableFilters !== undefined && (
           <div className={cn('mb-2', { invisible: pagination.type === 'hidden' })}>
-            <TableIndexResult
-              loading={loadingStates?.total}
-              pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-              pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
-              total={total}
-              quickfilters={quickfilters}
-            />
-          </div>
-        )}
-
-        <div className="w-full flex text-left justify-between items-end">
-          {/* Results without TableFilters */}
-          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
-            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+            {selectionSummary ?? (
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
@@ -1049,6 +1044,23 @@ function DataTable<T extends RowData>({
                 total={total}
                 quickfilters={quickfilters}
               />
+            )}
+          </div>
+        )}
+
+        <div className="w-full flex text-left justify-between items-end">
+          {/* Results without TableFilters */}
+          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
+            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+              {selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              )}
             </div>
           )}
 
@@ -1057,6 +1069,8 @@ function DataTable<T extends RowData>({
 
           {/* Right Menu Options */}
           <div className="flex justify-end">
+            {toolbarActions && <div className="flex items-center gap-2 mr-2">{toolbarActions}</div>}
+
             {/* GroupBy */}
             {groupByColumns.length > 0 && (
               <DataTableGroupBy
@@ -1208,15 +1222,16 @@ function DataTable<T extends RowData>({
       {pagination.type !== 'hidden' && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
-            {tableIndexResultPosition === 'bottom' && (
-              <TableIndexResult
-                loading={loadingStates?.total}
-                pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
-                total={total}
-                quickfilters={quickfilters}
-              />
-            )}
+            {tableIndexResultPosition === 'bottom' &&
+              (selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              ))}
           </div>
           <div className="flex items-center gap-2">
             <div>

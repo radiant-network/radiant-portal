@@ -1,15 +1,20 @@
 // @ts-nocheck
+import { useState } from 'react';
 import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SearchIcon } from 'lucide-react';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import { createAppColumnHelper, createColumnSettings } from '@/components/base/data-table/data-table';
 import DataTable, { type TableColumnDef } from '@/components/base/data-table/data-table';
+import TableSelectionSummary from '@/components/base/data-table/data-table-selection-summary';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import EmptyState from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
@@ -316,4 +321,62 @@ export const Footer: Story = {
     ],
   },
   render: args => <DataTableStory args={args} title="Footer" />,
+};
+
+const selectionColumn = {
+  id: 'rowSelection',
+  size: 48,
+  maxSize: 48,
+  enableResizing: false,
+  header: ({ table }) => <RowSelectionHeader table={table} />,
+  cell: ({ row }) => <RowSelectionCell row={row} />,
+};
+
+function SelectableDataTableStory({ args }: { args: any }) {
+  const [rowSelection, setRowSelection] = useState({});
+  const selectedCount = Object.keys(rowSelection).length;
+
+  return (
+    <DataTableStory
+      title="Toolbar actions and selection summary"
+      description="`toolbarActions` renders left of the table settings; `selectionSummary` replaces the results index while rows are selected."
+      args={{
+        ...args,
+        rowSelection,
+        onRowSelectionChange: setRowSelection,
+        toolbarActions:
+          selectedCount === 0 ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can open the tooltip */}
+                <span tabIndex={0}>
+                  <Button size="sm" disabled>
+                    Download report
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Select at least one item</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button size="sm">Download report</Button>
+          ),
+        selectionSummary: selectedCount > 0 ? <TableSelectionSummary count={selectedCount} /> : undefined,
+      }}
+    />
+  );
+}
+
+export const ToolbarActionsAndSelectionSummary: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [selectionColumn, ...mockColumns],
+    defaultColumnSettings: createColumnSettings([
+      { id: 'rowSelection', visible: true, fixed: true, pinningPosition: 'left' },
+      ...mockDefaultColumnSettings,
+    ]),
+    getRowId: (row: TableMockData) => `${row.firstName}-${row.lastName}`,
+  },
+  render: args => <SelectableDataTableStory args={args} />,
 };

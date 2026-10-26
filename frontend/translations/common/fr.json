@@ -840,6 +840,8 @@
       "results": "Résultats {{from}} - {{to}} de {{total}}",
       "results_filtered": "{{shown}} affichés sur {{total}}",
       "no_result": "Aucun résultat",
+      "items_selected_one": "{{value}} élément sélectionné",
+      "items_selected_other": "{{value}} éléments sélectionnés",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
