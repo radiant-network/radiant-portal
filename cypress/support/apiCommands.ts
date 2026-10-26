@@ -61,8 +61,7 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
 
 /**
  * Same as `apiCall`, but against an explicit tenant instead of `api_tenant`.
- * For specs whose data only exists in another tenant (e.g. assignment candidates, which need
- * cases in two diagnostic labs).
+ * For specs whose data only exists in another tenant.
  * @param tenant The tenant segment prepended to the path (e.g., 'radiant').
  * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
  * @param query The tenant-scoped API endpoint path, without the tenant prefix.
