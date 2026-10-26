@@ -25,6 +25,11 @@ from radiant_python.models.batch_message import BatchMessage
 from radiant_python.models.batch_report import BatchReport
 from radiant_python.models.batch_summary import BatchSummary
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.models.cnv_profile import CNVProfile
+from radiant_python.models.cnv_profile_chromosome import CNVProfileChromosome
+from radiant_python.models.cnv_profile_roh import CNVProfileROH
+from radiant_python.models.cnv_profile_segment import CNVProfileSegment
+from radiant_python.models.cnv_profile_track import CNVProfileTrack
 from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.case_batch import CaseBatch
 from radiant_python.models.case_batch_patch import CaseBatchPatch
@@ -67,6 +72,7 @@ from radiant_python.models.create_sample_batch_body import CreateSampleBatchBody
 from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
 from radiant_python.models.create_user_request import CreateUserRequest
 from radiant_python.models.create_user_role import CreateUserRole
+from radiant_python.models.cytoband import Cytoband
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.document_result import DocumentResult
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
@@ -82,6 +88,8 @@ from radiant_python.models.gene_panel_upload_result import GenePanelUploadResult
 from radiant_python.models.gene_panel_upload_warning import GenePanelUploadWarning
 from radiant_python.models.gene_result import GeneResult
 from radiant_python.models.gene_search_body import GeneSearchBody
+from radiant_python.models.gene_track_exon import GeneTrackExon
+from radiant_python.models.gene_track_gene import GeneTrackGene
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.get_batch_response import GetBatchResponse

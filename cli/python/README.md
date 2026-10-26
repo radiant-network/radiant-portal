@@ -121,6 +121,7 @@ Class | Method | HTTP request | Description
 *GenePanelsApi* | [**put_gene_panels**](docs/GenePanelsApi.md#put_gene_panels) | **PUT** /{tenant}/gene_panels | Replace the tenant&#39;s gene panels
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 *GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
+*GenesApi* | [**gene_track**](docs/GenesApi.md#gene_track) | **GET** /{tenant}/genes/track | List the genes of a region
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 *IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /{tenant}/igv/{case_id} | Get IGV
 *InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
@@ -148,6 +149,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 *OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
+*OccurrencesApi* | [**get_germline_cnv_profile**](docs/OccurrencesApi.md#get_germline_cnv_profile) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile | Get the CNV profile of a sequencing
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
 *OccurrencesApi* | [**get_germline_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_germline_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of germline SNV occurrences of a case
 *OccurrencesApi* | [**get_somatic_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_somatic_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of somatic SNV occurrences of a case
@@ -222,6 +224,11 @@ Class | Method | HTTP request | Description
  - [BatchReport](docs/BatchReport.md)
  - [BatchSummary](docs/BatchSummary.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
+ - [CNVProfile](docs/CNVProfile.md)
+ - [CNVProfileChromosome](docs/CNVProfileChromosome.md)
+ - [CNVProfileROH](docs/CNVProfileROH.md)
+ - [CNVProfileSegment](docs/CNVProfileSegment.md)
+ - [CNVProfileTrack](docs/CNVProfileTrack.md)
  - [CaseAssignee](docs/CaseAssignee.md)
  - [CaseBatch](docs/CaseBatch.md)
  - [CaseBatchPatch](docs/CaseBatchPatch.md)
@@ -264,6 +271,7 @@ Class | Method | HTTP request | Description
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
  - [CreateUserRequest](docs/CreateUserRequest.md)
  - [CreateUserRole](docs/CreateUserRole.md)
+ - [Cytoband](docs/Cytoband.md)
  - [DocumentFilters](docs/DocumentFilters.md)
  - [DocumentResult](docs/DocumentResult.md)
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)
@@ -279,6 +287,8 @@ Class | Method | HTTP request | Description
  - [GenePanelUploadWarning](docs/GenePanelUploadWarning.md)
  - [GeneResult](docs/GeneResult.md)
  - [GeneSearchBody](docs/GeneSearchBody.md)
+ - [GeneTrackExon](docs/GeneTrackExon.md)
+ - [GeneTrackGene](docs/GeneTrackGene.md)
  - [GermlineCNVOccurrence](docs/GermlineCNVOccurrence.md)
  - [GermlineSNVOccurrence](docs/GermlineSNVOccurrence.md)
  - [GetBatchResponse](docs/GetBatchResponse.md)
