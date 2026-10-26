@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -157,10 +158,19 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 }
 
 type MockCNVProfileRepository struct {
+	strategy  string
 	documents []types.CNVProfileDocument
 	segments  []types.CNVProfileSegment
 	cytobands []types.Cytoband
 	err       error
+}
+
+// GetExperimentalStrategy defaults to an exome.
+func (m *MockCNVProfileRepository) GetExperimentalStrategy(ctx context.Context, seqID int) (string, error) {
+	if m.strategy == "" {
+		return "wxs", nil
+	}
+	return m.strategy, nil
 }
 
 func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID int) ([]types.CNVProfileDocument, error) {
@@ -190,6 +200,14 @@ func (m *MockObjectStore) GetObject(ctx context.Context, url string, maxBytes in
 		return nil, fmt.Errorf("get object %s: not found", url)
 	}
 	return data, nil
+}
+
+func (m *MockObjectStore) OpenObject(ctx context.Context, url string) (io.ReaderAt, error) {
+	data, err := m.GetObject(ctx, url, 0)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(data), nil
 }
 
 type MockGeneTrackRepository struct {

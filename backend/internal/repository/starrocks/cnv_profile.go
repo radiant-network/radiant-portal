@@ -47,6 +47,23 @@ func (r *CNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID
 	return documents, nil
 }
 
+// GetExperimentalStrategy gives the experimental strategy code of a sequencing (wxs, wgs, ...),
+// empty when there is no such sequencing.
+func (r *CNVProfileRepository) GetExperimentalStrategy(ctx context.Context, seqID int) (string, error) {
+	var strategies []string
+	err := r.db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias)).
+		Where(fmt.Sprintf("%s.id = ?", types.SequencingExperimentTable.Alias), seqID).
+		Pluck("experimental_strategy_code", &strategies).Error
+	if err != nil {
+		return "", fmt.Errorf("error fetching experimental strategy: %w", err)
+	}
+	if len(strategies) == 0 {
+		return "", nil
+	}
+	return strategies[0], nil
+}
+
 // SelectCNVProfileFiles picks the copy ratio, BAF and ROH files. A rerun of the calling task
 // writes them again: the latest task (highest id) wins.
 func SelectCNVProfileFiles(documents []types.CNVProfileDocument) CNVProfileFiles {

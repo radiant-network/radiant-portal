@@ -110,10 +110,11 @@ export function parseLocus(genome: Genome, input: string): Locus | undefined {
 }
 
 /**
- * The region to fetch the genes of a view from: the view within one chromosome, widened on each
- * side and snapped to a grid so that small moves reuse it. Undefined when the view is too wide.
+ * The region to fetch the data of a view from (genes, detailed points): the view within one
+ * chromosome, widened on each side and snapped to a grid so that small moves reuse it. Undefined
+ * when the view is too wide.
  */
-export function geneWindow(genome: Genome, view: GenomeView, maxSpan: number): Locus | undefined {
+export function regionWindow(genome: Genome, view: GenomeView, maxSpan: number): Locus | undefined {
   const inView = chromosomesInView(genome, view);
   const span = view.x1 - view.x0;
   if (inView.length !== 1 || span > maxSpan) return undefined;

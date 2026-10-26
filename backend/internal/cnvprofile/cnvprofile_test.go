@@ -57,6 +57,53 @@ func Test_BAFTrack_SkipsChromosomesAbsentFromTheFile(t *testing.T) {
 	}, got)
 }
 
+func Test_BAFSample_KeepsOneVariantPerStrideAcrossChromosomes(t *testing.T) {
+	got, stride, err := BAFSample(openFixture(t, "baf.bw"), fixtureChromosomes, 2)
+	require.NoError(t, err)
+	assert.Equal(t, 2, stride)
+	assert.Equal(t, []types.CNVProfileTrack{
+		{Chromosome: "1", Positions: []int{10}, Values: []float64{0.5}},
+		{Chromosome: "2", Positions: []int{20}, Values: []float64{1}},
+	}, got)
+}
+
+func Test_BAFSample_KeepsEveryVariantUnderTheLimit(t *testing.T) {
+	got, stride, err := BAFSample(openFixture(t, "baf.bw"), fixtureChromosomes, 10)
+	require.NoError(t, err)
+	assert.Equal(t, 1, stride)
+	assert.Equal(t, []int{10, 150}, got[0].Positions)
+}
+
+func Test_CopyRatioSample_KeepsOneBinPerStrideAcrossChromosomes(t *testing.T) {
+	got, stride, err := CopyRatioSample(openFixture(t, "tn.bw"), fixtureChromosomes, 2)
+	require.NoError(t, err)
+	assert.Equal(t, 2, stride)
+	assert.Equal(t, []types.CNVProfileTrack{
+		{Chromosome: "1", Positions: []int{50}, Values: []float64{1}},
+		{Chromosome: "2", Positions: []int{50}, Values: []float64{0.5}},
+		{Chromosome: "X", Positions: []int{}, Values: []float64{}},
+	}, got)
+}
+
+func Test_CopyRatioSample_KeepsEveryBinUnderTheLimit(t *testing.T) {
+	got, stride, err := CopyRatioSample(openFixture(t, "tn.bw"), fixtureChromosomes, 10)
+	require.NoError(t, err)
+	assert.Equal(t, 1, stride)
+	assert.Equal(t, []int{50, 150}, got[0].Positions)
+}
+
+func Test_CopyRatioRegion_KeepsOverlappingBins(t *testing.T) {
+	got, err := CopyRatioRegion(openFixture(t, "tn.bw"), "1", 120, 130)
+	require.NoError(t, err)
+	assert.Equal(t, types.CNVProfileTrack{Chromosome: "1", Positions: []int{150}, Values: []float64{2}}, got)
+}
+
+func Test_BAFRegion_ChromosomeAbsentFromTheFile(t *testing.T) {
+	got, err := BAFRegion(openFixture(t, "baf.bw"), "X", 0, 300)
+	require.NoError(t, err)
+	assert.Equal(t, types.CNVProfileTrack{Chromosome: "X", Positions: []int{}, Values: []float64{}}, got)
+}
+
 func Test_ParseROH_ReadsRegions(t *testing.T) {
 	got, err := ParseROH([]byte("chr3\t121632491\t122164266\t1.57\t63\t0\nchr14\t66371417\t67475060\t1.50\t60\t1\n"))
 	require.NoError(t, err)

@@ -67,6 +67,12 @@ function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CN
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.locus')}</dt>
           <dd className="tabular-nums">{locus(gene.chromosome, gene.start, gene.end)}</dd>
+          {gene.biotype && (
+            <>
+              <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.biotype')}</dt>
+              <dd>{gene.biotype.replaceAll('_', ' ')}</dd>
+            </>
+          )}
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.size')}</dt>
           <dd>{toKiloBases(gene.end - gene.start)}</dd>
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.exons')}</dt>

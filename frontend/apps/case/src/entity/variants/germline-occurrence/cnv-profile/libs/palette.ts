@@ -7,11 +7,13 @@ export type CNVProfilePalette = {
   loss: string;
   roh: string;
   gene: string;
+  geneOther: string;
   highlight: string;
 };
 
-// Plotly can't read CSS variables. The point pairs are checked for colour-blind separation against
-// the light and dark card colours of usePlotlyTheme.
+// Plotly can't read CSS variables. The point pairs, and the gene colours against the gain and
+// highlight colours, are checked for colour-blind separation against the light and dark card
+// colours of usePlotlyTheme. A protein-coding gene stands out by lightness from the other genes.
 const LIGHT: CNVProfilePalette = {
   pointEven: '#16a08e',
   pointOdd: '#8a6bbf',
@@ -20,7 +22,8 @@ const LIGHT: CNVProfilePalette = {
   gain: '#1f6feb',
   loss: '#d1242f',
   roh: '#8b1a1a',
-  gene: '#6e7781',
+  gene: '#0a3069',
+  geneOther: '#8fb3d9',
   highlight: '#bf8700',
 };
 
@@ -32,7 +35,8 @@ const DARK: CNVProfilePalette = {
   gain: '#58a6ff',
   loss: '#ff7b72',
   roh: '#f0883e',
-  gene: '#8b949e',
+  gene: '#cfe0ff',
+  geneOther: '#46658f',
   highlight: '#d29922',
 };
 

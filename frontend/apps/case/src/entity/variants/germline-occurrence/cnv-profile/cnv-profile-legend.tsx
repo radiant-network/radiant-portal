@@ -48,6 +48,10 @@ function CNVProfileLegend({ palette }: CNVProfileLegendProps) {
         {t('case_entity.variants.cnv_profile.legend.gene')}
       </li>
       <li className="flex items-center gap-1.5">
+        {bar(palette.geneOther)}
+        {t('case_entity.variants.cnv_profile.legend.other_gene')}
+      </li>
+      <li className="flex items-center gap-1.5">
         {bar(palette.highlight)}
         {t('case_entity.variants.cnv_profile.legend.highlighted_gene')}
       </li>

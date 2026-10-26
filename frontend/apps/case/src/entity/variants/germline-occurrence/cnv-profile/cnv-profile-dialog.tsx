@@ -16,7 +16,7 @@ import { occurrencesApi } from '@/utils/api';
 // Plotly reads the window when it loads: the chart is only loaded in the browser, on open.
 const CNVProfileChart = lazy(() => import('./cnv-profile-chart'));
 
-const EXOME_STRATEGY = 'wxs';
+const SUPPORTED_STRATEGIES = ['wxs', 'wgs'];
 
 type CNVProfileDialogProps = {
   caseId: number;
@@ -36,7 +36,8 @@ function missingFilesKey(error: AxiosError<ApiError>) {
 
 function errorKey(error: unknown) {
   if (isAxiosError<ApiError>(error) && error.response?.status === 404) return missingFilesKey(error);
-  if (isAxiosError(error) && error.response?.status === 422) return 'case_entity.variants.cnv_profile.errors.too_large';
+  if (isAxiosError(error) && error.response?.status === 422)
+    return 'case_entity.variants.cnv_profile.errors.unsupported';
   return 'case_entity.variants.cnv_profile.errors.unknown';
 }
 
@@ -44,7 +45,8 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
-  const available = taskId !== undefined && experimentalStrategy === EXOME_STRATEGY;
+  const available =
+    taskId !== undefined && experimentalStrategy !== undefined && SUPPORTED_STRATEGIES.includes(experimentalStrategy);
   const { data, error, isLoading } = useSWR<CNVProfile>(
     open && taskId !== undefined ? ['cnv-profile', tenant, caseId, seqId, taskId] : null,
     async () => {
@@ -77,7 +79,7 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
           <TooltipTrigger asChild>
             <span>{trigger}</span>
           </TooltipTrigger>
-          <TooltipContent>{t('case_entity.variants.cnv_profile.exome_only')}</TooltipContent>
+          <TooltipContent>{t('case_entity.variants.cnv_profile.unavailable')}</TooltipContent>
         </Tooltip>
       )}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -97,7 +99,7 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
             {isLoading && loader}
             {data && (
               <Suspense fallback={loader}>
-                <CNVProfileChart profile={data} />
+                <CNVProfileChart profile={data} ids={{ caseId, seqId, taskId: taskId! }} />
               </Suspense>
             )}
           </DialogBody>

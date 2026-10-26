@@ -11,8 +11,10 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 import { genesApi } from '@/utils/api';
 
 import { useGeneTrack } from './hooks/use-gene-track';
-import { clampView, createGenome, geneWindow, type GenomeView, parseLocus, viewAround } from './libs/genome';
+import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
+import { clampView, createGenome, type GenomeView, parseLocus, regionWindow, viewAround } from './libs/genome';
 import { getCNVProfilePalette } from './libs/palette';
+import { withRegion } from './libs/region';
 import {
   buildCloudTraces,
   buildCytobandTraces,
@@ -48,9 +50,10 @@ const kindOf = (point: PlotDatum) => (point.data as { meta?: TraceKind }).meta;
 
 type CNVProfileChartProps = {
   profile: CNVProfile;
+  ids: CNVProfileIds;
 };
 
-function CNVProfileChart({ profile }: CNVProfileChartProps) {
+function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const theme = usePlotlyTheme();
@@ -63,14 +66,21 @@ function CNVProfileChart({ profile }: CNVProfileChartProps) {
   const [dragMode, setDragMode] = useState<DragMode>('pan');
   const [showFiltered, setShowFiltered] = useState(true);
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
-  const { genes } = useGeneTrack(geneWindow(genome, view, GENE_TRACK_MAX_SPAN));
+  const { genes } = useGeneTrack(regionWindow(genome, view, GENE_TRACK_MAX_SPAN));
+  const { overview } = profile;
+  const { region, isLoading: regionLoading } = useProfileRegion(
+    ids,
+    overview ? regionWindow(genome, view, overview.region_max_span) : undefined,
+  );
+  const copyRatio = useMemo(() => withRegion(profile.copy_ratio, region, r => r.copy_ratio), [profile, region]);
+  const baf = useMemo(() => withRegion(profile.baf, region, r => r.baf), [profile, region]);
 
   const palette = getCNVProfilePalette(theme.isDark);
   const pxPerBase = Math.max(1, plotWidth - PLOT_MARGIN_PX) / (view.x1 - view.x0);
-  const showGenes = geneWindow(genome, view, GENE_TRACK_MAX_SPAN) !== undefined;
+  const showGenes = regionWindow(genome, view, GENE_TRACK_MAX_SPAN) !== undefined;
   const pointCount = useMemo(
-    () => [...profile.copy_ratio, ...profile.baf].reduce((sum, track) => sum + track.positions.length, 0),
-    [profile],
+    () => [...copyRatio, ...baf].reduce((sum, track) => sum + track.positions.length, 0),
+    [copyRatio, baf],
   );
 
   const traceLabels = useMemo(
@@ -97,10 +107,10 @@ function CNVProfileChart({ profile }: CNVProfileChartProps) {
   // The point clouds keep their arrays across views: Plotly only restyles their markers.
   const clouds = useMemo(
     () => [
-      ...buildCloudTraces(profile.copy_ratio, genome, 'y', traceLabels.copyRatio, palette),
-      ...buildCloudTraces(profile.baf, genome, 'y2', traceLabels.baf, palette),
+      ...buildCloudTraces(copyRatio, genome, 'y', traceLabels.copyRatio, palette),
+      ...buildCloudTraces(baf, genome, 'y2', traceLabels.baf, palette),
     ],
-    [profile, genome, traceLabels, palette],
+    [copyRatio, baf, genome, traceLabels, palette],
   );
   const segmentTraces = useMemo(
     () => buildSegmentTraces(profile.segments, genome, palette, theme, traceLabels, FORMAT, showFiltered),
@@ -298,6 +308,18 @@ function CNVProfileChart({ profile }: CNVProfileChartProps) {
         pointCount={pointCount}
       />
       <CNVProfileLegend palette={palette} />
+      {overview && (
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          {regionLoading && <Spinner size={12} />}
+          {region
+            ? t('case_entity.variants.cnv_profile.overview.detailed')
+            : t('case_entity.variants.cnv_profile.overview.reduced', {
+                copyRatioStride: overview.copy_ratio_stride,
+                bafStride: overview.baf_stride,
+                span: toKiloBases(overview.region_max_span),
+              })}
+        </p>
+      )}
       <div ref={containerRef} className="relative min-h-0 flex-1">
         <Plot
           data={data}

@@ -3,6 +3,7 @@ package utils_test
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -138,5 +140,48 @@ func Test_GetObject_NotS3URL(t *testing.T) {
 	s3fs, _ := utils.NewS3Store()
 	_, err := s3fs.GetObject(context.Background(), "https://test-bucket/test-file.txt", 10)
 
-	assert.EqualError(t, err, "URL is not an S3 URL")
+	assert.EqualError(t, err, "locate https://test-bucket/test-file.txt: URL is not an S3 URL")
+}
+
+func Test_OpenObject_ReadsRange(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		r, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/test-file.txt")
+		require.NoError(t, err)
+		buf := make([]byte, 5)
+		n, err := r.ReadAt(buf, 6)
+
+		assert.NoError(t, err)
+		assert.Equal(t, 5, n)
+		assert.Equal(t, "world", string(buf))
+	})
+}
+
+func Test_OpenObject_ReadPastTheEnd(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		r, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/test-file.txt")
+		require.NoError(t, err)
+		buf := make([]byte, 10)
+		n, err := r.ReadAt(buf, 6)
+
+		assert.ErrorIs(t, err, io.EOF)
+		assert.Equal(t, 5, n)
+		assert.Equal(t, "world", string(buf[:n]))
+	})
+}
+
+func Test_OpenObject_Missing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/missing.txt")
+
+		assert.ErrorContains(t, err, "head object s3://test-bucket/missing.txt")
+	})
 }

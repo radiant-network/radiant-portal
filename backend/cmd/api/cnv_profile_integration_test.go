@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -11,13 +12,15 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// putCNVProfileFiles uploads the bigwig fixtures as the DRAGEN files of sequencing 70.
+// putCNVProfileFiles uploads the bigwig fixtures as the DRAGEN files of sequencing 70, a genome:
+// its copy ratio has 1,000 bins.
 func putCNVProfileFiles(t *testing.T, env *testutils.Env) {
 	t.Helper()
 	bucket := "cqdg-prod-file-workspace"
@@ -26,7 +29,7 @@ func putCNVProfileFiles(t *testing.T, env *testutils.Env) {
 		_, err := env.ObjectStore.Client.PutObject(env.Ctx, bucket, key, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 		require.NoError(t, err)
 	}
-	for key, fixture := range map[string]string{"dragen/NA12892/NA12892.tn.bw": "tn.bw", "dragen/NA12892/NA12892.hard-filtered.baf.bw": "baf.bw"} {
+	for key, fixture := range map[string]string{"dragen/NA12892/NA12892.tn.bw": "zoomed.bw", "dragen/NA12892/NA12892.hard-filtered.baf.bw": "baf.bw"} {
 		content, err := os.ReadFile("../../test/data/bigwig/" + fixture)
 		require.NoError(t, err)
 		put(key, content)
@@ -52,24 +55,42 @@ func Test_GetGermlineCNVProfileHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
+		require.Equal(t, http.StatusOK, w.Code)
+		var profile types.CNVProfile
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &profile))
+		assert.Equal(t, []types.CNVProfileChromosome{{Name: "1", Size: 100_000}}, profile.Chromosomes)
+		assert.Equal(t, &types.CNVProfileOverview{CopyRatioStride: 1, BAFStride: 1, RegionMaxSpan: types.CNVProfileRegionMaxSpan}, profile.Overview)
+		require.Len(t, profile.CopyRatio, 1)
+		assert.Len(t, profile.CopyRatio[0].Positions, 1000)
+		assert.Equal(t, []types.CNVProfileTrack{{Chromosome: "1", Positions: []int{10, 150}, Values: []float64{0.5, 0.25}}}, profile.BAF)
+		assert.Equal(t, []types.CNVProfileROH{{Chromosome: "1", Start: 100, End: 900, Score: 1.57, NbHom: 63, NbHet: 0}}, profile.ROH)
+		assert.Len(t, profile.Cytobands, 2)
+	})
+}
+
+func Test_GetGermlineCNVProfileRegionHandler(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+		putCNVProfileFiles(t, env)
+
+		store, err := utils.NewS3Store()
+		require.NoError(t, err)
+		repo := starrocks.NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/profile/region", server.GetGermlineCNVProfileRegionHandler(repo, store))
+
+		req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/cnv/70/70/71/profile/region?chromosome=1&start=120&end=320", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `{
-			"chromosomes": [{"name":"1","size":1000},{"name":"2","size":500},{"name":"X","size":300}],
-			"copy_ratio": [
-				{"chromosome":"1","positions":[50,150],"values":[1,2]},
-				{"chromosome":"2","positions":[50],"values":[0.5]},
-				{"chromosome":"X","positions":[],"values":[]}
-			],
-			"baf": [
-				{"chromosome":"1","positions":[10,150],"values":[0.5,0.25]},
-				{"chromosome":"2","positions":[20],"values":[1]}
-			],
-			"segments": [],
-			"roh": [{"chromosome":"1","start":100,"end":900,"score":1.57,"nb_hom":63,"nb_het":0}],
-			"cytobands": [
-				{"chromosome":"1","cytoband":"p1.1","start":10000,"end":10200,"gie_stain":"gneg"},
-				{"chromosome":"1","cytoband":"p1.2","start":10500,"end":10800,"gie_stain":"gpos25"}
-			]
+			"chromosome":"1","start":120,"end":320,
+			"copy_ratio":{"chromosome":"1","positions":[150,250,350],"values":[1.072,1.149,1.231]},
+			"baf":{"chromosome":"1","positions":[150],"values":[0.25]}
 		}`, w.Body.String())
 	})
 }

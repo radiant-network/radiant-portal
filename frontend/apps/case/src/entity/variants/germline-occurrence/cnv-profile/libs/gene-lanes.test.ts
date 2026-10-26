@@ -47,4 +47,15 @@ describe('assignLanes', () => {
       { lane: 0, labelled: false },
     ]);
   });
+
+  it('labels the primary genes first', () => {
+    const items = [
+      { start: 0, end: 100, label: 'A' },
+      { start: 10, end: 100, label: 'B', primary: true },
+    ];
+    expect(assignLanes(items, 1, 1)).toEqual([
+      { lane: 0, labelled: false },
+      { lane: 0, labelled: true },
+    ]);
+  });
 });

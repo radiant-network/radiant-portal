@@ -294,9 +294,12 @@ export function buildCytobandTraces(
 
 export const strandLabel = (gene: GeneTrackGene) => (gene.strand === '-' ? `‹ ${gene.symbol}` : `${gene.symbol} ›`);
 
+const PROTEIN_CODING = 'protein_coding';
+
 /**
  * Genes packed in lanes, as a bar, or below EXON_MAX_SPAN as exon blocks on an intron line. The
- * highlighted gene is drawn in its own colour. Hover markers carry [gene index, exon index or -1].
+ * protein-coding genes get their labels first; the other biotypes are drawn paler and the
+ * highlighted gene in its own colour. Hover markers carry [gene index, exon index or -1].
  */
 export function buildGeneTraces(
   genes: GeneTrackGene[],
@@ -315,6 +318,8 @@ export function buildGeneTraces(
     lineTrace('y4', palette.gene, 12),
     lineTrace('y4', palette.highlight, detailed ? 3 : 10),
     lineTrace('y4', palette.highlight, 14),
+    lineTrace('y4', palette.geneOther, detailed ? 2 : 8),
+    lineTrace('y4', palette.geneOther, 12),
   ] as (Trace & { x: number[]; y: number[] })[];
   const markers = { x: [] as number[], y: [] as number[], text: [] as string[], customdata: [] as number[][] };
   const names = { x: [] as number[], y: [] as number[], text: [] as string[] };
@@ -329,6 +334,7 @@ export function buildGeneTraces(
         start: chromosome.offset + gene.start,
         end: chromosome.offset + gene.end,
         label: strandLabel(gene),
+        primary: gene.biotype === PROTEIN_CODING,
       },
     ];
   });
@@ -338,8 +344,10 @@ export function buildGeneTraces(
     const { lane, labelled } = lanes[k];
     const y = GENE_LANES - 1 - lane + 0.25;
     const highlighted = gene.gene_id === highlightedGeneId;
+    let style = gene.biotype === PROTEIN_CODING ? 0 : 4;
+    if (highlighted) style = 2;
     const offset = start - gene.start;
-    pushSpan(bars[highlighted ? 2 : 0], start, end, y);
+    pushSpan(bars[style], start, end, y);
     markers.x.push((start + end) / 2);
     markers.y.push(y);
     markers.customdata.push([index, -1]);
@@ -353,7 +361,7 @@ export function buildGeneTraces(
     );
     if (detailed) {
       gene.exons.forEach((exon, exonIndex) => {
-        pushSpan(bars[highlighted ? 3 : 1], offset + exon.start, offset + exon.end, y);
+        pushSpan(bars[style + 1], offset + exon.start, offset + exon.end, y);
         markers.x.push(offset + (exon.start + exon.end) / 2);
         markers.y.push(y);
         markers.customdata.push([index, exonIndex]);

@@ -7,9 +7,9 @@ import pyBigWig
 HEADER = [("chr1", 1000), ("chr2", 500), ("chrX", 300)]
 
 
-def write(name, header, add):
+def write(name, header, add, zooms=0):
     bw = pyBigWig.open(name, "w")
-    bw.addHeader(header, maxZooms=0)
+    bw.addHeader(header, maxZooms=zooms)
     add(bw)
     bw.close()
 
@@ -28,6 +28,12 @@ def baf(bw):
     bw.addEntries(["chr1", "chr1", "chr2"], [10, 150, 20], ends=[11, 151, 21], values=[0.5, 0.25, 1.0])
 
 
+def zoomed(bw):
+    starts = list(range(0, 100_000, 100))
+    bw.addEntries(["chr1"] * len(starts), starts, ends=[s + 100 for s in starts], values=[(i % 5) * 0.1 for i in range(len(starts))])
+
+
 write("sections.bw", HEADER, sections)
 write("tn.bw", HEADER, tn)
 write("baf.bw", [("chr1", 1000), ("chr2", 500)], baf)
+write("zoomed.bw", [("chr1", 100_000)], zoomed, zooms=1)

@@ -6,9 +6,9 @@ import {
   clampView,
   computeTicks,
   createGenome,
-  geneWindow,
   MIN_SPAN,
   parseLocus,
+  regionWindow,
   toGenomePosition,
   viewAround,
 } from './genome';
@@ -125,14 +125,14 @@ describe('parseLocus', () => {
   });
 });
 
-describe('geneWindow', () => {
+describe('regionWindow', () => {
   const big = createGenome([
     { name: '1', size: 100_000_000 },
     { name: '2', size: 100_000_000 },
   ]);
 
   it('widens a view within a chromosome and covers it', () => {
-    const window = geneWindow(big, { x0: 10_000_000, x1: 11_000_000 }, 20_000_000)!;
+    const window = regionWindow(big, { x0: 10_000_000, x1: 11_000_000 }, 20_000_000)!;
     expect(window.chromosome).toBe('1');
     expect(window.start).toBeLessThanOrEqual(10_000_000);
     expect(window.end).toBeGreaterThanOrEqual(11_000_000);
@@ -140,19 +140,19 @@ describe('geneWindow', () => {
   });
 
   it('gives the same window after a small move', () => {
-    expect(geneWindow(big, { x0: 10_000_000, x1: 11_000_000 }, 20_000_000)).toEqual(
-      geneWindow(big, { x0: 10_100_000, x1: 11_100_000 }, 20_000_000),
+    expect(regionWindow(big, { x0: 10_000_000, x1: 11_000_000 }, 20_000_000)).toEqual(
+      regionWindow(big, { x0: 10_100_000, x1: 11_100_000 }, 20_000_000),
     );
   });
 
   it('stays within the chromosome', () => {
-    const window = geneWindow(big, { x0: 100_000_000, x1: 101_000_000 }, 20_000_000)!;
+    const window = regionWindow(big, { x0: 100_000_000, x1: 101_000_000 }, 20_000_000)!;
     expect(window.chromosome).toBe('2');
     expect(window.start).toBe(0);
   });
 
   it('gives nothing for a view across two chromosomes or too wide', () => {
-    expect(geneWindow(big, { x0: 99_000_000, x1: 101_000_000 }, 20_000_000)).toBeUndefined();
-    expect(geneWindow(big, { x0: 0, x1: 30_000_000 }, 20_000_000)).toBeUndefined();
+    expect(regionWindow(big, { x0: 99_000_000, x1: 101_000_000 }, 20_000_000)).toBeUndefined();
+    expect(regionWindow(big, { x0: 0, x1: 30_000_000 }, 20_000_000)).toBeUndefined();
   });
 });

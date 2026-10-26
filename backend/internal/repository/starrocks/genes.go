@@ -126,15 +126,15 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 	return genes, nil
 }
 
-// GetGeneTrack lists the protein-coding genes overlapping a region, each with its exons merged over
-// all its transcripts (ensembl_exon_by_gene holds no MANE or coding bounds).
+// GetGeneTrack lists the genes of every biotype overlapping a region, each with its exons merged
+// over all its transcripts (ensembl_exon_by_gene holds no MANE or coding bounds).
 func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
-	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ? AND biotype = 'protein_coding'", chromosome, start, end)
+	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ?", chromosome, start, end)
 }
 
 // GetGeneTrackBySymbol finds a gene of the gene track by its symbol, ignoring case.
 func (r *GenesRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
-	return r.geneTrack(ctx, "UPPER(name) = ? AND biotype = 'protein_coding'", strings.ToUpper(symbol))
+	return r.geneTrack(ctx, "UPPER(name) = ?", strings.ToUpper(symbol))
 }
 
 func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...any) ([]types.GeneTrackGene, error) {

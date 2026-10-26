@@ -1,6 +1,7 @@
-// Package bigwig reads the full-resolution data of a bigWig file (UCSC format, see
-// https://genome.ucsc.edu/goldenPath/help/bigWig.html and the bbiFile.h / bwgInternal.h layouts).
-// The zoom levels and summaries are not read.
+// Package bigwig reads a bigWig file (UCSC format, see
+// https://genome.ucsc.edu/goldenPath/help/bigWig.html and the bbiFile.h / bwgInternal.h layouts):
+// the full-resolution data and the zoom levels, whole chromosomes or a region. Only the blocks a
+// query needs are read, so a ReaderAt over ranged object storage reads little of a large file.
 package bigwig
 
 import (
@@ -19,12 +20,14 @@ const (
 	rTreeMagic     = 0x2468ACE0
 
 	headerSize        = 64
+	zoomHeadSize      = 24
 	chromTreeHeadSize = 32
 	rTreeHeadSize     = 48
 	nodeHeadSize      = 4
 	rTreeLeafItemSize = 32
 	rTreeNodeItemSize = 24
 	sectionHeadSize   = 24
+	summaryItemSize   = 32
 )
 
 const (
@@ -46,12 +49,31 @@ type Interval struct {
 	Value float32
 }
 
+// Summary aggregates the data of a zoom level window: ValidCount bases carry a value.
+type Summary struct {
+	Start      uint32
+	End        uint32
+	ValidCount uint32
+	Min        float32
+	Max        float32
+	Sum        float32
+	SumSquares float32
+}
+
+type zoomLevel struct {
+	reduction  uint32
+	indexStart int64
+}
+
 type File struct {
 	r          io.ReaderAt
 	order      binary.ByteOrder
 	compressed bool
 	indexStart int64
 	chroms     []Chrom
+	zooms      []zoomLevel
+	// basesCovered counts the bases that carry a value, from the file's total summary.
+	basesCovered uint64
 }
 
 func Open(r io.ReaderAt) (*File, error) {
@@ -71,15 +93,21 @@ func Open(r io.ReaderAt) (*File, error) {
 	f := &File{r: r, order: order, compressed: order.Uint32(head[52:]) > 0}
 	indexStart, err := f.offset(head[24:])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read index offset: %w", err)
+	}
+	if f.zooms, err = f.readZoomHeaders(int(order.Uint16(head[6:]))); err != nil {
+		return nil, fmt.Errorf("read zoom levels: %w", err)
+	}
+	if f.basesCovered, err = f.readBasesCovered(head[44:]); err != nil {
+		return nil, fmt.Errorf("read bases covered: %w", err)
 	}
 	chromTreeStart, err := f.offset(head[8:])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read chromosome tree offset: %w", err)
 	}
 	chroms, err := f.readChromTree(chromTreeStart)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read chromosomes: %w", err)
 	}
 	f.indexStart, f.chroms = indexStart, chroms
 	return f, nil
@@ -87,6 +115,56 @@ func Open(r io.ReaderAt) (*File, error) {
 
 func (f *File) Chroms() []Chrom {
 	return f.chroms
+}
+
+// BasesCovered counts the bases that carry a value, over all chromosomes: the number of points
+// of a file of 1-base intervals, such as a BAF.
+func (f *File) BasesCovered() uint64 {
+	return f.basesCovered
+}
+
+func (f *File) readBasesCovered(summaryOffset []byte) (uint64, error) {
+	offset, err := f.offset(summaryOffset)
+	if err != nil {
+		return 0, fmt.Errorf("read total summary offset: %w", err)
+	}
+	if offset == 0 {
+		return 0, nil
+	}
+	summary, err := f.readAt(offset, 8)
+	if err != nil {
+		return 0, fmt.Errorf("read total summary: %w", err)
+	}
+	return f.order.Uint64(summary), nil
+}
+
+// ZoomLevels lists the window size, in bases, of each zoom level, from the finest.
+func (f *File) ZoomLevels() []uint32 {
+	levels := make([]uint32, len(f.zooms))
+	for i, z := range f.zooms {
+		levels[i] = z.reduction
+	}
+	return levels
+}
+
+func (f *File) readZoomHeaders(count int) ([]zoomLevel, error) {
+	if count == 0 {
+		return nil, nil
+	}
+	data, err := f.readAt(headerSize, count*zoomHeadSize)
+	if err != nil {
+		return nil, fmt.Errorf("read zoom headers: %w", err)
+	}
+	zooms := make([]zoomLevel, count)
+	for i := range zooms {
+		item := data[i*zoomHeadSize:]
+		indexStart, err := f.offset(item[16:])
+		if err != nil {
+			return nil, fmt.Errorf("read zoom level %d index offset: %w", i, err)
+		}
+		zooms[i] = zoomLevel{reduction: f.order.Uint32(item), indexStart: indexStart}
+	}
+	return zooms, nil
 }
 
 func (f *File) readAt(offset int64, size int) ([]byte, error) {
@@ -108,7 +186,7 @@ func (f *File) readChromTree(offset int64) ([]Chrom, error) {
 	keySize := int(f.order.Uint32(head[8:]))
 	var chroms []Chrom
 	if err := f.walkChromNode(offset+chromTreeHeadSize, keySize, &chroms); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("walk chromosome tree: %w", err)
 	}
 	return chroms, nil
 }
@@ -136,10 +214,10 @@ func (f *File) walkChromNode(offset int64, keySize int, chroms *[]Chrom) error {
 		}
 		child, err := f.offset(item[keySize:])
 		if err != nil {
-			return err
+			return fmt.Errorf("read chromosome tree child offset: %w", err)
 		}
 		if err := f.walkChromNode(child, keySize, chroms); err != nil {
-			return err
+			return fmt.Errorf("chromosome tree node at %d: %w", child, err)
 		}
 	}
 	return nil
@@ -150,35 +228,67 @@ type block struct {
 	size   int
 }
 
+// region is a half-open range of one chromosome, [start, end).
+type region struct {
+	chromID uint32
+	start   uint32
+	end     uint32
+}
+
 // Intervals returns every interval of a chromosome, in file order (sorted by start). A chromosome
 // of the header with no data gives none; a name absent from the header is an error.
 func (f *File) Intervals(chrom string) ([]Interval, error) {
-	id, ok := f.chromID(chrom)
-	if !ok {
-		return nil, fmt.Errorf("chromosome %q not in bigwig", chrom)
-	}
-	head, err := f.readAt(f.indexStart, rTreeHeadSize)
+	return f.IntervalsIn(chrom, 0, math.MaxUint32)
+}
+
+// IntervalsIn returns the intervals of a chromosome that overlap [start, end), in file order.
+func (f *File) IntervalsIn(chrom string, start, end uint32) ([]Interval, error) {
+	q, err := f.region(chrom, start, end)
 	if err != nil {
-		return nil, fmt.Errorf("read index: %w", err)
-	}
-	if f.order.Uint32(head) != rTreeMagic {
-		return nil, errors.New("bad index magic")
-	}
-	var blocks []block
-	if err := f.walkIndexNode(f.indexStart+rTreeHeadSize, id, &blocks); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read intervals: %w", err)
 	}
 	var intervals []Interval
-	for _, b := range blocks {
-		data, err := f.readBlock(b)
-		if err != nil {
-			return nil, err
+	err = f.readRegion(f.indexStart, q, func(data []byte) error {
+		if intervals, err = f.decodeSections(data, q, intervals); err != nil {
+			return fmt.Errorf("decode sections: %w", err)
 		}
-		if intervals, err = f.decodeSections(data, id, intervals); err != nil {
-			return nil, err
-		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read intervals of %s:%d-%d: %w", chrom, start, end, err)
 	}
 	return intervals, nil
+}
+
+// Summaries returns the windows of a zoom level that overlap [start, end) of a chromosome, level
+// 0 being the finest. A window holds no data where ValidCount is 0.
+func (f *File) Summaries(chrom string, level int, start, end uint32) ([]Summary, error) {
+	if level < 0 || level >= len(f.zooms) {
+		return nil, fmt.Errorf("zoom level %d out of range: the file has %d", level, len(f.zooms))
+	}
+	q, err := f.region(chrom, start, end)
+	if err != nil {
+		return nil, fmt.Errorf("read summaries: %w", err)
+	}
+	var summaries []Summary
+	err = f.readRegion(f.zooms[level].indexStart, q, func(data []byte) error {
+		if summaries, err = f.decodeSummaries(data, q, summaries); err != nil {
+			return fmt.Errorf("decode summaries: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read zoom level %d of %s:%d-%d: %w", level, chrom, start, end, err)
+	}
+	return summaries, nil
+}
+
+func (f *File) region(chrom string, start, end uint32) (region, error) {
+	id, ok := f.chromID(chrom)
+	if !ok {
+		return region{}, fmt.Errorf("chromosome %q not in bigwig", chrom)
+	}
+	return region{chromID: id, start: start, end: end}, nil
 }
 
 func (f *File) chromID(name string) (uint32, bool) {
@@ -190,8 +300,58 @@ func (f *File) chromID(name string) (uint32, bool) {
 	return 0, false
 }
 
-// walkIndexNode collects the data blocks whose chromosome range covers the chromosome.
-func (f *File) walkIndexNode(offset int64, chromID uint32, blocks *[]block) error {
+// readRegion hands each block of an R-tree index that overlaps the region to decode, inflated.
+// Adjacent blocks are read at once: a region's blocks are contiguous in the file.
+func (f *File) readRegion(indexStart int64, q region, decode func([]byte) error) error {
+	head, err := f.readAt(indexStart, rTreeHeadSize)
+	if err != nil {
+		return fmt.Errorf("read index: %w", err)
+	}
+	if f.order.Uint32(head) != rTreeMagic {
+		return errors.New("bad index magic")
+	}
+	var blocks []block
+	if err := f.walkIndexNode(indexStart+rTreeHeadSize, q, &blocks); err != nil {
+		return fmt.Errorf("walk index: %w", err)
+	}
+	for _, run := range contiguousRuns(blocks) {
+		first, last := run[0], run[len(run)-1]
+		raw, err := f.readAt(first.offset, int(last.offset-first.offset)+last.size)
+		if err != nil {
+			return fmt.Errorf("read data blocks: %w", err)
+		}
+		for _, b := range run {
+			start := b.offset - first.offset
+			data, err := f.inflate(raw[start : start+int64(b.size)])
+			if err != nil {
+				return fmt.Errorf("block at %d: %w", b.offset, err)
+			}
+			if err := decode(data); err != nil {
+				return fmt.Errorf("block at %d: %w", b.offset, err)
+			}
+		}
+	}
+	return nil
+}
+
+func contiguousRuns(blocks []block) [][]block {
+	var runs [][]block
+	for i, b := range blocks {
+		if i > 0 {
+			prev := blocks[i-1]
+			if b.offset == prev.offset+int64(prev.size) {
+				runs[len(runs)-1] = append(runs[len(runs)-1], b)
+				continue
+			}
+		}
+		runs = append(runs, []block{b})
+	}
+	return runs
+}
+
+// walkIndexNode collects the data blocks whose range overlaps the region. An item's range runs
+// from (startChrom, startBase) to (endChrom, endBase), end excluded.
+func (f *File) walkIndexNode(offset int64, q region, blocks *[]block) error {
 	head, err := f.readAt(offset, nodeHeadSize)
 	if err != nil {
 		return fmt.Errorf("read index node: %w", err)
@@ -207,34 +367,41 @@ func (f *File) walkIndexNode(offset int64, chromID uint32, blocks *[]block) erro
 	}
 	for i := range count {
 		item := items[i*itemSize : (i+1)*itemSize]
-		startChrom, endChrom := f.order.Uint32(item), f.order.Uint32(item[8:])
-		if chromID < startChrom || chromID > endChrom {
+		startChrom, startBase := f.order.Uint32(item), f.order.Uint32(item[4:])
+		endChrom, endBase := f.order.Uint32(item[8:]), f.order.Uint32(item[12:])
+		if !q.overlaps(startChrom, startBase, endChrom, endBase) {
 			continue
 		}
 		offset, err := f.offset(item[16:])
 		if err != nil {
-			return err
+			return fmt.Errorf("read index item offset: %w", err)
 		}
 		if isLeaf {
 			size, err := f.offset(item[24:])
 			if err != nil {
-				return err
+				return fmt.Errorf("read index item size: %w", err)
 			}
 			*blocks = append(*blocks, block{offset: offset, size: int(size)})
 			continue
 		}
-		if err := f.walkIndexNode(offset, chromID, blocks); err != nil {
-			return err
+		if err := f.walkIndexNode(offset, q, blocks); err != nil {
+			return fmt.Errorf("index node at %d: %w", offset, err)
 		}
 	}
 	return nil
 }
 
-func (f *File) readBlock(b block) ([]byte, error) {
-	raw, err := f.readAt(b.offset, b.size)
-	if err != nil {
-		return nil, fmt.Errorf("read data block: %w", err)
-	}
+func (q region) overlaps(startChrom, startBase, endChrom, endBase uint32) bool {
+	beforeEnd := startChrom < q.chromID || (startChrom == q.chromID && startBase < q.end)
+	afterStart := endChrom > q.chromID || (endChrom == q.chromID && endBase > q.start)
+	return beforeEnd && afterStart
+}
+
+func (q region) contains(chromID, start, end uint32) bool {
+	return chromID == q.chromID && start < q.end && end > q.start
+}
+
+func (f *File) inflate(raw []byte) ([]byte, error) {
 	if !f.compressed {
 		return raw, nil
 	}
@@ -250,7 +417,29 @@ func (f *File) readBlock(b block) ([]byte, error) {
 	return data, nil
 }
 
-func (f *File) decodeSections(data []byte, chromID uint32, intervals []Interval) ([]Interval, error) {
+func (f *File) decodeSummaries(data []byte, q region, summaries []Summary) ([]Summary, error) {
+	if len(data)%summaryItemSize != 0 {
+		return nil, errors.New("truncated zoom block")
+	}
+	for ; len(data) > 0; data = data[summaryItemSize:] {
+		start, end := f.order.Uint32(data[4:]), f.order.Uint32(data[8:])
+		if !q.contains(f.order.Uint32(data), start, end) {
+			continue
+		}
+		summaries = append(summaries, Summary{
+			Start:      start,
+			End:        end,
+			ValidCount: f.order.Uint32(data[12:]),
+			Min:        f.float(data[16:]),
+			Max:        f.float(data[20:]),
+			Sum:        f.float(data[24:]),
+			SumSquares: f.float(data[28:]),
+		})
+	}
+	return summaries, nil
+}
+
+func (f *File) decodeSections(data []byte, q region, intervals []Interval) ([]Interval, error) {
 	for len(data) > 0 {
 		if len(data) < sectionHeadSize {
 			return nil, errors.New("truncated section header")
@@ -275,7 +464,7 @@ func (f *File) decodeSections(data []byte, chromID uint32, intervals []Interval)
 		if len(data) < count*itemSize {
 			return nil, errors.New("truncated section")
 		}
-		if chrom == chromID {
+		if chrom == q.chromID {
 			fixedStart := start
 			for i := range count {
 				item := data[i*itemSize:]
@@ -290,7 +479,9 @@ func (f *File) decodeSections(data []byte, chromID uint32, intervals []Interval)
 					iv = Interval{Start: fixedStart, End: fixedStart + span, Value: f.float(item)}
 					fixedStart += step
 				}
-				intervals = append(intervals, iv)
+				if q.contains(chrom, iv.Start, iv.End) {
+					intervals = append(intervals, iv)
+				}
 			}
 		}
 		data = data[count*itemSize:]

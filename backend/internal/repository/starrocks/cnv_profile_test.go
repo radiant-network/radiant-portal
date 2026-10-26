@@ -36,6 +36,24 @@ func Test_GetCNVProfileDocuments_NoIgvFiles(t *testing.T) {
 	})
 }
 
+func Test_GetExperimentalStrategy_OfTheSequencing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
+		strategy, err := repo.GetExperimentalStrategy(t.Context(), 1)
+		require.NoError(t, err)
+		assert.Equal(t, "wgs", strategy)
+	})
+}
+
+func Test_GetExperimentalStrategy_UnknownSequencing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
+		strategy, err := repo.GetExperimentalStrategy(t.Context(), 999_999)
+		require.NoError(t, err)
+		assert.Empty(t, strategy)
+	})
+}
+
 func Test_SelectCNVProfileFiles_PicksEachTrack(t *testing.T) {
 	documents := []types.CNVProfileDocument{
 		{TaskID: 71, DocumentName: "S1.seg.bw", FormatCode: "bw"},

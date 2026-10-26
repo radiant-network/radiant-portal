@@ -346,6 +346,7 @@ var expectedTenantActions = map[string]string{
 	"POST /:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/statistics":           types.ActionSearchCase,
 	"GET /:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap": types.ActionSearchCase,
 	"GET /:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/profile":               types.ActionSearchCase,
+	"GET /:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/profile/region":        types.ActionSearchCase,
 	"POST /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count":                types.ActionSearchCase,
 	"POST /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list":                 types.ActionSearchCase,
 	"POST /:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate":            types.ActionSearchCase,

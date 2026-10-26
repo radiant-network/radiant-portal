@@ -2523,14 +2523,18 @@
       },
       "cnv_profile": {
         "button": "CNV profile",
-        "exome_only": "Available for exome sequencing only",
+        "unavailable": "Available for exome and genome sequencing only",
         "title": "CNV profile",
         "loading": "Loading the CNV profile…",
+        "overview": {
+          "reduced": "Overview: one copy ratio bin in {{copyRatioStride}} and one BAF variant in {{bafStride}}. Zoom below {{span}} to see every point.",
+          "detailed": "Every point of the visible region is shown."
+        },
         "errors": {
           "not_found": "The copy ratio and B-allele frequency files of this sequencing are missing.",
           "copy_ratio_missing": "The copy ratio file (.tn.bw) of this sequencing is missing.",
           "baf_missing": "The B-allele frequency file (.baf.bw) of this sequencing is missing.",
-          "too_large": "This sequencing is too large to display: only exomes are supported.",
+          "unsupported": "The CNV profile of this sequencing cannot be displayed: only exomes and genomes have one.",
           "unknown": "The CNV profile could not be loaded."
         },
         "tracks": {
@@ -2549,6 +2553,7 @@
           "filtered": "Filtered",
           "roh": "ROH",
           "gene": "Protein-coding gene",
+          "other_gene": "Other gene",
           "highlighted_gene": "Selected gene"
         },
         "hover": {
@@ -2583,6 +2588,7 @@
         "panel": {
           "strand": "strand {{strand}}",
           "locus": "Locus",
+          "biotype": "Biotype",
           "size": "Size",
           "exons": "Exons",
           "exon": "Exon {{index}} of {{total}}",

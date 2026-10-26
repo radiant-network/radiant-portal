@@ -2527,14 +2527,18 @@
       },
       "cnv_profile": {
         "button": "Profil CNV",
-        "exome_only": "Disponible pour les exomes seulement",
+        "unavailable": "Disponible pour les exomes et les génomes seulement",
         "title": "Profil CNV",
         "loading": "Chargement du profil CNV…",
+        "overview": {
+          "reduced": "Vue d'ensemble : un bin de copy ratio sur {{copyRatioStride}} et un variant BAF sur {{bafStride}}. Zoomez sous {{span}} pour voir tous les points.",
+          "detailed": "Tous les points de la région visible sont affichés."
+        },
         "errors": {
           "not_found": "Les fichiers de copy ratio et de fréquence de l'allèle B de ce séquençage sont absents.",
           "copy_ratio_missing": "Le fichier de copy ratio (.tn.bw) de ce séquençage est absent.",
           "baf_missing": "Le fichier de fréquence de l'allèle B (.baf.bw) de ce séquençage est absent.",
-          "too_large": "Ce séquençage est trop gros pour être affiché : seuls les exomes sont pris en charge.",
+          "unsupported": "Le profil CNV de ce séquençage ne peut pas être affiché : seuls les exomes et les génomes en ont un.",
           "unknown": "Le profil CNV n'a pas pu être chargé."
         },
         "tracks": {
@@ -2553,6 +2557,7 @@
           "filtered": "Filtré",
           "roh": "ROH",
           "gene": "Gène codant",
+          "other_gene": "Autre gène",
           "highlighted_gene": "Gène sélectionné"
         },
         "hover": {
@@ -2587,6 +2592,7 @@
         "panel": {
           "strand": "brin {{strand}}",
           "locus": "Locus",
+          "biotype": "Biotype",
           "size": "Taille",
           "exons": "Exons",
           "exon": "Exon {{index}} sur {{total}}",

@@ -180,17 +180,18 @@ func Test_ResolveGenes_RunsOnRootPoolEvenWithAUserPoolBound(t *testing.T) {
 	})
 }
 
-func Test_GetGeneTrack_ProteinCodingGenesWithMergedExons(t *testing.T) {
+func Test_GetGeneTrack_GenesOfEveryBiotypeWithMergedExons(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
 		genes, err := repo.GetGeneTrack(t.Context(), "1", 10100, 10600)
 		require.NoError(t, err)
-		// DPM1 overlaps the region but is not protein coding.
 		assert.Equal(t, []types.GeneTrackGene{
 			{GeneID: "ENSG00000000003", Symbol: "TSPAN6", Chromosome: "1", Start: 10000, End: 10200, Strand: "-", Biotype: "protein_coding", Description: "tetraspanin 6",
 				Exons: []types.GeneTrackExon{{Start: 10000, End: 10100}}},
 			{GeneID: "ENSG00000000005", Symbol: "TNMD", Chromosome: "1", Start: 10000, End: 20000, Strand: "+", Biotype: "protein_coding", Description: "tenomodulin",
 				Exons: []types.GeneTrackExon{{Start: 10000, End: 10100}, {Start: 10150, End: 10250}, {Start: 10450, End: 10750}}},
+			{GeneID: "ENSG00000000419", Symbol: "DPM1", Chromosome: "1", Start: 10250, End: 10750, Strand: "-", Biotype: "lncRNA", Description: "dolichyl-phosphate mannosyltransferase subunit 1",
+				Exons: []types.GeneTrackExon{{Start: 10600, End: 10700}}},
 		}, genes)
 	})
 }
@@ -216,10 +217,22 @@ func Test_GetGeneTrackBySymbol_IgnoresCase(t *testing.T) {
 	})
 }
 
-func Test_GetGeneTrackBySymbol_NotProteinCoding(t *testing.T) {
+func Test_GetGeneTrackBySymbol_AnyBiotype(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
 		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "DPM1")
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{
+			{GeneID: "ENSG00000000419", Symbol: "DPM1", Chromosome: "1", Start: 10250, End: 10750, Strand: "-", Biotype: "lncRNA", Description: "dolichyl-phosphate mannosyltransferase subunit 1",
+				Exons: []types.GeneTrackExon{{Start: 10600, End: 10700}}},
+		}, genes)
+	})
+}
+
+func Test_GetGeneTrackBySymbol_UnknownSymbol(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "NOPE1")
 		require.NoError(t, err)
 		assert.Equal(t, []types.GeneTrackGene{}, genes)
 	})
