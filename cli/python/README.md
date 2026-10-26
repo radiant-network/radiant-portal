@@ -150,6 +150,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 *OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 *OccurrencesApi* | [**get_germline_cnv_profile**](docs/OccurrencesApi.md#get_germline_cnv_profile) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile | Get the CNV profile of a sequencing
+*OccurrencesApi* | [**get_germline_cnv_profile_region**](docs/OccurrencesApi.md#get_germline_cnv_profile_region) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region | Get every point of a region of a CNV profile
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
 *OccurrencesApi* | [**get_germline_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_germline_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of germline SNV occurrences of a case
 *OccurrencesApi* | [**get_somatic_snv_transcript_reports_xlsx**](docs/OccurrencesApi.md#get_somatic_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of somatic SNV occurrences of a case
@@ -226,7 +227,9 @@ Class | Method | HTTP request | Description
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
  - [CNVProfile](docs/CNVProfile.md)
  - [CNVProfileChromosome](docs/CNVProfileChromosome.md)
+ - [CNVProfileOverview](docs/CNVProfileOverview.md)
  - [CNVProfileROH](docs/CNVProfileROH.md)
+ - [CNVProfileRegion](docs/CNVProfileRegion.md)
  - [CNVProfileSegment](docs/CNVProfileSegment.md)
  - [CNVProfileTrack](docs/CNVProfileTrack.md)
  - [CaseAssignee](docs/CaseAssignee.md)

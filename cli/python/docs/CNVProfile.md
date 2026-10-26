@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **chromosomes** | [**List[CNVProfileChromosome]**](CNVProfileChromosome.md) |  | 
 **copy_ratio** | [**List[CNVProfileTrack]**](CNVProfileTrack.md) |  | 
 **cytobands** | [**List[Cytoband]**](Cytoband.md) |  | 
+**overview** | [**CNVProfileOverview**](CNVProfileOverview.md) |  | [optional] 
 **roh** | [**List[CNVProfileROH]**](CNVProfileROH.md) |  | 
 **segments** | [**List[CNVProfileSegment]**](CNVProfileSegment.md) |  | 
 

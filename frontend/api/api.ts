@@ -372,6 +372,12 @@ export interface CNVProfile {
     'cytobands': Array<Cytoband>;
     /**
      * 
+     * @type {CNVProfileOverview}
+     * @memberof CNVProfile
+     */
+    'overview'?: CNVProfileOverview;
+    /**
+     * 
      * @type {Array<CNVProfileROH>}
      * @memberof CNVProfile
      */
@@ -401,6 +407,31 @@ export interface CNVProfileChromosome {
      * @memberof CNVProfileChromosome
      */
     'size': number;
+}
+/**
+ * Overview is set when the copy ratio and BAF are reduced, for a genome: the points of a region come from the region endpoint.
+ * @export
+ * @interface CNVProfileOverview
+ */
+export interface CNVProfileOverview {
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileOverview
+     */
+    'baf_stride': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileOverview
+     */
+    'copy_ratio_stride': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileOverview
+     */
+    'region_max_span': number;
 }
 /**
  * 
@@ -442,6 +473,43 @@ export interface CNVProfileROH {
      * 
      * @type {number}
      * @memberof CNVProfileROH
+     */
+    'start': number;
+}
+/**
+ * CNVProfileRegion holds every copy ratio and BAF point of a region of one chromosome
+ * @export
+ * @interface CNVProfileRegion
+ */
+export interface CNVProfileRegion {
+    /**
+     * 
+     * @type {CNVProfileTrack}
+     * @memberof CNVProfileRegion
+     */
+    'baf': CNVProfileTrack;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVProfileRegion
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {CNVProfileTrack}
+     * @memberof CNVProfileRegion
+     */
+    'copy_ratio': CNVProfileTrack;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileRegion
+     */
+    'end': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileRegion
      */
     'start': number;
 }
@@ -12840,7 +12908,7 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -12937,7 +13005,7 @@ export const GenesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -12987,7 +13055,7 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.geneSearch(tenant, geneSearchBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -13038,7 +13106,7 @@ export class GenesApi extends BaseAPI {
     }
 
     /**
-     * List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+     * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
      * @summary List the genes of a region
      * @param {string} tenant Tenant code
      * @param {string} [symbol] Gene symbol, ignoring case
@@ -15448,7 +15516,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+         * Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
          * @summary Get the CNV profile of a sequencing
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -15485,6 +15553,77 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+         * @summary Get every point of a region of a CNV profile
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} chromosome Chromosome, without chr prefix
+         * @param {number} start Region start
+         * @param {number} end Region end
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineCNVProfileRegion: async (tenant: string, caseId: number, seqId: number, taskId: number, chromosome: string, start: number, end: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'taskId', taskId)
+            // verify required parameter 'chromosome' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'chromosome', chromosome)
+            // verify required parameter 'start' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'start', start)
+            // verify required parameter 'end' is not null or undefined
+            assertParamExists('getGermlineCNVProfileRegion', 'end', end)
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (chromosome !== undefined) {
+                localVarQueryParameter['chromosome'] = chromosome;
+            }
+
+            if (start !== undefined) {
+                localVarQueryParameter['start'] = start;
+            }
+
+            if (end !== undefined) {
+                localVarQueryParameter['end'] = end;
+            }
 
 
     
@@ -16395,7 +16534,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+         * Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
          * @summary Get the CNV profile of a sequencing
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -16408,6 +16547,25 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineCNVProfile(tenant, caseId, seqId, taskId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineCNVProfile']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+         * @summary Get every point of a region of a CNV profile
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} chromosome Chromosome, without chr prefix
+         * @param {number} start Region start
+         * @param {number} end Region end
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineCNVProfileRegion(tenant: string, caseId: number, seqId: number, taskId: number, chromosome: string, start: number, end: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CNVProfileRegion>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineCNVProfileRegion(tenant, caseId, seqId, taskId, chromosome, start, end, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineCNVProfileRegion']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -16783,7 +16941,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getExpandedSomaticSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+         * Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
          * @summary Get the CNV profile of a sequencing
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -16794,6 +16952,22 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         getGermlineCNVProfile(tenant: string, caseId: number, seqId: number, taskId: number, options?: RawAxiosRequestConfig): AxiosPromise<CNVProfile> {
             return localVarFp.getGermlineCNVProfile(tenant, caseId, seqId, taskId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+         * @summary Get every point of a region of a CNV profile
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} chromosome Chromosome, without chr prefix
+         * @param {number} start Region start
+         * @param {number} end Region end
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineCNVProfileRegion(tenant: string, caseId: number, seqId: number, taskId: number, chromosome: string, start: number, end: number, options?: RawAxiosRequestConfig): AxiosPromise<CNVProfileRegion> {
+            return localVarFp.getGermlineCNVProfileRegion(tenant, caseId, seqId, taskId, chromosome, start, end, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline SNV facets
@@ -17149,7 +17323,7 @@ export class OccurrencesApi extends BaseAPI {
     }
 
     /**
-     * Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+     * Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
      * @summary Get the CNV profile of a sequencing
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
@@ -17161,6 +17335,24 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getGermlineCNVProfile(tenant: string, caseId: number, seqId: number, taskId: number, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getGermlineCNVProfile(tenant, caseId, seqId, taskId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+     * @summary Get every point of a region of a CNV profile
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} chromosome Chromosome, without chr prefix
+     * @param {number} start Region start
+     * @param {number} end Region end
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getGermlineCNVProfileRegion(tenant: string, caseId: number, seqId: number, taskId: number, chromosome: string, start: number, end: number, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineCNVProfileRegion(tenant, caseId, seqId, taskId, chromosome, start, end, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

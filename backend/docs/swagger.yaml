@@ -185,6 +185,8 @@ components:
             $ref: '#/components/schemas/Cytoband'
           type: array
           uniqueItems: false
+        overview:
+          $ref: '#/components/schemas/CNVProfileOverview'
         roh:
           items:
             $ref: '#/components/schemas/CNVProfileROH'
@@ -213,6 +215,22 @@ components:
       - name
       - size
       type: object
+    CNVProfileOverview:
+      description: |-
+        Overview is set when the copy ratio and BAF are reduced, for a genome: the points of a
+        region come from the region endpoint.
+      properties:
+        baf_stride:
+          type: integer
+        copy_ratio_stride:
+          type: integer
+        region_max_span:
+          type: integer
+      required:
+      - baf_stride
+      - copy_ratio_stride
+      - region_max_span
+      type: object
     CNVProfileROH:
       properties:
         chromosome:
@@ -233,6 +251,27 @@ components:
       - nb_het
       - nb_hom
       - score
+      - start
+      type: object
+    CNVProfileRegion:
+      description: CNVProfileRegion holds every copy ratio and BAF point of a region
+        of one chromosome
+      properties:
+        baf:
+          $ref: '#/components/schemas/CNVProfileTrack'
+        chromosome:
+          type: string
+        copy_ratio:
+          $ref: '#/components/schemas/CNVProfileTrack'
+        end:
+          type: integer
+        start:
+          type: integer
+      required:
+      - baf
+      - chromosome
+      - copy_ratio
+      - end
       - start
       type: object
     CNVProfileSegment:
@@ -6956,8 +6995,8 @@ paths:
   /{tenant}/genes/track:
     get:
       description: |-
-        List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol,
-        each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
+        with its exons merged over all its transcripts. A symbol takes precedence over a region.
       operationId: geneTrack
       parameters:
       - description: Tenant code
@@ -8549,9 +8588,10 @@ paths:
   /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile:
     get:
       description: |-
-        Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency
-        of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of
-        homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the
+        DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the
+        cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins
+        and of the BAF variants; the region endpoint serves every point of a region.
       operationId: getGermlineCNVProfile
       parameters:
       - description: Tenant code
@@ -8625,6 +8665,104 @@ paths:
       security:
       - bearerauth: []
       summary: Get the CNV profile of a sequencing
+      tags:
+      - occurrences
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region:
+    get:
+      description: |-
+        Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw
+        files: what the overview of a genome profile leaves out.
+      operationId: getGermlineCNVProfileRegion
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Chromosome, without chr prefix
+        in: query
+        name: chromosome
+        required: true
+        schema:
+          type: string
+      - description: Region start
+        in: query
+        name: start
+        required: true
+        schema:
+          type: integer
+      - description: Region end
+        in: query
+        name: end
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CNVProfileRegion'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: detail.missing lists the tracks without a file (copy_ratio,
+            baf)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get every point of a region of a CNV profile
       tags:
       - occurrences
   /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:

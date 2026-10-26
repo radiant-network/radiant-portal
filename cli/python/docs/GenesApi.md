@@ -184,8 +184,8 @@ Name | Type | Description  | Notes
 
 List the genes of a region
 
-List the protein-coding genes overlapping a region of at most 20 Mb, or the one with a symbol,
-each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
+with its exons merged over all its transcripts. A symbol takes precedence over a region.
 
 ### Example
 

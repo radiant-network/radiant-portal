@@ -23,6 +23,7 @@ from radiant_python.models.aggregation import Aggregation
 from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
 from radiant_python.models.cnv_profile import CNVProfile
+from radiant_python.models.cnv_profile_region import CNVProfileRegion
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
 from radiant_python.models.expanded_somatic_snv_occurrence import ExpandedSomaticSNVOccurrence
@@ -3602,7 +3603,7 @@ class OccurrencesApi:
     ) -> CNVProfile:
         """Get the CNV profile of a sequencing
 
-        Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -3686,7 +3687,7 @@ class OccurrencesApi:
     ) -> ApiResponse[CNVProfile]:
         """Get the CNV profile of a sequencing
 
-        Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -3770,7 +3771,7 @@ class OccurrencesApi:
     ) -> RESTResponseType:
         """Get the CNV profile of a sequencing
 
-        Get the CNV profile of a germline sequencing: the copy ratio of every bin and the B-allele frequency of every variant, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. Only exome sequencings are supported.
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins and of the BAF variants; the region endpoint serves every point of a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -3886,6 +3887,378 @@ class OccurrencesApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def get_germline_cnv_profile_region(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
+        chromosome: Annotated[StrictStr, Field(description="Chromosome, without chr prefix")],
+        start: Annotated[StrictInt, Field(description="Region start")],
+        end: Annotated[StrictInt, Field(description="Region end")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> CNVProfileRegion:
+        """Get every point of a region of a CNV profile
+
+        Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
+        :param chromosome: Chromosome, without chr prefix (required)
+        :type chromosome: str
+        :param start: Region start (required)
+        :type start: int
+        :param end: Region end (required)
+        :type end: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_germline_cnv_profile_region_serialize(
+            tenant=tenant,
+            case_id=case_id,
+            seq_id=seq_id,
+            task_id=task_id,
+            chromosome=chromosome,
+            start=start,
+            end=end,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CNVProfileRegion",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def get_germline_cnv_profile_region_with_http_info(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
+        chromosome: Annotated[StrictStr, Field(description="Chromosome, without chr prefix")],
+        start: Annotated[StrictInt, Field(description="Region start")],
+        end: Annotated[StrictInt, Field(description="Region end")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[CNVProfileRegion]:
+        """Get every point of a region of a CNV profile
+
+        Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
+        :param chromosome: Chromosome, without chr prefix (required)
+        :type chromosome: str
+        :param start: Region start (required)
+        :type start: int
+        :param end: Region end (required)
+        :type end: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_germline_cnv_profile_region_serialize(
+            tenant=tenant,
+            case_id=case_id,
+            seq_id=seq_id,
+            task_id=task_id,
+            chromosome=chromosome,
+            start=start,
+            end=end,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CNVProfileRegion",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def get_germline_cnv_profile_region_without_preload_content(
+        self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
+        chromosome: Annotated[StrictStr, Field(description="Chromosome, without chr prefix")],
+        start: Annotated[StrictInt, Field(description="Region start")],
+        end: Annotated[StrictInt, Field(description="Region end")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Get every point of a region of a CNV profile
+
+        Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw files: what the overview of a genome profile leaves out.
+
+        :param tenant: Tenant code (required)
+        :type tenant: str
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
+        :param chromosome: Chromosome, without chr prefix (required)
+        :type chromosome: str
+        :param start: Region start (required)
+        :type start: int
+        :param end: Region end (required)
+        :type end: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_germline_cnv_profile_region_serialize(
+            tenant=tenant,
+            case_id=case_id,
+            seq_id=seq_id,
+            task_id=task_id,
+            chromosome=chromosome,
+            start=start,
+            end=end,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CNVProfileRegion",
+            '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_germline_cnv_profile_region_serialize(
+        self,
+        tenant,
+        case_id,
+        seq_id,
+        task_id,
+        chromosome,
+        start,
+        end,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
+        if case_id is not None:
+            _path_params['case_id'] = case_id
+        if seq_id is not None:
+            _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
+        # process the query parameters
+        if chromosome is not None:
+            
+            _query_params.append(('chromosome', chromosome))
+            
+        if start is not None:
+            
+            _query_params.append(('start', start))
+            
+        if end is not None:
+            
+            _query_params.append(('end', end))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerauth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

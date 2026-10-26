@@ -16,7 +16,9 @@ docs/BatchesApi.md
 docs/CNVGeneOverlap.md
 docs/CNVProfile.md
 docs/CNVProfileChromosome.md
+docs/CNVProfileOverview.md
 docs/CNVProfileROH.md
+docs/CNVProfileRegion.md
 docs/CNVProfileSegment.md
 docs/CNVProfileTrack.md
 docs/CaseAssignee.md
@@ -277,6 +279,8 @@ radiant_python/models/clinvar_variant_conditions.py
 radiant_python/models/cnv_gene_overlap.py
 radiant_python/models/cnv_profile.py
 radiant_python/models/cnv_profile_chromosome.py
+radiant_python/models/cnv_profile_overview.py
+radiant_python/models/cnv_profile_region.py
 radiant_python/models/cnv_profile_roh.py
 radiant_python/models/cnv_profile_segment.py
 radiant_python/models/cnv_profile_track.py

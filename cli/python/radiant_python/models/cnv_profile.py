@@ -18,8 +18,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.cnv_profile_chromosome import CNVProfileChromosome
+from radiant_python.models.cnv_profile_overview import CNVProfileOverview
 from radiant_python.models.cnv_profile_roh import CNVProfileROH
 from radiant_python.models.cnv_profile_segment import CNVProfileSegment
 from radiant_python.models.cnv_profile_track import CNVProfileTrack
@@ -35,9 +36,10 @@ class CNVProfile(BaseModel):
     chromosomes: List[CNVProfileChromosome]
     copy_ratio: List[CNVProfileTrack]
     cytobands: List[Cytoband]
+    overview: Optional[CNVProfileOverview] = None
     roh: List[CNVProfileROH]
     segments: List[CNVProfileSegment]
-    __properties: ClassVar[List[str]] = ["baf", "chromosomes", "copy_ratio", "cytobands", "roh", "segments"]
+    __properties: ClassVar[List[str]] = ["baf", "chromosomes", "copy_ratio", "cytobands", "overview", "roh", "segments"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -106,6 +108,9 @@ class CNVProfile(BaseModel):
                 if _item_cytobands:
                     _items.append(_item_cytobands.to_dict())
             _dict['cytobands'] = _items
+        # override the default output from pydantic by calling `to_dict()` of overview
+        if self.overview:
+            _dict['overview'] = self.overview.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in roh (list)
         _items = []
         if self.roh:
@@ -136,6 +141,7 @@ class CNVProfile(BaseModel):
             "chromosomes": [CNVProfileChromosome.from_dict(_item) for _item in obj["chromosomes"]] if obj.get("chromosomes") is not None else None,
             "copy_ratio": [CNVProfileTrack.from_dict(_item) for _item in obj["copy_ratio"]] if obj.get("copy_ratio") is not None else None,
             "cytobands": [Cytoband.from_dict(_item) for _item in obj["cytobands"]] if obj.get("cytobands") is not None else None,
+            "overview": CNVProfileOverview.from_dict(obj["overview"]) if obj.get("overview") is not None else None,
             "roh": [CNVProfileROH.from_dict(_item) for _item in obj["roh"]] if obj.get("roh") is not None else None,
             "segments": [CNVProfileSegment.from_dict(_item) for _item in obj["segments"]] if obj.get("segments") is not None else None
         })
