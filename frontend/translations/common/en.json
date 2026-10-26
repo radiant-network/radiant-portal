@@ -1299,6 +1299,7 @@
       "title": "Cohort analytics",
       "description": "Current registry snapshot · derived from roster fields",
       "source": "Live roster",
+      "explore": "Explore Data",
       "tabs": {
         "yac": "YAC",
         "david": "D.A.V.I.D",

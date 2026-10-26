@@ -1300,6 +1300,7 @@
       "title": "Analyse de cohorte",
       "description": "État actuel du registre · dérivé des données de la cohorte",
       "source": "Roster en direct",
+      "explore": "Explorer les données",
       "tabs": {
         "yac": "YAC",
         "david": "D.A.V.I.D",

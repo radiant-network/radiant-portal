@@ -48,12 +48,12 @@ const PORTAL_THEME = {
 const FONT_SCALE = 1.5;
 
 type PatientExplorationChatProps = {
-  // Inline, the dashboard is read-only; expanded, the chat is open. Explore Data expands it.
+  // Inline, the dashboard is read-only; expanded, the chat is open. The card's Explore Data
+  // button expands it.
   expanded: boolean;
-  onExpandedChange: (expanded: boolean) => void;
 };
 
-function PatientExplorationChat({ expanded, onExpandedChange }: PatientExplorationChatProps) {
+function PatientExplorationChat({ expanded }: PatientExplorationChatProps) {
   // UDIChat renders only in a browser, so it mounts after hydration.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -68,8 +68,8 @@ function PatientExplorationChat({ expanded, onExpandedChange }: PatientExplorati
           remotePackage={REMOTE_PACKAGE}
           model={OPENAI_MODEL}
           initialSession={demoSession}
-          readOnly={!expanded}
-          onReadOnlyChange={readOnly => onExpandedChange(!readOnly)}
+          // Locked inline: the card header has the way out, so the chat's own Explore Data is dropped.
+          readOnly={expanded ? false : 'locked'}
           // Keep the session's column count in both modes.
           refitOnReadOnlyChange={false}
           fontScale={FONT_SCALE}

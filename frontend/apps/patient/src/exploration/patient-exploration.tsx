@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { LineChart, X } from 'lucide-react';
+import { LineChart, Sparkles, X } from 'lucide-react';
 import useSWR from 'swr';
 
 import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
@@ -163,16 +163,22 @@ function PatientExploration() {
                     <X />
                   </Button>
                 ) : (
-                  <Badge variant="secondary" className="gap-1.5">
-                    <span className="size-1.5 rounded-full bg-emerald-500" />
-                    {t('patient_exploration.chat.source')}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={() => setChatExpanded(true)}>
+                      <Sparkles />
+                      {t('patient_exploration.chat.explore')}
+                    </Button>
+                    <Badge variant="secondary" className="gap-1.5">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                      {t('patient_exploration.chat.source')}
+                    </Badge>
+                  </div>
                 )}
               </CardAction>
             </CardHeader>
             {/* Mounted while another tab shows, only hidden, so switching tabs keeps the chat too. */}
             <TabsContent value="yac" forceMount className="flex min-h-0 flex-col data-[state=inactive]:hidden">
-              <PatientExplorationChat expanded={expanded} onExpandedChange={setChatExpanded} />
+              <PatientExplorationChat expanded={expanded} />
             </TabsContent>
             {expanded && (
               <>
