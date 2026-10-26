@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, UserRoundIcon } from 'lucide-react';
+import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, Star, UserRoundIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import FrequencyIcon from '@/components/base/icons/frequency-icon';
@@ -7,6 +7,10 @@ import GeneIcon from '@/components/base/icons/gene-icon';
 import OccurrenceIcon from '@/components/base/icons/occurrence-icon';
 import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
 import VariantIcon from '@/components/base/icons/variant-icon';
+import {
+  FAVOURITES_GROUP_KEY,
+  useFacetFavourites,
+} from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Sidebar,
@@ -15,6 +19,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   useSidebar,
 } from '@/components/base/shadcn/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -61,6 +66,7 @@ export function SidebarGroups({
 }: SidebarGroupsProps) {
   const { t } = useI18n();
   const { open, toggleSidebar } = useSidebar();
+  const favourites = useFacetFavourites();
   const [internalSelectedItemId, setInternalSelectedItemId] = useState<string | null>(null);
 
   // Use external state if provided, otherwise use internal state
@@ -104,6 +110,24 @@ export function SidebarGroups({
               {open ? t('query_filters.sidebar_panel.collapse') : t('query_filters.sidebar_panel.expand')}
             </TooltipContent>
           </Tooltip>
+          {favourites && (
+            <>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    data-cy="sidebar-group-favourites"
+                    className={buttonVariants({ selected: selectedItemId === FAVOURITES_GROUP_KEY })}
+                    onClick={() => handleItemClick(FAVOURITES_GROUP_KEY)}
+                    tooltip={t('query_filters.sidebar_panel.filters.favourites')}
+                  >
+                    <Star />
+                    <span>{t('query_filters.sidebar_panel.filters.favourites')}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+              <SidebarSeparator className="mx-0 my-2" />
+            </>
+          )}
           <SidebarMenu>
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];

@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 
+import Empty from '@/components/base/empties/empty';
+import FacetFavouritesEmptyImage from '@/components/base/icons/facet-favourites-empty-image';
 import { FacetContainer } from '@/components/base/query-builder/facets/facet-container';
+import {
+  FAVOURITES_GROUP_KEY,
+  useFacetFavourites,
+} from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
 import { SearchFacet } from '@/components/base/query-builder/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
-import { type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
+import { type Aggregation, type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import UploadIdModal from './upload-id-facet';
@@ -18,13 +24,21 @@ interface FacetListProps {
   defaultExpanded?: boolean;
 }
 
+const FAVOURITABLE_TYPES: string[] = [FilterTypes.MULTIPLE, FilterTypes.NUMERICAL, FilterTypes.BOOLEAN];
+
 export function FacetList({ groupKey, aggregations, defaultExpanded = false }: FacetListProps) {
   const { t } = useI18n();
+  const favourites = useFacetFavourites();
+  const isFavouritesGroup = groupKey === FAVOURITES_GROUP_KEY;
+  const everyField = Object.values(aggregations).flatMap(group => group.items);
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
-  const allFields = groupKey
-    ? aggregations[groupKey]?.items || []
-    : Object.values(aggregations).flatMap(group => group.items);
+  let allFields = groupKey ? aggregations[groupKey]?.items || [] : everyField;
+  if (isFavouritesGroup) {
+    allFields = (favourites?.favourites ?? [])
+      .map(key => everyField.find(field => field.key === key))
+      .filter((field): field is Aggregation => !!field && FAVOURITABLE_TYPES.includes(field.type));
+  }
 
   // Separate search by filters from other filters
   const searchByFilters = allFields.filter(item => item.type === FilterTypes.SEARCH_BY);
@@ -45,6 +59,21 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
   useEffect(() => {
     setPrevGroupKey(groupKey);
   }, [groupKey, prevGroupKey]);
+
+  if (isFavouritesGroup && fields.length === 0) {
+    return (
+      <Empty
+        data-cy="facet-favourites-empty"
+        size="mini"
+        showIcon={false}
+        contentTop={<FacetFavouritesEmptyImage />}
+        classNames={{ title: 'text-sm text-sidebar-foreground', description: 'text-sidebar-foreground' }}
+        title={t('query_filters.favourites.empty.title')}
+        description={t('query_filters.favourites.empty.description')}
+        className="whitespace-normal"
+      />
+    );
+  }
 
   return (
     <div>

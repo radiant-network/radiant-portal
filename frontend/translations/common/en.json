@@ -155,6 +155,10 @@
       "filters_group": "Filter timeline by type",
       "results_count_one": "Showing {{count}} result",
       "results_count_other": "Showing {{count}} results"
+    },
+    "facet_favourite": {
+      "add": "Add {{facet}} to favourites",
+      "remove": "Remove {{facet}} from favourites"
     }
   },
   "admin": {
@@ -1869,7 +1873,24 @@
         "pathogenicity": "Pathogenicity",
         "occurrence": "Occurrence",
         "organization": "My Organization",
-        "metric_qc": "Metric QC"
+        "metric_qc": "Metric QC",
+        "favourites": "Favourites"
+      }
+    },
+    "favourites": {
+      "tooltip": {
+        "add": "Add to favourites",
+        "remove": "Remove from favourites"
+      },
+      "empty": {
+        "title": "Your favourites will appear here",
+        "description": "Add your most-used facets by hovering over the title and clicking the star."
+      },
+      "notifications": {
+        "errors": {
+          "add": "Unable to add to favourites. Please try again.",
+          "remove": "Unable to remove from favourites. Please try again."
+        }
       }
     }
   },

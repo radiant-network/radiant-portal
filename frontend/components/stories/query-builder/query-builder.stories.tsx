@@ -15,6 +15,7 @@ import {
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { RangeOperators } from '@/components/base/query-builder/type';
+import { Toaster } from '@/components/base/shadcn/sonner';
 import { ApplicationId, ConfigProvider, FilterTypes, type PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
@@ -358,6 +359,68 @@ export const Default: Story = {
     defaultSidebarOpen: true,
   },
   render: args => <QueryBuilderStory args={args} title="Default" />,
+};
+
+export const FacetFavourites: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
+            return HttpResponse.json({ key: params.key, content: { favourites: ['lastName'] } });
+          }
+          return new HttpResponse(null, { status: 404 });
+        }),
+        http.post(userPreferenceApi, async ({ request }) => HttpResponse.json(await request.json())),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Facet favourites"
+      description="Hover a facet header and click the star. Favourites are listed under the star at the top of the rail."
+    />
+  ),
+};
+
+export const FacetFavouritesSaveError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, () => new HttpResponse(null, { status: 404 })),
+        http.post(userPreferenceApi, () => new HttpResponse(null, { status: 500 })),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <>
+      <Toaster />
+      <QueryBuilderStory
+        args={args}
+        title="Facet favourites – save error"
+        description="Saving always fails: the star reverts and an error toast is shown."
+      />
+    </>
+  ),
 };
 
 export const Multiselect: Story = {

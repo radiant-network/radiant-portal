@@ -48,6 +48,8 @@ export type EmptyProps = React.HTMLAttributes<HTMLDivElement> &
     showIcon?: boolean;
     title?: string;
     description?: string;
+    contentTop?: React.ReactNode;
+    classNames?: { title?: string; description?: string };
   } & (
     | {
         iconType: 'chartRow' | 'chartGrid';
@@ -73,6 +75,8 @@ function Empty({
   icon: Icon,
   size,
   className,
+  contentTop,
+  classNames,
   children,
   ...props
 }: EmptyProps) {
@@ -80,6 +84,7 @@ function Empty({
 
   return (
     <div className={styles.base({ className })} {...props}>
+      {contentTop && <div className="flex justify-center">{contentTop}</div>}
       {showIcon && iconType === 'chartRow' && <EmptyIconsRow className={styles.iconsContainer()} />}
       {showIcon && iconType === 'chartGrid' && <EmptyIconsGrid className={styles.iconsContainer()} />}
       {showIcon && iconType === 'custom' && Icon && (
@@ -90,8 +95,8 @@ function Empty({
         </div>
       )}
       <div className={styles.textContainer()}>
-        {title && <h1 className={styles.title()}>{title}</h1>}
-        {description && <div className={styles.description()}>{description}</div>}
+        {title && <h1 className={styles.title({ className: classNames?.title })}>{title}</h1>}
+        {description && <div className={styles.description({ className: classNames?.description })}>{description}</div>}
       </div>
       {children && <div className="flex justify-center">{children}</div>}
     </div>

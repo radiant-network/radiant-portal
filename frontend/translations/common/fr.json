@@ -155,6 +155,10 @@
       "filters_group": "Filtrer la chronologie par type",
       "results_count_one": "{{count}} résultat affiché",
       "results_count_other": "{{count}} résultats affichés"
+    },
+    "facet_favourite": {
+      "add": "Ajouter {{facet}} aux favoris",
+      "remove": "Retirer {{facet}} des favoris"
     }
   },
   "admin": {
@@ -1870,7 +1874,24 @@
         "pathogenicity": "Pathogénicité",
         "occurrence": "Occurrence",
         "organization": "Mon Organisation",
-        "metric_qc": "Metric QC"
+        "metric_qc": "Metric QC",
+        "favourites": "Favoris"
+      }
+    },
+    "favourites": {
+      "tooltip": {
+        "add": "Ajouter aux favoris",
+        "remove": "Retirer des favoris"
+      },
+      "empty": {
+        "title": "Vos favoris apparaîtront ici",
+        "description": "Ajoutez vos facettes les plus utilisées en survolant le titre, puis en cliquant sur l’étoile."
+      },
+      "notifications": {
+        "errors": {
+          "add": "Impossible d'ajouter aux favoris. Veuillez réessayer.",
+          "remove": "Impossible de retirer des favoris. Veuillez réessayer."
+        }
       }
     }
   },
