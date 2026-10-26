@@ -123,9 +123,10 @@ function PatientExploration() {
         />
       </div>
       <main className={cn('bg-muted h-screen p-3 space-y-3', expanded ? 'overflow-hidden' : 'overflow-auto')}>
+        {/* m-0 on the fixed boxes: main's space-y margins would shrink them by 12px. */}
         {expanded && (
           <div
-            className="fixed inset-0 z-40 bg-black/50 [view-transition-name:yac-backdrop]"
+            className="fixed inset-0 z-40 m-0 bg-black/50 [view-transition-name:yac-backdrop]"
             onClick={() => setChatExpanded(false)}
           />
         )}
@@ -136,7 +137,7 @@ function PatientExploration() {
           aria-labelledby={expanded ? chatTitleId : undefined}
           className={cn(
             'w-full gap-0 pb-0 overflow-hidden [view-transition-name:yac-chat]',
-            expanded && 'fixed inset-x-6 top-14 bottom-6 z-50 w-auto pt-0 shadow-lg',
+            expanded && 'fixed inset-x-6 top-14 bottom-6 z-50 m-0 w-auto pt-0 shadow-lg',
           )}
         >
           <Tabs value={chatTab} onValueChange={setChatTab} className="min-h-0 flex-1 gap-0">
