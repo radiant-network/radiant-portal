@@ -65,30 +65,6 @@
       },
       {
         "role": "user",
-        "content": "//readonly"
-      },
-      {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
-          {
-            "function": {
-              "name": "Rebuff",
-              "arguments": {
-                "message": "I can’t act on \"//readonly\" because it appears to be a control/comment-style token, not a supported data request, filter, or visualization instruction.",
-                "capabilities": "Visualization: create charts such as heatmaps, bar charts, scatterplots, histograms, pie/donut charts, density curves, data tables, and survival/Kaplan-Meier plots. Data filtering: filter rows by categorical values or numeric ranges. Data exploration: list available values in a field and answer general questions about datasets, fields, and supported functionality.",
-                "suggestions": [
-                  "Show a heatmap of data cohort by diagnosis cohort.",
-                  "Filter to patients with vital_status = alive.",
-                  "Show event-free survival split by diagnosis cohort."
-                ]
-              }
-            }
-          }
-        ]
-      },
-      {
-        "role": "user",
         "content": "Show bar chart of patients by organization"
       },
       {
@@ -189,30 +165,6 @@
                 "valid": true,
                 "validation_errors": [],
                 "corrections": 0
-              }
-            }
-          }
-        ]
-      },
-      {
-        "role": "user",
-        "content": "//readonly'"
-      },
-      {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
-          {
-            "function": {
-              "name": "Rebuff",
-              "arguments": {
-                "message": "I can’t act on \"//readonly'\" because it looks like a control/comment-style token rather than a supported request to visualize data, filter records, or explain the dataset.",
-                "capabilities": "Visualization: create charts including bar charts, stacked/grouped bars, scatterplots, heatmaps, histograms, CDFs, pie/donut charts, dot strips, density curves, data tables, and survival/Kaplan-Meier plots. Data filtering: subset data by categorical values or numeric ranges. Data exploration: list all values in a field and answer general questions about available datasets, fields, and system functionality.",
-                "suggestions": [
-                  "Show a bar chart of patients by organization.",
-                  "Filter radiation records to radiation_type = Proton and show a stacked bar chart of radiation site and type.",
-                  "Show event-free survival split by diagnosis cohort."
-                ]
               }
             }
           }
@@ -344,9 +296,9 @@
       }
     },
     {
-      "key": "5-0",
+      "key": "3-0",
       "uuid": "udi_1791469882259_3",
-      "index": 5,
+      "index": 3,
       "toolCallIndex": 0,
       "userPrompt": "Show bar chart of patients by organization",
       "titleTemplate": "Bar chart of the number of {entity} by {enc:y}",
@@ -407,9 +359,9 @@
       }
     },
     {
-      "key": "7-0",
+      "key": "5-0",
       "uuid": "udi_1791470014032_4",
-      "index": 7,
+      "index": 5,
       "toolCallIndex": 0,
       "userPrompt": "show stacked bar chart of radiation site and type",
       "titleTemplate": "Stacked bar chart of the number of {entity} by {enc:y} and {enc:color}",
@@ -500,7 +452,7 @@
   "layout": {
     "items": [
       {
-        "i": "7-0",
+        "i": "5-0",
         "x": 0,
         "y": 10,
         "w": 2,
@@ -511,7 +463,7 @@
         "static": false
       },
       {
-        "i": "5-0",
+        "i": "3-0",
         "x": 0,
         "y": 0,
         "w": 1,
