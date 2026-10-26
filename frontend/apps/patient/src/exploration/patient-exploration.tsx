@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { LineChart, Sparkles, X } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import useSWR from 'swr';
 
 import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
@@ -107,19 +107,6 @@ function PatientExploration() {
           title={t('patient_exploration.title', { total: data?.count ?? 0 })}
           description={t('patient_exploration.description')}
           variant="info"
-          buttons={[
-            {
-              variant: 'outline',
-              size: 'sm',
-              disabled: true,
-              children: (
-                <>
-                  <LineChart />
-                  {t('patient_exploration.actions.visualize_survival')}
-                </>
-              ),
-            },
-          ]}
         />
       </div>
       <main className={cn('bg-muted h-screen p-3 space-y-3', expanded ? 'overflow-hidden' : 'overflow-auto')}>

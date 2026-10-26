@@ -1291,11 +1291,8 @@
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
-    "description": "Cohorte ATRT · CHOP, UCSF et Seattle Children's",
+    "description": "",
     "search_placeholder": "Rechercher par nom, ID de recherche ou dossier",
-    "actions": {
-      "visualize_survival": "Visualiser la survie de la cohorte"
-    },
     "chat": {
       "title": "Analyse de cohorte",
       "description": "État actuel du registre · dérivé des données de la cohorte",
