@@ -1299,7 +1299,13 @@
     "chat": {
       "title": "Analyse de cohorte",
       "description": "État actuel du registre · dérivé des données de la cohorte",
-      "source": "Roster en direct"
+      "source": "Roster en direct",
+      "tabs": {
+        "yac": "YAC",
+        "david": "D.A.V.I.D",
+        "other": "Autre outil",
+        "placeholder": "Bientôt disponible"
+      }
     },
     "cells": {
       "patient": {

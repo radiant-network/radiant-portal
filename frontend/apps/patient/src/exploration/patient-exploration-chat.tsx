@@ -47,20 +47,31 @@ const PORTAL_THEME = {
 
 const FONT_SCALE = 1.5;
 
-function PatientExplorationChat() {
+type PatientExplorationChatProps = {
+  // Inline, the dashboard is read-only; expanded, the chat is open. Explore Data expands it.
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+};
+
+function PatientExplorationChat({ expanded, onExpandedChange }: PatientExplorationChatProps) {
   // UDIChat renders only in a browser, so it mounts after hydration.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // The same UDIChat stays mounted in both modes, so charts, filters and the conversation carry
+  // over. Only the container's size changes.
   return (
-    <div className="h-[800px]">
+    <div className={expanded ? 'min-h-0 flex-1' : 'h-[800px]'}>
       {mounted && (
         <UDIChat
           apiBaseUrl="/api/yac"
           remotePackage={REMOTE_PACKAGE}
           model={OPENAI_MODEL}
           initialSession={demoSession}
-          readOnly
+          readOnly={!expanded}
+          onReadOnlyChange={readOnly => onExpandedChange(!readOnly)}
+          // Keep the session's column count in both modes.
+          refitOnReadOnlyChange={false}
           fontScale={FONT_SCALE}
           style={PORTAL_THEME}
         />

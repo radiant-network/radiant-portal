@@ -1298,7 +1298,13 @@
     "chat": {
       "title": "Cohort analytics",
       "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster"
+      "source": "Live roster",
+      "tabs": {
+        "yac": "YAC",
+        "david": "D.A.V.I.D",
+        "other": "Other tool",
+        "placeholder": "Coming soon"
+      }
     },
     "cells": {
       "patient": {
