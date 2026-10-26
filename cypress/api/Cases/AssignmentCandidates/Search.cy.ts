@@ -7,7 +7,7 @@ describe('Cases - Assignment Candidates - Search', () => {
   it('Search by first name', () => {
     const Auth = Cypress.expose('globalData').Authorization;
 
-    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case_other_lab}/assignment_candidates?search=${dataCandidates.other_lab_only.first_name}`, '', Auth.token).then(res => {
+    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case}/assignment_candidates?search=${dataCandidates.other_lab_only.first_name}`, '', Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 1);
       expect(res.body[0].email).to.eq(dataCandidates.other_lab_only.email);
@@ -17,7 +17,7 @@ describe('Cases - Assignment Candidates - Search', () => {
   it('Search by last name', () => {
     const Auth = Cypress.expose('globalData').Authorization;
 
-    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case_other_lab}/assignment_candidates?search=${dataCandidates.other_lab_only.last_name}`, '', Auth.token).then(res => {
+    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case}/assignment_candidates?search=${dataCandidates.other_lab_only.last_name}`, '', Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 1);
       expect(res.body[0].email).to.eq(dataCandidates.other_lab_only.email);
