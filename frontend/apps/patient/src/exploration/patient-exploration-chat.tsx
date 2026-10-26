@@ -45,8 +45,6 @@ const PORTAL_THEME = {
   ...Object.fromEntries(THEME_TOKENS.map(token => [`--${token}`, 'inherit'])),
 } as CSSProperties;
 
-const FONT_SCALE = 1.5;
-
 type PatientExplorationChatProps = {
   // Inline, the dashboard is read-only; expanded, the chat is open. The card's Explore Data
   // button expands it.
@@ -72,7 +70,6 @@ function PatientExplorationChat({ expanded }: PatientExplorationChatProps) {
           readOnly={expanded ? false : 'locked'}
           // Keep the session's column count in both modes.
           refitOnReadOnlyChange={false}
-          fontScale={FONT_SCALE}
           style={PORTAL_THEME}
         />
       )}
