@@ -23,9 +23,11 @@ jobs:
 
       - name: Extract SJRA ticket keys from conventional-commit subjects
         id: extract
+        # Through env, not ${{ }} in the script: expanded there, a backtick or $( ) in a commit
+        # message would run as a command.
+        env:
+          COMMITS: ${{ steps.commits.outputs.commits }}
         run: |
-          # Read commits from previous step
-          COMMITS="${{ steps.commits.outputs.commits }}"
           # Extract SJRA-<digits> only if it appears after a colon (conventional commit style)
           # Example matches: "feat: SJRA-1324", "fix(scope): SJRA-12 details"
           TICKETS=$(printf "%s\n" "$COMMITS" \
