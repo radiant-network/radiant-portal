@@ -24,6 +24,7 @@ from radiant_python.models.patient_case import PatientCase
 from radiant_python.models.patient_day_date import PatientDayDate
 from radiant_python.models.patient_event import PatientEvent
 from radiant_python.models.patient_imaging_session import PatientImagingSession
+from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_dates import PatientKeyDates
 from radiant_python.models.patient_radiation import PatientRadiation
 from radiant_python.models.patient_surgery import PatientSurgery
@@ -55,6 +56,7 @@ class PatientEntity(BaseModel):
     has_imaging: StrictBool
     imaging: List[PatientImagingSession]
     initial_diagnosis_evidence_url: Optional[StrictStr] = Field(default=None, description="BRIM link, format to be defined")
+    interpretations: List[PatientInterpretation] = Field(description="Germline and somatic, of the patient's cases")
     key_dates: PatientKeyDates
     organization_code: StrictStr
     organization_name: StrictStr
@@ -71,7 +73,7 @@ class PatientEntity(BaseModel):
     treatment_summary: Optional[PatientTreatmentSummary] = None
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -154,6 +156,13 @@ class PatientEntity(BaseModel):
                 if _item_imaging:
                     _items.append(_item_imaging.to_dict())
             _dict['imaging'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in interpretations (list)
+        _items = []
+        if self.interpretations:
+            for _item_interpretations in self.interpretations:
+                if _item_interpretations:
+                    _items.append(_item_interpretations.to_dict())
+            _dict['interpretations'] = _items
         # override the default output from pydantic by calling `to_dict()` of key_dates
         if self.key_dates:
             _dict['key_dates'] = self.key_dates.to_dict()
@@ -215,6 +224,7 @@ class PatientEntity(BaseModel):
             "has_imaging": obj.get("has_imaging"),
             "imaging": [PatientImagingSession.from_dict(_item) for _item in obj["imaging"]] if obj.get("imaging") is not None else None,
             "initial_diagnosis_evidence_url": obj.get("initial_diagnosis_evidence_url"),
+            "interpretations": [PatientInterpretation.from_dict(_item) for _item in obj["interpretations"]] if obj.get("interpretations") is not None else None,
             "key_dates": PatientKeyDates.from_dict(obj["key_dates"]) if obj.get("key_dates") is not None else None,
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),

@@ -757,6 +757,11 @@ components:
           type: string
         proband_life_status_code:
           type: string
+        proband_submitter_sample_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         project_code:
           type: string
         project_name:
@@ -773,6 +778,7 @@ components:
       - created_on
       - diagnosis_lab_code
       - has_variants
+      - proband_submitter_sample_ids
       - status_code
       - updated_on
       type: object
@@ -1067,6 +1073,18 @@ components:
             $ref: '#/components/schemas/ClinvarRCV'
           type: array
           uniqueItems: false
+      type: object
+    ComphetGene:
+      description: ComphetGene is the number of compound heterozygous partners of
+        a variant in one gene
+      properties:
+        nb:
+          type: integer
+        symbol:
+          type: string
+      required:
+      - nb
+      - symbol
       type: object
     Count:
       description: Count represents count result
@@ -2119,6 +2137,12 @@ components:
           type: number
         cmc_tier:
           type: string
+        comphet_genes:
+          description: Number of compound heterozygous partners per gene
+          items:
+            $ref: '#/components/schemas/ComphetGene'
+          type: array
+          uniqueItems: false
         end:
           type: integer
         exomiser_acmg_classification:
@@ -2220,6 +2244,10 @@ components:
           type: integer
         gnomad_v3_af:
           type: number
+        has_comphet:
+          description: True when the variant has a compound heterozygous partner (slivar),
+            false otherwise, absent when not computed
+          type: boolean
         has_interpretation:
           type: boolean
         has_note:
@@ -2372,6 +2400,22 @@ components:
         username:
           type: string
       type: object
+    IGVPublicTrack:
+      properties:
+        indexURL:
+          type: string
+        indexURLExpireAt:
+          type: integer
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      required:
+      - indexURL
+      - indexURLExpireAt
+      - url
+      - urlExpireAt
+      type: object
     IGVTrackEnriched:
       properties:
         family_role:
@@ -2379,6 +2423,8 @@ components:
         fetus_id:
           type: integer
         format:
+          type: string
+        histology_code:
           type: string
         indexURL:
           type: string
@@ -2388,6 +2434,10 @@ components:
           type: string
         patient_id:
           type: integer
+        sample_id:
+          type: string
+        sequencing_experiment_id:
+          type: integer
         sex:
           type: string
         type:
@@ -2396,6 +2446,8 @@ components:
           type: string
         urlExpireAt:
           type: integer
+      required:
+      - sequencing_experiment_id
       type: object
     IGVTracks:
       properties:
@@ -2404,6 +2456,37 @@ components:
             $ref: '#/components/schemas/IGVTrackEnriched'
           type: array
           uniqueItems: false
+        baf:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        capture_targets:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        cnv:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        public_tracks:
+          additionalProperties:
+            $ref: '#/components/schemas/IGVPublicTrack'
+          type: object
+        roh:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        seg:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+      required:
+      - public_tracks
       type: object
     InputDocumentBatch:
       properties:
@@ -2872,11 +2955,30 @@ components:
       properties:
         analysis_catalog_code:
           type: string
+        analysis_catalog_name:
+          type: string
         case_id:
           type: integer
+        case_type:
+          description: 'As in the case list: germline_family when the case has more
+            than one member'
+          enum:
+          - somatic
+          - germline
+          - germline_family
+          type: string
         case_type_code:
           type: string
         diagnosis_lab_code:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_organization_name:
+          type: string
+        primary_condition_id:
+          description: MONDO id
+          type: string
+        primary_condition_name:
           type: string
         priority_code:
           type: string
@@ -2889,6 +2991,7 @@ components:
           type: string
       required:
       - case_id
+      - case_type
       - case_type_code
       - diagnosis_lab_code
       - relationship
@@ -2978,6 +3081,12 @@ components:
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
+        interpretations:
+          description: Germline and somatic, of the patient's cases
+          items:
+            $ref: '#/components/schemas/PatientInterpretation'
+          type: array
+          uniqueItems: false
         key_dates:
           $ref: '#/components/schemas/PatientKeyDates'
         organization_code:
@@ -3040,6 +3149,7 @@ components:
       - given_name
       - has_imaging
       - imaging
+      - interpretations
       - key_dates
       - organization_code
       - organization_name
@@ -3103,7 +3213,31 @@ components:
     PatientFilters:
       description: Values of the patient list filters
       properties:
+        age_at_initial_dx_group:
+          description: 'Always every key: congenital, neonatal, infantile, childhood,
+            juvenile, young_adult, middle_age, senior, unknown'
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        chemotherapy_agents:
+          description: Lowercase, as recorded
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
         cns_integrated_diagnosis:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        diagnosis_type_cohort:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        got_radiation_ever:
+          description: Keys true, false; labels Yes, No
           items:
             $ref: '#/components/schemas/FiltersValue'
           type: array
@@ -3120,7 +3254,11 @@ components:
           type: array
           uniqueItems: false
       required:
+      - age_at_initial_dx_group
+      - chemotherapy_agents
       - cns_integrated_diagnosis
+      - diagnosis_type_cohort
+      - got_radiation_ever
       - organization_code
       - vital_status
       type: object
@@ -3146,6 +3284,47 @@ components:
       required:
       - session_id
       - session_name
+      type: object
+    PatientInterpretation:
+      description: Germline or somatic interpretation recorded on one of the patient's
+        portal cases
+      properties:
+        aa_change:
+          description: On the interpreted transcript
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          description: 'Germline: LOINC answer code; somatic: oncogenicity, as the
+            case module records them'
+          type: string
+        hgvsg:
+          type: string
+        locus_id:
+          type: string
+        origin:
+          enum:
+          - germline
+          - somatic
+          type: string
+        sequencing_id:
+          type: integer
+        symbol:
+          description: Gene of the interpreted transcript
+          type: string
+        updated_at:
+          description: Last interpretation date
+          type: string
+      required:
+      - case_id
+      - locus_id
+      - origin
+      - sequencing_id
+      - updated_at
       type: object
     PatientKeyDate:
       description: Key date of the patient sidebar, with the source it comes from
@@ -3194,6 +3373,8 @@ components:
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
+        diagnosis_type_cohort:
           type: string
         family_name:
           description: Placeholder when can_read_phi is false
@@ -6649,7 +6830,9 @@ paths:
       - hpo
   /{tenant}/igv/{case_id}:
     get:
-      description: Get IGV tracks for a case
+      description: |-
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+        and the public reference tracks, all presigned
       operationId: getIGV
       parameters:
       - description: Tenant code
@@ -8523,6 +8706,107 @@ paths:
       summary: List germline SNV occurrences
       tags:
       - occurrences
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts:
+    get:
+      description: Fill the tenant's germline transcript report template with the
+        report object of each locus, one sheet per locus named after its hgvsg, and
+        return the workbook. 1 to 100 locus ids.
+      operationId: getGermlineSNVTranscriptReportsXlsx
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Comma-separated locus ids, 1 to 100
+        in: query
+        name: locus_ids
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                format: binary
+                type: string
+          description: xlsx workbook
+          headers:
+            Content-Disposition:
+              description: attachment; filename=<MRN>_<case id>_<UTC timestamp>.xlsx
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Zero, more than 100 or malformed locus ids
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A locus is not an occurrence of the task
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The tenant has no transcript report template loaded
+      security:
+      - bearerauth: []
+      summary: Download the transcript report (xlsx) of germline SNV occurrences of
+        a case
+      tags:
+      - occurrences
   /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
@@ -9437,6 +9721,107 @@ paths:
       security:
       - bearerauth: []
       summary: List somatic SNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts:
+    get:
+      description: Fill the tenant's somatic transcript report template with the report
+        object of each locus, one sheet per locus named after its hgvsg, and return
+        the workbook. 1 to 100 locus ids.
+      operationId: getSomaticSNVTranscriptReportsXlsx
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Comma-separated locus ids, 1 to 100
+        in: query
+        name: locus_ids
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                format: binary
+                type: string
+          description: xlsx workbook
+          headers:
+            Content-Disposition:
+              description: attachment; filename=<MRN>_<case id>_<UTC timestamp>.xlsx
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Zero, more than 100 or malformed locus ids
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A locus is not an occurrence of the task
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The tenant has no transcript report template loaded
+      security:
+      - bearerauth: []
+      summary: Download the transcript report (xlsx) of somatic SNV occurrences of
+        a case
       tags:
       - occurrences
   /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:

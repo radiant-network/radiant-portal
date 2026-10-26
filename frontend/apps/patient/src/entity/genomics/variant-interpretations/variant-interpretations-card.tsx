@@ -1,52 +1,19 @@
-import { useMemo, useState } from 'react';
-import useSWR from 'swr';
+import { useMemo } from 'react';
 
-import type { ListBodyWithCriteria } from '@/api/api';
-import type { PaginationState } from '@/components/base/data-table/data-table';
-import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import type { PatientInterpretation } from '@/api/api';
+import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-
-import {
-  fetchInterpretationsForPatient,
-  type VariantInterpretationsSearchResponse,
-} from '../../../api/patient-genomics';
 
 import { defaultSettings, getVariantInterpretationsColumns } from './variant-interpretations-table-settings';
 
 type VariantInterpretationsCardProps = {
-  patientId: string;
+  interpretations: PatientInterpretation[];
+  isLoading: boolean;
 };
 
-type FetchInput = {
-  key: string;
-  patientId: string;
-  listBodyWithCriteria: ListBodyWithCriteria;
-};
-
-async function fetchInterpretations(input: FetchInput) {
-  return fetchInterpretationsForPatient(input.patientId, input.listBodyWithCriteria);
-}
-
-function VariantInterpretationsCard({ patientId }: VariantInterpretationsCardProps) {
+function VariantInterpretationsCard({ interpretations, isLoading }: VariantInterpretationsCardProps) {
   const { t } = useI18n();
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  });
-
-  const { data, isLoading } = useSWR<VariantInterpretationsSearchResponse, any, FetchInput>(
-    {
-      key: 'patient-genomics-interpretations',
-      patientId,
-      listBodyWithCriteria: {
-        limit: pagination.pageSize,
-        page_index: pagination.pageIndex,
-      },
-    },
-    fetchInterpretations,
-    { revalidateOnFocus: false },
-  );
 
   const columns = useMemo(() => getVariantInterpretationsColumns(t), [t]);
 
@@ -59,11 +26,11 @@ function VariantInterpretationsCard({ patientId }: VariantInterpretationsCardPro
         <DataTable
           id="patient-variant-interpretations"
           columns={columns}
-          data={data?.list ?? []}
+          data={interpretations}
           defaultColumnSettings={defaultSettings}
           loadingStates={{ total: isLoading, list: isLoading }}
-          pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-          total={data?.count ?? 0}
+          pagination={{ type: 'hidden' }}
+          total={interpretations.length}
           tableIndexResultPosition="bottom"
         />
       </CardContent>

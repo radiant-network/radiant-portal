@@ -42,6 +42,7 @@
     "serialize-javascript": "^7.0.5",
     "yaml": "^1.10.3",
     "js-yaml": "^4.3.2",
+    "tinypool": "^2.1.2",
     "postman-collection": {
       "uuid": "^11.1.1"
     },
@@ -62,6 +63,6 @@
     ]
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=26.12.1"
   }
 }

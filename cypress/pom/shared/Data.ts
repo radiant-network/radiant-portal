@@ -46,11 +46,11 @@ export const data = {
     },
   },
   assignmentCandidates: {
-    // Kept in the radiant tenant: it is the only one with cases in two diagnostic labs.
-    tenant: 'radiant',
-    case: '1',
-    diagnostic_lab: 'CQGC',
-    case_other_lab: '1008',
+    tenant: 'cypress',
+    case: CASE_GERMLINE_VALUE,
+    diagnostic_lab: DIAGLAB_GERMLINE_VALUE,
+    // No tenant has cases in two diagnostic labs anymore: OrgScoping is skipped until one does.
+    case_other_lab: 'NO_CASE_OTHER_LAB',
     diagnostic_lab_other: 'LDM-CHUSJ',
     self: {
       first_name: 'Cypress',
@@ -75,13 +75,13 @@ export const data = {
     name: 'variants.CA1225.snv.vep.slivar.vcf.gz',
     format: 'vcf',
     type: 'snv',
-    size: '1.4 GB',
+    size: '1.43 GB',
     case: CASE_GERMLINE_VALUE,
     diag_lab: DIAGLAB_GERMLINE_VALUE,
     relationship: REL_PROBAND_VALUE,
     patient: PATIENT_GERMLINE_VALUE,
     sample: 'S13224',
-    task: '1187',
+    task: '1000092',
     created_on: '2026-',
     sequencing: '1044',
     hash: null,
@@ -229,11 +229,11 @@ export const data = {
       seq_status: 'Closed',
     },
     task_tn: {
-      task_id: '1185',
+      task_id: '1000060',
       type: 'RADIANT Somatic Annotation',
     },
     task_to: {
-      task_id: '1186',
+      task_id: '1000061',
       type: 'RADIANT Somatic Annotation',
     },
   },
@@ -241,13 +241,13 @@ export const data = {
     locus_id: '-8929279848199749632',
     variant: 'chr1:g.21836953C>T',
     type: 'SNV',
-    dbsnp: '-',
+    dbsnp: 'rs150666616',
     gene: 'HSPG2',
     aa_change: 'p.Val3402Met',
     consequence: 'Missense',
     consequenceImpact: CommonSelectors.colorIndicator('amber'),
     maneC: true,
-    maneM: false,
+    maneM: true,
     maneP: false,
     omim: {
       codes: ['AR'],
@@ -277,7 +277,7 @@ export const data = {
     consequence: 'Missense',
     consequenceImpact: CommonSelectors.colorIndicator('amber'),
     maneC: true,
-    maneM: false,
+    maneM: true,
     maneP: false,
     omim: {
       codes: ['AR'],
@@ -326,5 +326,8 @@ export const data = {
     overlapping_gene_percent: '14',
     overlapping_cnv_percent: '75.17',
     overlap_type: 'partial',
+  },
+  genePanel: {
+    my_network: 'TUPED_V3',
   },
 };

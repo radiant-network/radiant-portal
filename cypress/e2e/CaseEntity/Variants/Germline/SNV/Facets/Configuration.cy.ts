@@ -14,6 +14,7 @@ describe('Case Entity - Variants - Germline - SNV - Facets - Configuration', () 
 
   it('Order', () => {
     setupTest();
+    CaseEntity_Variants_Facets.snv.validations.shouldShowAllFacets('Panel');
     CaseEntity_Variants_Facets.snv.validations.shouldShowAllFacets('Variant');
     CaseEntity_Variants_Facets.snv.validations.shouldShowAllFacets('Gene');
     CaseEntity_Variants_Facets.snv.validations.shouldShowAllFacets('Pathogenicity');

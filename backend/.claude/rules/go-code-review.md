@@ -93,6 +93,9 @@ References: [Code Review Comments §Interfaces](https://go.dev/wiki/CodeReviewCo
 ## Errors
 
 - **Handle errors:** never discard with `_`. Check, handle, return, or (rarely) panic.
+- **Never return a bare `err`:** `return nil, err` loses the call site. Wrap with
+  `fmt.Errorf("<what was being done>: %w", err)`, always `%w` (never `%v`) so `errors.Is` / `errors.As` keep working.
+  Skip the wrap only when the callee's message already says it (wrapping again just stutters).
 - **Error strings:** lowercase, no trailing punctuation (they get wrapped) — `fmt.Errorf("upsert user %q: %w", ...)`,
   not `"Upsert failed."`. Exception: leading proper nouns/acronyms.
 - **Don't panic:** use error returns for normal flow; `panic` only for truly exceptional/unrecoverable cases.

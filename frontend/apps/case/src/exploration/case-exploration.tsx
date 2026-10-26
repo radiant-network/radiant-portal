@@ -20,6 +20,8 @@ type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
 };
 
+const CASES_DEFAULT_SORTING: SortBody[] = [{ field: 'updated_on', order: 'desc' }];
+
 async function fetchCasesList(input: CaseListInput, tenant: string) {
   const response = await caseApi.searchCases(tenant, input.listBodyWithCriteria);
   return response.data;
@@ -29,7 +31,7 @@ export default function App() {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const caseGroup = useCaseGroup();
-  const [sorting, setSorting] = useState<SortBody[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(CASES_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -108,6 +110,7 @@ export default function App() {
                 tableIndexResultPosition="bottom"
                 serverOptions={{
                   setAdditionalFields,
+                  defaultSorting: CASES_DEFAULT_SORTING,
                   onSortingChange: setSorting,
                 }}
               />

@@ -25,6 +25,7 @@ Name | Type | Description | Notes
 **has_imaging** | **bool** |  | 
 **imaging** | [**List[PatientImagingSession]**](PatientImagingSession.md) |  | 
 **initial_diagnosis_evidence_url** | **str** | BRIM link, format to be defined | [optional] 
+**interpretations** | [**List[PatientInterpretation]**](PatientInterpretation.md) | Germline and somatic, of the patient&#39;s cases | 
 **key_dates** | [**PatientKeyDates**](PatientKeyDates.md) |  | 
 **organization_code** | **str** |  | 
 **organization_name** | **str** |  | 

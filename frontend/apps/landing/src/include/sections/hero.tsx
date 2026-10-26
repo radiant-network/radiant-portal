@@ -52,6 +52,7 @@ function Hero() {
             <p className="text-base text-white/80">{t('landing.include.hero.description')}</p>
             <div className="flex flex-wrap gap-3">
               <Button asChild>
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
                 <a href="#">{t('landing.include.hero.login')}</a>
               </Button>
               <Button
@@ -59,6 +60,7 @@ function Hero() {
                 variant="outline"
                 className="border-white/40 hover:bg-white/10 bg-transparent text-white hover:text-white"
               >
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- TODO: real URL once the landing destinations are defined */}
                 <a href="#">{t('landing.include.hero.signup')}</a>
               </Button>
             </div>

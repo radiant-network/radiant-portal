@@ -31,9 +31,9 @@ INSERT INTO analysis_catalog (code, name, tenant_code) VALUES
     ('RETINO', 'Rétinopathies',                                                                              'qlin'),
     ('SHIGE',  'Syndrome d''hyper-IgE',                                                                      'qlin'),
     ('SLA',    'Sclérose latérale amyotrophique',                                                            'qlin'),
-    ('SURD',   'Surdité',                                                                                    'qlin'),
+    ('SURD',   'Surdité non-syndromique',                                                                    'qlin'),
     ('VEOIB',  'Maladie inflammatoire de l''intestin très précoce',                                          'qlin'),
     ('GENOR',  'Séquençage du génome entier - non spécifique',                                               'qlin'),
     ('NEUTP',  'Neutropénie congénitale',                                                                    'qlin'),
     ('CONCO',  'Prédisposition aux tumeurs solides de l''adulte',                                            'qlin')
-ON CONFLICT (code, tenant_code) DO NOTHING;
+ON CONFLICT (code, tenant_code) DO UPDATE SET name = EXCLUDED.name;

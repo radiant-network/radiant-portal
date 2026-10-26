@@ -25,6 +25,7 @@ import { cn } from '@/components/lib/utils';
 // Icon mapping for different aggregation groups
 const iconMap = {
   organization: Droplet,
+  panel: Droplet,
   variant: VariantIcon,
   gene: GeneIcon,
   pathogenicity: PathogenicityIcon,
@@ -88,6 +89,7 @@ export function SidebarGroups({
               <Button
                 id="sidebar-group-toggle-sidebar"
                 iconOnly
+                aria-label={open ? t('a11y.facets_sidebar.collapse') : t('a11y.facets_sidebar.expand')}
                 onClick={() => toggleSidebar()}
                 className={buttonVariants({
                   className: 'mb-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',

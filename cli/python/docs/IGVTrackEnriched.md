@@ -8,10 +8,13 @@ Name | Type | Description | Notes
 **family_role** | **str** |  | [optional] 
 **fetus_id** | **int** |  | [optional] 
 **format** | **str** |  | [optional] 
+**histology_code** | **str** |  | [optional] 
 **index_url** | **str** |  | [optional] 
 **index_url_expire_at** | **int** |  | [optional] 
 **name** | **str** |  | [optional] 
 **patient_id** | **int** |  | [optional] 
+**sample_id** | **str** |  | [optional] 
+**sequencing_experiment_id** | **int** |  | 
 **sex** | **str** |  | [optional] 
 **type** | **str** |  | [optional] 
 **url** | **str** |  | [optional] 

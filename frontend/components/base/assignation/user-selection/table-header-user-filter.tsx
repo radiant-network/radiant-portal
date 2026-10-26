@@ -106,6 +106,7 @@ export function TableHeaderUserFilter({
             const isChecked = stagedUsers.some(stagedUser => stagedUser.id === user.id);
 
             return (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the checkbox is keyboard accessible
               <div
                 key={user.id}
                 className="w-full flex items-center gap-1.5 py-1.5 hover:bg-accent transition-colors cursor-pointer"

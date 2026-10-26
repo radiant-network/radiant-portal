@@ -1,8 +1,8 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 import { CopyIcon, EllipsisVerticalIcon, EyeIcon, LockIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 
 import type { RoleResult } from '@/api/api';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import {
   type ColumnSettings,
   createColumnSettings,
@@ -54,6 +54,7 @@ export function getRolesColumns(t: TFunction<string, undefined>, actions: RolesC
               {role.is_default && (
                 <Tooltip>
                   <TooltipTrigger asChild>
+                    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can open the tooltip */}
                     <span tabIndex={0} className="inline-flex">
                       <LockIcon className="size-3.5 shrink-0 text-muted-foreground" />
                     </span>

@@ -1,43 +1,47 @@
-import { LineChart, Lock } from 'lucide-react';
+import { Lock, SparklesIcon } from 'lucide-react';
 
 import type { PatientEntity } from '@/api/api';
-import { PatientEntityPatientIdTypeEnum, PatientEntityVitalStatusEnum } from '@/api/api';
+import { PatientEntityVitalStatusEnum } from '@/api/api';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import type { BadgeProps } from '@/components/base/shadcn/badge';
+import type { ButtonProps } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-local-path';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
+
+import { derivePatientMrn } from '../patient-mrn';
 
 type HeaderProps = {
   patient?: PatientEntity;
   isLoading: boolean;
+  onAskAssistant?: () => void;
 };
 
-const MASKED_MRN = '*****';
-
-function Header({ patient, isLoading }: HeaderProps) {
+function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
   const { t } = useI18n();
-  const localPath = useLocalPath();
 
-  let title: string | undefined;
+  let title: React.ReactNode;
   if (patient) {
-    title = patient.can_read_phi
-      ? `${patient.given_name} ${patient.family_name}`
-      : t('patient_entity.header.research_id', { id: patient.patient_id });
+    title = patient.can_read_phi ? (
+      `${patient.given_name} ${patient.family_name}`
+    ) : (
+      <span className="inline-flex items-center gap-2">
+        <Lock className="size-4" aria-hidden />
+        {t('patient_entity.header.research_id', { id: patient.patient_id })}
+      </span>
+    );
   }
 
-  const mrn =
-    patient?.can_read_phi && patient.patient_id_type === PatientEntityPatientIdTypeEnum.Mrn
-      ? patient.patient_id
-      : MASKED_MRN;
+  const mrnCell = derivePatientMrn(patient);
+
+  let bornCell: string | undefined;
+  if (patient?.can_read_phi && patient.birth_date) {
+    bornCell = t('patient_entity.header.born_date', { date: patient.birth_date });
+  } else if (patient?.birth_year) {
+    bornCell = t('patient_entity.header.born_year', { year: patient.birth_year });
+  }
 
   const description = patient
-    ? [
-        mrn,
-        t('patient_entity.header.born', { year: patient.birth_year }),
-        titleCase(replaceUnderscore(patient.gender)),
-        patient.organization_name,
-      ]
+    ? [mrnCell, bornCell, titleCase(replaceUnderscore(patient.gender)), patient.organization_name]
         .filter(Boolean)
         .join('  ·  ')
     : undefined;
@@ -69,6 +73,22 @@ function Header({ patient, isLoading }: HeaderProps) {
       ]
     : [];
 
+  const buttons: ButtonProps[] = onAskAssistant
+    ? [
+        {
+          variant: 'outline',
+          size: 'sm',
+          onClick: onAskAssistant,
+          children: (
+            <>
+              <SparklesIcon />
+              {t('patient_entity.header.ask_assistant')}
+            </>
+          ),
+        },
+      ]
+    : [];
+
   return (
     <HeaderNavigation
       isLoading={isLoading}
@@ -76,19 +96,8 @@ function Header({ patient, isLoading }: HeaderProps) {
       title={title}
       description={description}
       badges={badges}
-      previousPageUrl={localPath('/patient')}
-      buttons={[
-        {
-          variant: 'outline',
-          size: 'sm',
-          children: (
-            <>
-              <LineChart />
-              {t('patient_entity.header.actions.visualize_survival')}
-            </>
-          ),
-        },
-      ]}
+      backLink={{ label: t('main_navbar.links.patients'), to: '/patient' }}
+      buttons={buttons}
     />
   );
 }

@@ -110,6 +110,7 @@ function SaveFilterButton() {
             variant="ghost"
             size="sm"
             disabled={!hasFilters || (isPristine && !!selectedSavedFilter)}
+            aria-label={t('a11y.saved_filter.save')}
             onClick={handleSave}
             className={isPristine ? '' : 'text-yellow-500'}
           >

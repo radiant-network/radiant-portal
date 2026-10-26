@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import type { CaseEntity, CaseSequencingExperiment, SortBody } from '@/api/api';
 import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
@@ -18,6 +18,8 @@ import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard'
 
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
 import { defaultSomaticSNVSettings, getSomaticSNVColumns } from './table/somatic-snv-table-settings';
+
+const SOMATIC_SNV_DEFAULT_SORTING: SortBody[] = [{ field: 'max_impact_score', order: 'desc' }];
 
 type SomaticOccurrencesProps = {
   /**
@@ -82,6 +84,7 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
           swrId={`${seqId}-${taskId}`}
           columns={columns}
           defaultColumnSettings={defaultSomaticSNVSettings}
+          defaultSorting={SOMATIC_SNV_DEFAULT_SORTING}
           enableColumnOrdering
           enableFullscreen
           extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}

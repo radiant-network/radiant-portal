@@ -2,6 +2,7 @@ import type { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Separator } from '@/components/base/shadcn/separator';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblGeneUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 
@@ -65,13 +66,18 @@ export default function OccurrenceExpandTranscript({
         </>
       )}
       {occurrence.picked_consequences && occurrence.vep_impact && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 max-w-full">
           <ConsequenceIndicator
             vepImpact={occurrence.vep_impact}
             consequence={occurrence.picked_consequences[0]}
             size="sm"
           />
-          {occurrence.aa_change && ` - ${occurrence.aa_change}`}
+          {occurrence.aa_change && (
+            <>
+              -
+              <AminoAcidChange value={occurrence.aa_change} className="font-sans" />
+            </>
+          )}
         </div>
       )}
       {expandedOccurrence.rsnumber && (

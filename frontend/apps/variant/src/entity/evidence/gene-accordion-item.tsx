@@ -28,11 +28,16 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
         <div className="flex flex-1 ml-4 items-center gap-2">
           <span className="font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
           {symbol && (
-            <Link to={getOmimOrgUrl({ symbol })} target="_blank" rel="noreferrer">
-              <Button iconOnly size="xs" variant="ghost">
-                {<ArrowUpRight className="size-4!" />}
-              </Button>
-            </Link>
+            <Button asChild iconOnly size="xs" variant="ghost">
+              <Link
+                to={getOmimOrgUrl({ symbol })}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t('a11y.omim_link.open', { symbol })}
+              >
+                <ArrowUpRight className="size-4!" />
+              </Link>
+            </Button>
           )}
         </div>
       </AccordionTrigger>

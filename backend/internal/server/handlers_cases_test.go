@@ -14,27 +14,29 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
 	var count = int64(1)
 	return &[]types.CaseResult{
 		{
-			CaseID:                   1,
-			ProbandID:                3,
-			SubmitterProbandId:       "MRN-283775",
-			PriorityCode:             "routine",
-			StatusCode:               "in_progress",
-			CaseTypeCode:             "germline",
-			CaseType:                 "germline_family",
-			AnalysisCatalogCode:      "WGA",
-			AnalysisCatalogName:      "Whole Genome Analysis",
-			PrimaryConditionID:       "MONDO:0700092",
-			PrimaryConditionName:     "neurodevelopmental disorder",
-			OrderingOrganizationCode: "CHUSJ",
-			OrderingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
-			ProjectCode:              "N1",
-			ProjectName:              "NeuroDev Phase I",
+			CaseID:                    1,
+			ProbandID:                 3,
+			SubmitterProbandId:        "MRN-283775",
+			ProbandSubmitterSampleIds: types.JsonArray[string]{"S13224"},
+			PriorityCode:              "routine",
+			StatusCode:                "in_progress",
+			CaseTypeCode:              "germline",
+			CaseType:                  "germline_family",
+			AnalysisCatalogCode:       "WGA",
+			AnalysisCatalogName:       "Whole Genome Analysis",
+			PrimaryConditionID:        "MONDO:0700092",
+			PrimaryConditionName:      "neurodevelopmental disorder",
+			OrderingOrganizationCode:  "CHUSJ",
+			OrderingOrganizationName:  "Centre hospitalier universitaire Sainte-Justine",
+			ProjectCode:               "N1",
+			ProjectName:               "NeuroDev Phase I",
 			CreatedOn: time.Date(
 				2000, 1, 1, 0, 0, 0, 0, time.UTC),
 			UpdatedOn: time.Date(
@@ -186,6 +188,7 @@ func Test_SearchCasesHandler(t *testing.T) {
 			"ordering_organization_code":"CHUSJ",
 			"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
 			"submitter_proband_id":"MRN-283775",
+			"proband_submitter_sample_ids":["S13224"],
 			"proband_id":3,
 			"diagnosis_lab_code":"CQGC",
 			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
@@ -284,6 +287,15 @@ func Test_CaseEntityHandler(t *testing.T) {
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
 			URL:                    "s3://example.com/file.cram",
+		}, {
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "crai",
+			URL:                    "s3://example.com/file.crai",
 		},
 		},
 	}
@@ -395,6 +407,77 @@ func Test_CaseEntityHandler_NoIGVTracks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to unmarshal response: %v", err)
 	}
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_OnlyUnusableIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "igv", FormatCode: "bw", DocumentName: "sample_123.coverage.bw", URL: "s3://example.com/sample_123.coverage.bw"},
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "igv", FormatCode: "bed", DocumentName: "sample_123_targets.bed", URL: "s3://example.com/sample_123_targets.bed"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_CNVOnlyHasIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "vcf", DocumentName: "sample_123.cnv.vcf.gz", URL: "s3://example.com/sample_123.cnv.vcf.gz"},
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.True(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_CNVWithoutIndexHasNoIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp["has_igv_files"].(bool))
 }
 

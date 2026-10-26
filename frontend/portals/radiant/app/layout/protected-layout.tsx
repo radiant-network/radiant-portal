@@ -1,18 +1,18 @@
 import { Suspense } from 'react';
 import { Outlet, useLoaderData } from 'react-router';
+import LibrechatDavidModal from 'librechat/librechat-david-modal';
 import { tv } from 'tailwind-variants';
 
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { LoginContext } from '@/components/hooks/use-login';
 import { TenantProvider } from '@/components/hooks/use-tenant';
+import { authenticateAndReturn, getSessionUser, requireAuth } from '@/utils/auth/server';
+import type { IAuthUser } from '@/utils/auth/types';
 
 import type { Route } from '../+types/root';
 
 import ProtectedNavbar from './protected-navbar';
-
-import { authenticateAndReturn, getSessionUser, requireAuth } from '@/utils/auth/server';
-import type { IAuthUser } from '@/utils/auth/types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   if (await requireAuth(request)) {
@@ -52,6 +52,7 @@ const _ProtectedLayout = () => {
             />
             <Outlet />
           </div>
+          {import.meta.env.APPS_LIBRECHAT && <LibrechatDavidModal />}
         </SidebarProvider>
       </TenantProvider>
     </LoginContext>

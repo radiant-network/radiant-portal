@@ -21,6 +21,8 @@ function HgvsgCell({ locusId, hgvsg }: HgvsgCellProps) {
 
   return (
     <AnchorLink
+      component="button"
+      type="button"
       size="sm"
       variant="primary"
       className="overflow-hidden text-ellipsis data-table-occurrence-hgvsg"

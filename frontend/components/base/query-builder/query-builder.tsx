@@ -19,6 +19,7 @@ import {
   type AppsConfig,
   useConfig,
 } from '@/components/cores/applications-config';
+import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 import { savedFiltersApi } from '@/utils/api';
 
@@ -42,6 +43,7 @@ export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
  * Query-Builder (facets + query-bar)
  */
 function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: QueryBuilderLayoutProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
   const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
@@ -102,6 +104,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
                           <button
                             onClick={() => setSelectedSidebarItem(null)}
                             className="text-muted-foreground hover:text-foreground"
+                            aria-label={t('a11y.query_builder.close_facets')}
                           >
                             <X size={16} />
                           </button>

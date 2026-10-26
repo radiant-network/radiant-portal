@@ -37,6 +37,7 @@ function SliderPatientRow({ patientId, relationshipToProband, seqId }: SliderPat
             variant="ghost"
             iconOnly
             className="size-6 text-muted-foreground"
+            aria-label={t('a11y.slider_patient_row.sequencing_details')}
             onClick={() => setAssayDialogOpen(true)}
           >
             <Info />

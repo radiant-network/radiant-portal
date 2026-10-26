@@ -16,7 +16,7 @@ About 15 to 19 dev days remain across 20 new stories, plus D.A.V.I.D (L1, not es
 | SJRA-2000 (B2) | 3 | Patient key lookup table (`pcx_30_patient_key`, `uuid4()` keys for patients without one) and secured view `v_pcx_30_patient_key`; `patient_key` in the list view | 0.5 d | B1 | In progress |
 | SJRA-2001 (B3) | 3 | `POST /patients/search`, `GET /patients/autocomplete` and `GET /patients/filters` | 1.25 d | B1, D2 | In progress (search done) |
 | B4 | 3 | `GET /patients/statistics` | 0.5 d | B3 | Not started |
-| B5 | 3 | `GET /patients/{patient_key}` with portal cases | 1 to 1.5 d | B2 | Not started |
+| SJRA-2018 (B5) | 3 | `GET /patients/{patient_key}` with portal cases | 1 to 1.5 d | B2 | In progress |
 | B6 | 3 | Routing guard tests, integration tests, Postman | 0.5 d | B3, B4, B5 | Not started |
 | F1 | 4 | Contract alignment: single identifier, `patient_key` route, "Restricted", codes | 0.5 d | B1 | Not started |
 | F2 | 4 | List on the generated client: table, search, filters | 1 to 1.5 d | F1 | Not started |

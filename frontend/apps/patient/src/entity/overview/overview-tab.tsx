@@ -1,13 +1,6 @@
-import { useSearchParams } from 'react-router';
+import { type PatientEntity, type PatientEvent, PatientEventEventTypeEnum } from '@/api/api';
 
-import {
-  type PatientEntity,
-  PatientEntityPatientIdTypeEnum,
-  type PatientEvent,
-  PatientEventEventTypeEnum,
-} from '@/api/api';
-
-import { PatientEntityTabs } from '../patient-entity-tabs';
+import { derivePatientMrn } from '../patient-mrn';
 
 import DemographicsCard from './demographics-card';
 import InitialDiagnosisCard from './initial-diagnosis-card';
@@ -19,14 +12,14 @@ type OverviewTabProps = {
 };
 
 function OverviewTab({ patient, isLoading }: OverviewTabProps) {
-  const [, setSearchParams] = useSearchParams();
-
   const events = patient?.events ?? [];
   const initialEvent = events.find(e => e.event_type === PatientEventEventTypeEnum.InitialCnsTumor);
   const latestEvent = events.reduce<PatientEvent | undefined>(
     (acc, e) => ((acc?.day ?? -Infinity) < (e.day ?? -Infinity) ? e : acc),
     undefined,
   );
+
+  const mrn = derivePatientMrn(patient);
 
   return (
     <div className="grid grid-cols-1 gap-4 items-start lg:grid-cols-[minmax(0,1fr)_minmax(auto,26rem)]">
@@ -35,8 +28,6 @@ function OverviewTab({ patient, isLoading }: OverviewTabProps) {
           cns_diagnosis_category={initialEvent?.cns_diagnosis_category}
           cns_integrated_diagnosis={initialEvent?.cns_integrated_diagnosis}
           event_day={initialEvent?.day}
-          event_count={events.length || undefined}
-          onViewTimeline={() => setSearchParams({ tab: PatientEntityTabs.Timeline })}
           isLoading={isLoading}
         />
         <TumourAndMetastasisCard
@@ -45,14 +36,12 @@ function OverviewTab({ patient, isLoading }: OverviewTabProps) {
           metastasis={latestEvent?.metastasis}
           metastasis_locations={latestEvent?.metastasis_locations}
           metastasis_location_other={latestEvent?.metastasis_location_other}
-          event_type={latestEvent?.event_type}
-          event_day={latestEvent?.day}
           isLoading={isLoading}
         />
       </div>
       <div className="flex flex-col gap-4">
         <DemographicsCard
-          mrn={patient?.patient_id_type === PatientEntityPatientIdTypeEnum.Mrn ? patient.patient_id : undefined}
+          mrn={mrn}
           birth_year={patient?.birth_year}
           gender={patient?.gender}
           race={patient?.race}

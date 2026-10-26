@@ -54,7 +54,13 @@ function InterpretationCell({
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button className="size-6 cursor-default hover:bg-transparent" iconOnly variant="ghost" aria-disabled>
+            <Button
+              className="size-6 cursor-default hover:bg-transparent"
+              iconOnly
+              variant="ghost"
+              aria-disabled
+              aria-label={t('variant.interpretation.tooltip.none')}
+            >
               <ClipboardList className="text-muted-foreground/40" size={16} />
             </Button>
           </TooltipTrigger>
@@ -82,6 +88,7 @@ function InterpretationCell({
                 className="size-6"
                 iconOnly
                 variant="ghost"
+                aria-label={t('variant.interpretation.tooltip.add')}
                 onClick={handleOpen}
               >
                 <ClipboardList className="text-muted-foreground/40" size={16} />
@@ -97,7 +104,13 @@ function InterpretationCell({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button className="size-6" iconOnly variant="ghost" onClick={handleClick}>
+        <Button
+          className="size-6"
+          iconOnly
+          variant="ghost"
+          aria-label={t('variant.interpretation.tooltip.view')}
+          onClick={handleClick}
+        >
           <ClipboardList className="text-primary fill-primary/20" size={16} />
         </Button>
       </TooltipTrigger>

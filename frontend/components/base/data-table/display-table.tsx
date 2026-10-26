@@ -58,6 +58,9 @@ function DisplayTable({
     onRowSelectionChange: onRowSelectionChange,
   });
   const hasRows = table.getRowModel().rows.length > 0;
+  const hasFooter = table
+    .getFooterGroups()
+    .some(group => group.headers.some(header => header.column.columnDef.footer != null));
 
   return (
     <div
@@ -110,7 +113,7 @@ function DisplayTable({
             </TableRow>
           )}
         </TableBody>
-        {!loading && (
+        {!loading && hasFooter && (
           <TableFooter>
             {table.getFooterGroups().map(footerGroup => (
               <TableRow key={footerGroup.id} variant={variant}>

@@ -16,6 +16,7 @@ import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
 import type { AvatarUser } from '@/components/base/avatar';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
@@ -150,6 +151,7 @@ export type BaseCellMockData = {
   is_mane_select?: boolean;
   vep_impact?: VepImpact;
   aa_change?: string;
+  aa_change_description?: string;
   picked_consequences?: string[];
   omim_inheritance_code?: string[];
   germline_pf_wgs?: number;
@@ -430,6 +432,7 @@ export const firstSetCellData = [
  *   - GnomadCell
  *   - ManeCell
  *   - MostDeleteriousConsequenceCell
+ *   - AminoAcidChangeCell
  *   - OmimCell
  *   - ParticipantFrequencyCell
  *   - ZygosityCell
@@ -495,6 +498,13 @@ export const secondSetCellColumns = [
     size: 225,
     minSize: 160,
   }),
+  baseCellColumnHelper.accessor(row => row.aa_change, {
+    id: 'aa_change',
+    cell: info => <AminoAcidChangeCell value={info.getValue()} description={info.row.original.aa_change_description} />,
+    header: 'AminoAcidChangeCell',
+    size: 124,
+    minSize: 40,
+  }),
   baseCellColumnHelper.accessor(row => row.omim_inheritance_code, {
     id: 'omim_inheritance_code',
     cell: info => <OmimCell codes={info.getValue()} />,
@@ -544,6 +554,7 @@ export const secondSetCellData = [
     cmc_sample_ratio: 0.000134,
     is_canonical: true,
     aa_change: 'p.Val234GlyfsTer4',
+    aa_change_description: 'Amino acid substitution',
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'MODERATE',
     omim_inheritance_code: ['IC', 'Mi', 'Mu', 'NA'],
@@ -559,7 +570,7 @@ export const secondSetCellData = [
     cmc_sample_mutated: 12,
     cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1001',
     is_mane_select: true,
-    aa_change: 'p.Val234GlyfsTer4',
+    aa_change: 'p.Glu182_Leu183insProLeuSerGlnGluSerGlnValGluGluProLeuSerGlnGluSerGlnValGluGlu',
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'LOW',
     omim_inheritance_code: ['NRT', 'SMo', 'Smu', 'XL'],

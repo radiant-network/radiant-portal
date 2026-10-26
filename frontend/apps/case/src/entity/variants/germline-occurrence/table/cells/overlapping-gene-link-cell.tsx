@@ -11,10 +11,12 @@ type OverlappingGeneLinkCellProps = {
 
 function OverlappingGeneLinkCell({ occurrence, children }: OverlappingGeneLinkCellProps) {
   if (!children) return <EmptyCell />;
-  if (!occurrence.symbol || occurrence.symbol.length === 0) return <div className="text-xs">{children}</div>;
+  if (!occurrence.symbol || occurrence.symbol.length === 0) return <div>{children}</div>;
   return (
     <OverlappingGeneDialog occurrence={occurrence}>
-      <AnchorLink size="xs">{children}</AnchorLink>
+      <AnchorLink component="button" type="button" size="sm">
+        {children}
+      </AnchorLink>
     </OverlappingGeneDialog>
   );
 }

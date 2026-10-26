@@ -12,6 +12,8 @@ import (
 	"sort"
 	"strings"
 	texttemplate "text/template"
+
+	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 var ErrTemplateMissing = errors.New("notification template missing for tenant")
@@ -19,11 +21,9 @@ var ErrTemplateMissing = errors.New("notification template missing for tenant")
 const (
 	TemplateDirEnv = "NOTIFICATION_TEMPLATE_DIR"
 
-	// Load outcome reported by GET /status: ok = every file loaded, warning = usable but at least
-	// one file skipped or ignored, error = no tenant can be notified.
-	StatusOK      = "ok"
-	StatusWarning = "warning"
-	StatusError   = "error"
+	StatusOK      = types.TemplateStatusOK
+	StatusWarning = types.TemplateStatusWarning
+	StatusError   = types.TemplateStatusError
 
 	templatePrefix = "manifest_"
 	templateExt    = ".tmpl"

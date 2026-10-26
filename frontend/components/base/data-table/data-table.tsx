@@ -12,6 +12,7 @@ import {
   type ColumnPinningState,
   columnResizingFeature,
   columnSizingFeature,
+  type ColumnSort,
   columnVisibilityFeature,
   createExpandedRowModel,
   createFilteredRowModel,
@@ -37,9 +38,13 @@ import {
   rowSelectionFeature,
   type RowSelectionState,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
   type SortingState,
   tableFeatures,
 } from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
@@ -124,6 +129,8 @@ export const features = tableFeatures({
   rowSelectionFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
+  // sort functions resolved by name when a column's sortFn is 'auto'
+  sortFns: { alphanumeric: sortFn_alphanumeric, datetime: sortFn_datetime, text: sortFn_text },
   filteredRowModel: createFilteredRowModel(),
   expandedRowModel: createExpandedRowModel(),
   groupedRowModel: createGroupedRowModel(),
@@ -474,6 +481,7 @@ function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, T
 function getHeaderFlexRender<TData extends RowData>(
   table: ReactTable<AppFeatures, TData>,
   header: Header<AppFeatures, TData, unknown>,
+  defaultSort?: ColumnSort,
 ) {
   if (header.isPlaceholder) return null;
   return (
@@ -485,11 +493,12 @@ function getHeaderFlexRender<TData extends RowData>(
         </div>
 
         {/* Table Header Actions, only display on hover */}
-        <TableHeaderActions header={header} />
+        <TableHeaderActions header={header} defaultSort={defaultSort} />
       </div>
 
       {/* Resize Grip */}
       {header.column.getCanResize() && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mouse-only column resize
         <div
           onDoubleClick={() => header.column.resetSize()}
           onMouseDown={header.getResizeHandler()}
@@ -514,9 +523,11 @@ function getHeaderFlexRender<TData extends RowData>(
 function getRowFlexRender<T extends RowData>({
   subComponent,
   containerWidth,
+  t,
 }: {
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
+  t: TFunction<string, undefined>;
 }) {
   return (row: Row<AppFeatures, T>) => (
     <Fragment key={row.id}>
@@ -546,6 +557,8 @@ function getRowFlexRender<T extends RowData>({
                   size="xs"
                   variant="ghost"
                   iconOnly
+                  aria-label={row.getIsExpanded() ? t('a11y.data_table.collapse_row') : t('a11y.data_table.expand_row')}
+                  aria-expanded={row.getIsExpanded()}
                   onClick={row.getToggleExpandedHandler()}
                 >
                   {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
@@ -746,12 +759,15 @@ function DataTable<T extends RowData>({
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [sorting, setSorting] = useState<SortingState>(
-    (serverOptions?.defaultSorting?.map(serverSorting => ({
-      id: serverSorting.field,
-      desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState) || [],
+  const defaultSortingState = useMemo<SortingState>(
+    () =>
+      (serverOptions?.defaultSorting?.map(serverSorting => ({
+        id: serverSorting.field,
+        desc: serverSorting.order === SortBodyOrderEnum.Desc,
+      })) as SortingState) ?? [],
+    [serverOptions?.defaultSorting],
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
@@ -840,8 +856,8 @@ function DataTable<T extends RowData>({
    * Cache our row flexRender method
    */
   const rowFlexRender = useMemo(
-    () => getRowFlexRender<T>({ subComponent, containerWidth }),
-    [subComponent, containerWidth],
+    () => getRowFlexRender<T>({ subComponent, containerWidth, t }),
+    [subComponent, containerWidth, t],
   );
 
   // Table Index display position
@@ -1154,7 +1170,13 @@ function DataTable<T extends RowData>({
                       colSpan={header.colSpan}
                       variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
                     >
-                      {getHeaderFlexRender(table, header)}
+                      {getHeaderFlexRender(
+                        table,
+                        header,
+                        sorting.length === 0
+                          ? defaultSortingState.find(sort => sort.id === header.column.id)
+                          : undefined,
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>

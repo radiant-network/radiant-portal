@@ -24,6 +24,13 @@ import {
 } from './table/uninterpreted-cases-table-settings';
 import { UNINTERPRETED_CASE_ID_PARAM, UNINTERPRETED_PATIENT_ID_PARAM } from './constants';
 
+const UNINTERPRETED_CASES_DEFAULT_SORTING: SortBody[] = [
+  { field: 'updated_on', order: 'desc' },
+  { field: 'case_id', order: 'asc' },
+  { field: 'seq_id', order: 'desc' },
+  { field: 'task_id', order: 'desc' },
+];
+
 type UninterpretedCasesSearchInput = {
   key: string;
   locusId: string;
@@ -45,7 +52,7 @@ function UninterpretedCasesTable() {
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowSelection, setRowSelection] = useState({});
-  const [sorting, setSorting] = useState<SortBody[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(UNINTERPRETED_CASES_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -113,6 +120,7 @@ function UninterpretedCasesTable() {
         tableIndexResultPosition="bottom"
         serverOptions={{
           setAdditionalFields,
+          defaultSorting: UNINTERPRETED_CASES_DEFAULT_SORTING,
           onSortingChange: setSorting,
         }}
         rowSelection={rowSelection}

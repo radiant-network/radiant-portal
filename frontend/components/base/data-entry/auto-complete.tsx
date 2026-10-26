@@ -186,6 +186,7 @@ export const AutoComplete = <T extends Option>({
           rightAddon={
             <button
               type="button"
+              aria-label={t('a11y.auto_complete.clear')}
               onClick={() => {
                 setSelected(undefined);
                 setInputValue('');

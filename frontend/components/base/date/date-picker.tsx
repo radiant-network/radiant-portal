@@ -66,6 +66,7 @@ function DatePicker({
         month={month}
         onMonthChange={setMonth}
         captionLayout={captionLayout}
+        // eslint-disable-next-line jsx-a11y/no-autofocus -- focus moves into the calendar the user just opened
         autoFocus
       />
     </PopoverContent>

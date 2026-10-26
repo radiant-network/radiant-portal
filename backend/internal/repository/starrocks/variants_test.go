@@ -423,7 +423,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 		assert.Equal(t, 3, len((*filters).Sex))
 		assert.Equal(t, 4, len((*filters).Zygosity))
-		assert.Equal(t, 12, len((*filters).TransmissionMode))
+		assert.Equal(t, 13, len((*filters).TransmissionMode))
 	})
 }
 

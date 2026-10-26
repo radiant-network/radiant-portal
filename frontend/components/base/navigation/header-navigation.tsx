@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft } from 'lucide-react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
 import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
@@ -10,7 +9,7 @@ import { cn } from '@/components/lib/utils';
 
 import Container from '../container';
 
-import AnchorLink from './anchor-link';
+import BackLink from './back-link';
 
 const headerNavigationVariants = tv({
   slots: {
@@ -33,21 +32,23 @@ const headerNavigationVariants = tv({
 
 type HeaderNavigationBadge = BadgeProps & { tooltipText?: string };
 
+type HeaderNavigationBackLink = { label: string; to: string };
+
 interface EntityHeaderProps extends VariantProps<typeof headerNavigationVariants> {
   isLoading?: boolean;
   badges?: HeaderNavigationBadge[];
   buttons?: ButtonProps[];
   statuses?: ReactNode[];
-  title?: string;
+  title?: ReactNode;
   description?: string;
-  previousPageUrl?: string;
+  backLink?: HeaderNavigationBackLink;
 }
 
 function HeaderNavigation({
   title,
   badges,
   buttons,
-  previousPageUrl,
+  backLink,
   statuses,
   description,
   isLoading = true,
@@ -74,11 +75,7 @@ function HeaderNavigation({
           <div className="flex justify-between">
             <div className={cn('flex flex-col', { 'gap-3': !!description })}>
               <div className="flex items-center gap-4 flex-wrap">
-                {previousPageUrl && (
-                  <AnchorLink href={previousPageUrl}>
-                    <ArrowLeft size={20} />
-                  </AnchorLink>
-                )}
+                {backLink && <BackLink to={backLink.to}>{backLink.label}</BackLink>}
                 <h1 className="text-2xl font-bold max-w-md text-ellipsis overflow-hidden whitespace-nowrap">{title}</h1>
                 <div className="flex items-center gap-2">
                   {(badges ?? []).map((badgeProps, index) => {

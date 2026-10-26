@@ -12,7 +12,15 @@ const globalData = {
     case_id: 1225,
     seq_id: 1044,
     snv: {
-      task_id: 1187,
+      task_id: 1000092,
+      Panel: [
+        {
+          field: 'tenant_gene_panel',
+          value: 'TUPED_V3',
+          op: 'in',
+          count: 14720,
+        },
+      ],
       Variant: [
         {
           field: 'variant_class',
@@ -507,7 +515,15 @@ const globalData = {
       //TODO: Waiting for stable data to restore the counts
       case_id: 1226,
       seq_id: 1047,
-      task_id: 1185,
+      task_id: 1000060,
+      Panel: [
+        {
+          field: 'tenant_gene_panel',
+          value: 'TUPED_V3',
+          op: 'in',
+          count: 649,
+        },
+      ],
       Variant: [
         {
           field: 'variant_class',

@@ -193,6 +193,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- TODO(SJRA-2024): keyboard activation of a query
     <div
       className="flex flex-1 group/query"
       data-query-active={active}
@@ -255,13 +256,26 @@ function QueryBar({ index, sqon }: QueryBarProps) {
 
           {/* actions */}
           <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
-            <Button data-cy="query-duplicate-button" iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
+            <Button
+              data-cy="query-duplicate-button"
+              iconOnly
+              variant="ghost"
+              size="sm"
+              aria-label={t('a11y.query_bar.duplicate')}
+              onClick={handleDuplicate}
+            >
               <CopyIcon />
             </Button>
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button data-cy="query-delete-button" iconOnly variant="ghost" size="sm">
+                <Button
+                  data-cy="query-delete-button"
+                  iconOnly
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t('a11y.query_bar.delete')}
+                >
                   <TrashIcon />
                 </Button>
               </PopoverTrigger>

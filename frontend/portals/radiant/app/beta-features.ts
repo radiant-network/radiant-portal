@@ -1,6 +1,6 @@
 import type { FeatureDefinitions } from '@/components/hooks/beta-feature-provider';
 
-export const radiantFeatureDefinitions: FeatureDefinitions = {
+const commonFeatures: FeatureDefinitions = {
   orientation: {
     type: 'select',
     defaultValue: 'top',
@@ -12,36 +12,6 @@ export const radiantFeatureDefinitions: FeatureDefinitions = {
     label: 'Main Menu Orientation',
     description: 'Change the position of the main navigation menu',
   },
-  analysis: {
-    type: 'link',
-    link: '/analysis',
-    label: 'Analysis',
-    description: 'Access analysis page',
-  },
-  landingInclude: {
-    type: 'link',
-    link: '/landing/include',
-    label: 'Landing (Include)',
-    description: 'Access the Include landing page',
-  },
-  landingKidsfirst: {
-    type: 'link',
-    link: '/landing/kidsfirst',
-    label: 'Landing (Kids First)',
-    description: 'Access the Kids First landing page',
-  },
-  study: {
-    type: 'link',
-    link: '/study',
-    label: 'Studies',
-    description: 'Access the new Studies page',
-  },
-  community: {
-    type: 'link',
-    link: '/community',
-    label: 'Community',
-    description: 'Access the new Community exploration page',
-  },
   onboarding: {
     type: 'boolean',
     defaultValue: false,
@@ -49,3 +19,36 @@ export const radiantFeatureDefinitions: FeatureDefinitions = {
     description: "Enable onboarding wizard on case's variant tab page",
   },
 };
+
+const radiantFeatureDefinitions: FeatureDefinitions = {
+  ...commonFeatures,
+  analysis: {
+    type: 'link',
+    link: '/radiant/analysis',
+    label: 'Analysis',
+    description: 'Access analysis page',
+  },
+  study: {
+    type: 'link',
+    link: '/radiant/study',
+    label: 'Studies',
+    description: 'Access the new Studies page',
+  },
+  community: {
+    type: 'link',
+    link: '/radiant/community',
+    label: 'Community',
+    description: 'Access the new Community exploration page',
+  },
+};
+
+const qlinFeatureDefinitions: FeatureDefinitions = commonFeatures;
+
+const perTheme = {
+  radiant: radiantFeatureDefinitions,
+  include: radiantFeatureDefinitions,
+  kf: radiantFeatureDefinitions,
+  qlin: qlinFeatureDefinitions,
+} as const;
+
+export const featureDefinitions = perTheme[(import.meta.env.THEME ?? 'radiant') as keyof typeof perTheme];

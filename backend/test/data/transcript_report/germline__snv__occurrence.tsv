@@ -1,0 +1,6 @@
+part	seq_id	task_id	locus_id	zygosity	parental_origin	father_zygosity	mother_zygosity	transmission_mode	ad_ratio	ad_alt	ad_total	gq	filter	info_qd
+1	1	5	1000	HET	mother	WT	HET	autosomal_dominant	0.5	10	20	99	PASS	0.1
+1	1	5	2000	HOM	denovo	WT	WT	autosomal_dominant_de_novo	1.0	30	30	99	PASS	0.2
+1	1	1	3000	HET	NULL	NULL	NULL	NULL	0.5	5	10	99	PASS	0.3
+2	7	77	1000	HET	father	HET	WT	autosomal_dominant	0.5	10	20	99	PASS	0.4
+2	1	5	4000	HET	NULL	NULL	NULL	NULL	0.5	5	10	99	PASS	0.5

@@ -22,6 +22,12 @@ export const filters = [
     isVisibleByDefault: true,
   },
   {
+    key: 'diagnosis_lab_code',
+    label: 'Diagnostic lab',
+    field: 'diagnosis_lab_code',
+    isVisibleByDefault: true,
+  },
+  {
     key: 'project_code',
     label: 'Project',
     field: 'project_code',
@@ -31,12 +37,6 @@ export const filters = [
     key: 'analysis_catalog_code',
     label: 'Analysis',
     field: 'analysis_catalog_code',
-    isVisibleByDefault: false,
-  },
-  {
-    key: 'diagnosis_lab_code',
-    label: 'Diagnostic lab',
-    field: 'diagnosis_lab_code',
     isVisibleByDefault: false,
   },
   {

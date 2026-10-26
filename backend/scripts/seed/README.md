@@ -21,7 +21,7 @@ views/*.sql.tmpl                                     out/starrocks_views.sql
 | `fake_deid.py` → `data/deid/` | Stand-ins for the real `pcx_30_*_deid` CSVs, same columns and unknown-value conventions. Replace the folder with the real export when it arrives. |
 | `../pcx_tables/` | Maintained by the RADIANT-Timeline-Abstraction team, the source of truth for the PCX data. The seed reads the secured view templates (`access_controlled_views/*.sql.tmpl`), the organization reference (`radiant-prod/organization_ref/organization_ref_table.sql`, plus `pcx.PENDING_ORGS` until upstream adds them) and `view_data_dictionary_access_policy.csv`. |
 | `pcx.py` | CSVs + fake identity → the identified `<tenant>_pcx_source.v_pcx_30_*_combined` tables (`radiant_data_dev` in PRD); MRI sessions and labs generated from each patient's timeline. |
-| `genomics.py` | Portal patients (`data_type_cohort = 'radiant'`), one somatic tumor-normal case and one germline case each, variants and occurrences driven by the diagnosis, CNVs, Exomiser, interpretations, notes and flags. |
+| `genomics.py` | Portal patients (`data_type_cohort = 'radiant'`), one somatic tumor-normal case and one germline case each, variants and occurrences driven by the diagnosis, CNVs, Exomiser, interpretations, notes and flags. The cohort is pediatric, so prenatal germline cases are added on top, each with a mother outside the cohort as proband. `PRENATAL-1`: her fetus, and a sequencing for each. `PRENATAL-2` to `-5`, one per layout the case page renders: the fetus alone sequenced (with exams, notes, ethnicity, consanguinity, family history and a diagnostic hypothesis), twins with one deceased, a trio with the father, and a fetus affected while its mother is not; every member carries its own phenotypes, observed and excluded. The first three somatic cases also get a relapse tumor, sequenced later and not annotated yet, so some cases have several proband samples. |
 | `build_seed.py` | Assembles the three SQL files. |
 | `sql/starrocks_schema.sql` | StarRocks DDL: `{shared}` = `radiant` (`SHARED_DATABASE`), `{tenant}` = `cbtn_tenant` (the `PerTenant` tables). |
 | `views/` | Radiant's own views over the secured views: `v_pcx_30_patient_key` (the URL key, as the caller sees the patient) and `v_pcx_30_patient_list`. |
@@ -81,7 +81,8 @@ Recipe, for tenant `demo`. Toolbox commands run with the environment's settings 
    ```sql
    SELECT max(m) FROM (SELECT max(id) m FROM patient UNION ALL SELECT max(id) FROM sample UNION ALL SELECT max(id) FROM sequencing_experiment
      UNION ALL SELECT max(id) FROM cases UNION ALL SELECT max(id) FROM task UNION ALL SELECT max(id) FROM family
-     UNION ALL SELECT max(id) FROM document UNION ALL SELECT max(id) FROM obs_categorical) x;
+     UNION ALL SELECT max(id) FROM document UNION ALL SELECT max(id) FROM obs_categorical UNION ALL SELECT max(id) FROM fetus
+     UNION ALL SELECT max(id) FROM obs_string UNION ALL SELECT max(id) FROM family_history) x;
    ```
 1. Export real loci from a tenant that already has variants: run `sql/qa_loci_export.sql` in that tenant's database (`USE <existing>_tenant;`) and copy the result table into `qa_loci.txt` (about 650 lines; the prompt, borders and footer are skipped). `mysql -B … > qa_loci.tsv` works too. The export keeps the SNVs annotated in part 1, the part the seed's occurrences use.
 2. Build the SQL: `python3 build_seed.py --env qa --tenant demo --name "Demo (fake)" --id-base 2000000 --loci qa_loci.txt --like-tenant <existing> --out out/demo`
@@ -94,6 +95,34 @@ Recipe, for tenant `demo`. Toolbox commands run with the environment's settings 
 8. Grant users with the admin UI or `create-user -sub <keycloak sub> -grant demo::member -grant 'demo:*:geneticist'`.
 
 For QA's `cbtn`, use `--tenant cbtn --name "Children's Brain Tumor Network"`. Before running it, check that the MONDO codes of `genomics.py` exist in QA's `mondo_term`.
+
+### A new data release, without a reseed
+
+A reseed from new CSVs would change most fake MRNs, because an MRN depends on how many patients sort before it. That would break every patient URL and recreate the portal patients. `--migrate-from` instead writes two scripts that bring a tenant from the CSVs it was seeded with to the new ones:
+
+- **Existing patients keep their MRN and birth date.** A birth date changes only when it no longer fits the new ages.
+- **The PCX source tables are reloaded whole.** Each table is loaded next to the live one and then swapped in, so the views never read an empty table.
+- **Portal patients:**
+  - Added patients are created with ids after `--new-id-base`.
+  - Removed patients are deleted.
+  - A patient whose genomics would now come out differently (for example, the initial diagnosis changed) is replaced: deleted, then created again with new ids.
+  - A patient whose patient row alone changed (for example, vital status) is updated in place.
+  - Deleting a patient also deletes what users added to its cases (notes, flags, interpretations, assignments), as a reseed would.
+- **`snv__variant` frequencies are recounted from the tenant's occurrences.** So `--loci` can be any current export; it does not have to be the file of the original seed.
+
+1. Pick `--new-id-base` with the query of step 0.
+2. Build, with the arguments of the original seed plus the old CSVs:
+   ```bash
+   python3 build_seed.py --env qa --tenant cbtn --id-base 10000 --loci qa_loci.txt \
+     --deid <new release> --migrate-from <CSVs the tenant was seeded with> --new-id-base <N> --out out/cbtn_migrate
+   ```
+   It prints the patients added, removed, replaced and updated.
+3. `psql -v ON_ERROR_STOP=1 -f out/cbtn_migrate/migrate_postgres.sql`. This script runs once. It stops before any change if the tenant does not hold the portal patients the old CSVs give (wrong CSVs, wrong `--id-base`, or already migrated), or if an id it would add is taken.
+4. `mysql … < out/cbtn_migrate/migrate_starrocks.sql`. This script can be run again.
+
+No `create-tenant`, `refresh-tenants` or view reload is needed: no table or view is added.
+
+Migrations do not chain yet. After one, the tenant no longer matches what any single CSV directory builds, so a second `--migrate-from` would be refused by the Postgres check.
 
 ## Demo users
 

@@ -39,7 +39,7 @@ func Test_PatientViewRoutes_NotRegisteredWhenDisabled(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, false))
+		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, false, ""))
 
 		for _, route := range patientViewRoutes {
 			assert.Falsef(t, routes[route], "route %q is registered while the patient view is disabled", route)
@@ -54,7 +54,7 @@ func Test_PatientViewRoutes_RegisteredWhenEnabled(t *testing.T) {
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
 
-		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, true))
+		routes := registeredRoutes(setupRouter(env.Starrocks, env.Postgres, true, ""))
 
 		for _, route := range patientViewRoutes {
 			assert.Truef(t, routes[route], "route %q is missing while the patient view is enabled", route)
@@ -83,13 +83,14 @@ func Test_SearchPatients_NameCriterionReturnsTheIdentifiablePatient(t *testing.T
 				"patient_id": "MRN-0002",
 				"patient_id_type": "mrn",
 				"can_read_phi": true,
-				"radiant_patient_id": 11,
+				"radiant_patient_id": 3,
 				"organization_code": "CHOP",
 				"organization_name": "Children's Hospital of Philadelphia",
 				"given_name": "Ada",
 				"family_name": "Lovelace",
 				"birth_year": 2015,
 				"gender": "female",
+				"diagnosis_type_cohort": "Atypical teratoid/rhabdoid tumor",
 				"cns_integrated_diagnosis": "ATRT",
 				"cns_integrated_diagnosis_source": "CBTN",
 				"vital_status": "alive",
@@ -117,6 +118,21 @@ func Test_SearchPatients_DefaultSortAndPage(t *testing.T) {
 		}
 		assert.Equal(t, int64(5), resp.Count)
 		assert.Equal(t, []string{"MRN-0001", "MRN-0002", "MRN-0100"}, ids)
+	})
+}
+
+func Test_SearchPatients_BooleanCriterionMatchesOnlyThatValue(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := postPatientsSearchIntegration(t, env, `{"search_criteria": [{"field": "got_radiation_ever", "value": [false]}]}`)
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var resp types.PatientsSearchResponse
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+		ids := make([]string, len(resp.List))
+		for i, p := range resp.List {
+			ids[i] = p.PatientID
+		}
+		assert.Equal(t, []string{"MRN-0001", "MRN-0100", "C100005"}, ids)
 	})
 }
 
@@ -160,7 +176,46 @@ func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
 				{"key": "CHOP", "label": "Children's Hospital of Philadelphia"},
 				{"key": "SCH", "label": "Seattle Children's Hospital"}
 			],
-			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}]
+			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
+			"diagnosis_type_cohort": [{"key": "Atypical teratoid/rhabdoid tumor"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
+			"age_at_initial_dx_group": [
+				{"key": "congenital"}, {"key": "neonatal"}, {"key": "infantile"}, {"key": "childhood"}, {"key": "juvenile"},
+				{"key": "young_adult"}, {"key": "middle_age"}, {"key": "senior"}, {"key": "unknown"}
+			],
+			"chemotherapy_agents": [{"key": "carboplatin"}, {"key": "cisplatin"}, {"key": "methotrexate"}, {"key": "vincristine"}],
+			"got_radiation_ever": [{"key": "true", "label": "Yes"}, {"key": "false", "label": "No"}]
 		}`, w.Body.String())
+	})
+}
+
+func getPatientEntityIntegration(t *testing.T, env *testutils.Env, key string) *httptest.ResponseRecorder {
+	t.Helper()
+	repo := starrocks.NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	router := tenantRouter()
+	router.GET("/:tenant/patients/:patient_key", server.PatientEntityHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key, nil))
+	return w
+}
+
+func Test_PatientEntity_ReturnsThePatientPage(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000002")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var patient types.PatientEntity
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &patient))
+		assert.Equal(t, "MRN-0001", patient.PatientID)
+		require.Len(t, patient.Cases, 1)
+		assert.Equal(t, "father", patient.Cases[0].Relationship)
+	})
+}
+
+func Test_PatientEntity_UnknownKey_404(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000999")
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String())
 	})
 }

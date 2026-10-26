@@ -11,6 +11,8 @@ Coordinates are GRCh38-like and the transcripts are MANE-like, but this is fake 
 """
 import datetime as dt, hashlib, random
 
+import pcx
+
 PART = 1
 CREATED = dt.datetime(2026, 3, 2, 9, 0)
 
@@ -84,9 +86,19 @@ SOMATIC_CNV = [
 MONDO = {"ATRT": ("MONDO:0020560", "atypical teratoid/rhabdoid tumor"), "Medulloblastoma": ("MONDO:0007959", "medulloblastoma"),
          "astrocytoma": ("MONDO:0016691", "pilocytic astrocytoma"), "glioma": ("MONDO:0002816", "diffuse midline glioma, H3 K27-altered"),
          "ependymoma": ("MONDO:0016698", "ependymoma")}
-EXTRA_MONDO = [("MONDO:0012583", "rhabdoid tumor predisposition syndrome 1"), ("MONDO:0018875", "Li-Fraumeni syndrome")]
+EXTRA_MONDO = [("MONDO:0012583", "rhabdoid tumor predisposition syndrome 1"), ("MONDO:0018875", "Li-Fraumeni syndrome"),
+               ("MONDO:0700092", "neurodevelopmental disorder")]
 HPO = [("HP:0002664", "Neoplasm"), ("HP:0002315", "Headache"), ("HP:0002013", "Vomiting"), ("HP:0001251", "Ataxia"),
        ("HP:0000238", "Hydrocephalus"), ("HP:0001250", "Seizure"), ("HP:0000639", "Nystagmus"), ("HP:0001263", "Global developmental delay")]
+# Phenotypes of the prenatal examples: the parents' own signs and the fetuses' ultrasound findings.
+PRENATAL_HPO = [("HP:0009800", "Maternal diabetes"), ("HP:0100622", "Maternal seizure"), ("HP:0000479", "Abnormal retinal morphology"),
+                ("HP:0010818", "Generalized tonic seizure"), ("HP:0010819", "Atonic seizure"), ("HP:0001561", "Polyhydramnios"),
+                ("HP:0001562", "Oligohydramnios"), ("HP:0010519", "Increased fetal movement"),
+                ("HP:0000003", "Multicystic kidney dysplasia"), ("HP:0012443", "Abnormal brain morphology"),
+                ("HP:0004325", "Decreased body weight"), ("HP:0007068", "Inferior cerebellar vermis hypoplasia"),
+                ("HP:0002011", "Morphological central nervous system abnormality")]
+# The exams of the prenatal examples, with the codes and labels of the QLIN catalog (scripts/init-sql/qlin/exam.sql).
+EXAMS = [("irmc", "Cerebral MRI", "IRM cérébrale"), ("opht", "Ophthalmological Examination", "Examen ophtalmologique")]
 OMIM = [("SMARCB1", "Rhabdoid tumor predisposition syndrome 1", "601607", "609322", ["AD"], ["Autosomal dominant"]),
         ("TP53", "Li-Fraumeni syndrome", "191170", "151623", ["AD"], ["Autosomal dominant"]),
         ("SUFU", "Medulloblastoma, desmoplastic", "607035", "155255", ["AD"], ["Autosomal dominant"]),
@@ -215,17 +227,32 @@ class Genomics:
         return self.variants.setdefault(v.locus_id, v)
 
 
+def germline_snv(rng, seq, task, v, hom, total, alt, exo, pathogenic, origin, transmission):
+    """A germline__snv__occurrence row. origin None: no parent was sequenced, so the parental columns stay empty."""
+    return [PART, seq, task, v.locus_id, round(alt / total, 3), rng.randrange(40, 99), total, total, total - alt, alt,
+            "HOM" if hom else "HET", [1, 1] if hom else [0, 1], round(rng.uniform(200, 3000), 1), "PASS",
+            round(rng.uniform(10, 30), 2),
+            "AD" if exo else None,
+            ("PATHOGENIC" if pathogenic else "UNCERTAIN_SIGNIFICANCE") if exo else None,
+            (["PVS1", "PM2"] if pathogenic else ["PM2"]) if exo else None,
+            round(rng.uniform(0.85, 0.99) if pathogenic else rng.uniform(0.3, 0.7), 3) if exo else None,
+            round(rng.uniform(0.8, 0.98) if pathogenic else rng.uniform(0.2, 0.6), 3) if exo else None,
+            origin, None if origin is None else "HET" if origin in ("father", "both") else "WT",
+            None if origin is None else "HET" if origin in ("mother", "both") else "WT", transmission]
+
+
 def build(patients, pcx_data, id_base=0, loci=None):
     """patients: pcx.Patient by rid. Every integer id starts after id_base, so the tenant's rows cannot collide with an
     environment that already holds data (QA). Returns (genomics, postgres rows by table, starrocks rows by table, ids)."""
     g = Genomics(loci)
-    pg = {t: [] for t in ["patient", "sample", "sequencing_experiment", "cases", "family", "case_has_sequencing_experiment", "task",
-                          "task_context", "document", "task_has_document", "obs_categorical", "interpretation_germline",
-                          "interpretation_somatic", "occurrence_flag", "occurrence_note"]}
+    pg = {t: [] for t in ["patient", "fetus", "sample", "sequencing_experiment", "cases", "family", "case_has_sequencing_experiment", "task",
+                          "task_context", "document", "task_has_document", "obs_categorical", "obs_string", "family_history",
+                          "interpretation_germline", "interpretation_somatic", "occurrence_flag", "occurrence_note"]}
     sr = {t: [] for t in ["germline__snv__occurrence", "somatic__snv__occurrence", "germline__cnv__occurrence", "somatic__cnv__occurrence",
                           "exomiser", "staging_sequencing_experiment"]}
     diagnosis = {r["research_id"]: r["cns_integrated_diagnosis"] for r in pcx_data["event_level"] if r["event_type"] == "Initial CNS Tumor"}
-    ids = dict.fromkeys(["patient", "sample", "seq", "case", "family", "task", "document", "obs", "cnv"], id_base)
+    ids = dict.fromkeys(["patient", "fetus", "sample", "seq", "case", "family", "task", "document", "obs", "obs_string",
+                         "family_history", "cnv"], id_base)
 
     def nid(kind):
         ids[kind] += 1
@@ -244,7 +271,7 @@ def build(patients, pcx_data, id_base=0, loci=None):
 
         def sample(type_code, histology, parent=None, site=None):
             sid = nid("sample")
-            pg["sample"].append([sid, type_code, parent, site, histology, f"S{100000 + sid}", pid, p.org])
+            pg["sample"].append([sid, type_code, parent, site, histology, f"S{100000 + sid}", pid, p.org, None])
             return sid
 
         tumor_specimen = sample("solid_tissue", "tumoral", site="Brain")
@@ -266,8 +293,8 @@ def build(patients, pcx_data, id_base=0, loci=None):
             pg["cases"].append([cid, pid, catalog, status, "DGD", mondo[0], made, made + dt.timedelta(days=rng.randrange(1, 60)),
                                 rng.choice(["routine", "routine", "urgent", "asap"]), case_type, "postnatal",
                                 rng.choice(["Dr. Phillip Storm", "Dr. Adam Resnick", "Dr. Angela Waanders", "Dr. Jena Lilly"]), p.org,
-                                f"{p.rid}-{case_type[:4].upper()}"])
-            pg["family"].append([nid("family"), cid, pid, "proband", "affected"])
+                                f"{p.rid}-{case_type[:4].upper()}", None])
+            pg["family"].append([nid("family"), cid, pid, "proband", "affected", None])
             return cid
 
         def task(task_type, pipeline, version, contexts):
@@ -304,7 +331,7 @@ def build(patients, pcx_data, id_base=0, loci=None):
         # Phenotypes of the germline proband.
         for code, _ in rng.sample(HPO, 3):
             pg["obs_categorical"].append([nid("obs"), germ, pid, "phenotype", "HPO", code, rng.choice(["childhood", "infantile", "unknown"]),
-                                          "positive", None])
+                                          "positive", None, None, None])
 
         # Germline SNVs.
         carried = rng.sample(g.common, 26)
@@ -317,15 +344,10 @@ def build(patients, pcx_data, id_base=0, loci=None):
             alt = total if hom else rng.randrange(int(total * 0.35), int(total * 0.6))
             exo = v in predisposition or (v in rare and rng.random() < 0.5)
             pathogenic = v in predisposition
-            sr["germline__snv__occurrence"].append([
-                PART, n_seq, g_task, v.locus_id, round(alt / total, 3), rng.randrange(40, 99), total, total, total - alt, alt,
-                "HOM" if hom else "HET", [1, 1] if hom else [0, 1], round(rng.uniform(200, 3000), 1), "PASS",
-                round(rng.uniform(10, 30), 2),
-                "AD" if exo else None,
-                ("PATHOGENIC" if pathogenic else "UNCERTAIN_SIGNIFICANCE") if exo else None,
-                (["PVS1", "PM2"] if pathogenic else ["PM2"]) if exo else None,
-                round(rng.uniform(0.85, 0.99) if pathogenic else rng.uniform(0.3, 0.7), 3) if exo else None,
-                round(rng.uniform(0.8, 0.98) if pathogenic else rng.uniform(0.2, 0.6), 3) if exo else None])
+            origin = "both" if hom else ["mother", "father", "denovo"][h("origin", n_seq, v.locus_id) % 3]
+            transmission = {"both": "autosomal_recessive", "denovo": "autosomal_dominant_de_novo"}.get(origin, "autosomal_dominant")
+            sr["germline__snv__occurrence"].append(germline_snv(rng, n_seq, g_task, v, hom, total, alt, exo, pathogenic, origin,
+                                                                transmission))
             v.germline_seqs.add(n_seq)
             if exo:
                 sr["exomiser"].append([PART, n_seq, v.locus_id, f"{v.locus}-{n_seq}", hashlib.md5(v.locus.encode()).hexdigest(), "AD",
@@ -405,3 +427,259 @@ def build(patients, pcx_data, id_base=0, loci=None):
                                                    round(rng.uniform(0.05, 0.2), 2), 1, bands, symbols, len(symbols), rng.randrange(0, 40)])
 
     return g, pg, sr, ids
+
+
+def add_relapse_samples(pg, ids, count=3):
+    """Each somatic case of the cohort sequenced one tumor. The first few also get a relapse tumor, sequenced later and
+    not annotated yet, so some cases have several proband samples (the case list shows them behind "See more")."""
+    def nid(kind):
+        ids[kind] += 1
+        return ids[kind]
+
+    samples = {r[0]: r for r in pg["sample"]}
+    sequencings = {r[0]: r for r in pg["sequencing_experiment"]}
+    somatic = [r[0] for r in pg["cases"] if r[9] == "somatic"][:count]
+    for cid in somatic:
+        tumor_seq = next(sequencings[sq] for sq, c in pg["case_has_sequencing_experiment"]
+                         if c == cid and samples[sequencings[sq][1]][4] == "tumoral")
+        pid, org = samples[tumor_seq[1]][6], samples[tumor_seq[1]][7]
+        made = tumor_seq[8] + dt.timedelta(days=180)
+        specimen = nid("sample")
+        pg["sample"].append([specimen, "solid_tissue", None, "Brain", "tumoral", f"S{100000 + specimen}", pid, org, None])
+        dna = nid("sample")
+        pg["sample"].append([dna, "dna", specimen, None, "tumoral", f"S{100000 + dna}", pid, org, None])
+        sq = nid("seq")
+        pg["sequencing_experiment"].append([sq, dna, "completed", f"{tumor_seq[3]}R", "Broad", f"{2400 + sq}", f"RUN{sq:05d}",
+                                            (made - dt.timedelta(days=20)).date().isoformat(), made, made, "wgs", "short_read", "illumina"])
+        pg["case_has_sequencing_experiment"].append([sq, cid])
+
+
+def add_prenatal_case(g, pg, sr, ids, org):
+    """The PCX cohort is pediatric, so none of its cases is prenatal: this adds one, whose proband is a mother outside the
+    cohort. Like the API's prenatal fixtures, the fetus's sample is drawn from the mother (patient_id) and attributed to the
+    fetus (fetus_id); the mother is sequenced too. She carries SMARCB1_R377H, which the fetus inherited."""
+    rng = random.Random(h("genomics", "prenatal"))
+
+    def nid(kind):
+        ids[kind] += 1
+        return ids[kind]
+
+    made = CREATED + dt.timedelta(days=1)
+    used = {r[1] for r in pg["patient"]}
+    retry = 0
+    mrn = None
+    while mrn is None or mrn in used:
+        mrn = str(10_000_000 + h("mrn", "prenatal", retry) % 90_000_000)
+        retry += 1
+    pid = nid("patient")
+    pg["patient"].append([pid, mrn, "mrn", org, "female", "1992-05-14", "alive", pcx.FIRST_F[h("given", "prenatal") % len(pcx.FIRST_F)],
+                          pcx.LAST[h("family", "prenatal") % len(pcx.LAST)]])
+    fid = nid("fetus")
+    pg["fetus"].append([fid, f"F-{mrn}-1", pid, org, "alive", "male", (made - dt.timedelta(weeks=20)).date().isoformat(), None])
+
+    def sample(type_code, parent=None, fetus=None):
+        sid = nid("sample")
+        pg["sample"].append([sid, type_code, parent, None, "normal", f"S{100000 + sid}", pid, org, fetus])
+        return sid
+
+    mother_dna = sample("dna", sample("blood"))
+    fetus_dna = sample("dna", fetus=fid)
+
+    def seq(sample_id, aliquot):
+        sq = nid("seq")
+        pg["sequencing_experiment"].append([sq, sample_id, "completed", aliquot, "Broad", f"{2400 + sq}", f"RUN{sq:05d}",
+                                            (made - dt.timedelta(days=10)).date().isoformat(), made, made, "wgs", "short_read", "illumina"])
+        return sq
+
+    m_seq, f_seq = seq(mother_dna, "PRENATAL-M"), seq(fetus_dna, "PRENATAL-F")
+    cid = nid("case")
+    pg["cases"].append([cid, pid, "CBTN-GERM", "in_progress", "DGD", EXTRA_MONDO[0][0], made, made + dt.timedelta(days=4), "asap",
+                        "germline", "prenatal", "Dr. Jena Lilly", org, "PRENATAL-1", None])
+    pg["family"] += [[nid("family"), cid, pid, "proband", "affected", None], [nid("family"), cid, None, "fetus", "unknown", fid]]
+    pg["case_has_sequencing_experiment"] += [[m_seq, cid], [f_seq, cid]]
+
+    def task(task_type, pipeline, version, contexts):
+        tid = nid("task")
+        pg["task"].append([tid, task_type, pipeline, version, "GRCh38", made])
+        for sq, case_id in contexts:
+            pg["task_context"].append([tid, sq, case_id])
+        return tid
+
+    g_task = task("radiant_germline_annotation", "radiant-germline", "2.1.0", [(m_seq, cid), (f_seq, cid)])
+    for sq, aliquot in [(m_seq, "PRENATAL-M"), (f_seq, "PRENATAL-F")]:
+        align = task("alignment_germline_variant_calling", "Dragen", "4.4.4", [(sq, None)])
+        for tid, ttype in [(g_task, "radiant_germline_annotation"), (align, "alignment_germline_variant_calling")]:
+            sr["staging_sequencing_experiment"].append([cid, sq, tid, ttype, PART, "germline", aliquot, str(pid), "wgs", "normal",
+                                                        made, made, made + dt.timedelta(hours=6)])
+        for ext, fmt, size in [("cram", "cram", 98_000_000_000 + h("cram", sq) % 9_000_000_000), ("cram.crai", "crai", 2_400_000)]:
+            did = nid("document")
+            pg["document"].append([did, f"{aliquot}.{ext}", "genomic", "alignment", fmt, size,
+                                   f"s3://radiant-fake-genomics/prenatal/{aliquot}.{ext}", hashlib.md5(f"{did}".encode()).hexdigest(), made])
+            pg["task_has_document"].append([align, did, "output"])
+
+    # The mother's variants, unphased (her parents are not sequenced); the fetus inherits about half of them, the
+    # predisposition variant included, and gets the rest from the father.
+    predisposition = g.named["SMARCB1_R377H"]
+    mother = list(dict.fromkeys(rng.sample(g.common, 20) + [predisposition]))
+    inherited = [v for v in mother if v is predisposition or rng.random() < 0.5]
+    paternal = [v for v in dict.fromkeys(rng.sample(g.common, 10)) if v not in mother]
+    for sq, variants in [(m_seq, [(v, None) for v in mother]), (f_seq, [(v, "mother") for v in inherited] + [(v, "father") for v in paternal])]:
+        for v, origin in variants:
+            total = rng.randrange(28, 60)
+            alt = rng.randrange(int(total * 0.35), int(total * 0.6))
+            sr["germline__snv__occurrence"].append(germline_snv(rng, sq, g_task, v, False, total, alt, False, False, origin,
+                                                                None if origin is None else "autosomal_dominant"))
+            v.germline_seqs.add(sq)
+
+
+def add_prenatal_examples(g, pg, sr, ids, org):
+    """The other prenatal layouts the case page renders, after PRENATAL-1:
+      PRENATAL-2  only the fetus sequenced; the case also carries the rest of the clinical data (exams, notes, ethnicity,
+                  consanguinity, family history, diagnostic hypothesis);
+      PRENATAL-3  twins, one deceased, and their mother sequenced;
+      PRENATAL-4  a trio: mother, father and fetus sequenced;
+      PRENATAL-5  a fetus alone: the affected subject, its mother only the administrative anchor, with no observation.
+    Each member carries its own phenotypes, observed and excluded, so a set shown on the wrong member stands out."""
+    def nid(kind):
+        ids[kind] += 1
+        return ids[kind]
+
+    used = {r[1] for r in pg["patient"]}
+
+    def patient(key, sex, dob, family=None):
+        retry, mrn = 0, None
+        while mrn is None or mrn in used:
+            mrn = str(10_000_000 + h("mrn", key, retry) % 90_000_000)
+            retry += 1
+        used.add(mrn)
+        given = pcx.FIRST_F if sex == "female" else pcx.FIRST_M
+        row = [nid("patient"), mrn, "mrn", org, sex, dob, "alive", given[h("given", key) % len(given)],
+               family or pcx.LAST[h("family", key) % len(pcx.LAST)]]
+        pg["patient"].append(row)
+        return row
+
+    def case(n, mother_dob, fetuses, father_dob=None, mother_sequenced=False, fetus_affected=False, hypothesis=None):
+        """fetuses: (life status, sex, "lmp" | "due" | None) each. Returns the case id and its members as (patient_id,
+        fetus_id): the mother, the father (None without one) and the fetuses. Every fetus and the father are sequenced."""
+        made = CREATED + dt.timedelta(days=n)
+        rng = random.Random(h("genomics", "prenatal", n))
+        mother = patient(f"prenatal-{n}", "female", mother_dob)
+        father = patient(f"prenatal-{n}-father", "male", father_dob, mother[8]) if father_dob else None
+        cid = nid("case")
+        pg["cases"].append([cid, mother[0], "CBTN-GERM", "in_progress", "DGD", EXTRA_MONDO[2][0], made, made + dt.timedelta(days=4),
+                            "asap", "germline", "prenatal", "Dr. Jena Lilly", org, f"PRENATAL-{n}", hypothesis])
+        pg["family"].append([nid("family"), cid, mother[0], "proband", "non_affected" if fetus_affected else "affected", None])
+        if father:
+            pg["family"].append([nid("family"), cid, father[0], "father", "non_affected", None])
+        fetus_ids = []
+        for rank, (life, sex, dated) in enumerate(fetuses, 1):
+            fid = nid("fetus")
+            pg["fetus"].append([fid, f"F-{mother[1]}-{rank}", mother[0], org, life, sex,
+                                (made - dt.timedelta(weeks=20)).date().isoformat() if dated == "lmp" else None,
+                                (made + dt.timedelta(weeks=20)).date().isoformat() if dated == "due" else None])
+            pg["family"].append([nid("family"), cid, None, "fetus", "affected" if fetus_affected else "unknown", fid])
+            fetus_ids.append(fid)
+
+        def sample(type_code, pid, parent=None, fetus=None):
+            sid = nid("sample")
+            pg["sample"].append([sid, type_code, parent, None, "normal", f"S{100000 + sid}", pid, org, fetus])
+            return sid
+
+        sequenced = []
+
+        def seq(tag, pid, fetus=None):
+            dna = sample("dna", pid, fetus=fetus) if fetus else sample("dna", pid, sample("blood", pid))
+            sq, aliquot = nid("seq"), f"PRENATAL-{n}-{tag}"
+            pg["sequencing_experiment"].append([sq, dna, "completed", aliquot, "Broad", f"{2400 + sq}", f"RUN{sq:05d}",
+                                                (made - dt.timedelta(days=10)).date().isoformat(), made, made, "wgs", "short_read", "illumina"])
+            pg["case_has_sequencing_experiment"].append([sq, cid])
+            sequenced.append((sq, aliquot, pid))
+            return sq
+
+        m_seq = seq("M", mother[0]) if mother_sequenced else None
+        p_seq = seq("P", father[0]) if father else None
+        # A fetus's sample is drawn from its mother.
+        f_seqs = [seq(f"F{rank}" if len(fetus_ids) > 1 else "F", mother[0], fid) for rank, fid in enumerate(fetus_ids, 1)]
+
+        def task(task_type, pipeline, version, contexts):
+            tid = nid("task")
+            pg["task"].append([tid, task_type, pipeline, version, "GRCh38", made])
+            for sq, case_id in contexts:
+                pg["task_context"].append([tid, sq, case_id])
+            return tid
+
+        g_task = task("radiant_germline_annotation", "radiant-germline", "2.1.0", [(sq, cid) for sq, _, _ in sequenced])
+        for sq, aliquot, pid in sequenced:
+            align = task("alignment_germline_variant_calling", "Dragen", "4.4.4", [(sq, None)])
+            for tid, ttype in [(g_task, "radiant_germline_annotation"), (align, "alignment_germline_variant_calling")]:
+                sr["staging_sequencing_experiment"].append([cid, sq, tid, ttype, PART, "germline", aliquot, str(pid), "wgs", "normal",
+                                                            made, made, made + dt.timedelta(hours=6)])
+            for ext, fmt, size in [("cram", "cram", 98_000_000_000 + h("cram", sq) % 9_000_000_000), ("cram.crai", "crai", 2_400_000)]:
+                did = nid("document")
+                pg["document"].append([did, f"{aliquot}.{ext}", "genomic", "alignment", fmt, size,
+                                       f"s3://radiant-fake-genomics/prenatal/{aliquot}.{ext}", hashlib.md5(f"{did}".encode()).hexdigest(), made])
+                pg["task_has_document"].append([align, did, "output"])
+
+        # A fetus inherits about half of each parent's variants. The parental origin needs the mother's genome (what she
+        # lacks is then the father's, as in PRENATAL-1): without it, it stays empty.
+        maternal = list(dict.fromkeys(rng.sample(g.common, 20)))
+        paternal = [v for v in dict.fromkeys(rng.sample(g.common, 20)) if v not in maternal]
+        carried = [(m_seq, [(v, None) for v in maternal]), (p_seq, [(v, None) for v in paternal])]
+        for sq in f_seqs:
+            inherited = [(v, "mother") for v in maternal if rng.random() < 0.5] + [(v, "father") for v in paternal if rng.random() < 0.5]
+            carried.append((sq, [(v, origin if m_seq else None) for v, origin in inherited]))
+        for sq, variants in carried:
+            if sq is None:
+                continue
+            for v, origin in variants:
+                total = rng.randrange(28, 60)
+                alt = rng.randrange(int(total * 0.35), int(total * 0.6))
+                sr["germline__snv__occurrence"].append(germline_snv(rng, sq, g_task, v, False, total, alt, False, False, origin,
+                                                                    None if origin is None else "autosomal_dominant"))
+                v.germline_seqs.add(sq)
+        return cid, (mother[0], None), (father[0], None) if father else None, [(None, fid) for fid in fetus_ids]
+
+    def coded(cid, member, observation, system, value, onset=None, interpretation=None, exam=None):
+        pid, fid = member
+        pg["obs_categorical"].append([nid("obs"), cid, pid, observation, system, value, onset, interpretation, None, fid, exam])
+
+    def text(cid, member, observation, value, interpretation=None, exam=None):
+        pid, fid = member
+        pg["obs_string"].append([nid("obs_string"), cid, pid, observation, value, interpretation, fid, exam])
+
+    def phenotypes(cid, member, onset, observed, excluded=()):
+        for code in observed:
+            coded(cid, member, "phenotype", "HPO", code, onset, "positive")
+        # An excluded sign never started: no onset.
+        for code in excluded:
+            coded(cid, member, "phenotype", "HPO", code, None, "negative")
+
+    cid, mother, _, (fetus,) = case(2, "1992-04-10", [("alive", "male", "lmp")],
+                                    hypothesis="Suspected congenital myotonic dystrophy (maternal transmission)")
+    phenotypes(cid, mother, "young_adult", ["HP:0009800", "HP:0100622"], ["HP:0000479"])
+    phenotypes(cid, fetus, "antenatal", ["HP:0001561", "HP:0010519", "HP:0000003"], ["HP:0002011"])
+    # An abnormal exam whose finding has no code: its value is free text under the 'exam' coding system.
+    coded(cid, fetus, "exam", "exam", "Bilateral ventriculomegaly", interpretation="abnormal", exam="irmc")
+    text(cid, mother, "exam", "normal", "normal", "opht")
+    coded(cid, mother, "ancestry", "radiant", "LAT-AM")
+    coded(cid, mother, "consanguinity", "radiant", "consanguinity")
+    text(cid, mother, "note", "High-risk pregnancy, ultrasound every two weeks.")
+    text(cid, fetus, "note", "Anomalies seen on the second-trimester ultrasound.")
+    # family_history has no fetus_id: on a prenatal case, the mother carries it.
+    pg["family_history"].append([nid("family_history"), cid, mother[0], "sister", "Myotonic dystrophy"])
+
+    cid, mother, _, (twin_1, twin_2) = case(3, "1988-11-02", [("alive", "female", "due"), ("deceased", "unknown", None)],
+                                            mother_sequenced=True)
+    phenotypes(cid, mother, "young_adult", ["HP:0009800"], ["HP:0100622"])
+    # Opposite amniotic-fluid findings keep the twins apart; the deceased one excludes nothing, the empty state.
+    phenotypes(cid, twin_1, "antenatal", ["HP:0001561", "HP:0012443"], ["HP:0007068"])
+    phenotypes(cid, twin_2, "antenatal", ["HP:0001562", "HP:0004325"])
+
+    cid, mother, father, (fetus,) = case(4, "1990-06-15", [("alive", "male", "lmp")], father_dob="1987-03-22",
+                                         mother_sequenced=True)
+    phenotypes(cid, mother, "young_adult", ["HP:0100622"], ["HP:0009800"])
+    phenotypes(cid, father, "young_adult", ["HP:0010818"], ["HP:0010819"])
+    phenotypes(cid, fetus, "antenatal", ["HP:0007068", "HP:0002011"], ["HP:0000003"])
+
+    cid, _, _, (fetus,) = case(5, "1994-09-08", [("alive", "female", "due")], fetus_affected=True)
+    phenotypes(cid, fetus, "antenatal", ["HP:0001562", "HP:0004325"], ["HP:0000003"])

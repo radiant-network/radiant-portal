@@ -28,9 +28,9 @@ const CRITERIAS = {
   priority_code: { key: 'priority_code', weight: 1, visible: true },
   status_code: { key: 'status_code', weight: 2, visible: true },
   case_type_code: { key: 'case_type_code', weight: 3, visible: true },
+  diagnosis_lab_code: { key: 'diagnosis_lab_code', weight: 4, visible: true },
   project_code: { key: 'project_code', visible: false },
   analysis_catalog_code: { key: 'analysis_catalog_code', visible: false },
-  diagnosis_lab_code: { key: 'diagnosis_lab_code', visible: false },
   ordering_organization_code: { key: 'ordering_organization_code', visible: false },
   panel_code: { key: 'panel_code', visible: false },
   life_status_code: { key: 'proband_life_status_code', visible: false },
@@ -120,9 +120,16 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
             ...baseOption,
             options: sortOptions(apiFilters[key] || []),
           };
+        case 'diagnosis_lab_code':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            options: sortOptions(apiFilters[key] || []),
+            showKey: true,
+            withTooltip: true,
+          };
         case 'project_code':
         case 'analysis_catalog_code':
-        case 'diagnosis_lab_code':
         case 'ordering_organization_code':
         case 'panel_code':
           return {

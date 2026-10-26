@@ -44,7 +44,11 @@ async function fetchPatientEntity(input: PatientEntityInput) {
   return response.data;
 }
 
-export default function App() {
+type PatientEntityProps = {
+  onAskAssistant?: () => void;
+};
+
+export default function App({ onAskAssistant }: PatientEntityProps = {}) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const patientId = usePatientIdFromParam();
@@ -96,7 +100,7 @@ export default function App() {
 
   return (
     <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-      <Header patient={data} isLoading={isLoading} />
+      <Header patient={data} isLoading={isLoading} onAskAssistant={onAskAssistant} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           {TAB_ORDER.map(({ value, i18nKey }) => (
@@ -113,13 +117,13 @@ export default function App() {
                 <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
-                <TimelineTab />
+                <TimelineTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
                 <TreatmentsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
-                <GenomicsTab />
+                <GenomicsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.TumorBoard}>
                 <TumorBoardTab />
@@ -128,7 +132,7 @@ export default function App() {
                 <LaboratoryTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Imaging}>
-                <ImagingTab />
+                <ImagingTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
                 <ClinicalTrialsTab />

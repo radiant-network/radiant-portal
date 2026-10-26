@@ -1,8 +1,20 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "More actions"
+    },
     "assignment_picker": {
       "open": "Edit case assignment",
       "remove_user": "Remove {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Clear"
+    },
+    "back_link": {
+      "back_to": "Back to {{page}}"
+    },
+    "badge": {
+      "remove": "Remove"
     },
     "breadcrumb": {
       "more": "More"
@@ -11,9 +23,18 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "case_actions_menu": {
+      "open": "Case actions"
+    },
     "case_group_tag": {
       "copy_name": "Copy group name",
       "remove": "Remove the New data filter"
+    },
+    "classification_section": {
+      "open": "Go to {{title}}"
+    },
+    "clingen_cell": {
+      "open": "Open in ClinGen (new tab)"
     },
     "cmc": {
       "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
@@ -23,12 +44,100 @@
       "no_data": "No data",
       "open_franklin": "{{tier}}, open in Franklin (new tab)"
     },
+    "data_table": {
+      "collapse_row": "Collapse row",
+      "column_settings": "Column settings",
+      "expand_row": "Expand row",
+      "group_by": "Group by",
+      "grouped_by": "Grouped by {{value}}",
+      "pin_column": "Pin column",
+      "pin_row": "Pin row",
+      "sort": "Sort",
+      "sorted_asc": "Sorted ascending",
+      "sorted_desc": "Sorted descending",
+      "unpin_row": "Unpin row"
+    },
     "date_picker": {
       "open_calendar": "Open calendar"
+    },
+    "editable_text": {
+      "edit": "Edit"
+    },
+    "facets_sidebar": {
+      "collapse": "Collapse filters",
+      "expand": "Expand filters"
+    },
+    "gene_cell": {
+      "add_to_query": "Add {{symbol}} to the query"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Switch to English (EN)",
+      "switch_to_fr": "Switch to French (FR)"
+    },
+    "list_item": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "share": "Share"
+    },
+    "main_navbar": {
+      "close_menu": "Close menu",
+      "open_menu": "Open menu"
+    },
+    "main_sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
     },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
+    },
+    "multi_selector": {
+      "clear_all": "Clear all"
+    },
+    "note": {
+      "actions": "Comment actions"
+    },
+    "notes": {
+      "open_count_one": "{{count}} comment",
+      "open_count_other": "{{count}} comments"
+    },
+    "occurrence_flag": {
+      "edit": "Edit flag"
+    },
+    "omim_link": {
+      "open": "Open {{symbol}} in OMIM (new tab)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Remove citation"
+    },
+    "query_bar": {
+      "delete": "Delete query",
+      "duplicate": "Duplicate query"
+    },
+    "query_builder": {
+      "close_facets": "Close filters panel"
+    },
+    "query_pill": {
+      "remove": "Remove filter"
+    },
+    "saved_filter": {
+      "delete": "Delete filter",
+      "discard": "Discard unsaved changes",
+      "duplicate": "Duplicate filter",
+      "edit": "Edit filter",
+      "new": "New filter",
+      "save": "Save filter"
+    },
+    "slider": {
+      "next": "Next result",
+      "previous": "Previous result"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Sequencing details"
+    },
+    "theme_toggle": {
+      "to_dark": "Switch to dark theme",
+      "to_light": "Switch to light theme"
     },
     "sidebar": {
       "description": "Displays the mobile sidebar.",
@@ -41,6 +150,11 @@
     },
     "spinner": {
       "loading": "Loading"
+    },
+    "timeline": {
+      "filters_group": "Filter timeline by type",
+      "results_count_one": "Showing {{count}} result",
+      "results_count_other": "Showing {{count}} results"
     }
   },
   "admin": {
@@ -882,6 +996,7 @@
         "study_code": "Study Code",
         "study_id": "Study ID",
         "symbol": "Gene Symbol",
+        "tenant_gene_panel": "My Network",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -1002,6 +1117,8 @@
           "autosomal_recessive_abbrev": "AR",
           "non_carrier_proband": "Non Carrier Proband",
           "non_carrier_proband_abbrev": "NCP",
+          "uniparental_disomy": "Uniparental Disomy",
+          "uniparental_disomy_abbrev": "UPD",
           "unknown_father_genotype": "Unknown Father Genotype",
           "unknown_father_genotype_abbrev": "UFG",
           "unknown_mother_genotype": "Unknown Mother Genotype",
@@ -1160,15 +1277,14 @@
     "header": {
       "title": "Patient {{id}}",
       "research_id": "ID: {{id}}",
-      "born": "Born {{year}}",
+      "born_date": "Born {{date}}",
+      "born_year": "Born {{year}}",
       "phi_restricted": "Restricted",
       "phi_restricted_tooltip": "Identity restricted outside your organisation",
+      "ask_assistant": "Ask about this patient",
       "vital_status": {
         "alive": "Alive",
         "deceased": "Deceased"
-      },
-      "actions": {
-        "visualize_survival": "Visualize Cohort Survival"
       }
     },
     "tabs": {
@@ -1187,9 +1303,7 @@
         "cns_diagnosis_category": "CNS diagnosis category",
         "cns_integrated_diagnosis": "CNS integrated diagnosis",
         "event_date": "Date of diagnosis",
-        "day": "Day {{day}}",
-        "events_total": "{{count}} events total",
-        "view_timeline": "View timeline"
+        "day": "Day {{day}}"
       },
       "tumour_and_metastasis": {
         "title": "Tumour and metastasis",
@@ -1197,8 +1311,7 @@
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
-        "metastasis_location_other": "Extraneural site",
-        "most_recent_event": "Most recent event · {{type}} · Day {{day}}"
+        "metastasis_location_other": "Extraneural site"
       },
       "demographics": {
         "title": "Demographics",
@@ -1223,25 +1336,34 @@
       },
       "interpretations": {
         "title": "Variant interpretations",
+        "aa_tooltip": "Amino acid change",
+        "date_tooltip": "Last interpretation date",
         "headers": {
-          "gene": "Gene",
           "variant": "Variant",
+          "gene": "Gene",
+          "aa": "AA",
           "classification": "Classification",
           "origin": "Origin",
           "case": "Case",
-          "assay": "Assay",
-          "reported": "Reported"
+          "analysis": "Analysis",
+          "date": "Date"
         }
       },
       "cases": {
         "title": "Genomic cases",
+        "type": {
+          "somatic": "Somatic",
+          "germline": "Solo germline",
+          "germline_family": "Family germline"
+        },
         "headers": {
           "case": "Case",
-          "priority": "Priority",
+          "type": "Type",
+          "analysis": "Analysis",
+          "primary_condition": "Primary Condition",
           "status": "Status",
-          "sample_scope": "Sample scope",
-          "assay": "Assay",
-          "requested_by": "Requested by",
+          "priority": "Priority",
+          "requested_by": "Req. By",
           "updated": "Updated"
         }
       }
@@ -1266,6 +1388,29 @@
         "connected": "Connected"
       }
     },
+    "timeline": {
+      "title": "Clinical Timeline",
+      "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "event_type": {
+        "initial_cns_tumor": "Initial CNS Tumor",
+        "progressive": "Progressive",
+        "recurrence": "Recurrence",
+        "second_malignancy": "Second Malignancy",
+        "deceased": "Deceased",
+        "unavailable": "Unavailable",
+        "not_reported": "Not Reported"
+      },
+      "event_fields": {
+        "tumor_locations": "Tumor locations",
+        "metastasis": "Metastasis",
+        "metastasis_locations": "Metastasis locations"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
+      }
+    },
     "treatments": {
       "title_count_one": "{{count}} treatment",
       "title_count_other": "{{count}} treatments",
@@ -1286,12 +1431,47 @@
         "focal_boost": "Focal boost",
         "total_primary": "Total to primary"
       }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} imaging session",
+      "title_count_other": "{{count}} imaging sessions",
+      "day_age": "Day {{day}} · age {{age}}y",
+      "columns": {
+        "date": "Date",
+        "modality": "Modality",
+        "viewer": "Viewer"
+      }
+    }
+  },
+  "timeline": {
+    "evidence": "Evidence",
+    "initial_treatment": "Initial treatment",
+    "marker": {
+      "day": "Day {{day}}",
+      "day_range": "Day {{start}} — {{end}}",
+      "day_unknown": "Day n/a",
+      "years": "{{value}}y"
+    },
+    "filters": {
+      "all": "All",
+      "events": "Disease events",
+      "surgery": "Surgery",
+      "chemotherapy": "Chemotherapy",
+      "radiation": "Radiation"
+    },
+    "empty": {
+      "title": "No results",
+      "description": "Adjust your filters and try again."
     }
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
     "description": "",
     "search_placeholder": "Search by name, research ID or MRN",
+    "tabs": {
+      "cohort_analytics": "Cohort analytics",
+      "patient_list": "Patient list"
+    },
     "chat": {
       "title": "Cohort analytics",
       "description": "Current registry snapshot · derived from roster fields",
@@ -1324,11 +1504,9 @@
       "vital_status": "Vital status",
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnosis",
-      "protocol": "Protocol",
-      "molecular_subtype": "Molecular subtype",
-      "age_at_initial_dx_days": "Age at diagnosis",
-      "had_initial_methotrexate": "Treatment exposure",
-      "had_initial_radiation": "Radiation",
+      "age_at_initial_dx_group": "Age at diagnosis",
+      "chemotherapy_agents": "Chemotherapy agents",
+      "got_radiation_ever": "Radiation",
       "diagnosis_type_cohort": "Cohort"
     },
     "pagination": {
@@ -1691,6 +1869,7 @@
       "expand": "Expand",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gene",
         "frequency": "Frequency",
@@ -2344,7 +2523,8 @@
     }
   },
   "file_entity": {
-    "title": "Files",
+    "count_one": "{{total}} File",
+    "count_other": "{{total}} Files",
     "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
     "name": "File Name",
     "format_code": "Format",
@@ -2669,7 +2849,8 @@
       "resources": "Resources",
       "website": "Website",
       "documentation": "Documentation",
-      "contact": "Contact"
+      "contact": "Contact",
+      "david": "D.A.V.I.D"
     },
     "tenant_switcher": {
       "title": "Switch Tenant"
@@ -2688,6 +2869,15 @@
       "title": "You don't have access to RADIANT",
       "body": "To get access, contact your organization's RADIANT administrator.",
       "cta": "Back to sign in"
+    }
+  },
+  "librechat": {
+    "david": {
+      "title": "D.A.V.I.D",
+      "badge": "AI assistant",
+      "description": "AI-driven predictive analytics for personalized cancer care",
+      "frame_title": "D.A.V.I.D assistant",
+      "not_configured": "D.A.V.I.D is not configured for this environment."
     }
   }
 }

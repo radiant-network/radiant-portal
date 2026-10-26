@@ -82,6 +82,7 @@ const GermlineInterpretationForm = forwardRef<InterpretationFormRef, Interpretat
                         i18nKey="variant.interpretation_form.germline.classification_popover.full_text"
                         components={{
                           guides: (
+                            // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
                             <AnchorLink
                               className="inline-flex no-underline hover:underline"
                               href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
@@ -204,7 +205,7 @@ const GermlineInterpretationForm = forwardRef<InterpretationFormRef, Interpretat
                 <FormLabel>{t('variant.interpretation_form.germline.mode_of_transmission')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
-                    defaultOptions={getTransmissionModeList(t)}
+                    defaultOptions={getTransmissionModeList(t).filter(mode => mode.value !== 'uniparental_disomy')}
                     placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
                     emptyIndicator={<p>{t('variant.interpretation_form.germline.no_results')}</p>}
                     openOnFocus

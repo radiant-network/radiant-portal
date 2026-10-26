@@ -20,5 +20,7 @@ create table v_pcx_30_patient_list
     survival_days                   int          NULL,
     has_imaging                     boolean      NULL,
     case_count                      bigint       NULL,
+    got_radiation_ever              boolean      NULL,
+    chemotherapy_agents             array<varchar(256)> NULL,
     can_read_phi                    boolean      NULL
 );

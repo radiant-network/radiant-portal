@@ -61,7 +61,13 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="sm" aria-disabled className="cursor-default hover:bg-background">
+          <Button
+            variant="outline"
+            size="sm"
+            aria-disabled
+            aria-label={t('notes.variant.tooltip.none')}
+            className="cursor-default hover:bg-background"
+          >
             <MessageSquare className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -72,7 +78,12 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
 
   return (
     <div>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
+      <Button
+        variant="outline"
+        size="sm"
+        aria-label={t('a11y.notes.open_count', { count: data?.count ?? 0 })}
+        onClick={handleOpen}
+      >
         <MessageSquare className="h-4 w-4" />
         {isLoading ? <Spinner /> : (data?.count ?? 0) > 0 && data?.count}
       </Button>

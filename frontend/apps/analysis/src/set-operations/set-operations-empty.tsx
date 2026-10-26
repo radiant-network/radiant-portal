@@ -20,6 +20,7 @@ function SetOperationsEmpty() {
             i18nKey="analysis.set_operations.empty.description"
             components={{
               // TODO: dead link, no /variants route exists; wrap with localPath once the page is known
+              // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
               variant: <AnchorLink size="sm" href="/variants" />,
             }}
           />

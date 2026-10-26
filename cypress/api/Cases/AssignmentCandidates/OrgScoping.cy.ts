@@ -1,7 +1,8 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 
-describe('Cases - Assignment Candidates - Org scoping', () => {
+// Skipped: no tenant has cases in two diagnostic labs.
+describe.skip('Cases - Assignment Candidates - Org scoping', () => {
   const dataCandidates = data.assignmentCandidates;
   let responseCase: any;
   let responseOtherLab: any;

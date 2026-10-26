@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import type { ColumnPinningPosition, Header, RowData, SortDirection } from '@tanstack/react-table';
+import type { ColumnPinningPosition, ColumnSort, Header, RowData, SortDirection } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
@@ -66,9 +66,10 @@ function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: So
  */
 type TableHeaderActionsProps<TData extends RowData> = {
   header: Header<AppFeatures, TData, unknown>;
+  defaultSort?: ColumnSort;
 };
 
-function TableHeaderActions<TData extends RowData>({ header }: TableHeaderActionsProps<TData>) {
+function TableHeaderActions<TData extends RowData>({ header, defaultSort }: TableHeaderActionsProps<TData>) {
   const { t } = useI18n();
 
   // Header group contains subgroup, they shouldn't have actions
@@ -78,7 +79,8 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
   const hasActions = header.column.getCanPin() || header.column.getCanSort();
-  const isSorted = header.column.getIsSorted();
+  const defaultDirection = defaultSort && (defaultSort.desc ? 'desc' : 'asc');
+  const isSorted = header.column.getIsSorted() || defaultDirection || false;
 
   if (!hasActions || isHeaderGroup) return null;
 
@@ -97,6 +99,7 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
             <Button
               variant="ghost"
               iconOnly
+              aria-label={t('a11y.data_table.pin_column')}
               className={cn('size-6 hidden group-hover/header:flex', {
                 flex: isPinningDropdownActive,
               })}
@@ -130,6 +133,12 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
             <Button
               variant="ghost"
               iconOnly
+              aria-label={
+                {
+                  asc: t('a11y.data_table.sorted_asc'),
+                  desc: t('a11y.data_table.sorted_desc'),
+                }[isSorted as string] ?? t('a11y.data_table.sort')
+              }
               className={cn('size-6 hidden group-hover/header:flex', {
                 flex: isSorted || isPinningDropdownActive,
               })}

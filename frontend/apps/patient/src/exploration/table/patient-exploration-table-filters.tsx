@@ -2,8 +2,8 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import type { SearchCriterion } from '@/api/api';
-import type { IFilterButton } from '@/components/base/buttons/filter-button';
+import type { FiltersValue, PatientFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,
@@ -14,7 +14,7 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { patientsApi } from '@/utils/api';
 
-import { fetchPatientFilters, type PatientFilters } from '../../api/patient';
+import { fetchPatientFilters } from '../../api/patient';
 
 type FiltersGroupFormProps = {
   loading?: boolean;
@@ -25,11 +25,9 @@ const CRITERIAS = {
   vital_status: { key: 'vital_status', weight: 1, visible: true },
   organization_code: { key: 'organization_code', weight: 2, visible: true },
   cns_integrated_diagnosis: { key: 'cns_integrated_diagnosis', weight: 3, visible: true },
-  protocol: { key: 'protocol', weight: 4, visible: true },
-  molecular_subtype: { key: 'molecular_subtype', weight: 5, visible: true },
-  age_at_initial_dx_days: { key: 'age_at_initial_dx_days', weight: 6, visible: true },
-  had_initial_methotrexate: { key: 'had_initial_methotrexate', weight: 7, visible: true },
-  had_initial_radiation: { key: 'had_initial_radiation', weight: 8, visible: true },
+  age_at_initial_dx_group: { key: 'age_at_initial_dx_group', weight: 4, visible: true },
+  chemotherapy_agents: { key: 'chemotherapy_agents', weight: 5, visible: true },
+  got_radiation_ever: { key: 'got_radiation_ever', weight: 6, visible: true },
   diagnosis_type_cohort: { key: 'diagnosis_type_cohort', visible: false },
 };
 
@@ -37,11 +35,9 @@ export const FILTER_DEFAULTS: StringArrayRecord = {
   vital_status: [],
   organization_code: [],
   cns_integrated_diagnosis: [],
-  protocol: [],
-  molecular_subtype: [],
-  age_at_initial_dx_days: [],
-  had_initial_methotrexate: [],
-  had_initial_radiation: [],
+  age_at_initial_dx_group: [],
+  chemotherapy_agents: [],
+  got_radiation_ever: [],
   diagnosis_type_cohort: [],
 };
 
@@ -54,7 +50,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
     ...FILTER_DEFAULTS,
   });
 
-  const { data: apiFilters } = useSWR<PatientFilters>('patient-filters', fetchPatientFilters, {
+  const { data: apiFilters } = useSWR<PatientFilters>('patient-filters', () => fetchPatientFilters(tenant), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
@@ -68,6 +64,8 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
 
     return sortedKeys.map(key => {
       const typedKey = key as keyof PatientFilters;
+      const rawValues: FiltersValue[] = apiFilters[typedKey] || [];
+      const values = rawValues.map(v => ({ ...v, label: v.label ?? v.key }));
       const baseOption: IFilterButton = {
         key,
         label: t(`patient_exploration.filters.${key}`),
@@ -82,12 +80,21 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
           return {
             ...baseOption,
             isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
-            options: sortOptions(apiFilters[typedKey] || []),
+            options: sortOptions(values),
+            popoverSize: 'lg' as PopoverSize,
+          };
+        case 'organization_code':
+        case 'cns_integrated_diagnosis':
+          return {
+            ...baseOption,
+            options: sortOptions(values),
+            popoverSize: 'lg' as PopoverSize,
+            withTooltip: true,
           };
         default:
           return {
             ...baseOption,
-            options: sortOptions(apiFilters[typedKey] || []),
+            options: sortOptions(values),
           };
       }
     });

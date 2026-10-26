@@ -17,6 +17,7 @@ type QueryBuilderDataTableProps<T extends RowData> = Omit<
   defaultPageSize?: number;
   swrId?: string | number;
   paginationType?: 'server' | 'hidden';
+  defaultSorting?: SortBody[];
 };
 
 /**
@@ -27,6 +28,7 @@ function QueryBuilderDataTable<T extends RowData>({
   defaultPageSize = DEFAULT_PAGE_SIZE,
   swrId,
   paginationType = 'server',
+  defaultSorting,
   ...props
 }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
@@ -40,7 +42,7 @@ function QueryBuilderDataTable<T extends RowData>({
     pageSize: defaultPageSize,
   });
 
-  const [sorting, setSorting] = useState<SortBody[]>([]);
+  const [sorting, setSorting] = useState<SortBody[]>(defaultSorting ?? []);
 
   const swrKey = swrId !== undefined ? `${props.id}:${swrId}` : props.id;
 
@@ -103,6 +105,7 @@ function QueryBuilderDataTable<T extends RowData>({
             loadingStates={{ list: fetchList.isLoading, total: fetchCount.isLoading }}
             serverOptions={{
               setAdditionalFields,
+              defaultSorting,
               onSortingChange: setSorting,
             }}
             pagination={

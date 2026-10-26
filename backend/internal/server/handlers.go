@@ -24,13 +24,14 @@ type templateStatusReporter interface {
 // @Produce json
 // @Success 200 {object} map[string]string
 // @Router /status [get]
-func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker, templates templateStatusReporter) gin.HandlerFunc {
+func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker, notificationTemplates templateStatusReporter, reportTemplates templateStatusReporter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": gin.H{
 				"starrocks":              repoStarrocks.CheckDatabaseConnection(),
 				"postgres":               repoPostgres.CheckDatabaseConnection(),
-				"notification_templates": templates.Status(),
+				"notification_templates": notificationTemplates.Status(),
+				"report_templates":       reportTemplates.Status(),
 			},
 		})
 	}

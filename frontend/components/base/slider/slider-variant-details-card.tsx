@@ -16,6 +16,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getFranklinSnvUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
@@ -809,7 +810,7 @@ export const GeneCard = ({
     <div className="@container/gene-card rounded-md border border-border p-3">
       <div className="flex flex-col @md/gene-card:flex-row @md/gene-card:flex-wrap gap-4 @md/gene-card:gap-20 w-full">
         {hasGene && (
-          <div className="flex flex-1 flex-col grow gap-2">
+          <div className="flex flex-1 flex-col grow gap-2 min-w-0">
             <AnchorLink
               className="font-semibold text-lg"
               external
@@ -818,7 +819,7 @@ export const GeneCard = ({
             >
               {symbol}
             </AnchorLink>
-            {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}
+            {aa_change && <AminoAcidChange value={aa_change} className="font-semibold text-sm" />}
             {ensembl_gene_id && (
               <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}

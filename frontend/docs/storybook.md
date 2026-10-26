@@ -91,6 +91,10 @@ export const AllVariants: Story = {
 When you need to add a new table cell to Storybook, you must update
 `frontend/components/stories/table/cells-mock.tsx` to display the new cell.
 
+## Accessibility
+
+Every story is checked by `@storybook/addon-a11y` (Accessibility tab). See [Accessibility](./accessibility.md) for the `todo` / `error` modes.
+
 ## External Links
 
 [Storybook Radiant Portal](https://radiant-network.github.io/radiant-portal)

@@ -118,7 +118,14 @@ function DuplicateFilterButton() {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex">
-          <Button iconOnly variant="ghost" size="sm" disabled={!selectedSavedFilter} onClick={handleDuplicate}>
+          <Button
+            iconOnly
+            variant="ghost"
+            size="sm"
+            disabled={!selectedSavedFilter}
+            aria-label={t('a11y.saved_filter.duplicate')}
+            onClick={handleDuplicate}
+          >
             <CopyIcon />
           </Button>
         </span>

@@ -39,25 +39,27 @@ export const AllVariants: Story = {
   render: () => (
     <StoryShowcase>
       <StorySection title="Default">
-        <AnchorLink external>Anchor Link</AnchorLink>
+        <AnchorLink href="https://example.com" external>
+          Anchor Link
+        </AnchorLink>
       </StorySection>
 
       <StorySection title="Secondary">
-        <AnchorLink external variant="secondary">
+        <AnchorLink href="https://example.com" external variant="secondary">
           Anchor Link
         </AnchorLink>
       </StorySection>
 
       <StorySection title="White (on a dark surface)">
         <div className="rounded-md bg-slate-900 p-4">
-          <AnchorLink external variant="white">
+          <AnchorLink href="https://example.com" external variant="white">
             Anchor Link
           </AnchorLink>
         </div>
       </StorySection>
 
       <StorySection title="Mono">
-        <AnchorLink external mono>
+        <AnchorLink href="https://example.com" external mono>
           Anchor Link
         </AnchorLink>
       </StorySection>
