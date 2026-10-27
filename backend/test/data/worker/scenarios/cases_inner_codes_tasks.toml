@@ -59,7 +59,7 @@ ordering_organization_code = "CHUSJ"
 
     [[cases.tasks]] # TASK-004 missing output documents
     type_code = "exomiser"  # TASK-001 type removed by RAD-116: Exomiser files are outputs of the annotation tasks
-    aliquots = ["NA12891", "NA12892"]
+    aliquots = ["NA12891", "NA12892"]  # TASK-002 NA12892 not defined in this case
     pipeline_name = "Dragen"
     pipeline_version = "4.4.4"
     genome_build = "GRch38"
