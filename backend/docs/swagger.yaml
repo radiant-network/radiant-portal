@@ -766,6 +766,11 @@ components:
           type: string
         project_name:
           type: string
+        run_aliases:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         status_code:
           $ref: '#/components/schemas/CaseStatus'
         submitter_proband_id:
@@ -779,6 +784,7 @@ components:
       - diagnosis_lab_code
       - has_variants
       - proband_submitter_sample_ids
+      - run_aliases
       - status_code
       - updated_on
       type: object
