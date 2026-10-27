@@ -1,4 +1,4 @@
-import type { Data, Layout } from 'plotly.js';
+import type { Data, Layout, Shape } from 'plotly.js';
 
 import type { CNVProfileROH, CNVProfileSegment, CNVProfileTrack, Cytoband, GeneTrackGene } from '@/api/api';
 import type { PlotlyThemeColors } from '@/components/base/charts/hooks/use-plotly-theme';
@@ -34,8 +34,10 @@ export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [numbe
 // The data tracks sit on a tinted panel each, so that the gaps between them read as separators.
 const PANEL_AXES: YAxisName[] = ['y', 'y2', 'y3'];
 const PANEL_OPACITY = 0.35;
+// Hex alpha of the fill of the highlight, about 15%.
+const HIGHLIGHT_FILL_ALPHA = '26';
 
-export type TraceKind = 'cloud' | 'cnv' | 'roh' | 'cytoband' | 'decoration';
+export type TraceKind = 'cloud' | 'roh' | 'cytoband' | 'decoration';
 
 export type Formatters = {
   number: (value: number) => string;
@@ -54,9 +56,14 @@ export type TraceLabels = {
 
 type Trace = Data & { meta?: TraceKind };
 
+// WebGL projects the lines in float32: at genome coordinates, zoomed in, their ends move by up to 128
+// bases on the last chromosomes. The lines are in SVG, which keeps them exact; the clouds keep WebGL,
+// whose markers are projected in double precision. Plotly draws WebGL over the SVG traces, so the
+// CNVs, the only lines over a cloud, are layout shapes, drawn above both.
+
 const lineTrace = (yaxis: string, color: string, width: number, extra: object = {}): Trace =>
   ({
-    type: 'scattergl',
+    type: 'scatter',
     mode: 'lines',
     x: [],
     y: [],
@@ -176,59 +183,61 @@ export const isSegmentShown = (
   (showFiltered || !isFiltered(segment)) &&
   matchesAnnotations(segment, annotations);
 
+const SEGMENT_MARKER_RADIUS_PX = 5.5;
+
 /**
- * A line per called CNV over its span and a marker at its middle, grouped by type and filter status.
- * The chart shows their tooltip and handles their click on the whole span. customdata holds the
- * segment index.
+ * A line per called CNV in view over its span and a marker at its middle, as layout shapes: Plotly
+ * draws them over the WebGL clouds, and in SVG, at the exact position (see Trace). The chart shows
+ * their tooltip and handles their click on the whole span.
  */
-export function buildSegmentTraces(
+export function buildSegmentShapes(
   segments: CNVProfileSegment[],
   genome: Genome,
+  view: GenomeView,
   palette: CNVProfilePalette,
   theme: PlotlyThemeColors,
   showFiltered: boolean,
   annotations: string[] = [],
-): Trace[] {
-  const groups = new Map<string, number[]>();
-  segments.forEach((segment, index) => {
-    if (!isSegmentShown(segment, genome, showFiltered, annotations)) return;
-    const key = `${segment.type === 'GAIN' ? 'gain' : 'loss'}-${isFiltered(segment)}`;
-    groups.set(key, [...(groups.get(key) ?? []), index]);
-  });
-
-  return [...groups.entries()].flatMap(([key, indexes]) => {
-    const gain = key.startsWith('gain');
-    const filtered = key.endsWith('true');
-    const color = gain ? palette.gain : palette.loss;
-    const line = lineTrace('y', color, 4, { line: { color, width: 4, dash: filtered ? 'dot' : 'solid' } });
-    const markers = { x: [] as number[], y: [] as number[] };
-    for (const index of indexes) {
-      const segment = segments[index];
-      const offset = genome.byName.get(segment.chromosome)!.offset;
-      const y = segmentValue(segment);
-      pushSpan(line as { x: number[]; y: number[] }, offset + segment.start, offset + segment.end, y);
-      markers.x.push(offset + (segment.start + segment.end) / 2);
-      markers.y.push(y);
-    }
-    return [
-      line,
-      {
-        type: 'scattergl',
-        mode: 'markers',
-        yaxis: 'y',
-        showlegend: false,
-        meta: 'cnv',
-        ...markers,
-        customdata: indexes,
-        hoverinfo: 'skip',
-        marker: {
-          size: 11,
-          color: filtered ? theme.card : color,
-          line: { color: filtered ? color : theme.card, width: 2.5 },
-        },
-      } as Trace,
-    ];
-  });
+): Partial<Shape>[] {
+  const lines: Partial<Shape>[] = [];
+  const markers: Partial<Shape>[] = [];
+  for (const segment of segments) {
+    if (!isSegmentShown(segment, genome, showFiltered, annotations)) continue;
+    const offset = genome.byName.get(segment.chromosome)!.offset;
+    const [x0, x1] = [offset + segment.start, offset + segment.end];
+    if (x1 < view.x0 || x0 > view.x1) continue;
+    const filtered = isFiltered(segment);
+    const color = segment.type === 'GAIN' ? palette.gain : palette.loss;
+    const y = segmentValue(segment);
+    lines.push({
+      type: 'line',
+      layer: 'above',
+      xref: 'x',
+      yref: 'y',
+      x0,
+      x1,
+      y0: y,
+      y1: y,
+      line: { color, width: 4, dash: filtered ? 'dot' : 'solid' },
+    });
+    markers.push({
+      type: 'circle',
+      layer: 'above',
+      xref: 'x',
+      yref: 'y',
+      xsizemode: 'pixel',
+      ysizemode: 'pixel',
+      xanchor: (x0 + x1) / 2,
+      yanchor: y,
+      x0: -SEGMENT_MARKER_RADIUS_PX,
+      x1: SEGMENT_MARKER_RADIUS_PX,
+      y0: -SEGMENT_MARKER_RADIUS_PX,
+      y1: SEGMENT_MARKER_RADIUS_PX,
+      fillcolor: filtered ? theme.card : color,
+      line: { color: filtered ? color : theme.card, width: 2.5 },
+    });
+  }
+  return [...lines, ...markers];
 }
 
 export function buildRohTraces(
@@ -258,7 +267,7 @@ export function buildRohTraces(
   return [
     line,
     {
-      type: 'scattergl',
+      type: 'scatter',
       mode: 'markers',
       yaxis: 'y3',
       showlegend: false,
@@ -345,7 +354,7 @@ export function buildCytobandTraces(
       text: markers.text,
       customdata: markers.customdata,
       hovertemplate: '%{text}<extra></extra>',
-      marker: { size: markers.size, color: 'rgba(0,0,0,0)' },
+      marker: { size: markers.size, color: 'rgba(0,0,0,0)', line: { width: 0 } },
     } as Trace,
     {
       type: 'scatter',
@@ -464,6 +473,9 @@ export function buildGeneTraces(
   ];
 }
 
+/** The span of the selected CNV, gene or exon, in genome coordinates, shaded over the tracks. */
+export type Highlight = { x0: number; x1: number; color: string };
+
 export type LayoutLabels = {
   copyRatio: string;
   baf: string;
@@ -479,6 +491,7 @@ export function buildLayout(
   labels: LayoutLabels,
   showGenes: boolean,
   formatPosition: (bases: number) => string,
+  highlight?: Highlight,
 ): Partial<Layout> {
   const ticks = computeTicks(genome, view, formatPosition);
   const chromosomeLevel = isChromosomeLevel(genome, view);
@@ -539,6 +552,24 @@ export function buildLayout(
         opacity: PANEL_OPACITY,
         line: { width: 0 },
       })),
+      // Under the points, like a region being selected, from the genes up to the copy ratio. The
+      // outline keeps a span narrower than a pixel visible.
+      ...(highlight
+        ? [
+            {
+              type: 'rect' as const,
+              layer: 'below' as const,
+              xref: 'x' as const,
+              yref: 'paper' as const,
+              x0: highlight.x0,
+              x1: highlight.x1,
+              y0: 0,
+              y1: Y_AXES.y.domain[1],
+              fillcolor: `${highlight.color}${HIGHLIGHT_FILL_ALPHA}`,
+              line: { color: highlight.color, width: 1, dash: 'dot' as const },
+            },
+          ]
+        : []),
       ...genome.chromosomes.slice(1).map(c => ({
         type: 'line' as const,
         xref: 'x' as const,

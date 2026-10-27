@@ -31,10 +31,11 @@ import {
   buildGeneTraces,
   buildLayout,
   buildRohTraces,
-  buildSegmentTraces,
+  buildSegmentShapes,
   cloudMarker,
   COPY_RATIO_OUT_OF_SCALE,
   GENE_TRACK_MAX_SPAN,
+  type Highlight,
   OUT_OF_SCALE_SIZE_BOOST,
   PLOT_MARGIN,
 } from './libs/traces';
@@ -163,9 +164,9 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     ],
     [copyRatio, baf, genome, traceLabels, palette],
   );
-  const segmentTraces = useMemo(
-    () => buildSegmentTraces(segments, genome, palette, theme, showFiltered, annotations),
-    [segments, genome, palette, theme, showFiltered, annotations],
+  const segmentShapes = useMemo(
+    () => buildSegmentShapes(segments, genome, view, palette, theme, showFiltered, annotations),
+    [segments, genome, view, palette, theme, showFiltered, annotations],
   );
   const rohTraces = useMemo(
     () => buildRohTraces(profile.roh, genome, palette, theme, traceLabels, FORMAT),
@@ -188,14 +189,12 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     });
     return [
       ...sizedClouds,
-      ...segmentTraces,
       ...rohTraces,
       ...buildGeneTraces(showGenes ? genes : [], genome, view, pxPerBase, palette, theme, selectedGene?.gene.gene_id),
       ...buildCytobandTraces(profile.cytobands, genome, view, pxPerBase, theme, traceLabels, FORMAT),
     ];
   }, [
     clouds,
-    segmentTraces,
     rohTraces,
     genes,
     showGenes,
@@ -209,27 +208,35 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     profile.cytobands,
   ]);
 
-  const layout = useMemo(
-    () => ({
-      ...buildLayout(
-        genome,
-        view,
-        theme,
-        {
-          copyRatio: traceLabels.copyRatio,
-          baf: traceLabels.baf,
-          roh: t('case_entity.variants.cnv_profile.tracks.roh'),
-          genes: t('case_entity.variants.cnv_profile.tracks.genes'),
-          zoomForGenes: t('case_entity.variants.cnv_profile.hints.zoom_for_genes'),
-        },
-        showGenes,
-        position => (view.x1 - view.x0 >= 6e6 ? `${position / 1e6} Mb` : thousandNumberFormat(position)),
-      ),
-      dragmode: dragMode,
-      autosize: true,
-    }),
-    [genome, view, theme, traceLabels, t, showGenes, dragMode],
-  );
+  const highlight = useMemo<Highlight | undefined>(() => {
+    const exon =
+      selectedGene && selectedGene.exonIndex !== undefined
+        ? selectedGene.gene.exons[selectedGene.exonIndex]
+        : undefined;
+    const item = shownSegment ?? exon ?? selectedGene?.gene;
+    const chromosome = genome.byName.get(shownSegment?.chromosome ?? selectedGene?.gene.chromosome ?? '');
+    if (!item || !chromosome) return undefined;
+    return { x0: chromosome.offset + item.start, x1: chromosome.offset + item.end, color: palette.highlight };
+  }, [shownSegment, selectedGene, genome, palette]);
+
+  const layout = useMemo(() => {
+    const base = buildLayout(
+      genome,
+      view,
+      theme,
+      {
+        copyRatio: traceLabels.copyRatio,
+        baf: traceLabels.baf,
+        roh: t('case_entity.variants.cnv_profile.tracks.roh'),
+        genes: t('case_entity.variants.cnv_profile.tracks.genes'),
+        zoomForGenes: t('case_entity.variants.cnv_profile.hints.zoom_for_genes'),
+      },
+      showGenes,
+      position => (view.x1 - view.x0 >= 6e6 ? `${position / 1e6} Mb` : thousandNumberFormat(position)),
+      highlight,
+    );
+    return { ...base, shapes: [...(base.shapes ?? []), ...segmentShapes], dragmode: dragMode, autosize: true };
+  }, [genome, view, theme, traceLabels, t, showGenes, dragMode, highlight, segmentShapes]);
 
   const goTo = useCallback((next: GenomeView) => setView(clampView(genome, next.x0, next.x1)), [genome]);
 
@@ -319,8 +326,13 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     const graph = graphRef.current;
     if (!graph || !rendered) return;
     const targetAt = (event: MouseEvent) => hitTest(hitAreas, view, plotFrame(graph), event.clientX, event.clientY);
-    // Plotly dispatches the click on its drag layer once the mouse is released without a drag.
+    // Plotly dispatches the click on its drag layer once the mouse is released without a drag, and the
+    // browser may dispatch its own: only the first click of a press counts. The second would hit what
+    // the zoom of the first brought under the cursor, as the next exon.
+    let pressed = false;
     const handleClick = (event: MouseEvent) => {
+      if (!pressed) return;
+      pressed = false;
       const target = targetAt(event);
       if (target) handleTarget(target);
     };
@@ -376,6 +388,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     };
     // Captured before Plotly's own handler, which copies this cursor onto its drag cover.
     const handlePress = (event: MouseEvent) => {
+      pressed = true;
       tooltipRef.current?.hide();
       if (!targetAt(event)) setCursor(dragMode === 'pan' ? 'move' : 'ew-resize');
     };

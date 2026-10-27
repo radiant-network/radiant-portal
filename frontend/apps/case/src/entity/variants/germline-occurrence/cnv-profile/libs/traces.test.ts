@@ -1,3 +1,4 @@
+import type { Shape } from 'plotly.js';
 import { describe, expect, it } from 'vitest';
 
 import type { CNVProfileSegment, GeneTrackGene } from '@/api/api';
@@ -11,7 +12,7 @@ import {
   buildGeneTraces,
   buildLayout,
   buildRohTraces,
-  buildSegmentTraces,
+  buildSegmentShapes,
   cloudMarker,
   matchesAnnotations,
   segmentValue,
@@ -102,29 +103,33 @@ describe('segmentValue', () => {
   });
 });
 
-describe('buildSegmentTraces', () => {
+describe('buildSegmentShapes', () => {
   const segments = [
     segment({}),
     segment({ type: 'LOSS', sm: 0.5 }),
     segment({ filter: 'cnvQual' }),
     segment({ chromosome: 'Y' }),
+    segment({ chromosome: '2' }),
   ];
+  const view = { x0: 0, x1: 10_000 };
+  const circles = (shapes: Partial<Shape>[]) => shapes.filter(shape => shape.type === 'circle');
 
-  it('groups the CNVs by type and filter status, with a line and a marker trace each', () => {
-    const traces = buildSegmentTraces(segments, genome, palette, theme, true) as {
-      meta: string;
-      customdata?: number[];
-    }[];
-    expect(traces.filter(t => t.meta === 'cnv').map(t => t.customdata)).toEqual([[0], [1], [2]]);
-    expect(traces).toHaveLength(6);
+  it('draws a line and a marker above the clouds for each CNV in view, at its exact span', () => {
+    const shapes = buildSegmentShapes(segments, genome, view, palette, theme, true);
+    expect(shapes).toHaveLength(6);
+    expect(shapes[0]).toMatchObject({ type: 'line', layer: 'above', x0: 1000, x1: 2000, y0: 1.5 });
+    expect(circles(shapes).map(shape => [shape.xanchor, shape.yanchor])).toEqual([
+      [1500, 1.5],
+      [1500, 0.5],
+      [1500, 1.5],
+    ]);
   });
 
-  it('leaves out the filtered CNVs on demand', () => {
-    const traces = buildSegmentTraces(segments, genome, palette, theme, false) as {
-      meta: string;
-      customdata?: number[];
-    }[];
-    expect(traces.filter(t => t.meta === 'cnv').map(t => t.customdata)).toEqual([[0], [1]]);
+  it('draws the filtered CNVs dotted and hollow, or leaves them out on demand', () => {
+    const shapes = buildSegmentShapes(segments, genome, view, palette, theme, true);
+    expect(shapes[2].line?.dash).toBe('dot');
+    expect(circles(shapes)[2].fillcolor).toBe(theme.card);
+    expect(circles(buildSegmentShapes(segments, genome, view, palette, theme, false))).toHaveLength(2);
   });
 });
 
@@ -217,6 +222,14 @@ describe('buildLayout', () => {
     expect(layout.xaxis?.ticktext).toEqual(['1', '2', '3']);
   });
 
+  it('shades the span of the selected item over the tracks', () => {
+    const highlight = { x0: 100, x1: 200, color: '#bf8700' };
+    const layout = buildLayout(genome, { x0: 0, x1: 1_000_000 }, theme, layoutLabels, true, String, highlight);
+    expect(layout.shapes).toContainEqual(
+      expect.objectContaining({ xref: 'x', x0: 100, x1: 200, y0: 0, y1: 0.9, fillcolor: '#bf870026' }),
+    );
+  });
+
   it('shows the top axis on a chromosome', () => {
     const layout = buildLayout(genome, { x0: 0, x1: 1_000_000 }, theme, layoutLabels, true, String);
     expect(layout.xaxis2?.visible).toBe(true);
@@ -239,11 +252,10 @@ describe('matchesAnnotations', () => {
     expect([noted, pinned, plain].filter(s => matchesAnnotations(s, ['note', 'pin']))).toEqual([noted, pinned]);
   });
 
-  it('hides the CNVs out of the filter from the traces', () => {
-    const traces = buildSegmentTraces([noted, plain], genome, palette, theme, true, ['note']) as {
-      meta: string;
-      customdata?: number[];
-    }[];
-    expect(traces.filter(t => t.meta === 'cnv').map(t => t.customdata)).toEqual([[0]]);
+  it('hides the CNVs out of the filter from the chart', () => {
+    const shapes = buildSegmentShapes([noted, plain], genome, { x0: 0, x1: genome.length }, palette, theme, true, [
+      'note',
+    ]);
+    expect(shapes.filter(shape => shape.type === 'circle')).toHaveLength(1);
   });
 });
