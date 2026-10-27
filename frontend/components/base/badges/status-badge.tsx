@@ -1,5 +1,6 @@
 import type { CaseStatus } from '@/api/api';
 import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
+import type { ButtonProps } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 
 type StatusBadgeProps = {
@@ -8,7 +9,7 @@ type StatusBadgeProps = {
   className?: string;
 };
 
-export const statusColors: Record<CaseStatus, BadgeProps['variant']> = {
+export const statusColors: Record<CaseStatus, BadgeProps['variant'] & ButtonProps['variant']> = {
   draft: 'neutral',
   submitted: 'outline',
   processing: 'yellow',

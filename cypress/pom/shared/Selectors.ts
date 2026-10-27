@@ -130,6 +130,7 @@ export const CommonSelectors = {
   tabsTrigger: (value: string) => `[data-cy="tabs-trigger-${value}"]`,
   tag: (color: string) => `[class*="bg-${color}/20 text-${color}-foreground"]`,
   tagBlank: '[class*="text-foreground"]',
+  tagButton: (color: string) => `[class*="bg-${color}/20 border-1 text-${color}-foreground"]`,
   tagLevel: (level: string) => `[class*="bg-${level} text-${level}-foreground"]`,
   taskLatestBadge: '[data-cy="task-latest-badge"]',
   taskOption: (taskId: string) => `[data-cy="task-option-${taskId}"]`,

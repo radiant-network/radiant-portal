@@ -13,7 +13,7 @@ import BackLink from './back-link';
 
 const headerNavigationVariants = tv({
   slots: {
-    container: 'bg-background',
+    container: 'relative z-1 bg-background',
   },
   variants: {
     variant: {
