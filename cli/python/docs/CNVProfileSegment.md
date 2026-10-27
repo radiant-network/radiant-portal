@@ -10,7 +10,9 @@ Name | Type | Description | Notes
 **cnv_id** | **str** |  | 
 **end** | **int** |  | 
 **filter** | **str** |  | [optional] 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **gnomad_sf** | **float** |  | [optional] 
+**has_note** | **bool** |  | 
 **length** | **int** |  | 
 **nb_snv** | **int** |  | [optional] 
 **quality** | **float** |  | [optional] 

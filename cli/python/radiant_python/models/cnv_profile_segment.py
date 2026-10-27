@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,14 +32,16 @@ class CNVProfileSegment(BaseModel):
     cnv_id: StrictStr
     end: StrictInt
     filter: Optional[StrictStr] = None
+    flag_type: Optional[OccurrenceFlagType] = None
     gnomad_sf: Optional[Union[StrictFloat, StrictInt]] = None
+    has_note: StrictBool
     length: StrictInt
     nb_snv: Optional[StrictInt] = None
     quality: Optional[Union[StrictFloat, StrictInt]] = None
     sm: Optional[Union[StrictFloat, StrictInt]] = None
     start: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["chromosome", "cn", "cnv_id", "end", "filter", "gnomad_sf", "length", "nb_snv", "quality", "sm", "start", "type"]
+    __properties: ClassVar[List[str]] = ["chromosome", "cn", "cnv_id", "end", "filter", "flag_type", "gnomad_sf", "has_note", "length", "nb_snv", "quality", "sm", "start", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,7 +99,9 @@ class CNVProfileSegment(BaseModel):
             "cnv_id": obj.get("cnv_id"),
             "end": obj.get("end"),
             "filter": obj.get("filter"),
+            "flag_type": obj.get("flag_type"),
             "gnomad_sf": obj.get("gnomad_sf"),
+            "has_note": obj.get("has_note"),
             "length": obj.get("length"),
             "nb_snv": obj.get("nb_snv"),
             "quality": obj.get("quality"),

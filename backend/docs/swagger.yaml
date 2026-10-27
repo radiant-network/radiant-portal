@@ -305,8 +305,12 @@ components:
           type: integer
         filter:
           type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
         gnomad_sf:
           type: number
+        has_note:
+          type: boolean
         length:
           type: integer
         nb_snv:
@@ -323,6 +327,7 @@ components:
       - chromosome
       - cnv_id
       - end
+      - has_note
       - length
       - start
       - type

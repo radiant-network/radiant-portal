@@ -581,10 +581,22 @@ export interface CNVProfileSegment {
     'filter'?: string;
     /**
      * 
+     * @type {OccurrenceFlagType}
+     * @memberof CNVProfileSegment
+     */
+    'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
      * @type {number}
      * @memberof CNVProfileSegment
      */
     'gnomad_sf'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CNVProfileSegment
+     */
+    'has_note': boolean;
     /**
      * 
      * @type {number}
@@ -622,6 +634,8 @@ export interface CNVProfileSegment {
      */
     'type': string;
 }
+
+
 /**
  * CNVProfileTrack holds the points of one chromosome as two parallel arrays: the 0-based positions and their values
  * @export
