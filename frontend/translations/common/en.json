@@ -842,6 +842,8 @@
       "no_result": "No results",
       "items_selected_one": "{{value}} item selected",
       "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
