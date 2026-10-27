@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
 
@@ -537,14 +538,15 @@ func fillPcxPerformanceStatus(ctx context.Context, db *gorm.DB, id pcxPatientIde
 	if err := tx.Find(&rows).Error; err != nil {
 		return fmt.Errorf("error fetching patient performance status: %w", err)
 	}
-	p.PerformanceStatus = make([]types.PatientPerformanceScore, len(rows))
-	for i, row := range rows {
+	p.PerformanceStatus = make([]types.PatientPerformanceScore, 0, len(rows))
+	for _, row := range rows {
 		scale, err := pcxPerformanceScale(row.Scale)
 		if err != nil {
-			return err
+			slog.WarnContext(ctx, "skipping performance status score", slog.Any("error", err))
+			continue
 		}
-		p.PerformanceStatus[i] = types.PatientPerformanceScore{PatientDayDate: dayDate(row.ScoreDay, row.ScoreDate),
-			Scale: scale, Score: *row.Score, ScoreText: row.ScoreText}
+		p.PerformanceStatus = append(p.PerformanceStatus, types.PatientPerformanceScore{PatientDayDate: dayDate(row.ScoreDay, row.ScoreDate),
+			Scale: scale, Score: *row.Score, ScoreText: row.ScoreText})
 	}
 	return nil
 }

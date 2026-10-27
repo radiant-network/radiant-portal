@@ -496,6 +496,15 @@ func Test_GetPcxPatient_RestrictedPatientLabsHaveNoDates(t *testing.T) {
 	})
 }
 
+func Test_GetPcxPatient_UnknownPerformanceScaleIsSkipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := getPcxPatient(t, env, pcxPatientKey("2"))
+
+		require.NotNil(t, patient)
+		assert.Equal(t, []types.PatientPerformanceScore{}, patient.PerformanceStatus)
+	})
+}
+
 func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		patient := getPcxPatient(t, env, pcxPatientKey("3"))
