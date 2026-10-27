@@ -21,7 +21,7 @@ export type YAxisName = 'y' | 'y2' | 'y3' | 'y4' | 'y5';
  * cytobands.
  */
 export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [number, number] }> = {
-  y: { domain: [0.52, 0.9], range: [-0.12, 2.62] },
+  y: { domain: [0.52, 0.9], range: [-0.12, 2.8] },
   y2: { domain: [0.275, 0.48], range: [-0.07, 1.07] },
   y3: { domain: [0.2, 0.24], range: [0, 1] },
   y4: { domain: [0, 0.16], range: [0, GENE_LANES] },
@@ -81,13 +81,20 @@ const pushSpan = (trace: { x: (number | null)[]; y: (number | null)[] }, x0: num
 export const isChromosomeLevel = (genome: Genome, view: GenomeView) =>
   chromosomesInView(genome, view).length <= 2 && view.x1 - view.x0 < CYTOBAND_MAX_SPAN;
 
-/** The highest copy ratio drawn at its value: the ones above sit on this line, as triangles. */
-export const COPY_RATIO_CEILING = 2.55;
+export type OutOfScale = { above: number; drawnAt: number };
+
+/**
+ * The copy ratios above 2.6 are drawn as triangles on a line of their own, at the top of the track and
+ * above the called CNVs, which stop at SEGMENT_MAX_VALUE.
+ */
+export const COPY_RATIO_OUT_OF_SCALE: OutOfScale = { above: 2.6, drawnAt: 2.7 };
+
+/** How much bigger than the cloud points the out-of-scale triangles are drawn, in pixels. */
+export const OUT_OF_SCALE_SIZE_BOOST = 4;
 
 /**
  * One trace per chromosome, coloured by parity so that neighbours alternate, like the DRAGEN plot.
- * Above the ceiling, the points go in a second trace of triangles laid on it, which keeps their value
- * for the hover.
+ * Out of scale, the points go in a second trace of triangles, which keeps their value for the hover.
  */
 export function buildCloudTraces(
   tracks: CNVProfileTrack[],
@@ -95,7 +102,7 @@ export function buildCloudTraces(
   yaxis: 'y' | 'y2',
   name: string,
   palette: CNVProfilePalette,
-  ceiling = Infinity,
+  outOfScale: OutOfScale = { above: Infinity, drawnAt: Infinity },
 ): Trace[] {
   return tracks.flatMap(track => {
     const chromosome = genome.byName.get(track.chromosome);
@@ -103,7 +110,7 @@ export function buildCloudTraces(
     const odd = chromosomeIndexAt(genome, chromosome.offset) % 2 === 1;
     const inScale: number[] = [];
     const above: number[] = [];
-    track.values.forEach((value, index) => (value > ceiling ? above : inScale).push(index));
+    track.values.forEach((value, index) => (value > outOfScale.above ? above : inScale).push(index));
     const cloud = (indexes: number[], extra: object) =>
       ({
         type: 'scattergl',
@@ -130,7 +137,7 @@ export function buildCloudTraces(
     ];
     if (above.length > 0) {
       const triangles = cloud(above, {
-        y: Float32Array.from(above, () => ceiling),
+        y: Float32Array.from(above, () => outOfScale.drawnAt),
         customdata: above.map(index => [track.positions[index], track.values[index]]),
         hovertemplate: `${chromosome.name}:%{customdata[0]:,}<br>${name} %{customdata[1]:.3f}<extra></extra>`,
       }) as Trace & { marker: object };

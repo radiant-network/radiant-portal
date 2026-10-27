@@ -24,8 +24,9 @@ import {
   buildRohTraces,
   buildSegmentTraces,
   cloudMarker,
-  COPY_RATIO_CEILING,
+  COPY_RATIO_OUT_OF_SCALE,
   GENE_TRACK_MAX_SPAN,
+  OUT_OF_SCALE_SIZE_BOOST,
   PLOT_MARGIN,
 } from './libs/traces';
 import CNVGenePanel from './cnv-gene-panel';
@@ -107,7 +108,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   // The point clouds keep their arrays across views: Plotly only restyles their markers.
   const clouds = useMemo(
     () => [
-      ...buildCloudTraces(copyRatio, genome, 'y', traceLabels.copyRatio, palette, COPY_RATIO_CEILING),
+      ...buildCloudTraces(copyRatio, genome, 'y', traceLabels.copyRatio, palette, COPY_RATIO_OUT_OF_SCALE),
       ...buildCloudTraces(baf, genome, 'y2', traceLabels.baf, palette),
     ],
     [copyRatio, baf, genome, traceLabels, palette],
@@ -124,12 +125,12 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   const data = useMemo(() => {
     const marker = cloudMarker(genome, view);
     const sizedClouds = clouds.map(trace => {
-      const cloudTraceMarker = (trace as { marker: { line: object } }).marker;
+      const cloudTraceMarker = (trace as { marker: { line: object; symbol?: string } }).marker;
       return {
         ...trace,
         marker: {
           ...cloudTraceMarker,
-          size: marker.size,
+          size: cloudTraceMarker.symbol ? marker.size + OUT_OF_SCALE_SIZE_BOOST : marker.size,
           opacity: marker.opacity,
           line: { ...cloudTraceMarker.line, width: marker.ringWidth },
         },
