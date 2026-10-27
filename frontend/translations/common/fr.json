@@ -1891,6 +1891,19 @@
   },
   "variant": {
     "no_data_for_variant": "Aucune donnée pour ce variant.",
+    "report": {
+      "download": "Télécharger rapport",
+      "select_at_least_one": "Sélectionner au moins un élément",
+      "max_exceeded": {
+        "title": "Nombre maximum dépassé",
+        "description": "Un maximum de 100 éléments peut être exporté à la fois. Veuillez réduire votre sélection et réessayer."
+      },
+      "toast": {
+        "loading": "Génération du rapport…",
+        "success": "Rapport téléchargé",
+        "error": "Impossible de télécharger le rapport. Veuillez réessayer."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Substitution acide aminé",

@@ -16,6 +16,7 @@ import { type SomaticSNVCohort, SomaticVariantInterface } from '../constants';
 import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
+import VariantsReportButton from '../table/variants-report-button';
 
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
 import { defaultSomaticSNVSettings, getSomaticSNVColumns } from './table/somatic-snv-table-settings';
@@ -91,7 +92,16 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
           enableFullscreen
           extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}
           TableFilters={<AnnotationsTableQuickfilters />}
-          selection={canDownloadVariantsReport ? { idField: 'locus_id', renderActions: () => null } : undefined}
+          selection={
+            canDownloadVariantsReport
+              ? {
+                  idField: 'locus_id',
+                  renderActions: selection => (
+                    <VariantsReportButton kind="somatic" seqId={seqId} taskId={taskId} selection={selection} />
+                  ),
+                }
+              : undefined
+          }
         />
       </QueryBuilder>
       <VariantsOnboardingWizard />
