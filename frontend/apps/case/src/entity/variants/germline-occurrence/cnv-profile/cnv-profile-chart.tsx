@@ -88,6 +88,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   const [view, setView] = useState<GenomeView>({ x0: 0, x1: genome.length });
   const [dragMode, setDragMode] = useState<DragMode>('zoom');
   const [showFiltered, setShowFiltered] = useState(true);
+  const [annotations, setAnnotations] = useState<string[]>([]);
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
   const [selectedSegment, setSelectedSegment] = useState<CNVProfileSegment | undefined>();
   const { occurrenceChanged } = useCNVProfile();
@@ -155,8 +156,8 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [copyRatio, baf, genome, traceLabels, palette],
   );
   const segmentTraces = useMemo(
-    () => buildSegmentTraces(profile.segments, genome, palette, theme, showFiltered),
-    [profile.segments, genome, palette, theme, showFiltered],
+    () => buildSegmentTraces(segments, genome, palette, theme, showFiltered, annotations),
+    [segments, genome, palette, theme, showFiltered, annotations],
   );
   const rohTraces = useMemo(
     () => buildRohTraces(profile.roh, genome, palette, theme, traceLabels, FORMAT),
@@ -289,17 +290,17 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   // nearest point, often one of the clouds.
   const hitAreas = useMemo(
     () => [
-      ...segmentHitAreas(profile.segments, genome, showFiltered),
+      ...segmentHitAreas(segments, genome, showFiltered, annotations),
       ...geneHitAreas(showGenes ? genes : [], genome, view, pxPerBase),
       ...cytobandHitAreas(profile.cytobands, genome, view),
     ],
-    [profile.segments, profile.cytobands, genome, showFiltered, showGenes, genes, view, pxPerBase],
+    [segments, profile.cytobands, genome, showFiltered, annotations, showGenes, genes, view, pxPerBase],
   );
 
   const handleTarget = useCallback(
     (target: ClickTarget) => {
       if (target.kind === 'cnv') {
-        focusSegment(profile.segments[target.index]);
+        focusSegment(segments[target.index]);
       } else if (target.kind === 'cytoband') {
         const band = profile.cytobands[target.index];
         zoomOnRegion(band.chromosome, band.start, band.end);
@@ -427,6 +428,8 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
         dragMode={dragMode}
         onDragModeChange={setDragMode}
         showFiltered={showFiltered}
+        annotations={annotations}
+        onAnnotationsChange={setAnnotations}
         onShowFilteredChange={setShowFiltered}
         onSearch={handleSearch}
         pointCount={pointCount}
@@ -467,7 +470,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
             className="absolute -top-5 -translate-x-1/2 whitespace-nowrap rounded-sm bg-background/90 px-1 text-xs text-muted-foreground"
           />
         </div>
-        <CNVProfileTooltip ref={tooltipRef} segments={profile.segments} genes={showGenes ? genes : []} />
+        <CNVProfileTooltip ref={tooltipRef} segments={segments} genes={showGenes ? genes : []} />
         {!rendered && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70">
             <Spinner size={32} />

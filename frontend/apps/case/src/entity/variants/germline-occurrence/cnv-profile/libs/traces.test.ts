@@ -13,6 +13,7 @@ import {
   buildRohTraces,
   buildSegmentTraces,
   cloudMarker,
+  matchesAnnotations,
   segmentValue,
   type TraceLabels,
 } from './traces';
@@ -221,5 +222,29 @@ describe('buildLayout', () => {
     const layout = buildLayout(genome, { x0: 0, x1: 1_000_000 }, theme, layoutLabels, true, String);
     expect(layout.xaxis2?.visible).toBe(true);
     expect(layout.annotations?.map(a => a.visible)).toEqual([false, false]);
+  });
+});
+
+describe('matchesAnnotations', () => {
+  const noted = segment({ has_note: true });
+  const pinned = segment({ flag_type: 'pin' });
+  const plain = segment({});
+
+  it('keeps every CNV without a filter', () => {
+    expect([noted, pinned, plain].filter(s => matchesAnnotations(s, []))).toEqual([noted, pinned, plain]);
+  });
+
+  it('keeps the CNVs with comments or one of the flags, as the CNV table', () => {
+    expect([noted, pinned, plain].filter(s => matchesAnnotations(s, ['note']))).toEqual([noted]);
+    expect([noted, pinned, plain].filter(s => matchesAnnotations(s, ['pin', 'star']))).toEqual([pinned]);
+    expect([noted, pinned, plain].filter(s => matchesAnnotations(s, ['note', 'pin']))).toEqual([noted, pinned]);
+  });
+
+  it('hides the CNVs out of the filter from the traces', () => {
+    const traces = buildSegmentTraces([noted, plain], genome, palette, theme, true, ['note']) as {
+      meta: string;
+      customdata?: number[];
+    }[];
+    expect(traces.filter(t => t.meta === 'cnv').map(t => t.customdata)).toEqual([[0]]);
   });
 });

@@ -9,6 +9,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-gr
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
+import AnnotationsQuickfilters from '../../filters/annotations-quickfilters';
+
 import { chromosomesInView, type Genome, type GenomeView, MIN_SPAN } from './libs/genome';
 import CNVProfileSearch from './cnv-profile-search';
 
@@ -24,6 +26,8 @@ type CNVProfileNavbarProps = {
   onDragModeChange: (mode: DragMode) => void;
   showFiltered: boolean;
   onShowFilteredChange: (show: boolean) => void;
+  annotations: string[];
+  onAnnotationsChange: (annotations: string[]) => void;
   onSearch: (query: string) => Promise<boolean>;
   pointCount: number;
 };
@@ -46,6 +50,8 @@ function CNVProfileNavbar({
   onDragModeChange,
   showFiltered,
   onShowFilteredChange,
+  annotations,
+  onAnnotationsChange,
   onSearch,
   pointCount,
 }: CNVProfileNavbarProps) {
@@ -170,6 +176,7 @@ function CNVProfileNavbar({
             {t('case_entity.variants.cnv_profile.navbar.show_filtered')}
           </Label>
         </div>
+        <AnnotationsQuickfilters value={annotations} onChange={onAnnotationsChange} disabled={['interpretation']} />
         <span className="ml-auto text-xs text-muted-foreground tabular-nums">
           {t('case_entity.variants.cnv_profile.navbar.points', {
             count: pointCount,

@@ -47,9 +47,14 @@ export function plotFrame(graph: Element): PlotFrame {
   };
 }
 
-export function segmentHitAreas(segments: CNVProfileSegment[], genome: Genome, showFiltered: boolean): HitArea[] {
+export function segmentHitAreas(
+  segments: CNVProfileSegment[],
+  genome: Genome,
+  showFiltered: boolean,
+  annotations: string[] = [],
+): HitArea[] {
   return segments.flatMap((segment, index) => {
-    if (!isSegmentShown(segment, genome, showFiltered)) return [];
+    if (!isSegmentShown(segment, genome, showFiltered, annotations)) return [];
     const offset = genome.byName.get(segment.chromosome)!.offset;
     const y = segmentValue(segment);
     return [

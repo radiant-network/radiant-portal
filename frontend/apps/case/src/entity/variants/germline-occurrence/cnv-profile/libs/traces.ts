@@ -3,6 +3,8 @@ import type { Data, Layout } from 'plotly.js';
 import type { CNVProfileROH, CNVProfileSegment, CNVProfileTrack, Cytoband, GeneTrackGene } from '@/api/api';
 import type { PlotlyThemeColors } from '@/components/base/charts/hooks/use-plotly-theme';
 
+import { NOTE_ITEM } from '../../../filters/annotation-filter-items';
+
 import { assignLanes, GENE_LANES } from './gene-lanes';
 import { chromosomeIndexAt, chromosomesInView, computeTicks, type Genome, type GenomeView } from './genome';
 import { type CNVProfilePalette, CYTOBAND_STAINS } from './palette';
@@ -151,8 +153,27 @@ export const segmentValue = (segment: CNVProfileSegment) =>
 
 export const isFiltered = (segment: CNVProfileSegment) => segment.filter !== undefined && segment.filter !== 'PASS';
 
-export const isSegmentShown = (segment: CNVProfileSegment, genome: Genome, showFiltered: boolean) =>
-  genome.byName.has(segment.chromosome) && (showFiltered || !isFiltered(segment));
+/**
+ * Whether a CNV passes the annotation quick filters of the CNV table: with no filter, every CNV does;
+ * otherwise a CNV with comments when the note item is on, or flagged with one of the flag types.
+ */
+export function matchesAnnotations(segment: CNVProfileSegment, annotations: string[]): boolean {
+  if (annotations.length === 0) return true;
+  return (
+    (annotations.includes(NOTE_ITEM) && segment.has_note) ||
+    (segment.flag_type !== undefined && annotations.includes(segment.flag_type))
+  );
+}
+
+export const isSegmentShown = (
+  segment: CNVProfileSegment,
+  genome: Genome,
+  showFiltered: boolean,
+  annotations: string[] = [],
+) =>
+  genome.byName.has(segment.chromosome) &&
+  (showFiltered || !isFiltered(segment)) &&
+  matchesAnnotations(segment, annotations);
 
 /**
  * A line per called CNV over its span and a marker at its middle, grouped by type and filter status.
@@ -165,10 +186,11 @@ export function buildSegmentTraces(
   palette: CNVProfilePalette,
   theme: PlotlyThemeColors,
   showFiltered: boolean,
+  annotations: string[] = [],
 ): Trace[] {
   const groups = new Map<string, number[]>();
   segments.forEach((segment, index) => {
-    if (!isSegmentShown(segment, genome, showFiltered)) return;
+    if (!isSegmentShown(segment, genome, showFiltered, annotations)) return;
     const key = `${segment.type === 'GAIN' ? 'gain' : 'loss'}-${isFiltered(segment)}`;
     groups.set(key, [...(groups.get(key) ?? []), index]);
   });
