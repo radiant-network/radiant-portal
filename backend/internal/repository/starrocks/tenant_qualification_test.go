@@ -189,6 +189,7 @@ func Test_CaseWithRuns_BoundTenant_QualifiesSubqueryTables(t *testing.T) {
 		assert.Contains(t, sql, "tenant1_tenant.cases c")
 		assert.Contains(t, sql, "tenant1_tenant.case_has_sequencing_experiment chseq")
 		assert.Contains(t, sql, "tenant1_tenant.sequencing_experiment s")
+		assert.Contains(t, sql, "tenant1_tenant.sample spl")
 		assert.NotContains(t, sql, "radiant_jdbc")
 	})
 }

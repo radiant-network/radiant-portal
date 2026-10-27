@@ -1131,8 +1131,8 @@ func insertProbandSampleCase(t *testing.T, env *testutils.Env, id int, submitter
 	`, id, submitterSampleID).Error)
 	require.NoError(t, env.Postgres.Exec(`
 		INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
-		VALUES (?, ?, 'completed', ?, 'CQGC', 'radiant', 9999, ?, ?, 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
-	`, id, id, submitterSampleID, submitterSampleID, runDate).Error)
+		VALUES (?, ?, 'completed', ?, 'CQGC', 'radiant', ?, ?, ?, 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+	`, id, id, submitterSampleID, submitterSampleID, submitterSampleID, runDate).Error)
 	require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (1, ?), (?, ?)", id, id, id).Error)
 	return func() {
 		env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = ?", id)
@@ -1276,22 +1276,36 @@ func Test_SearchCases_OnProbandSubmitterSampleIds_NonProbandSample_NoResult(t *t
 	})
 }
 
-func caseRunAliases(t *testing.T, env *testutils.Env, caseID int) types.JsonArray[string] {
+func caseRunNames(t *testing.T, env *testutils.Env, caseID int) types.JsonArray[string] {
 	t.Helper()
 	tx := env.Starrocks.WithContext(t.Context()).Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(t.Context()), types.CaseTable.Alias))
 	tx = joins.Starrocks().CaseWithRuns(tx)
 	var rows []struct {
-		RunAliases types.JsonArray[string]
+		RunNames types.JsonArray[string]
 	}
-	require.NoError(t, tx.Select(fmt.Sprintf("%s.%s AS run_aliases", types.CaseRunTable.Alias, types.CaseRunAliasesField.Name)).Where(fmt.Sprintf("%s.id = ?", types.CaseTable.Alias), caseID).Scan(&rows).Error)
+	require.NoError(t, tx.Select(fmt.Sprintf("%s.%s AS run_names", types.CaseRunTable.Alias, types.CaseRunNamesField.Name)).Where(fmt.Sprintf("%s.id = ?", types.CaseTable.Alias), caseID).Scan(&rows).Error)
 	require.Len(t, rows, 1)
-	return rows[0].RunAliases
+	return rows[0].RunNames
 }
 
-func Test_CaseWithRuns_TrioCase_ListsEveryMemberRun(t *testing.T) {
+func Test_CaseWithRuns_TrioCase_ListsProbandRunOnly(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		// Case 1 sequenced the proband, mother and father on the same day: the latest sequencing comes first.
-		assert.Equal(t, types.JsonArray[string]{"A00516_0171", "A00516_0170", "A00516_0169"}, caseRunAliases(t, env, 1))
+		// Case 1 also sequenced the mother and father, on runs 1618 and 1619.
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1))
+	})
+}
+
+func Test_CaseWithRuns_SomaticCase_KeepsTumoralRunOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 71 also sequenced the proband's normal sample, on run 1678.
+		assert.Equal(t, types.JsonArray[string]{"1679"}, caseRunNames(t, env, 71))
+	})
+}
+
+func Test_CaseWithRuns_PrenatalCase_LeavesFetusRunOut(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 72's proband is the mother; the fetus's sample also carries her patient_id.
+		assert.Equal(t, types.JsonArray[string]{"1704"}, caseRunNames(t, env, 72))
 	})
 }
 
@@ -1299,16 +1313,16 @@ func Test_CaseWithRuns_MostRecentRunFirst(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		defer insertProbandSampleCase(t, env, 1110, "RUN-2026", "2026-01-01")()
 
-		assert.Equal(t, types.JsonArray[string]{"RUN-2026", "A00516_0169"}, caseRunAliases(t, env, 1110))
+		assert.Equal(t, types.JsonArray[string]{"RUN-2026", "1617"}, caseRunNames(t, env, 1110))
 	})
 }
 
 func Test_CaseWithRuns_OrderedByRunDateNotSequencingId(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		// Sequencing 1111 is the latest loaded, but its run is older than A00516_0169's 2021 run.
+		// Sequencing 1111 is the latest loaded, but its run is older than run 1617, from 2021.
 		defer insertProbandSampleCase(t, env, 1111, "RUN-2020", "2020-01-01")()
 
-		assert.Equal(t, types.JsonArray[string]{"A00516_0169", "RUN-2020"}, caseRunAliases(t, env, 1111))
+		assert.Equal(t, types.JsonArray[string]{"1617", "RUN-2020"}, caseRunNames(t, env, 1111))
 	})
 }
 
@@ -1316,16 +1330,16 @@ func Test_CaseWithRuns_NoRunDateComesLast(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		defer insertProbandSampleCase(t, env, 1112, "RUN-NO-DATE", nil)()
 
-		assert.Equal(t, types.JsonArray[string]{"A00516_0169", "RUN-NO-DATE"}, caseRunAliases(t, env, 1112))
+		assert.Equal(t, types.JsonArray[string]{"1617", "RUN-NO-DATE"}, caseRunNames(t, env, 1112))
 	})
 }
 
 func Test_CaseWithRuns_RunSharedBySequencings_ListedOnce(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		// The second sequencing ran on A00516_0169 too, like sequencing 1.
-		defer insertProbandSampleCase(t, env, 1113, "A00516_0169", "2021-08-17")()
+		// The second sequencing ran on run 1617 too, like sequencing 1.
+		defer insertProbandSampleCase(t, env, 1113, "1617", "2021-08-17")()
 
-		assert.Equal(t, types.JsonArray[string]{"A00516_0169"}, caseRunAliases(t, env, 1113))
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1113))
 	})
 }
 
@@ -1337,13 +1351,13 @@ func Test_CaseWithRuns_EmptyArrayWithoutRun(t *testing.T) {
 		`).Error)
 		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1114")
 
-		assert.Equal(t, types.JsonArray[string]{}, caseRunAliases(t, env, 1114))
+		assert.Equal(t, types.JsonArray[string]{}, caseRunNames(t, env, 1114))
 	})
 }
 
-func Test_SearchCases_RunAliases_TrioCase_ListsEveryMemberRun(t *testing.T) {
+func Test_SearchCases_RunNames_TrioCase_ListsProbandRunOnly(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		assert.Equal(t, types.JsonArray[string]{"A00516_0171", "A00516_0170", "A00516_0169"}, searchCaseById(t, repo, 1).RunAliases)
+		assert.Equal(t, types.JsonArray[string]{"1617"}, searchCaseById(t, repo, 1).RunNames)
 	})
 }

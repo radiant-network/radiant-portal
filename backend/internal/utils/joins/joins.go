@@ -117,51 +117,47 @@ func (j Joiner) caseWithArray(tx *gorm.DB, rows string, column string, table typ
 }
 
 // ProbandSamples returns one (case_id, submitter_sample_id) row per proband sample the case sequenced, with
-// the run_date and seq_id of its latest sequencing, to order them. A somatic case keeps the tumoral samples
-// only. A prenatal case's proband is the mother, and a fetus's sample also carries her patient_id, so fetus
-// samples (fetus_id set) are left out.
+// the run_date and seq_id of its latest sequencing, to order them.
 func (j Joiner) ProbandSamples(tx *gorm.DB) string {
-	// Indexed verbs: %[1]s chseq, %[2]s c, %[3]s s, %[4]s spl, then their table names.
+	return j.probandSequencings(tx, fmt.Sprintf("%s.submitter_sample_id", types.SampleTable.Alias))
+}
+
+// CaseWithRuns joins, per case, the array of the run names of its proband's sequencings, ordered like
+// CaseWithProbandSample: by run date, a run without one last, then sequencing id. Every case gets a row,
+// with an empty array when it has no run, built the same way.
+func (j Joiner) CaseWithRuns(tx *gorm.DB) *gorm.DB {
+	return j.caseWithArray(tx, j.CaseRuns(tx), "run_name", types.CaseRunTable, types.CaseRunNamesField)
+}
+
+// CaseRuns returns one (case_id, run_name) row per run of the proband's sequencings, with the run_date and
+// seq_id of its latest sequencing, to order them.
+func (j Joiner) CaseRuns(tx *gorm.DB) string {
+	return j.probandSequencings(tx, fmt.Sprintf("%s.run_name", types.SequencingExperimentTable.Alias))
+}
+
+// probandSequencings returns one row per case and distinct value of column over the sequencings of the
+// case's proband, so that the sample and run columns cover the same sequencings. A somatic case keeps the
+// tumoral samples only. A prenatal case's proband is the mother, and a fetus's sample also carries her
+// patient_id, so fetus samples (fetus_id set) are left out.
+func (j Joiner) probandSequencings(tx *gorm.DB, column string) string {
+	// Indexed verbs: %[1]s chseq, %[2]s c, %[3]s s, %[4]s spl, %[5]s the column, then the table names.
 	return fmt.Sprintf(
-		`SELECT %[1]s.case_id, %[4]s.submitter_sample_id, MAX(%[3]s.run_date) AS run_date, MAX(%[3]s.id) AS seq_id
-        FROM %[5]s %[1]s
-        INNER JOIN %[6]s %[2]s ON %[2]s.id = %[1]s.case_id
-        INNER JOIN %[7]s %[3]s ON %[3]s.id = %[1]s.sequencing_experiment_id
-        INNER JOIN %[8]s %[4]s ON %[4]s.id = %[3]s.sample_id AND %[4]s.patient_id = %[2]s.proband_id AND %[4]s.fetus_id IS NULL
+		`SELECT %[1]s.case_id, %[5]s, MAX(%[3]s.run_date) AS run_date, MAX(%[3]s.id) AS seq_id
+        FROM %[6]s %[1]s
+        INNER JOIN %[7]s %[2]s ON %[2]s.id = %[1]s.case_id
+        INNER JOIN %[8]s %[3]s ON %[3]s.id = %[1]s.sequencing_experiment_id
+        INNER JOIN %[9]s %[4]s ON %[4]s.id = %[3]s.sample_id AND %[4]s.patient_id = %[2]s.proband_id AND %[4]s.fetus_id IS NULL
         WHERE %[2]s.case_type_code <> 'somatic' OR %[4]s.histology_code = 'tumoral'
-        GROUP BY %[1]s.case_id, %[4]s.submitter_sample_id`,
+        GROUP BY %[1]s.case_id, %[5]s`,
 		types.CaseHasSequencingExperimentTable.Alias,
 		types.CaseTable.Alias,
 		types.SequencingExperimentTable.Alias,
 		types.SampleTable.Alias,
+		column,
 		j.name(types.CaseHasSequencingExperimentTable, tx),
 		j.name(types.CaseTable, tx),
 		j.name(types.SequencingExperimentTable, tx),
 		j.name(types.SampleTable, tx),
-	)
-}
-
-// CaseWithRuns joins, per case, the array of the distinct run aliases of all its sequencings (every family
-// member's), ordered like CaseWithProbandSample: by run date, a run without one last, then sequencing id.
-// Every case gets a row, with an empty array when it has no run, built the same way.
-func (j Joiner) CaseWithRuns(tx *gorm.DB) *gorm.DB {
-	return j.caseWithArray(tx, j.CaseRuns(tx), "run_alias", types.CaseRunTable, types.CaseRunAliasesField)
-}
-
-// CaseRuns returns one (case_id, run_alias) row per distinct run of the case's sequencings, with the run_date
-// and seq_id of its latest sequencing, to order them.
-func (j Joiner) CaseRuns(tx *gorm.DB) string {
-	// Indexed verbs: %[1]s chseq, %[2]s s, then their table names.
-	return fmt.Sprintf(
-		`SELECT %[1]s.case_id, %[2]s.run_alias, MAX(%[2]s.run_date) AS run_date, MAX(%[2]s.id) AS seq_id
-        FROM %[3]s %[1]s
-        INNER JOIN %[4]s %[2]s ON %[2]s.id = %[1]s.sequencing_experiment_id
-        WHERE %[2]s.run_alias IS NOT NULL
-        GROUP BY %[1]s.case_id, %[2]s.run_alias`,
-		types.CaseHasSequencingExperimentTable.Alias,
-		types.SequencingExperimentTable.Alias,
-		j.name(types.CaseHasSequencingExperimentTable, tx),
-		j.name(types.SequencingExperimentTable, tx),
 	)
 }
 
