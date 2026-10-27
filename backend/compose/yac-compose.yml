@@ -18,7 +18,7 @@ services:
       dockerfile: packages/agent/Dockerfile
     image: radiant/yac-agent:local
     ports:
-      - "${YAC_PORT:-8007}:80"
+      - "${YAC_PORT:-8007}:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -48,7 +48,7 @@ services:
       starrocks:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
       interval: 10s
       timeout: 5s
       retries: 10

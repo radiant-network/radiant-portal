@@ -1466,7 +1466,7 @@
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
-    "description": "ATRT cohort · CHOP, UCSF and Seattle Children's",
+    "description": "",
     "search_placeholder": "Search by name, research ID or MRN",
     "tabs": {
       "cohort_analytics": "Cohort analytics",
@@ -1475,7 +1475,14 @@
     "chat": {
       "title": "Cohort analytics",
       "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster"
+      "source": "Live roster",
+      "explore": "Explore Data",
+      "tabs": {
+        "yac": "YAC",
+        "david": "D.A.V.I.D",
+        "other": "Other tool",
+        "placeholder": "Coming soon"
+      }
     },
     "cells": {
       "patient": {
