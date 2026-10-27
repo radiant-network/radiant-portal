@@ -277,14 +277,11 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [genome, tenant, focusGene],
   );
 
-  // Opened on a CNV or a gene of the CNV table: zoom on it and show its panel.
+  // Opened on a CNV of the CNV table: zoom on it and show its panel.
   useEffect(() => {
-    if (focus?.kind === 'cnv') {
-      const segment = profile.segments.find(candidate => candidate.cnv_id === focus.cnvId);
-      if (segment) focusSegment(segment);
-    }
-    if (focus?.kind === 'gene') void handleSearch(focus.symbol);
-  }, [focus, profile.segments, focusSegment, handleSearch]);
+    const segment = focus && profile.segments.find(candidate => candidate.cnv_id === focus.cnvId);
+    if (segment) focusSegment(segment);
+  }, [focus, profile.segments, focusSegment]);
 
   const handleRelayout = useCallback(
     (event: PlotRelayoutEvent) => {

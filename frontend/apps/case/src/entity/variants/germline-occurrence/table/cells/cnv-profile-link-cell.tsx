@@ -13,7 +13,7 @@ type CNVProfileLinkCellProps = {
 };
 
 /**
- * Opens the CNV profile on a CNV or a gene. Without a profile, opens the overlapping genes of the CNV.
+ * Opens the CNV profile on its CNV. Without a profile, opens the overlapping genes of the CNV.
  */
 function CNVProfileLinkCell({ occurrence, focus, label }: CNVProfileLinkCellProps) {
   const { available, open } = useCNVProfile();

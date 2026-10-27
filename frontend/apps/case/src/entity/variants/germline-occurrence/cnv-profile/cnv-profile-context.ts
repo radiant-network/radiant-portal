@@ -16,7 +16,7 @@ export const CNVProfileContext = createContext<CNVProfileContextValue>({
 });
 
 /**
- * Opens the CNV profile of the sequencing, on the whole genome or on a CNV or a gene. Outside a
+ * Opens the CNV profile of the sequencing, on the whole genome or on a CNV. Outside a
  * CNVProfileProvider, the profile is unavailable.
  */
 export const useCNVProfile = () => useContext(CNVProfileContext);

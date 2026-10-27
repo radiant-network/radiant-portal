@@ -12,7 +12,7 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
-import { cnvFocus, genesFocus } from '../cnv-profile/libs/focus';
+import { cnvFocus } from '../cnv-profile/libs/focus';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
@@ -56,11 +56,10 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      // A single gene opens the profile on the gene, several on the CNV.
       cell: info => (
         <CNVProfileLinkCell
           occurrence={info.row.original}
-          focus={genesFocus(info.row.original)}
+          focus={cnvFocus(info.row.original)}
           label={info.getValue()?.join(', ')}
         />
       ),
