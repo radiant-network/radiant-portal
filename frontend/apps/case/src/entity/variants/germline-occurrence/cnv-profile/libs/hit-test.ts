@@ -1,6 +1,6 @@
 import type { CNVProfileSegment, Cytoband, GeneTrackGene } from '@/api/api';
 
-import { chromosomesInView, type Genome, type GenomeView } from './genome';
+import { chromosomeIndexAt, chromosomesInView, type Genome, type GenomeView } from './genome';
 import {
   isChromosomeLevel,
   isExonView,
@@ -116,6 +116,27 @@ export function cytobandHitAreas(cytobands: Cytoband[], genome: Genome, view: Ge
       } satisfies HitArea,
     ];
   });
+}
+
+/**
+ * The chromosome and position under a client position, when it is inside the plot area.
+ */
+export function locusAt(
+  genome: Genome,
+  view: GenomeView,
+  frame: PlotFrame,
+  clientX: number,
+  clientY: number,
+): { chromosome: string; position: number } | undefined {
+  const inside =
+    clientX >= frame.left &&
+    clientX <= frame.left + frame.width &&
+    clientY >= frame.top &&
+    clientY <= frame.top + frame.height;
+  if (!inside) return undefined;
+  const x = view.x0 + ((clientX - frame.left) / frame.width) * (view.x1 - view.x0);
+  const chromosome = genome.chromosomes[chromosomeIndexAt(genome, x)];
+  return { chromosome: chromosome.name, position: Math.max(1, Math.round(x - chromosome.offset)) };
 }
 
 /**

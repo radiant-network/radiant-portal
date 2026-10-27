@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { CNVProfileSegment, Cytoband, GeneTrackGene } from '@/api/api';
 
 import { createGenome } from './genome';
-import { cytobandHitAreas, geneHitAreas, hitTest, type PlotFrame, segmentHitAreas } from './hit-test';
+import { cytobandHitAreas, geneHitAreas, hitTest, locusAt, type PlotFrame, segmentHitAreas } from './hit-test';
 import { Y_AXES, type YAxisName } from './traces';
 
 const genome = createGenome([
@@ -99,5 +99,21 @@ describe('hitTest', () => {
     const y = clientY('y4', 2.25);
     expect(hitTest(areas, view, frame, clientX(4500), y)).toEqual({ kind: 'gene', index: 0, exonIndex: 1 });
     expect(hitTest(areas, view, frame, clientX(3000), y)).toEqual({ kind: 'gene', index: 0 });
+  });
+});
+
+describe('locusAt', () => {
+  const wholeGenome = { x0: 0, x1: genome.length };
+
+  it('gives the chromosome and position under the cursor', () => {
+    const x = frame.left + ((248_956_422 + 1000) / genome.length) * frame.width;
+    const locus = locusAt(genome, wholeGenome, frame, x, frame.top + 10);
+    expect(locus?.chromosome).toBe('2');
+    expect(locus?.position).toBeGreaterThan(0);
+  });
+
+  it('gives nothing outside the plot area', () => {
+    expect(locusAt(genome, wholeGenome, frame, frame.left - 1, frame.top + 10)).toBeUndefined();
+    expect(locusAt(genome, wholeGenome, frame, frame.left + 10, frame.top + frame.height + 1)).toBeUndefined();
   });
 });

@@ -13,7 +13,15 @@ import { genesApi } from '@/utils/api';
 import { useGeneTrack } from './hooks/use-gene-track';
 import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
 import { clampView, createGenome, type GenomeView, parseLocus, regionWindow, viewAround } from './libs/genome';
-import { type ClickTarget, cytobandHitAreas, geneHitAreas, hitTest, plotFrame, segmentHitAreas } from './libs/hit-test';
+import {
+  type ClickTarget,
+  cytobandHitAreas,
+  geneHitAreas,
+  hitTest,
+  locusAt,
+  plotFrame,
+  segmentHitAreas,
+} from './libs/hit-test';
 import { getCNVProfilePalette } from './libs/palette';
 import { withRegion } from './libs/region';
 import {
@@ -34,7 +42,13 @@ import CNVProfileLegend from './cnv-profile-legend';
 import CNVProfileNavbar, { type DragMode, panView, zoomView } from './cnv-profile-navbar';
 
 const PLOT_MARGIN_PX = PLOT_MARGIN.l + PLOT_MARGIN.r;
-const PLOT_CONFIG = { displayModeBar: false, scrollZoom: false, doubleClick: false, responsive: true } as const;
+const PLOT_CONFIG = {
+  displayModeBar: false,
+  scrollZoom: false,
+  doubleClick: false,
+  showTips: false,
+  responsive: true,
+} as const;
 const FORMAT = { number: (value: number) => thousandNumberFormat(value), size: toKiloBases };
 
 type SelectedGene = { gene: GeneTrackGene; exonIndex?: number };
@@ -59,12 +73,14 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   const { tenant } = useTenant();
   const theme = usePlotlyTheme();
   const containerRef = useRef<HTMLDivElement>(null);
+  const guideRef = useRef<HTMLDivElement>(null);
+  const guideLabelRef = useRef<HTMLSpanElement>(null);
   const graphRef = useRef<HTMLElement | null>(null);
   const [plotWidth, setPlotWidth] = useState(1000);
   const [rendered, setRendered] = useState(false);
   const genome = useMemo(() => createGenome(profile.chromosomes), [profile.chromosomes]);
   const [view, setView] = useState<GenomeView>({ x0: 0, x1: genome.length });
-  const [dragMode, setDragMode] = useState<DragMode>('pan');
+  const [dragMode, setDragMode] = useState<DragMode>('zoom');
   const [showFiltered, setShowFiltered] = useState(true);
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
   const { genes } = useGeneTrack(regionWindow(genome, view, GENE_TRACK_MAX_SPAN));
@@ -270,19 +286,41 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
       const target = targetAt(event);
       if (target) handleTarget(target);
     };
+    // The guide is moved through the DOM: a React render per mouse move would redraw the plot.
+    const hideGuide = () => guideRef.current?.style.setProperty('display', 'none');
+    const moveGuide = (event: MouseEvent) => {
+      const guide = guideRef.current;
+      const container = containerRef.current;
+      const frame = plotFrame(graph);
+      const locus = locusAt(genome, view, frame, event.clientX, event.clientY);
+      if (!guide || !container || !locus) return hideGuide();
+      const bounds = container.getBoundingClientRect();
+      guide.style.display = 'block';
+      guide.style.left = `${event.clientX - bounds.left}px`;
+      guide.style.top = `${frame.top - bounds.top}px`;
+      guide.style.height = `${frame.height}px`;
+      if (guideLabelRef.current) {
+        guideLabelRef.current.textContent = `${locus.chromosome}:${thousandNumberFormat(locus.position)}`;
+      }
+    };
     const handleMove = (event: MouseEvent) => {
       const cursor = targetAt(event) ? 'pointer' : '';
       graph.querySelectorAll<HTMLElement>('.nsewdrag').forEach(layer => {
         layer.style.cursor = cursor;
       });
+      moveGuide(event);
     };
     graph.addEventListener('click', handleClick);
     graph.addEventListener('mousemove', handleMove);
+    graph.addEventListener('mouseleave', hideGuide);
     return () => {
+      // The view changed: the guide shows the old position until the mouse moves again.
+      hideGuide();
       graph.removeEventListener('click', handleClick);
       graph.removeEventListener('mousemove', handleMove);
+      graph.removeEventListener('mouseleave', hideGuide);
     };
-  }, [rendered, hitAreas, view, handleTarget]);
+  }, [rendered, hitAreas, genome, view, handleTarget]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -353,6 +391,16 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
           }}
           onRelayout={handleRelayout}
         />
+        <div
+          ref={guideRef}
+          aria-hidden
+          className="pointer-events-none absolute hidden border-l border-dashed border-muted-foreground"
+        >
+          <span
+            ref={guideLabelRef}
+            className="absolute -top-5 -translate-x-1/2 whitespace-nowrap rounded-sm bg-background/90 px-1 text-xs text-muted-foreground"
+          />
+        </div>
         {!rendered && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70">
             <Spinner size={32} />
