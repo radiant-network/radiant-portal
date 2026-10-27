@@ -95,7 +95,8 @@ export const COPY_RATIO_OUT_OF_SCALE: OutOfScale = { above: 2.6, drawnAt: 2.7 };
 export const OUT_OF_SCALE_SIZE_BOOST = 4;
 
 /**
- * One trace per chromosome, coloured by parity so that neighbours alternate, like the DRAGEN plot.
+ * One trace per chromosome, in the colours of its track and coloured by parity so that neighbours
+ * alternate, like the DRAGEN plot.
  * Out of scale, the points go in a second trace of triangles, which keeps their value for the hover.
  */
 export function buildCloudTraces(
@@ -106,6 +107,7 @@ export function buildCloudTraces(
   palette: CNVProfilePalette,
   outOfScale: OutOfScale = { above: Infinity, drawnAt: Infinity },
 ): Trace[] {
+  const colors = yaxis === 'y' ? palette.copyRatio : palette.baf;
   return tracks.flatMap(track => {
     const chromosome = genome.byName.get(track.chromosome);
     if (!chromosome) return [];
@@ -125,8 +127,8 @@ export function buildCloudTraces(
         marker: {
           size: 2,
           opacity: 0.55,
-          color: odd ? palette.pointOdd : palette.pointEven,
-          line: { width: 0, color: odd ? palette.pointOddRing : palette.pointEvenRing },
+          color: odd ? colors.odd : colors.even,
+          line: { width: 0, color: odd ? colors.oddRing : colors.evenRing },
         },
         ...extra,
       }) as Trace;

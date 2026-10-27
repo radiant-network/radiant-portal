@@ -35,9 +35,14 @@ function CNVProfileLegend({ palette }: CNVProfileLegendProps) {
         {t('case_entity.variants.cnv_profile.legend.filtered')}
       </li>
       <li className="flex items-center gap-1.5">
-        {dot(palette.pointEven)}
-        {dot(palette.pointOdd)}
-        {t('case_entity.variants.cnv_profile.tracks.copy_ratio')} / {t('case_entity.variants.cnv_profile.tracks.baf')}
+        {dot(palette.copyRatio.even)}
+        {dot(palette.copyRatio.odd)}
+        {t('case_entity.variants.cnv_profile.tracks.copy_ratio')}
+      </li>
+      <li className="flex items-center gap-1.5">
+        {dot(palette.baf.even)}
+        {dot(palette.baf.odd)}
+        {t('case_entity.variants.cnv_profile.tracks.baf')}
       </li>
       <li className="flex items-center gap-1.5">
         {dot(palette.roh)}

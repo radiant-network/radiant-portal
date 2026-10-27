@@ -60,8 +60,19 @@ describe('buildCloudTraces', () => {
     expect(traces).toHaveLength(2);
     expect(Array.from(traces[1].x)).toEqual([248_956_427]);
     expect(traces[1].customdata).toEqual([5]);
-    expect(traces[0].marker.color).toBe(palette.pointEven);
-    expect(traces[1].marker.color).toBe(palette.pointOdd);
+    expect(traces[0].marker.color).toBe(palette.copyRatio.even);
+    expect(traces[1].marker.color).toBe(palette.copyRatio.odd);
+  });
+
+  it('colours the BAF in its own pair', () => {
+    const traces = buildCloudTraces(
+      [{ chromosome: '2', positions: [5], values: [0.5] }],
+      genome,
+      'y2',
+      'baf',
+      palette,
+    ) as { marker: { color: string } }[];
+    expect(traces[0].marker.color).toBe(palette.baf.odd);
   });
 
   it('draws the out-of-scale points as triangles on their own line, keeping their value', () => {

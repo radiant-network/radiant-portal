@@ -1,8 +1,9 @@
+/** The points of a track, by chromosome parity, and the rings they get once zoomed in. */
+export type CloudColors = { even: string; odd: string; evenRing: string; oddRing: string };
+
 export type CNVProfilePalette = {
-  pointEven: string;
-  pointOdd: string;
-  pointEvenRing: string;
-  pointOddRing: string;
+  copyRatio: CloudColors;
+  baf: CloudColors;
   gain: string;
   loss: string;
   roh: string;
@@ -14,11 +15,11 @@ export type CNVProfilePalette = {
 // Plotly can't read CSS variables. The point pairs, and the gene colours against the gain and
 // highlight colours, are checked for colour-blind separation against the light and dark card
 // colours of usePlotlyTheme. A protein-coding gene stands out by lightness from the other genes.
+// Each track has its own pair, in the same tone by chromosome parity: teal and green on the even
+// chromosomes, purple and orchid on the odd ones.
 const LIGHT: CNVProfilePalette = {
-  pointEven: '#16a08e',
-  pointOdd: '#8a6bbf',
-  pointEvenRing: '#0b6b5e',
-  pointOddRing: '#5c4291',
+  copyRatio: { even: '#16a08e', odd: '#8a6bbf', evenRing: '#0b6b5e', oddRing: '#5c4291' },
+  baf: { even: '#5b9b2a', odd: '#b8579f', evenRing: '#3a6619', oddRing: '#7e3a6c' },
   gain: '#1f6feb',
   loss: '#d1242f',
   roh: '#8b1a1a',
@@ -28,10 +29,8 @@ const LIGHT: CNVProfilePalette = {
 };
 
 const DARK: CNVProfilePalette = {
-  pointEven: '#26a593',
-  pointOdd: '#9a7fd0',
-  pointEvenRing: '#13695e',
-  pointOddRing: '#614a8f',
+  copyRatio: { even: '#26a593', odd: '#9a7fd0', evenRing: '#13695e', oddRing: '#614a8f' },
+  baf: { even: '#7cbf4a', odd: '#d27cbe', evenRing: '#4d7a2c', oddRing: '#8a4c7c' },
   gain: '#58a6ff',
   loss: '#ff7b72',
   roh: '#f0883e',
