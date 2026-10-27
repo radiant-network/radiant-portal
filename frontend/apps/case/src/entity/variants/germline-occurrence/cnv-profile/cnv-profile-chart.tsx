@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
 import type { PlotRelayoutEvent } from 'plotly.js';
 
-import type { CNVProfile, CNVProfileSegment, GeneTrackGene } from '@/api/api';
+import type { CNVProfile, CNVProfileSegment, GeneTrackGene, OccurrenceFlagType } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
-import { genesApi, occurencesNotesApi } from '@/utils/api';
+import { genesApi } from '@/utils/api';
 
 import { useGeneTrack } from './hooks/use-gene-track';
 import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
@@ -92,30 +92,38 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
   const [selectedSegment, setSelectedSegment] = useState<CNVProfileSegment | undefined>();
   const { occurrenceChanged } = useCNVProfile();
-  // Whether each CNV has comments, once they changed in the profile: the profile is not reloaded.
-  const [hasNoteChanges, setHasNoteChanges] = useState<Record<string, boolean>>({});
+  // The comments and flag of each CNV, once they changed in the profile: the profile is not reloaded.
+  const [occurrenceChanges, setOccurrenceChanges] = useState<
+    Record<string, Partial<Pick<CNVProfileSegment, 'has_note' | 'flag_type'>>>
+  >({});
   const segments = useMemo(
     () =>
       profile.segments.map(segment =>
-        segment.cnv_id in hasNoteChanges ? { ...segment, has_note: hasNoteChanges[segment.cnv_id] } : segment,
+        occurrenceChanges[segment.cnv_id] ? { ...segment, ...occurrenceChanges[segment.cnv_id] } : segment,
       ),
-    [profile.segments, hasNoteChanges],
+    [profile.segments, occurrenceChanges],
   );
   const shownSegment = selectedSegment && segments.find(segment => segment.cnv_id === selectedSegment.cnv_id);
 
   const handleNotesChange = useCallback(
-    async (segment: CNVProfileSegment) => {
-      const response = await occurencesNotesApi.countOccurrenceNotes(
-        tenant,
-        ids.caseId,
-        ids.seqId,
-        ids.taskId,
-        segment.cnv_id,
-      );
-      setHasNoteChanges(current => ({ ...current, [segment.cnv_id]: (response.data.count ?? 0) > 0 }));
+    (segment: CNVProfileSegment, hasNote: boolean) => {
+      setOccurrenceChanges(current => ({
+        ...current,
+        [segment.cnv_id]: { ...current[segment.cnv_id], has_note: hasNote },
+      }));
       occurrenceChanged();
     },
-    [tenant, ids.caseId, ids.seqId, ids.taskId, occurrenceChanged],
+    [occurrenceChanged],
+  );
+  const handleFlagChange = useCallback(
+    (segment: CNVProfileSegment, flag: OccurrenceFlagType | undefined) => {
+      setOccurrenceChanges(current => ({
+        ...current,
+        [segment.cnv_id]: { ...current[segment.cnv_id], flag_type: flag },
+      }));
+      occurrenceChanged();
+    },
+    [occurrenceChanged],
   );
   const { genes } = useGeneTrack(regionWindow(genome, view, GENE_TRACK_MAX_SPAN));
   const { overview } = profile;
@@ -491,7 +499,8 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
             ids={ids}
             segment={shownSegment}
             onGeneClick={symbol => void handleSearch(symbol)}
-            onNotesChange={segment => void handleNotesChange(segment)}
+            onNotesChange={handleNotesChange}
+            onFlagChange={handleFlagChange}
             onClose={() => setSelectedSegment(undefined)}
           />
         )}

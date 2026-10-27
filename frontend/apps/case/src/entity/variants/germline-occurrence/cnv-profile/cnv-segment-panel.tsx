@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { XIcon } from 'lucide-react';
+import useSWR from 'swr';
 
-import type { CNVGeneOverlap, CNVProfileSegment } from '@/api/api';
+import type { CNVGeneOverlap, CNVProfileSegment, OccurrenceFlagType } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -12,8 +14,11 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/componen
 import { Spinner } from '@/components/base/spinner';
 import { getClingenCnvUrl, getFranklinCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
+import { occurencesNotesApi } from '@/utils/api';
 
+import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import { useCNVGeneOverlaps } from './hooks/use-cnv-gene-overlaps';
@@ -28,7 +33,8 @@ type CNVSegmentPanelProps = {
   ids: CNVProfileIds;
   segment: CNVProfileSegment;
   onGeneClick: (symbol: string) => void;
-  onNotesChange: (segment: CNVProfileSegment) => void;
+  onNotesChange: (segment: CNVProfileSegment, hasNote: boolean) => void;
+  onFlagChange: (segment: CNVProfileSegment, flag: OccurrenceFlagType | undefined) => void;
   onClose: () => void;
 };
 
@@ -44,9 +50,29 @@ const percent = (value: number, fractionDigits: number) =>
  * of each gene, as in the gene panel. The protein-coding genes come first, edged in the colour of
  * their track.
  */
-function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onClose }: CNVSegmentPanelProps) {
+function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChange, onClose }: CNVSegmentPanelProps) {
   const { t } = useI18n();
   const { canComment } = useCaseVariantPermissions();
+  const commentsRef = useRef<HTMLElement>(null);
+  const { tenant } = useTenant();
+  const { data: noteCount, mutate: refreshNoteCount } = useSWR(
+    ['cnv-profile-note-count', tenant, ids.caseId, ids.seqId, ids.taskId, segment.cnv_id],
+    async () => {
+      const response = await occurencesNotesApi.countOccurrenceNotes(
+        tenant,
+        ids.caseId,
+        ids.seqId,
+        ids.taskId,
+        segment.cnv_id,
+      );
+      return response.data.count ?? 0;
+    },
+    { revalidateOnFocus: false },
+  );
+  const handleNotesChange = async () => {
+    const count = await refreshNoteCount();
+    onNotesChange(segment, (count ?? 0) > 0);
+  };
   const { overlaps, trackGenes, isLoading } = useCNVGeneOverlaps(ids, segment);
   const palette = getCNVProfilePalette(usePlotlyTheme().isDark);
   const gain = segment.type === 'GAIN';
@@ -77,7 +103,18 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onClose }: 
             {gain ? t('case_entity.variants.cnv_profile.hover.gain') : t('case_entity.variants.cnv_profile.hover.loss')}
           </Badge>
           <span className="tabular-nums">{locus(segment.chromosome, segment.start, segment.end)}</span>
-          <CNVOccurrenceMarks flag={segment.flag_type} hasNote={segment.has_note} />
+          <OccurrenceFlagCell
+            caseId={ids.caseId}
+            seqId={ids.seqId}
+            taskId={ids.taskId}
+            occurrenceId={segment.cnv_id}
+            flag={segment.flag_type}
+            onFlagChange={flag => onFlagChange(segment, flag)}
+          />
+          <CNVOccurrenceMarks
+            hasNote={segment.has_note}
+            onNoteClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          />
         </CardTitle>
         <CardAction>
           <Button
@@ -188,9 +225,12 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onClose }: 
           </div>
         </section>
 
-        <section className="-mx-4 flex flex-col gap-2">
-          <h3 className="px-4 text-xs font-medium uppercase text-muted-foreground">{t('notes.variant.title')}</h3>
-          <NotesProvider value={{ onChangeCallback: () => onNotesChange(segment) }}>
+        <section ref={commentsRef} className="-mx-4 flex flex-col gap-2">
+          <h3 className="px-4 text-xs font-medium uppercase text-muted-foreground">
+            {t('notes.variant.title')}
+            {noteCount !== undefined && ` (${noteCount})`}
+          </h3>
+          <NotesProvider value={{ onChangeCallback: () => void handleNotesChange() }}>
             <NotesContainer
               caseId={ids.caseId}
               seqId={ids.seqId}
