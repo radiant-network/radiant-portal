@@ -12,7 +12,7 @@ function TableSelectionSummary({ count, children }: TableSelectionSummaryProps) 
   const { t } = useI18n();
 
   return (
-    <span className="flex items-center gap-2 text-xs text-muted-foreground" data-cy="table-selection-summary">
+    <span className="inline-flex items-center gap-2 text-xs text-muted-foreground" data-cy="table-selection-summary">
       {t('common.table.items_selected', { count, value: thousandNumberFormat(count) })}
       {children}
     </span>

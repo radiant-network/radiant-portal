@@ -12,6 +12,7 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import { useCanDownloadVariantsReport } from '../../../permissions/use-case-permissions';
 import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
 
@@ -41,6 +42,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const appId = config.germline_snv_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
+  const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
     () => getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id }),
@@ -80,6 +82,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
           enableColumnOrdering
           enableFullscreen
           TableFilters={<AnnotationsTableQuickfilters />}
+          selection={canDownloadVariantsReport ? { idField: 'locus_id', renderActions: () => null } : undefined}
           extras={[
             <SliderGermlineOccurrenceSheet key="germline-snv-occurrence-sheet" patientSelected={patientSelected} />,
           ]}

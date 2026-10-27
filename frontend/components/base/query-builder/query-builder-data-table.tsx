@@ -112,6 +112,7 @@ function QueryBuilderDataTable<T extends RowData>({
   const selectionProps = selection
     ? {
         getRowId: tableSelection.getRowId,
+        enableRowSelectionColumn: true,
         rowSelection: tableSelection.rowSelection,
         onRowSelectionChange: tableSelection.onRowSelectionChange,
         toolbarActions: selection.renderActions(tableSelection.selection),

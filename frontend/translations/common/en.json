@@ -53,6 +53,8 @@
       "grouped_by": "Grouped by {{value}}",
       "pin_column": "Pin column",
       "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
       "sort": "Sort",
       "sorted_asc": "Sorted ascending",
       "sorted_desc": "Sorted descending",

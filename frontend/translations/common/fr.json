@@ -53,6 +53,8 @@
       "grouped_by": "Regroupé par {{value}}",
       "pin_column": "Épingler la colonne",
       "pin_row": "Épingler la ligne",
+      "select_page_rows": "Sélectionner toutes les lignes de la page",
+      "select_row": "Sélectionner la ligne",
       "sort": "Trier",
       "sorted_asc": "Trié par ordre croissant",
       "sorted_desc": "Trié par ordre décroissant",

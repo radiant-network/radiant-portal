@@ -1,6 +1,7 @@
 import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useCreateAtom, useSelector } from '@tanstack/react-store';
 import {
+  type CellContext,
   type Column,
   type ColumnDef,
   columnFilteringFeature,
@@ -24,6 +25,7 @@ import {
   FlexRender,
   type GroupingState,
   type Header,
+  type HeaderContext,
   metaHelper,
   type OnChangeFn,
   type PaginationState,
@@ -49,11 +51,13 @@ import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
 import { type SortBody, SortBodyOrderEnum } from '@/api/api';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import {
@@ -213,6 +217,7 @@ export type TableProps<TData extends RowData> = {
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   getRowId?: (row: TData) => string;
+  enableRowSelectionColumn?: boolean;
   toolbarActions?: React.ReactNode;
   selectionSummary?: React.ReactNode;
   pagination: PaginationSettings;
@@ -633,17 +638,8 @@ function getRowFlexRender<T extends RowData>({
  *   enablePinning: false,
  *  }]
  *
- * @DESCRIPTION: add a row selection checkbox for each row
- * @EXAMPLE:
- *  [{
- *   id: "rowSelection",
- *   header: (header: HeaderContext<AppFeatures, Occurrence, unknown>) => <RowSelectionHeader table={header.table} />,
- *   cell: info => <RowSelectionCell row={info.row} />,
- *   size: 48,
- *   maxSize: 48,
- *   enableResizing: false,
- *   enablePinning: false,
- *  }]
+ * @DESCRIPTION: add a row selection checkbox for each row with `enableRowSelectionColumn`: the column stays
+ *              pinned first whatever the saved preferences, and never enters them or the column settings
  *
  * @DESCRIPTION: add a `RowExpandCell`, expand a custom subcomponent
  * @EXAMPLE:
@@ -700,6 +696,27 @@ function getRowFlexRender<T extends RowData>({
  *   additionalFields: ['field1', 'field2'],
  * }
  */
+const ROW_SELECTION_COLUMN_ID = 'row-selection';
+
+const rowSelectionColumn = {
+  id: ROW_SELECTION_COLUMN_ID,
+  header: ({ table }: HeaderContext<AppFeatures, any, unknown>) => <RowSelectionHeader table={table} />,
+  cell: ({ row }: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={row} />,
+  size: 48,
+  maxSize: 48,
+  enableResizing: false,
+  enablePinning: false,
+  enableSorting: false,
+};
+
+function withRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: [ROW_SELECTION_COLUMN_ID, ...withoutRowSelectionPinned(pinning).start!] };
+}
+
+function withoutRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: (pinning.start ?? []).filter(id => id !== ROW_SELECTION_COLUMN_ID) };
+}
+
 // eslint-disable-next-line complexity
 function DataTable<T extends RowData>({
   id,
@@ -725,6 +742,7 @@ function DataTable<T extends RowData>({
   rowSelection,
   onRowSelectionChange,
   getRowId,
+  enableRowSelectionColumn = false,
   toolbarActions,
   selectionSummary,
   serverOptions,
@@ -815,11 +833,17 @@ function DataTable<T extends RowData>({
   // Ref to update only if additional fields change
   const lastFilteredAdditionalFields = useRef<string[]>([]);
 
+  const tableColumns = useMemo(
+    () => (enableRowSelectionColumn ? [rowSelectionColumn as TableColumnDef<T, any>, ...columns] : columns),
+    [columns, enableRowSelectionColumn],
+  );
+  const tableColumnPinning = enableRowSelectionColumn ? withRowSelectionPinned(columnPinning) : columnPinning;
+
   // Initialize tanstack table
   const table = useAppTable({
     // 'hidden' drives the slice through state instead, so no atom owns it
     atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
-    columns,
+    columns: tableColumns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     data,
@@ -830,7 +854,12 @@ function DataTable<T extends RowData>({
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
     manualPagination: pagination.type === 'server',
     manualSorting: serverOptions?.onSortingChange !== undefined, // client-side sorting when no server callback
-    onColumnPinningChange: setColumnPinning,
+    onColumnPinningChange: enableRowSelectionColumn
+      ? updater =>
+          setColumnPinning(prev =>
+            withoutRowSelectionPinned(typeof updater === 'function' ? updater(withRowSelectionPinned(prev)) : updater),
+          )
+      : setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
@@ -846,7 +875,7 @@ function DataTable<T extends RowData>({
     state: {
       columnOrder,
       columnVisibility,
-      columnPinning,
+      columnPinning: tableColumnPinning,
       grouping,
       columnSizing,
       expanded,
