@@ -1432,6 +1432,12 @@ export interface CaseResult {
     'proband_life_status_code'?: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'proband_submitter_sample_ids': Array<string>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseResult
      */
@@ -1442,6 +1448,12 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'project_name'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'run_aliases': Array<string>;
     /**
      * 
      * @type {CaseStatus}
