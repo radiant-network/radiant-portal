@@ -165,7 +165,8 @@
       "drag_mode": "Action du glisser",
       "chromosome": "Chromosome",
       "search": "Gène ou locus",
-      "close_panel": "Fermer le détail du gène"
+      "close_panel": "Fermer le détail du gène",
+      "close_cnv_panel": "Fermer le détail du CNV"
     }
   },
   "admin": {
@@ -2572,8 +2573,7 @@
           "homozygous": "homozygotes",
           "heterozygous": "hétérozygotes",
           "score": "score",
-          "exons": "exons",
-          "exon": "exon"
+          "filter": "Filtre"
         },
         "navbar": {
           "genome": "Génome",
@@ -2593,14 +2593,16 @@
           "strand": "brin {{strand}}",
           "locus": "Locus",
           "biotype": "Biotype",
+          "omim_inheritance": "Transmission OMIM",
+          "pli": "pLI (max)",
+          "loeuf": "LOEUF (min)",
           "size": "Taille",
           "exons": "Exons",
           "exon": "Exon {{index}} sur {{total}}",
           "cnvs": "CNV appelés sur ce gène",
           "no_cnv": "Aucun gain ni perte appelé sur ce gène.",
-          "exons_hit": "{{count}} exons sur {{total}}",
-          "whole_gene": "gène entier",
-          "intronic": "aucun exon (intronique)",
+          "genes": "Gènes chevauchés ({{count}})",
+          "no_gene": "Aucun gène ne chevauche ce CNV.",
           "links": "Liens"
         }
       }

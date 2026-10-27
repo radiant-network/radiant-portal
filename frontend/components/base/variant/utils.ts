@@ -27,3 +27,12 @@ export function getDbSnpUrl(rsnumber: string): string {
 export function getFranklinSnvUrl(locus: string): string {
   return `https://franklin.genoox.com/clinical-db/variant/snpTumor/chr${locus}-hg38`;
 }
+
+/**
+ * @TODO: genome_build will be added later in API; the URL assumes GRCh38. A gain is a DUP and a loss
+ * a DEL.
+ */
+export function getFranklinCnvUrl(chromosome: string, start: number, end: number, type: string): string {
+  const svType = type === 'GAIN' ? 'DUP' : 'DEL';
+  return `https://franklin.genoox.com/clinical-db/variant/sv/chr${chromosome}-${start}-${end}-${svType}-HG38`;
+}

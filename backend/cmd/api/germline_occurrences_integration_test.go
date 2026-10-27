@@ -576,7 +576,9 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"overlapping_cnv_percent": 40,
 			"overlapping_gene_percent": 100,
 			"symbol": "TSPAN6",
-			"tenant_gene_panels": ["EPILEP", "ONCO"]
+			"tenant_gene_panels": ["EPILEP", "ONCO"],
+			"biotype": "protein_coding",
+			"strand": "-"
 		  },
 		  {
 			"cytoband": ["p1.2"],
@@ -588,7 +590,10 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"overlapping_cnv_percent": 50,
 			"overlapping_gene_percent": 50,
 			"symbol": "DPM1",
-			"tenant_gene_panels": ["ONCO"]
+			"tenant_gene_panels": ["ONCO"],
+			"biotype": "lncRNA",
+			"strand": "-",
+			"gnomad_pli": 0.5
 		  },
 		  {
 			"cytoband": ["p1.1", "p1.2"],
@@ -600,7 +605,12 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"overlapping_cnv_percent": 100,
 			"overlapping_gene_percent": 5,
 			"symbol": "TNMD",
-			"tenant_gene_panels": []
+			"tenant_gene_panels": [],
+			"biotype": "protein_coding",
+			"strand": "+",
+			"omim_inheritance_code": ["AR", "XLR"],
+			"gnomad_pli": 0.95,
+			"gnomad_loeuf": 0.31
 		  }
 		]`
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {

@@ -211,10 +211,25 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	if err = query.Find(&overlaps).Error; err != nil {
 		return nil, fmt.Errorf("error query gene overlap: %w", err)
 	}
+	symbols := make([]string, len(overlaps))
+	geneIDs := make([]string, len(overlaps))
+	for i, o := range overlaps {
+		symbols[i], geneIDs[i] = o.Symbol, o.GeneId
+	}
+	inheritance, err := omimInheritanceCodes(ctx, db, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene overlap omim inheritance: %w", err)
+	}
+	constraints, err := geneConstraints(ctx, db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene overlap constraint: %w", err)
+	}
 	for i := range overlaps {
 		if overlaps[i].TenantGenePanels == nil {
 			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
 		}
+		overlaps[i].OmimInheritanceCode = inheritance[overlaps[i].Symbol]
+		overlaps[i].GnomadPli, overlaps[i].GnomadLoeuf = constraints[overlaps[i].GeneId].Pli, constraints[overlaps[i].GeneId].Loeuf
 	}
 	return overlaps, nil
 }
@@ -228,6 +243,8 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	SELECT
     	    g.gene_id,
     	    g.name AS symbol,
+    	    g.biotype,
+    	    g.strand,
     	    g.length AS gene_length,
     	    GREATEST(0, LEAST(g.end, @cnv_end) - GREATEST(g.start, @cnv_start)) AS nb_overlap_bases,
     	    g.start AS gene_start,
@@ -271,6 +288,8 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	gc.cytoband,
     	go.symbol,
     	go.gene_id,
+    	go.biotype,
+    	go.strand,
     	go.gene_length,
     	go.nb_overlap_bases,
     	COALESCE(eo.nb_exons, 0) AS nb_exons,

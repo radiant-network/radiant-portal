@@ -165,7 +165,8 @@
       "drag_mode": "Drag action",
       "chromosome": "Chromosome",
       "search": "Gene or locus",
-      "close_panel": "Close the gene details"
+      "close_panel": "Close the gene details",
+      "close_cnv_panel": "Close the CNV details"
     }
   },
   "admin": {
@@ -2568,8 +2569,7 @@
           "homozygous": "homozygous",
           "heterozygous": "heterozygous",
           "score": "score",
-          "exons": "exons",
-          "exon": "exon"
+          "filter": "Filter"
         },
         "navbar": {
           "genome": "Genome",
@@ -2589,14 +2589,16 @@
           "strand": "strand {{strand}}",
           "locus": "Locus",
           "biotype": "Biotype",
+          "omim_inheritance": "OMIM inheritance",
+          "pli": "pLI (max)",
+          "loeuf": "LOEUF (min)",
           "size": "Size",
           "exons": "Exons",
           "exon": "Exon {{index}} of {{total}}",
           "cnvs": "Called CNVs on this gene",
           "no_cnv": "No gain or loss called on this gene.",
-          "exons_hit": "{{count}} of {{total}} exons",
-          "whole_gene": "whole gene",
-          "intronic": "no exon (intronic)",
+          "genes": "Overlapping genes ({{count}})",
+          "no_gene": "No gene overlaps this CNV.",
           "links": "Links"
         }
       }

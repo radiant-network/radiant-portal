@@ -1,6 +1,7 @@
 import { XIcon } from 'lucide-react';
 
 import type { CNVProfileSegment, GeneTrackGene } from '@/api/api';
+import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
@@ -8,9 +9,14 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
+import { useGeneCNVOverlaps } from './hooks/use-gene-cnv-overlaps';
+import type { CNVProfileIds } from './hooks/use-profile-region';
+import { geneDescription } from './libs/gene';
 import { cnvsOnGene, exonsHit } from './libs/overlap';
+import CNVGeneConstraint from './cnv-gene-constraint';
 
 type CNVGenePanelProps = {
+  ids: CNVProfileIds;
   gene: GeneTrackGene;
   exonIndex?: number;
   segments: CNVProfileSegment[];
@@ -21,10 +27,11 @@ type CNVGenePanelProps = {
 const locus = (chromosome: string, start: number, end: number) =>
   `chr${chromosome}:${thousandNumberFormat(start)}-${thousandNumberFormat(end)}`;
 
-function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CNVGenePanelProps) {
+function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose }: CNVGenePanelProps) {
   const { t } = useI18n();
   const exon = exonIndex === undefined ? undefined : gene.exons[exonIndex];
   const cnvs = cnvsOnGene(segments, gene);
+  const { overlaps, isLoading: overlapsLoading } = useGeneCNVOverlaps(ids, gene, cnvs);
   const symbol = encodeURIComponent(gene.symbol);
   const links = [
     { name: 'OMIM', href: `https://www.omim.org/search?search=${symbol}` },
@@ -40,11 +47,19 @@ function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CN
     { name: 'GeneCards', href: `https://www.genecards.org/cgi-bin/carddisp.pl?gene=${symbol}` },
   ];
 
-  const hitText = (segment: CNVProfileSegment) => {
-    const hit = exonsHit(gene, segment);
-    if (hit === 0) return t('case_entity.variants.cnv_profile.panel.intronic');
-    if (hit === gene.exons.length) return t('case_entity.variants.cnv_profile.panel.whole_gene');
-    return t('case_entity.variants.cnv_profile.panel.exons_hit', { count: hit, total: gene.exons.length });
+  // The overlap columns of the CNV table, under the same names. The exons are the merged exons of
+  // the gene: the table counts every exon id of every transcript, so a CNV over ORM1's 6 exons hits 10.
+  const overlapText = (segment: CNVProfileSegment) => {
+    const overlap = overlaps[segment.cnv_id];
+    const pending = overlapsLoading ? '…' : '-';
+    const percent = (value: number, fractionDigits: number) =>
+      thousandNumberFormat(value, { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits });
+    return [
+      `${t('variant.headers.nb_overlap_bases')} ${overlap ? toKiloBases(overlap.nb_overlap_bases) : pending}`,
+      `${t('variant.headers.nb_exons')} ${exonsHit(gene, segment)}`,
+      `${t('variant.headers.overlapping_gene_percent')} ${overlap ? percent(overlap.overlapping_gene_percent, 0) : pending}`,
+      `${t('variant.headers.overlapping_cnv_percent')} ${overlap ? percent(overlap.overlapping_cnv_percent, 2) : pending}`,
+    ].join(' · ');
   };
 
   return (
@@ -56,7 +71,7 @@ function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CN
             ({t('case_entity.variants.cnv_profile.panel.strand', { strand: gene.strand ?? '-' })})
           </span>
         </CardTitle>
-        {gene.description && <CardDescription>{gene.description}</CardDescription>}
+        {geneDescription(gene) && <CardDescription>{geneDescription(gene)}</CardDescription>}
         <CardAction>
           <Button size="xs" variant="ghost" iconOnly aria-label={t('a11y.cnv_profile.close_panel')} onClick={onClose}>
             <XIcon />
@@ -73,6 +88,18 @@ function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CN
               <dd>{gene.biotype.replaceAll('_', ' ')}</dd>
             </>
           )}
+          <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.omim_inheritance')}</dt>
+          <dd>
+            <OmimCell codes={gene.omim_inheritance_code} />
+          </dd>
+          <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.pli')}</dt>
+          <dd>
+            <CNVGeneConstraint kind="pli" value={gene.gnomad_pli} />
+          </dd>
+          <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.loeuf')}</dt>
+          <dd>
+            <CNVGeneConstraint kind="loeuf" value={gene.gnomad_loeuf} />
+          </dd>
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.size')}</dt>
           <dd>{toKiloBases(gene.end - gene.start)}</dd>
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.exons')}</dt>
@@ -115,8 +142,10 @@ function CNVGenePanel({ gene, exonIndex, segments, onSegmentClick, onClose }: CN
                     {segment.filter ?? '-'}
                   </span>
                   <span className="text-xs font-normal text-muted-foreground tabular-nums">
-                    {locus(segment.chromosome, segment.start, segment.end)} · {toKiloBases(segment.end - segment.start)}{' '}
-                    · {hitText(segment)}
+                    {locus(segment.chromosome, segment.start, segment.end)} · {toKiloBases(segment.end - segment.start)}
+                  </span>
+                  <span className="text-xs font-normal whitespace-normal text-muted-foreground tabular-nums">
+                    {overlapText(segment)}
                   </span>
                 </Button>
               </li>

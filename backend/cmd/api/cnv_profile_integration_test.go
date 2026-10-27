@@ -58,11 +58,15 @@ func Test_GetGermlineCNVProfileHandler(t *testing.T) {
 		require.Equal(t, http.StatusOK, w.Code)
 		var profile types.CNVProfile
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &profile))
-		assert.Equal(t, []types.CNVProfileChromosome{{Name: "1", Size: 100_000}}, profile.Chromosomes)
+		// The baf has a chromosome 2 that the copy ratio has not: the profile lists both.
+		assert.Equal(t, []types.CNVProfileChromosome{{Name: "1", Size: 100_000}, {Name: "2", Size: 500}}, profile.Chromosomes)
 		assert.Equal(t, &types.CNVProfileOverview{CopyRatioStride: 1, BAFStride: 1, RegionMaxSpan: types.CNVProfileRegionMaxSpan}, profile.Overview)
 		require.Len(t, profile.CopyRatio, 1)
 		assert.Len(t, profile.CopyRatio[0].Positions, 1000)
-		assert.Equal(t, []types.CNVProfileTrack{{Chromosome: "1", Positions: []int{10, 150}, Values: []float64{0.5, 0.25}}}, profile.BAF)
+		assert.Equal(t, []types.CNVProfileTrack{
+			{Chromosome: "1", Positions: []int{10, 150}, Values: []float64{0.5, 0.25}},
+			{Chromosome: "2", Positions: []int{20}, Values: []float64{1}},
+		}, profile.BAF)
 		assert.Equal(t, []types.CNVProfileROH{{Chromosome: "1", Start: 100, End: 900, Score: 1.57, NbHom: 63, NbHet: 0}}, profile.ROH)
 		assert.Len(t, profile.Cytobands, 2)
 	})
@@ -123,7 +127,7 @@ func Test_GetGeneTrackHandler(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `[
 			{"gene_id":"ENSG00000000003","symbol":"TSPAN6","chromosome":"1","start":10000,"end":10200,"strand":"-","biotype":"protein_coding","description":"tetraspanin 6","exons":[{"start":10000,"end":10100}]},
-			{"gene_id":"ENSG00000000005","symbol":"TNMD","chromosome":"1","start":10000,"end":20000,"strand":"+","biotype":"protein_coding","description":"tenomodulin","exons":[{"start":10000,"end":10100},{"start":10150,"end":10250},{"start":10450,"end":10750}]}
+			{"gene_id":"ENSG00000000005","symbol":"TNMD","chromosome":"1","start":10000,"end":20000,"strand":"+","biotype":"protein_coding","description":"tenomodulin","exons":[{"start":10000,"end":10100},{"start":10150,"end":10250},{"start":10450,"end":10750}],"omim_inheritance_code":["AR","XLR"],"gnomad_pli":0.95,"gnomad_loeuf":0.31}
 		]`, w.Body.String())
 	})
 }

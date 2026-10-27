@@ -13,4 +13,12 @@ type CNVGeneOverlap struct {
 	OverlappingCNVPercent  float32           `json:"overlapping_cnv_percent" validate:"required"`
 	OverlapType            string            `json:"overlap_type" enum:"full_gene,full_cnv,partial" validate:"required"`
 	TenantGenePanels       JsonArray[string] `json:"tenant_gene_panels" validate:"required"`
+	Biotype                string            `json:"biotype,omitempty"`
+	Strand                 string            `json:"strand,omitempty"`
+	// OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+	OmimInheritanceCode []string `json:"omim_inheritance_code,omitempty" gorm:"-"`
+	// GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene
+	GnomadPli *float32 `json:"gnomad_pli,omitempty" gorm:"-"`
+	// GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene
+	GnomadLoeuf *float32 `json:"gnomad_loeuf,omitempty" gorm:"-"`
 }

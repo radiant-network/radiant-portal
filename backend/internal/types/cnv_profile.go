@@ -60,6 +60,8 @@ type CNVProfileSegment struct {
 	Filter     string   `json:"filter,omitempty"`
 	CN         *int     `json:"cn,omitempty"`
 	SM         *float32 `json:"sm,omitempty"`
+	NbSNV      *int     `json:"nb_snv,omitempty"`
+	GnomadSF   *float32 `json:"gnomad_sf,omitempty"`
 }
 
 type CNVProfileROH struct {
@@ -99,6 +101,12 @@ type GeneTrackGene struct {
 	Biotype     string          `json:"biotype,omitempty"`
 	Description string          `json:"description,omitempty"`
 	Exons       []GeneTrackExon `json:"exons" validate:"required" gorm:"-"`
+	// OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+	OmimInheritanceCode []string `json:"omim_inheritance_code,omitempty" gorm:"-"`
+	// GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene
+	GnomadPli *float32 `json:"gnomad_pli,omitempty" gorm:"-"`
+	// GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene
+	GnomadLoeuf *float32 `json:"gnomad_loeuf,omitempty" gorm:"-"`
 }
 
 // GeneTrackMaxSpan is the widest region the gene track lists, in bases.
@@ -117,4 +125,10 @@ var CytobandTable = Table{
 var EnsemblExonByGeneTable = Table{
 	Name:  "ensembl_exon_by_gene",
 	Alias: "e",
+}
+
+// GnomadConstraintTable holds the gnomAD loss-of-function constraint of each Ensembl transcript.
+var GnomadConstraintTable = Table{
+	Name:  "gnomad_constraint",
+	Alias: "gc",
 }

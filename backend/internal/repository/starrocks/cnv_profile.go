@@ -94,7 +94,7 @@ func (r *CNVProfileRepository) GetCNVProfileSegments(ctx context.Context, seqID 
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	alias := types.GermlineCNVOccurrenceTable.Alias
-	tx = tx.Select(fmt.Sprintf("%[1]s.cnv_id, %[1]s.chromosome, %[1]s.start, %[1]s.end, %[1]s.type, %[1]s.length, %[1]s.quality, %[1]s.filter, %[1]s.cn, %[1]s.sm", alias))
+	tx = tx.Select(fmt.Sprintf("%[1]s.cnv_id, %[1]s.chromosome, %[1]s.start, %[1]s.end, %[1]s.type, %[1]s.length, %[1]s.quality, %[1]s.filter, %[1]s.cn, %[1]s.sm, %[1]s.nb_snv, %[1]s.gnomad_sf", alias))
 	tx = tx.Order(fmt.Sprintf("%[1]s.chromosome, %[1]s.start", alias))
 
 	var segments []types.CNVProfileSegment

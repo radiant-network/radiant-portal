@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/database"
@@ -170,10 +171,86 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	for _, e := range exons {
 		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
 	}
+	symbols := make([]string, len(genes))
+	for i, g := range genes {
+		symbols[i] = g.Symbol
+	}
+	inheritance, err := omimInheritanceCodes(ctx, r.db, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track omim inheritance: %w", err)
+	}
+	constraints, err := geneConstraints(ctx, r.db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track constraint: %w", err)
+	}
 	for i := range genes {
 		genes[i].Exons = mergeExons(exonsByGene[genes[i].GeneID])
+		genes[i].OmimInheritanceCode = inheritance[genes[i].Symbol]
+		genes[i].GnomadPli, genes[i].GnomadLoeuf = constraints[genes[i].GeneID].Pli, constraints[genes[i].GeneID].Loeuf
 	}
 	return genes, nil
+}
+
+type geneConstraint struct {
+	GeneID string
+	Pli    *float32
+	Loeuf  *float32
+}
+
+// geneConstraints gives the gnomAD constraint of each gene id, the most constrained over its Ensembl
+// transcripts: the highest pLI and the lowest LOEUF, which can come from two transcripts.
+// gnomad_constraint is keyed by transcript and StarRocks knows no canonical transcript of a gene
+// (RAD-146), which should replace these bounds.
+func geneConstraints(ctx context.Context, db *gorm.DB, geneIDs []string) (map[string]geneConstraint, error) {
+	constraints := map[string]geneConstraint{}
+	if len(geneIDs) == 0 {
+		return constraints, nil
+	}
+	var rows []geneConstraint
+	query := fmt.Sprintf(`SELECT t.gene_id, MAX(gc.pli) AS pli, MIN(gc.loeuf) AS loeuf
+		FROM (
+			SELECT DISTINCT e.gene_id, x.transcript_id
+			FROM %s e, UNNEST(e.transcript_ids) AS x(transcript_id)
+			WHERE e.gene_id IN ?
+		) t
+		JOIN %s gc ON gc.transcript_id = t.transcript_id
+		GROUP BY t.gene_id`,
+		types.EnsemblExonByGeneTable.TenantQualifiedName(ctx), types.GnomadConstraintTable.TenantQualifiedName(ctx))
+	if err := db.WithContext(ctx).Raw(query, geneIDs).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene constraint: %w", err)
+	}
+	for _, row := range rows {
+		constraints[row.GeneID] = row
+	}
+	return constraints, nil
+}
+
+// omimInheritanceCodes gives the OMIM inheritance modes of each gene symbol, over all its phenotypes,
+// without duplicates and in the order of the phenotypes.
+func omimInheritanceCodes(ctx context.Context, db *gorm.DB, symbols []string) (map[string][]string, error) {
+	codes := map[string][]string{}
+	if len(symbols) == 0 {
+		return codes, nil
+	}
+	var panels []struct {
+		Symbol          string
+		InheritanceCode types.JsonArray[string] `gorm:"type:json"`
+	}
+	tx := db.WithContext(ctx).Table(types.OmimGenePanelTable.TenantQualifiedName(ctx))
+	tx = tx.Select("symbol, inheritance_code").Where("symbol IN ? AND inheritance_code IS NOT NULL", symbols)
+	tx = tx.Order("symbol, omim_phenotype_id, panel")
+	if err := tx.Find(&panels).Error; err != nil {
+		return nil, fmt.Errorf("error fetching omim inheritance: %w", err)
+	}
+
+	for _, p := range panels {
+		for _, code := range p.InheritanceCode {
+			if !slices.Contains(codes[p.Symbol], code) {
+				codes[p.Symbol] = append(codes[p.Symbol], code)
+			}
+		}
+	}
+	return codes, nil
 }
 
 // mergeExons merges overlapping exons, given sorted by start.

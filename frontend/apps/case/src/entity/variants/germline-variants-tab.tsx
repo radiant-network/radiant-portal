@@ -6,7 +6,7 @@ import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
-import CNVProfileDialog from './germline-occurrence/cnv-profile/cnv-profile-dialog';
+import CNVProfileButton, { CNVProfileProvider } from './germline-occurrence/cnv-profile/cnv-profile-dialog';
 import CNVTab from './germline-occurrence/cnv-tab';
 import SNVTab from './germline-occurrence/snv-tab';
 import {
@@ -79,39 +79,37 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   });
 
   return (
-    <div className="bg-background flex flex-col">
-      <SequencingExperimentVariantFilters
-        isLoading={isLoading}
-        sequencingExperiments={seqExpVariants}
-        selectedSeqId={seqId}
-        options={Object.keys(GermlineVariantInterface).map(key => ({
-          value: key,
-        }))}
-        handleChange={handlechange}
-        activeInterface={activeInterface}
-        onActiveInterfaceChange={value => {
-          setActiveInterface(value as GermlineVariantInterface);
-        }}
-        tasks={tasks}
-        selectedTaskId={selectedTaskId}
-        onTaskChange={handleTaskChange}
-        actions={
-          activeInterface === GermlineVariantInterface.CNV && (
-            <CNVProfileDialog
-              caseId={caseId}
-              seqId={seqId}
-              taskId={selectedTaskId}
-              experimentalStrategy={selectedSeqExp?.experimental_strategy_code}
-              sampleId={selectedSeqExp?.sample_submitter_id}
-            />
-          )
-        }
-      />
-      {activeInterface == GermlineVariantInterface.SNV && (
-        <SNVTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
-      )}
-      {activeInterface == GermlineVariantInterface.CNV && <CNVTab seqId={seqId} caseEntity={caseEntity} />}
-    </div>
+    <CNVProfileProvider
+      caseId={caseId}
+      seqId={seqId}
+      taskId={selectedTaskId}
+      experimentalStrategy={selectedSeqExp?.experimental_strategy_code}
+      sampleId={selectedSeqExp?.sample_submitter_id}
+    >
+      <div className="bg-background flex flex-col">
+        <SequencingExperimentVariantFilters
+          isLoading={isLoading}
+          sequencingExperiments={seqExpVariants}
+          selectedSeqId={seqId}
+          options={Object.keys(GermlineVariantInterface).map(key => ({
+            value: key,
+          }))}
+          handleChange={handlechange}
+          activeInterface={activeInterface}
+          onActiveInterfaceChange={value => {
+            setActiveInterface(value as GermlineVariantInterface);
+          }}
+          tasks={tasks}
+          selectedTaskId={selectedTaskId}
+          onTaskChange={handleTaskChange}
+          actions={activeInterface === GermlineVariantInterface.CNV && <CNVProfileButton />}
+        />
+        {activeInterface == GermlineVariantInterface.SNV && (
+          <SNVTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
+        )}
+        {activeInterface == GermlineVariantInterface.CNV && <CNVTab seqId={seqId} caseEntity={caseEntity} />}
+      </div>
+    </CNVProfileProvider>
   );
 }
 

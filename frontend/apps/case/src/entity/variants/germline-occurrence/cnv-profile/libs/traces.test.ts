@@ -109,7 +109,7 @@ describe('buildSegmentTraces', () => {
   ];
 
   it('groups the CNVs by type and filter status, with a line and a marker trace each', () => {
-    const traces = buildSegmentTraces(segments, genome, palette, theme, labels, format, true) as {
+    const traces = buildSegmentTraces(segments, genome, palette, theme, true) as {
       meta: string;
       customdata?: number[];
     }[];
@@ -118,7 +118,7 @@ describe('buildSegmentTraces', () => {
   });
 
   it('leaves out the filtered CNVs on demand', () => {
-    const traces = buildSegmentTraces(segments, genome, palette, theme, labels, format, false) as {
+    const traces = buildSegmentTraces(segments, genome, palette, theme, false) as {
       meta: string;
       customdata?: number[];
     }[];
@@ -173,34 +173,25 @@ describe('buildGeneTraces', () => {
     ],
   };
 
+  // The gene has no biotype: it is drawn as an other gene, its bar in traces[4] and its exons in traces[5].
   it('adds the exons below the exon span', () => {
-    const traces = buildGeneTraces([gene], genome, { x0: 0, x1: 10_000 }, 0.1, palette, theme, labels, format);
-    const markers = traces.find(t => (t as { meta?: string }).meta === 'gene') as { customdata: number[][] };
-    expect(markers.customdata).toEqual([
-      [0, -1],
-      [0, 0],
-      [0, 1],
-    ]);
+    const traces = buildGeneTraces([gene], genome, { x0: 0, x1: 10_000 }, 0.1, palette, theme) as {
+      x: (number | null)[];
+    }[];
+    expect(traces[4].x).toEqual([1000, 5000, null]);
+    expect(traces[5].x).toEqual([1000, 1200, null, 4000, 5000, null]);
   });
 
   it('draws the gene alone above the exon span', () => {
-    const traces = buildGeneTraces([gene], genome, { x0: 0, x1: 10_000_000 }, 0.0001, palette, theme, labels, format);
-    const markers = traces.find(t => (t as { meta?: string }).meta === 'gene') as { customdata: number[][] };
-    expect(markers.customdata).toEqual([[0, -1]]);
+    const traces = buildGeneTraces([gene], genome, { x0: 0, x1: 10_000_000 }, 0.0001, palette, theme) as {
+      x: (number | null)[];
+    }[];
+    expect(traces[4].x).toEqual([1000, 5000, null]);
+    expect(traces[5].x).toEqual([]);
   });
 
   it('draws the highlighted gene in its own trace', () => {
-    const traces = buildGeneTraces(
-      [gene],
-      genome,
-      { x0: 0, x1: 10_000 },
-      0.1,
-      palette,
-      theme,
-      labels,
-      format,
-      'ENSG1',
-    ) as {
+    const traces = buildGeneTraces([gene], genome, { x0: 0, x1: 10_000 }, 0.1, palette, theme, 'ENSG1') as {
       x: (number | null)[];
     }[];
     expect(traces[0].x).toEqual([]);

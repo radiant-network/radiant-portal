@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { createContext, lazy, type ReactNode, Suspense, useContext, useMemo, useState } from 'react';
 import { type AxiosError, isAxiosError } from 'axios';
 import { ChartScatter } from 'lucide-react';
 import useSWR from 'swr';
@@ -13,18 +13,34 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { occurrencesApi } from '@/utils/api';
 
+import type { CNVProfileFocus } from './libs/focus';
+
 // Plotly reads the window when it loads: the chart is only loaded in the browser, on open.
 const CNVProfileChart = lazy(() => import('./cnv-profile-chart'));
 
 const SUPPORTED_STRATEGIES = ['wxs', 'wgs'];
 
-type CNVProfileDialogProps = {
+type CNVProfileProviderProps = {
   caseId: number;
   seqId: number;
   taskId?: number;
   experimentalStrategy?: string;
   sampleId?: string;
+  children: ReactNode;
 };
+
+type CNVProfileContextValue = {
+  available: boolean;
+  open: (focus?: CNVProfileFocus) => void;
+};
+
+const CNVProfileContext = createContext<CNVProfileContextValue>({ available: false, open: () => {} });
+
+/**
+ * Opens the CNV profile of the sequencing, on the whole genome or on a CNV or a gene. Outside a
+ * CNVProfileProvider, the profile is unavailable.
+ */
+export const useCNVProfile = () => useContext(CNVProfileContext);
 
 function missingFilesKey(error: AxiosError<ApiError>) {
   const missing: string[] = error.response?.data?.detail?.missing ?? [];
@@ -41,10 +57,21 @@ function errorKey(error: unknown) {
   return 'case_entity.variants.cnv_profile.errors.unknown';
 }
 
-function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleId }: CNVProfileDialogProps) {
+/**
+ * Holds the CNV profile dialog of a sequencing, opened by the CNVProfileButton or by the CNV table.
+ */
+export function CNVProfileProvider({
+  caseId,
+  seqId,
+  taskId,
+  experimentalStrategy,
+  sampleId,
+  children,
+}: CNVProfileProviderProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
+  const [focus, setFocus] = useState<CNVProfileFocus | undefined>();
   const available =
     taskId !== undefined && experimentalStrategy !== undefined && SUPPORTED_STRATEGIES.includes(experimentalStrategy);
   const { data, error, isLoading } = useSWR<CNVProfile>(
@@ -56,6 +83,17 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
     { revalidateOnFocus: false, shouldRetryOnError: false },
   );
 
+  const context = useMemo<CNVProfileContextValue>(
+    () => ({
+      available,
+      open: next => {
+        setFocus(next);
+        setOpen(true);
+      },
+    }),
+    [available],
+  );
+
   const loader = (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
       <Spinner size={32} />
@@ -63,25 +101,9 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
     </div>
   );
 
-  const trigger = (
-    <Button size="xs" variant="outline" disabled={!available} onClick={() => setOpen(true)}>
-      <ChartScatter />
-      {t('case_entity.variants.cnv_profile.button')}
-    </Button>
-  );
-
   return (
-    <>
-      {available ? (
-        trigger
-      ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>{trigger}</span>
-          </TooltipTrigger>
-          <TooltipContent>{t('case_entity.variants.cnv_profile.unavailable')}</TooltipContent>
-        </Tooltip>
-      )}
+    <CNVProfileContext.Provider value={context}>
+      {children}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent size="full" variant="stickyHeader">
           <DialogHeader>
@@ -99,14 +121,36 @@ function CNVProfileDialog({ caseId, seqId, taskId, experimentalStrategy, sampleI
             {isLoading && loader}
             {data && (
               <Suspense fallback={loader}>
-                <CNVProfileChart profile={data} ids={{ caseId, seqId, taskId: taskId! }} />
+                <CNVProfileChart profile={data} ids={{ caseId, seqId, taskId: taskId! }} focus={focus} />
               </Suspense>
             )}
           </DialogBody>
         </DialogContent>
       </Dialog>
-    </>
+    </CNVProfileContext.Provider>
   );
 }
 
-export default CNVProfileDialog;
+function CNVProfileButton() {
+  const { t } = useI18n();
+  const { available, open } = useCNVProfile();
+
+  const trigger = (
+    <Button size="xs" variant="outline" disabled={!available} onClick={() => open()}>
+      <ChartScatter />
+      {t('case_entity.variants.cnv_profile.button')}
+    </Button>
+  );
+
+  if (available) return trigger;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span>{trigger}</span>
+      </TooltipTrigger>
+      <TooltipContent>{t('case_entity.variants.cnv_profile.unavailable')}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+export default CNVProfileButton;

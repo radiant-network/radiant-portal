@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
 import type { PlotRelayoutEvent } from 'plotly.js';
 
-import type { CNVProfile, GeneTrackGene } from '@/api/api';
+import type { CNVProfile, CNVProfileSegment, GeneTrackGene } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
@@ -12,6 +12,7 @@ import { genesApi } from '@/utils/api';
 
 import { useGeneTrack } from './hooks/use-gene-track';
 import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
+import type { CNVProfileFocus } from './libs/focus';
 import { clampView, createGenome, type GenomeView, parseLocus, regionWindow, viewAround } from './libs/genome';
 import {
   type ClickTarget,
@@ -40,6 +41,8 @@ import {
 import CNVGenePanel from './cnv-gene-panel';
 import CNVProfileLegend from './cnv-profile-legend';
 import CNVProfileNavbar, { type DragMode, panView, zoomView } from './cnv-profile-navbar';
+import CNVProfileTooltip, { type CNVProfileTooltipHandle } from './cnv-profile-tooltip';
+import CNVSegmentPanel from './cnv-segment-panel';
 
 const PLOT_MARGIN_PX = PLOT_MARGIN.l + PLOT_MARGIN.r;
 const PLOT_CONFIG = {
@@ -66,15 +69,17 @@ const rangeOf = (event: PlotRelayoutEvent): [number, number] | undefined => {
 type CNVProfileChartProps = {
   profile: CNVProfile;
   ids: CNVProfileIds;
+  focus?: CNVProfileFocus;
 };
 
-function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
+function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const theme = usePlotlyTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const guideRef = useRef<HTMLDivElement>(null);
   const guideLabelRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<CNVProfileTooltipHandle>(null);
   const graphRef = useRef<HTMLElement | null>(null);
   const [plotWidth, setPlotWidth] = useState(1000);
   const [rendered, setRendered] = useState(false);
@@ -83,6 +88,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   const [dragMode, setDragMode] = useState<DragMode>('zoom');
   const [showFiltered, setShowFiltered] = useState(true);
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
+  const [selectedSegment, setSelectedSegment] = useState<CNVProfileSegment | undefined>();
   const { genes } = useGeneTrack(regionWindow(genome, view, GENE_TRACK_MAX_SPAN));
   const { overview } = profile;
   const { region, isLoading: regionLoading } = useProfileRegion(
@@ -104,19 +110,11 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
     () => ({
       copyRatio: t('case_entity.variants.cnv_profile.tracks.copy_ratio'),
       baf: t('case_entity.variants.cnv_profile.tracks.baf'),
-      gain: t('case_entity.variants.cnv_profile.hover.gain'),
-      loss: t('case_entity.variants.cnv_profile.hover.loss'),
       clickToZoom: t('case_entity.variants.cnv_profile.hover.click_to_zoom'),
-      clickForDetails: t('case_entity.variants.cnv_profile.hover.click_for_details'),
-      segmentMean: t('case_entity.variants.cnv_profile.hover.segment_mean'),
-      copyNumber: t('case_entity.variants.cnv_profile.hover.copy_number'),
-      quality: t('case_entity.variants.cnv_profile.hover.quality'),
       roh: t('case_entity.variants.cnv_profile.hover.roh'),
       homozygous: t('case_entity.variants.cnv_profile.hover.homozygous'),
       heterozygous: t('case_entity.variants.cnv_profile.hover.heterozygous'),
       score: t('case_entity.variants.cnv_profile.hover.score'),
-      exons: t('case_entity.variants.cnv_profile.hover.exons'),
-      exon: t('case_entity.variants.cnv_profile.hover.exon'),
     }),
     [t],
   );
@@ -130,8 +128,8 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
     [copyRatio, baf, genome, traceLabels, palette],
   );
   const segmentTraces = useMemo(
-    () => buildSegmentTraces(profile.segments, genome, palette, theme, traceLabels, FORMAT, showFiltered),
-    [profile.segments, genome, palette, theme, traceLabels, showFiltered],
+    () => buildSegmentTraces(profile.segments, genome, palette, theme, showFiltered),
+    [profile.segments, genome, palette, theme, showFiltered],
   );
   const rohTraces = useMemo(
     () => buildRohTraces(profile.roh, genome, palette, theme, traceLabels, FORMAT),
@@ -156,17 +154,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
       ...sizedClouds,
       ...segmentTraces,
       ...rohTraces,
-      ...buildGeneTraces(
-        showGenes ? genes : [],
-        genome,
-        view,
-        pxPerBase,
-        palette,
-        theme,
-        traceLabels,
-        FORMAT,
-        selectedGene?.gene.gene_id,
-      ),
+      ...buildGeneTraces(showGenes ? genes : [], genome, view, pxPerBase, palette, theme, selectedGene?.gene.gene_id),
       ...buildCytobandTraces(profile.cytobands, genome, view, pxPerBase, theme, traceLabels, FORMAT),
     ];
   }, [
@@ -222,9 +210,19 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
       const [start, end] = exon ? [exon.start, exon.end] : [gene.start, gene.end];
       const margin = exon ? Math.max((end - start) * 3, 2000) : Math.max((end - start) * 0.5, 5000);
       setView(viewAround(genome, gene.chromosome, start, end, margin));
+      setSelectedSegment(undefined);
       setSelectedGene({ gene, exonIndex });
     },
     [genome],
+  );
+
+  const focusSegment = useCallback(
+    (segment: CNVProfileSegment) => {
+      zoomOnRegion(segment.chromosome, segment.start, segment.end);
+      setSelectedGene(undefined);
+      setSelectedSegment(segment);
+    },
+    [zoomOnRegion],
   );
 
   const handleSearch = useCallback(
@@ -242,6 +240,15 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
     },
     [genome, tenant, focusGene],
   );
+
+  // Opened on a CNV or a gene of the CNV table: zoom on it and show its panel.
+  useEffect(() => {
+    if (focus?.kind === 'cnv') {
+      const segment = profile.segments.find(candidate => candidate.cnv_id === focus.cnvId);
+      if (segment) focusSegment(segment);
+    }
+    if (focus?.kind === 'gene') void handleSearch(focus.symbol);
+  }, [focus, profile.segments, focusSegment, handleSearch]);
 
   const handleRelayout = useCallback(
     (event: PlotRelayoutEvent) => {
@@ -265,8 +272,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   const handleTarget = useCallback(
     (target: ClickTarget) => {
       if (target.kind === 'cnv') {
-        const segment = profile.segments[target.index];
-        zoomOnRegion(segment.chromosome, segment.start, segment.end);
+        focusSegment(profile.segments[target.index]);
       } else if (target.kind === 'cytoband') {
         const band = profile.cytobands[target.index];
         zoomOnRegion(band.chromosome, band.start, band.end);
@@ -274,7 +280,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
         focusGene(genes[target.index], target.exonIndex);
       }
     },
-    [profile, genes, zoomOnRegion, focusGene],
+    [profile, genes, zoomOnRegion, focusGene, focusSegment],
   );
 
   useEffect(() => {
@@ -288,6 +294,17 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
     };
     // The guide is moved through the DOM: a React render per mouse move would redraw the plot.
     const hideGuide = () => guideRef.current?.style.setProperty('display', 'none');
+    const hideOverlays = () => {
+      hideGuide();
+      tooltipRef.current?.hide();
+    };
+    // The CNVs and genes get the portal tooltip; the cytobands keep Plotly's, as the other tracks.
+    const showTooltip = (event: MouseEvent, target: ClickTarget | undefined) => {
+      const container = containerRef.current;
+      if (!container || !target || target.kind === 'cytoband') return tooltipRef.current?.hide();
+      const bounds = container.getBoundingClientRect();
+      tooltipRef.current?.show(target, event.clientX - bounds.left, event.clientY - bounds.top);
+    };
     const moveGuide = (event: MouseEvent) => {
       const guide = guideRef.current;
       const container = containerRef.current;
@@ -310,24 +327,36 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
       });
     // The dialog turns off the pointer events of the page, Plotly's drag cover included: the moves of
     // a drag reach the plot, which keeps the cursor of the press while a button is down.
+    // Captured, so that the move over a CNV or a gene stops before Plotly's drag layer: Plotly would
+    // also show the hover label of a point next to it. Its mouseout handler clears the label shown.
     const handleMove = (event: MouseEvent) => {
-      if (event.buttons === 0) setCursor(targetAt(event) ? 'pointer' : 'default');
+      if (event.buttons === 0) {
+        const target = targetAt(event);
+        setCursor(target ? 'pointer' : 'default');
+        showTooltip(event, target);
+        const layer = event.target as HTMLElement;
+        if (target && target.kind !== 'cytoband' && layer.classList.contains('nsewdrag')) {
+          event.stopPropagation();
+          layer.onmouseout?.call(layer, event);
+        }
+      }
       moveGuide(event);
     };
     // Captured before Plotly's own handler, which copies this cursor onto its drag cover.
     const handlePress = (event: MouseEvent) => {
+      tooltipRef.current?.hide();
       if (!targetAt(event)) setCursor(dragMode === 'pan' ? 'move' : 'ew-resize');
     };
     graph.addEventListener('click', handleClick);
-    graph.addEventListener('mousemove', handleMove);
-    graph.addEventListener('mouseleave', hideGuide);
+    graph.addEventListener('mousemove', handleMove, true);
+    graph.addEventListener('mouseleave', hideOverlays);
     graph.addEventListener('mousedown', handlePress, true);
     return () => {
-      // The view changed: the guide shows the old position until the mouse moves again.
-      hideGuide();
+      // The view changed: the guide and the tooltip show the old position until the mouse moves again.
+      hideOverlays();
       graph.removeEventListener('click', handleClick);
-      graph.removeEventListener('mousemove', handleMove);
-      graph.removeEventListener('mouseleave', hideGuide);
+      graph.removeEventListener('mousemove', handleMove, true);
+      graph.removeEventListener('mouseleave', hideOverlays);
       graph.removeEventListener('mousedown', handlePress, true);
     };
   }, [rendered, hitAreas, genome, view, dragMode, handleTarget]);
@@ -411,6 +440,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
             className="absolute -top-5 -translate-x-1/2 whitespace-nowrap rounded-sm bg-background/90 px-1 text-xs text-muted-foreground"
           />
         </div>
+        <CNVProfileTooltip ref={tooltipRef} segments={profile.segments} genes={showGenes ? genes : []} />
         {!rendered && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70">
             <Spinner size={32} />
@@ -418,11 +448,20 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
         )}
         {selectedGene && (
           <CNVGenePanel
+            ids={ids}
             gene={selectedGene.gene}
             exonIndex={selectedGene.exonIndex}
             segments={profile.segments}
-            onSegmentClick={segment => zoomOnRegion(segment.chromosome, segment.start, segment.end)}
+            onSegmentClick={focusSegment}
             onClose={() => setSelectedGene(undefined)}
+          />
+        )}
+        {selectedSegment && (
+          <CNVSegmentPanel
+            ids={ids}
+            segment={selectedSegment}
+            onGeneClick={symbol => void handleSearch(symbol)}
+            onClose={() => setSelectedSegment(undefined)}
           />
         )}
       </div>

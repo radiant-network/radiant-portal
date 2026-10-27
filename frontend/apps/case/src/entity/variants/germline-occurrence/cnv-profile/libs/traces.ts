@@ -32,7 +32,7 @@ export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [numbe
 const PANEL_AXES: YAxisName[] = ['y', 'y2', 'y3'];
 const PANEL_OPACITY = 0.35;
 
-export type TraceKind = 'cloud' | 'cnv' | 'roh' | 'cytoband' | 'gene' | 'exon' | 'decoration';
+export type TraceKind = 'cloud' | 'cnv' | 'roh' | 'cytoband' | 'decoration';
 
 export type Formatters = {
   number: (value: number) => string;
@@ -42,19 +42,11 @@ export type Formatters = {
 export type TraceLabels = {
   copyRatio: string;
   baf: string;
-  gain: string;
-  loss: string;
   clickToZoom: string;
-  clickForDetails: string;
-  segmentMean: string;
-  copyNumber: string;
-  quality: string;
   roh: string;
   homozygous: string;
   heterozygous: string;
   score: string;
-  exons: string;
-  exon: string;
 };
 
 type Trace = Data & { meta?: TraceKind };
@@ -163,16 +155,15 @@ export const isSegmentShown = (segment: CNVProfileSegment, genome: Genome, showF
   genome.byName.has(segment.chromosome) && (showFiltered || !isFiltered(segment));
 
 /**
- * A line per called CNV over its span and a marker at its middle that carries the hover and the
- * click, grouped by type and filter status. customdata holds the segment index.
+ * A line per called CNV over its span and a marker at its middle, grouped by type and filter status.
+ * The chart shows their tooltip and handles their click on the whole span. customdata holds the
+ * segment index.
  */
 export function buildSegmentTraces(
   segments: CNVProfileSegment[],
   genome: Genome,
   palette: CNVProfilePalette,
   theme: PlotlyThemeColors,
-  labels: TraceLabels,
-  format: Formatters,
   showFiltered: boolean,
 ): Trace[] {
   const groups = new Map<string, number[]>();
@@ -187,7 +178,7 @@ export function buildSegmentTraces(
     const filtered = key.endsWith('true');
     const color = gain ? palette.gain : palette.loss;
     const line = lineTrace('y', color, 4, { line: { color, width: 4, dash: filtered ? 'dot' : 'solid' } });
-    const markers = { x: [] as number[], y: [] as number[], text: [] as string[] };
+    const markers = { x: [] as number[], y: [] as number[] };
     for (const index of indexes) {
       const segment = segments[index];
       const offset = genome.byName.get(segment.chromosome)!.offset;
@@ -195,15 +186,6 @@ export function buildSegmentTraces(
       pushSpan(line as { x: number[]; y: number[] }, offset + segment.start, offset + segment.end, y);
       markers.x.push(offset + (segment.start + segment.end) / 2);
       markers.y.push(y);
-      markers.text.push(
-        [
-          `<b>${gain ? labels.gain : labels.loss} ${segment.chromosome}:${format.number(segment.start)}-${format.number(segment.end)}</b>`,
-          `${format.size(segment.end - segment.start)}`,
-          `${labels.segmentMean} ${segment.sm ?? '-'} · ${labels.copyNumber} ${segment.cn ?? '-'}`,
-          `${labels.quality} ${segment.quality ?? '-'} · ${segment.filter ?? '-'}`,
-          `<i>${labels.clickToZoom}</i>`,
-        ].join('<br>'),
-      );
     }
     return [
       line,
@@ -215,7 +197,7 @@ export function buildSegmentTraces(
         meta: 'cnv',
         ...markers,
         customdata: indexes,
-        hovertemplate: '%{text}<extra></extra>',
+        hoverinfo: 'skip',
         marker: {
           size: 11,
           color: filtered ? theme.card : color,
@@ -347,7 +329,7 @@ export function buildCytobandTraces(
 
 export const strandLabel = (gene: GeneTrackGene) => (gene.strand === '-' ? `‹ ${gene.symbol}` : `${gene.symbol} ›`);
 
-const PROTEIN_CODING = 'protein_coding';
+export const PROTEIN_CODING = 'protein_coding';
 
 export const isExonView = (view: GenomeView) => view.x1 - view.x0 <= EXON_MAX_SPAN;
 
@@ -395,7 +377,7 @@ export function placeGenes(genes: GeneTrackGene[], genome: Genome, pxPerBase: nu
 /**
  * Genes packed in lanes, as a bar, or below EXON_MAX_SPAN as exon blocks on an intron line. The
  * protein-coding genes get their labels first; the other biotypes are drawn paler and the
- * highlighted gene in its own colour. Hover markers carry [gene index, exon index or -1].
+ * highlighted gene in its own colour. The chart shows their tooltip and handles their click.
  */
 export function buildGeneTraces(
   genes: GeneTrackGene[],
@@ -404,8 +386,6 @@ export function buildGeneTraces(
   pxPerBase: number,
   palette: CNVProfilePalette,
   theme: PlotlyThemeColors,
-  labels: TraceLabels,
-  format: Formatters,
   highlightedGeneId?: string,
 ): Trace[] {
   const detailed = isExonView(view);
@@ -417,39 +397,15 @@ export function buildGeneTraces(
     lineTrace('y4', palette.geneOther, detailed ? 2 : 8),
     lineTrace('y4', palette.geneOther, 12),
   ] as (Trace & { x: number[]; y: number[] })[];
-  const markers = { x: [] as number[], y: [] as number[], text: [] as string[], customdata: [] as number[][] };
   const names = { x: [] as number[], y: [] as number[], text: [] as string[] };
 
-  placeGenes(genes, genome, pxPerBase).forEach(({ gene, index, start, end, offset, y, labelled }) => {
+  placeGenes(genes, genome, pxPerBase).forEach(({ gene, start, end, offset, y, labelled }) => {
     const highlighted = gene.gene_id === highlightedGeneId;
     let style = gene.biotype === PROTEIN_CODING ? 0 : 4;
     if (highlighted) style = 2;
     pushSpan(bars[style], start, end, y);
-    markers.x.push((start + end) / 2);
-    markers.y.push(y);
-    markers.customdata.push([index, -1]);
-    markers.text.push(
-      [
-        `<b>${gene.symbol}</b> (${gene.strand ?? '-'})`,
-        gene.description ?? '',
-        `${gene.chromosome}:${format.number(gene.start)}-${format.number(gene.end)} · ${format.size(gene.end - gene.start)} · ${gene.exons.length} ${labels.exons}`,
-        `<i>${labels.clickForDetails}</i>`,
-      ].join('<br>'),
-    );
     if (detailed) {
-      gene.exons.forEach((exon, exonIndex) => {
-        pushSpan(bars[style + 1], offset + exon.start, offset + exon.end, y);
-        markers.x.push(offset + (exon.start + exon.end) / 2);
-        markers.y.push(y);
-        markers.customdata.push([index, exonIndex]);
-        markers.text.push(
-          [
-            `<b>${gene.symbol} ${labels.exon} ${exonIndex + 1}/${gene.exons.length}</b>`,
-            `${gene.chromosome}:${format.number(exon.start)}-${format.number(exon.end)} · ${format.size(exon.end - exon.start)}`,
-            `<i>${labels.clickForDetails}</i>`,
-          ].join('<br>'),
-        );
-      });
+      gene.exons.forEach(exon => pushSpan(bars[style + 1], offset + exon.start, offset + exon.end, y));
     }
     if (labelled) {
       names.x.push((start + end) / 2);
@@ -460,16 +416,6 @@ export function buildGeneTraces(
 
   return [
     ...bars,
-    {
-      type: 'scatter',
-      mode: 'markers',
-      yaxis: 'y4',
-      showlegend: false,
-      meta: 'gene',
-      ...markers,
-      hovertemplate: '%{text}<extra></extra>',
-      marker: { size: 16, color: 'rgba(0,0,0,0)' },
-    } as Trace,
     {
       type: 'scatter',
       mode: 'text',
