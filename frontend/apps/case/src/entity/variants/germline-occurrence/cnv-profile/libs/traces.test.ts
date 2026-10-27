@@ -60,6 +60,23 @@ describe('buildCloudTraces', () => {
     expect(traces[0].marker.color).toBe(palette.pointEven);
     expect(traces[1].marker.color).toBe(palette.pointOdd);
   });
+
+  it('lays the points above the ceiling on it, as triangles that keep their value', () => {
+    const traces = buildCloudTraces(
+      [{ chromosome: '1', positions: [10, 20, 30], values: [1, 4.2, 2] }],
+      genome,
+      'y',
+      'copy ratio',
+      palette,
+      2.5,
+    ) as { y: Float32Array; customdata: unknown[]; marker: { symbol?: string } }[];
+
+    expect(traces).toHaveLength(2);
+    expect(Array.from(traces[0].y)).toEqual([1, 2]);
+    expect(Array.from(traces[1].y)).toEqual([2.5]);
+    expect(traces[1].customdata).toEqual([[20, 4.2]]);
+    expect(traces[1].marker.symbol).toBe('triangle-up');
+  });
 });
 
 describe('cloudMarker', () => {

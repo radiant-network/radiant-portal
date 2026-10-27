@@ -24,6 +24,7 @@ import {
   buildRohTraces,
   buildSegmentTraces,
   cloudMarker,
+  COPY_RATIO_CEILING,
   GENE_TRACK_MAX_SPAN,
   PLOT_MARGIN,
 } from './libs/traces';
@@ -106,7 +107,7 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
   // The point clouds keep their arrays across views: Plotly only restyles their markers.
   const clouds = useMemo(
     () => [
-      ...buildCloudTraces(copyRatio, genome, 'y', traceLabels.copyRatio, palette),
+      ...buildCloudTraces(copyRatio, genome, 'y', traceLabels.copyRatio, palette, COPY_RATIO_CEILING),
       ...buildCloudTraces(baf, genome, 'y2', traceLabels.baf, palette),
     ],
     [copyRatio, baf, genome, traceLabels, palette],

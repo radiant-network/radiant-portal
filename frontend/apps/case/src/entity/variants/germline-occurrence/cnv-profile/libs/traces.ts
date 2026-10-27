@@ -21,12 +21,16 @@ export type YAxisName = 'y' | 'y2' | 'y3' | 'y4' | 'y5';
  * cytobands.
  */
 export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [number, number] }> = {
-  y: { domain: [0.5, 0.91], range: [-0.12, 2.62] },
-  y2: { domain: [0.26, 0.47], range: [-0.03, 1.03] },
-  y3: { domain: [0.205, 0.235], range: [0, 1] },
-  y4: { domain: [0, 0.17], range: [0, GENE_LANES] },
+  y: { domain: [0.52, 0.9], range: [-0.12, 2.62] },
+  y2: { domain: [0.275, 0.48], range: [-0.07, 1.07] },
+  y3: { domain: [0.2, 0.24], range: [0, 1] },
+  y4: { domain: [0, 0.16], range: [0, GENE_LANES] },
   y5: { domain: [0.935, 1], range: [0, 1.3] },
 };
+
+// The data tracks sit on a tinted panel each, so that the gaps between them read as separators.
+const PANEL_AXES: YAxisName[] = ['y', 'y2', 'y3'];
+const PANEL_OPACITY = 0.35;
 
 export type TraceKind = 'cloud' | 'cnv' | 'roh' | 'cytoband' | 'gene' | 'exon' | 'decoration';
 
@@ -77,8 +81,13 @@ const pushSpan = (trace: { x: (number | null)[]; y: (number | null)[] }, x0: num
 export const isChromosomeLevel = (genome: Genome, view: GenomeView) =>
   chromosomesInView(genome, view).length <= 2 && view.x1 - view.x0 < CYTOBAND_MAX_SPAN;
 
+/** The highest copy ratio drawn at its value: the ones above sit on this line, as triangles. */
+export const COPY_RATIO_CEILING = 2.55;
+
 /**
  * One trace per chromosome, coloured by parity so that neighbours alternate, like the DRAGEN plot.
+ * Above the ceiling, the points go in a second trace of triangles laid on it, which keeps their value
+ * for the hover.
  */
 export function buildCloudTraces(
   tracks: CNVProfileTrack[],
@@ -86,31 +95,49 @@ export function buildCloudTraces(
   yaxis: 'y' | 'y2',
   name: string,
   palette: CNVProfilePalette,
+  ceiling = Infinity,
 ): Trace[] {
   return tracks.flatMap(track => {
     const chromosome = genome.byName.get(track.chromosome);
     if (!chromosome) return [];
     const odd = chromosomeIndexAt(genome, chromosome.offset) % 2 === 1;
-    return [
-      {
+    const inScale: number[] = [];
+    const above: number[] = [];
+    track.values.forEach((value, index) => (value > ceiling ? above : inScale).push(index));
+    const cloud = (indexes: number[], extra: object) =>
+      ({
         type: 'scattergl',
         mode: 'markers',
         name,
         yaxis,
         showlegend: false,
         meta: 'cloud',
-        x: Float64Array.from(track.positions, position => chromosome.offset + position),
-        y: Float32Array.from(track.values),
-        customdata: track.positions,
-        hovertemplate: `${chromosome.name}:%{customdata:,}<br>${name} %{y:.3f}<extra></extra>`,
+        x: Float64Array.from(indexes, index => chromosome.offset + track.positions[index]),
         marker: {
           size: 2,
           opacity: 0.55,
           color: odd ? palette.pointOdd : palette.pointEven,
           line: { width: 0, color: odd ? palette.pointOddRing : palette.pointEvenRing },
         },
-      } as Trace,
+        ...extra,
+      }) as Trace;
+    const traces = [
+      cloud(inScale, {
+        y: Float32Array.from(inScale, index => track.values[index]),
+        customdata: inScale.map(index => track.positions[index]),
+        hovertemplate: `${chromosome.name}:%{customdata:,}<br>${name} %{y:.3f}<extra></extra>`,
+      }),
     ];
+    if (above.length > 0) {
+      const triangles = cloud(above, {
+        y: Float32Array.from(above, () => ceiling),
+        customdata: above.map(index => [track.positions[index], track.values[index]]),
+        hovertemplate: `${chromosome.name}:%{customdata[0]:,}<br>${name} %{customdata[1]:.3f}<extra></extra>`,
+      }) as Trace & { marker: object };
+      triangles.marker = { ...triangles.marker, symbol: 'triangle-up' };
+      traces.push(triangles);
+    }
+    return traces;
   });
 }
 
@@ -513,6 +540,19 @@ export function buildLayout(
     yaxis3: hiddenYAxis('y3', labels.roh),
     yaxis4: hiddenYAxis('y4', labels.genes),
     shapes: [
+      ...PANEL_AXES.map(axis => ({
+        type: 'rect' as const,
+        layer: 'below' as const,
+        xref: 'paper' as const,
+        yref: `${axis} domain` as const,
+        x0: 0,
+        x1: 1,
+        y0: 0,
+        y1: 1,
+        fillcolor: theme.border,
+        opacity: PANEL_OPACITY,
+        line: { width: 0 },
+      })),
       ...genome.chromosomes.slice(1).map(c => ({
         type: 'line' as const,
         xref: 'x' as const,
