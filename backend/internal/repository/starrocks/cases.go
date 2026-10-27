@@ -222,6 +222,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithAnalysisCatalog(tx)
 	tx = r.joiner.CaseWithProject(tx)
 	tx = r.joiner.CaseWithProbandSample(tx)
+	tx = r.joiner.CaseWithRuns(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 

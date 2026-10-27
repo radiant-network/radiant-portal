@@ -179,6 +179,7 @@ type CaseResult struct {
 	ProbandID                 int                     `json:"proband_id,omitempty"`
 	SubmitterProbandId        string                  `json:"submitter_proband_id,omitempty"`
 	ProbandSubmitterSampleIds JsonArray[string]       `json:"proband_submitter_sample_ids" validate:"required"`
+	RunAliases                JsonArray[string]       `json:"run_aliases" validate:"required"`
 	PriorityCode              string                  `json:"priority_code,omitempty"`
 	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	CaseTypeCode              string                  `json:"-"`
@@ -332,6 +333,11 @@ var CaseProbandSampleTable = Table{
 	Alias: "proband_sample",
 }
 
+var CaseRunTable = Table{
+	Name:  "case_run",
+	Alias: "case_run",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -363,6 +369,7 @@ var CasesFields = []Field{
 	CaseOrderingOrganizationNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseProbandSubmitterSampleIdsField,
+	CaseRunAliasesField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -390,6 +397,7 @@ var CasesDefaultFields = []Field{
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
 	CaseProbandSubmitterSampleIdsField,
+	CaseRunAliasesField,
 	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
@@ -540,6 +548,14 @@ var CaseProbandSubmitterSampleIdsField = Field{
 	CanBeFiltered: true,
 	IsArray:       true,
 	Table:         CaseProbandSampleTable,
+}
+
+var CaseRunAliasesField = Field{
+	Name:          "run_aliases",
+	Alias:         "run_aliases",
+	CanBeSelected: true,
+	IsArray:       true,
+	Table:         CaseRunTable,
 }
 
 var CaseSequencingExperimentIdField = Field{

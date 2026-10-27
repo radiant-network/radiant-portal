@@ -137,6 +137,33 @@ func (j Joiner) ProbandSamples(tx *gorm.DB) string {
 	)
 }
 
+// CaseWithRuns joins, per case, the array of the distinct run aliases of all its sequencings (every family
+// member's), ordered like CaseWithProbandSample: by run date, a run without one last, then sequencing id.
+// Every case gets a row, with an empty array when it has no run, built the same way for the same reason.
+func (j Joiner) CaseWithRuns(tx *gorm.DB) *gorm.DB {
+	// Indexed verbs: %[1]s c, %[2]s chseq, %[3]s s, %[4]s the array alias, then the table names.
+	perCase := fmt.Sprintf(
+		`SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(runs.run_alias ORDER BY runs.run_date DESC NULLS LAST, runs.seq_id DESC)) AS %[4]s
+        FROM %[5]s %[1]s
+        LEFT JOIN (
+            SELECT %[2]s.case_id, %[3]s.run_alias, MAX(%[3]s.run_date) AS run_date, MAX(%[3]s.id) AS seq_id
+            FROM %[6]s %[2]s
+            INNER JOIN %[7]s %[3]s ON %[3]s.id = %[2]s.sequencing_experiment_id
+            WHERE %[3]s.run_alias IS NOT NULL
+            GROUP BY %[2]s.case_id, %[3]s.run_alias
+        ) runs ON runs.case_id = %[1]s.id
+        GROUP BY %[1]s.id`,
+		types.CaseTable.Alias,
+		types.CaseHasSequencingExperimentTable.Alias,
+		types.SequencingExperimentTable.Alias,
+		types.CaseRunAliasesField.Name,
+		j.name(types.CaseTable, tx),
+		j.name(types.CaseHasSequencingExperimentTable, tx),
+		j.name(types.SequencingExperimentTable, tx),
+	)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, types.CaseRunTable.Alias, types.CaseRunTable.Alias, types.CaseTable.Alias))
+}
+
 func (j Joiner) SeqExpWithSample(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sample_id=%s.id", j.name(types.SampleTable, tx), types.SampleTable.Alias, types.SequencingExperimentTable.Alias, types.SampleTable.Alias))
 }
