@@ -1,25 +1,19 @@
 import type { GermlineCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { getClingenCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 
-/**
- * @TODO: genome_build will be added later in API
- */
-const genome_build = `GRCh38`;
 type ClingenCellProps = {
   occurrence: GermlineCNVOccurrence;
 };
 
-/**
- * Url: https://search.clinicalgenome.org/kb/regions?page=1&type=genome_build&region=chrchromosome%3Astart-end&size=25&search=
- */
 function ClingenCell({ occurrence }: ClingenCellProps) {
   const { t } = useI18n();
   const { start, end, chromosome } = occurrence;
 
   return (
     <AnchorLink
-      href={`https://search.clinicalgenome.org/kb/regions?page=1&type=${genome_build}&region=chr${chromosome}%3A${start}-${end}&size=25&search=`}
+      href={getClingenCnvUrl(chromosome, start, end)}
       target="_blank"
       external
       aria-label={t('a11y.clingen_cell.open')}

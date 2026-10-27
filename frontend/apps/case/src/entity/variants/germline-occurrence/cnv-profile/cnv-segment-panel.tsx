@@ -8,7 +8,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Spinner } from '@/components/base/spinner';
-import { getFranklinCnvUrl } from '@/components/base/variant/utils';
+import { getClingenCnvUrl, getFranklinCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
@@ -167,6 +167,15 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onClose }: CNVSegmentPanel
               external
             >
               Franklin
+            </AnchorLink>
+            <AnchorLink
+              href={getClingenCnvUrl(segment.chromosome, segment.start, segment.end)}
+              target="_blank"
+              rel="noreferrer"
+              size="sm"
+              external
+            >
+              ClinGen
             </AnchorLink>
           </div>
         </section>
