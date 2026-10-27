@@ -2,6 +2,10 @@ import { SavedFilterType } from '../../../../api';
 import { RangeOperators } from '../../../../components/base/query-builder/type';
 import { ApplicationId, FilterTypes, type PortalConfig } from '../../../../components/cores/applications-config';
 
+const panelAggregation = {
+  items: [{ key: 'tenant_gene_panel', translation_key: 'tenant_gene_panel', type: FilterTypes.MULTIPLE }],
+};
+
 export const kfConfig = {
   admin: {
     app_id: ApplicationId.admin,
@@ -145,7 +149,132 @@ export const kfConfig = {
   germline_cnv_occurrence: {
     app_id: ApplicationId.germline_cnv_occurrence,
     saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
-    aggregations: {},
+    aggregations: {
+      panel: panelAggregation,
+      variant: {
+        items: [
+          { key: 'type', translation_key: 'type', type: FilterTypes.MULTIPLE, withDictionary: true },
+          {
+            key: 'cn',
+            translation_key: 'cn',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.GreaterThan },
+          },
+          {
+            key: 'length',
+            translation_key: 'cnv_length',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.GreaterThan },
+          },
+          { key: 'chromosome', translation_key: 'chromosome', type: FilterTypes.MULTIPLE, withDictionary: true },
+          {
+            key: 'start',
+            translation_key: 'cnv_start',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.Between },
+          },
+          {
+            key: 'end',
+            translation_key: 'cnv_end',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.LessThan },
+          },
+          {
+            key: 'nb_snv',
+            translation_key: 'nb_snv',
+            type: FilterTypes.NUMERICAL,
+            defaults: { min: 0, max: 100, defaultOperator: RangeOperators.GreaterThan },
+          },
+        ],
+      },
+      gene: {
+        items: [
+          { key: 'search_by_symbol', translation_key: 'search_by_symbol', type: FilterTypes.SEARCH_BY },
+          { key: 'upload_list_symbol', translation_key: 'upload_list_symbol', type: FilterTypes.UPLOAD_LIST },
+          { key: 'cytoband', translation_key: 'cytoband', type: FilterTypes.MULTIPLE },
+          { key: 'gene_divider', translation_key: 'gene_divider', type: FilterTypes.DIVIDER },
+          { key: 'hpo_gene_panel', translation_key: 'hpo_gene_panel', type: FilterTypes.MULTIPLE },
+          { key: 'orphanet_gene_panel', translation_key: 'orphanet_gene_panel', type: FilterTypes.MULTIPLE },
+          { key: 'omim_gene_panel', translation_key: 'omim_gene_panel', type: FilterTypes.MULTIPLE },
+          { key: 'ddd_gene_panel', translation_key: 'ddd_gene_panel', type: FilterTypes.MULTIPLE },
+          { key: 'cosmic_gene_panel', translation_key: 'cosmic_gene_panel', type: FilterTypes.MULTIPLE },
+        ],
+      },
+      frequency: {
+        items: [
+          {
+            key: 'frequency_divider_pulic_cohorts',
+            translation_key: 'frequency_divider_pulic_cohorts',
+            type: FilterTypes.DIVIDER,
+          },
+          {
+            key: 'gnomad_sf',
+            translation_key: 'gnomad_sf',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+          {
+            key: 'gnomad_sc',
+            translation_key: 'gnomad_sc',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+        ],
+      },
+      metric_qc: {
+        items: [
+          { key: 'filter', translation_key: 'filter', type: FilterTypes.MULTIPLE },
+          {
+            key: 'quality',
+            translation_key: 'cnv_quality',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.GreaterThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+          {
+            key: 'pe',
+            translation_key: 'pe',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+          {
+            key: 'sm',
+            translation_key: 'sm',
+            type: FilterTypes.NUMERICAL,
+            defaults: {
+              min: 0,
+              max: 100,
+              defaultOperator: RangeOperators.LessThan,
+              defaultMin: 0,
+              defaultMax: 100,
+            },
+          },
+        ],
+      },
+    },
   },
   somatic_snv_to_occurrence: {
     app_id: ApplicationId.somatic_snv_to_occurrence,
