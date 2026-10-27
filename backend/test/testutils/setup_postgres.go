@@ -2,19 +2,13 @@ package testutils
 
 import (
 	"context"
-	"crypto/rand"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
-	"testing"
 
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -104,74 +98,6 @@ func initPostgresDb() (*gorm.DB, error) {
 	}
 
 	return gormPostgresDb, nil
-}
-
-// MigrationDatabase is a database of its own in the shared Postgres container, for tests of one migration:
-// NewMigrationDatabase stops at the version before it, LoadFixtures and the test insert the rows the migration
-// reads, then MigrateTo applies it. The fixtures must be valid at that version, so a migration test loads a
-// folder of its own, never the clinical one: that one follows the latest schema.
-type MigrationDatabase struct {
-	DB  *gorm.DB
-	url string
-}
-
-func NewMigrationDatabase(t *testing.T, version uint) *MigrationDatabase {
-	t.Helper()
-	ctx := context.Background()
-	host, err := PostgresContainerSetup.Container.Host(ctx)
-	if err != nil {
-		t.Fatalf("failed to get container host: %v", err)
-	}
-	port, err := PostgresContainerSetup.Container.MappedPort(ctx, "5432")
-	if err != nil {
-		t.Fatalf("failed to get container port: %v", err)
-	}
-
-	admin, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=radiant password=radiant dbname=radiant port=%s sslmode=disable", host, port.Port())), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to open admin connection: %v", err)
-	}
-	name := "migration_" + strings.ToLower(rand.Text())
-	if err := admin.Exec("CREATE DATABASE " + name).Error; err != nil {
-		t.Fatalf("failed to create database %s: %v", name, err)
-	}
-
-	db, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=radiant password=radiant dbname=%s port=%s sslmode=disable", host, name, port.Port())), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to open database %s: %v", name, err)
-	}
-	t.Cleanup(func() {
-		if sqlDB, err := db.DB(); err == nil {
-			_ = sqlDB.Close()
-		}
-		admin.Exec("DROP DATABASE IF EXISTS " + name + " WITH (FORCE)")
-		if sqlDB, err := admin.DB(); err == nil {
-			_ = sqlDB.Close()
-		}
-	})
-
-	m := &MigrationDatabase{DB: db, url: fmt.Sprintf("postgres://radiant:radiant@%s:%s/%s?sslmode=disable", host, port.Port(), name)}
-	if err := m.MigrateTo(version); err != nil {
-		t.Fatalf("failed to migrate %s to version %d: %v", name, version, err)
-	}
-	return m
-}
-
-func (m *MigrationDatabase) LoadFixtures(folder string) error {
-	sqlDB, err := m.DB.DB()
-	if err != nil {
-		return fmt.Errorf("get sql.DB: %w", err)
-	}
-	return populateFolder(sqlDB, folder)
-}
-
-func (m *MigrationDatabase) MigrateTo(version uint) error {
-	mig, err := migrate.New("file://"+filepath.Join(ModuleRoot(), "scripts", "init-sql", "migrations"), m.url)
-	if err != nil {
-		return fmt.Errorf("init migrations: %w", err)
-	}
-	defer func() { _, _ = mig.Close() }()
-	return mig.Migrate(version)
 }
 
 func populateData(db *sql.DB) error {
