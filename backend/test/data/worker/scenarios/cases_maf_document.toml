@@ -1,0 +1,39 @@
+# scenarios/cases_maf_document.toml
+
+# A somatic case whose tumor-normal calling task outputs a MAF file (test/data/worker/documents).
+[[cases]]
+submitter_case_id = "CASE-MAF"
+type = "somatic"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "CQGC"
+category_code = "postnatal"
+analysis_code = "WGA"
+ordering_organization_code = "CHUSJ"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283834"
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband"
+
+  [[cases.sequencing_experiments]]
+  aliquot = "TSRX1091647"
+  sample_organization_code = "LDM-CHUSJ"
+  submitter_sample_id = "SRX1091647"
+
+  [[cases.tasks]]
+  type_code = "alignment_somatic_variant_calling"
+  aliquots = ["TSRX1091647"]
+  pipeline_name = "Dragen"
+  pipeline_version = "4.4.4"
+  genome_build = "GRCh38"
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomic"
+    data_type_code = "ssnv"
+    format_code = "maf"
+    hash = "da69de1fa721a4526aafc83562706e23"
+    name = "TSRX1091647.somatic.maf"
+    size = 997
+    url = "s3://test-bucket/TSRX1091647.somatic.maf"

@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -1205,23 +1208,31 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 	})
 }
 
-func Test_ProcessBatch_Case_validateDocument_MafFormat_Persisted(t *testing.T) {
+func Test_ProcessBatch_Case_MafDocument_Persisted(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
-		payload := createBaseCasePayload("validateDocument_MafFormat_Persisted")
-		document := payload[0].Tasks[0].OutputDocuments[0]
-		document.DataTypeCode = "ssnv"
-		document.FormatCode = "maf"
-		document.Name = "validateDocument_MafFormat_Persisted.maf"
-		document.Url = "s3://test-bucket/validateDocument_MafFormat_Persisted.maf"
-		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		scenario, err := testutils.LoadScenario("cases_maf_document")
+		require.NoError(t, err)
+		maf, err := os.ReadFile(filepath.Join(testutils.TestResources, "worker", "documents", "TSRX1091647.somatic.maf"))
+		require.NoError(t, err)
+		document := scenario.Cases[0].Tasks[0].OutputDocuments[0]
+		require.NoError(t, createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", document.Name, maf))
 
-		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		payload, err := json.Marshal(scenario.Cases)
+		require.NoError(t, err)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
-		var formatCode string
-		env.Postgres.Table("document").Select("format_code").Where("url = ?", document.Url).Scan(&formatCode)
-		assert.Equal(t, "maf", formatCode)
+		var persisted struct {
+			FormatCode   string
+			DataTypeCode string
+			Size         int64
+			Hash         string
+		}
+		require.NoError(t, env.Postgres.Table("document").Select("format_code, data_type_code, size, hash").Where("url = ?", document.Url).Take(&persisted).Error)
+		assert.Equal(t, "maf", persisted.FormatCode)
+		assert.Equal(t, "ssnv", persisted.DataTypeCode)
+		assert.Equal(t, int64(len(maf)), persisted.Size)
+		assert.Equal(t, document.Hash, persisted.Hash)
 	})
 }
 
