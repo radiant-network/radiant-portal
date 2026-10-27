@@ -103,13 +103,17 @@ func (j Joiner) CaseWithCaseGroup(tx *gorm.DB) *gorm.DB {
 // A sample whose sequencing has no run date comes last. Every case gets a row, with an empty array when it
 // has no proband sample: a NULL would make a not-in filter on the field drop the case.
 func (j Joiner) CaseWithProbandSample(tx *gorm.DB) *gorm.DB {
+	return j.caseWithArray(tx, j.ProbandSamples(tx), "submitter_sample_id", types.CaseProbandSampleTable, types.CaseProbandSubmitterSampleIdsField)
+}
+
+func (j Joiner) caseWithArray(tx *gorm.DB, rows string, column string, table types.Table, field types.Field) *gorm.DB {
 	// The empty array is the aggregate of the case's one NULL row, filtered out. An ifnull(..., []) literal
 	// instead breaks array_contains on StarRocks 3.4 (NULL or "get state failed"), which a single-value
 	// not-in filter uses.
-	perCase := fmt.Sprintf("SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(samples.submitter_sample_id ORDER BY samples.run_date DESC NULLS LAST, samples.seq_id DESC)) AS %[2]s "+
+	perCase := fmt.Sprintf("SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(samples.%[5]s ORDER BY samples.run_date DESC NULLS LAST, samples.seq_id DESC)) AS %[2]s "+
 		"FROM %[3]s %[1]s LEFT JOIN (%[4]s) samples ON samples.case_id = %[1]s.id GROUP BY %[1]s.id",
-		types.CaseTable.Alias, types.CaseProbandSubmitterSampleIdsField.Name, j.name(types.CaseTable, tx), j.ProbandSamples(tx))
-	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, types.CaseProbandSampleTable.Alias, types.CaseProbandSampleTable.Alias, types.CaseTable.Alias))
+		types.CaseTable.Alias, field.Name, j.name(types.CaseTable, tx), rows, column)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, table.Alias, table.Alias, types.CaseTable.Alias))
 }
 
 // ProbandSamples returns one (case_id, submitter_sample_id) row per proband sample the case sequenced, with
@@ -139,29 +143,26 @@ func (j Joiner) ProbandSamples(tx *gorm.DB) string {
 
 // CaseWithRuns joins, per case, the array of the distinct run aliases of all its sequencings (every family
 // member's), ordered like CaseWithProbandSample: by run date, a run without one last, then sequencing id.
-// Every case gets a row, with an empty array when it has no run, built the same way for the same reason.
+// Every case gets a row, with an empty array when it has no run, built the same way.
 func (j Joiner) CaseWithRuns(tx *gorm.DB) *gorm.DB {
-	// Indexed verbs: %[1]s c, %[2]s chseq, %[3]s s, %[4]s the array alias, then the table names.
-	perCase := fmt.Sprintf(
-		`SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(runs.run_alias ORDER BY runs.run_date DESC NULLS LAST, runs.seq_id DESC)) AS %[4]s
-        FROM %[5]s %[1]s
-        LEFT JOIN (
-            SELECT %[2]s.case_id, %[3]s.run_alias, MAX(%[3]s.run_date) AS run_date, MAX(%[3]s.id) AS seq_id
-            FROM %[6]s %[2]s
-            INNER JOIN %[7]s %[3]s ON %[3]s.id = %[2]s.sequencing_experiment_id
-            WHERE %[3]s.run_alias IS NOT NULL
-            GROUP BY %[2]s.case_id, %[3]s.run_alias
-        ) runs ON runs.case_id = %[1]s.id
-        GROUP BY %[1]s.id`,
-		types.CaseTable.Alias,
+	return j.caseWithArray(tx, j.CaseRuns(tx), "run_alias", types.CaseRunTable, types.CaseRunAliasesField)
+}
+
+// CaseRuns returns one (case_id, run_alias) row per distinct run of the case's sequencings, with the run_date
+// and seq_id of its latest sequencing, to order them.
+func (j Joiner) CaseRuns(tx *gorm.DB) string {
+	// Indexed verbs: %[1]s chseq, %[2]s s, then their table names.
+	return fmt.Sprintf(
+		`SELECT %[1]s.case_id, %[2]s.run_alias, MAX(%[2]s.run_date) AS run_date, MAX(%[2]s.id) AS seq_id
+        FROM %[3]s %[1]s
+        INNER JOIN %[4]s %[2]s ON %[2]s.id = %[1]s.sequencing_experiment_id
+        WHERE %[2]s.run_alias IS NOT NULL
+        GROUP BY %[1]s.case_id, %[2]s.run_alias`,
 		types.CaseHasSequencingExperimentTable.Alias,
 		types.SequencingExperimentTable.Alias,
-		types.CaseRunAliasesField.Name,
-		j.name(types.CaseTable, tx),
 		j.name(types.CaseHasSequencingExperimentTable, tx),
 		j.name(types.SequencingExperimentTable, tx),
 	)
-	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, types.CaseRunTable.Alias, types.CaseRunTable.Alias, types.CaseTable.Alias))
 }
 
 func (j Joiner) SeqExpWithSample(tx *gorm.DB) *gorm.DB {
