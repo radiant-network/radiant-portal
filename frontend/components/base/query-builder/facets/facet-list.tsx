@@ -67,7 +67,10 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
         size="mini"
         showIcon={false}
         contentTop={<FacetFavouritesEmptyImage />}
-        classNames={{ title: 'text-sm text-sidebar-foreground', description: 'text-sidebar-foreground' }}
+        classNames={{
+          title: 'text-sm text-sidebar-foreground opacity-70',
+          description: 'text-sidebar-foreground opacity-70',
+        }}
         title={t('query_filters.favourites.empty.title')}
         description={t('query_filters.favourites.empty.description')}
         className="whitespace-normal"

@@ -48,7 +48,7 @@ export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
           onPointerLeave={() => setIsSettling(false)}
           onBlur={() => setIsSettling(false)}
           className={cn(
-            'group/favourite text-foreground hover:bg-transparent hover:text-foreground [&_svg]:size-3.5',
+            'group/favourite text-foreground hover:bg-transparent hover:text-foreground [&_svg]:size-3',
             !isFavourite && 'opacity-0 group-hover/facet-header:opacity-100 focus-visible:opacity-100',
           )}
         >
