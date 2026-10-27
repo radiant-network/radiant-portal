@@ -502,6 +502,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"key":"gvcf", "label":"gVCF File"}, 
 			{"key":"html", "label":"HTML File"}, 
 			{"key":"json", "label":"JSON File"}, 
+			{"key":"maf", "label":"MAF File"}, 
 			{"key":"pdf", "label":"PDF File"}, 
 			{"key":"png", "label":"PNG File"}, 
 			{"key":"tgz", "label":"TGZ Archive File"}, 

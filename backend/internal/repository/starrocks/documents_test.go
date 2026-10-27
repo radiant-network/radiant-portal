@@ -427,7 +427,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 		assert.Equal(t, 2, len((*filters).Project))
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 		assert.Equal(t, 7, len((*filters).RelationshipToProband))
-		assert.Equal(t, 15, len((*filters).Format))
+		assert.Equal(t, 16, len((*filters).Format))
 		assert.Equal(t, 21, len((*filters).DataType))
 	})
 }
@@ -440,7 +440,7 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 		assert.Nil(t, (*filters).Project)
 		assert.Nil(t, (*filters).DiagnosisLab)
 		assert.Equal(t, 7, len((*filters).RelationshipToProband))
-		assert.Equal(t, 15, len((*filters).Format))
+		assert.Equal(t, 16, len((*filters).Format))
 		assert.Equal(t, 21, len((*filters).DataType))
 	})
 }

@@ -1142,7 +1142,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
+				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, maf, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1202,6 +1202,26 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 		}
 		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_MafFormat_Persisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_MafFormat_Persisted")
+		document := payload[0].Tasks[0].OutputDocuments[0]
+		document.DataTypeCode = "ssnv"
+		document.FormatCode = "maf"
+		document.Name = "validateDocument_MafFormat_Persisted.maf"
+		document.Url = "s3://test-bucket/validateDocument_MafFormat_Persisted.maf"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var formatCode string
+		env.Postgres.Table("document").Select("format_code").Where("url = ?", document.Url).Scan(&formatCode)
+		assert.Equal(t, "maf", formatCode)
 	})
 }
 

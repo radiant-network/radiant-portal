@@ -645,7 +645,8 @@
       "txt": "Text File",
       "gvcf": "GVCF File",
       "zip": "ZIP Archive File",
-      "xlsx": "XLSX File"
+      "xlsx": "XLSX File",
+      "maf": "MAF File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",

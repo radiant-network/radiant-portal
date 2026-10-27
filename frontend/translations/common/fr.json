@@ -645,7 +645,8 @@
       "txt": "Fichier texte",
       "gvcf": "Fichier GVCF",
       "zip": "Fichier archive ZIP",
-      "xlsx": "Fichier XLSX"
+      "xlsx": "Fichier XLSX",
+      "maf": "Fichier MAF"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
