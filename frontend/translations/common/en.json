@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
       "remove_user": "Remove {{name}}"
     },
     "auto_complete": {
@@ -112,7 +113,8 @@
     },
     "query_bar": {
       "delete": "Delete query",
-      "duplicate": "Duplicate query"
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
     },
     "query_builder": {
       "close_facets": "Close filters panel"

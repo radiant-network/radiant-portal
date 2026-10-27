@@ -161,7 +161,7 @@ const generateQueryBuilderFunctions = (
      * Toggles the collapse/expand state of the query panel.
      */
     toggleCollapse() {
-      cy.get(CommonSelectors.querybuilderHeader).clickAndWait({ force: true });
+      cy.get(CommonSelectors.querybuilderToggle).clickAndWait({ force: true });
     },
     /**
      * Toggles the field labels switch.
@@ -208,7 +208,7 @@ const generateQueryBuilderFunctions = (
      * @param collapsed Whether the panel should be collapsed.
      */
     shouldBeCollapsed(collapsed: boolean) {
-      cy.get(CommonSelectors.querybuilderHeader).should('have.attr', 'data-state', collapsed ? 'closed' : 'open');
+      cy.get(CommonSelectors.querybuilderToggle).should('have.attr', 'data-state', collapsed ? 'closed' : 'open');
     },
     /**
      * Checks the number of pills in the active query.
