@@ -1,6 +1,6 @@
 import { lazy, type ReactNode, Suspense, useMemo, useState } from 'react';
 import { type AxiosError, isAxiosError } from 'axios';
-import { ChartScatter } from 'lucide-react';
+import { ChartScatter, Maximize, Minimize } from 'lucide-react';
 import useSWR from 'swr';
 
 import type { ApiError, CNVProfile } from '@/api/api';
@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
 import { occurrencesApi } from '@/utils/api';
 
 import type { CNVProfileFocus } from './libs/focus';
@@ -61,6 +62,7 @@ export function CNVProfileProvider({
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [focus, setFocus] = useState<CNVProfileFocus | undefined>();
   const available =
     taskId !== undefined && experimentalStrategy !== undefined && SUPPORTED_STRATEGIES.includes(experimentalStrategy);
@@ -95,15 +97,39 @@ export function CNVProfileProvider({
   return (
     <CNVProfileContext.Provider value={context}>
       {children}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent size="full" variant="stickyHeader">
+      <Dialog
+        open={open}
+        onOpenChange={next => {
+          setOpen(next);
+          if (!next) setFullscreen(false);
+        }}
+      >
+        <DialogContent
+          size="full"
+          variant="stickyHeader"
+          className={cn({
+            'h-screen max-h-screen w-screen max-w-none grid-rows-[auto_1fr] border-0 sm:rounded-none': fullscreen,
+          })}
+          onOpenAutoFocus={event => {
+            // The dialog takes the focus itself: while the profile loads, the fullscreen button would
+            // be the first to take it, and show its tooltip.
+            event.preventDefault();
+            (event.currentTarget as HTMLElement).focus();
+          }}
+          onEscapeKeyDown={event => {
+            // As in the tables, Esc leaves the fullscreen first.
+            if (!fullscreen) return;
+            event.preventDefault();
+            setFullscreen(false);
+          }}
+        >
           <DialogHeader>
             <DialogTitle>
               {t('case_entity.variants.cnv_profile.title')}
               {sampleId && <span className="font-normal text-muted-foreground"> · {sampleId}</span>}
             </DialogTitle>
           </DialogHeader>
-          <DialogBody className="h-[85vh]">
+          <DialogBody className={cn('h-[85vh]', { 'h-full max-h-none min-h-0': fullscreen })}>
             {error && (
               <Alert variant="error">
                 <AlertDescription>{t(errorKey(error))}</AlertDescription>
@@ -116,6 +142,23 @@ export function CNVProfileProvider({
               </Suspense>
             )}
           </DialogBody>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="xs"
+                variant="ghost"
+                iconOnly
+                className="absolute top-3 right-11"
+                aria-label={fullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
+                onClick={() => setFullscreen(!fullscreen)}
+              >
+                {fullscreen ? <Minimize /> : <Maximize />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {fullscreen ? t('common.table.fullscreen.minimize') : t('common.table.fullscreen.maximize')}
+            </TooltipContent>
+          </Tooltip>
         </DialogContent>
       </Dialog>
     </CNVProfileContext.Provider>

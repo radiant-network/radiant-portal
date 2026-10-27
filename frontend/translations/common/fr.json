@@ -2549,8 +2549,7 @@
           "genes": "Gènes"
         },
         "hints": {
-          "zoom_for_genes": "Zoomer sous 20 Mb sur un chromosome pour afficher les gènes",
-          "zoom_for_cytobands": "Zoomer sur un ou deux chromosomes pour afficher les cytobandes et les positions"
+          "zoom_for_genes": "Zoomer sous 20 Mb sur un chromosome pour afficher les gènes"
         },
         "legend": {
           "gain": "Gain PASS",

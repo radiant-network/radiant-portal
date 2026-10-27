@@ -1,16 +1,7 @@
 import type { CNVProfileSegment, Cytoband, GeneTrackGene } from '@/api/api';
 
 import { chromosomeIndexAt, chromosomesInView, type Genome, type GenomeView } from './genome';
-import {
-  isChromosomeLevel,
-  isExonView,
-  isSegmentShown,
-  placeGenes,
-  PLOT_MARGIN,
-  segmentValue,
-  Y_AXES,
-  type YAxisName,
-} from './traces';
+import { isExonView, isSegmentShown, placeGenes, PLOT_MARGIN, segmentValue, Y_AXES, type YAxisName } from './traces';
 
 export type ClickTarget =
   | { kind: 'cnv'; index: number }
@@ -104,7 +95,6 @@ export function geneHitAreas(genes: GeneTrackGene[], genome: Genome, view: Genom
 }
 
 export function cytobandHitAreas(cytobands: Cytoband[], genome: Genome, view: GenomeView): HitArea[] {
-  if (!isChromosomeLevel(genome, view)) return [];
   const inView = new Set(chromosomesInView(genome, view).map(chromosome => chromosome.name));
   return cytobands.flatMap((band, index) => {
     if (!inView.has(band.chromosome)) return [];

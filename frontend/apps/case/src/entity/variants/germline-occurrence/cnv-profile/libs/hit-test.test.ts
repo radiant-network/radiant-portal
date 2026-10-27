@@ -72,8 +72,11 @@ describe('cytobandHitAreas', () => {
     expect(cytobandHitAreas(bands, genome, view).map(area => area.target)).toEqual([{ kind: 'cytoband', index: 0 }]);
   });
 
-  it('gives nothing on the whole genome', () => {
-    expect(cytobandHitAreas(bands, genome, { x0: 0, x1: genome.length })).toEqual([]);
+  it('keeps every band on the whole genome', () => {
+    expect(cytobandHitAreas(bands, genome, { x0: 0, x1: genome.length }).map(area => area.target)).toEqual([
+      { kind: 'cytoband', index: 0 },
+      { kind: 'cytoband', index: 1 },
+    ]);
   });
 });
 

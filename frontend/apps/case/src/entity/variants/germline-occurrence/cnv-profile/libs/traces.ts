@@ -12,6 +12,7 @@ import { type CNVProfilePalette, CYTOBAND_STAINS } from './palette';
 export const GENE_TRACK_MAX_SPAN = 20_000_000;
 export const EXON_MAX_SPAN = 2_000_000;
 const CYTOBAND_MAX_SPAN = 300_000_000;
+const CYTOBAND_HOVER_SIZE = 16;
 const SEGMENT_MAX_VALUE = 2.5;
 
 export const PLOT_MARGIN = { l: 64, r: 16, t: 30, b: 40 };
@@ -270,8 +271,9 @@ export function buildRohTraces(
 }
 
 /**
- * The ideogram of the chromosomes in view: an outline, one line per stain, a hover marker per band
- * (customdata: band index) and the names that fit.
+ * The ideogram of the chromosomes in view, at every zoom: an outline, one line per stain, a hover
+ * marker per band (customdata: band index) and the names that fit. On the whole genome, it shows that
+ * the gaps of the copy ratio and the BAF are centromeres, heterochromatin or acrocentric arms.
  */
 export function buildCytobandTraces(
   cytobands: Cytoband[],
@@ -282,45 +284,52 @@ export function buildCytobandTraces(
   labels: TraceLabels,
   format: Formatters,
 ): Trace[] {
-  const show = isChromosomeLevel(genome, view);
   const stains = Object.keys(CYTOBAND_STAINS);
   const axes = { xaxis: 'x2', yaxis: 'y5' };
   const outline = lineTrace('y5', theme.muted, 16, { xaxis: 'x2' }) as Trace & { x: number[]; y: number[] };
   const lines = stains.map(
     stain => lineTrace('y5', CYTOBAND_STAINS[stain], 13, { xaxis: 'x2' }) as Trace & { x: number[]; y: number[] },
   );
-  const markers = { x: [] as number[], y: [] as number[], text: [] as string[], customdata: [] as number[] };
+  const markers = {
+    x: [] as number[],
+    y: [] as number[],
+    text: [] as string[],
+    customdata: [] as number[],
+    size: [] as number[],
+  };
   const names = { x: [] as number[], y: [] as number[], text: [] as string[] };
 
-  if (show) {
-    for (const chromosome of chromosomesInView(genome, view)) {
-      pushSpan(outline, chromosome.offset, chromosome.offset + chromosome.size, 0.35);
-    }
-    cytobands.forEach((band, index) => {
-      const chromosome = genome.byName.get(band.chromosome);
-      if (!chromosome) return;
-      const g0 = chromosome.offset + band.start;
-      const g1 = chromosome.offset + band.end;
-      if (g1 < view.x0 || g0 > view.x1) return;
-      pushSpan(lines[Math.max(0, stains.indexOf(band.gie_stain ?? 'gneg'))], g0, g1, 0.35);
-      const middle = (Math.max(g0, view.x0) + Math.min(g1, view.x1)) / 2;
-      markers.x.push(middle);
-      markers.y.push(0.35);
-      markers.customdata.push(index);
-      markers.text.push(
-        [
-          `<b>${band.chromosome}${band.cytoband}</b> (${band.gie_stain ?? '-'})`,
-          `${band.chromosome}:${format.number(band.start + 1)}-${format.number(band.end)} · ${format.size(band.end - band.start)}`,
-          `<i>${labels.clickToZoom}</i>`,
-        ].join('<br>'),
-      );
-      if ((Math.min(g1, view.x1) - Math.max(g0, view.x0)) * pxPerBase > band.cytoband.length * 6.5 + 8) {
-        names.x.push(middle);
-        names.y.push(1.05);
-        names.text.push(band.cytoband);
-      }
-    });
+  for (const chromosome of chromosomesInView(genome, view)) {
+    pushSpan(outline, chromosome.offset, chromosome.offset + chromosome.size, 0.35);
   }
+  cytobands.forEach((band, index) => {
+    const chromosome = genome.byName.get(band.chromosome);
+    if (!chromosome) return;
+    const g0 = chromosome.offset + band.start;
+    const g1 = chromosome.offset + band.end;
+    if (g1 < view.x0 || g0 > view.x1) return;
+    pushSpan(lines[Math.max(0, stains.indexOf(band.gie_stain ?? 'gneg'))], g0, g1, 0.35);
+    const middle = (Math.max(g0, view.x0) + Math.min(g1, view.x1)) / 2;
+    const widthPx = (Math.min(g1, view.x1) - Math.max(g0, view.x0)) * pxPerBase;
+    markers.x.push(middle);
+    markers.y.push(0.35);
+    markers.customdata.push(index);
+    // Plotly ties the markers under the cursor: each one is as wide as its band, so that the hover
+    // gets the band under the cursor on the whole genome too.
+    markers.size.push(Math.min(CYTOBAND_HOVER_SIZE, Math.max(2, widthPx)));
+    markers.text.push(
+      [
+        `<b>${band.chromosome}${band.cytoband}</b> (${band.gie_stain ?? '-'})`,
+        `${band.chromosome}:${format.number(band.start + 1)}-${format.number(band.end)} · ${format.size(band.end - band.start)}`,
+        `<i>${labels.clickToZoom}</i>`,
+      ].join('<br>'),
+    );
+    if (widthPx > band.cytoband.length * 6.5 + 8) {
+      names.x.push(middle);
+      names.y.push(1.05);
+      names.text.push(band.cytoband);
+    }
+  });
 
   return [
     outline,
@@ -331,9 +340,12 @@ export function buildCytobandTraces(
       ...axes,
       showlegend: false,
       meta: 'cytoband',
-      ...markers,
+      x: markers.x,
+      y: markers.y,
+      text: markers.text,
+      customdata: markers.customdata,
       hovertemplate: '%{text}<extra></extra>',
-      marker: { size: 16, color: 'rgba(0,0,0,0)' },
+      marker: { size: markers.size, color: 'rgba(0,0,0,0)' },
     } as Trace,
     {
       type: 'scatter',
@@ -458,7 +470,6 @@ export type LayoutLabels = {
   roh: string;
   genes: string;
   zoomForGenes: string;
-  zoomForCytobands: string;
 };
 
 export function buildLayout(
@@ -564,16 +575,6 @@ export function buildLayout(
         visible: !showGenes,
         font: { size: 11, color: theme.muted },
         text: labels.zoomForGenes,
-      },
-      {
-        xref: 'paper',
-        yref: 'paper',
-        x: 0.5,
-        y: 0.967,
-        showarrow: false,
-        visible: !chromosomeLevel,
-        font: { size: 11, color: theme.muted },
-        text: labels.zoomForCytobands,
       },
     ],
   };

@@ -221,7 +221,6 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
           roh: t('case_entity.variants.cnv_profile.tracks.roh'),
           genes: t('case_entity.variants.cnv_profile.tracks.genes'),
           zoomForGenes: t('case_entity.variants.cnv_profile.hints.zoom_for_genes'),
-          zoomForCytobands: t('case_entity.variants.cnv_profile.hints.zoom_for_cytobands'),
         },
         showGenes,
         position => (view.x1 - view.x0 >= 6e6 ? `${position / 1e6} Mb` : thousandNumberFormat(position)),

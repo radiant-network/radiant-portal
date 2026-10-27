@@ -154,10 +154,10 @@ describe('buildCytobandTraces', () => {
     expect(markers.customdata).toEqual([0]);
   });
 
-  it('shows nothing on the whole genome', () => {
+  it('shows every band on the whole genome', () => {
     const traces = buildCytobandTraces(cytobands, genome, { x0: 0, x1: genome.length }, 0.001, theme, labels, format);
     const markers = traces.find(t => (t as { meta?: string }).meta === 'cytoband') as { customdata: number[] };
-    expect(markers.customdata).toEqual([]);
+    expect(markers.customdata).toEqual([0, 1]);
   });
 });
 
@@ -208,20 +208,19 @@ describe('buildLayout', () => {
     roh: 'roh',
     genes: 'genes',
     zoomForGenes: 'g',
-    zoomForCytobands: 'c',
   };
 
-  it('hides the top axis and shows the hints on the whole genome', () => {
+  it('hides the top axis and shows the gene hint on the whole genome', () => {
     const layout = buildLayout(genome, { x0: 0, x1: genome.length }, theme, layoutLabels, false, String);
     expect(layout.xaxis2?.visible).toBe(false);
-    expect(layout.annotations?.map(a => a.visible)).toEqual([true, true]);
+    expect(layout.annotations?.map(a => a.visible)).toEqual([true]);
     expect(layout.xaxis?.ticktext).toEqual(['1', '2', '3']);
   });
 
   it('shows the top axis on a chromosome', () => {
     const layout = buildLayout(genome, { x0: 0, x1: 1_000_000 }, theme, layoutLabels, true, String);
     expect(layout.xaxis2?.visible).toBe(true);
-    expect(layout.annotations?.map(a => a.visible)).toEqual([false, false]);
+    expect(layout.annotations?.map(a => a.visible)).toEqual([false]);
   });
 });
 
