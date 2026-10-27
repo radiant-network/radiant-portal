@@ -303,24 +303,34 @@ function CNVProfileChart({ profile, ids }: CNVProfileChartProps) {
         guideLabelRef.current.textContent = `${locus.chromosome}:${thousandNumberFormat(locus.position)}`;
       }
     };
-    const handleMove = (event: MouseEvent) => {
-      const cursor = targetAt(event) ? 'pointer' : '';
+    // Plotly gives its drag layers the cursor of the drag mode; the plot keeps an arrow until a press.
+    const setCursor = (cursor: string) =>
       graph.querySelectorAll<HTMLElement>('.nsewdrag').forEach(layer => {
         layer.style.cursor = cursor;
       });
+    // The dialog turns off the pointer events of the page, Plotly's drag cover included: the moves of
+    // a drag reach the plot, which keeps the cursor of the press while a button is down.
+    const handleMove = (event: MouseEvent) => {
+      if (event.buttons === 0) setCursor(targetAt(event) ? 'pointer' : 'default');
       moveGuide(event);
+    };
+    // Captured before Plotly's own handler, which copies this cursor onto its drag cover.
+    const handlePress = (event: MouseEvent) => {
+      if (!targetAt(event)) setCursor(dragMode === 'pan' ? 'move' : 'ew-resize');
     };
     graph.addEventListener('click', handleClick);
     graph.addEventListener('mousemove', handleMove);
     graph.addEventListener('mouseleave', hideGuide);
+    graph.addEventListener('mousedown', handlePress, true);
     return () => {
       // The view changed: the guide shows the old position until the mouse moves again.
       hideGuide();
       graph.removeEventListener('click', handleClick);
       graph.removeEventListener('mousemove', handleMove);
       graph.removeEventListener('mouseleave', hideGuide);
+      graph.removeEventListener('mousedown', handlePress, true);
     };
-  }, [rendered, hitAreas, genome, view, handleTarget]);
+  }, [rendered, hitAreas, genome, view, dragMode, handleTarget]);
 
   useEffect(() => {
     const container = containerRef.current;
