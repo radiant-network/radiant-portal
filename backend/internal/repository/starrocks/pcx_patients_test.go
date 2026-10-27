@@ -491,7 +491,15 @@ func Test_GetPcxPatient_RestrictedPatientLabsHaveNoDates(t *testing.T) {
 				{"day": 2950, "date": null, "scale": "karnofsky", "score": 70,
 				 "score_text": "70 - Cares for self, unable to carry on normal activity"}
 			],
-			"csf": null
+			"csf": {
+				"protein": {"day": 2920, "date": null, "display": "38 mg/dL", "value": 38, "comparator": null, "unit": "mg/dL"},
+				"glucose": {"day": null, "date": null, "display": null, "value": null, "comparator": null, "unit": null},
+				"wbc": {"day": 2920, "date": null, "display": "12 /uL", "value": 12, "comparator": null, "unit": "/uL"},
+				"rbc": {"day": 2920, "date": null, "display": "150 /uL", "value": 150, "comparator": null, "unit": "/uL"},
+				"cytology": {"day": 2925, "date": null, "test_name": "Body Fluid Cytology", "malignant_cells": "suspicious",
+				 "evidence_tier": "text_confirmed", "multi_specimen_report": true},
+				"cell_free_dna": {"day": null, "date": null}
+			}
 		}`, string(actual))
 	})
 }
