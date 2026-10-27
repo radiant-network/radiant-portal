@@ -231,7 +231,7 @@ def occurrence_rows(sr):
                ["part", "seq_id", "task_id", "cnv_id", "aliquot", "chromosome", "start", "end", "type", "alternate", "length", "name",
                 "quality", "calls", "filter", "bc", "pe", "sm", "svtype", "svlen", "reflen", "ciend", "cipos", "cn", "cnf", "cnq", "mcn",
                 "mcnf", "mcnq", "maf", "sd", "ascn_as", "cytoband", "symbol", "nb_genes", "nb_snv"], sr["somatic__cnv__occurrence"]),
-        insert(f"{TENANT_DB}.exomiser", ["part", "seq_id", "locus_id", "id", "locus_hash", "moi", "variant_score", "gene_combined_score",
+        insert(f"{TENANT_DB}.exomiser", ["part", "seq_id", "task_id", "locus_id", "id", "locus_hash", "moi", "variant_score", "gene_combined_score",
                                           "variant_rank", "rank", "symbol", "acmg_classification", "acmg_evidence"], sr["exomiser"])]
 
 

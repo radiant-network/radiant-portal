@@ -104,8 +104,6 @@ var CaseRelatedTaskTypes = map[string]struct{}{
 	types.RadiantGermlineCNVAnnotationTask: {},
 	types.RadiantSomaticAnnotationTask:     {},
 	types.ClinicalReportTaskTypeCode:       {},
-	types.ExomiserTaskTypeCode:             {},
-	types.ExomiserCNVTaskTypeCode:          {},
 }
 
 var RequiresInputDocumentsTaskTypes = map[string]struct{}{
@@ -115,8 +113,6 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	types.RadiantGermlineAnnotationTask:    {},
 	types.RadiantGermlineCNVAnnotationTask: {},
 	types.RadiantSomaticAnnotationTask:     {},
-	types.ExomiserTaskTypeCode:             {},
-	types.ExomiserCNVTaskTypeCode:          {},
 }
 
 const VCFFormatCode = "vcf"
@@ -128,8 +124,6 @@ var VariantVCFDataTypeCodes = map[string]struct{}{
 }
 
 var SingleAliquotTaskTypes = map[string]struct{}{
-	types.ExomiserTaskTypeCode:                        {},
-	types.ExomiserCNVTaskTypeCode:                     {},
 	types.AlignmentGermlineVariantCallingTaskTypeCode: {},
 	types.AlignmentSomaticVariantCallingTaskTypeCode:  {},
 }
