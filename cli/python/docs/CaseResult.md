@@ -34,7 +34,7 @@ Name | Type | Description | Notes
 **proband_submitter_sample_ids** | **List[str]** |  | 
 **project_code** | **str** |  | [optional] 
 **project_name** | **str** |  | [optional] 
-**run_aliases** | **List[str]** |  | 
+**run_names** | **List[str]** |  | 
 **status_code** | [**CaseStatus**](CaseStatus.md) |  | 
 **submitter_proband_id** | **str** |  | [optional] 
 **updated_on** | **str** |  | 

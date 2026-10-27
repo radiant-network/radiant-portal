@@ -56,11 +56,11 @@ class CaseResult(BaseModel):
     proband_submitter_sample_ids: List[StrictStr]
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
-    run_aliases: List[StrictStr]
+    run_names: List[StrictStr]
     status_code: CaseStatus
     submitter_proband_id: Optional[StrictStr] = None
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assignees", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "proband_submitter_sample_ids", "project_code", "project_name", "run_aliases", "status_code", "submitter_proband_id", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assignees", "case_category_code", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_variants", "ordering_organization_code", "ordering_organization_name", "organization_code", "organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "proband_first_name", "proband_id", "proband_jhn", "proband_last_name", "proband_life_status_code", "proband_submitter_sample_ids", "project_code", "project_name", "run_names", "status_code", "submitter_proband_id", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -148,7 +148,7 @@ class CaseResult(BaseModel):
             "proband_submitter_sample_ids": obj.get("proband_submitter_sample_ids"),
             "project_code": obj.get("project_code"),
             "project_name": obj.get("project_name"),
-            "run_aliases": obj.get("run_aliases"),
+            "run_names": obj.get("run_names"),
             "status_code": obj.get("status_code"),
             "submitter_proband_id": obj.get("submitter_proband_id"),
             "updated_on": obj.get("updated_on")
