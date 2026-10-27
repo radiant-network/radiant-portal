@@ -50,18 +50,20 @@ type CNVProfileTrack struct {
 }
 
 type CNVProfileSegment struct {
-	CnvID      string   `json:"cnv_id" validate:"required"`
-	Chromosome string   `json:"chromosome" validate:"required"`
-	Start      int      `json:"start" validate:"required"`
-	End        int      `json:"end" validate:"required"`
-	Type       string   `json:"type" validate:"required"`
-	Length     int      `json:"length" validate:"required"`
-	Quality    *float32 `json:"quality,omitempty"`
-	Filter     string   `json:"filter,omitempty"`
-	CN         *int     `json:"cn,omitempty"`
-	SM         *float32 `json:"sm,omitempty"`
-	NbSNV      *int     `json:"nb_snv,omitempty"`
-	GnomadSF   *float32 `json:"gnomad_sf,omitempty"`
+	CnvID      string             `json:"cnv_id" validate:"required"`
+	Chromosome string             `json:"chromosome" validate:"required"`
+	Start      int                `json:"start" validate:"required"`
+	End        int                `json:"end" validate:"required"`
+	Type       string             `json:"type" validate:"required"`
+	Length     int                `json:"length" validate:"required"`
+	Quality    *float32           `json:"quality,omitempty"`
+	Filter     string             `json:"filter,omitempty"`
+	CN         *int               `json:"cn,omitempty"`
+	SM         *float32           `json:"sm,omitempty"`
+	NbSNV      *int               `json:"nb_snv,omitempty"`
+	GnomadSF   *float32           `json:"gnomad_sf,omitempty"`
+	HasNote    bool               `json:"has_note" validate:"required"`
+	FlagType   OccurrenceFlagType `json:"flag_type,omitempty" enums:"flag,pin,star"`
 }
 
 type CNVProfileROH struct {

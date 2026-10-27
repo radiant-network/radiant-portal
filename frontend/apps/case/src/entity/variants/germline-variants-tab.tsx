@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { useSWRConfig } from 'swr';
 
 import { type CaseEntity, type CaseSequencingExperiment, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
+import { useConfig } from '@/components/cores/applications-config';
 import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
@@ -61,6 +63,17 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [seqExpVariants],
   );
 
+  // Reloads the CNV table, whose list and count are keyed by its app id, after a change in the profile.
+  const { mutate } = useSWRConfig();
+  const cnvAppId = useConfig().germline_cnv_occurrence.app_id;
+  const refreshCNVTable = useCallback(
+    () =>
+      mutate(
+        key => typeof key === 'object' && key !== null && 'id' in key && String(key.id).startsWith(`${cnvAppId}:`),
+      ),
+    [mutate, cnvAppId],
+  );
+
   const handleTaskChange = useCallback(
     (value: number) => {
       searchParams.set('task_id', `${value}`);
@@ -85,6 +98,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
       taskId={selectedTaskId}
       experimentalStrategy={selectedSeqExp?.experimental_strategy_code}
       sampleId={selectedSeqExp?.sample_submitter_id}
+      onOccurrenceChange={refreshCNVTable}
     >
       <div className="bg-background flex flex-col">
         <SequencingExperimentVariantFilters

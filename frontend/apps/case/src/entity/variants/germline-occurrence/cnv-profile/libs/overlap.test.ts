@@ -24,6 +24,7 @@ const segment = (chromosome: string, start: number, end: number): CNVProfileSegm
   end,
   type: 'LOSS',
   length: end - start,
+  has_note: false,
 });
 
 describe('cnvsOnGene', () => {

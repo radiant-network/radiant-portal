@@ -8,7 +8,7 @@ import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
-import { genesApi } from '@/utils/api';
+import { genesApi, occurencesNotesApi } from '@/utils/api';
 
 import { useGeneTrack } from './hooks/use-gene-track';
 import { type CNVProfileIds, useProfileRegion } from './hooks/use-profile-region';
@@ -39,6 +39,7 @@ import {
   PLOT_MARGIN,
 } from './libs/traces';
 import CNVGenePanel from './cnv-gene-panel';
+import { useCNVProfile } from './cnv-profile-context';
 import CNVProfileLegend from './cnv-profile-legend';
 import CNVProfileNavbar, { type DragMode, panView, zoomView } from './cnv-profile-navbar';
 import CNVProfileTooltip, { type CNVProfileTooltipHandle } from './cnv-profile-tooltip';
@@ -89,6 +90,32 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   const [showFiltered, setShowFiltered] = useState(true);
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
   const [selectedSegment, setSelectedSegment] = useState<CNVProfileSegment | undefined>();
+  const { occurrenceChanged } = useCNVProfile();
+  // Whether each CNV has comments, once they changed in the profile: the profile is not reloaded.
+  const [hasNoteChanges, setHasNoteChanges] = useState<Record<string, boolean>>({});
+  const segments = useMemo(
+    () =>
+      profile.segments.map(segment =>
+        segment.cnv_id in hasNoteChanges ? { ...segment, has_note: hasNoteChanges[segment.cnv_id] } : segment,
+      ),
+    [profile.segments, hasNoteChanges],
+  );
+  const shownSegment = selectedSegment && segments.find(segment => segment.cnv_id === selectedSegment.cnv_id);
+
+  const handleNotesChange = useCallback(
+    async (segment: CNVProfileSegment) => {
+      const response = await occurencesNotesApi.countOccurrenceNotes(
+        tenant,
+        ids.caseId,
+        ids.seqId,
+        ids.taskId,
+        segment.cnv_id,
+      );
+      setHasNoteChanges(current => ({ ...current, [segment.cnv_id]: (response.data.count ?? 0) > 0 }));
+      occurrenceChanged();
+    },
+    [tenant, ids.caseId, ids.seqId, ids.taskId, occurrenceChanged],
+  );
   const { genes } = useGeneTrack(regionWindow(genome, view, GENE_TRACK_MAX_SPAN));
   const { overview } = profile;
   const { region, isLoading: regionLoading } = useProfileRegion(
@@ -451,16 +478,17 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
             ids={ids}
             gene={selectedGene.gene}
             exonIndex={selectedGene.exonIndex}
-            segments={profile.segments}
+            segments={segments}
             onSegmentClick={focusSegment}
             onClose={() => setSelectedGene(undefined)}
           />
         )}
-        {selectedSegment && (
+        {shownSegment && (
           <CNVSegmentPanel
             ids={ids}
-            segment={selectedSegment}
+            segment={shownSegment}
             onGeneClick={symbol => void handleSearch(symbol)}
+            onNotesChange={segment => void handleNotesChange(segment)}
             onClose={() => setSelectedSegment(undefined)}
           />
         )}

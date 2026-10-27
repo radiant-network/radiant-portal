@@ -4,6 +4,8 @@ import type { CNVGeneOverlap, CNVProfileSegment } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
+import NotesContainer from '@/components/base/notes/notes-container';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
@@ -12,17 +14,21 @@ import { getClingenCnvUrl, getFranklinCnvUrl } from '@/components/base/variant/u
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
+
 import { useCNVGeneOverlaps } from './hooks/use-cnv-gene-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
 import { exonsHit } from './libs/overlap';
 import { getCNVProfilePalette } from './libs/palette';
 import { PROTEIN_CODING } from './libs/traces';
 import CNVGeneConstraint from './cnv-gene-constraint';
+import CNVOccurrenceMarks from './cnv-occurrence-marks';
 
 type CNVSegmentPanelProps = {
   ids: CNVProfileIds;
   segment: CNVProfileSegment;
   onGeneClick: (symbol: string) => void;
+  onNotesChange: (segment: CNVProfileSegment) => void;
   onClose: () => void;
 };
 
@@ -38,8 +44,9 @@ const percent = (value: number, fractionDigits: number) =>
  * of each gene, as in the gene panel. The protein-coding genes come first, edged in the colour of
  * their track.
  */
-function CNVSegmentPanel({ ids, segment, onGeneClick, onClose }: CNVSegmentPanelProps) {
+function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onClose }: CNVSegmentPanelProps) {
   const { t } = useI18n();
+  const { canComment } = useCaseVariantPermissions();
   const { overlaps, trackGenes, isLoading } = useCNVGeneOverlaps(ids, segment);
   const palette = getCNVProfilePalette(usePlotlyTheme().isDark);
   const gain = segment.type === 'GAIN';
@@ -70,6 +77,7 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onClose }: CNVSegmentPanel
             {gain ? t('case_entity.variants.cnv_profile.hover.gain') : t('case_entity.variants.cnv_profile.hover.loss')}
           </Badge>
           <span className="tabular-nums">{locus(segment.chromosome, segment.start, segment.end)}</span>
+          <CNVOccurrenceMarks flag={segment.flag_type} hasNote={segment.has_note} />
         </CardTitle>
         <CardAction>
           <Button
@@ -178,6 +186,19 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onClose }: CNVSegmentPanel
               ClinGen
             </AnchorLink>
           </div>
+        </section>
+
+        <section className="-mx-4 flex flex-col gap-2">
+          <h3 className="px-4 text-xs font-medium uppercase text-muted-foreground">{t('notes.variant.title')}</h3>
+          <NotesProvider value={{ onChangeCallback: () => onNotesChange(segment) }}>
+            <NotesContainer
+              caseId={ids.caseId}
+              seqId={ids.seqId}
+              taskId={ids.taskId}
+              occurrenceId={segment.cnv_id}
+              canComment={canComment}
+            />
+          </NotesProvider>
         </section>
       </CardContent>
     </Card>

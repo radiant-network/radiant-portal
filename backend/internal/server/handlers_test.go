@@ -177,7 +177,7 @@ func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, s
 	return m.documents, m.err
 }
 
-func (m *MockCNVProfileRepository) GetCNVProfileSegments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
+func (m *MockCNVProfileRepository) GetCNVProfileSegments(ctx context.Context, caseID int, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
 	return m.segments, nil
 }
 

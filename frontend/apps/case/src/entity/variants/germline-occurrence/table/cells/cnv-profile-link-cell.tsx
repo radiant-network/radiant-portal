@@ -1,7 +1,7 @@
 import type { GermlineCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-import { useCNVProfile } from '../../cnv-profile/cnv-profile-dialog';
+import { useCNVProfile } from '../../cnv-profile/cnv-profile-context';
 import type { CNVProfileFocus } from '../../cnv-profile/libs/focus';
 
 import OverlappingGeneLinkCell from './overlapping-gene-link-cell';

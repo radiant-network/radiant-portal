@@ -14,6 +14,7 @@ import type { CNVProfileIds } from './hooks/use-profile-region';
 import { geneDescription } from './libs/gene';
 import { cnvsOnGene, exonsHit } from './libs/overlap';
 import CNVGeneConstraint from './cnv-gene-constraint';
+import CNVOccurrenceMarks from './cnv-occurrence-marks';
 
 type CNVGenePanelProps = {
   ids: CNVProfileIds;
@@ -140,6 +141,7 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
                     </Badge>
                     {t('case_entity.variants.cnv_profile.hover.copy_number')} {segment.cn ?? '-'} ·{' '}
                     {segment.filter ?? '-'}
+                    <CNVOccurrenceMarks flag={segment.flag_type} hasNote={segment.has_note} />
                   </span>
                   <span className="text-xs font-normal text-muted-foreground tabular-nums">
                     {locus(segment.chromosome, segment.start, segment.end)} · {toKiloBases(segment.end - segment.start)}

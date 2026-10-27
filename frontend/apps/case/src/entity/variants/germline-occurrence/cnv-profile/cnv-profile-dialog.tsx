@@ -1,4 +1,4 @@
-import { createContext, lazy, type ReactNode, Suspense, useContext, useMemo, useState } from 'react';
+import { lazy, type ReactNode, Suspense, useMemo, useState } from 'react';
 import { type AxiosError, isAxiosError } from 'axios';
 import { ChartScatter } from 'lucide-react';
 import useSWR from 'swr';
@@ -14,6 +14,7 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { occurrencesApi } from '@/utils/api';
 
 import type { CNVProfileFocus } from './libs/focus';
+import { CNVProfileContext, type CNVProfileContextValue, useCNVProfile } from './cnv-profile-context';
 
 // Plotly reads the window when it loads: the chart is only loaded in the browser, on open.
 const CNVProfileChart = lazy(() => import('./cnv-profile-chart'));
@@ -26,21 +27,9 @@ type CNVProfileProviderProps = {
   taskId?: number;
   experimentalStrategy?: string;
   sampleId?: string;
+  onOccurrenceChange?: () => void;
   children: ReactNode;
 };
-
-type CNVProfileContextValue = {
-  available: boolean;
-  open: (focus?: CNVProfileFocus) => void;
-};
-
-const CNVProfileContext = createContext<CNVProfileContextValue>({ available: false, open: () => {} });
-
-/**
- * Opens the CNV profile of the sequencing, on the whole genome or on a CNV or a gene. Outside a
- * CNVProfileProvider, the profile is unavailable.
- */
-export const useCNVProfile = () => useContext(CNVProfileContext);
 
 function missingFilesKey(error: AxiosError<ApiError>) {
   const missing: string[] = error.response?.data?.detail?.missing ?? [];
@@ -66,6 +55,7 @@ export function CNVProfileProvider({
   taskId,
   experimentalStrategy,
   sampleId,
+  onOccurrenceChange,
   children,
 }: CNVProfileProviderProps) {
   const { t } = useI18n();
@@ -90,8 +80,9 @@ export function CNVProfileProvider({
         setFocus(next);
         setOpen(true);
       },
+      occurrenceChanged: () => onOccurrenceChange?.(),
     }),
-    [available],
+    [available, onOccurrenceChange],
   );
 
   const loader = (

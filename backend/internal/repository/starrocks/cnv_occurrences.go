@@ -39,6 +39,13 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	return tx, nil
 }
 
+// joinCNVNoteAndFlag joins, as note and flag, the notes and the flag of the CNVs of a case and
+// sequencing: at most one row each per CNV.
+func joinCNVNoteAndFlag(ctx context.Context, tx *gorm.DB, alias string, caseId int, seqId int) *gorm.DB {
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+}
+
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the
 // same column-agnostic query and differ solely in which DTO the rows are scanned into.
 func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]T, error) {
@@ -48,8 +55,7 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	alias := cnvTable.Alias
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	tx = joinCNVNoteAndFlag(ctx, tx, alias, caseId, seqId)
 	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
 	// row per occurrence, so filtering on them beats a second scan of the federated tables.
 	if userQuery != nil {

@@ -67,7 +67,7 @@ func Test_GetGermlineCNVProfileHandler_OK(t *testing.T) {
 	cn, sm, nbSNV, gnomadSF := 3, float32(1.5), 4, float32(0.25)
 	repo := &MockCNVProfileRepository{
 		documents: cnvProfileDocuments,
-		segments:  []types.CNVProfileSegment{{CnvID: "7", Chromosome: "1", Start: 100, End: 200, Type: "GAIN", Length: 100, Filter: "PASS", CN: &cn, SM: &sm, NbSNV: &nbSNV, GnomadSF: &gnomadSF}},
+		segments:  []types.CNVProfileSegment{{CnvID: "7", Chromosome: "1", Start: 100, End: 200, Type: "GAIN", Length: 100, Filter: "PASS", CN: &cn, SM: &sm, NbSNV: &nbSNV, GnomadSF: &gnomadSF, HasNote: true, FlagType: types.OccurrenceFlagTypePin}},
 		cytobands: []types.Cytoband{{Chromosome: "1", Cytoband: "p36.33", Start: 0, End: 500, GieStain: "gneg"}},
 	}
 	w := getCNVProfile(repo, &MockObjectStore{objects: cnvProfileObjects(t)}, "1", "1", "1")
@@ -84,7 +84,7 @@ func Test_GetGermlineCNVProfileHandler_OK(t *testing.T) {
 			{"chromosome":"1","positions":[10,150],"values":[0.5,0.25]},
 			{"chromosome":"2","positions":[20],"values":[1]}
 		],
-		"segments": [{"cnv_id":"7","chromosome":"1","start":100,"end":200,"type":"GAIN","length":100,"filter":"PASS","cn":3,"sm":1.5,"nb_snv":4,"gnomad_sf":0.25}],
+		"segments": [{"cnv_id":"7","chromosome":"1","start":100,"end":200,"type":"GAIN","length":100,"filter":"PASS","cn":3,"sm":1.5,"nb_snv":4,"gnomad_sf":0.25,"has_note":true,"flag_type":"pin"}],
 		"roh": [{"chromosome":"2","start":100,"end":400,"score":1.5,"nb_hom":60,"nb_het":0}],
 		"cytobands": [{"chromosome":"1","cytoband":"p36.33","start":0,"end":500,"gie_stain":"gneg"}]
 	}`, w.Body.String())

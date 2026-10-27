@@ -39,7 +39,7 @@ const (
 type cnvProfileReader interface {
 	GetExperimentalStrategy(ctx context.Context, seqID int) (string, error)
 	GetCNVProfileDocuments(ctx context.Context, seqID int) ([]types.CNVProfileDocument, error)
-	GetCNVProfileSegments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileSegment, error)
+	GetCNVProfileSegments(ctx context.Context, caseID int, seqID int, taskID int) ([]types.CNVProfileSegment, error)
 	GetCytobands(ctx context.Context) ([]types.Cytoband, error)
 }
 
@@ -95,11 +95,11 @@ type genomeTracks struct {
 func GetGermlineCNVProfileHandler(repo cnvProfileReader, store objectReader) gin.HandlerFunc {
 	overviews := expirable.NewLRU[string, *genomeTracks](cnvProfileOverviewCacheSize, nil, cnvProfileOverviewTTL)
 	return func(c *gin.Context) {
-		seqID, taskID, ok := cnvProfileParams(c)
+		caseID, seqID, taskID, ok := cnvProfileParams(c)
 		if !ok {
 			return
 		}
-		profile, err := buildCNVProfile(c.Request.Context(), repo, store, overviews, seqID, taskID)
+		profile, err := buildCNVProfile(c.Request.Context(), repo, store, overviews, caseID, seqID, taskID)
 		if err != nil {
 			handleCNVProfileError(c, err)
 			return
@@ -133,7 +133,7 @@ func GetGermlineCNVProfileHandler(repo cnvProfileReader, store objectReader) gin
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region [get]
 func GetGermlineCNVProfileRegionHandler(repo cnvProfileReader, store objectReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		seqID, _, ok := cnvProfileParams(c)
+		_, seqID, _, ok := cnvProfileParams(c)
 		if !ok {
 			return
 		}
@@ -151,22 +151,23 @@ func GetGermlineCNVProfileRegionHandler(repo cnvProfileReader, store objectReade
 	}
 }
 
-func cnvProfileParams(c *gin.Context) (int, int, bool) {
-	if _, err := strconv.Atoi(c.Param("case_id")); err != nil {
+func cnvProfileParams(c *gin.Context) (int, int, int, bool) {
+	caseID, err := strconv.Atoi(c.Param("case_id"))
+	if err != nil {
 		HandleNotFoundError(c, "case_id")
-		return 0, 0, false
+		return 0, 0, 0, false
 	}
 	seqID, err := strconv.Atoi(c.Param("seq_id"))
 	if err != nil {
 		HandleNotFoundError(c, "seq_id")
-		return 0, 0, false
+		return 0, 0, 0, false
 	}
 	taskID, err := strconv.Atoi(c.Param("task_id"))
 	if err != nil {
 		HandleNotFoundError(c, "task_id")
-		return 0, 0, false
+		return 0, 0, 0, false
 	}
-	return seqID, taskID, true
+	return caseID, seqID, taskID, true
 }
 
 func handleCNVProfileError(c *gin.Context, err error) {
@@ -187,7 +188,7 @@ func handleCNVProfileError(c *gin.Context, err error) {
 	}
 }
 
-func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectReader, overviews *overviewCache, seqID int, taskID int) (*types.CNVProfile, error) {
+func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectReader, overviews *overviewCache, caseID int, seqID int, taskID int) (*types.CNVProfile, error) {
 	strategy, err := repo.GetExperimentalStrategy(ctx, seqID)
 	if err != nil {
 		return nil, fmt.Errorf("get experimental strategy of sequencing %d: %w", seqID, err)
@@ -222,7 +223,7 @@ func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectRea
 		}
 	}
 
-	if profile.Segments, err = repo.GetCNVProfileSegments(ctx, seqID, taskID); err != nil {
+	if profile.Segments, err = repo.GetCNVProfileSegments(ctx, caseID, seqID, taskID); err != nil {
 		return nil, fmt.Errorf("get cnv segments of task %d: %w", taskID, err)
 	}
 	if profile.Segments == nil {

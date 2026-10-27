@@ -4,7 +4,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { getFranklinCnvUrl } from '@/components/base/variant/utils';
 
-import { useCNVProfile } from '../../cnv-profile/cnv-profile-dialog';
+import { useCNVProfile } from '../../cnv-profile/cnv-profile-context';
 import { cnvFocus } from '../../cnv-profile/libs/focus';
 
 type CNVNameCellProps = {

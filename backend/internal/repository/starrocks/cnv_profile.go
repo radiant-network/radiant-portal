@@ -88,13 +88,14 @@ func SelectCNVProfileFiles(documents []types.CNVProfileDocument) CNVProfileFiles
 	return files
 }
 
-func (r *CNVProfileRepository) GetCNVProfileSegments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
+func (r *CNVProfileRepository) GetCNVProfileSegments(ctx context.Context, caseID int, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
 	tx, err := prepareCNVQuery(ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, seqID, taskID, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	alias := types.GermlineCNVOccurrenceTable.Alias
-	tx = tx.Select(fmt.Sprintf("%[1]s.cnv_id, %[1]s.chromosome, %[1]s.start, %[1]s.end, %[1]s.type, %[1]s.length, %[1]s.quality, %[1]s.filter, %[1]s.cn, %[1]s.sm, %[1]s.nb_snv, %[1]s.gnomad_sf", alias))
+	tx = joinCNVNoteAndFlag(ctx, tx, alias, caseID, seqID)
+	tx = tx.Select(fmt.Sprintf("%[1]s.cnv_id, %[1]s.chromosome, %[1]s.start, %[1]s.end, %[1]s.type, %[1]s.length, %[1]s.quality, %[1]s.filter, %[1]s.cn, %[1]s.sm, %[1]s.nb_snv, %[1]s.gnomad_sf, note.occurrence_id IS NOT NULL AS has_note, flag.flag_type", alias))
 	tx = tx.Order(fmt.Sprintf("%[1]s.chromosome, %[1]s.start", alias))
 
 	var segments []types.CNVProfileSegment

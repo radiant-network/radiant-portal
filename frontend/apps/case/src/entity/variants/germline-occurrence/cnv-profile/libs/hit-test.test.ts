@@ -27,6 +27,7 @@ const segment = (overrides: Partial<CNVProfileSegment>): CNVProfileSegment => ({
   end: 5000,
   type: 'GAIN',
   length: 4000,
+  has_note: false,
   filter: 'PASS',
   sm: 1.5,
   cn: 3,
