@@ -10,7 +10,9 @@ Name | Type | Description | Notes
 **cnv_id** | **str** |  | 
 **end** | **int** |  | 
 **filter** | **str** |  | [optional] 
+**gnomad_sf** | **float** |  | [optional] 
 **length** | **int** |  | 
+**nb_snv** | **int** |  | [optional] 
 **quality** | **float** |  | [optional] 
 **sm** | **float** |  | [optional] 
 **start** | **int** |  | 

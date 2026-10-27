@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from radiant_python.models.gene_track_exon import GeneTrackExon
 from typing import Optional, Set
 from typing_extensions import Self
@@ -33,10 +33,13 @@ class GeneTrackGene(BaseModel):
     end: StrictInt
     exons: List[GeneTrackExon]
     gene_id: StrictStr
+    gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene")
+    gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene")
+    omim_inheritance_code: Optional[List[StrictStr]] = Field(default=None, description="OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene")
     start: StrictInt
     strand: Optional[StrictStr] = None
     symbol: StrictStr
-    __properties: ClassVar[List[str]] = ["biotype", "chromosome", "description", "end", "exons", "gene_id", "start", "strand", "symbol"]
+    __properties: ClassVar[List[str]] = ["biotype", "chromosome", "description", "end", "exons", "gene_id", "gnomad_loeuf", "gnomad_pli", "omim_inheritance_code", "start", "strand", "symbol"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,6 +105,9 @@ class GeneTrackGene(BaseModel):
             "end": obj.get("end"),
             "exons": [GeneTrackExon.from_dict(_item) for _item in obj["exons"]] if obj.get("exons") is not None else None,
             "gene_id": obj.get("gene_id"),
+            "gnomad_loeuf": obj.get("gnomad_loeuf"),
+            "gnomad_pli": obj.get("gnomad_pli"),
+            "omim_inheritance_code": obj.get("omim_inheritance_code"),
             "start": obj.get("start"),
             "strand": obj.get("strand"),
             "symbol": obj.get("symbol")

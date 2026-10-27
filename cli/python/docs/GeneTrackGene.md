@@ -12,6 +12,9 @@ Name | Type | Description | Notes
 **end** | **int** |  | 
 **exons** | [**List[GeneTrackExon]**](GeneTrackExon.md) |  | 
 **gene_id** | **str** |  | 
+**gnomad_loeuf** | **float** | GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene | [optional] 
+**gnomad_pli** | **float** | GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene | [optional] 
+**omim_inheritance_code** | **List[str]** | OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene | [optional] 
 **start** | **int** |  | 
 **strand** | **str** |  | [optional] 
 **symbol** | **str** |  | 

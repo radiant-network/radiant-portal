@@ -123,6 +123,8 @@ components:
     CNVGeneOverlap:
       description: CNVGeneOverlap represents a gene overlap with a CNV
       properties:
+        biotype:
+          type: string
         cytoband:
           items:
             type: string
@@ -132,16 +134,33 @@ components:
           type: string
         gene_length:
           type: integer
+        gnomad_loeuf:
+          description: GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts
+            of the gene
+          type: number
+        gnomad_pli:
+          description: GnomadPli is the highest gnomAD pLI over the Ensembl transcripts
+            of the gene
+          type: number
         nb_exons:
           type: integer
         nb_overlap_bases:
           type: integer
+        omim_inheritance_code:
+          description: OmimInheritanceCode lists the OMIM inheritance modes of the
+            phenotypes of the gene
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         overlap_type:
           type: string
         overlapping_cnv_percent:
           type: number
         overlapping_gene_percent:
           type: number
+        strand:
+          type: string
         symbol:
           type: string
         tenant_gene_panels:
@@ -286,7 +305,11 @@ components:
           type: integer
         filter:
           type: string
+        gnomad_sf:
+          type: number
         length:
+          type: integer
+        nb_snv:
           type: integer
         quality:
           type: number
@@ -2231,6 +2254,21 @@ components:
           uniqueItems: false
         gene_id:
           type: string
+        gnomad_loeuf:
+          description: GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts
+            of the gene
+          type: number
+        gnomad_pli:
+          description: GnomadPli is the highest gnomAD pLI over the Ensembl transcripts
+            of the gene
+          type: number
+        omim_inheritance_code:
+          description: OmimInheritanceCode lists the OMIM inheritance modes of the
+            phenotypes of the gene
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         start:
           type: integer
         strand:

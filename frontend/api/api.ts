@@ -281,6 +281,12 @@ export interface BatchSummary {
 export interface CNVGeneOverlap {
     /**
      * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
+    'biotype'?: string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof CNVGeneOverlap
      */
@@ -298,6 +304,18 @@ export interface CNVGeneOverlap {
      */
     'gene_length': number;
     /**
+     * GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
+    'gnomad_pli'?: number;
+    /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
@@ -309,6 +327,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'nb_overlap_bases': number;
+    /**
+     * OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+     * @type {Array<string>}
+     * @memberof CNVGeneOverlap
+     */
+    'omim_inheritance_code'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -327,6 +351,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'overlapping_gene_percent': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
+    'strand'?: string;
     /**
      * 
      * @type {string}
@@ -554,7 +584,19 @@ export interface CNVProfileSegment {
      * @type {number}
      * @memberof CNVProfileSegment
      */
+    'gnomad_sf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileSegment
+     */
     'length': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CNVProfileSegment
+     */
+    'nb_snv'?: number;
     /**
      * 
      * @type {number}
@@ -4228,6 +4270,24 @@ export interface GeneTrackGene {
      * @memberof GeneTrackGene
      */
     'gene_id': string;
+    /**
+     * GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'gnomad_pli'?: number;
+    /**
+     * OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+     * @type {Array<string>}
+     * @memberof GeneTrackGene
+     */
+    'omim_inheritance_code'?: Array<string>;
     /**
      * 
      * @type {number}

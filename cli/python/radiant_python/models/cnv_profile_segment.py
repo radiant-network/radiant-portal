@@ -31,12 +31,14 @@ class CNVProfileSegment(BaseModel):
     cnv_id: StrictStr
     end: StrictInt
     filter: Optional[StrictStr] = None
+    gnomad_sf: Optional[Union[StrictFloat, StrictInt]] = None
     length: StrictInt
+    nb_snv: Optional[StrictInt] = None
     quality: Optional[Union[StrictFloat, StrictInt]] = None
     sm: Optional[Union[StrictFloat, StrictInt]] = None
     start: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["chromosome", "cn", "cnv_id", "end", "filter", "length", "quality", "sm", "start", "type"]
+    __properties: ClassVar[List[str]] = ["chromosome", "cn", "cnv_id", "end", "filter", "gnomad_sf", "length", "nb_snv", "quality", "sm", "start", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,7 +96,9 @@ class CNVProfileSegment(BaseModel):
             "cnv_id": obj.get("cnv_id"),
             "end": obj.get("end"),
             "filter": obj.get("filter"),
+            "gnomad_sf": obj.get("gnomad_sf"),
             "length": obj.get("length"),
+            "nb_snv": obj.get("nb_snv"),
             "quality": obj.get("quality"),
             "sm": obj.get("sm"),
             "start": obj.get("start"),
