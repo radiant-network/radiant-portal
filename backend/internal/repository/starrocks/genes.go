@@ -175,9 +175,9 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	for i, g := range genes {
 		symbols[i] = g.Symbol
 	}
-	inheritance, err := omimInheritanceCodes(ctx, r.db, symbols)
+	omim, err := omimGenes(ctx, r.db, symbols)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching gene track omim inheritance: %w", err)
+		return nil, fmt.Errorf("error fetching gene track omim phenotypes: %w", err)
 	}
 	constraints, err := geneConstraints(ctx, r.db, geneIDs)
 	if err != nil {
@@ -185,7 +185,8 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	}
 	for i := range genes {
 		genes[i].Exons = mergeExons(exonsByGene[genes[i].GeneID])
-		genes[i].OmimInheritanceCode = inheritance[genes[i].Symbol]
+		genes[i].OmimInheritanceCode = omim[genes[i].Symbol].InheritanceCodes
+		genes[i].OmimConditions = omim[genes[i].Symbol].Conditions
 		genes[i].GnomadPli, genes[i].GnomadLoeuf = constraints[genes[i].GeneID].Pli, constraints[genes[i].GeneID].Loeuf
 	}
 	return genes, nil
@@ -225,32 +226,43 @@ func geneConstraints(ctx context.Context, db *gorm.DB, geneIDs []string) (map[st
 	return constraints, nil
 }
 
-// omimInheritanceCodes gives the OMIM inheritance modes of each gene symbol, over all its phenotypes,
-// without duplicates and in the order of the phenotypes.
-func omimInheritanceCodes(ctx context.Context, db *gorm.DB, symbols []string) (map[string][]string, error) {
-	codes := map[string][]string{}
+type omimGene struct {
+	// InheritanceCodes are the inheritance modes over all the phenotypes, without duplicates and in
+	// the order of the phenotypes.
+	InheritanceCodes []string
+	Conditions       []types.OmimGenePanel
+}
+
+// omimGenes gives the OMIM phenotypes of each gene symbol, as conditions with their inheritance modes.
+func omimGenes(ctx context.Context, db *gorm.DB, symbols []string) (map[string]omimGene, error) {
+	genes := map[string]omimGene{}
 	if len(symbols) == 0 {
-		return codes, nil
+		return genes, nil
 	}
 	var panels []struct {
 		Symbol          string
+		Panel           string
+		OmimPhenotypeId string
 		InheritanceCode types.JsonArray[string] `gorm:"type:json"`
 	}
 	tx := db.WithContext(ctx).Table(types.OmimGenePanelTable.TenantQualifiedName(ctx))
-	tx = tx.Select("symbol, inheritance_code").Where("symbol IN ? AND inheritance_code IS NOT NULL", symbols)
+	tx = tx.Select("symbol, panel, omim_phenotype_id, inheritance_code").Where("symbol IN ? AND omim_phenotype_id IS NOT NULL", symbols)
 	tx = tx.Order("symbol, omim_phenotype_id, panel")
 	if err := tx.Find(&panels).Error; err != nil {
-		return nil, fmt.Errorf("error fetching omim inheritance: %w", err)
+		return nil, fmt.Errorf("error fetching omim phenotypes: %w", err)
 	}
 
 	for _, p := range panels {
+		gene := genes[p.Symbol]
+		gene.Conditions = append(gene.Conditions, types.OmimGenePanel{OmimPhenotypeId: p.OmimPhenotypeId, Panel: p.Panel, InheritanceCode: p.InheritanceCode})
 		for _, code := range p.InheritanceCode {
-			if !slices.Contains(codes[p.Symbol], code) {
-				codes[p.Symbol] = append(codes[p.Symbol], code)
+			if !slices.Contains(gene.InheritanceCodes, code) {
+				gene.InheritanceCodes = append(gene.InheritanceCodes, code)
 			}
 		}
+		genes[p.Symbol] = gene
 	}
-	return codes, nil
+	return genes, nil
 }
 
 // mergeExons merges overlapping exons, given sorted by start.

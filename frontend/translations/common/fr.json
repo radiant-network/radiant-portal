@@ -2603,6 +2603,7 @@
           "no_cnv": "Aucun gain ni perte appelé sur ce gène.",
           "genes": "Gènes chevauchés ({{count}})",
           "no_gene": "Aucun gène ne chevauche ce CNV.",
+          "no_omim_condition": "Aucune condition OMIM pour ce gène.",
           "links": "Liens"
         }
       }

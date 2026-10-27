@@ -105,6 +105,8 @@ type GeneTrackGene struct {
 	Exons       []GeneTrackExon `json:"exons" validate:"required" gorm:"-"`
 	// OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
 	OmimInheritanceCode []string `json:"omim_inheritance_code,omitempty" gorm:"-"`
+	// OmimConditions lists the OMIM phenotypes of the gene, with their inheritance modes
+	OmimConditions []OmimGenePanel `json:"omim_conditions,omitempty" gorm:"-"`
 	// GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene
 	GnomadPli *float32 `json:"gnomad_pli,omitempty" gorm:"-"`
 	// GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene

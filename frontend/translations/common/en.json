@@ -2599,6 +2599,7 @@
           "no_cnv": "No gain or loss called on this gene.",
           "genes": "Overlapping genes ({{count}})",
           "no_gene": "No gene overlaps this CNV.",
+          "no_omim_condition": "No OMIM condition for this gene.",
           "links": "Links"
         }
       }

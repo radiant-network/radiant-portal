@@ -98,11 +98,15 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
   return (
     <Card size="sm" className="absolute top-2 right-2 z-10 w-96 max-h-full overflow-y-auto shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="items-center gap-2">
           <Badge variant={gain ? 'blue' : 'red'}>
             {gain ? t('case_entity.variants.cnv_profile.hover.gain') : t('case_entity.variants.cnv_profile.hover.loss')}
           </Badge>
-          <span className="tabular-nums">{locus(segment.chromosome, segment.start, segment.end)}</span>
+          <span className="whitespace-nowrap tabular-nums">
+            {locus(segment.chromosome, segment.start, segment.end)}
+          </span>
+        </CardTitle>
+        <div className="flex items-center gap-1">
           <OccurrenceFlagCell
             caseId={ids.caseId}
             seqId={ids.seqId}
@@ -115,7 +119,7 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
             hasNote={segment.has_note}
             onNoteClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           />
-        </CardTitle>
+        </div>
         <CardAction>
           <Button
             size="xs"

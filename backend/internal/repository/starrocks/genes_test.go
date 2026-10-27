@@ -187,10 +187,15 @@ func Test_GetGeneTrack_GenesOfEveryBiotypeWithMergedExonsOmimInheritanceAndConst
 		require.NoError(t, err)
 		assert.Equal(t, []types.GeneTrackGene{
 			{GeneID: "ENSG00000000003", Symbol: "TSPAN6", Chromosome: "1", Start: 10000, End: 10200, Strand: "-", Biotype: "protein_coding", Description: "tetraspanin 6",
-				Exons: []types.GeneTrackExon{{Start: 10000, End: 10100}}},
+				Exons:          []types.GeneTrackExon{{Start: 10000, End: 10100}},
+				OmimConditions: []types.OmimGenePanel{{OmimPhenotypeId: "100000", Panel: "Tetraspanin disease"}}},
 			{GeneID: "ENSG00000000005", Symbol: "TNMD", Chromosome: "1", Start: 10000, End: 20000, Strand: "+", Biotype: "protein_coding", Description: "tenomodulin",
 				Exons:               []types.GeneTrackExon{{Start: 10000, End: 10100}, {Start: 10150, End: 10250}, {Start: 10450, End: 10750}},
 				OmimInheritanceCode: []string{"AR", "XLR"},
+				OmimConditions: []types.OmimGenePanel{
+					{OmimPhenotypeId: "100001", Panel: "Tenomodulin disease A", InheritanceCode: types.JsonArray[string]{"AR"}},
+					{OmimPhenotypeId: "100002", Panel: "Tenomodulin disease B", InheritanceCode: types.JsonArray[string]{"AR", "XLR"}},
+				},
 				// The highest pLI and the lowest LOEUF come from two transcripts.
 				GnomadPli: ptr(float32(0.95)), GnomadLoeuf: ptr(float32(0.31))},
 			{GeneID: "ENSG00000000419", Symbol: "DPM1", Chromosome: "1", Start: 10250, End: 10750, Strand: "-", Biotype: "lncRNA", Description: "dolichyl-phosphate mannosyltransferase subunit 1",
@@ -215,7 +220,8 @@ func Test_GetGeneTrackBySymbol_IgnoresCase(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, []types.GeneTrackGene{
 			{GeneID: "ENSG00000000003", Symbol: "TSPAN6", Chromosome: "1", Start: 10000, End: 10200, Strand: "-", Biotype: "protein_coding", Description: "tetraspanin 6",
-				Exons: []types.GeneTrackExon{{Start: 10000, End: 10100}}},
+				Exons:          []types.GeneTrackExon{{Start: 10000, End: 10100}},
+				OmimConditions: []types.OmimGenePanel{{OmimPhenotypeId: "100000", Panel: "Tetraspanin disease"}}},
 		}, genes)
 	})
 }

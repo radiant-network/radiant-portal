@@ -222,9 +222,9 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	for i, o := range overlaps {
 		symbols[i], geneIDs[i] = o.Symbol, o.GeneId
 	}
-	inheritance, err := omimInheritanceCodes(ctx, db, symbols)
+	omim, err := omimGenes(ctx, db, symbols)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching gene overlap omim inheritance: %w", err)
+		return nil, fmt.Errorf("error fetching gene overlap omim phenotypes: %w", err)
 	}
 	constraints, err := geneConstraints(ctx, db, geneIDs)
 	if err != nil {
@@ -234,7 +234,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 		if overlaps[i].TenantGenePanels == nil {
 			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
 		}
-		overlaps[i].OmimInheritanceCode = inheritance[overlaps[i].Symbol]
+		overlaps[i].OmimInheritanceCode = omim[overlaps[i].Symbol].InheritanceCodes
 		overlaps[i].GnomadPli, overlaps[i].GnomadLoeuf = constraints[overlaps[i].GeneId].Pli, constraints[overlaps[i].GeneId].Loeuf
 	}
 	return overlaps, nil

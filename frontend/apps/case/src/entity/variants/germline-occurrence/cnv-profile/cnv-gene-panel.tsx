@@ -2,17 +2,17 @@ import { XIcon } from 'lucide-react';
 
 import type { CNVProfileSegment, GeneTrackGene } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
-import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
 import { useGeneCNVOverlaps } from './hooks/use-gene-cnv-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
-import { geneDescription } from './libs/gene';
 import { cnvsOnGene, exonsHit } from './libs/overlap';
 import { getCNVProfilePalette } from './libs/palette';
 import { isFiltered } from './libs/traces';
@@ -70,13 +70,12 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
   return (
     <Card size="sm" className="absolute top-2 right-2 z-10 w-96 max-h-full overflow-y-auto shadow-lg">
       <CardHeader>
-        <CardTitle>
-          {gene.symbol}{' '}
+        <CardTitle className="items-baseline gap-1.5">
+          {gene.symbol}
           <span className="text-sm font-normal text-muted-foreground">
             ({t('case_entity.variants.cnv_profile.panel.strand', { strand: gene.strand ?? '-' })})
           </span>
         </CardTitle>
-        {geneDescription(gene) && <CardDescription>{geneDescription(gene)}</CardDescription>}
         <CardAction>
           <Button size="xs" variant="ghost" iconOnly aria-label={t('a11y.cnv_profile.close_panel')} onClick={onClose}>
             <XIcon />
@@ -93,10 +92,6 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
               <dd>{gene.biotype.replaceAll('_', ' ')}</dd>
             </>
           )}
-          <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.omim_inheritance')}</dt>
-          <dd>
-            <OmimCell codes={gene.omim_inheritance_code} />
-          </dd>
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.pli')}</dt>
           <dd>
             <CNVGeneConstraint kind="pli" value={gene.gnomad_pli} />
@@ -110,6 +105,49 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.exons')}</dt>
           <dd>{gene.exons.length}</dd>
         </dl>
+
+        <section className="flex flex-col gap-2">
+          <h3 className="text-xs font-medium uppercase text-muted-foreground">
+            {t('variant_entity.overview.associated_conditions_omim')}
+          </h3>
+          {!gene.omim_conditions?.length && (
+            <span className="text-muted-foreground">
+              {t('case_entity.variants.cnv_profile.panel.no_omim_condition')}
+            </span>
+          )}
+          <ul className="flex flex-col gap-1.5">
+            {gene.omim_conditions?.map(condition => (
+              <li
+                key={`${condition.omim_phenotype_id}${condition.panel}`}
+                className="flex items-start justify-between gap-2"
+              >
+                <AnchorLink
+                  href={`https://www.omim.org/entry/${condition.omim_phenotype_id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  size="sm"
+                  className="text-left"
+                >
+                  {condition.panel}
+                </AnchorLink>
+                <span className="flex shrink-0 items-center gap-1">
+                  {condition.inheritance_code?.length ? (
+                    condition.inheritance_code.map(code => (
+                      <Tooltip key={code}>
+                        <TooltipTrigger>
+                          <Badge variant="outline">{code}</Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{t(`variant.omim.${code}`)}</TooltipContent>
+                      </Tooltip>
+                    ))
+                  ) : (
+                    <EmptyCell />
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {exon && exonIndex !== undefined && (
           <section className="flex flex-col gap-1">
