@@ -20,6 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from radiant_python.models.gene_track_exon import GeneTrackExon
+from radiant_python.models.omim_gene_panel import OmimGenePanel
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -35,11 +36,12 @@ class GeneTrackGene(BaseModel):
     gene_id: StrictStr
     gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene")
     gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene")
+    omim_conditions: Optional[List[OmimGenePanel]] = Field(default=None, description="OmimConditions lists the OMIM phenotypes of the gene, with their inheritance modes")
     omim_inheritance_code: Optional[List[StrictStr]] = Field(default=None, description="OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene")
     start: StrictInt
     strand: Optional[StrictStr] = None
     symbol: StrictStr
-    __properties: ClassVar[List[str]] = ["biotype", "chromosome", "description", "end", "exons", "gene_id", "gnomad_loeuf", "gnomad_pli", "omim_inheritance_code", "start", "strand", "symbol"]
+    __properties: ClassVar[List[str]] = ["biotype", "chromosome", "description", "end", "exons", "gene_id", "gnomad_loeuf", "gnomad_pli", "omim_conditions", "omim_inheritance_code", "start", "strand", "symbol"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -87,6 +89,13 @@ class GeneTrackGene(BaseModel):
                 if _item_exons:
                     _items.append(_item_exons.to_dict())
             _dict['exons'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in omim_conditions (list)
+        _items = []
+        if self.omim_conditions:
+            for _item_omim_conditions in self.omim_conditions:
+                if _item_omim_conditions:
+                    _items.append(_item_omim_conditions.to_dict())
+            _dict['omim_conditions'] = _items
         return _dict
 
     @classmethod
@@ -107,6 +116,7 @@ class GeneTrackGene(BaseModel):
             "gene_id": obj.get("gene_id"),
             "gnomad_loeuf": obj.get("gnomad_loeuf"),
             "gnomad_pli": obj.get("gnomad_pli"),
+            "omim_conditions": [OmimGenePanel.from_dict(_item) for _item in obj["omim_conditions"]] if obj.get("omim_conditions") is not None else None,
             "omim_inheritance_code": obj.get("omim_inheritance_code"),
             "start": obj.get("start"),
             "strand": obj.get("strand"),

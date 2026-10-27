@@ -2267,6 +2267,13 @@ components:
           description: GnomadPli is the highest gnomAD pLI over the Ensembl transcripts
             of the gene
           type: number
+        omim_conditions:
+          description: OmimConditions lists the OMIM phenotypes of the gene, with
+            their inheritance modes
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
         omim_inheritance_code:
           description: OmimInheritanceCode lists the OMIM inheritance modes of the
             phenotypes of the gene

@@ -4297,6 +4297,12 @@ export interface GeneTrackGene {
      */
     'gnomad_pli'?: number;
     /**
+     * OmimConditions lists the OMIM phenotypes of the gene, with their inheritance modes
+     * @type {Array<OmimGenePanel>}
+     * @memberof GeneTrackGene
+     */
+    'omim_conditions'?: Array<OmimGenePanel>;
+    /**
      * OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
      * @type {Array<string>}
      * @memberof GeneTrackGene
