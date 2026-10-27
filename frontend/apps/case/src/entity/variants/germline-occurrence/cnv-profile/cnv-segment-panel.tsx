@@ -237,6 +237,7 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
               taskId={ids.taskId}
               occurrenceId={segment.cnv_id}
               canComment={canComment}
+              focusEditor={false}
             />
           </NotesProvider>
         </section>

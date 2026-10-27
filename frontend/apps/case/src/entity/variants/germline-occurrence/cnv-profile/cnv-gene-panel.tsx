@@ -1,6 +1,7 @@
 import { XIcon } from 'lucide-react';
 
 import type { CNVProfileSegment, GeneTrackGene } from '@/api/api';
+import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -13,6 +14,8 @@ import { useGeneCNVOverlaps } from './hooks/use-gene-cnv-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
 import { geneDescription } from './libs/gene';
 import { cnvsOnGene, exonsHit } from './libs/overlap';
+import { getCNVProfilePalette } from './libs/palette';
+import { isFiltered } from './libs/traces';
 import CNVGeneConstraint from './cnv-gene-constraint';
 import CNVOccurrenceMarks from './cnv-occurrence-marks';
 
@@ -30,6 +33,7 @@ const locus = (chromosome: string, start: number, end: number) =>
 
 function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose }: CNVGenePanelProps) {
   const { t } = useI18n();
+  const palette = getCNVProfilePalette(usePlotlyTheme().isDark);
   const exon = exonIndex === undefined ? undefined : gene.exons[exonIndex];
   const cnvs = cnvsOnGene(segments, gene);
   const { overlaps, isLoading: overlapsLoading } = useGeneCNVOverlaps(ids, gene, cnvs);
@@ -128,9 +132,14 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
           <ul className="flex flex-col gap-2">
             {cnvs.map(segment => (
               <li key={segment.cnv_id}>
+                {/* Edged as the CNV is drawn: blue for a gain, red for a loss, dashed when it fails the filters. */}
                 <Button
                   variant="outline"
-                  className="h-auto w-full flex-col items-start gap-1 py-2 text-left"
+                  className="h-auto w-full flex-col items-start gap-1 border-2 py-2 text-left"
+                  style={{
+                    borderColor: segment.type === 'GAIN' ? palette.gain : palette.loss,
+                    borderStyle: isFiltered(segment) ? 'dashed' : 'solid',
+                  }}
                   onClick={() => onSegmentClick(segment)}
                 >
                   <span className="flex items-center gap-2">
