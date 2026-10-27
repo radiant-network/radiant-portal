@@ -2066,7 +2066,7 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update:",
+      "last_update": "<strong>Last updated:</strong> {{name}} on <date/>",
       "header": {
         "germline": "Germline",
         "germline_family": "Germline",
