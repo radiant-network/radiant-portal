@@ -25,7 +25,7 @@ export const Variant: Story = {
       <div className="flex flex-col gap-6">
         {(['default', 'sm'] as const).map(size => (
           <Card key={size} size={size} className="w-[350px]">
-            <CardHeader size={size}>
+            <CardHeader size={size} bordered>
               <CardTitle>
                 Card <span className="bold uppercase">({size})</span>
               </CardTitle>

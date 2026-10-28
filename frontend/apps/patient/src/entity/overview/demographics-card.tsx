@@ -40,7 +40,7 @@ function DemographicsCard({
 
   return (
     <Card data-cy="demographics-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.demographics.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">

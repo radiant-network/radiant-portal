@@ -387,10 +387,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 			{"id": 2, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
 			{"id": 3, "type_code": "alignment_germline_variant_calling", "type_name": "Genome Alignment and Germline Variant Calling", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]},
 			{"id": 4, "type_code": "family_variant_calling", "type_name": "Family Joint Genotyping", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
-			{"id": 5, "type_code": "radiant_germline_annotation", "type_name": "RADIANT Germline Annotation", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]},
-			{"id": 6, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["proband"]},
-			{"id": 7, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["mother"]},
-			{"id": 8, "type_code": "exomiser", "type_name": "Exomiser", "created_on": "2021-10-12T13:08:00Z", "patients": ["father"]}
+			{"id": 5, "type_code": "radiant_germline_annotation", "type_name": "RADIANT Germline Annotation", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
 		],
 		"updated_on":"2021-09-12T13:08:00Z"
 	}`
@@ -480,6 +477,7 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 			{"key":"cnvvis", "label":"CNV Visualization"}, 
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
 			{"key":"exomiser", "label":"Exomiser Report"}, 
+			{"key":"exomiser_cnv", "label":"Exomiser CNV Report"},
 			{"key":"exp", "label":"Expression PNG"}, 
 			{"key":"gcnv", "label":"Germline CNV"}, 
 			{"key":"gsv", "label":"Germline SV"}, 

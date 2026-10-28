@@ -32,7 +32,7 @@ function InitialDiagnosisCard({
 
   return (
     <Card data-cy="initial-diagnosis-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.initial_diagnosis.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">

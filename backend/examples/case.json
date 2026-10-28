@@ -227,26 +227,7 @@
               "data_category_code": "genomic",
               "size": 512000,
               "hash": "sha256:ddd112..."
-            }
-          ]
-        },
-        {
-          "type_code": "exomiser",
-          "aliquots": [
-            "ALQ-PROBAND-001"
-          ],
-          "pipeline_name": "exomiser",
-          "pipeline_version": "14.0.0",
-          "genome_build": "GRCh38",
-          "input_documents": [
-            {
-              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz"
             },
-            {
-              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi"
-            }
-          ],
-          "output_documents": [
             {
               "name": "trio001_proband.exomiser.csv",
               "url": "s3://bucket/exomiser/trio001_proband.exomiser.csv",
