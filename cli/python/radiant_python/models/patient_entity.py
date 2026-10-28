@@ -33,6 +33,7 @@ from radiant_python.models.patient_radiation import PatientRadiation
 from radiant_python.models.patient_surgery import PatientSurgery
 from radiant_python.models.patient_therapy import PatientTherapy
 from radiant_python.models.patient_treatment_summary import PatientTreatmentSummary
+from radiant_python.models.patient_trial_enrollment import PatientTrialEnrollment
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -77,9 +78,10 @@ class PatientEntity(BaseModel):
     survival_days: Optional[StrictInt] = Field(default=None, description="Vital status day minus initial diagnosis day")
     therapies: List[PatientTherapy]
     treatment_summary: Optional[PatientTreatmentSummary] = None
+    trial_enrollments: List[PatientTrialEnrollment] = Field(description="Most recent first")
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cbc", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "csf", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "performance_status", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cbc", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "csf", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "performance_status", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "trial_enrollments", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -209,6 +211,13 @@ class PatientEntity(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of treatment_summary
         if self.treatment_summary:
             _dict['treatment_summary'] = self.treatment_summary.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in trial_enrollments (list)
+        _items = []
+        if self.trial_enrollments:
+            for _item_trial_enrollments in self.trial_enrollments:
+                if _item_trial_enrollments:
+                    _items.append(_item_trial_enrollments.to_dict())
+            _dict['trial_enrollments'] = _items
         # override the default output from pydantic by calling `to_dict()` of vital_status_at
         if self.vital_status_at:
             _dict['vital_status_at'] = self.vital_status_at.to_dict()
@@ -261,6 +270,7 @@ class PatientEntity(BaseModel):
             "survival_days": obj.get("survival_days"),
             "therapies": [PatientTherapy.from_dict(_item) for _item in obj["therapies"]] if obj.get("therapies") is not None else None,
             "treatment_summary": PatientTreatmentSummary.from_dict(obj["treatment_summary"]) if obj.get("treatment_summary") is not None else None,
+            "trial_enrollments": [PatientTrialEnrollment.from_dict(_item) for _item in obj["trial_enrollments"]] if obj.get("trial_enrollments") is not None else None,
             "vital_status": obj.get("vital_status"),
             "vital_status_at": PatientDayDate.from_dict(obj["vital_status_at"]) if obj.get("vital_status_at") is not None else None
         })

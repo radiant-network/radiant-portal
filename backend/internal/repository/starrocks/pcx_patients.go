@@ -225,6 +225,7 @@ func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey strin
 		return nil, err
 	}
 	patient.KeyDates = pcxKeyDates(patient.TreatmentSummary, patient.Events, patient.VitalStatusAt)
+	patient.TrialEnrollments = pcxTrialEnrollments(patient.Therapies)
 	return &patient, nil
 }
 
