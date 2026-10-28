@@ -1309,6 +1309,38 @@ func Test_CaseWithRuns_PrenatalCase_LeavesFetusRunOut(t *testing.T) {
 	})
 }
 
+func Test_CaseWithRuns_PrenatalCase_OnlyFetusSequenced_EmptyArray(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 73 sequenced the fetus only; the mother, its proband, has no sequencing of her own.
+		assert.Equal(t, types.JsonArray[string]{}, caseRunNames(t, env, 73))
+	})
+}
+
+func Test_CaseWithRuns_SomaticCase_ListsEveryTumoralRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM sample WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM sequencing_experiment WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = 1115")
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1115, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'somatic', 'postnatal', 'CHUSJ', 'CASE-RUN-TWO-TUMORS')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sample (id, type_code, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1115, 'dna', 'tumoral', 'SRX9999999-RELAPSE-RUN', 62, 'LDM-CHUSJ', 'radiant')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
+			VALUES (1115, 1115, 'completed', 'RELAPSE-RUN', 'CQGC', 'radiant', 'RUN-RELAPSE', 'RELAPSE_RUN', '2026-09-01', 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+		`).Error)
+		// Seq 73 is the proband's normal (run 1678), seq 74 its first tumoral (run 1679, 2026-03-08).
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (73, 1115), (74, 1115), (1115, 1115)").Error)
+
+		assert.Equal(t, types.JsonArray[string]{"RUN-RELAPSE", "1679"}, caseRunNames(t, env, 1115))
+	})
+}
+
 func Test_CaseWithRuns_MostRecentRunFirst(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		defer insertProbandSampleCase(t, env, 1110, "RUN-2026", "2026-01-01")()
