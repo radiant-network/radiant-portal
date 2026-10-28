@@ -316,7 +316,7 @@ export interface CNVGeneOverlap {
      */
     'gnomad_pli'?: number;
     /**
-     * 
+     * NbExons counts the exons the CNV hits, merged over the transcripts of the gene
      * @type {number}
      * @memberof CNVGeneOverlap
      */

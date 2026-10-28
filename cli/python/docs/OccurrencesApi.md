@@ -1041,7 +1041,7 @@ Name | Type | Description  | Notes
 **200** | OK |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
-**404** | detail.missing lists the tracks without a file (copy_ratio, baf) |  -  |
+**404** | The case has no such sequencing analysed by the task, or detail.missing lists the tracks without a file (copy_ratio, baf) |  -  |
 **422** | Unprocessable Entity |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
@@ -1138,7 +1138,8 @@ Name | Type | Description  | Notes
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
-**404** | detail.missing lists the tracks without a file (copy_ratio, baf) |  -  |
+**404** | The case has no such sequencing analysed by the task, or detail.missing lists the tracks without a file (copy_ratio, baf) |  -  |
+**422** | Unprocessable Entity |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

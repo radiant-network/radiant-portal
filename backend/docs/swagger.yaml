@@ -143,6 +143,8 @@ components:
             of the gene
           type: number
         nb_exons:
+          description: NbExons counts the exons the CNV hits, merged over the transcripts
+            of the gene
           type: integer
         nb_overlap_bases:
           type: integer
@@ -8692,8 +8694,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: detail.missing lists the tracks without a file (copy_ratio,
-            baf)
+          description: The case has no such sequencing analysed by the task, or detail.missing
+            lists the tracks without a file (copy_ratio, baf)
         "422":
           content:
             application/json:
@@ -8796,8 +8798,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: detail.missing lists the tracks without a file (copy_ratio,
-            baf)
+          description: The case has no such sequencing analysed by the task, or detail.missing
+            lists the tracks without a file (copy_ratio, baf)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
         "500":
           content:
             application/json:

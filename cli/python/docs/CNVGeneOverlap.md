@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **gene_length** | **int** |  | 
 **gnomad_loeuf** | **float** | GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene | [optional] 
 **gnomad_pli** | **float** | GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene | [optional] 
-**nb_exons** | **int** |  | 
+**nb_exons** | **int** | NbExons counts the exons the CNV hits, merged over the transcripts of the gene | 
 **nb_overlap_bases** | **int** |  | 
 **omim_inheritance_code** | **List[str]** | OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene | [optional] 
 **overlap_type** | **str** |  | 

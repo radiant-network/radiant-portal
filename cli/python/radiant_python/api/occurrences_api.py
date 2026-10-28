@@ -3985,6 +3985,7 @@ class OccurrencesApi:
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
+            '422': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -4081,6 +4082,7 @@ class OccurrencesApi:
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
+            '422': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -4177,6 +4179,7 @@ class OccurrencesApi:
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
+            '422': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
