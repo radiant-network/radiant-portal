@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/database"
@@ -124,4 +125,177 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 		}
 	}
 	return genes, nil
+}
+
+// GetGeneTrack lists the genes of every biotype overlapping a region, each with the exons of its
+// transcript with the most exons (ensembl_exon_by_gene holds no MANE or coding bounds).
+func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ?", chromosome, start, end)
+}
+
+// GetGeneTrackBySymbol finds a gene of the gene track by its symbol, ignoring case.
+func (r *GenesRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
+	return r.geneTrack(ctx, "UPPER(name) = ?", strings.ToUpper(symbol))
+}
+
+func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...any) ([]types.GeneTrackGene, error) {
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.TenantQualifiedName(ctx))
+	tx = tx.Select("gene_id, name AS symbol, chromosome, start, end, strand, biotype, description")
+	tx = tx.Where(where, args...)
+	tx = tx.Order("start, gene_id")
+
+	var genes []types.GeneTrackGene
+	if err := tx.Find(&genes).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene track genes: %w", err)
+	}
+	if len(genes) == 0 {
+		return []types.GeneTrackGene{}, nil
+	}
+
+	geneIDs := make([]string, len(genes))
+	for i, g := range genes {
+		geneIDs[i] = g.GeneID
+	}
+	exonsByGene, err := geneExons(ctx, r.db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track exons: %w", err)
+	}
+	symbols := make([]string, len(genes))
+	for i, g := range genes {
+		symbols[i] = g.Symbol
+	}
+	omim, err := omimGenes(ctx, r.db, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track omim phenotypes: %w", err)
+	}
+	constraints, err := geneConstraints(ctx, r.db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track constraint: %w", err)
+	}
+	for i := range genes {
+		genes[i].Exons = exonsByGene[genes[i].GeneID]
+		if genes[i].Exons == nil {
+			genes[i].Exons = []types.GeneTrackExon{}
+		}
+		genes[i].OmimInheritanceCode = omim[genes[i].Symbol].InheritanceCodes
+		genes[i].OmimConditions = omim[genes[i].Symbol].Conditions
+		genes[i].GnomadPli, genes[i].GnomadLoeuf = constraints[genes[i].GeneID].Pli, constraints[genes[i].GeneID].Loeuf
+	}
+	return genes, nil
+}
+
+type geneConstraint struct {
+	GeneID string
+	Pli    *float32
+	Loeuf  *float32
+}
+
+// geneConstraints gives the gnomAD constraint of each gene id, the most constrained over its Ensembl
+// transcripts: the highest pLI and the lowest LOEUF, which can come from two transcripts.
+// gnomad_constraint is keyed by transcript and StarRocks knows no canonical transcript of a gene
+// (RAD-146), which should replace these bounds.
+func geneConstraints(ctx context.Context, db *gorm.DB, geneIDs []string) (map[string]geneConstraint, error) {
+	constraints := map[string]geneConstraint{}
+	if len(geneIDs) == 0 {
+		return constraints, nil
+	}
+	var rows []geneConstraint
+	query := fmt.Sprintf(`SELECT t.gene_id, MAX(gc.pli) AS pli, MIN(gc.loeuf) AS loeuf
+		FROM (
+			SELECT DISTINCT e.gene_id, x.transcript_id
+			FROM %s e, UNNEST(e.transcript_ids) AS x(transcript_id)
+			WHERE e.gene_id IN ?
+		) t
+		JOIN %s gc ON gc.transcript_id = t.transcript_id
+		GROUP BY t.gene_id`,
+		types.EnsemblExonByGeneTable.TenantQualifiedName(ctx), types.GnomadConstraintTable.TenantQualifiedName(ctx))
+	if err := db.WithContext(ctx).Raw(query, geneIDs).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene constraint: %w", err)
+	}
+	for _, row := range rows {
+		constraints[row.GeneID] = row
+	}
+	return constraints, nil
+}
+
+type omimGene struct {
+	// InheritanceCodes are the inheritance modes over all the phenotypes, without duplicates and in
+	// the order of the phenotypes.
+	InheritanceCodes []string
+	Conditions       []types.OmimGenePanel
+}
+
+// omimGenes gives the OMIM phenotypes of each gene symbol, as conditions with their inheritance modes.
+func omimGenes(ctx context.Context, db *gorm.DB, symbols []string) (map[string]omimGene, error) {
+	genes := map[string]omimGene{}
+	if len(symbols) == 0 {
+		return genes, nil
+	}
+	var panels []struct {
+		Symbol          string
+		Panel           string
+		OmimPhenotypeId string
+		InheritanceCode types.JsonArray[string] `gorm:"type:json"`
+	}
+	tx := db.WithContext(ctx).Table(types.OmimGenePanelTable.TenantQualifiedName(ctx))
+	tx = tx.Select("symbol, panel, omim_phenotype_id, inheritance_code").Where("symbol IN ? AND omim_phenotype_id IS NOT NULL", symbols)
+	tx = tx.Order("symbol, omim_phenotype_id, panel")
+	if err := tx.Find(&panels).Error; err != nil {
+		return nil, fmt.Errorf("error fetching omim phenotypes: %w", err)
+	}
+
+	for _, p := range panels {
+		gene := genes[p.Symbol]
+		gene.Conditions = append(gene.Conditions, types.OmimGenePanel{OmimPhenotypeId: p.OmimPhenotypeId, Panel: p.Panel, InheritanceCode: p.InheritanceCode})
+		for _, code := range p.InheritanceCode {
+			if !slices.Contains(gene.InheritanceCodes, code) {
+				gene.InheritanceCodes = append(gene.InheritanceCodes, code)
+			}
+		}
+		genes[p.Symbol] = gene
+	}
+	return genes, nil
+}
+
+// geneExons gives the exons of one transcript of each gene, the one with the most exons (the
+// smallest id on a tie): Ensembl has one exon per set of bounds, so the union over the transcripts
+// would count the variants of an exon apart, and an exon of a retained intron transcript would
+// fuse the exons it spans. Each scope narrows the exons, to a region for instance. Until RAD-146
+// brings the canonical transcript, this is how the exons of a gene are drawn and counted.
+func geneExons(ctx context.Context, db *gorm.DB, geneIDs []string, scopes ...func(*gorm.DB) *gorm.DB) (map[string][]types.GeneTrackExon, error) {
+	exonsByGene := map[string][]types.GeneTrackExon{}
+	if len(geneIDs) == 0 {
+		return exonsByGene, nil
+	}
+	transcriptExons := fmt.Sprintf(`(
+		WITH exons AS (
+			SELECT DISTINCT e.gene_id, x.transcript_id, e.start, e.end
+			FROM %s e, UNNEST(e.transcript_ids) AS x(transcript_id)
+			WHERE e.gene_id IN ?
+		),
+		picked AS (
+			SELECT gene_id, transcript_id
+			FROM (
+				SELECT gene_id, transcript_id, ROW_NUMBER() OVER (PARTITION BY gene_id ORDER BY nb_exons DESC, transcript_id) AS rn
+				FROM (SELECT gene_id, transcript_id, COUNT(*) AS nb_exons FROM exons GROUP BY gene_id, transcript_id) counted
+			) ranked
+			WHERE rn = 1
+		)
+		SELECT exons.gene_id, exons.start, exons.end
+		FROM exons JOIN picked ON picked.gene_id = exons.gene_id AND picked.transcript_id = exons.transcript_id
+	) AS transcript_exons`, types.EnsemblExonByGeneTable.TenantQualifiedName(ctx))
+	var exons []struct {
+		GeneID string
+		Start  int
+		End    int
+	}
+	tx := db.WithContext(ctx).Table(transcriptExons, geneIDs).Scopes(scopes...)
+	tx = tx.Select("gene_id, start, end").Order("gene_id, start, end")
+	if err := tx.Find(&exons).Error; err != nil {
+		return nil, fmt.Errorf("error fetching exons: %w", err)
+	}
+	for _, e := range exons {
+		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
+	}
+	return exonsByGene, nil
 }

@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/cnvprofile"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -82,4 +85,78 @@ func SearchGenesHandler(repo genesReader) gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, genes)
 	}
+}
+
+type geneTrackReader interface {
+	GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error)
+	GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error)
+}
+
+// GetGeneTrackHandler handles listing the genes of a region, or finding one by its symbol
+// @Summary List the genes of a region
+// @Id geneTrack
+// @Description List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
+// @Description with the exons of its transcript with the most exons. A symbol takes precedence over a region.
+// @Tags genes
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param symbol query string false "Gene symbol, ignoring case"
+// @Param chromosome query string false "Chromosome, without chr prefix; required without symbol"
+// @Param start query int false "Region start; required without symbol"
+// @Param end query int false "Region end; required without symbol"
+// @Produce json
+// @Success 200 {array} types.GeneTrackGene
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/genes/track [get]
+func GetGeneTrackHandler(repo geneTrackReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if symbol := c.Query("symbol"); symbol != "" {
+			genes, err := repo.GetGeneTrackBySymbol(c.Request.Context(), symbol)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			c.JSON(http.StatusOK, genes)
+			return
+		}
+		chromosome, start, end, err := parseRegionQuery(c, types.GeneTrackMaxSpan)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		genes, err := repo.GetGeneTrack(c.Request.Context(), chromosome, start, end)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, genes)
+	}
+}
+
+// parseRegionQuery reads the chromosome, start and end query parameters of a region of at most
+// maxSpan bases.
+func parseRegionQuery(c *gin.Context, maxSpan int) (string, int, int, error) {
+	chromosome := c.Query("chromosome")
+	if chromosome == "" {
+		return "", 0, 0, errors.New("chromosome is required")
+	}
+	if !cnvprofile.IsChromosome(chromosome) {
+		return "", 0, 0, fmt.Errorf("chromosome must be one of 1-22, X or Y, got %q", chromosome)
+	}
+	start, err := strconv.Atoi(c.Query("start"))
+	if err != nil {
+		return "", 0, 0, fmt.Errorf("invalid start: %w", err)
+	}
+	end, err := strconv.Atoi(c.Query("end"))
+	if err != nil {
+		return "", 0, 0, fmt.Errorf("invalid end: %w", err)
+	}
+	if start < 0 || end < start || end-start > maxSpan {
+		return "", 0, 0, fmt.Errorf("region must satisfy 0 <= start <= end and span at most %d bases", maxSpan)
+	}
+	return chromosome, start, end, nil
 }
