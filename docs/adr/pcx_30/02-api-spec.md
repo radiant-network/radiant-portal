@@ -160,6 +160,7 @@ interface PatientEntity extends PatientListItem {
   surgeries: PatientSurgery[];
   radiations: PatientRadiation[];
   therapies: PatientTherapy[];
+  trial_enrollments: PatientTrialEnrollment[];  // Clinical trials tab, most recent start first
   imaging: PatientImagingSession[];
   treatment_summary: PatientTreatmentSummary | null;
   cbc: PatientCbc | null;                       // null when the patient has no CBC
@@ -211,6 +212,17 @@ interface PatientTherapy {
   chemotherapy_type: string | null;
   chemotherapy_agents: string[];
   is_initial_treatment: boolean | null; // source Yes / No; null when Not Reported
+}
+
+// The therapies whose chemotherapy_type is "Treatment follows a protocol and subject is enrolled on a protocol",
+// merged by protocol_name_and_arm (one therapy per phase). Following a protocol without enrollment is left out.
+interface PatientTrialEnrollment {
+  start: PatientDayDate;          // earliest start of its therapies
+  stop: PatientDayDate;           // latest stop of its therapies
+  protocol_name: string;          // as in the source, Other / Not Reported included
+  protocol_arm: string | null;    // null when Not Applicable
+  chemotherapy_agents: string[];  // of all its therapies, without duplicates
+  is_initial_treatment: boolean;  // true when any of its therapies is
 }
 
 interface PatientImagingSession extends PatientDayDate {

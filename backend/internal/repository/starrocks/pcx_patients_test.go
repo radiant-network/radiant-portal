@@ -412,6 +412,11 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "chemotherapy_type": "Treatment follows a protocol and subject is enrolled on a protocol",
 				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
 			],
+			"trial_enrollments": [
+				{"start": {"day": 1021, "date": "2017-12-20"}, "stop": {"day": 1184, "date": "2018-06-01"},
+				 "protocol_name": "ACNS0333", "protocol_arm": "Arm I",
+				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
+			],
 			"imaging": [
 				{"day": 999, "date": "2017-11-28", "session_id": "ses-1", "session_name": "MRI Brain", "anatomical_site": "Brain",
 				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1"},
@@ -520,13 +525,14 @@ func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 		require.NotNil(t, patient)
 		actual, err := json.Marshal(struct {
 			Events, Surgeries, Radiations, Therapies, Imaging, Cases, Interpretations any
-			TreatmentSummary, Cbc, PerformanceStatus, Csf                             any
+			TreatmentSummary, Cbc, PerformanceStatus, Csf, TrialEnrollments           any
 			VitalStatusAt                                                             types.PatientDayDate
 		}{patient.Events, patient.Surgeries, patient.Radiations, patient.Therapies, patient.Imaging, patient.Cases,
-			patient.Interpretations, patient.TreatmentSummary, patient.Cbc, patient.PerformanceStatus, patient.Csf, patient.VitalStatusAt})
+			patient.Interpretations, patient.TreatmentSummary, patient.Cbc, patient.PerformanceStatus, patient.Csf,
+			patient.TrialEnrollments, patient.VitalStatusAt})
 		require.NoError(t, err)
 		assert.JSONEq(t, `{"Events": [], "Surgeries": [], "Radiations": [], "Therapies": [], "Imaging": [], "Cases": [],
-			"Interpretations": [], "TreatmentSummary": null, "Cbc": null, "PerformanceStatus": [], "Csf": null,
+			"Interpretations": [], "TreatmentSummary": null, "Cbc": null, "PerformanceStatus": [], "Csf": null, "TrialEnrollments": [],
 			"VitalStatusAt": {"day": null, "date": null}}`, string(actual))
 	})
 }

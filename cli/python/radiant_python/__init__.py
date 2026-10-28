@@ -178,6 +178,7 @@ from radiant_python.models.patient_surgery import PatientSurgery
 from radiant_python.models.patient_survival import PatientSurvival
 from radiant_python.models.patient_therapy import PatientTherapy
 from radiant_python.models.patient_treatment_summary import PatientTreatmentSummary
+from radiant_python.models.patient_trial_enrollment import PatientTrialEnrollment
 from radiant_python.models.patients_search_response import PatientsSearchResponse
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails

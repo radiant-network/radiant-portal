@@ -6366,6 +6366,12 @@ export interface PatientEntity {
      */
     'treatment_summary'?: PatientTreatmentSummary;
     /**
+     * Most recent first
+     * @type {Array<PatientTrialEnrollment>}
+     * @memberof PatientEntity
+     */
+    'trial_enrollments': Array<PatientTrialEnrollment>;
+    /**
      * 
      * @type {string}
      * @memberof PatientEntity
@@ -7284,6 +7290,49 @@ export interface PatientTreatmentSummary {
      * @memberof PatientTreatmentSummary
      */
     'initial_treatment_order'?: string;
+}
+/**
+ * Treatment protocol arm the patient was enrolled on, its medical therapies merged
+ * @export
+ * @interface PatientTrialEnrollment
+ */
+export interface PatientTrialEnrollment {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientTrialEnrollment
+     */
+    'chemotherapy_agents': Array<string>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientTrialEnrollment
+     */
+    'is_initial_treatment': boolean;
+    /**
+     * null when Not Applicable
+     * @type {string}
+     * @memberof PatientTrialEnrollment
+     */
+    'protocol_arm'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTrialEnrollment
+     */
+    'protocol_name': string;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTrialEnrollment
+     */
+    'start': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTrialEnrollment
+     */
+    'stop': PatientDayDate;
 }
 /**
  * 

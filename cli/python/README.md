@@ -331,6 +331,7 @@ Class | Method | HTTP request | Description
  - [PatientSurvival](docs/PatientSurvival.md)
  - [PatientTherapy](docs/PatientTherapy.md)
  - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
+ - [PatientTrialEnrollment](docs/PatientTrialEnrollment.md)
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)

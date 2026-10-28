@@ -129,6 +129,7 @@ type PatientEntity struct {
 	Surgeries                   []PatientSurgery          `json:"surgeries" validate:"required"`
 	Radiations                  []PatientRadiation        `json:"radiations" validate:"required"`
 	Therapies                   []PatientTherapy          `json:"therapies" validate:"required"`
+	TrialEnrollments            []PatientTrialEnrollment  `json:"trial_enrollments" validate:"required"` // Most recent first
 	Imaging                     []PatientImagingSession   `json:"imaging" validate:"required"`
 	TreatmentSummary            *PatientTreatmentSummary  `json:"treatment_summary"`
 	Cbc                         *PatientCbc               `json:"cbc"`
@@ -199,6 +200,18 @@ type PatientTherapy struct {
 	ChemotherapyType   *string        `json:"chemotherapy_type"`
 	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
 	IsInitialTreatment *bool          `json:"is_initial_treatment"` // null when Not Reported
+}
+
+// PatientTrialEnrollment - Treatment protocol the patient was enrolled on
+// @Description Treatment protocol arm the patient was enrolled on, its medical therapies merged
+// @Name PatientTrialEnrollment
+type PatientTrialEnrollment struct {
+	Start              PatientDayDate `json:"start" validate:"required"` // Earliest start of its therapies
+	Stop               PatientDayDate `json:"stop" validate:"required"`  // Latest stop of its therapies
+	ProtocolName       string         `json:"protocol_name" validate:"required"`
+	ProtocolArm        *string        `json:"protocol_arm"` // null when Not Applicable
+	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
+	IsInitialTreatment bool           `json:"is_initial_treatment" validate:"required"`
 }
 
 // PatientImagingSession - Imaging session of a patient
