@@ -5,7 +5,8 @@ import useSWRMutation from 'swr/mutation';
 
 import { type CaseStatus, PatchCaseStatusCodeEnum } from '@/api/api';
 import StatusBadge, { statusColors } from '@/components/base/badges/status-badge';
-import { type BadgeProps, badgeVariants } from '@/components/base/shadcn/badge';
+import type { BadgeProps } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
-import { cn } from '@/components/lib/utils';
 import { caseApi } from '@/utils/api';
 
 const USER_APPLIED_STATUSES: readonly CaseStatus[] = Object.values(PatchCaseStatusCodeEnum);
@@ -45,6 +45,13 @@ const MENU_ENTRIES: { status: PatchCaseStatusCodeEnum; submenu?: PatchCaseStatus
   { status: PatchCaseStatusCodeEnum.Reopened },
 ];
 
+type CaseStatusDropdownSize = '3xs' | 'sm';
+
+const READ_ONLY_BADGE_SIZES: Record<CaseStatusDropdownSize, BadgeProps['size']> = {
+  '3xs': 'default',
+  sm: 'lg',
+};
+
 type PatchStatusInput = {
   caseId: number;
   status: PatchCaseStatusCodeEnum;
@@ -60,7 +67,7 @@ export type CaseStatusDropdownProps = {
   status: CaseStatus;
   canEdit?: boolean;
   readOnlyTooltip?: ReactNode;
-  size?: BadgeProps['size'];
+  size?: CaseStatusDropdownSize;
   className?: string;
   onSaved?: () => void;
 };
@@ -70,7 +77,7 @@ function CaseStatusDropdown({
   status,
   canEdit = true,
   readOnlyTooltip,
-  size,
+  size = '3xs',
   className,
   onSaved,
 }: CaseStatusDropdownProps) {
@@ -103,7 +110,7 @@ function CaseStatusDropdown({
   }
 
   if (!canEdit || !isUserAppliedStatus(currentStatus)) {
-    const badge = <StatusBadge status={currentStatus} size={size} className={className} />;
+    const badge = <StatusBadge status={currentStatus} size={READ_ONLY_BADGE_SIZES[size]} className={className} />;
     if (!readOnlyTooltip) return badge;
 
     return (
@@ -117,16 +124,10 @@ function CaseStatusDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            badgeVariants({ variant: statusColors[currentStatus] ?? 'neutral', clickable: true, size }).base(),
-            className,
-          )}
-        >
+        <Button variant={statusColors[currentStatus]} size={size} className={className}>
           {label(currentStatus)}
           <ChevronDown />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

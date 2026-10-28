@@ -7,6 +7,8 @@ import { CommonTexts } from './Texts';
  */
 export const oneMinute = 60 * 1000;
 
+const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Builds a RegExp that matches either the English or French text from CommonTexts.
  * Special RegExp characters are automatically escaped.
@@ -14,7 +16,6 @@ export const oneMinute = 60 * 1000;
  * @returns A RegExp matching either EN or FR text exactly.
  */
 export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
-  const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const keyOfCommonTextsId = commonTextsId as keyof typeof CommonTexts.en;
 
   const enValue = CommonTexts.en[keyOfCommonTextsId];
@@ -26,6 +27,14 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
 
   return new RegExp(`^(${escapeRegExp(enValue)}|${escapeRegExp(frValue)})$`);
 };
+
+/**
+ * Builds a RegExp that matches the text exactly (e.g., 'Cypress_F1' does not match 'Cypress_F1 COPY').
+ * Special RegExp characters are automatically escaped.
+ * @param text The text to match.
+ * @returns A RegExp matching the text exactly.
+ */
+export const buildExactRegExp = (text: string): RegExp => new RegExp(`^${escapeRegExp(text)}$`);
 
 /**
  * Resolves a facet configuration from its section name and facet id.

@@ -182,7 +182,7 @@ export function GermlineOccurrenceSheetContent({
             </NotesProvider>
             {!occurrence.has_interpretation && canInterpret && (
               <GermlineInterpretationDialog
-                isCreation
+                mode="create"
                 locusId={occurrence.locus_id}
                 taskId={occurrence.task_id}
                 transcriptId={occurrence.transcript_id}

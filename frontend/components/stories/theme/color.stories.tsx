@@ -28,7 +28,7 @@ export const Variants: Story = {
           <Color color="secondary foreground" colorClass="bg-secondary-foreground" />
           <Color color="muted" colorClass="bg-muted" />
           <Color color="muted foreground" colorClass="bg-muted-foreground" />
-          <Color color="muted subdued" cssVar="--muted-subdued" />
+          <Color color="muted subdued" colorClass="bg-muted-subdued" />
           <Color color="accent" colorClass="bg-accent" />
           <Color color="accent foreground" colorClass="bg-accent-foreground" />
           <Color color="destructive" colorClass="bg-destructive" />
@@ -70,13 +70,9 @@ export const Variants: Story = {
   ),
 };
 
-// cssVar is for colors no component uses yet: Tailwind doesn't scan stories, so their class isn't generated
-const Color = ({ color, colorClass, cssVar }: { color: string; colorClass?: string; cssVar?: string }) => (
+const Color = ({ color, colorClass }: { color: string; colorClass: string }) => (
   <div className="flex flex-col items-center gap-1">
-    <div
-      className={cn('rounded-sm size-10 border', colorClass)}
-      style={cssVar ? { backgroundColor: `var(${cssVar})` } : undefined}
-    />
+    <div className={cn('rounded-sm size-10 border', colorClass)} />
     <div className="text-sm text-center">{color}</div>
   </div>
 );

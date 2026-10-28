@@ -1,6 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import type { InterpretationSomatic } from '@/api/api';
@@ -9,7 +8,6 @@ import {
   oncogenicityClassificationCriterias,
 } from '@/components/base/classifications/oncogenicity';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
@@ -18,6 +16,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { ToggleGroup, ToggleGroupItem } from 'components/base/shadcn/toggle-group';
 
 import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
+import { OncogenicityInfoCard } from '../../interpretation/interpretation-info-cards';
 import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
   type InterpretationFormProps,
@@ -101,26 +100,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
             name="oncogenicity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel
-                  infoCardContent={
-                    <div className="leading-6">
-                      <Trans
-                        i18nKey="variant.interpretation_form.somatic.oncogenicity_popover.full_text"
-                        components={{
-                          guides: (
-                            // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
-                            <AnchorLink
-                              className="inline-flex no-underline hover:underline"
-                              href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
-                              target="_blank"
-                              size="sm"
-                            />
-                          ),
-                        }}
-                      />
-                    </div>
-                  }
-                >
+                <FormLabel infoCardContent={<OncogenicityInfoCard />}>
                   {t('variant.interpretation_form.somatic.oncogenicity')}
                 </FormLabel>
                 <FormControl>

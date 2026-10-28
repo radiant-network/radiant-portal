@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
       "remove_user": "Remove {{name}}"
     },
     "auto_complete": {
@@ -112,7 +113,8 @@
     },
     "query_bar": {
       "delete": "Delete query",
-      "duplicate": "Duplicate query"
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
     },
     "query_builder": {
       "close_facets": "Close filters panel"
@@ -1466,7 +1468,7 @@
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
-    "description": "ATRT cohort · CHOP, UCSF and Seattle Children's",
+    "description": "",
     "search_placeholder": "Search by name, research ID or MRN",
     "tabs": {
       "cohort_analytics": "Cohort analytics",
@@ -1475,7 +1477,14 @@
     "chat": {
       "title": "Cohort analytics",
       "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster"
+      "source": "Live roster",
+      "explore": "Explore Data",
+      "tabs": {
+        "yac": "YAC",
+        "david": "D.A.V.I.D",
+        "other": "Other tool",
+        "placeholder": "Coming soon"
+      }
     },
     "cells": {
       "patient": {
@@ -2057,7 +2066,7 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update:",
+      "last_update": "<strong>Last updated:</strong> {{name}} on <date/>",
       "header": {
         "germline": "Germline",
         "germline_family": "Germline",
@@ -2830,7 +2839,7 @@
       "admin": "Admin",
       "analysis": "Analysis",
       "cases": "Cases",
-      "files": "Files",
+      "files": "File Archive",
       "patients": "Patients",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",
