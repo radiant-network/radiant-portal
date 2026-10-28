@@ -14,7 +14,7 @@ import (
 func Test_GetCNVProfileDocuments_ListsIgvFilesOfTheSequencing(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
-		documents, err := repo.GetCNVProfileDocuments(t.Context(), 70)
+		documents, err := repo.GetCNVProfileDocuments(t.Context(), 70, 71)
 		require.NoError(t, err)
 		// The family-level CNV annotation task also writes case70.roh.bed: it is left out.
 		assert.Equal(t, []types.CNVProfileDocument{
@@ -31,7 +31,16 @@ func Test_GetCNVProfileDocuments_ListsIgvFilesOfTheSequencing(t *testing.T) {
 func Test_GetCNVProfileDocuments_NoIgvFiles(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
-		documents, err := repo.GetCNVProfileDocuments(t.Context(), 1)
+		documents, err := repo.GetCNVProfileDocuments(t.Context(), 1, 1)
+		require.NoError(t, err)
+		assert.Empty(t, documents)
+	})
+}
+
+func Test_GetCNVProfileDocuments_OtherTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
+		documents, err := repo.GetCNVProfileDocuments(t.Context(), 70, 70)
 		require.NoError(t, err)
 		assert.Empty(t, documents)
 	})
@@ -40,18 +49,24 @@ func Test_GetCNVProfileDocuments_NoIgvFiles(t *testing.T) {
 func Test_GetExperimentalStrategy_OfTheSequencing(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
-		strategy, err := repo.GetExperimentalStrategy(t.Context(), 1)
+		strategy, err := repo.GetExperimentalStrategy(t.Context(), 1, 1, 1)
 		require.NoError(t, err)
 		assert.Equal(t, "wgs", strategy)
 	})
 }
 
-func Test_GetExperimentalStrategy_UnknownSequencing(t *testing.T) {
+func Test_GetExperimentalStrategy_NotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCNVProfileRepository(database.StarrocksDB{DB: env.Starrocks})
-		strategy, err := repo.GetExperimentalStrategy(t.Context(), 999_999)
-		require.NoError(t, err)
-		assert.Empty(t, strategy)
+		for name, ids := range map[string][3]int{
+			"unknown sequencing":                {1, 999_999, 1},
+			"sequencing of another case":        {2, 1, 1},
+			"task that did not analyse the seq": {1, 1, 2},
+		} {
+			strategy, err := repo.GetExperimentalStrategy(t.Context(), ids[0], ids[1], ids[2])
+			require.NoError(t, err, name)
+			assert.Empty(t, strategy, name)
+		}
 	})
 }
 
@@ -67,14 +82,6 @@ func Test_SelectCNVProfileFiles_PicksEachTrack(t *testing.T) {
 	assert.Equal(t, &documents[1], files.CopyRatio)
 	assert.Equal(t, &documents[2], files.BAF)
 	assert.Equal(t, &documents[3], files.ROH)
-}
-
-func Test_SelectCNVProfileFiles_LatestTaskWins(t *testing.T) {
-	documents := []types.CNVProfileDocument{
-		{TaskID: 72, DocumentName: "S1.tn.bw", FormatCode: "bw"},
-		{TaskID: 71, DocumentName: "S1.tn.bw", FormatCode: "bw"},
-	}
-	assert.Equal(t, &documents[0], SelectCNVProfileFiles(documents).CopyRatio)
 }
 
 func Test_SelectCNVProfileFiles_WrongFormatIsIgnored(t *testing.T) {

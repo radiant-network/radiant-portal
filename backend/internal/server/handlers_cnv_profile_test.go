@@ -121,7 +121,7 @@ func Test_GetGermlineCNVProfileHandler_FileTooLarge(t *testing.T) {
 	w := getCNVProfile(repo, &MockObjectStore{err: fmt.Errorf("s3://bucket/S1.tn.bw: %w", utils.ErrObjectTooLarge)}, "1", "1", "1")
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-	assert.JSONEq(t, `{"status":422,"message":"cnv profile files too large for an exome"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":422,"message":"cnv profile file too large to be read whole"}`, w.Body.String())
 }
 
 func Test_GetGermlineCNVProfileHandler_NotABigWig(t *testing.T) {
@@ -191,6 +191,51 @@ func Test_GetGermlineCNVProfileHandler_UnsupportedStrategy(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 	assert.JSONEq(t, `{"status":422,"message":"cnv profile unsupported: only exome and genome sequencings have one"}`, w.Body.String())
+}
+
+func Test_GetGermlineCNVProfileHandler_SequencingNotFound(t *testing.T) {
+	repo := &MockCNVProfileRepository{notFound: true, documents: cnvProfileDocuments}
+	w := getCNVProfile(repo, &MockObjectStore{objects: cnvProfileObjects(t)}, "1", "1", "1")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"sequencing not found"}`, w.Body.String())
+}
+
+func Test_GetGermlineCNVProfileHandler_SortsInGenomeOrder(t *testing.T) {
+	repo := &MockCNVProfileRepository{
+		documents: cnvProfileDocuments,
+		segments: []types.CNVProfileSegment{
+			{CnvID: "a", Chromosome: "X", Start: 10}, {CnvID: "b", Chromosome: "10", Start: 10},
+			{CnvID: "c", Chromosome: "2", Start: 50}, {CnvID: "d", Chromosome: "2", Start: 10},
+		},
+		cytobands: []types.Cytoband{{Chromosome: "10", Cytoband: "p15.3"}, {Chromosome: "2", Cytoband: "p25.3"}},
+	}
+	w := getCNVProfile(repo, &MockObjectStore{objects: cnvProfileObjects(t)}, "1", "1", "1")
+
+	require.Equal(t, http.StatusOK, w.Code)
+	var profile types.CNVProfile
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &profile))
+	var ids []string
+	for _, segment := range profile.Segments {
+		ids = append(ids, segment.CnvID)
+	}
+	assert.Equal(t, []string{"d", "c", "b", "a"}, ids)
+	assert.Equal(t, "2", profile.Cytobands[0].Chromosome)
+}
+
+func Test_GetGermlineCNVProfileRegionHandler_SequencingNotFound(t *testing.T) {
+	router := cnvProfileRouter(&MockCNVProfileRepository{notFound: true, documents: cnvProfileDocuments}, &MockObjectStore{objects: cnvProfileObjects(t)})
+	w := serveCNVProfile(router, "/radiant/occurrences/germline/cnv/1/1/1/profile/region?chromosome=1&start=0&end=100")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"sequencing not found"}`, w.Body.String())
+}
+
+func Test_GetGermlineCNVProfileRegionHandler_UnsupportedStrategy(t *testing.T) {
+	router := cnvProfileRouter(&MockCNVProfileRepository{strategy: "rnaseq", documents: cnvProfileDocuments}, &MockObjectStore{objects: cnvProfileObjects(t)})
+	w := serveCNVProfile(router, "/radiant/occurrences/germline/cnv/1/1/1/profile/region?chromosome=1&start=0&end=100")
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 }
 
 func Test_GetGermlineCNVProfileRegionHandler_OK(t *testing.T) {

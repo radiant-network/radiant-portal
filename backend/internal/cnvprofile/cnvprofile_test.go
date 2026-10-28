@@ -138,3 +138,13 @@ func Test_ParseROH_BadNumber(t *testing.T) {
 	_, err := ParseROH([]byte("chr3\t1\t2\tx\t1\t0\n"))
 	assert.ErrorContains(t, err, "roh line 1: strconv.ParseFloat")
 }
+
+func Test_SortByLocus_GenomeOrder(t *testing.T) {
+	type locus struct {
+		chromosome string
+		start      int
+	}
+	loci := []locus{{"X", 1}, {"10", 5}, {"GL000220.1", 1}, {"2", 9}, {"2", 3}, {"1", 7}}
+	SortByLocus(loci, func(l locus) (string, int) { return l.chromosome, l.start })
+	assert.Equal(t, []locus{{"1", 7}, {"2", 3}, {"2", 9}, {"10", 5}, {"X", 1}, {"GL000220.1", 1}}, loci)
+}

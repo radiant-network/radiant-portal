@@ -156,20 +156,9 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	for i, g := range genes {
 		geneIDs[i] = g.GeneID
 	}
-	var exons []struct {
-		GeneID string
-		Start  int
-		End    int
-	}
-	tx = r.db.WithContext(ctx).Table(types.EnsemblExonByGeneTable.TenantQualifiedName(ctx))
-	tx = tx.Select("DISTINCT gene_id, start, end").Where("gene_id IN ?", geneIDs).Order("gene_id, start, end")
-	if err := tx.Find(&exons).Error; err != nil {
+	exonsByGene, err := mergedExons(ctx, r.db, geneIDs)
+	if err != nil {
 		return nil, fmt.Errorf("error fetching gene track exons: %w", err)
-	}
-
-	exonsByGene := map[string][]types.GeneTrackExon{}
-	for _, e := range exons {
-		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
 	}
 	symbols := make([]string, len(genes))
 	for i, g := range genes {
@@ -184,7 +173,10 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 		return nil, fmt.Errorf("error fetching gene track constraint: %w", err)
 	}
 	for i := range genes {
-		genes[i].Exons = mergeExons(exonsByGene[genes[i].GeneID])
+		genes[i].Exons = exonsByGene[genes[i].GeneID]
+		if genes[i].Exons == nil {
+			genes[i].Exons = []types.GeneTrackExon{}
+		}
 		genes[i].OmimInheritanceCode = omim[genes[i].Symbol].InheritanceCodes
 		genes[i].OmimConditions = omim[genes[i].Symbol].Conditions
 		genes[i].GnomadPli, genes[i].GnomadLoeuf = constraints[genes[i].GeneID].Pli, constraints[genes[i].GeneID].Loeuf
@@ -263,6 +255,34 @@ func omimGenes(ctx context.Context, db *gorm.DB, symbols []string) (map[string]o
 		genes[p.Symbol] = gene
 	}
 	return genes, nil
+}
+
+// mergedExons gives the exons of each gene merged over all its transcripts: Ensembl has one exon per
+// set of bounds, so the variants of an exon (alternative splice sites) would count apart. Each
+// scope narrows the exons, to a region for instance. Until RAD-146 brings the canonical transcript,
+// this is how the exons of a gene are counted.
+func mergedExons(ctx context.Context, db *gorm.DB, geneIDs []string, scopes ...func(*gorm.DB) *gorm.DB) (map[string][]types.GeneTrackExon, error) {
+	exonsByGene := map[string][]types.GeneTrackExon{}
+	if len(geneIDs) == 0 {
+		return exonsByGene, nil
+	}
+	var exons []struct {
+		GeneID string
+		Start  int
+		End    int
+	}
+	tx := db.WithContext(ctx).Table(types.EnsemblExonByGeneTable.TenantQualifiedName(ctx)).Scopes(scopes...)
+	tx = tx.Select("DISTINCT gene_id, start, end").Where("gene_id IN ?", geneIDs).Order("gene_id, start, end")
+	if err := tx.Find(&exons).Error; err != nil {
+		return nil, fmt.Errorf("error fetching exons: %w", err)
+	}
+	for _, e := range exons {
+		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
+	}
+	for geneID, geneExons := range exonsByGene {
+		exonsByGene[geneID] = mergeExons(geneExons)
+	}
+	return exonsByGene, nil
 }
 
 // mergeExons merges overlapping exons, given sorted by start.

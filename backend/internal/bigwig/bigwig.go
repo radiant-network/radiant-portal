@@ -1,7 +1,7 @@
 // Package bigwig reads a bigWig file (UCSC format, see
 // https://genome.ucsc.edu/goldenPath/help/bigWig.html and the bbiFile.h / bwgInternal.h layouts):
-// the full-resolution data and the zoom levels, whole chromosomes or a region. Only the blocks a
-// query needs are read, so a ReaderAt over ranged object storage reads little of a large file.
+// the full-resolution data, whole chromosomes or a region. Only the blocks a query needs are read,
+// so a ReaderAt over ranged object storage reads little of a large file.
 package bigwig
 
 import (
@@ -20,14 +20,12 @@ const (
 	rTreeMagic     = 0x2468ACE0
 
 	headerSize        = 64
-	zoomHeadSize      = 24
 	chromTreeHeadSize = 32
 	rTreeHeadSize     = 48
 	nodeHeadSize      = 4
 	rTreeLeafItemSize = 32
 	rTreeNodeItemSize = 24
 	sectionHeadSize   = 24
-	summaryItemSize   = 32
 )
 
 const (
@@ -49,29 +47,12 @@ type Interval struct {
 	Value float32
 }
 
-// Summary aggregates the data of a zoom level window: ValidCount bases carry a value.
-type Summary struct {
-	Start      uint32
-	End        uint32
-	ValidCount uint32
-	Min        float32
-	Max        float32
-	Sum        float32
-	SumSquares float32
-}
-
-type zoomLevel struct {
-	reduction  uint32
-	indexStart int64
-}
-
 type File struct {
 	r          io.ReaderAt
 	order      binary.ByteOrder
 	compressed bool
 	indexStart int64
 	chroms     []Chrom
-	zooms      []zoomLevel
 	// basesCovered counts the bases that carry a value, from the file's total summary.
 	basesCovered uint64
 }
@@ -94,9 +75,6 @@ func Open(r io.ReaderAt) (*File, error) {
 	indexStart, err := f.offset(head[24:])
 	if err != nil {
 		return nil, fmt.Errorf("read index offset: %w", err)
-	}
-	if f.zooms, err = f.readZoomHeaders(int(order.Uint16(head[6:]))); err != nil {
-		return nil, fmt.Errorf("read zoom levels: %w", err)
 	}
 	if f.basesCovered, err = f.readBasesCovered(head[44:]); err != nil {
 		return nil, fmt.Errorf("read bases covered: %w", err)
@@ -136,35 +114,6 @@ func (f *File) readBasesCovered(summaryOffset []byte) (uint64, error) {
 		return 0, fmt.Errorf("read total summary: %w", err)
 	}
 	return f.order.Uint64(summary), nil
-}
-
-// ZoomLevels lists the window size, in bases, of each zoom level, from the finest.
-func (f *File) ZoomLevels() []uint32 {
-	levels := make([]uint32, len(f.zooms))
-	for i, z := range f.zooms {
-		levels[i] = z.reduction
-	}
-	return levels
-}
-
-func (f *File) readZoomHeaders(count int) ([]zoomLevel, error) {
-	if count == 0 {
-		return nil, nil
-	}
-	data, err := f.readAt(headerSize, count*zoomHeadSize)
-	if err != nil {
-		return nil, fmt.Errorf("read zoom headers: %w", err)
-	}
-	zooms := make([]zoomLevel, count)
-	for i := range zooms {
-		item := data[i*zoomHeadSize:]
-		indexStart, err := f.offset(item[16:])
-		if err != nil {
-			return nil, fmt.Errorf("read zoom level %d index offset: %w", i, err)
-		}
-		zooms[i] = zoomLevel{reduction: f.order.Uint32(item), indexStart: indexStart}
-	}
-	return zooms, nil
 }
 
 func (f *File) readAt(offset int64, size int) ([]byte, error) {
@@ -258,29 +207,6 @@ func (f *File) IntervalsIn(chrom string, start, end uint32) ([]Interval, error) 
 		return nil, fmt.Errorf("read intervals of %s:%d-%d: %w", chrom, start, end, err)
 	}
 	return intervals, nil
-}
-
-// Summaries returns the windows of a zoom level that overlap [start, end) of a chromosome, level
-// 0 being the finest. A window holds no data where ValidCount is 0.
-func (f *File) Summaries(chrom string, level int, start, end uint32) ([]Summary, error) {
-	if level < 0 || level >= len(f.zooms) {
-		return nil, fmt.Errorf("zoom level %d out of range: the file has %d", level, len(f.zooms))
-	}
-	q, err := f.region(chrom, start, end)
-	if err != nil {
-		return nil, fmt.Errorf("read summaries: %w", err)
-	}
-	var summaries []Summary
-	err = f.readRegion(f.zooms[level].indexStart, q, func(data []byte) error {
-		if summaries, err = f.decodeSummaries(data, q, summaries); err != nil {
-			return fmt.Errorf("decode summaries: %w", err)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("read zoom level %d of %s:%d-%d: %w", level, chrom, start, end, err)
-	}
-	return summaries, nil
 }
 
 func (f *File) region(chrom string, start, end uint32) (region, error) {
@@ -415,28 +341,6 @@ func (f *File) inflate(raw []byte) ([]byte, error) {
 		return nil, fmt.Errorf("inflate data block: %w", err)
 	}
 	return data, nil
-}
-
-func (f *File) decodeSummaries(data []byte, q region, summaries []Summary) ([]Summary, error) {
-	if len(data)%summaryItemSize != 0 {
-		return nil, errors.New("truncated zoom block")
-	}
-	for ; len(data) > 0; data = data[summaryItemSize:] {
-		start, end := f.order.Uint32(data[4:]), f.order.Uint32(data[8:])
-		if !q.contains(f.order.Uint32(data), start, end) {
-			continue
-		}
-		summaries = append(summaries, Summary{
-			Start:      start,
-			End:        end,
-			ValidCount: f.order.Uint32(data[12:]),
-			Min:        f.float(data[16:]),
-			Max:        f.float(data[20:]),
-			Sum:        f.float(data[24:]),
-			SumSquares: f.float(data[28:]),
-		})
-	}
-	return summaries, nil
 }
 
 func (f *File) decodeSections(data []byte, q region, intervals []Interval) ([]Interval, error) {

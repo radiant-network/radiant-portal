@@ -31,11 +31,13 @@ internal/
   mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
                  cmd/mysql-gateway; the Authenticator seam is the only difference
   batchval/    - Batch validation context, caching, record validation
-  bigwig/      - Minimal bigWig reader (chromosomes, full-resolution intervals; no zoom levels)
+  bigwig/      - Minimal bigWig reader (chromosomes, full-resolution intervals, by region; no zoom
+                 levels); reads only the blocks a query needs, so it works over S3 ranged reads
   client/      - External clients (PubMed, Keycloak admin, Ranger admin)
-  cnvprofile/  - CNV profile tracks from the DRAGEN CNV files (tn.bw copy ratio, baf.bw, roh.bed),
-                 read whole from S3 by GET .../germline/cnv/{case}/{seq}/{task}/profile; exome only
-                 (each file is capped at 64 MB)
+  cnvprofile/  - CNV profile tracks from the DRAGEN CNV files (tn.bw copy ratio, baf.bw, roh.bed) of
+                 the task, served by GET .../germline/cnv/{case}/{seq}/{task}/profile: an exome reads
+                 the files whole (64 MB cap); a genome gets a sampled overview, read by S3 ranges and
+                 cached in memory, and .../profile/region serves every point of up to 10 Mb
   database/    - DB connection setup (postgres.go, starrocks.go)
   provisioning/- Wires service.AdminDeps from env config; shared by cmd/api and cmd/create-user
   repository/  - Data access layer, split by DB target into postgres/ and starrocks/ subpackages

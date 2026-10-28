@@ -159,21 +159,26 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 
 type MockCNVProfileRepository struct {
 	strategy  string
+	notFound  bool
 	documents []types.CNVProfileDocument
 	segments  []types.CNVProfileSegment
 	cytobands []types.Cytoband
 	err       error
 }
 
-// GetExperimentalStrategy defaults to an exome.
-func (m *MockCNVProfileRepository) GetExperimentalStrategy(ctx context.Context, seqID int) (string, error) {
+// GetExperimentalStrategy defaults to an exome; notFound stands for a case, sequencing and task
+// that do not go together.
+func (m *MockCNVProfileRepository) GetExperimentalStrategy(ctx context.Context, caseID int, seqID int, taskID int) (string, error) {
+	if m.notFound {
+		return "", nil
+	}
 	if m.strategy == "" {
 		return "wxs", nil
 	}
 	return m.strategy, nil
 }
 
-func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID int) ([]types.CNVProfileDocument, error) {
+func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileDocument, error) {
 	return m.documents, m.err
 }
 

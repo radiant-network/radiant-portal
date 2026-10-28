@@ -6,8 +6,10 @@ package cnvprofile
 import (
 	"bufio"
 	"bytes"
+	"cmp"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -26,6 +28,22 @@ var chromosomeOrder = func() map[string]int {
 	}
 	return order
 }()
+
+// SortByLocus sorts items in genome order, chromosome (1-22, X, Y, then the others by name) then
+// start: StarRocks sorts the chromosome names as text.
+func SortByLocus[T any](items []T, locus func(T) (string, int)) {
+	rank := func(name string) int {
+		if order, ok := chromosomeOrder[name]; ok {
+			return order
+		}
+		return len(chromosomeOrder) + 1
+	}
+	slices.SortStableFunc(items, func(a, b T) int {
+		chromA, startA := locus(a)
+		chromB, startB := locus(b)
+		return cmp.Or(cmp.Compare(rank(chromA), rank(chromB)), strings.Compare(chromA, chromB), cmp.Compare(startA, startB))
+	})
+}
 
 func chromosomeName(name string) (string, bool) {
 	name = strings.TrimPrefix(name, "chr")

@@ -37,8 +37,8 @@ const (
 )
 
 type cnvProfileReader interface {
-	GetExperimentalStrategy(ctx context.Context, seqID int) (string, error)
-	GetCNVProfileDocuments(ctx context.Context, seqID int) ([]types.CNVProfileDocument, error)
+	GetExperimentalStrategy(ctx context.Context, caseID int, seqID int, taskID int) (string, error)
+	GetCNVProfileDocuments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileDocument, error)
 	GetCNVProfileSegments(ctx context.Context, caseID int, seqID int, taskID int) ([]types.CNVProfileSegment, error)
 	GetCytobands(ctx context.Context) ([]types.Cytoband, error)
 }
@@ -57,7 +57,10 @@ func (e *cnvProfileFilesMissingError) Error() string {
 	return fmt.Sprintf("cnv profile files missing: %v", e.missing)
 }
 
-var errCNVProfileStrategyUnsupported = errors.New("cnv profile strategy unsupported")
+var (
+	errCNVProfileSequencingNotFound  = errors.New("cnv profile sequencing not found")
+	errCNVProfileStrategyUnsupported = errors.New("cnv profile strategy unsupported")
+)
 
 // overviewCache keeps the genome overviews by file, bounded in count and in age.
 type overviewCache = expirable.LRU[string, *genomeTracks]
@@ -87,7 +90,7 @@ type genomeTracks struct {
 // @Success 200 {object} types.CNVProfile
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
-// @Failure 404 {object} types.ApiError "detail.missing lists the tracks without a file (copy_ratio, baf)"
+// @Failure 404 {object} types.ApiError "The case has no such sequencing analysed by the task, or detail.missing lists the tracks without a file (copy_ratio, baf)"
 // @Failure 422 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
@@ -127,13 +130,14 @@ func GetGermlineCNVProfileHandler(repo cnvProfileReader, store objectReader) gin
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
-// @Failure 404 {object} types.ApiError "detail.missing lists the tracks without a file (copy_ratio, baf)"
+// @Failure 404 {object} types.ApiError "The case has no such sequencing analysed by the task, or detail.missing lists the tracks without a file (copy_ratio, baf)"
+// @Failure 422 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region [get]
 func GetGermlineCNVProfileRegionHandler(repo cnvProfileReader, store objectReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, seqID, _, ok := cnvProfileParams(c)
+		caseID, seqID, taskID, ok := cnvProfileParams(c)
 		if !ok {
 			return
 		}
@@ -142,7 +146,7 @@ func GetGermlineCNVProfileRegionHandler(repo cnvProfileReader, store objectReade
 			HandleValidationError(c, err)
 			return
 		}
-		region, err := buildCNVProfileRegion(c.Request.Context(), repo, store, seqID, chromosome, start, end)
+		region, err := buildCNVProfileRegion(c.Request.Context(), repo, store, caseID, seqID, taskID, chromosome, start, end)
 		if err != nil {
 			handleCNVProfileError(c, err)
 			return
@@ -173,6 +177,8 @@ func cnvProfileParams(c *gin.Context) (int, int, int, bool) {
 func handleCNVProfileError(c *gin.Context, err error) {
 	var missingErr *cnvProfileFilesMissingError
 	switch {
+	case errors.Is(err, errCNVProfileSequencingNotFound):
+		HandleNotFoundError(c, "sequencing")
 	case errors.As(err, &missingErr):
 		c.JSON(http.StatusNotFound, types.ApiError{
 			Status:  http.StatusNotFound,
@@ -182,21 +188,35 @@ func handleCNVProfileError(c *gin.Context, err error) {
 	case errors.Is(err, errCNVProfileStrategyUnsupported):
 		HandleUnprocessableEntityError(c, "cnv profile unsupported: only exome and genome sequencings have one")
 	case errors.Is(err, utils.ErrObjectTooLarge):
-		HandleUnprocessableEntityError(c, "cnv profile files too large for an exome")
+		HandleUnprocessableEntityError(c, "cnv profile file too large to be read whole")
 	default:
 		HandleError(c, err)
 	}
 }
 
-func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectReader, overviews *overviewCache, caseID int, seqID int, taskID int) (*types.CNVProfile, error) {
-	strategy, err := repo.GetExperimentalStrategy(ctx, seqID)
+// cnvProfileStrategy checks that the case has the sequencing, analysed by the task, and that the
+// sequencing has a profile: an exome or a genome.
+func cnvProfileStrategy(ctx context.Context, repo cnvProfileReader, caseID int, seqID int, taskID int) (string, error) {
+	strategy, err := repo.GetExperimentalStrategy(ctx, caseID, seqID, taskID)
 	if err != nil {
-		return nil, fmt.Errorf("get experimental strategy of sequencing %d: %w", seqID, err)
+		return "", fmt.Errorf("get experimental strategy of sequencing %d: %w", seqID, err)
 	}
-	if strategy != strategyExome && strategy != strategyGenome {
-		return nil, errCNVProfileStrategyUnsupported
+	switch strategy {
+	case "":
+		return "", errCNVProfileSequencingNotFound
+	case strategyExome, strategyGenome:
+		return strategy, nil
+	default:
+		return "", errCNVProfileStrategyUnsupported
 	}
-	files, err := cnvProfileFiles(ctx, repo, seqID)
+}
+
+func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectReader, overviews *overviewCache, caseID int, seqID int, taskID int) (*types.CNVProfile, error) {
+	strategy, err := cnvProfileStrategy(ctx, repo, caseID, seqID, taskID)
+	if err != nil {
+		return nil, err
+	}
+	files, err := cnvProfileFiles(ctx, repo, seqID, taskID)
 	if err != nil {
 		return nil, fmt.Errorf("cnv profile files of sequencing %d: %w", seqID, err)
 	}
@@ -229,17 +249,19 @@ func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectRea
 	if profile.Segments == nil {
 		profile.Segments = []types.CNVProfileSegment{}
 	}
+	cnvprofile.SortByLocus(profile.Segments, func(s types.CNVProfileSegment) (string, int) { return s.Chromosome, s.Start })
 	if profile.Cytobands, err = repo.GetCytobands(ctx); err != nil {
 		return nil, fmt.Errorf("get cytobands: %w", err)
 	}
 	if profile.Cytobands == nil {
 		profile.Cytobands = []types.Cytoband{}
 	}
+	cnvprofile.SortByLocus(profile.Cytobands, func(b types.Cytoband) (string, int) { return b.Chromosome, b.Start })
 	return &profile, nil
 }
 
-func cnvProfileFiles(ctx context.Context, repo cnvProfileReader, seqID int) (starrocks.CNVProfileFiles, error) {
-	documents, err := repo.GetCNVProfileDocuments(ctx, seqID)
+func cnvProfileFiles(ctx context.Context, repo cnvProfileReader, seqID int, taskID int) (starrocks.CNVProfileFiles, error) {
+	documents, err := repo.GetCNVProfileDocuments(ctx, seqID, taskID)
 	if err != nil {
 		return starrocks.CNVProfileFiles{}, fmt.Errorf("get cnv profile documents: %w", err)
 	}
@@ -304,8 +326,11 @@ func genomeOverview(ctx context.Context, store objectReader, overviews *overview
 	return tracks, nil
 }
 
-func buildCNVProfileRegion(ctx context.Context, repo cnvProfileReader, store objectReader, seqID int, chromosome string, start, end int) (*types.CNVProfileRegion, error) {
-	files, err := cnvProfileFiles(ctx, repo, seqID)
+func buildCNVProfileRegion(ctx context.Context, repo cnvProfileReader, store objectReader, caseID int, seqID int, taskID int, chromosome string, start, end int) (*types.CNVProfileRegion, error) {
+	if _, err := cnvProfileStrategy(ctx, repo, caseID, seqID, taskID); err != nil {
+		return nil, err
+	}
+	files, err := cnvProfileFiles(ctx, repo, seqID, taskID)
 	if err != nil {
 		return nil, fmt.Errorf("cnv profile files of sequencing %d: %w", seqID, err)
 	}

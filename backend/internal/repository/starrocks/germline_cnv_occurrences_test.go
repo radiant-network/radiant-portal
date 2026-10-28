@@ -404,6 +404,7 @@ func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 				assert.Equal(t, []string{"AR", "XLR"}, fullCnvOverlap.OmimInheritanceCode)
 				assert.Equal(t, ptr(float32(0.95)), fullCnvOverlap.GnomadPli)
 				assert.Equal(t, ptr(float32(0.31)), fullCnvOverlap.GnomadLoeuf)
+				// ENSG00000000005.5 lies inside ENSG00000000005.1, from another transcript: one exon.
 				assert.EqualValues(t, 3, fullCnvOverlap.NbExons)
 				assert.EqualValues(t, "ENSG00000000005", fullCnvOverlap.GeneId)
 				assert.ElementsMatch(t, types.JsonArray[string]{"p1.1", "p1.2"}, fullCnvOverlap.Cytoband)

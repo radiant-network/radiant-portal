@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { XIcon } from 'lucide-react';
 import useSWR from 'swr';
 
-import type { CNVGeneOverlap, CNVProfileSegment, OccurrenceFlagType } from '@/api/api';
+import type { CNVProfileSegment, OccurrenceFlagType } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -23,7 +23,6 @@ import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import { useCNVGeneOverlaps } from './hooks/use-cnv-gene-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
-import { exonsHit } from './libs/overlap';
 import { getCNVProfilePalette } from './libs/palette';
 import { PROTEIN_CODING } from './libs/traces';
 import CNVGeneConstraint from './cnv-gene-constraint';
@@ -46,9 +45,8 @@ const percent = (value: number, fractionDigits: number) =>
 
 /**
  * The details of a called CNV: its calls, its Franklin link and the genes it overlaps, with the
- * columns of the overlapping genes of the CNV table. The exons hit are counted on the merged exons
- * of each gene, as in the gene panel. The protein-coding genes come first, edged in the colour of
- * their track.
+ * columns of the overlapping genes of the CNV table. The protein-coding genes come first, edged in
+ * the colour of their track.
  */
 function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChange, onClose }: CNVSegmentPanelProps) {
   const { t } = useI18n();
@@ -73,17 +71,12 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
     const count = await refreshNoteCount();
     onNotesChange(segment, (count ?? 0) > 0);
   };
-  const { overlaps, trackGenes, isLoading } = useCNVGeneOverlaps(ids, segment);
+  const { overlaps, isLoading } = useCNVGeneOverlaps(ids, segment);
   const palette = getCNVProfilePalette(usePlotlyTheme().isDark);
   const gain = segment.type === 'GAIN';
   const genes = [...overlaps].sort(
     (a, b) => Number(b.biotype === PROTEIN_CODING) - Number(a.biotype === PROTEIN_CODING),
   );
-
-  const exonsText = (overlap: CNVGeneOverlap) => {
-    const gene = trackGenes[overlap.gene_id];
-    return gene ? exonsHit(gene, segment) : '-';
-  };
 
   const fields = [
     { label: t('case_entity.variants.cnv_profile.panel.size'), value: toKiloBases(segment.end - segment.start) },
@@ -180,7 +173,7 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
                     {[
                       `${t('variant.headers.gene_length')} ${toKiloBases(overlap.gene_length)}`,
                       `${t('variant.headers.nb_overlap_bases')} ${toKiloBases(overlap.nb_overlap_bases)}`,
-                      `${t('variant.headers.nb_exons')} ${exonsText(overlap)}`,
+                      `${t('variant.headers.nb_exons')} ${overlap.nb_exons}`,
                       `${t('variant.headers.overlapping_gene_percent')} ${percent(overlap.overlapping_gene_percent, 0)}`,
                       `${t('variant.headers.overlapping_cnv_percent')} ${percent(overlap.overlapping_cnv_percent, 2)}`,
                     ].map(item => (

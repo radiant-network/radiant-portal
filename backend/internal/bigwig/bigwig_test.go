@@ -76,39 +76,6 @@ func Test_IntervalsIn_FixedStepSection(t *testing.T) {
 	assert.Equal(t, []Interval{{120, 130, 0.2}}, got)
 }
 
-func Test_ZoomLevels_ReadsReductions(t *testing.T) {
-	assert.Equal(t, []uint32{1600}, openFixture(t, "zoomed.bw").ZoomLevels())
-}
-
-func Test_ZoomLevels_FileWithoutZoom(t *testing.T) {
-	assert.Empty(t, openFixture(t, "sections.bw").ZoomLevels())
-}
-
-func Test_Summaries_ReadsWindows(t *testing.T) {
-	got, err := openFixture(t, "zoomed.bw").Summaries("chr1", 0, 0, 100_000)
-	require.NoError(t, err)
-	require.Len(t, got, 63)
-	assert.Equal(t, uint32(0), got[0].Start)
-	assert.Equal(t, uint32(1600), got[0].End)
-	assert.Equal(t, uint32(1600), got[0].ValidCount)
-	assert.Equal(t, float32(0), got[0].Min)
-	assert.InDelta(t, 0.4, got[0].Max, 1e-6)
-	assert.InDelta(t, 300, got[0].Sum, 1e-3)
-	assert.Equal(t, uint32(100_000), got[62].End)
-}
-
-func Test_Summaries_KeepsOverlappingWindows(t *testing.T) {
-	got, err := openFixture(t, "zoomed.bw").Summaries("chr1", 0, 1601, 1602)
-	require.NoError(t, err)
-	require.Len(t, got, 1)
-	assert.Equal(t, uint32(1600), got[0].Start)
-}
-
-func Test_Summaries_LevelOutOfRange(t *testing.T) {
-	_, err := openFixture(t, "zoomed.bw").Summaries("chr1", 1, 0, 100)
-	assert.EqualError(t, err, "zoom level 1 out of range: the file has 1")
-}
-
 func Test_BasesCovered_CountsBasesWithValue(t *testing.T) {
 	assert.Equal(t, uint64(100_000), openFixture(t, "zoomed.bw").BasesCovered())
 }
