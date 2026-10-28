@@ -36,7 +36,7 @@ function TumourAndMetastasisCard({
 
   return (
     <Card data-cy="tumour-and-metastasis-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.tumour_and_metastasis.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">

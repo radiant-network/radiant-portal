@@ -39,7 +39,7 @@ function Card({ className, size = 'default', ...props }: CardProps) {
  */
 const cardHeaderVariants = tv({
   slots: {
-    base: '@container/card-header grid auto-rows-min items-start sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-4',
+    base: '@container/card-header grid auto-rows-min items-start sm:grid-rows-[auto_auto] sm:has-data-[slot=card-action]:grid-cols-[1fr_auto]',
   },
   variants: {
     size: {
@@ -50,16 +50,21 @@ const cardHeaderVariants = tv({
         base: 'py-0 px-2 gap-0 text-card-foreground font-semibold',
       },
     },
+    bordered: {
+      true: { base: 'border-b pb-2' },
+      false: {},
+    },
   },
   defaultVariants: {
     size: 'default',
+    bordered: false,
   },
 });
 
 type CardHeaderProps = React.ComponentProps<'div'> & VariantProps<typeof cardHeaderVariants>;
 
-function CardHeader({ className, size, ...props }: CardHeaderProps) {
-  const style = cardHeaderVariants({ size });
+function CardHeader({ className, size, bordered, ...props }: CardHeaderProps) {
+  const style = cardHeaderVariants({ size, bordered });
   return <div data-slot="card-header" className={style.base({ className })} {...props} />;
 }
 

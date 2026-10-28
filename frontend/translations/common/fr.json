@@ -1444,6 +1444,91 @@
         "modality": "Modalité",
         "viewer": "Visionneuse"
       }
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "Aucune date au dossier",
+        "restricted": "Date restreinte",
+        "age_day": "Âge {{age}} ans (jour {{day}})",
+        "age_day_capped": "Âge 90+ ans (jour {{day}})",
+        "calendar_restricted_sr": "date calendaire restreinte"
+      },
+      "lab_tile": {
+        "no_result": "Aucun résultat au dossier",
+        "reported": "rapporté {{reported}}",
+        "unverified": "unité non reconnue — pas de normalisation",
+        "aria_empty": "{{label}} : aucun résultat au dossier",
+        "aria_value": "{{label}} : {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Dernière formule sanguine",
+        "empty": "Aucune formule sanguine au dossier.",
+        "analytes": {
+          "wbc": "GB",
+          "hemoglobin": "Hémoglobine",
+          "platelets": "Plaquettes",
+          "anc": "PNN"
+        }
+      },
+      "performance_status": {
+        "title": "Statut de performance",
+        "empty": "Aucun score de performance au dossier.",
+        "released": "Publié",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}} : {{score}} sur 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky enregistré à 16 ans ou plus",
+          "karnofsky-paediatric": "Karnofsky enregistré avant 16 ans"
+        }
+      },
+      "csf": {
+        "title": "Analyse du LCR",
+        "empty": "Aucune analyse du LCR au dossier.",
+        "analytes": {
+          "protein": "Protéines",
+          "glucose": "Glucose",
+          "nucleated_cells": "Cellules nucléées",
+          "rbc": "GR"
+        },
+        "cytology": {
+          "title": "Cytologie",
+          "multi_specimen_warning": "Le rapport couvre plus d'un spécimen — le résultat pourrait ne pas provenir du LCR.",
+          "multi_specimen": {
+            "yes": "Oui",
+            "no": "Non"
+          },
+          "fields": {
+            "test_name": "Nom du test",
+            "multi_specimen": "Couvre plusieurs spécimens",
+            "result_date": "Date du résultat"
+          },
+          "badge": {
+            "positive": "Cellules malignes présentes",
+            "suspicious": "Suspect de malignité",
+            "negative": "Aucune cellule maligne rapportée",
+            "non_diagnostic": "Spécimen non diagnostique",
+            "no_malignancy_statement": "Le rapport ne se prononce pas sur la malignité",
+            "unknown": "Résultat de cytologie non reconnu",
+            "empty": "Aucune cytologie au dossier"
+          },
+          "tier_note": {
+            "text_confirmed": "Attribué au LCR à partir du texte du rapport.",
+            "same_day_only": "Attribué au LCR uniquement parce que prélevé le même jour — ce résultat pourrait ne pas provenir du LCR."
+          }
+        },
+        "chemistry": {
+          "title": "Biochimie et numération cellulaire"
+        },
+        "specimen": {
+          "title": "Spécimen prélevé — résultat non affiché dans RADIANT",
+          "cell_free_dna": "ADN libre circulant",
+          "collected": "Prélevé"
+        }
+      }
     }
   },
   "timeline": {

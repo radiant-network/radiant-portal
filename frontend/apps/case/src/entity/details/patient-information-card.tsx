@@ -121,7 +121,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   if (isFamilyCase && members.length > 1) {
     return (
       <Card data-cy="patient-information-card" {...props}>
-        <CardHeader className="border-b [.border-b]:pb-2">
+        <CardHeader bordered>
           <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -151,7 +151,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   const firstMember = members[0];
   return (
     <Card data-cy="patient-information-card" {...props}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

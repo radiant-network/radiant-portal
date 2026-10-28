@@ -38,7 +38,7 @@ function KeyDatesCard({ initialDiagnosis, latestEncounter, isLoading }: KeyDates
 
   return (
     <Card>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.sidebar.key_dates.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
