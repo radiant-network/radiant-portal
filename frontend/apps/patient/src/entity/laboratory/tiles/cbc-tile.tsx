@@ -41,17 +41,16 @@ type CbcTileProps = {
   result: PatientLabResult | undefined;
   label: string;
   normaliseAsCount: boolean;
-  canReadPhi: boolean;
 };
 
-function CbcTile({ result, label, normaliseAsCount, canReadPhi }: CbcTileProps) {
+function CbcTile({ result, label, normaliseAsCount }: CbcTileProps) {
   const { t } = useI18n();
 
   if (!result || result.value == null) {
     return <LabTile label={label} />;
   }
 
-  const meta = <LabDate day={result.day} date={result.date} canReadPhi={canReadPhi} />;
+  const meta = <LabDate day={result.day} date={result.date} />;
 
   if (!normaliseAsCount) {
     return (

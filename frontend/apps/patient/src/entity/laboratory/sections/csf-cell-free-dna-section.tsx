@@ -7,10 +7,9 @@ import LabDate from '../dates/lab-date';
 
 type CsfCellFreeDnaSectionProps = {
   cellFreeDna: PatientCsf['cell_free_dna'];
-  canReadPhi: boolean;
 };
 
-function CsfCellFreeDnaSection({ cellFreeDna, canReadPhi }: CsfCellFreeDnaSectionProps) {
+function CsfCellFreeDnaSection({ cellFreeDna }: CsfCellFreeDnaSectionProps) {
   const { t } = useI18n();
   const titleId = useId();
   if (cellFreeDna.day == null && cellFreeDna.date == null) return null;
@@ -24,7 +23,7 @@ function CsfCellFreeDnaSection({ cellFreeDna, canReadPhi }: CsfCellFreeDnaSectio
         <span className="font-medium">{t('patient_entity.laboratory.csf.specimen.cell_free_dna')}</span>
         <span className="inline-flex gap-1 text-muted-foreground">
           <span>{t('patient_entity.laboratory.csf.specimen.collected')}</span>
-          <LabDate day={cellFreeDna.day} date={cellFreeDna.date} canReadPhi={canReadPhi} />
+          <LabDate day={cellFreeDna.day} date={cellFreeDna.date} />
         </span>
       </div>
     </section>

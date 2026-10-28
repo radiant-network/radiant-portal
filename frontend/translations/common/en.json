@@ -1375,7 +1375,7 @@
         "title": "Key Dates",
         "initial_diagnosis": "Initial diagnosis",
         "latest_encounter": "Latest encounter",
-        "day_age": "Day {{day}} · age {{age}}y",
+        "day_age": "{{age}}y · Day {{day}}",
         "sources": {
           "clinical": "Clinical",
           "registry": "Registry"
@@ -1447,10 +1447,8 @@
     "laboratory": {
       "date": {
         "no_date_on_file": "No date on file",
-        "restricted": "Date restricted",
-        "age_day": "Age {{age}}y (day {{day}})",
-        "age_day_capped": "Age 90+y (day {{day}})",
-        "calendar_restricted_sr": "calendar date restricted"
+        "age_day": "{{age}}y · Day {{day}}",
+        "age_day_capped": "90+y · Day {{day}}"
       },
       "lab_tile": {
         "no_result": "No result on file",
@@ -2163,7 +2161,10 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": { "title": "Interpretation saved", "button": "View interpretation" },
+        "success": {
+          "title": "Interpretation saved",
+          "button": "View interpretation"
+        },
         "error": {
           "title": "Failed to save interpretation",
           "text": "Failed to save interpretation. Please try again."

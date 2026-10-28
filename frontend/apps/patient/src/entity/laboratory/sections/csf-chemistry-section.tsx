@@ -37,10 +37,9 @@ export function csfResultDisplay(result: PatientCsfResult | undefined): CsfResul
 
 type CsfChemistrySectionProps = {
   csf: PatientCsf;
-  canReadPhi: boolean;
 };
 
-function CsfChemistrySection({ csf, canReadPhi }: CsfChemistrySectionProps) {
+function CsfChemistrySection({ csf }: CsfChemistrySectionProps) {
   const { t } = useI18n();
   const titleId = useId();
 
@@ -63,7 +62,7 @@ function CsfChemistrySection({ csf, canReadPhi }: CsfChemistrySectionProps) {
               unit={<LabUnit unit={display.unit} />}
               unitLabel={labUnitLabel(display.unit)}
               tooltip={display.tooltip ?? undefined}
-              meta={<LabDate day={result?.day} date={result?.date} canReadPhi={canReadPhi} showBoth />}
+              meta={<LabDate day={result?.day} date={result?.date} showBoth />}
             />
           );
         })}

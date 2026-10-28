@@ -17,11 +17,10 @@ const CBC_ANALYTES: ReadonlyArray<{ key: CbcAnalyteKey; normaliseAsCount: boolea
 
 type CbcCardProps = {
   cbc?: PatientCbc;
-  canReadPhi: boolean;
   isLoading?: boolean;
 } & CardProps;
 
-function CbcCard({ cbc, canReadPhi, isLoading, ...cardProps }: CbcCardProps) {
+function CbcCard({ cbc, isLoading, ...cardProps }: CbcCardProps) {
   const { t } = useI18n();
 
   if (isLoading) {
@@ -42,7 +41,6 @@ function CbcCard({ cbc, canReadPhi, isLoading, ...cardProps }: CbcCardProps) {
                 result={cbc[key]}
                 label={t(`patient_entity.laboratory.cbc.analytes.${key}`)}
                 normaliseAsCount={normaliseAsCount}
-                canReadPhi={canReadPhi}
               />
             ))}
           </div>

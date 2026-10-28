@@ -10,11 +10,10 @@ import CsfCytologySection from './sections/csf-cytology-section';
 
 type CsfCardProps = {
   csf?: PatientCsf;
-  canReadPhi: boolean;
   isLoading?: boolean;
 } & CardProps;
 
-function CsfCard({ csf, canReadPhi, isLoading, ...cardProps }: CsfCardProps) {
+function CsfCard({ csf, isLoading, ...cardProps }: CsfCardProps) {
   const { t } = useI18n();
 
   if (isLoading) {
@@ -28,9 +27,9 @@ function CsfCard({ csf, canReadPhi, isLoading, ...cardProps }: CsfCardProps) {
       </CardHeader>
       {csf ? (
         <CardContent className="flex flex-col gap-6">
-          <CsfCytologySection cytology={csf.cytology} canReadPhi={canReadPhi} />
-          <CsfChemistrySection csf={csf} canReadPhi={canReadPhi} />
-          <CsfCellFreeDnaSection cellFreeDna={csf.cell_free_dna} canReadPhi={canReadPhi} />
+          <CsfCytologySection cytology={csf.cytology} />
+          <CsfChemistrySection csf={csf} />
+          <CsfCellFreeDnaSection cellFreeDna={csf.cell_free_dna} />
         </CardContent>
       ) : (
         <CardContent>
