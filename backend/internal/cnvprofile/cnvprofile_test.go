@@ -78,6 +78,24 @@ func Test_BAFSample_KeepsEveryVariantUnderTheLimit(t *testing.T) {
 	assert.Equal(t, []int{10, 150}, got[0].Positions)
 }
 
+func Test_BAFSample_FileWithoutTotalSummary(t *testing.T) {
+	data, err := os.ReadFile("../../test/data/bigwig/baf.bw")
+	require.NoError(t, err)
+	// A writer may leave the total summary offset at 0: the variants cannot be counted up front.
+	copy(data[44:52], make([]byte, 8))
+	f, err := bigwig.Open(bytes.NewReader(data))
+	require.NoError(t, err)
+	require.Zero(t, f.BasesCovered())
+
+	got, stride, err := BAFSample(f, fixtureChromosomes, 2)
+	require.NoError(t, err)
+	assert.Equal(t, 2, stride)
+	assert.Equal(t, []types.CNVProfileTrack{
+		{Chromosome: "1", Positions: []int{10}, Values: []float64{0.5}},
+		{Chromosome: "2", Positions: []int{20}, Values: []float64{1}},
+	}, got)
+}
+
 func Test_CopyRatioSample_KeepsOneBinPerStrideAcrossChromosomes(t *testing.T) {
 	got, stride, err := CopyRatioSample(openFixture(t, "tn.bw"), fixtureChromosomes, 2)
 	require.NoError(t, err)
