@@ -1443,6 +1443,91 @@
         "modality": "Modality",
         "viewer": "Viewer"
       }
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "No date on file",
+        "restricted": "Date restricted",
+        "age_day": "Age {{age}}y (day {{day}})",
+        "age_day_capped": "Age 90+y (day {{day}})",
+        "calendar_restricted_sr": "calendar date restricted"
+      },
+      "lab_tile": {
+        "no_result": "No result on file",
+        "reported": "reported {{reported}}",
+        "unverified": "unrecognised unit — not normalised",
+        "aria_empty": "{{label}}: no result on file",
+        "aria_value": "{{label}}: {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Latest blood counts",
+        "empty": "No complete blood count on file.",
+        "analytes": {
+          "wbc": "WBC",
+          "hemoglobin": "Hemoglobin",
+          "platelets": "Platelets",
+          "anc": "ANC"
+        }
+      },
+      "performance_status": {
+        "title": "Performance status",
+        "empty": "No performance status score on file.",
+        "released": "Released",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}}: {{score}} out of 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky recorded at age 16+",
+          "karnofsky-paediatric": "Karnofsky recorded under age 16"
+        }
+      },
+      "csf": {
+        "title": "CSF analysis",
+        "empty": "No CSF analysis on file.",
+        "analytes": {
+          "protein": "Protein",
+          "glucose": "Glucose",
+          "nucleated_cells": "Nucleated cells",
+          "rbc": "RBC"
+        },
+        "cytology": {
+          "title": "Cytology",
+          "multi_specimen_warning": "The report covers more than one specimen — the finding may pertain to a non-CSF sample.",
+          "multi_specimen": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "fields": {
+            "test_name": "Test name",
+            "multi_specimen": "Covers multiple specimens",
+            "result_date": "Result date"
+          },
+          "badge": {
+            "positive": "Malignant cells present",
+            "suspicious": "Suspicious for malignancy",
+            "negative": "No malignant cells reported",
+            "non_diagnostic": "Non-diagnostic specimen",
+            "no_malignancy_statement": "Report makes no malignancy statement",
+            "unknown": "Unrecognised cytology result",
+            "empty": "No cytology on file"
+          },
+          "tier_note": {
+            "text_confirmed": "Attributed to CSF from the report text.",
+            "same_day_only": "Attributed to CSF only because it was collected the same day — this result may not be from CSF."
+          }
+        },
+        "chemistry": {
+          "title": "Chemistry and cell count"
+        },
+        "specimen": {
+          "title": "Specimen collected — result not shown in RADIANT",
+          "cell_free_dna": "Cell-free DNA",
+          "collected": "Collected"
+        }
+      }
     }
   },
   "timeline": {
