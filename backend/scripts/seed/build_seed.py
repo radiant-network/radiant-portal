@@ -19,6 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PCX_DIR = os.path.join(HERE, "..", "pcx_tables")
 # The upstream templates hard-code PRD's names; only the tenant code is a placeholder.
 TEMPLATE_VIEW_DB, TEMPLATE_SOURCE_DB = "cbtn_tenant", "radiant_data_dev"
+# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V6, 2026-10-21 delivery), read by the YAC agent (compose/yac/backends.json).
+CUBES_DIR = os.path.join(HERE, "data", "cubes")
 SHARED_DB = "radiant"
 JDBC_PATIENT_JOIN = "LEFT JOIN radiant_jdbc.public.patient p"
 
@@ -268,6 +270,17 @@ def source_tables(pcx_tables, swap=False):
         if swap:
             out += [f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
     return out
+
+
+def cube_tables():
+    """The survival cubes of data/cubes, one source table per CSV. NULL in a dimension means rolled up, never missing."""
+    tables = {}
+    for file in sorted(os.listdir(CUBES_DIR)):
+        path = os.path.join(CUBES_DIR, file)
+        cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in pcx.read_csv_header(path)]
+        rows = [[None if r[c] is None else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in pcx.read_csv(path)]
+        tables[file.removesuffix(".csv")] = (cols, rows)
+    return tables
 
 
 def patient_keys(patients):
@@ -562,6 +575,8 @@ S += occurrence_rows(sr)
 # PCX source tables, MRI and labs, the data dictionary, and the URL keys.
 S += source_tables(pcx_tables)
 S += patient_keys(patients)
+cubes = cube_tables()
+S += source_tables(cubes)
 
 # ---------------------------------------------------------------- StarRocks: views
 V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tables/access_controlled_views (owned by the
@@ -589,6 +604,8 @@ for file in sorted(os.listdir(views_dir)):
     V.append(sql + ";")
 V.append(f"CREATE OR REPLACE VIEW {TENANT_DB}.v_pcx_30_data_dictionary AS\n"
          f"SELECT display_order, table_name, source_file, field_name, description FROM {SOURCE_DB}.v_pcx_30_data_dictionary;")
+for name in cubes:
+    V.append(f"CREATE OR REPLACE VIEW {TENANT_DB}.v_{name} AS\nSELECT * FROM {SOURCE_DB}.`{name}`;")
 for file in sorted(os.listdir(os.path.join(HERE, "views"))):
     if file.endswith(".sql.tmpl"):
         sql = (open(os.path.join(HERE, "views", file), encoding="utf-8").read().replace("{{.TenantCode}}", TENANT)
