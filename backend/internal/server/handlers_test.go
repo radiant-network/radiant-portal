@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -202,7 +203,7 @@ func (m *MockObjectStore) GetObject(ctx context.Context, url string, maxBytes in
 	}
 	data, ok := m.objects[url]
 	if !ok {
-		return nil, fmt.Errorf("get object %s: not found", url)
+		return nil, fmt.Errorf("get object %s: %w", url, utils.ErrObjectNotFound)
 	}
 	return data, nil
 }

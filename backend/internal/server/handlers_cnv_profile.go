@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -234,12 +235,8 @@ func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectRea
 	}
 
 	if files.ROH != nil {
-		data, err := store.GetObject(ctx, files.ROH.URL, maxCNVProfileFileBytes)
-		if err != nil {
-			return nil, fmt.Errorf("read roh: %w", err)
-		}
-		if profile.ROH, err = cnvprofile.ParseROH(data); err != nil {
-			return nil, fmt.Errorf("read %s: %w", files.ROH.URL, err)
+		if profile.ROH, err = readROH(ctx, store, files.ROH.URL); err != nil {
+			return nil, err
 		}
 	}
 
@@ -258,6 +255,25 @@ func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectRea
 	}
 	cnvprofile.SortByLocus(profile.Cytobands, func(b types.Cytoband) (string, int) { return b.Chromosome, b.Start })
 	return &profile, nil
+}
+
+// readROH reads the optional ROH track: a file missing from the store or that does not parse
+// leaves the track empty, as a sequencing without roh.bed does, rather than failing the profile.
+func readROH(ctx context.Context, store objectReader, url string) ([]types.CNVProfileROH, error) {
+	data, err := store.GetObject(ctx, url, maxCNVProfileFileBytes)
+	if errors.Is(err, utils.ErrObjectNotFound) {
+		slog.WarnContext(ctx, "cnv profile roh file not found", slog.String("url", url))
+		return []types.CNVProfileROH{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read roh: %w", err)
+	}
+	regions, err := cnvprofile.ParseROH(data)
+	if err != nil {
+		slog.WarnContext(ctx, "cnv profile roh file invalid", slog.String("url", url), slog.Any("error", err))
+		return []types.CNVProfileROH{}, nil
+	}
+	return regions, nil
 }
 
 func cnvProfileFiles(ctx context.Context, repo cnvProfileReader, seqID int, taskID int) (starrocks.CNVProfileFiles, error) {
@@ -281,11 +297,11 @@ func cnvProfileFiles(ctx context.Context, repo cnvProfileReader, seqID int, task
 
 // exomeTracks reads every point.
 func exomeTracks(ctx context.Context, store objectReader, files starrocks.CNVProfileFiles, profile *types.CNVProfile) error {
-	tn, err := readBigWig(ctx, store, files.CopyRatio.URL)
+	tn, err := readBigWig(ctx, store, files.CopyRatio.URL, "copy_ratio")
 	if err != nil {
 		return fmt.Errorf("read copy ratio file: %w", err)
 	}
-	baf, err := readBigWig(ctx, store, files.BAF.URL)
+	baf, err := readBigWig(ctx, store, files.BAF.URL, "baf")
 	if err != nil {
 		return fmt.Errorf("read baf file: %w", err)
 	}
@@ -306,11 +322,11 @@ func genomeOverview(ctx context.Context, store objectReader, overviews *overview
 	if cached, ok := overviews.Get(key); ok {
 		return cached, nil
 	}
-	tn, err := openBigWig(ctx, store, files.CopyRatio.URL)
+	tn, err := openBigWig(ctx, store, files.CopyRatio.URL, "copy_ratio")
 	if err != nil {
 		return nil, fmt.Errorf("open copy ratio file: %w", err)
 	}
-	baf, err := openBigWig(ctx, store, files.BAF.URL)
+	baf, err := openBigWig(ctx, store, files.BAF.URL, "baf")
 	if err != nil {
 		return nil, fmt.Errorf("open baf file: %w", err)
 	}
@@ -334,11 +350,11 @@ func buildCNVProfileRegion(ctx context.Context, repo cnvProfileReader, store obj
 	if err != nil {
 		return nil, fmt.Errorf("cnv profile files of sequencing %d: %w", seqID, err)
 	}
-	tn, err := openBigWig(ctx, store, files.CopyRatio.URL)
+	tn, err := openBigWig(ctx, store, files.CopyRatio.URL, "copy_ratio")
 	if err != nil {
 		return nil, fmt.Errorf("open copy ratio file: %w", err)
 	}
-	baf, err := openBigWig(ctx, store, files.BAF.URL)
+	baf, err := openBigWig(ctx, store, files.BAF.URL, "baf")
 	if err != nil {
 		return nil, fmt.Errorf("open baf file: %w", err)
 	}
@@ -352,11 +368,12 @@ func buildCNVProfileRegion(ctx context.Context, repo cnvProfileReader, store obj
 	return &region, nil
 }
 
-// readBigWig reads a whole file, which is faster than ranges when every point is needed.
-func readBigWig(ctx context.Context, store objectReader, url string) (*bigwig.File, error) {
+// readBigWig reads a whole file, which is faster than ranges when every point is needed. A file
+// registered but missing from the store is reported as missing, under the name of its track.
+func readBigWig(ctx context.Context, store objectReader, url string, track string) (*bigwig.File, error) {
 	data, err := store.GetObject(ctx, url, maxCNVProfileFileBytes)
 	if err != nil {
-		return nil, fmt.Errorf("get %s: %w", url, err)
+		return nil, objectReadError(url, track, err)
 	}
 	f, err := bigwig.Open(bytes.NewReader(data))
 	if err != nil {
@@ -366,14 +383,21 @@ func readBigWig(ctx context.Context, store objectReader, url string) (*bigwig.Fi
 }
 
 // openBigWig reads a file by range, only the blocks a query needs.
-func openBigWig(ctx context.Context, store objectReader, url string) (*bigwig.File, error) {
+func openBigWig(ctx context.Context, store objectReader, url string, track string) (*bigwig.File, error) {
 	r, err := store.OpenObject(ctx, url)
 	if err != nil {
-		return nil, fmt.Errorf("open %s: %w", url, err)
+		return nil, objectReadError(url, track, err)
 	}
 	f, err := bigwig.Open(r)
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", url, err)
 	}
 	return f, nil
+}
+
+func objectReadError(url string, track string, err error) error {
+	if errors.Is(err, utils.ErrObjectNotFound) {
+		return fmt.Errorf("%s: %w", url, &cnvProfileFilesMissingError{missing: []string{track}})
+	}
+	return fmt.Errorf("get %s: %w", url, err)
 }

@@ -91,8 +91,8 @@ type CNVProfileDocument struct {
 	URL          string `json:"url" gorm:"column:url"`
 }
 
-// GeneTrackGene is a gene of the gene track, with its exons merged over all its transcripts
-// @Description GeneTrackGene is a gene of the gene track, with its exons merged over all its transcripts
+// GeneTrackGene is a gene of the gene track, with the exons of its transcript with the most exons
+// @Description GeneTrackGene is a gene of the gene track, with the exons of its transcript with the most exons
 type GeneTrackGene struct {
 	GeneID      string          `json:"gene_id" validate:"required"`
 	Symbol      string          `json:"symbol" validate:"required"`

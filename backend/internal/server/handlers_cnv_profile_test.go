@@ -116,6 +116,33 @@ func Test_GetGermlineCNVProfileHandler_BAFFileMissing(t *testing.T) {
 	assert.JSONEq(t, `{"status":404,"message":"cnv profile files not found","detail":{"missing":["baf"]}}`, w.Body.String())
 }
 
+func Test_GetGermlineCNVProfileHandler_BAFObjectMissing(t *testing.T) {
+	objects := cnvProfileObjects(t)
+	delete(objects, "s3://bucket/S1.hard-filtered.baf.bw")
+	w := getCNVProfile(&MockCNVProfileRepository{documents: cnvProfileDocuments}, &MockObjectStore{objects: objects}, "1", "1", "1")
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"cnv profile files not found","detail":{"missing":["baf"]}}`, w.Body.String())
+}
+
+func Test_GetGermlineCNVProfileHandler_ROHObjectMissing(t *testing.T) {
+	objects := cnvProfileObjects(t)
+	delete(objects, "s3://bucket/S1.roh.bed")
+	w := getCNVProfile(&MockCNVProfileRepository{documents: cnvProfileDocuments}, &MockObjectStore{objects: objects}, "1", "1", "1")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `"roh":[]`)
+}
+
+func Test_GetGermlineCNVProfileHandler_ROHInvalid(t *testing.T) {
+	objects := cnvProfileObjects(t)
+	objects["s3://bucket/S1.roh.bed"] = []byte("chr2\t100\t400\n")
+	w := getCNVProfile(&MockCNVProfileRepository{documents: cnvProfileDocuments}, &MockObjectStore{objects: objects}, "1", "1", "1")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `"roh":[]`)
+}
+
 func Test_GetGermlineCNVProfileHandler_FileTooLarge(t *testing.T) {
 	repo := &MockCNVProfileRepository{documents: cnvProfileDocuments}
 	w := getCNVProfile(repo, &MockObjectStore{err: fmt.Errorf("s3://bucket/S1.tn.bw: %w", utils.ErrObjectTooLarge)}, "1", "1", "1")

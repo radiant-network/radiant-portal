@@ -230,7 +230,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	if err != nil {
 		return nil, fmt.Errorf("error fetching gene overlap constraint: %w", err)
 	}
-	exons, err := mergedExons(ctx, db, geneIDs, func(tx *gorm.DB) *gorm.DB {
+	exons, err := geneExons(ctx, db, geneIDs, func(tx *gorm.DB) *gorm.DB {
 		return tx.Where("end >= ? AND start <= ?", start, end)
 	})
 	if err != nil {

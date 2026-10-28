@@ -127,8 +127,8 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 	return genes, nil
 }
 
-// GetGeneTrack lists the genes of every biotype overlapping a region, each with its exons merged
-// over all its transcripts (ensembl_exon_by_gene holds no MANE or coding bounds).
+// GetGeneTrack lists the genes of every biotype overlapping a region, each with the exons of its
+// transcript with the most exons (ensembl_exon_by_gene holds no MANE or coding bounds).
 func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
 	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ?", chromosome, start, end)
 }
@@ -156,7 +156,7 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	for i, g := range genes {
 		geneIDs[i] = g.GeneID
 	}
-	exonsByGene, err := mergedExons(ctx, r.db, geneIDs)
+	exonsByGene, err := geneExons(ctx, r.db, geneIDs)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching gene track exons: %w", err)
 	}
@@ -257,43 +257,45 @@ func omimGenes(ctx context.Context, db *gorm.DB, symbols []string) (map[string]o
 	return genes, nil
 }
 
-// mergedExons gives the exons of each gene merged over all its transcripts: Ensembl has one exon per
-// set of bounds, so the variants of an exon (alternative splice sites) would count apart. Each
-// scope narrows the exons, to a region for instance. Until RAD-146 brings the canonical transcript,
-// this is how the exons of a gene are counted.
-func mergedExons(ctx context.Context, db *gorm.DB, geneIDs []string, scopes ...func(*gorm.DB) *gorm.DB) (map[string][]types.GeneTrackExon, error) {
+// geneExons gives the exons of one transcript of each gene, the one with the most exons (the
+// smallest id on a tie): Ensembl has one exon per set of bounds, so the union over the transcripts
+// would count the variants of an exon apart, and an exon of a retained intron transcript would
+// fuse the exons it spans. Each scope narrows the exons, to a region for instance. Until RAD-146
+// brings the canonical transcript, this is how the exons of a gene are drawn and counted.
+func geneExons(ctx context.Context, db *gorm.DB, geneIDs []string, scopes ...func(*gorm.DB) *gorm.DB) (map[string][]types.GeneTrackExon, error) {
 	exonsByGene := map[string][]types.GeneTrackExon{}
 	if len(geneIDs) == 0 {
 		return exonsByGene, nil
 	}
+	transcriptExons := fmt.Sprintf(`(
+		WITH exons AS (
+			SELECT DISTINCT e.gene_id, x.transcript_id, e.start, e.end
+			FROM %s e, UNNEST(e.transcript_ids) AS x(transcript_id)
+			WHERE e.gene_id IN ?
+		),
+		picked AS (
+			SELECT gene_id, transcript_id
+			FROM (
+				SELECT gene_id, transcript_id, ROW_NUMBER() OVER (PARTITION BY gene_id ORDER BY nb_exons DESC, transcript_id) AS rn
+				FROM (SELECT gene_id, transcript_id, COUNT(*) AS nb_exons FROM exons GROUP BY gene_id, transcript_id) counted
+			) ranked
+			WHERE rn = 1
+		)
+		SELECT exons.gene_id, exons.start, exons.end
+		FROM exons JOIN picked ON picked.gene_id = exons.gene_id AND picked.transcript_id = exons.transcript_id
+	) AS transcript_exons`, types.EnsemblExonByGeneTable.TenantQualifiedName(ctx))
 	var exons []struct {
 		GeneID string
 		Start  int
 		End    int
 	}
-	tx := db.WithContext(ctx).Table(types.EnsemblExonByGeneTable.TenantQualifiedName(ctx)).Scopes(scopes...)
-	tx = tx.Select("DISTINCT gene_id, start, end").Where("gene_id IN ?", geneIDs).Order("gene_id, start, end")
+	tx := db.WithContext(ctx).Table(transcriptExons, geneIDs).Scopes(scopes...)
+	tx = tx.Select("gene_id, start, end").Order("gene_id, start, end")
 	if err := tx.Find(&exons).Error; err != nil {
 		return nil, fmt.Errorf("error fetching exons: %w", err)
 	}
 	for _, e := range exons {
 		exonsByGene[e.GeneID] = append(exonsByGene[e.GeneID], types.GeneTrackExon{Start: e.Start, End: e.End})
 	}
-	for geneID, geneExons := range exonsByGene {
-		exonsByGene[geneID] = mergeExons(geneExons)
-	}
 	return exonsByGene, nil
-}
-
-// mergeExons merges overlapping exons, given sorted by start.
-func mergeExons(exons []types.GeneTrackExon) []types.GeneTrackExon {
-	merged := []types.GeneTrackExon{}
-	for _, e := range exons {
-		if n := len(merged); n > 0 && e.Start <= merged[n-1].End {
-			merged[n-1].End = max(merged[n-1].End, e.End)
-			continue
-		}
-		merged = append(merged, e)
-	}
-	return merged
 }

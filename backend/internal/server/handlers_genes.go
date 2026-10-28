@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/cnvprofile"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -95,7 +96,7 @@ type geneTrackReader interface {
 // @Summary List the genes of a region
 // @Id geneTrack
 // @Description List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
-// @Description with its exons merged over all its transcripts. A symbol takes precedence over a region.
+// @Description with the exons of its transcript with the most exons. A symbol takes precedence over a region.
 // @Tags genes
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -142,6 +143,9 @@ func parseRegionQuery(c *gin.Context, maxSpan int) (string, int, int, error) {
 	chromosome := c.Query("chromosome")
 	if chromosome == "" {
 		return "", 0, 0, errors.New("chromosome is required")
+	}
+	if !cnvprofile.IsChromosome(chromosome) {
+		return "", 0, 0, fmt.Errorf("chromosome must be one of 1-22, X or Y, got %q", chromosome)
 	}
 	start, err := strconv.Atoi(c.Query("start"))
 	if err != nil {

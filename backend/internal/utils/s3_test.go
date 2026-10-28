@@ -133,6 +133,7 @@ func Test_GetObject_Missing(t *testing.T) {
 		_, err := s3fs.GetObject(context.Background(), "s3://test-bucket/missing.txt", 10)
 
 		assert.ErrorContains(t, err, "get object s3://test-bucket/missing.txt")
+		assert.ErrorIs(t, err, utils.ErrObjectNotFound)
 	})
 }
 
@@ -183,5 +184,6 @@ func Test_OpenObject_Missing(t *testing.T) {
 		_, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/missing.txt")
 
 		assert.ErrorContains(t, err, "head object s3://test-bucket/missing.txt")
+		assert.ErrorIs(t, err, utils.ErrObjectNotFound)
 	})
 }

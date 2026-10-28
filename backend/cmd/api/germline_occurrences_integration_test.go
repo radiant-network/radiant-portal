@@ -599,7 +599,7 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"cytoband": ["p1.1", "p1.2"],
 			"gene_id": "ENSG00000000005",
 			"gene_length": 10000,
-			"nb_exons": 3,
+			"nb_exons": 2,
 			"nb_overlap_bases": 500,
 			"overlap_type": "full_cnv",
 			"overlapping_cnv_percent": 100,

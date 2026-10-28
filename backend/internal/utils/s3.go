@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -190,7 +191,22 @@ func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
 	}, nil
 }
 
-var ErrObjectTooLarge = errors.New("object too large")
+var (
+	ErrObjectTooLarge = errors.New("object too large")
+	// ErrObjectNotFound is a missing object: a document registered for a file that was deleted
+	// or moved since.
+	ErrObjectNotFound = errors.New("object not found")
+)
+
+// objectError wraps an S3 error, as ErrObjectNotFound when the object is missing: GET answers
+// NoSuchKey, HEAD has no body and answers NotFound.
+func objectError(err error) error {
+	var aerr awserr.Error
+	if errors.As(err, &aerr) && (aerr.Code() == s3.ErrCodeNoSuchKey || aerr.Code() == "NotFound") {
+		return fmt.Errorf("%w: %w", ErrObjectNotFound, err)
+	}
+	return err
+}
 
 // GetObject reads a whole object, refusing one over maxBytes before downloading it.
 func (s *S3Store) GetObject(ctx context.Context, rawUrl string, maxBytes int64) ([]byte, error) {
@@ -204,7 +220,7 @@ func (s *S3Store) GetObject(ctx context.Context, rawUrl string, maxBytes int64) 
 		Key:    aws.String(s3location.Key),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get object %s: %w", rawUrl, err)
+		return nil, fmt.Errorf("get object %s: %w", rawUrl, objectError(err))
 	}
 	defer func() { _ = out.Body.Close() }()
 
@@ -242,7 +258,7 @@ func (s *S3Store) OpenObject(ctx context.Context, rawUrl string) (io.ReaderAt, e
 		Key:    aws.String(s3location.Key),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("head object %s: %w", rawUrl, err)
+		return nil, fmt.Errorf("head object %s: %w", rawUrl, objectError(err))
 	}
 	return &S3Object{ctx: ctx, svc: s.svc, location: s3location, size: aws.Int64Value(out.ContentLength)}, nil
 }

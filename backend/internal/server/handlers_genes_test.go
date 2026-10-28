@@ -101,6 +101,13 @@ func Test_GetGeneTrackHandler_MissingChromosome(t *testing.T) {
 	assert.JSONEq(t, `{"status":400,"message":"chromosome is required"}`, w.Body.String())
 }
 
+func Test_GetGeneTrackHandler_UnknownChromosome(t *testing.T) {
+	w := getGeneTrack("chromosome=chr17&start=0&end=10")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"chromosome must be one of 1-22, X or Y, got \"chr17\""}`, w.Body.String())
+}
+
 func Test_GetGeneTrackHandler_InvalidStart(t *testing.T) {
 	w := getGeneTrack("chromosome=17&start=x&end=10")
 

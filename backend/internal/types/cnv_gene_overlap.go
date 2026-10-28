@@ -8,7 +8,7 @@ type CNVGeneOverlap struct {
 	GeneLength     int               `json:"gene_length" validate:"required"`
 	NbOverlapBases int               `json:"nb_overlap_bases" validate:"required"`
 	Cytoband       JsonArray[string] `json:"cytoband" validate:"required"`
-	// NbExons counts the exons the CNV hits, merged over the transcripts of the gene
+	// NbExons counts the exons the CNV hits, on the transcript of the gene with the most exons
 	NbExons                int               `json:"nb_exons" validate:"required" gorm:"-"`
 	OverlappingGenePercent float32           `json:"overlapping_gene_percent" validate:"required"`
 	OverlappingCNVPercent  float32           `json:"overlapping_cnv_percent" validate:"required"`

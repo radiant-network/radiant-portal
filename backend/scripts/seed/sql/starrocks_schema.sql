@@ -600,6 +600,13 @@ CREATE TABLE IF NOT EXISTS {shared}.`cytoband` (
 ) ENGINE=OLAP
 DUPLICATE KEY(`chromosome`, `cytoband`);
 
+CREATE TABLE IF NOT EXISTS {shared}.`gnomad_constraint` (
+                                     `transcript_id` varchar(100) NOT NULL COMMENT "",
+                                     `pli` float NULL COMMENT "",
+                                     `loeuf` float NULL COMMENT ""
+) ENGINE=OLAP
+DUPLICATE KEY(`transcript_id`);
+
 CREATE TABLE IF NOT EXISTS {shared}.`gnomad_genomes_v3` (
     `locus_id` bigint(20) NOT NULL,
     `af` double NULL,

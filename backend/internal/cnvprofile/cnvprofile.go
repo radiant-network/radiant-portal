@@ -45,6 +45,13 @@ func SortByLocus[T any](items []T, locus func(T) (string, int)) {
 	})
 }
 
+// IsChromosome tells whether name is one of the chromosomes of a profile: 1-22, X or Y, without
+// the chr prefix.
+func IsChromosome(name string) bool {
+	_, ok := chromosomeOrder[name]
+	return ok
+}
+
 func chromosomeName(name string) (string, bool) {
 	name = strings.TrimPrefix(name, "chr")
 	_, ok := chromosomeOrder[name]
@@ -138,13 +145,22 @@ func BAFRegion(f *bigwig.File, chromosome string, start, end int) (types.CNVProf
 
 func regionTrack(f *bigwig.File, chromosome string, start, end int, point func(bigwig.Interval) (int, float64)) (types.CNVProfileTrack, error) {
 	t := types.CNVProfileTrack{Chromosome: chromosome, Positions: []int{}, Values: []float64{}}
-	fileName, ok := fileChromosomeNames(f)[chromosome]
-	if !ok {
+	idx := slices.IndexFunc(f.Chroms(), func(c bigwig.Chrom) bool {
+		name, ok := chromosomeName(c.Name)
+		return ok && name == chromosome
+	})
+	if idx < 0 {
 		return t, nil
 	}
-	intervals, err := f.IntervalsIn(fileName, uint32(max(start, 0)), uint32(max(end, 0))) //nolint:gosec // clamped to positive
+	c := f.Chroms()[idx]
+	// Clamped to the chromosome, which also keeps the bounds within uint32.
+	start, end = max(start, 0), min(end, int(c.Size))
+	if start >= end {
+		return t, nil
+	}
+	intervals, err := f.IntervalsIn(c.Name, uint32(start), uint32(end)) //nolint:gosec // clamped to the chromosome
 	if err != nil {
-		return t, fmt.Errorf("read chromosome %s: %w", fileName, err)
+		return t, fmt.Errorf("read chromosome %s: %w", c.Name, err)
 	}
 	appendPoints(&t, intervals, 0, 1, point)
 	return t, nil
@@ -237,7 +253,8 @@ func track(f *bigwig.File, chromosomes []types.CNVProfileChromosome, stride int,
 func appendPoints(t *types.CNVProfileTrack, intervals []bigwig.Interval, first, stride int, point func(bigwig.Interval) (int, float64)) int {
 	i := first
 	for ; i < len(intervals); i += stride {
-		if math.IsNaN(float64(intervals[i].Value)) {
+		// JSON has no NaN or infinity.
+		if v := float64(intervals[i].Value); math.IsNaN(v) || math.IsInf(v, 0) {
 			continue
 		}
 		position, value := point(intervals[i])
@@ -278,6 +295,9 @@ func ParseROH(data []byte) ([]types.CNVProfileROH, error) {
 			if err != nil {
 				return nil, fmt.Errorf("roh line %d: %w", line, err)
 			}
+		}
+		if math.IsNaN(score) || math.IsInf(score, 0) {
+			return nil, fmt.Errorf("roh line %d: score %s is not a finite number", line, fields[3])
 		}
 		regions = append(regions, types.CNVProfileROH{Chromosome: name, Start: start, End: end, Score: score, NbHom: nbHom, NbHet: nbHet})
 	}

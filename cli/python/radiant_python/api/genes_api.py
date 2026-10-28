@@ -670,7 +670,7 @@ class GenesApi:
     ) -> List[GeneTrackGene]:
         """List the genes of a region
 
-        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -757,7 +757,7 @@ class GenesApi:
     ) -> ApiResponse[List[GeneTrackGene]]:
         """List the genes of a region
 
-        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -844,7 +844,7 @@ class GenesApi:
     ) -> RESTResponseType:
         """List the genes of a region
 
-        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
 
         :param tenant: Tenant code (required)
         :type tenant: str

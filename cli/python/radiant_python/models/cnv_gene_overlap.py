@@ -32,7 +32,7 @@ class CNVGeneOverlap(BaseModel):
     gene_length: StrictInt
     gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene")
     gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene")
-    nb_exons: StrictInt = Field(description="NbExons counts the exons the CNV hits, merged over the transcripts of the gene")
+    nb_exons: StrictInt = Field(description="NbExons counts the exons the CNV hits, on the transcript of the gene with the most exons")
     nb_overlap_bases: StrictInt
     omim_inheritance_code: Optional[List[StrictStr]] = Field(default=None, description="OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene")
     overlap_type: StrictStr

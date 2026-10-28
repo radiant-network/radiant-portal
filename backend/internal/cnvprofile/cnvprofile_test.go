@@ -120,6 +120,13 @@ func Test_CopyRatioRegion_KeepsOverlappingBins(t *testing.T) {
 	assert.Equal(t, types.CNVProfileTrack{Chromosome: "1", Positions: []int{150}, Values: []float64{2}}, got)
 }
 
+func Test_CopyRatioRegion_PastTheChromosomeEnd(t *testing.T) {
+	// Bounds past uint32 would wrap to the start of the chromosome.
+	got, err := CopyRatioRegion(openFixture(t, "tn.bw"), "1", 4294967296, 4294967496)
+	require.NoError(t, err)
+	assert.Equal(t, types.CNVProfileTrack{Chromosome: "1", Positions: []int{}, Values: []float64{}}, got)
+}
+
 func Test_BAFRegion_ChromosomeAbsentFromTheFile(t *testing.T) {
 	got, err := BAFRegion(openFixture(t, "baf.bw"), "X", 0, 300)
 	require.NoError(t, err)
@@ -155,6 +162,13 @@ func Test_ParseROH_MissingColumns(t *testing.T) {
 func Test_ParseROH_BadNumber(t *testing.T) {
 	_, err := ParseROH([]byte("chr3\t1\t2\tx\t1\t0\n"))
 	assert.ErrorContains(t, err, "roh line 1: strconv.ParseFloat")
+}
+
+func Test_ParseROH_NonFiniteScore(t *testing.T) {
+	for _, score := range []string{"nan", "inf", "-Infinity"} {
+		_, err := ParseROH([]byte("chr3\t1\t2\t" + score + "\t1\t0\n"))
+		assert.EqualError(t, err, "roh line 1: score "+score+" is not a finite number")
+	}
 }
 
 func Test_SortByLocus_GenomeOrder(t *testing.T) {

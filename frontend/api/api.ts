@@ -316,7 +316,7 @@ export interface CNVGeneOverlap {
      */
     'gnomad_pli'?: number;
     /**
-     * NbExons counts the exons the CNV hits, merged over the transcripts of the gene
+     * NbExons counts the exons the CNV hits, on the transcript of the gene with the most exons
      * @type {number}
      * @memberof CNVGeneOverlap
      */
@@ -4243,7 +4243,7 @@ export interface GeneTrackExon {
     'start': number;
 }
 /**
- * GeneTrackGene is a gene of the gene track, with its exons merged over all its transcripts
+ * GeneTrackGene is a gene of the gene track, with the exons of its transcript with the most exons
  * @export
  * @interface GeneTrackGene
  */
@@ -12988,7 +12988,7 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -13085,7 +13085,7 @@ export const GenesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -13135,7 +13135,7 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.geneSearch(tenant, geneSearchBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
@@ -13186,7 +13186,7 @@ export class GenesApi extends BaseAPI {
     }
 
     /**
-     * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with its exons merged over all its transcripts. A symbol takes precedence over a region.
+     * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its transcript with the most exons. A symbol takes precedence over a region.
      * @summary List the genes of a region
      * @param {string} tenant Tenant code
      * @param {string} [symbol] Gene symbol, ignoring case

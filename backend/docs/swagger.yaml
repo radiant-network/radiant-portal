@@ -143,8 +143,8 @@ components:
             of the gene
           type: number
         nb_exons:
-          description: NbExons counts the exons the CNV hits, merged over the transcripts
-            of the gene
+          description: NbExons counts the exons the CNV hits, on the transcript of
+            the gene with the most exons
           type: integer
         nb_overlap_bases:
           type: integer
@@ -2243,8 +2243,8 @@ components:
       - start
       type: object
     GeneTrackGene:
-      description: GeneTrackGene is a gene of the gene track, with its exons merged
-        over all its transcripts
+      description: GeneTrackGene is a gene of the gene track, with the exons of its
+        transcript with the most exons
       properties:
         biotype:
           type: string
@@ -7048,7 +7048,7 @@ paths:
     get:
       description: |-
         List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
-        with its exons merged over all its transcripts. A symbol takes precedence over a region.
+        with the exons of its transcript with the most exons. A symbol takes precedence over a region.
       operationId: geneTrack
       parameters:
       - description: Tenant code

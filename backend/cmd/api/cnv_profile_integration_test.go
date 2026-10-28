@@ -127,7 +127,7 @@ func Test_GetGeneTrackHandler(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `[
 			{"gene_id":"ENSG00000000003","symbol":"TSPAN6","chromosome":"1","start":10000,"end":10200,"strand":"-","biotype":"protein_coding","description":"tetraspanin 6","exons":[{"start":10000,"end":10100}],"omim_conditions":[{"omim_phenotype_id":"100000","panel":"Tetraspanin disease"}]},
-			{"gene_id":"ENSG00000000005","symbol":"TNMD","chromosome":"1","start":10000,"end":20000,"strand":"+","biotype":"protein_coding","description":"tenomodulin","exons":[{"start":10000,"end":10100},{"start":10150,"end":10250},{"start":10450,"end":10750}],"omim_inheritance_code":["AR","XLR"],"omim_conditions":[{"omim_phenotype_id":"100001","panel":"Tenomodulin disease A","inheritance_code":["AR"]},{"omim_phenotype_id":"100002","panel":"Tenomodulin disease B","inheritance_code":["AR","XLR"]}],"gnomad_pli":0.95,"gnomad_loeuf":0.31}
+			{"gene_id":"ENSG00000000005","symbol":"TNMD","chromosome":"1","start":10000,"end":20000,"strand":"+","biotype":"protein_coding","description":"tenomodulin","exons":[{"start":10000,"end":10100},{"start":10150,"end":10250},{"start":10650,"end":10750}],"omim_inheritance_code":["AR","XLR"],"omim_conditions":[{"omim_phenotype_id":"100001","panel":"Tenomodulin disease A","inheritance_code":["AR"]},{"omim_phenotype_id":"100002","panel":"Tenomodulin disease B","inheritance_code":["AR","XLR"]}],"gnomad_pli":0.95,"gnomad_loeuf":0.31}
 		]`, w.Body.String())
 	})
 }

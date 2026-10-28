@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class GeneTrackGene(BaseModel):
     """
-    GeneTrackGene is a gene of the gene track, with its exons merged over all its transcripts
+    GeneTrackGene is a gene of the gene track, with the exons of its transcript with the most exons
     """ # noqa: E501
     biotype: Optional[StrictStr] = None
     chromosome: StrictStr
