@@ -205,15 +205,10 @@ func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
 				TaskID:                 5,
 				SequencingExperimentID: 1,
 			},
-			{
-				CaseID:                 &caseId,
-				TaskID:                 6,
-				SequencingExperimentID: 1,
-			},
 		}
 
 		assert.NoError(t, err)
-		assert.Len(t, result, 4)
+		assert.Len(t, result, 3)
 		assert.Equal(t, expected, result)
 	})
 }

@@ -202,15 +202,6 @@
         "mother",
         "father"
       ]
-    },
-    {
-      "id": 3,
-      "type_code": "exomiser",
-      "type_name": "Exomiser",
-      "created_on": "2024-01-15T09:00:00Z",
-      "patients": [
-        "proband"
-      ]
     }
   ],
   "has_igv_files": false

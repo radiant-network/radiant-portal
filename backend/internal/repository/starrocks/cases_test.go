@@ -509,7 +509,7 @@ func Test_GetCaseEntity(t *testing.T) {
 		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
 		assert.Len(t, (*caseEntity).SequencingExperiments, 3)
 		assert.Len(t, (*caseEntity).Members, 3)
-		assert.Len(t, (*caseEntity).Tasks, 8)
+		assert.Len(t, (*caseEntity).Tasks, 5)
 	})
 }
 
@@ -934,7 +934,7 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		tasks, err := repo.retrieveCaseTasks(t.Context(), 1)
 		assert.NoError(t, err)
-		assert.Equal(t, 8, len(*tasks))
+		assert.Equal(t, 5, len(*tasks))
 
 		assert.Equal(t, 1, (*tasks)[0].ID)
 		assert.Equal(t, "alignment_germline_variant_calling", (*tasks)[0].TypeCode)
