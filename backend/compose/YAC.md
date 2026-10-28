@@ -73,22 +73,20 @@ The agent verifies Keycloak JWTs (realm `radiant`, audience `radiant`, the same 
 every StarRocks query **as the caller**: the token is forwarded as the StarRocks password and the
 StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore apply per user.
 
-`yac/backends.json` exposes one package, `cbtn`: the PCX secured views of tenant `cbtn`, in
-database `cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
+`yac/backends.json` exposes one package, `cbtn`: two views of tenant `cbtn`, in database
+`cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
 
-- `patient` (`v_pcx_30_patient_level_combined`) is the parent entity, one row per patient. The other
-  eleven views (`demographics`, `event`, `medical_therapy`, `radiation`, `surgery`,
-  `treatment_summary`, `mri_image` and the latest labs) link to it on `patient_id`.
-- The descriptions come from the seed's data dictionaries, so the LLM knows what each column means.
-- The PHI rule lives in the views and reads `current_user()`, so it applies per caller. With PHI
-  access, `patient_id` is the MRN and calendar dates are filled; without it, `patient_id` is the
-  research id and the dates are NULL.
+- `Efs` and `Os` (`v_pcx30_efs_all_dx_v6_months_cube`, `v_pcx30_os_all_dx_v6_months_cube`) are
+  pre-aggregated event-free and overall survival cubes (`udi:cube`): patient counts over diagnosis,
+  protocol arm, subtype and site, where NULL means the dimension is rolled up. `Os` links its
+  dimensions to `Efs`'s, so one filter reaches both. They are built from a newer data release
+  (`scripts/seed/data/cubes`, 970 patients) than the patient views.
+- The descriptions and cube settings come from the cubes' datapackage, so the LLM knows what each
+  column means.
+- The cubes hold counts only, no PHI: every user with access to the tenant sees the same rows.
 
 Log in with the seed's demo users (`cbtn-admin`, `cbtn-phi-chop`, `cbtn-phi-sch`, `cbtn-lab`,
 `cbtn-nophi`). The password is the username.
-
-Known StarRocks 4.0.16 bug in the upstream PCX views: a `WHERE` on `radiant_patient_id` fails with
-"slot_id not found". A chart selection on that column hits it.
 
 ## Smoke test
 
@@ -101,12 +99,11 @@ tok() { curl -s -d client_id=radiant --data-urlencode "client_secret=$SECRET" -d
   -d "password=$1" -d grant_type=password \
   http://localhost:8080/realms/radiant/protocol/openid-connect/token | jq -r .access_token; }
 
-# Same query, different users: patients whose MRN (PHI) each user sees.
-# cbtn-admin 966 mrn, cbtn-phi-chop 255 mrn / 711 research_id, cbtn-nophi 966 research_id.
+# Same query, different users, read as each of them: 24056 cube rows for every user.
 for u in cbtn-admin cbtn-phi-chop cbtn-nophi; do
   curl -s -X POST localhost:8007/v1/yac/query -H "Authorization: Bearer $(tok $u)" -H 'Content-Type: application/json' \
-    -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"patient","source":"patient"}],
-         "transformation":[{"groupby":["patient_id_type"]},{"rollup":{"n":{"op":"count"}}}]}]}' \
+    -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"Efs","source":"Efs"}],
+         "transformation":[{"rollup":{"n":{"op":"count"}}}]}]}' \
     | jq -c "{user: \"$u\", result: .results.q.displayData}"
 done
 
