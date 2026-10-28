@@ -35,7 +35,7 @@ function CbcCard({ cbc, canReadPhi, isLoading, ...cardProps }: CbcCardProps) {
       </CardHeader>
       {cbc ? (
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {CBC_ANALYTES.map(({ key, normaliseAsCount }) => (
               <CbcTile
                 key={key}
