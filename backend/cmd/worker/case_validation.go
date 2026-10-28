@@ -98,12 +98,13 @@ const (
 const RelationshipProbandCode = "proband"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
-	"family_variant_calling":               {},
-	"tumor_only_variant_calling":           {},
-	types.RadiantGermlineAnnotationTask:    {},
-	types.RadiantGermlineCNVAnnotationTask: {},
-	types.RadiantSomaticAnnotationTask:     {},
-	types.ClinicalReportTaskTypeCode:       {},
+	"family_variant_calling":                {},
+	"tumor_only_variant_calling":            {},
+	types.RadiantGermlineAnnotationTask:     {},
+	types.RadiantGermlineCNVAnnotationTask:  {},
+	types.RadiantSomaticAnnotationTask:      {},
+	types.ClinicalReportTaskTypeCode:        {},
+	types.QualityControlMetricsTaskTypeCode: {},
 }
 
 var RequiresInputDocumentsTaskTypes = map[string]struct{}{

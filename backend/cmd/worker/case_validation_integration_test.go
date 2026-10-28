@@ -1410,6 +1410,52 @@ func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_QualityControlMetricsTask_IsLinkedToCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Quality_Control")
+		size := int64(13)
+		reportUrl := "s3://test-bucket/CA1/CA1_multiqc_report.html"
+		payload[0].Tasks = append(payload[0].Tasks, &types.CaseTaskBatch{
+			TypeCode:        types.QualityControlMetricsTaskTypeCode,
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "quality-control-pipeline",
+			PipelineVersion: "2.1.0-beta.1",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{
+					DataCategoryCode: "genomic",
+					DataTypeCode:     "aggqc",
+					FormatCode:       "html",
+					Name:             "CA1_multiqc_report.html",
+					Size:             &size,
+					Url:              reportUrl,
+				},
+			},
+		})
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Quality_Control").First(&ca)
+
+		var task *types.Task
+		env.Postgres.Table("task").Where("task_type_code = ?", types.QualityControlMetricsTaskTypeCode).First(&task)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = ?", task.ID).Find(&tc)
+		assert.NotEmpty(t, tc)
+		for _, ctx := range tc {
+			if assert.NotNil(t, ctx.CaseID) {
+				assert.Equal(t, ca.ID, *ctx.CaseID)
+			}
+		}
+	})
+}
+
 func Test_ProcessBatch_Case_Template(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		t.Skip("Template test - implement specific error case tests as needed")

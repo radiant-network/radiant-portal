@@ -10,6 +10,7 @@ const (
 	RadiantGermlineCNVAnnotationTask            = "radiant_germline_cnv_annotation"
 	RadiantSomaticAnnotationTask                = "radiant_somatic_annotation"
 	ClinicalReportTaskTypeCode                  = "clinical_report"
+	QualityControlMetricsTaskTypeCode           = "quality_control_metrics"
 	AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
 	AlignmentSomaticVariantCallingTaskTypeCode  = "alignment_somatic_variant_calling"
 	TumorOnlyVariantCallingTaskTypeCode         = "tumor_only_variant_calling"
