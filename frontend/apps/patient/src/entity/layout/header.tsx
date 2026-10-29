@@ -8,6 +8,7 @@ import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
+import { PatientExplorationTabs } from '../../exploration/patient-exploration-tabs';
 import { derivePatientMrn } from '../patient-mrn';
 
 type HeaderProps = {
@@ -47,7 +48,6 @@ function Header({ patient, isLoading }: HeaderProps) {
 
   const vitalStatusBadge: BadgeProps = {
     variant: patient?.vital_status === PatientEntityVitalStatusEnum.Alive ? 'green' : 'neutral',
-    size: 'lg',
     children: patient ? t(`patient_entity.header.vital_status.${patient.vital_status}`) : null,
   };
 
@@ -66,7 +66,7 @@ function Header({ patient, isLoading }: HeaderProps) {
     ? [
         ...(patient.can_read_phi ? [] : [phiRestrictedBadge]),
         ...(patient.cns_integrated_diagnosis
-          ? [{ variant: 'secondary' as const, size: 'lg' as const, children: patient.cns_integrated_diagnosis }]
+          ? [{ variant: 'secondary' as const, children: patient.cns_integrated_diagnosis }]
           : []),
         vitalStatusBadge,
       ]
@@ -79,7 +79,7 @@ function Header({ patient, isLoading }: HeaderProps) {
       title={title}
       description={description}
       badges={badges}
-      backLink={{ label: t('main_navbar.links.patients'), to: '/patient' }}
+      backLink={{ label: t('main_navbar.links.patients'), to: `/patient?tab=${PatientExplorationTabs.PatientList}` }}
       statuses={[<LibreChatDavid key="librechat-david" />]}
     />
   );
