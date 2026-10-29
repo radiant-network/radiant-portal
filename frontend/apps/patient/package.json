@@ -7,6 +7,6 @@
     "components": "file:../../components",
     "lucide-react": "^1.18.0",
     "swr": "^2.4.1",
-    "udi-yac": "^0.7.0"
+    "udi-yac": "^0.12.0"
   }
 }

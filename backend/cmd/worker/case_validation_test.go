@@ -261,7 +261,7 @@ func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organizatio
 func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetType) ([]string, error) {
 	switch setType {
 	case postgres.ValueSetTaskType:
-		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "radiant_germline_cnv_annotation", "exomiser", "exomiser_cnv", "rnaseq_analysis"}, nil
+		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "radiant_germline_cnv_annotation", "rnaseq_analysis"}, nil
 	}
 	return nil, nil
 }
@@ -908,8 +908,6 @@ func Test_fetchTaskTypeCodes_OK(t *testing.T) {
 		"tumor_only_variant_calling",
 		"radiant_germline_annotation",
 		"radiant_germline_cnv_annotation",
-		"exomiser",
-		"exomiser_cnv",
 		"rnaseq_analysis",
 	}, mockRecord.TaskTypeCodes)
 }
@@ -3864,72 +3862,6 @@ func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 	assert.Equal(t, expected, record.Errors[0])
 }
 
-func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Case: types.CaseBatch{
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-				},
-				{
-					Aliquot: "ALIQUOT-2",
-				},
-			},
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserTaskTypeCode,
-					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
-				},
-			},
-		},
-	}
-	record.validateTaskAliquot(0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-007",
-		Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
-func Test_validateTaskAliquot_ErrorExomiserCNVNotExactly1Aliquot(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Case: types.CaseBatch{
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-				},
-				{
-					Aliquot: "ALIQUOT-2",
-				},
-			},
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserCNVTaskTypeCode,
-					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
-				},
-			},
-		},
-	}
-	record.validateTaskAliquot(0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-007",
-		Message: "Task type exomiser_cnv doesn't support being associated with more than 1 aliquot value.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
 func Test_validateTaskAliquot_RadiantGermlineCNVAnnotationMultipleAliquots_OK(t *testing.T) {
 	record := CaseValidationRecord{
 		TenantCode: types.DefaultTenantCode,
@@ -4145,42 +4077,6 @@ func Test_validateTaskDocuments_MissingInputDocumentsError_RadiantGermlineCNVAnn
 	expected := types.BatchMessage{
 		Code:    "TASK-003",
 		Message: "Missing input documents for case 0 - task 0 of type radiant_germline_cnv_annotation.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
-func Test_validateTaskDocuments_MissingInputDocumentsError_ExomiserCNV(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Documents: map[string]*types.Document{
-			"s3://input/foo/bar.txt": {},
-		},
-		TaskContexts: map[int][]*types.TaskContext{
-			0: {{TaskID: 0, SequencingExperimentID: 0}},
-		},
-		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserCNVTaskTypeCode,
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://output/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	record.validateTaskDocuments(record.Case.Tasks[0], 0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-003",
-		Message: "Missing input documents for case 0 - task 0 of type exomiser_cnv.",
 		Path:    "case[0].tasks[0]",
 	}
 

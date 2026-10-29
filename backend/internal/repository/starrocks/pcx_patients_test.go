@@ -412,6 +412,11 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "chemotherapy_type": "Treatment follows a protocol and subject is enrolled on a protocol",
 				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
 			],
+			"trial_enrollments": [
+				{"start": {"day": 1021, "date": "2017-12-20"}, "stop": {"day": 1184, "date": "2018-06-01"},
+				 "protocol_name": "ACNS0333", "protocol_arm": "Arm I",
+				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
+			],
 			"imaging": [
 				{"day": 999, "date": "2017-11-28", "session_id": "ses-1", "session_name": "MRI Brain", "anatomical_site": "Brain",
 				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1"},
@@ -425,6 +430,26 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				"first_methotrexate_ever": {"day": null, "date": null},
 				"had_initial_radiation": true, "had_initial_chemo": true, "had_initial_methotrexate": false,
 				"initial_treatment_order": "chemo_before_radiation"
+			},
+			"cbc": {
+				"day": 3960, "date": "2025-12-01",
+				"wbc": {"value": 6.2, "unit": "10*3/uL"},
+				"hemoglobin": {"value": 11.8, "unit": "g/dL"},
+				"platelets": {"value": 245, "unit": "10*3/uL"},
+				"anc": {"value": 2.9, "unit": "x10E9/L"}
+			},
+			"performance_status": [
+				{"day": 3961, "date": "2025-12-02", "scale": "lansky", "score": 90,
+				 "score_text": "90 - Minor restrictions in strenuous physical activity"}
+			],
+			"csf": {
+				"protein": {"day": 3786, "date": "2025-06-10", "display": "<10 mg/dL", "value": 10, "comparator": "<", "unit": "mg/dL"},
+				"glucose": {"day": 3786, "date": "2025-06-10", "display": "55 mg/dL", "value": 55, "comparator": null, "unit": "mg/dL"},
+				"wbc": {"day": 3786, "date": "2025-06-10", "display": "2 /uL", "value": 2, "comparator": null, "unit": "/uL"},
+				"rbc": {"day": null, "date": null, "display": null, "value": null, "comparator": null, "unit": null},
+				"cytology": {"day": 3687, "date": "2025-03-01", "test_name": "Cytology, CSF", "malignant_cells": "negative",
+				 "evidence_tier": "named", "multi_specimen_report": false},
+				"cell_free_dna": {"day": 3687, "date": "2025-03-01"}
 			},
 			"cases": null,
 			"interpretations": null
@@ -450,6 +475,51 @@ func Test_GetPcxPatient_RestrictedPatientHasNoDates(t *testing.T) {
 	})
 }
 
+func Test_GetPcxPatient_RestrictedPatientLabsHaveNoDates(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := getPcxPatient(t, env, pcxPatientKey("4"))
+
+		require.NotNil(t, patient)
+		actual, err := json.Marshal(struct {
+			Cbc               any `json:"cbc"`
+			PerformanceStatus any `json:"performance_status"`
+			Csf               any `json:"csf"`
+		}{patient.Cbc, patient.PerformanceStatus, patient.Csf})
+		require.NoError(t, err)
+		assert.JSONEq(t, `{
+			"cbc": {
+				"day": 2900, "date": null,
+				"wbc": {"value": 4.1, "unit": "10*3/uL"},
+				"hemoglobin": {"value": null, "unit": null},
+				"platelets": {"value": 180, "unit": "10*3/uL"},
+				"anc": {"value": 1500, "unit": "/uL"}
+			},
+			"performance_status": [
+				{"day": 2950, "date": null, "scale": "karnofsky", "score": 70,
+				 "score_text": "70 - Cares for self, unable to carry on normal activity"}
+			],
+			"csf": {
+				"protein": {"day": 2920, "date": null, "display": "38 mg/dL", "value": 38, "comparator": null, "unit": "mg/dL"},
+				"glucose": {"day": null, "date": null, "display": null, "value": null, "comparator": null, "unit": null},
+				"wbc": {"day": 2920, "date": null, "display": "12 /uL", "value": 12, "comparator": null, "unit": "/uL"},
+				"rbc": {"day": 2920, "date": null, "display": "150 /uL", "value": 150, "comparator": null, "unit": "/uL"},
+				"cytology": {"day": 2925, "date": null, "test_name": "Body Fluid Cytology", "malignant_cells": "suspicious",
+				 "evidence_tier": "text_confirmed", "multi_specimen_report": true},
+				"cell_free_dna": {"day": null, "date": null}
+			}
+		}`, string(actual))
+	})
+}
+
+func Test_GetPcxPatient_UnknownPerformanceScaleIsSkipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := getPcxPatient(t, env, pcxPatientKey("2"))
+
+		require.NotNil(t, patient)
+		assert.Equal(t, []types.PatientPerformanceScore{}, patient.PerformanceStatus)
+	})
+}
+
 func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		patient := getPcxPatient(t, env, pcxPatientKey("3"))
@@ -457,13 +527,15 @@ func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 		require.NotNil(t, patient)
 		actual, err := json.Marshal(struct {
 			Events, Surgeries, Radiations, Therapies, Imaging, Cases, Interpretations any
-			TreatmentSummary                                                          any
+			TreatmentSummary, Cbc, PerformanceStatus, Csf, TrialEnrollments           any
 			VitalStatusAt                                                             types.PatientDayDate
 		}{patient.Events, patient.Surgeries, patient.Radiations, patient.Therapies, patient.Imaging, patient.Cases,
-			patient.Interpretations, patient.TreatmentSummary, patient.VitalStatusAt})
+			patient.Interpretations, patient.TreatmentSummary, patient.Cbc, patient.PerformanceStatus, patient.Csf,
+			patient.TrialEnrollments, patient.VitalStatusAt})
 		require.NoError(t, err)
 		assert.JSONEq(t, `{"Events": [], "Surgeries": [], "Radiations": [], "Therapies": [], "Imaging": [], "Cases": [],
-			"Interpretations": [], "TreatmentSummary": null, "VitalStatusAt": {"day": null, "date": null}}`, string(actual))
+			"Interpretations": [], "TreatmentSummary": null, "Cbc": null, "PerformanceStatus": [], "Csf": null, "TrialEnrollments": [],
+			"VitalStatusAt": {"day": null, "date": null}}`, string(actual))
 	})
 }
 

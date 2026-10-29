@@ -76,3 +76,6 @@ var PcxRadiationLevelTable = Table{Name: "v_pcx_30_radiation_level_combined", Al
 var PcxMedicalTherapyTable = Table{Name: "v_pcx_30_medical_therapy_level_combined", Alias: "mt", PerTenant: true}
 var PcxMriImagesTable = Table{Name: "v_pcx_30_mri_images_combined", Alias: "mri", PerTenant: true}
 var PcxTreatmentSummaryTable = Table{Name: "v_pcx_30_treatment_summary_combined", Alias: "ts", PerTenant: true}
+var PcxCbcTable = Table{Name: "v_cbc_latest_results", Alias: "cbc", PerTenant: true}
+var PcxPerformanceStatusTable = Table{Name: "v_lansky_karnofsky_latest", Alias: "lk", PerTenant: true}
+var PcxCsfTable = Table{Name: "v_csf_results_latest_by_component", Alias: "csf", PerTenant: true}

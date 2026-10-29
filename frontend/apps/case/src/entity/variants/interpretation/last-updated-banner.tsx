@@ -1,8 +1,8 @@
-import { format } from 'date-fns';
+import { Trans } from 'react-i18next';
 import { History } from 'lucide-react';
 
+import DateTime from '@/components/base/date/datetime';
 import { Alert, AlertDescription } from '@/components/base/shadcn/alert';
-import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationLastUpdatedBannerProps = {
   updated_by_name?: string;
@@ -10,19 +10,17 @@ type InterpretationLastUpdatedBannerProps = {
 };
 
 function InterpretationLastUpdatedBanner({ updated_by_name, updated_at }: InterpretationLastUpdatedBannerProps) {
-  const { t } = useI18n();
   if (!updated_by_name || !updated_at) return null;
 
   return (
-    <Alert className="flex gap-2 items-center mb-3">
-      <div>
-        <History size={20} />
-      </div>
-      <AlertDescription className="text-foreground">
-        <span className="flex gap-1">
-          {t('variant.interpretation_form.last_update')}
-          <strong>{updated_by_name}</strong>({format(new Date(updated_at), t('common.date.year_month_day_hour'))})
-        </span>
+    <Alert variant="info" className="items-center gap-2">
+      <History size={20} />
+      <AlertDescription>
+        <Trans
+          i18nKey="variant.interpretation_form.last_update"
+          values={{ name: updated_by_name }}
+          components={{ strong: <strong />, date: <DateTime date={updated_at} /> }}
+        />
       </AlertDescription>
     </Alert>
   );

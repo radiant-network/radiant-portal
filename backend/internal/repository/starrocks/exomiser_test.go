@@ -85,6 +85,18 @@ func Test_GetExomiserACMGClassificationCounts(t *testing.T) {
 	})
 }
 
+func Test_GetExomiserACMGClassificationCounts_SequencingWithTwoTasksCountsOncePerClassification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Locus 1001: seq 1 classified Pathogenic by tasks 1 and 2; seq 2 classified Pathogenic by task 3 and VUS by task 4.
+		expected := map[string]int{"Pathogenic": 2, "VUS": 1}
+
+		exomiser, err := repo.GetExomiserACMGClassificationCounts(t.Context(), 1001)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, exomiser)
+	})
+}
+
 func Test_GetExomiserACMGClassificationCounts_Empty(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "exomiser"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})

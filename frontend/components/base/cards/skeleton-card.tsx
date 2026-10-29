@@ -9,7 +9,7 @@ type SkeletonCardProps = {
 function SkeletonCard({ title, rows, ...cardProps }: SkeletonCardProps) {
   return (
     <Card {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">

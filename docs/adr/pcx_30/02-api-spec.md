@@ -160,8 +160,12 @@ interface PatientEntity extends PatientListItem {
   surgeries: PatientSurgery[];
   radiations: PatientRadiation[];
   therapies: PatientTherapy[];
+  trial_enrollments: PatientTrialEnrollment[];  // Clinical trials tab, most recent start first
   imaging: PatientImagingSession[];
   treatment_summary: PatientTreatmentSummary | null;
+  cbc: PatientCbc | null;                       // null when the patient has no CBC
+  performance_status: PatientPerformanceScore[];
+  csf: PatientCsf | null;                       // null when the patient has no CSF result
   cases: PatientCase[];
   interpretations: PatientInterpretation[];
 }
@@ -210,12 +214,58 @@ interface PatientTherapy {
   is_initial_treatment: boolean | null; // source Yes / No; null when Not Reported
 }
 
+// The therapies whose chemotherapy_type is "Treatment follows a protocol and subject is enrolled on a protocol",
+// merged by protocol_name_and_arm (one therapy per phase). Following a protocol without enrollment is left out.
+interface PatientTrialEnrollment {
+  start: PatientDayDate;          // earliest start of its therapies
+  stop: PatientDayDate;           // latest stop of its therapies
+  protocol_name: string;          // as in the source, Other / Not Reported included
+  protocol_arm: string | null;    // null when Not Applicable
+  chemotherapy_agents: string[];  // of all its therapies, without duplicates
+  is_initial_treatment: boolean;  // true when any of its therapies is
+}
+
 interface PatientImagingSession extends PatientDayDate {
   session_id: string;
   session_name: string;
   anatomical_site: string | null;
   imaging_modality: string | null;
   flywheel_url: string | null;
+}
+
+// Laboratory. Raw from the views: units are not normalized (ANC comes in /uL and x10E9/L, 1000x apart).
+// The CBC is the most recent panel: every analyte comes from it, so the day and date are the panel's.
+interface PatientLabResult { value: number | null; unit: string | null }
+interface PatientCbc extends PatientDayDate { wbc: PatientLabResult; hemoglobin: PatientLabResult; platelets: PatientLabResult; anc: PatientLabResult }
+
+// The view holds the latest score of either scale (one row per patient today); a list so one score per scale fits later.
+// The date is when the result was released (observation.issued): the source has no assessment date.
+interface PatientPerformanceScore extends PatientDayDate {
+  scale: 'lansky' | 'karnofsky';
+  score: number;                   // 10 to 100, steps of 10
+  score_text: string | null;       // as recorded
+}
+
+// Read display: it carries the comparator ('<10 mg/dL'), and '<1.0' means undetectable, not 1.0.
+interface PatientCsfResult extends PatientDayDate {
+  display: string | null;
+  value: number | null;
+  comparator: string | null;       // protein and glucose only
+  unit: string | null;
+}
+interface PatientCsfCytology extends PatientDayDate {
+  test_name: string | null;
+  malignant_cells: 'positive' | 'suspicious' | 'negative' | 'non_diagnostic' | 'no_malignancy_statement' | null;
+  evidence_tier: 'named' | 'text_confirmed' | 'same_day_only' | null; // how the report was attributed to CSF
+  multi_specimen_report: boolean | null; // the finding may pertain to a non-CSF specimen
+}
+interface PatientCsf {
+  protein: PatientCsfResult;
+  glucose: PatientCsfResult;
+  wbc: PatientCsfResult;           // nucleated cells
+  rbc: PatientCsfResult;
+  cytology: PatientCsfCytology;
+  cell_free_dna: PatientDayDate;   // when the test was done; the source has no value
 }
 
 // "ever" = first occurrence at any time; "initial" = part of the initial treatment.
@@ -265,7 +315,7 @@ interface PatientInterpretation {
 }
 ```
 
-Not in the contract yet, to be added without breaking anything: the tumor board reports (their view is not ready; B8 adds the list and the download endpoint), and the Laboratory (CBC), predisposition and clinical-trial models, once the other team's views are described. Until then those tabs have no API data.
+Not in the contract yet, to be added without breaking anything: the tumor board reports (their view is not ready; B8 adds the list and the download endpoint), and the predisposition and clinical-trial models, once the other team's views are described. Until then those tabs have no API data. Laboratory reads `v_cbc_latest_results`, `v_lansky_karnofsky_latest` and `v_csf_results_latest_by_component`; CSF opening pressure has no source, and the cytology free text (`cytology_final_diagnosis`, `cytology_result_text`) is left out: it quotes the patient's name and MRN.
 
 ## Frontend alignment
 

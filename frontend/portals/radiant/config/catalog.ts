@@ -7,7 +7,6 @@ export const APP_NAMES = [
   'PATIENT',
   'STUDY',
   'COMMUNITY',
-  'LIBRECHAT',
 ] as const;
 
 export type AppName = (typeof APP_NAMES)[number];

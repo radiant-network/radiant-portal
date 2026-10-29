@@ -4,26 +4,13 @@ import { useParams, useSearchParams } from 'react-router';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { useRuntimeConfig } from '@/components/hooks/use-runtime-config';
 
-const DAVID_URL = import.meta.env.APPS_LIBRECHAT_DAVID_URL;
 const OPEN_PARAM = 'david';
 
-export function useOpenLibrechatDavid(): () => void {
-  const [, setSearchParams] = useSearchParams();
-  return useCallback(() => {
-    setSearchParams(
-      prev => {
-        const next = new URLSearchParams(prev);
-        next.set(OPEN_PARAM, '1');
-        return next;
-      },
-      { preventScrollReset: true },
-    );
-  }, [setSearchParams]);
-}
-
-function LibrechatDavidModal() {
+function LibreChatDavidModal() {
   const { t } = useI18n();
+  const { librechatDavidUrl } = useRuntimeConfig();
   const [searchParams, setSearchParams] = useSearchParams();
   const { patientId } = useParams<{ patientId: string }>();
 
@@ -45,12 +32,14 @@ function LibrechatDavidModal() {
   );
 
   const iframeSrc = useMemo(() => {
-    if (!DAVID_URL) return undefined;
-    if (!patientId) return DAVID_URL;
-    const url = new URL(DAVID_URL);
+    if (!librechatDavidUrl) return undefined;
+    if (!patientId) return librechatDavidUrl;
+    const url = new URL(librechatDavidUrl);
     url.searchParams.set('patient', patientId);
     return url.toString();
-  }, [patientId]);
+  }, [librechatDavidUrl, patientId]);
+
+  if (!librechatDavidUrl) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -67,23 +56,17 @@ function LibrechatDavidModal() {
           )}
         </DialogHeader>
         <div className="w-full h-full border-t">
-          {iframeSrc ? (
-            <iframe
-              key={iframeSrc}
-              src={iframeSrc}
-              title={t('librechat.david.frame_title')}
-              className="w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full p-6 text-sm text-muted-foreground">
-              {t('librechat.david.not_configured')}
-            </div>
-          )}
+          <iframe
+            key={iframeSrc}
+            src={iframeSrc}
+            title={t('librechat.david.frame_title')}
+            className="w-full h-full border-0"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          />
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-export default LibrechatDavidModal;
+export default LibreChatDavidModal;

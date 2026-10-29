@@ -1,22 +1,22 @@
-import { Lock, SparklesIcon } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 import type { PatientEntity } from '@/api/api';
 import { PatientEntityVitalStatusEnum } from '@/api/api';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import type { BadgeProps } from '@/components/base/shadcn/badge';
-import type { ButtonProps } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
+import { PatientExplorationTabs } from '../../exploration/patient-exploration-tabs';
 import { derivePatientMrn } from '../patient-mrn';
 
 type HeaderProps = {
   patient?: PatientEntity;
   isLoading: boolean;
-  onAskAssistant?: () => void;
 };
 
-function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
+function Header({ patient, isLoading }: HeaderProps) {
   const { t } = useI18n();
 
   let title: React.ReactNode;
@@ -48,7 +48,6 @@ function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
 
   const vitalStatusBadge: BadgeProps = {
     variant: patient?.vital_status === PatientEntityVitalStatusEnum.Alive ? 'green' : 'neutral',
-    size: 'lg',
     children: patient ? t(`patient_entity.header.vital_status.${patient.vital_status}`) : null,
   };
 
@@ -67,25 +66,9 @@ function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
     ? [
         ...(patient.can_read_phi ? [] : [phiRestrictedBadge]),
         ...(patient.cns_integrated_diagnosis
-          ? [{ variant: 'secondary' as const, size: 'lg' as const, children: patient.cns_integrated_diagnosis }]
+          ? [{ variant: 'secondary' as const, children: patient.cns_integrated_diagnosis }]
           : []),
         vitalStatusBadge,
-      ]
-    : [];
-
-  const buttons: ButtonProps[] = onAskAssistant
-    ? [
-        {
-          variant: 'outline',
-          size: 'sm',
-          onClick: onAskAssistant,
-          children: (
-            <>
-              <SparklesIcon />
-              {t('patient_entity.header.ask_assistant')}
-            </>
-          ),
-        },
       ]
     : [];
 
@@ -96,8 +79,8 @@ function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
       title={title}
       description={description}
       badges={badges}
-      backLink={{ label: t('main_navbar.links.patients'), to: '/patient' }}
-      buttons={buttons}
+      backLink={{ label: t('main_navbar.links.patients'), to: `/patient?tab=${PatientExplorationTabs.PatientList}` }}
+      statuses={[<LibreChatDavid key="librechat-david" />]}
     />
   );
 }

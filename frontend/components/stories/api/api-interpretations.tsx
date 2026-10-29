@@ -1,6 +1,7 @@
 import { HttpResponse } from 'msw';
 
 export const interpretationsGermlineApi = `api/:tenant/interpretations/v2/germline/:case_id/:seq_id/:locus_id/:transcript_id`;
+export const interpretationsSomaticApi = `api/:tenant/interpretations/v2/somatic/:case_id/:seq_id/:locus_id/:transcript_id`;
 
 export async function httpInterpretationGermlineOccurrenceResponse() {
   return HttpResponse.json({
@@ -23,5 +24,43 @@ export async function httpInterpretationGermlineOccurrenceResponse() {
     classification: 'LA26334-5',
     classification_criterias: ['PVS1'],
     transmission_modes: ['unknown_father_genotype'],
+    pubmed: [
+      {
+        citation_id: '25741868',
+        citation:
+          'Richards S, et al. Standards and guidelines for the interpretation of sequence variants. Genet Med. 2015;17(5):405-24.',
+      },
+    ],
+  });
+}
+
+export async function httpInterpretationSomaticOccurrenceResponse() {
+  return HttpResponse.json({
+    id: '6b1f3c2a-8d4e-4f5a-9c7b-1e2d3f4a5b6c',
+    case_id: '1',
+    sequencing_id: '1',
+    locus_id: '219406',
+    transcript_id: 'ENST00000412585',
+    interpretation:
+      '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus hendrerit, erat ut pulvinar semper, metus ligula elementum felis, tincidunt facilisis nibh neque tincidunt libero.</p>',
+    metadata: {},
+    created_by: '1468ac8a-b61f-4216-a1a1-a0db15150ac8',
+    created_by_name: 'John Doe',
+    created_at: '2026-01-26T16:50:17.382399Z',
+    updated_by: '1468ac8a-b61f-4216-a1a1-a0db15150ac8',
+    updated_by_name: 'John Doe',
+    updated_at: '2026-01-26T16:50:17.382399Z',
+    tumoral_type: 'MONDO:0005061',
+    tumoral_name: 'lung adenocarcinoma',
+    oncogenicity: 'LA6668-3',
+    oncogenicity_classification_criterias: ['OVS1', 'OS2'],
+    clinical_utility: 'category_ia',
+    pubmed: [
+      {
+        citation_id: '35101336',
+        citation:
+          'Horak P, et al. Standards for the classification of pathogenicity of somatic variants in cancer (oncogenicity). Genet Med. 2022;24(5):986-998.',
+      },
+    ],
   });
 }

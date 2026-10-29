@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import type { FiltersValue, PatientFilters, SearchCriterion } from '@/api/api';
-import type { IFilterButton } from '@/components/base/buttons/filter-button';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
 import DataTableFilters, {
   getSortedCriterias,
   getVisibleFiltersByCriterias,
@@ -81,6 +81,15 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             ...baseOption,
             isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
             options: sortOptions(values),
+            popoverSize: 'lg' as PopoverSize,
+          };
+        case 'organization_code':
+        case 'cns_integrated_diagnosis':
+          return {
+            ...baseOption,
+            options: sortOptions(values),
+            popoverSize: 'lg' as PopoverSize,
+            withTooltip: true,
           };
         default:
           return {

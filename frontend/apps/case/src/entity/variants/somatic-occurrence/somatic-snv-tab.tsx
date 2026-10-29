@@ -11,10 +11,12 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import { useCanDownloadVariantsReport } from '../../../permissions/use-case-permissions';
 import { type SomaticSNVCohort, SomaticVariantInterface } from '../constants';
 import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
+import VariantsReportButton from '../table/variants-report-button';
 
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
 import { defaultSomaticSNVSettings, getSomaticSNVColumns } from './table/somatic-snv-table-settings';
@@ -44,10 +46,17 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
       : config.somatic_snv_tn_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
+  const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
-    () => getSomaticSNVColumns({ t, caseEntity, patientId: patient?.patient_id }),
-    [t, caseEntity, patient?.patient_id],
+    () =>
+      getSomaticSNVColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
   );
 
   if (!isValidSeqId(seqId)) {
@@ -89,6 +98,16 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
           enableFullscreen
           extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}
           TableFilters={<AnnotationsTableQuickfilters />}
+          selection={
+            canDownloadVariantsReport
+              ? {
+                  idField: 'locus_id',
+                  renderActions: selection => (
+                    <VariantsReportButton kind="somatic" seqId={seqId} taskId={taskId} selection={selection} />
+                  ),
+                }
+              : undefined
+          }
         />
       </QueryBuilder>
       <VariantsOnboardingWizard />

@@ -11,6 +11,8 @@ export interface InterpretationFormRef {
 
 export type Interpretation = InterpretationSomatic | InterpretationGermline;
 
+export type InterpretationDialogMode = 'create' | 'edit' | 'view';
+
 export type InterpretationFormProps<T> = {
   interpretation: T | undefined;
   saveInterpretation: (data: T) => void;

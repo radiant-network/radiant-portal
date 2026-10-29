@@ -5,12 +5,13 @@ import useSWR from 'swr';
 import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Badge } from '@/components/base/shadcn/badge';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
 
 import { fetchPatientsList } from '../api/patient';
 
@@ -54,6 +55,7 @@ function PatientExploration() {
   });
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
+  const [chatExpanded, setChatExpanded] = useState(false);
 
   const { data, isLoading, isValidating } = useSWR<PatientsSearchResponse, any, PatientListInput>(
     {
@@ -100,14 +102,17 @@ function PatientExploration() {
 
   return (
     <>
-      <HeaderNavigation
-        isLoading={isLoading}
-        title={t('patient_exploration.title', { total: data?.count ?? 0 })}
-        description={t('patient_exploration.description')}
-      />
-      <main className="bg-muted h-screen overflow-auto">
+      <div inert={chatExpanded} className="contents">
+        <HeaderNavigation
+          isLoading={isLoading}
+          title={t('patient_exploration.title', { total: data?.count ?? 0 })}
+          description={t('patient_exploration.description')}
+          statuses={[<LibreChatDavid key="librechat-david" />]}
+        />
+      </div>
+      <main className={cn('bg-muted h-screen', chatExpanded ? 'overflow-hidden' : 'overflow-auto')}>
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
-          <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
+          <TabsList inert={chatExpanded} className="pt-4 px-3 bg-background" contentClassName="mx-auto">
             {TAB_ORDER.map(({ value, i18nKey }) => (
               <TabsListItem key={value} value={value}>
                 {t(i18nKey)}
@@ -116,21 +121,7 @@ function PatientExploration() {
           </TabsList>
           <div className="p-3 space-y-3">
             <TabsContent value={PatientExplorationTabs.CohortAnalytics}>
-              <Card className="w-full gap-0 pb-0 overflow-hidden">
-                <CardHeader className="border-b">
-                  <div className="flex flex-col gap-0.5">
-                    <CardTitle>{t('patient_exploration.chat.title')}</CardTitle>
-                    <p className="text-muted-foreground text-xs">{t('patient_exploration.chat.description')}</p>
-                  </div>
-                  <CardAction>
-                    <Badge variant="secondary" className="gap-1.5">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      {t('patient_exploration.chat.source')}
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <PatientExplorationChat />
-              </Card>
+              <PatientExplorationChat onExpandedChange={setChatExpanded} />
             </TabsContent>
             <TabsContent value={PatientExplorationTabs.PatientList}>
               <Card className="h-auto size-max w-full">

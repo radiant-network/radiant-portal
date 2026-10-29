@@ -1,27 +1,31 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
+import { ArrowUpRight, Download, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import type { AppFeatures, Row } from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLocalPath } from '@/components/hooks/use-local-path';
-import { useCaseIdFromParam } from '@/utils/helper';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
+import useVariantsReportDownload, { type VariantsReportKind } from '../use-variants-report-download';
 
 type OccurrenceActionsMenuProps = {
   row: Row<AppFeatures, GermlineSNVOccurrence>;
   caseEntity?: CaseEntity;
+  reportKind?: VariantsReportKind;
 };
 
-function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) {
+function OccurrenceActionsMenu({ row, caseEntity, reportKind }: OccurrenceActionsMenuProps) {
   const { t } = useI18n();
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
+  const taskId = useTaskIdFromSearchParam();
   const localPath = useLocalPath();
+  const downloadReport = useVariantsReportDownload(reportKind ?? 'germline');
   const { locus_id, chromosome, start, end, rsnumber, seq_id, locus } = row.original;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -33,6 +37,11 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
   const onNavigateToVariantPage = useCallback(() => {
     window.open(localPath(`/variants/entity/${locus_id}`), '_blank');
   }, [locus_id, localPath]);
+
+  const handleDownloadReport = useCallback(() => {
+    if (taskId === undefined) return;
+    downloadReport(seq_id, taskId, async () => [locus_id]).catch(() => undefined);
+  }, [downloadReport, seq_id, taskId, locus_id]);
 
   const handleUcsclick = useCallback(() => {
     window.open(
@@ -81,8 +90,20 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
             icon: <ArrowUpRight />,
             label: t('variant.actions.view_variant'),
             onClick: onNavigateToVariantPage,
-            hasSeparator: true,
+            hasSeparator: !reportKind,
           },
+          ...(reportKind
+            ? [
+                {
+                  id: 'download_report',
+                  icon: <Download />,
+                  label: t('variant.report.download'),
+                  disabled: taskId === undefined,
+                  onClick: handleDownloadReport,
+                  hasSeparator: true,
+                },
+              ]
+            : []),
           {
             id: 'open_in_igv',
             icon: <FlipHorizontal2Icon />,

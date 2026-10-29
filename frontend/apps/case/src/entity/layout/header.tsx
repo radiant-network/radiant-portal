@@ -3,6 +3,7 @@ import { Biohazard, Users } from 'lucide-react';
 import type { CaseEntity } from '@/api/api';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -60,8 +61,8 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
           : []),
         <Tooltip key="priority">
           <TooltipTrigger>
-            <Badge variant="outline" className="px-3 py-2">
-              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} />
+            <Badge variant="outline" size="lg">
+              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} size="sm" />
             </Badge>
           </TooltipTrigger>
           <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
@@ -73,12 +74,13 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
                 caseId={data.case_id}
                 status={data.status_code}
                 canEdit={canEditCase}
-                className="px-3 py-2"
+                size="sm"
                 readOnlyTooltip={t('case_entity.header.status_tooltip')}
                 onSaved={onStatusChange}
               />,
             ]
           : []),
+        <LibreChatDavid key="librechat-david" size="sm" />,
       ]}
     />
   );

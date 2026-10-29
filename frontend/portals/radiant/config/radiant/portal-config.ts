@@ -711,6 +711,7 @@ export const radiantConfig = {
     app_id: ApplicationId.germline_cnv_occurrence,
     saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
     aggregations: {
+      panel: panelAggregation,
       variant: {
         items: [
           { key: 'type', translation_key: 'type', type: FilterTypes.MULTIPLE, withDictionary: true },
@@ -860,6 +861,7 @@ export const radiantConfig = {
   },
   portal: {
     name: 'Radiant',
+    default_language: 'en',
     navigation: {
       dashboard: true,
       variant: true,

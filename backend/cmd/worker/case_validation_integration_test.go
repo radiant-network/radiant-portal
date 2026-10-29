@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -563,7 +566,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, exomiser_cnv, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "case[0].tasks[0].type_code",
 			},
 		}
@@ -1007,7 +1010,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, exomiser, exomiser_cnv, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "case[0].tasks[0].type_code",
 			},
 			{
@@ -1066,13 +1069,13 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Path:    "case[0].tasks[3]",
 			},
 			{
-				Code:    "TASK-007",
-				Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
-				Path:    "case[0].tasks[4]",
+				Code:    "TASK-001",
+				Message: "Invalid field type_code for case 0 - task 4. Reason: invalid task type code `exomiser`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "case[0].tasks[4].type_code",
 			},
 			{
-				Code:    "TASK-003",
-				Message: "Missing input documents for case 0 - task 4 of type exomiser.",
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12892\" is not defined for case 0 - task 4.",
 				Path:    "case[0].tasks[4]",
 			},
 			{
@@ -1132,7 +1135,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, alirpg, chrmr, clinical_report, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, nrrv, qcrun, scnv, snv, snvpg, somfu, ssnv, ssup, ssv].",
+				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, alirpg, chrmr, clinical_report, cnvvis, covgene, exomiser, exomiser_cnv, exp, gcnv, gsv, igv, nrrv, qcrun, scnv, snv, snvpg, somfu, ssnv, ssup, ssv].",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1142,7 +1145,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
+				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, maf, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1202,6 +1205,34 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 		}
 		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_MafDocument_Persisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, err := testutils.LoadScenario("cases_maf_document")
+		require.NoError(t, err)
+		maf, err := os.ReadFile(filepath.Join(testutils.TestResources, "worker", "documents", "TSRX1091647.somatic.maf"))
+		require.NoError(t, err)
+		document := scenario.Cases[0].Tasks[0].OutputDocuments[0]
+		require.NoError(t, createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", document.Name, maf))
+
+		payload, err := json.Marshal(scenario.Cases)
+		require.NoError(t, err)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var persisted struct {
+			FormatCode   string
+			DataTypeCode string
+			Size         int64
+			Hash         string
+		}
+		require.NoError(t, env.Postgres.Table("document").Select("format_code, data_type_code, size, hash").Where("url = ?", document.Url).Take(&persisted).Error)
+		assert.Equal(t, "maf", persisted.FormatCode)
+		assert.Equal(t, "ssnv", persisted.DataTypeCode)
+		assert.Equal(t, int64(len(maf)), persisted.Size)
+		assert.Equal(t, document.Hash, persisted.Hash)
 	})
 }
 
@@ -1321,9 +1352,9 @@ func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
 	})
 }
 
-func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
+func Test_ProcessBatch_Case_AnnotationTasks_WithExomiserOutputs(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
-		scenario, _ := testutils.LoadScenario("fix_sjra_1218")
+		scenario, _ := testutils.LoadScenario("annotation_with_exomiser_outputs")
 		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, scenario.Cases)
 		payloadBytes, _ := json.Marshal(scenario.Cases)
 
@@ -1331,27 +1362,30 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
-		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "FIX-SJRA-1218").First(&ca)
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "RAD-116-EXOMISER").First(&ca)
 
-		var tc []*types.TaskContext
-		env.Postgres.Table("task_context").Where("case_id = ?", ca.ID).Find(&tc)
-		assert.Len(t, tc, 4)
+		type exomiserOutput struct {
+			URL          string
+			DataTypeCode string
+			TaskTypeCode string
+			CaseID       *int
+		}
+		var outputs []exomiserOutput
+		env.Postgres.Raw(`
+			SELECT DISTINCT d.url, d.data_type_code, t.task_type_code, tc.case_id
+			FROM document d
+			JOIN task_has_document thd ON thd.document_id = d.id AND thd.type = 'output'
+			JOIN task t ON t.id = thd.task_id
+			JOIN task_context tc ON tc.task_id = t.id
+			WHERE d.data_type_code IN ('exomiser', 'exomiser_cnv') AND tc.case_id = ?
+			ORDER BY d.url`, ca.ID).Scan(&outputs)
 
-		// Retrieve the exomiser task from the linked case_id in task_context
-		var exo *types.Task
-		env.Postgres.Table("task").Where("id = ?", tc[0].TaskID).First(&exo)
-		assert.Equal(t, "exomiser", exo.TaskTypeCode)
-		assert.Equal(t, "Dragen", exo.PipelineName)
-		assert.Equal(t, "4.4.4", exo.PipelineVersion)
-		assert.Equal(t, "GRch38", exo.GenomeBuild)
-
-		// Retrieve the radiant_germline_annotation task from the linked case_id in task_context
-		var rGA *types.Task
-		env.Postgres.Table("task").Where("id = ?", tc[2].TaskID).First(&rGA)
-		assert.Equal(t, "radiant_germline_annotation", rGA.TaskTypeCode)
-		assert.Equal(t, "Dragen", rGA.PipelineName)
-		assert.Equal(t, "4.4.4", rGA.PipelineVersion)
-		assert.Equal(t, "GRch38", rGA.GenomeBuild)
+		assert.Equal(t, []exomiserOutput{
+			{URL: "s3://test-bucket/cnv/NA12878.json", DataTypeCode: "exomiser_cnv", TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/cnv/NA12878.variants.tsv", DataTypeCode: "exomiser_cnv", TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/snv/NA12878.html", DataTypeCode: "exomiser", TaskTypeCode: types.RadiantGermlineAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/snv/NA12878.variants.tsv", DataTypeCode: "exomiser", TaskTypeCode: types.RadiantGermlineAnnotationTask, CaseID: &ca.ID},
+		}, outputs)
 	})
 }
 
@@ -1404,6 +1438,52 @@ func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
 		env.Postgres.Table("document").Where("url = ?", reportUrl).First(&doc)
 		assert.Equal(t, "clinical_report", doc.DataTypeCode)
 		assert.Equal(t, "vcf", doc.FileFormatCode)
+	})
+}
+
+func Test_ProcessBatch_Case_QualityControlMetricsTask_IsLinkedToCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Quality_Control")
+		size := int64(13)
+		reportUrl := "s3://test-bucket/CA1/CA1_multiqc_report.html"
+		payload[0].Tasks = append(payload[0].Tasks, &types.CaseTaskBatch{
+			TypeCode:        types.QualityControlMetricsTaskTypeCode,
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "quality-control-pipeline",
+			PipelineVersion: "2.1.0-beta.1",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{
+					DataCategoryCode: "genomic",
+					DataTypeCode:     "aggqc",
+					FormatCode:       "html",
+					Name:             "CA1_multiqc_report.html",
+					Size:             &size,
+					Url:              reportUrl,
+				},
+			},
+		})
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Quality_Control").First(&ca)
+
+		var task *types.Task
+		env.Postgres.Table("task").Where("task_type_code = ?", types.QualityControlMetricsTaskTypeCode).First(&task)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = ?", task.ID).Find(&tc)
+		assert.NotEmpty(t, tc)
+		for _, ctx := range tc {
+			if assert.NotNil(t, ctx.CaseID) {
+				assert.Equal(t, ca.ID, *ctx.CaseID)
+			}
+		}
 	})
 }
 

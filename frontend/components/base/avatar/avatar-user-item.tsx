@@ -40,7 +40,7 @@ export function AvatarUserItem({ user, size = 'xs', className }: AvatarUserItemP
             >
               {user.email}
             </AnchorLink>
-            <div className="hidden group-hover:block shrink-0">
+            <div className="shrink-0 w-0 opacity-0 overflow-hidden group-hover:w-auto group-hover:opacity-100 group-hover:overflow-visible group-has-[:focus-visible]:w-auto group-has-[:focus-visible]:opacity-100 group-has-[:focus-visible]:overflow-visible">
               <CopyButton value={user.email} size="3xs" variant="ghost" className="text-muted-foreground" />
             </div>
           </div>

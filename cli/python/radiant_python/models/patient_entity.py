@@ -21,15 +21,19 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.patient_case import PatientCase
+from radiant_python.models.patient_cbc import PatientCbc
+from radiant_python.models.patient_csf import PatientCsf
 from radiant_python.models.patient_day_date import PatientDayDate
 from radiant_python.models.patient_event import PatientEvent
 from radiant_python.models.patient_imaging_session import PatientImagingSession
 from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_dates import PatientKeyDates
+from radiant_python.models.patient_performance_score import PatientPerformanceScore
 from radiant_python.models.patient_radiation import PatientRadiation
 from radiant_python.models.patient_surgery import PatientSurgery
 from radiant_python.models.patient_therapy import PatientTherapy
 from radiant_python.models.patient_treatment_summary import PatientTreatmentSummary
+from radiant_python.models.patient_trial_enrollment import PatientTrialEnrollment
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -44,8 +48,10 @@ class PatientEntity(BaseModel):
     can_read_phi: StrictBool
     case_count: StrictInt = Field(description="Portal cases, 0 outside the portal")
     cases: List[PatientCase]
+    cbc: Optional[PatientCbc] = None
     cns_integrated_diagnosis: Optional[StrictStr] = Field(default=None, description="From the initial event")
     cns_integrated_diagnosis_source: Optional[StrictStr] = Field(default=None, description="Dataset of the diagnosis, e.g. CBTN or OpenPedCan")
+    csf: Optional[PatientCsf] = None
     data_type_cohort: Optional[StrictStr] = None
     diagnosis_type_cohort: Optional[StrictStr] = None
     ethnicity: Optional[StrictStr] = None
@@ -63,6 +69,7 @@ class PatientEntity(BaseModel):
     patient_id: StrictStr
     patient_id_type: StrictStr
     patient_key: StrictStr = Field(description="Opaque key for the patient page URL, the same for every user")
+    performance_status: List[PatientPerformanceScore]
     postal_code: Optional[StrictStr] = Field(default=None, description="Full with PHI access, 3 digits + XX otherwise")
     race: Optional[StrictStr] = None
     radiant_patient_id: Optional[StrictInt] = Field(default=None, description="Portal patient id, null outside the portal")
@@ -71,9 +78,10 @@ class PatientEntity(BaseModel):
     survival_days: Optional[StrictInt] = Field(default=None, description="Vital status day minus initial diagnosis day")
     therapies: List[PatientTherapy]
     treatment_summary: Optional[PatientTreatmentSummary] = None
+    trial_enrollments: List[PatientTrialEnrollment] = Field(description="Most recent first")
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cbc", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "csf", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "performance_status", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "trial_enrollments", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -142,6 +150,12 @@ class PatientEntity(BaseModel):
                 if _item_cases:
                     _items.append(_item_cases.to_dict())
             _dict['cases'] = _items
+        # override the default output from pydantic by calling `to_dict()` of cbc
+        if self.cbc:
+            _dict['cbc'] = self.cbc.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of csf
+        if self.csf:
+            _dict['csf'] = self.csf.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in events (list)
         _items = []
         if self.events:
@@ -166,6 +180,13 @@ class PatientEntity(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of key_dates
         if self.key_dates:
             _dict['key_dates'] = self.key_dates.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in performance_status (list)
+        _items = []
+        if self.performance_status:
+            for _item_performance_status in self.performance_status:
+                if _item_performance_status:
+                    _items.append(_item_performance_status.to_dict())
+            _dict['performance_status'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in radiations (list)
         _items = []
         if self.radiations:
@@ -190,6 +211,13 @@ class PatientEntity(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of treatment_summary
         if self.treatment_summary:
             _dict['treatment_summary'] = self.treatment_summary.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in trial_enrollments (list)
+        _items = []
+        if self.trial_enrollments:
+            for _item_trial_enrollments in self.trial_enrollments:
+                if _item_trial_enrollments:
+                    _items.append(_item_trial_enrollments.to_dict())
+            _dict['trial_enrollments'] = _items
         # override the default output from pydantic by calling `to_dict()` of vital_status_at
         if self.vital_status_at:
             _dict['vital_status_at'] = self.vital_status_at.to_dict()
@@ -212,8 +240,10 @@ class PatientEntity(BaseModel):
             "can_read_phi": obj.get("can_read_phi"),
             "case_count": obj.get("case_count"),
             "cases": [PatientCase.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None,
+            "cbc": PatientCbc.from_dict(obj["cbc"]) if obj.get("cbc") is not None else None,
             "cns_integrated_diagnosis": obj.get("cns_integrated_diagnosis"),
             "cns_integrated_diagnosis_source": obj.get("cns_integrated_diagnosis_source"),
+            "csf": PatientCsf.from_dict(obj["csf"]) if obj.get("csf") is not None else None,
             "data_type_cohort": obj.get("data_type_cohort"),
             "diagnosis_type_cohort": obj.get("diagnosis_type_cohort"),
             "ethnicity": obj.get("ethnicity"),
@@ -231,6 +261,7 @@ class PatientEntity(BaseModel):
             "patient_id": obj.get("patient_id"),
             "patient_id_type": obj.get("patient_id_type"),
             "patient_key": obj.get("patient_key"),
+            "performance_status": [PatientPerformanceScore.from_dict(_item) for _item in obj["performance_status"]] if obj.get("performance_status") is not None else None,
             "postal_code": obj.get("postal_code"),
             "race": obj.get("race"),
             "radiant_patient_id": obj.get("radiant_patient_id"),
@@ -239,6 +270,7 @@ class PatientEntity(BaseModel):
             "survival_days": obj.get("survival_days"),
             "therapies": [PatientTherapy.from_dict(_item) for _item in obj["therapies"]] if obj.get("therapies") is not None else None,
             "treatment_summary": PatientTreatmentSummary.from_dict(obj["treatment_summary"]) if obj.get("treatment_summary") is not None else None,
+            "trial_enrollments": [PatientTrialEnrollment.from_dict(_item) for _item in obj["trial_enrollments"]] if obj.get("trial_enrollments") is not None else None,
             "vital_status": obj.get("vital_status"),
             "vital_status_at": PatientDayDate.from_dict(obj["vital_status_at"]) if obj.get("vital_status_at") is not None else None
         })

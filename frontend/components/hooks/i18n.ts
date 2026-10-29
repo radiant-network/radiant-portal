@@ -22,6 +22,10 @@ const loadTranslations = async (lang: string) => {
   }
 };
 
+declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } };
+
+const defaultLanguage = __PROJECT__.portal.default_language;
+
 // Track initialization state
 let isInitialized = false;
 let initializationPromise: Promise<void> | null = null;
@@ -39,7 +43,7 @@ const initializeI18n = async () => {
       .use(LanguageDetector)
       .init({
         debug: import.meta.env.DEV,
-        fallbackLng: 'en',
+        fallbackLng: defaultLanguage,
         // Don't set lng here - let LanguageDetector handle it
 
         // Only support en and fr
@@ -76,12 +80,12 @@ const initializeI18n = async () => {
     } catch (error) {
       console.error(`Failed to load initial translations for ${detectedLang}:`, error);
       // Try to load fallback
-      if (detectedLang !== 'en') {
+      if (detectedLang !== defaultLanguage) {
         try {
-          const fallbackTranslations = await loadTranslations('en');
-          i18next.addResourceBundle('en', 'common', fallbackTranslations, true, true);
-          await i18next.changeLanguage('en');
-          console.log('✅ Fallback English translations loaded');
+          const fallbackTranslations = await loadTranslations(defaultLanguage);
+          i18next.addResourceBundle(defaultLanguage, 'common', fallbackTranslations, true, true);
+          await i18next.changeLanguage(defaultLanguage);
+          console.log(`✅ Fallback ${defaultLanguage} translations loaded`);
         } catch (fallbackError) {
           console.error('Failed to load fallback translations:', fallbackError);
         }
