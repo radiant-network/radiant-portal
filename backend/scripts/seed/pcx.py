@@ -258,19 +258,15 @@ MRI_COLS = IDENT + [("flywheel_subject_id", "VARCHAR(128)"), ("flywheel_project_
 LAB_IDENT = [("organization_name", S), ("organization_code", "VARCHAR(64)"), ("mrn", L), ("research_id", L)]
 
 
-def analyte(name, extra=()):
-    return [(f"{name}_value", DEC), (f"{name}_unit", L), (f"{name}_observed_at", "DATETIME"), (f"age_at_{name}_days", "INT"), *extra,
-            (f"{name}_source_code_text", L)]
-
-
 def csf_analyte(name, comparator=True):
     return [(f"{name}_display", L), (f"{name}_value", DEC)] + ([(f"{name}_comparator", L)] if comparator else []) + [
         (f"{name}_unit", L), (f"{name}_observed_at", "DATETIME"), (f"age_at_{name}_days", "INT")]
 
 
 LAB_TABLES = {
-    "v_cbc_latest_results": LAB_IDENT + [c for a in ["wbc", "hemoglobin", "platelets", "anc"] for c in analyte(a, [(f"{a}_loinc", L)])]
-    + [("analytes_found", "BIGINT"), ("administrative_dates", "BIGINT")],
+    "v_cbc_latest_results": LAB_IDENT + [("panel_observed_at", "DATETIME"), ("age_at_panel_days", "INT"), ("date_semantic", L)]
+    + [(f"{a}_{c}", DEC if c == "value" else L) for a in ["wbc", "hemoglobin", "platelets", "anc"] for c in ["value", "unit", "loinc", "source_code_text"]]
+    + [("analytes_found", "BIGINT")],
     "v_csf_results_latest_by_component": LAB_IDENT + [("patient_best_evidence", L)]
     + [c for a in ["protein", "glucose", "wbc", "rbc"] for c in csf_analyte(a, a in ("protein", "glucose")) + [(f"{a}_source_code_text", L)]]
     + [("cytology_evidence_tier", L), ("cytology_test_name", L), ("malignant_cells", L), ("multi_specimen_report", "TINYINT"),
@@ -321,15 +317,15 @@ def labs(p, t):
                   "anc": round(rng.uniform(0.2, 1.5) if low else rng.uniform(1.8, 6.5), 2)}
         meta_cbc = {"wbc": ("10*3/uL", "6690-2", "WBC"), "hemoglobin": ("g/dL", "718-7", "HGB"),
                     "platelets": ("10*3/uL", "777-3", "PLT"), "anc": ("10*3/uL", "751-8", "ANC (automated)")}
-        row, found = [], 0
+        row, found = [p.date(day), day, "clinical"], 0
         for k in ["wbc", "hemoglobin", "platelets", "anc"]:
             if k == "anc" and rng.random() < 0.1:
-                row += [None] * 6
+                row += [None] * 4
                 continue
             unit, loinc, text = meta_cbc[k]
-            row += [values[k], unit, p.date(day), day, loinc, text]
+            row += [values[k], unit, loinc, text]
             found += 1
-        out["v_cbc_latest_results"].append(ident + row + [found, 0])
+        out["v_cbc_latest_results"].append(ident + row + [found])
 
     atrt = "teratoid" in t["cohort"].lower()
     if (atrt or "medulloblastoma" in t["cohort"].lower()) and rng.random() < 0.8:

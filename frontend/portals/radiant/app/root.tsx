@@ -15,10 +15,21 @@ import { featureDefinitions } from './beta-features';
 
 declare const __PROJECT__: PortalConfig;
 
+const CASE_VARIANTS_REPORT_ENV_SUFFIX = '_CASE_VARIANTS_REPORT_ENABLED';
+
+function getEnabledTenants(envSuffix: string): string[] {
+  return Object.entries(process.env)
+    .filter(([key, value]) => key.endsWith(envSuffix) && value === 'true')
+    .map(([key]) => key.slice(0, -envSuffix.length).toLowerCase());
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   // Just detect and return the language for consistent server/client behavior
   return {
     language: detectLanguageFromRequest(request),
+    features: {
+      caseVariantsReportTenants: getEnabledTenants(CASE_VARIANTS_REPORT_ENV_SUFFIX),
+    },
   };
 }
 

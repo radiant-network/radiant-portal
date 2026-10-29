@@ -53,6 +53,8 @@
       "grouped_by": "Grouped by {{value}}",
       "pin_column": "Pin column",
       "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
       "sort": "Sort",
       "sorted_asc": "Sorted ascending",
       "sorted_desc": "Sorted descending",
@@ -840,6 +842,10 @@
       "results": "Results {{from}} - {{to}} of {{total}}",
       "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
+      "items_selected_one": "{{value}} item selected",
+      "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
@@ -1283,7 +1289,6 @@
       "born_year": "Born {{year}}",
       "phi_restricted": "Restricted",
       "phi_restricted_tooltip": "Identity restricted outside your organisation",
-      "ask_assistant": "Ask about this patient",
       "vital_status": {
         "alive": "Alive",
         "deceased": "Deceased"
@@ -1375,7 +1380,7 @@
         "title": "Key Dates",
         "initial_diagnosis": "Initial diagnosis",
         "latest_encounter": "Latest encounter",
-        "day_age": "Day {{day}} · age {{age}}y",
+        "day_age": "{{age}}y · Day {{day}}",
         "sources": {
           "clinical": "Clinical",
           "registry": "Registry"
@@ -1443,6 +1448,89 @@
         "modality": "Modality",
         "viewer": "Viewer"
       }
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "No date on file",
+        "age_day": "{{age}}y · Day {{day}}",
+        "age_day_capped": "90+y · Day {{day}}"
+      },
+      "lab_tile": {
+        "no_result": "No result on file",
+        "reported": "reported {{reported}}",
+        "unverified": "unrecognised unit — not normalised",
+        "aria_empty": "{{label}}: no result on file",
+        "aria_value": "{{label}}: {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Latest blood counts",
+        "empty": "No complete blood count on file.",
+        "analytes": {
+          "wbc": "WBC",
+          "hemoglobin": "Hemoglobin",
+          "platelets": "Platelets",
+          "anc": "ANC"
+        }
+      },
+      "performance_status": {
+        "title": "Performance status",
+        "empty": "No performance status score on file.",
+        "released": "Released",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}}: {{score}} out of 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky recorded at age 16+",
+          "karnofsky-paediatric": "Karnofsky recorded under age 16"
+        }
+      },
+      "csf": {
+        "title": "CSF analysis",
+        "empty": "No CSF analysis on file.",
+        "analytes": {
+          "protein": "Protein",
+          "glucose": "Glucose",
+          "nucleated_cells": "Nucleated cells",
+          "rbc": "RBC"
+        },
+        "cytology": {
+          "title": "Cytology",
+          "multi_specimen_warning": "The report covers more than one specimen — the finding may pertain to a non-CSF sample.",
+          "multi_specimen": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "fields": {
+            "test_name": "Test name",
+            "multi_specimen": "Covers multiple specimens",
+            "result_date": "Result date"
+          },
+          "badge": {
+            "positive": "Malignant cells present",
+            "suspicious": "Suspicious for malignancy",
+            "negative": "No malignant cells reported",
+            "non_diagnostic": "Non-diagnostic specimen",
+            "no_malignancy_statement": "Report makes no malignancy statement",
+            "unknown": "Unrecognised cytology result",
+            "empty": "No cytology on file"
+          },
+          "tier_note": {
+            "text_confirmed": "Attributed to CSF from the report text.",
+            "same_day_only": "Attributed to CSF only because it was collected the same day — this result may not be from CSF."
+          }
+        },
+        "chemistry": {
+          "title": "Chemistry and cell count"
+        },
+        "specimen": {
+          "title": "Specimen collected — result not shown in RADIANT",
+          "cell_free_dna": "Cell-free DNA",
+          "collected": "Collected"
+        }
+      }
     }
   },
   "timeline": {
@@ -1476,15 +1564,8 @@
     },
     "chat": {
       "title": "Cohort analytics",
-      "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster",
-      "explore": "Explore Data",
-      "tabs": {
-        "yac": "YAC",
-        "david": "D.A.V.I.D",
-        "other": "Other tool",
-        "placeholder": "Coming soon"
-      }
+      "explore": "Explore charts",
+      "explore_tooltip": "Ask questions about these charts and generate new views with AI"
     },
     "cells": {
       "patient": {
@@ -1884,6 +1965,19 @@
   },
   "variant": {
     "no_data_for_variant": "No data for this variant.",
+    "report": {
+      "download": "Download report",
+      "select_at_least_one": "Select at least one item",
+      "max_exceeded": {
+        "title": "Maximum number exceeded",
+        "description": "A maximum of 100 items can be exported at a time. Please narrow your selection and try again."
+      },
+      "toast": {
+        "loading": "Generating report…",
+        "success": "Report downloaded",
+        "error": "Unable to download the report. Please try again."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
@@ -2078,7 +2172,10 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": { "title": "Interpretation saved", "button": "View interpretation" },
+        "success": {
+          "title": "Interpretation saved",
+          "button": "View interpretation"
+        },
         "error": {
           "title": "Failed to save interpretation",
           "text": "Failed to save interpretation. Please try again."
@@ -2851,8 +2948,7 @@
       "resources": "Resources",
       "website": "Website",
       "documentation": "Documentation",
-      "contact": "Contact",
-      "david": "D.A.V.I.D"
+      "contact": "Contact"
     },
     "tenant_switcher": {
       "title": "Switch Tenant"
@@ -2879,7 +2975,8 @@
       "badge": "AI assistant",
       "description": "AI-driven predictive analytics for personalized cancer care",
       "frame_title": "D.A.V.I.D assistant",
-      "not_configured": "D.A.V.I.D is not configured for this environment."
+      "not_configured": "D.A.V.I.D is not configured for this environment.",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen"
     }
   }
 }

@@ -322,6 +322,7 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		Events: []types.PatientEvent{}, Surgeries: []types.PatientSurgery{}, Radiations: []types.PatientRadiation{},
 		Therapies: []types.PatientTherapy{}, Imaging: []types.PatientImagingSession{}, Cases: []types.PatientCase{},
 		Interpretations: []types.PatientInterpretation{}, PerformanceStatus: []types.PatientPerformanceScore{},
+		TrialEnrollments: []types.PatientTrialEnrollment{},
 	}}
 
 	w := getPatientEntity(repo, testPatientKey)
@@ -338,7 +339,7 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		"key_dates": {"initial_diagnosis": {"day": null, "date": null, "source": "clinical"}, "latest_encounter": {"day": null, "date": null, "source": "registry"}},
 		"initial_diagnosis_evidence_url": null, "vital_status_at": {"day": null, "date": null},
 		"events": [], "surgeries": [], "radiations": [], "therapies": [], "imaging": [], "treatment_summary": null,
-		"cbc": null, "performance_status": [], "csf": null, "cases": [], "interpretations": []
+		"trial_enrollments": [], "cbc": null, "performance_status": [], "csf": null, "cases": [], "interpretations": []
 	}`, w.Body.String())
 }
 

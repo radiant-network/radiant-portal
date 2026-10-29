@@ -24,7 +24,7 @@ function CancerPredispositionsCard({ cancer_predisposition, isLoading, ...cardPr
 
   return (
     <Card data-cy="cancer-predispositions-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.cancer_predispositions.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">

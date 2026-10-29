@@ -53,6 +53,8 @@
       "grouped_by": "Regroupé par {{value}}",
       "pin_column": "Épingler la colonne",
       "pin_row": "Épingler la ligne",
+      "select_page_rows": "Sélectionner toutes les lignes de la page",
+      "select_row": "Sélectionner la ligne",
       "sort": "Trier",
       "sorted_asc": "Trié par ordre croissant",
       "sorted_desc": "Trié par ordre décroissant",
@@ -840,6 +842,10 @@
       "results": "Résultats {{from}} - {{to}} de {{total}}",
       "results_filtered": "{{shown}} affichés sur {{total}}",
       "no_result": "Aucun résultat",
+      "items_selected_one": "{{value}} élément sélectionné",
+      "items_selected_other": "{{value}} éléments sélectionnés",
+      "select_all": "Tout sélectionner",
+      "clear_selection": "Effacer la sélection",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
@@ -1284,7 +1290,6 @@
       "born_year": "Né en {{year}}",
       "phi_restricted": "Restreint",
       "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
-      "ask_assistant": "Interroger l'IA sur ce patient",
       "vital_status": {
         "alive": "Vivant",
         "deceased": "Décédé"
@@ -1376,7 +1381,7 @@
         "title": "Dates clés",
         "initial_diagnosis": "Diagnostic initial",
         "latest_encounter": "Dernière rencontre",
-        "day_age": "Jour {{day}} · {{age}} ans",
+        "day_age": "{{age}} a · Jour {{day}}",
         "sources": {
           "clinical": "Clinique",
           "registry": "Registre"
@@ -1444,6 +1449,89 @@
         "modality": "Modalité",
         "viewer": "Visionneuse"
       }
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "Aucune date au dossier",
+        "age_day": "{{age}} a · Jour {{day}}",
+        "age_day_capped": "90+ a · Jour {{day}}"
+      },
+      "lab_tile": {
+        "no_result": "Aucun résultat au dossier",
+        "reported": "rapporté {{reported}}",
+        "unverified": "unité non reconnue — pas de normalisation",
+        "aria_empty": "{{label}} : aucun résultat au dossier",
+        "aria_value": "{{label}} : {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Dernière formule sanguine",
+        "empty": "Aucune formule sanguine au dossier.",
+        "analytes": {
+          "wbc": "GB",
+          "hemoglobin": "Hémoglobine",
+          "platelets": "Plaquettes",
+          "anc": "PNN"
+        }
+      },
+      "performance_status": {
+        "title": "Statut de performance",
+        "empty": "Aucun score de performance au dossier.",
+        "released": "Publié",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}} : {{score}} sur 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky enregistré à 16 ans ou plus",
+          "karnofsky-paediatric": "Karnofsky enregistré avant 16 ans"
+        }
+      },
+      "csf": {
+        "title": "Analyse du LCR",
+        "empty": "Aucune analyse du LCR au dossier.",
+        "analytes": {
+          "protein": "Protéines",
+          "glucose": "Glucose",
+          "nucleated_cells": "Cellules nucléées",
+          "rbc": "GR"
+        },
+        "cytology": {
+          "title": "Cytologie",
+          "multi_specimen_warning": "Le rapport couvre plus d'un spécimen — le résultat pourrait ne pas provenir du LCR.",
+          "multi_specimen": {
+            "yes": "Oui",
+            "no": "Non"
+          },
+          "fields": {
+            "test_name": "Nom du test",
+            "multi_specimen": "Couvre plusieurs spécimens",
+            "result_date": "Date du résultat"
+          },
+          "badge": {
+            "positive": "Cellules malignes présentes",
+            "suspicious": "Suspect de malignité",
+            "negative": "Aucune cellule maligne rapportée",
+            "non_diagnostic": "Spécimen non diagnostique",
+            "no_malignancy_statement": "Le rapport ne se prononce pas sur la malignité",
+            "unknown": "Résultat de cytologie non reconnu",
+            "empty": "Aucune cytologie au dossier"
+          },
+          "tier_note": {
+            "text_confirmed": "Attribué au LCR à partir du texte du rapport.",
+            "same_day_only": "Attribué au LCR uniquement parce que prélevé le même jour — ce résultat pourrait ne pas provenir du LCR."
+          }
+        },
+        "chemistry": {
+          "title": "Biochimie et numération cellulaire"
+        },
+        "specimen": {
+          "title": "Spécimen prélevé — résultat non affiché dans RADIANT",
+          "cell_free_dna": "ADN libre circulant",
+          "collected": "Prélevé"
+        }
+      }
     }
   },
   "timeline": {
@@ -1477,15 +1565,8 @@
     },
     "chat": {
       "title": "Analyse de cohorte",
-      "description": "État actuel du registre · dérivé des données de la cohorte",
-      "source": "Roster en direct",
-      "explore": "Explorer les données",
-      "tabs": {
-        "yac": "YAC",
-        "david": "D.A.V.I.D",
-        "other": "Autre outil",
-        "placeholder": "Bientôt disponible"
-      }
+      "explore": "Explorer les graphiques",
+      "explore_tooltip": "Posez des questions sur ces graphiques et générez de nouvelles vues avec l'IA"
     },
     "cells": {
       "patient": {
@@ -1885,6 +1966,19 @@
   },
   "variant": {
     "no_data_for_variant": "Aucune donnée pour ce variant.",
+    "report": {
+      "download": "Télécharger rapport",
+      "select_at_least_one": "Sélectionner au moins un élément",
+      "max_exceeded": {
+        "title": "Nombre maximum dépassé",
+        "description": "Un maximum de 100 éléments peut être exporté à la fois. Veuillez réduire votre sélection et réessayer."
+      },
+      "toast": {
+        "loading": "Génération du rapport…",
+        "success": "Rapport téléchargé",
+        "error": "Impossible de télécharger le rapport. Veuillez réessayer."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Substitution acide aminé",
@@ -2855,8 +2949,7 @@
       "resources": "Ressources",
       "website": "Site web",
       "documentation": "Documentation",
-      "contact": "Contact",
-      "david": "D.A.V.I.D"
+      "contact": "Contact"
     },
     "tenant_switcher": {
       "title": "Changer de tenant"
@@ -2883,7 +2976,8 @@
       "badge": "Assistant IA",
       "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
       "frame_title": "Assistant D.A.V.I.D",
-      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement."
+      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement.",
+      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran"
     }
   }
 }

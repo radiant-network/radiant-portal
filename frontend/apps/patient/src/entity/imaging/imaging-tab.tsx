@@ -21,7 +21,7 @@ function ImagingTab({ patient, isLoading }: ImagingTabProps) {
 
   return (
     <Card>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         {isLoading ? (
           <Skeleton className="h-5 w-32" />
         ) : (

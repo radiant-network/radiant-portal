@@ -43,6 +43,7 @@ Name | Type | Description | Notes
 **survival_days** | **int** | Vital status day minus initial diagnosis day | [optional] 
 **therapies** | [**List[PatientTherapy]**](PatientTherapy.md) |  | 
 **treatment_summary** | [**PatientTreatmentSummary**](PatientTreatmentSummary.md) |  | [optional] 
+**trial_enrollments** | [**List[PatientTrialEnrollment]**](PatientTrialEnrollment.md) | Most recent first | 
 **vital_status** | **str** |  | 
 **vital_status_at** | [**PatientDayDate**](PatientDayDate.md) |  | 
 

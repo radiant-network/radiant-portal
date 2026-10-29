@@ -129,6 +129,7 @@ type PatientEntity struct {
 	Surgeries                   []PatientSurgery          `json:"surgeries" validate:"required"`
 	Radiations                  []PatientRadiation        `json:"radiations" validate:"required"`
 	Therapies                   []PatientTherapy          `json:"therapies" validate:"required"`
+	TrialEnrollments            []PatientTrialEnrollment  `json:"trial_enrollments" validate:"required"` // Most recent first
 	Imaging                     []PatientImagingSession   `json:"imaging" validate:"required"`
 	TreatmentSummary            *PatientTreatmentSummary  `json:"treatment_summary"`
 	Cbc                         *PatientCbc               `json:"cbc"`
@@ -201,6 +202,18 @@ type PatientTherapy struct {
 	IsInitialTreatment *bool          `json:"is_initial_treatment"` // null when Not Reported
 }
 
+// PatientTrialEnrollment - Treatment protocol the patient was enrolled on
+// @Description Treatment protocol arm the patient was enrolled on, its medical therapies merged
+// @Name PatientTrialEnrollment
+type PatientTrialEnrollment struct {
+	Start              PatientDayDate `json:"start" validate:"required"` // Earliest start of its therapies
+	Stop               PatientDayDate `json:"stop" validate:"required"`  // Latest stop of its therapies
+	ProtocolName       string         `json:"protocol_name" validate:"required"`
+	ProtocolArm        *string        `json:"protocol_arm"` // null when Not Applicable
+	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
+	IsInitialTreatment bool           `json:"is_initial_treatment" validate:"required"`
+}
+
 // PatientImagingSession - Imaging session of a patient
 // @Description Imaging session of a patient
 // @Name PatientImagingSession
@@ -231,18 +244,18 @@ type PatientTreatmentSummary struct {
 }
 
 // PatientLabResult - Lab result of a patient
-// @Description Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+// @Description Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
 // @Name PatientLabResult
 type PatientLabResult struct {
-	PatientDayDate
 	Value *float64 `json:"value"`
 	Unit  *string  `json:"unit"`
 }
 
 // PatientCbc - Latest complete blood count of a patient
-// @Description Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+// @Description Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
 // @Name PatientCbc
 type PatientCbc struct {
+	PatientDayDate
 	Wbc        PatientLabResult `json:"wbc" validate:"required"`
 	Hemoglobin PatientLabResult `json:"hemoglobin" validate:"required"`
 	Platelets  PatientLabResult `json:"platelets" validate:"required"`
