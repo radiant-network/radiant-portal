@@ -5,6 +5,7 @@ import { tv } from 'tailwind-variants';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useSidebar } from '@/components/base/shadcn/sidebar';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
 
 import BetaFeaturesSheet from '../admin/beta-features-sheet';
@@ -145,7 +146,9 @@ function MobileNavbar({
   onBurgerClick: () => void;
 }) {
   const { t } = useI18n();
+  const { tenants } = useTenant();
   const navbarStyles = navbarVariant();
+  const isSingleTenant = tenants.length <= 1;
 
   return (
     <div className={navbarStyles.base({ className: 'h-[56px] px-3 flex md:hidden' })}>
@@ -158,7 +161,10 @@ function MobileNavbar({
         responsive={false}
       />
       <div className="flex flex-1 items-center justify-center gap-1.5">
-        <div data-cy="logo-mobile" className="flex h-8 text-primary">
+        <div
+          data-cy="logo-mobile"
+          className={cn('flex text-primary [&_svg]:h-full [&_img]:h-full', isSingleTenant ? 'h-8' : 'h-7')}
+        >
           {logo}
         </div>
         <MainNavbarTenantSwitcher hideSingleTenantLabel />
