@@ -1290,7 +1290,6 @@
       "born_year": "Né en {{year}}",
       "phi_restricted": "Restreint",
       "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
-      "ask_assistant": "Interroger l'IA sur ce patient",
       "vital_status": {
         "alive": "Vivant",
         "deceased": "Décédé"
@@ -2957,8 +2956,7 @@
       "resources": "Ressources",
       "website": "Site web",
       "documentation": "Documentation",
-      "contact": "Contact",
-      "david": "D.A.V.I.D"
+      "contact": "Contact"
     },
     "tenant_switcher": {
       "title": "Changer de tenant"
@@ -2985,7 +2983,8 @@
       "badge": "Assistant IA",
       "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
       "frame_title": "Assistant D.A.V.I.D",
-      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement."
+      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement.",
+      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran"
     }
   }
 }

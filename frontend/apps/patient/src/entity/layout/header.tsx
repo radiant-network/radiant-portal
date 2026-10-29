@@ -1,10 +1,10 @@
-import { Lock, SparklesIcon } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 import type { PatientEntity } from '@/api/api';
 import { PatientEntityVitalStatusEnum } from '@/api/api';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import type { BadgeProps } from '@/components/base/shadcn/badge';
-import type { ButtonProps } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
@@ -13,10 +13,9 @@ import { derivePatientMrn } from '../patient-mrn';
 type HeaderProps = {
   patient?: PatientEntity;
   isLoading: boolean;
-  onAskAssistant?: () => void;
 };
 
-function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
+function Header({ patient, isLoading }: HeaderProps) {
   const { t } = useI18n();
 
   let title: React.ReactNode;
@@ -73,22 +72,6 @@ function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
       ]
     : [];
 
-  const buttons: ButtonProps[] = onAskAssistant
-    ? [
-        {
-          variant: 'outline',
-          size: 'sm',
-          onClick: onAskAssistant,
-          children: (
-            <>
-              <SparklesIcon />
-              {t('patient_entity.header.ask_assistant')}
-            </>
-          ),
-        },
-      ]
-    : [];
-
   return (
     <HeaderNavigation
       isLoading={isLoading}
@@ -97,7 +80,7 @@ function Header({ patient, isLoading, onAskAssistant }: HeaderProps) {
       description={description}
       badges={badges}
       backLink={{ label: t('main_navbar.links.patients'), to: '/patient' }}
-      buttons={buttons}
+      statuses={[<LibreChatDavid key="librechat-david" />]}
     />
   );
 }

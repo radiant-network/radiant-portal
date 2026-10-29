@@ -3,6 +3,7 @@ import { Biohazard, Users } from 'lucide-react';
 import type { CaseEntity } from '@/api/api';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -79,6 +80,7 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
               />,
             ]
           : []),
+        <LibreChatDavid key="librechat-david" size="sm" />,
       ]}
     />
   );
