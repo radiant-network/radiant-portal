@@ -828,6 +828,7 @@
           "sample_id": "Sample ID",
           "task_id": "Task",
           "sequencing_experiment_id": "Sequencing",
+          "proband_submitter_sample_ids": "Sample",
           "placeholder": "Search..."
         },
         "buttons": {
@@ -1708,6 +1709,8 @@
         "primary_condition": "Primary Condition",
         "ordering_organization_code": "Req. By",
         "ordering_organization_code_tooltip": "Requested by",
+        "proband_submitter_sample_ids": "Sample",
+        "proband_submitter_sample_ids_tooltip": "Proband's sample ID (tumor sample for somatic cases)",
         "project_code": "Project",
         "updated_on": "Updated",
         "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",
