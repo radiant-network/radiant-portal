@@ -39,6 +39,8 @@ function CbcCard({ cbc, isLoading, ...cardProps }: CbcCardProps) {
               <CbcTile
                 key={key}
                 result={cbc[key]}
+                day={cbc.day}
+                date={cbc.date}
                 label={t(`patient_entity.laboratory.cbc.analytes.${key}`)}
                 normaliseAsCount={normaliseAsCount}
               />
