@@ -2055,7 +2055,11 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignement et variant"
+      "title": "Alignement et variant",
+      "chrm_hidden_reads": {
+        "title": "Lectures masquées sur chrM",
+        "description": "Certaines pistes sont très profondes sur chrM. Pour que IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      }
     },
     "interpretation_form": {
       "alert": {

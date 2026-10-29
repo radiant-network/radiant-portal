@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { igvApi } from '@/utils/api';
 
-import IgvContainer from './igv-container';
+import IGV from './igv';
 
 type IGVDialogProps = {
   open: boolean;
@@ -60,7 +60,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
               <DialogTitle>{t('variant.igv.title')}</DialogTitle>
             </DialogHeader>
             <DialogBody className="relative max-h-[85vh] overflow-y-auto">
-              <IgvContainer tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
+              <IGV tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
             </DialogBody>
           </div>
         )}

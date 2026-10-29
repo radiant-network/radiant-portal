@@ -1,3 +1,5 @@
+import type { ReferenceGenome } from 'igv';
+
 import type { IGVTrackEnriched } from '@/api/api';
 
 // igv.js track config. API case tracks (IGVTrackEnriched) fit it as is; tracks built here, such as
@@ -42,33 +44,9 @@ export type IGVTrack = Partial<IGVTrackEnriched> & {
   maxHeight?: number;
 };
 
-export interface IIGVBrowser {
-  loadTrack(config: IGVTrack[]): void;
-  loadTrackList(config: IGVTrack[]): void;
-  removeTrackByName(name: string): void;
-  search(locusOrGene: string): void;
-}
-
-export interface IIGVBrowserOptions {
-  genome?: string;
-  reference?: IReference;
-  palette?: string[];
-  locus: string;
-  tracks?: IGVTrack[];
-}
-
-interface IReference {
-  id: string;
+// igv.js reads these reference fields, which its types leave out.
+export type IGVReference = ReferenceGenome & {
   ucscID?: string;
   blatDB?: string;
-  name: string;
-  fastaURL: string;
-  indexURL?: string;
-  cytobandURL?: string;
-  aliasURL?: string;
   tracks?: IGVTrack[];
-}
-
-export declare function createBrowser(div: HTMLElement, options: IIGVBrowserOptions): IIGVBrowser;
-
-export declare const browser: IIGVBrowser;
+};

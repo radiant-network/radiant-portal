@@ -2054,7 +2054,11 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignment and variant"
+      "title": "Alignment and variant",
+      "chrm_hidden_reads": {
+        "title": "Reads hidden on chrM",
+        "description": "Some tracks are very deep on chrM. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      }
     },
     "interpretation_form": {
       "alert": {

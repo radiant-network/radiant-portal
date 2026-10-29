@@ -57,7 +57,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-128x128.png`} sizes="128x128" />
         <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-196x196.png`} sizes="196x196" />
         <link rel="manifest" href={`/${import.meta.env.THEME}/site.webmanifest`} />
-        <script src="https://cdn.jsdelivr.net/npm/igv@3.7.0/dist/igv.min.js"></script>
       </head>
       <body>
         <I18nProvider initialLanguage={loaderData?.language}>
