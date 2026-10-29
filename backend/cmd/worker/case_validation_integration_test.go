@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -1142,7 +1145,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
+				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, maf, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 			{
@@ -1202,6 +1205,34 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			},
 		}
 		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_MafDocument_Persisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, err := testutils.LoadScenario("cases_maf_document")
+		require.NoError(t, err)
+		maf, err := os.ReadFile(filepath.Join(testutils.TestResources, "worker", "documents", "TSRX1091647.somatic.maf"))
+		require.NoError(t, err)
+		document := scenario.Cases[0].Tasks[0].OutputDocuments[0]
+		require.NoError(t, createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", document.Name, maf))
+
+		payload, err := json.Marshal(scenario.Cases)
+		require.NoError(t, err)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var persisted struct {
+			FormatCode   string
+			DataTypeCode string
+			Size         int64
+			Hash         string
+		}
+		require.NoError(t, env.Postgres.Table("document").Select("format_code, data_type_code, size, hash").Where("url = ?", document.Url).Take(&persisted).Error)
+		assert.Equal(t, "maf", persisted.FormatCode)
+		assert.Equal(t, "ssnv", persisted.DataTypeCode)
+		assert.Equal(t, int64(len(maf)), persisted.Size)
+		assert.Equal(t, document.Hash, persisted.Hash)
 	})
 }
 
