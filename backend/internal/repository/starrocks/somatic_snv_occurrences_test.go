@@ -605,3 +605,18 @@ func Test_Somatic_SNV_GetOccurrences_Sort_By_Germline_Af_Wgs_Affected_Asc(t *tes
 		assert.ElementsMatch(t, []string{"1000", "1010", "1020"}, somaticLocusIds(occurrences))
 	})
 }
+
+// TOPMed is joined only when the query uses one of its fields: a sort alone must be enough, on the inner and the
+// outer query of the TOP-N list.
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "topmed_af", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		require.NoError(t, err)
+		locusIds := sliceutils.Map(occurrences, func(o SomaticSNVOccurrence, _ int, _ []SomaticSNVOccurrence) string { return o.LocusId })
+		assert.Equal(t, []string{"2000", "1000", "3000"}, locusIds, "3000 has no TOPMed row: NULL last in descending order")
+	})
+}
