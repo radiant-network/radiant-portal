@@ -861,6 +861,7 @@ export const radiantConfig = {
   },
   portal: {
     name: 'Radiant',
+    default_language: 'en',
     navigation: {
       dashboard: true,
       variant: true,

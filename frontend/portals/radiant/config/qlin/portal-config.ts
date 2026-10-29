@@ -846,6 +846,7 @@ export const qlinConfig = {
   },
   portal: {
     name: 'Qlin',
+    default_language: 'fr',
     navigation: {
       dashboard: true,
       variant: true,
