@@ -828,6 +828,7 @@
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
           "sequencing_experiment_id": "Séquençage",
+          "proband_submitter_sample_ids": "Échantillon",
           "placeholder": "Rechercher..."
         },
         "buttons": {
@@ -1695,6 +1696,8 @@
         "analysis_catalog_code": "Analyse",
         "ordering_organization_code": "Req. par",
         "ordering_organization_code_tooltip": "Requête faite par",
+        "proband_submitter_sample_ids": "Échantillon",
+        "proband_submitter_sample_ids_tooltip": "Identifiant d'échantillon du proband (échantillon tumoral pour les cas somatiques)",
         "project_code": "Projet",
         "updated_on": "Dernière modification",
         "updated_on_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",
