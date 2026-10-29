@@ -1564,8 +1564,6 @@
     },
     "chat": {
       "title": "Cohort analytics",
-      "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster",
       "explore": "Explore charts",
       "explore_tooltip": "Ask questions about these charts and generate new views with AI"
     },

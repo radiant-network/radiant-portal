@@ -1565,8 +1565,6 @@
     },
     "chat": {
       "title": "Analyse de cohorte",
-      "description": "État actuel du registre · dérivé des données de la cohorte",
-      "source": "Roster en direct",
       "explore": "Explorer les graphiques",
       "explore_tooltip": "Posez des questions sur ces graphiques et générez de nouvelles vues avec l'IA"
     },

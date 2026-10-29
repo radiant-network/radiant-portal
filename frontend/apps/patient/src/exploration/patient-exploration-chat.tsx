@@ -3,7 +3,6 @@ import { flushSync } from 'react-dom';
 import { Sparkles, X } from 'lucide-react';
 import { UDIChat } from 'udi-yac';
 
-import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -122,36 +121,27 @@ function PatientExplorationChat({ onExpandedChange }: PatientExplorationChatProp
         aria-modal={expanded || undefined}
         aria-labelledby={expanded ? chatTitleId : undefined}
         className={cn(
-          'w-full gap-0 pb-0 overflow-hidden [view-transition-name:yac-chat]',
+          'w-full gap-0 pb-4 overflow-hidden [view-transition-name:yac-chat]',
           expanded && 'fixed inset-x-6 top-14 bottom-6 z-50 m-0 w-auto pt-0 shadow-lg',
         )}
       >
-        <CardHeader className={cn('border-b', expanded && 'pt-4')}>
-          <div className="flex flex-col gap-0.5">
-            <CardTitle id={chatTitleId}>{t('patient_exploration.chat.title')}</CardTitle>
-            <p className="text-muted-foreground text-xs">{t('patient_exploration.chat.description')}</p>
-          </div>
+        <CardHeader className={cn('border-b pb-4', expanded && 'pt-4')}>
+          <CardTitle id={chatTitleId}>{t('patient_exploration.chat.title')}</CardTitle>
           <CardAction>
             {expanded ? (
               <Button variant="ghost" iconOnly aria-label={t('common.close')} onClick={() => setChatExpanded(false)}>
                 <X />
               </Button>
             ) : (
-              <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" onClick={() => setChatExpanded(true)}>
-                      <Sparkles />
-                      {t('patient_exploration.chat.explore')}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t('patient_exploration.chat.explore_tooltip')}</TooltipContent>
-                </Tooltip>
-                <Badge variant="secondary" className="gap-1.5">
-                  <span className="size-1.5 rounded-full bg-emerald-500" />
-                  {t('patient_exploration.chat.source')}
-                </Badge>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" onClick={() => setChatExpanded(true)}>
+                    <Sparkles />
+                    {t('patient_exploration.chat.explore')}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('patient_exploration.chat.explore_tooltip')}</TooltipContent>
+              </Tooltip>
             )}
           </CardAction>
         </CardHeader>
