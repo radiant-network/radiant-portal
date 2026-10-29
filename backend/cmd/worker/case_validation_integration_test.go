@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -662,35 +664,35 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 	})
 }
 
-func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
+func Test_ProcessBatch_Case_validateDocument_IdenticalTaskAlreadyAttached_Skipped(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
-		payload := createBaseCasePayload("validateDocument_IdenticalDocumentAlreadyExists_1")
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
-		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
+		const url = "s3://test-bucket/validateDocument_IdenticalTaskAlreadyAttached.recal.crai"
+		payload := createBaseCasePayload("validateDocument_IdenticalTaskAlreadyAttached_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_IdenticalTaskAlreadyAttached.recal.crai"
 		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
-		payload[0].SubmitterCaseId = "validateDocument_IdenticalDocumentAlreadyExists_2"
+		payload[0].SubmitterCaseId = "validateDocument_IdenticalTaskAlreadyAttached_2"
 		payloadBytes, _ = json.Marshal(payload)
 		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
 		infos := []types.BatchMessage{
 			{
-				Code:    "DOCUMENT-003",
-				Message: "Document s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai already exists, skipped.",
-				Path:    "case[0].tasks[0].output_documents[0]",
+				Code:    "TASK-008",
+				Message: "Task alignment_germline_variant_calling on aliquots [NA12891] is already attached, skipped.",
+				Path:    "case[0].tasks[0]",
 			},
 		}
-		errors := []types.BatchMessage{
-			{
-				Code:    "DOCUMENT-005",
-				Message: "A document with same url s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai has been found in the output of a different task.",
-				Path:    "case[0].tasks[0].output_documents[0]",
-			},
-		}
-		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		var docs, owners int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document thd").Joins("JOIN document d ON d.id = thd.document_id").Where("d.url = ? AND thd.type = ?", url, "output").Count(&owners)
+		assert.Equal(t, int64(1), docs)
+		assert.Equal(t, int64(1), owners)
 	})
 }
 
@@ -1438,5 +1440,35 @@ func Test_ProcessBatch_Case_Template(t *testing.T) {
 		//
 		//// TODO: Call the assertion function with expected messages
 		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_persistTask_SkippedTaskNotPersisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const skippedURL = "s3://test-bucket/persistTask_SkippedTaskNotPersisted.skipped.cram"
+		const newURL = "s3://test-bucket/persistTask_SkippedTaskNotPersisted.new.cram"
+		size := int64(11)
+		task := func(url string) *types.CaseTaskBatch {
+			return &types.CaseTaskBatch{
+				TypeCode:        types.AlignmentGermlineVariantCallingTaskTypeCode,
+				PipelineVersion: "1.0.0",
+				OutputDocuments: []*types.OutputDocumentBatch{
+					{DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: url[strings.LastIndex(url, "/")+1:], Size: &size, Url: url},
+				},
+			}
+		}
+		bctx := &batchval.BatchValidationContext{}
+		cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{Tasks: []*types.CaseTaskBatch{task(skippedURL), task(newURL)}}, 0, types.DefaultTenantCode)
+		cr.SkippedTasks[0] = struct{}{}
+		sc := NewStorageContext(env.Postgres)
+		sc.TenantCode = types.DefaultTenantCode
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var skipped, created int64
+		env.Postgres.Table("document").Where("url = ?", skippedURL).Count(&skipped)
+		env.Postgres.Table("document").Where("url = ?", newURL).Count(&created)
+		assert.Equal(t, int64(0), skipped)
+		assert.Equal(t, int64(1), created)
 	})
 }

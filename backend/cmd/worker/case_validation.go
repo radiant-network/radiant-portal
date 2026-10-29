@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
 	"regexp"
 	"slices"
 	"strings"
@@ -79,6 +80,7 @@ const (
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
 	TaskTypeDoesNotSupportMultipleAliquots      = "TASK-007"
+	TaskAlreadyAttached                         = "TASK-008"
 )
 
 // Documents error codes
@@ -205,6 +207,8 @@ type CaseValidationRecord struct {
 	Documents             map[string]*types.Document
 	DocumentsInTasks      map[string][]*DocumentRelation
 	TaskContexts          map[int][]*types.TaskContext
+	ExistingTasks         map[int]*types.Task // Key: task ID
+	SkippedTasks          map[int]struct{}    // Key: index in Case.Tasks
 }
 
 // caseResourceLabel names the entity in report messages. It is deliberately not the batch
@@ -227,6 +231,8 @@ func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchv
 		Documents:             make(map[string]*types.Document),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		TaskContexts:          make(map[int][]*types.TaskContext),
+		ExistingTasks:         make(map[int]*types.Task),
+		SkippedTasks:          make(map[int]struct{}),
 	}
 }
 
@@ -597,6 +603,27 @@ func (cr *CaseValidationRecord) fetchFromTasks(ctx context.Context) error {
 
 		if err := cr.fetchOutputDocumentsFromTask(ctx, t); err != nil {
 			return fmt.Errorf("failed to fetch output documents from task: %w", err)
+		}
+	}
+	return cr.fetchTasksOwningOutputDocuments(ctx)
+}
+
+func (cr *CaseValidationRecord) fetchTasksOwningOutputDocuments(ctx context.Context) error {
+	for _, relations := range cr.DocumentsInTasks {
+		for _, dr := range relations {
+			if dr.Type != "output" {
+				continue
+			}
+			if _, ok := cr.ExistingTasks[dr.TaskID]; ok {
+				continue
+			}
+			task, err := cr.Cache.GetTaskById(ctx, dr.TaskID)
+			if err != nil {
+				return fmt.Errorf("failed to get task by id %d: %w", dr.TaskID, err)
+			}
+			if task != nil {
+				cr.ExistingTasks[dr.TaskID] = task
+			}
 		}
 	}
 	return nil
@@ -1315,8 +1342,66 @@ func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode
 	}
 }
 
+// isTaskAlreadyAttached reports whether every output URL of the incoming task is already the
+// output of one single existing task, of the same type, on the same sequencing experiments.
+func (cr *CaseValidationRecord) isTaskAlreadyAttached(t *types.CaseTaskBatch) bool {
+	owners := map[int]struct{}{}
+	for _, doc := range t.OutputDocuments {
+		if _, ok := cr.Documents[doc.Url]; !ok {
+			return false
+		}
+		owned := false
+		for _, dr := range cr.DocumentsInTasks[doc.Url] {
+			if dr.Type == "output" {
+				owners[dr.TaskID] = struct{}{}
+				owned = true
+			}
+		}
+		if !owned {
+			return false
+		}
+	}
+	if len(owners) != 1 {
+		return false
+	}
+
+	var taskID int
+	for id := range owners {
+		taskID = id
+	}
+	existing, ok := cr.ExistingTasks[taskID]
+	if !ok || existing.TaskTypeCode != t.TypeCode {
+		return false
+	}
+
+	expected := map[int]struct{}{}
+	for _, se := range cr.SequencingExperiments {
+		if slices.Contains(t.Aliquots, se.Aliquot) {
+			expected[se.ID] = struct{}{}
+		}
+	}
+
+	_, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]
+	actual := map[int]struct{}{}
+	for _, tc := range cr.TaskContexts[taskID] {
+		// A case-related task attached to another case is not this case's task.
+		if isCaseRelated && (tc.CaseID == nil || cr.CaseID == nil || *tc.CaseID != *cr.CaseID) {
+			return false
+		}
+		actual[tc.SequencingExperimentID] = struct{}{}
+	}
+
+	return len(expected) > 0 && maps.Equal(expected, actual)
+}
+
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
+		if cr.isTaskAlreadyAttached(t) {
+			msg := fmt.Sprintf("Task %s on aliquots [%s] is already attached, skipped.", t.TypeCode, strings.Join(t.Aliquots, ", "))
+			cr.AddInfos(msg, TaskAlreadyAttached, cr.formatFieldPath("tasks", &tid, "", nil))
+			cr.SkippedTasks[tid] = struct{}{}
+			continue
+		}
 		for did, doc := range t.OutputDocuments {
 			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
 			cr.validateDocumentDataTypeForTaskType(t.TypeCode, doc, path)
@@ -1669,7 +1754,10 @@ func persistFamilyHistory(ctx context.Context, sc *StorageContext, cr *CaseValid
 }
 
 func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
-	for _, t := range cr.Case.Tasks {
+	for i, t := range cr.Case.Tasks {
+		if _, skipped := cr.SkippedTasks[i]; skipped {
+			continue
+		}
 		task := types.Task{
 			TaskTypeCode:    t.TypeCode,
 			PipelineName:    t.PipelineName,

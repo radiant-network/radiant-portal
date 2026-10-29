@@ -257,3 +257,56 @@ func Test_ProcessBatch_PatchCase_TasksOnly_AliquotFromAlreadyAttachedExperiment(
 		assert.NotZero(t, doc.ID, "tasks-only PATCH output document should be persisted")
 	})
 }
+
+// The bridge re-syncs whole analyses: the task already attached by the seed is re-sent unchanged
+// next to a new task. The re-sent one is skipped with TASK-008, only the new one is persisted.
+func Test_ProcessBatch_PatchCase_IdenticalTaskReSentWithNewTask_OnlyNewTaskPersisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.ObjectStore.Client, env.Postgres
+		const submitterCaseId = "CASE-PATCH-E"
+		const outURL = "s3://test-bucket/CASE-PATCH-E.patch.recal.cram"
+		const outName = "CASE-PATCH-E.patch.recal.cram"
+
+		base := createBaseCasePayload(submitterCaseId)
+		createDocumentsForBatch(ctx, client, base)
+		baseBytes, _ := json.Marshal(base)
+		seedID := insertPayloadAndProcessBatch(db, string(baseBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, seedID, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, submitterCaseId).First(&ca)
+		var seqExpID int
+		db.Table("case_has_sequencing_experiment chse").
+			Joins("JOIN sequencing_experiment se ON se.id = chse.sequencing_experiment_id").
+			Where("chse.case_id = ? AND se.aliquot = ?", ca.ID, "NA12891").
+			Select("chse.sequencing_experiment_id").Scan(&seqExpID)
+		assert.NotZero(t, seqExpID, "base case should have NA12891 attached")
+		var tasksBefore int64
+		db.Table("task_context").Where("sequencing_experiment_id = ?", seqExpID).Count(&tasksBefore)
+
+		patches := patchCaseWithTask(submitterCaseId, "N1", outURL, outName, 11)
+		uploadPatchTaskDocuments(ctx, client, patches)
+		patches[0].Tasks = append([]*types.CaseTaskBatch{base[0].Tasks[0]}, patches[0].Tasks...)
+		patchBytes, _ := json.Marshal(patches)
+
+		patchID := insertPayloadAndProcessBatch(db, string(patchBytes), types.BatchStatusPending, types.PatchCaseBatchType, false, "user123", "2025-12-05")
+		infos := []types.BatchMessage{
+			{
+				Code:    "TASK-008",
+				Message: "Task alignment_germline_variant_calling on aliquots [NA12891] is already attached, skipped.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, patchID, types.BatchStatusSuccess, false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		var tasksAfter int64
+		db.Table("task_context").Where("sequencing_experiment_id = ?", seqExpID).Count(&tasksAfter)
+		assert.Equal(t, tasksBefore+1, tasksAfter, "only the new task is persisted")
+
+		var docs int64
+		db.Table("document").Where("url = ?", outURL).Count(&docs)
+		assert.Equal(t, int64(1), docs, "the new task's output document is persisted")
+		db.Table("document").Where("url = ?", base[0].Tasks[0].OutputDocuments[0].Url).Count(&docs)
+		assert.Equal(t, int64(1), docs, "the re-sent task's output document is not duplicated")
+	})
+}

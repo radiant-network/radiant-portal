@@ -69,7 +69,7 @@ type BatchValidationCache struct {
 	// Referenced Entities (Indexed by their natural keys). Every natural key includes the
 	// tenant: none of these keys is unique across tenants, and the tenant is what the lookups
 	// themselves are scoped by. Maps keyed by an internal id (SamplesById, FetusesById,
-	// TaskContext, TaskHasDocuments) need no tenant — the id was resolved within one.
+	// Tasks, TaskContext, TaskHasDocuments) need no tenant — the id was resolved within one.
 	OrganizationsByCode            map[OrganizationKey]*types.Organization                 // Key: code + tenant
 	Projects                       map[ProjectKey]*types.Project                           // Key: code + tenant
 	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id + tenant
@@ -78,6 +78,7 @@ type BatchValidationCache struct {
 	FetusesById                    map[int]*types.Fetus                                    // Key: ID
 	SequencingExperimentsByAliquot map[AliquotKey][]types.SequencingExperiment             // Key: aliquot + tenant
 	SequencingExperimentsByKey     map[SequencingExperimentKey]*types.SequencingExperiment // Key: org_code + submitter_sample_id + aliquot + tenant
+	Tasks                          map[int]*types.Task                                     // Key: ID
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
 	Documents                      map[DocumentKey]*types.Document                         // Key: URL + tenant
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
@@ -98,6 +99,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		FetusesById:                    make(map[int]*types.Fetus),
 		SequencingExperimentsByAliquot: make(map[AliquotKey][]types.SequencingExperiment),
 		SequencingExperimentsByKey:     make(map[SequencingExperimentKey]*types.SequencingExperiment),
+		Tasks:                          make(map[int]*types.Task),
 		TaskContext:                    make(map[int][]*types.TaskContext),
 		Documents:                      make(map[DocumentKey]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
@@ -322,6 +324,20 @@ func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSampl
 	}
 
 	return seqExp, nil
+}
+
+func (c *BatchValidationCache) GetTaskById(ctx context.Context, taskId int) (*types.Task, error) {
+	if task, ok := c.Tasks[taskId]; ok {
+		return task, nil
+	}
+
+	task, err := c.Context.TaskRepo.GetTaskById(ctx, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Tasks[taskId] = task
+	return task, nil
 }
 
 func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*types.TaskContext, error) {
