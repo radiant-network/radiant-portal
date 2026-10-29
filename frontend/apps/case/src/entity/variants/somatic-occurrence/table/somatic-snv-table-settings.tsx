@@ -35,10 +35,11 @@ const columnHelper = createAppColumnHelper<SomaticSNVOccurrence>();
 type SomaticSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
+  canDownloadReport?: boolean;
   t: TFunction<string, undefined>;
 };
 
-function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrenceTableSettingsProps) {
+function getSomaticSNVColumns({ t, caseEntity, patientId, canDownloadReport }: SomaticSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -321,7 +322,13 @@ function getSomaticSNVColumns({ t, caseEntity, patientId }: SomaticSNVOccurrence
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsCell row={info.row} caseEntity={caseEntity} />,
+      cell: info => (
+        <OccurrenceActionsCell
+          row={info.row}
+          caseEntity={caseEntity}
+          reportKind={canDownloadReport ? 'somatic' : undefined}
+        />
+      ),
       size: 86,
       enableResizing: false,
       enablePinning: true,

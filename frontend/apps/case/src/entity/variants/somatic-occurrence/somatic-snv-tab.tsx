@@ -49,8 +49,14 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
   const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
-    () => getSomaticSNVColumns({ t, caseEntity, patientId: patient?.patient_id }),
-    [t, caseEntity, patient?.patient_id],
+    () =>
+      getSomaticSNVColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
   );
 
   if (!isValidSeqId(seqId)) {
