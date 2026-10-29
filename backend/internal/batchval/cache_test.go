@@ -95,6 +95,7 @@ type mockTaskRepo struct {
 	GetByIdFunc            func(taskId int) (*types.Task, error)
 	GetContextBySeqExpFunc func(seqExpId int) ([]*types.TaskContext, error)
 	GetHasDocByDocFunc     func(documentId int, tenantCode string) ([]*types.TaskHasDocument, error)
+	GetHasDocByTaskFunc    func(taskId int) ([]*types.TaskHasDocument, error)
 }
 
 func (m *mockTaskRepo) GetTaskById(_ context.Context, taskId int) (*types.Task, error) {
@@ -105,6 +106,9 @@ func (m *mockTaskRepo) GetTaskContextBySequencingExperimentId(_ context.Context,
 }
 func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(_ context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error) {
 	return m.GetHasDocByDocFunc(documentId, tenantCode)
+}
+func (m *mockTaskRepo) GetTaskHasDocumentByTaskId(_ context.Context, taskId int) ([]*types.TaskHasDocument, error) {
+	return m.GetHasDocByTaskFunc(taskId)
 }
 
 type mockDocRepo struct {
@@ -450,6 +454,33 @@ func TestBatchValidationCache_GetTaskById(t *testing.T) {
 	result, err = cache.GetTaskById(t.Context(), 42)
 	assert.NoError(t, err)
 	assert.Equal(t, task, result)
+}
+
+func TestBatchValidationCache_GetTaskHasDocumentByTaskId(t *testing.T) {
+	mockRepo := &mockTaskRepo{}
+	ctx := &BatchValidationContext{TaskRepo: mockRepo}
+	cache := NewBatchValidationCache(ctx)
+
+	thd := []*types.TaskHasDocument{{TaskID: 42, DocumentID: 500, Type: "output"}, {TaskID: 42, DocumentID: 501, Type: "input"}}
+
+	// Test cache miss
+	mockRepo.GetHasDocByTaskFunc = func(id int) ([]*types.TaskHasDocument, error) {
+		assert.Equal(t, 42, id)
+		return thd, nil
+	}
+	result, err := cache.GetTaskHasDocumentByTaskId(t.Context(), 42)
+	assert.NoError(t, err)
+	assert.Equal(t, thd, result)
+	assert.Equal(t, thd, cache.TaskHasDocumentsByTask[42])
+
+	// Test cache hit
+	mockRepo.GetHasDocByTaskFunc = func(id int) ([]*types.TaskHasDocument, error) {
+		t.Fatal("Repo should not be called on cache hit")
+		return nil, nil
+	}
+	result, err = cache.GetTaskHasDocumentByTaskId(t.Context(), 42)
+	assert.NoError(t, err)
+	assert.Equal(t, thd, result)
 }
 
 func TestBatchValidationCache_GetTaskContextBySequencingExperimentId(t *testing.T) {

@@ -696,6 +696,41 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalTaskAlreadyAttached_Skippe
 	})
 }
 
+// Same outputs, other pipeline version: not the same task, so the former DOCUMENT-005 stands.
+func Test_ProcessBatch_Case_validateDocument_SameOutputsOtherPipelineVersion_Document005(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/validateDocument_SameOutputsOtherPipelineVersion.recal.crai"
+		payload := createBaseCasePayload("validateDocument_SameOutputsOtherPipelineVersion_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_SameOutputsOtherPipelineVersion.recal.crai"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		payload[0].SubmitterCaseId = "validateDocument_SameOutputsOtherPipelineVersion_2"
+		payload[0].Tasks[0].PipelineVersion = payload[0].Tasks[0].PipelineVersion + "-other"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document " + url + " already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url " + url + " has been found in the output of a different task.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
+
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
 		payload := createBaseCasePayload("validateDocument_Error_DocumentField")

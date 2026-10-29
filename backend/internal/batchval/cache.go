@@ -69,7 +69,8 @@ type BatchValidationCache struct {
 	// Referenced Entities (Indexed by their natural keys). Every natural key includes the
 	// tenant: none of these keys is unique across tenants, and the tenant is what the lookups
 	// themselves are scoped by. Maps keyed by an internal id (SamplesById, FetusesById,
-	// Tasks, TaskContext, TaskHasDocuments) need no tenant — the id was resolved within one.
+	// Tasks, TaskContext, TaskHasDocuments, TaskHasDocumentsByTask) need no tenant — the id was
+	// resolved within one.
 	OrganizationsByCode            map[OrganizationKey]*types.Organization                 // Key: code + tenant
 	Projects                       map[ProjectKey]*types.Project                           // Key: code + tenant
 	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id + tenant
@@ -82,6 +83,7 @@ type BatchValidationCache struct {
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
 	Documents                      map[DocumentKey]*types.Document                         // Key: URL + tenant
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
+	TaskHasDocumentsByTask         map[int][]*types.TaskHasDocument                        // Key: task ID
 	AnalysisCatalogs               map[AnalysisCatalogKey]*types.AnalysisCatalog           // Key: code + tenant
 	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id + tenant
 }
@@ -103,6 +105,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		TaskContext:                    make(map[int][]*types.TaskContext),
 		Documents:                      make(map[DocumentKey]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
+		TaskHasDocumentsByTask:         make(map[int][]*types.TaskHasDocument),
 		AnalysisCatalogs:               make(map[AnalysisCatalogKey]*types.AnalysisCatalog),
 		Cases:                          make(map[CaseKey]*types.Case),
 	}
@@ -365,6 +368,20 @@ func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(ctx context.Contex
 	}
 
 	c.TaskHasDocuments[documentId] = thd
+	return getCopy(thd), nil
+}
+
+func (c *BatchValidationCache) GetTaskHasDocumentByTaskId(ctx context.Context, taskId int) ([]*types.TaskHasDocument, error) {
+	if thd, ok := c.TaskHasDocumentsByTask[taskId]; ok {
+		return getCopy(thd), nil
+	}
+
+	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByTaskId(ctx, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	c.TaskHasDocumentsByTask[taskId] = thd
 	return getCopy(thd), nil
 }
 
