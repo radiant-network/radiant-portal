@@ -33,10 +33,10 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(171), *count)
+		assert.Equal(t, int64(172), *count)
 
 		// Default sort is document_id DESC.
-		assert.Equal(t, 294, (*documents)[0].DocumentID)
+		assert.Equal(t, 296, (*documents)[0].DocumentID)
 	})
 }
 
@@ -83,7 +83,7 @@ func Test_SearchDocumentsCustomSort(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(171), *count)
+		assert.Equal(t, int64(172), *count)
 
 		document135 := (*documents)[0]
 		assert.Equal(t, 135, document135.DocumentID)
@@ -263,10 +263,10 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(93), *count)
+		assert.Equal(t, int64(94), *count)
 
-		document294 := (*documents)[0]
-		assert.Equal(t, 294, document294.DocumentID)
+		document296 := (*documents)[0]
+		assert.Equal(t, 296, document296.DocumentID)
 	})
 }
 
@@ -283,10 +283,10 @@ func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(171), *count)
+		assert.Equal(t, int64(172), *count)
 
-		document294 := (*documents)[0]
-		assert.Equal(t, 294, document294.DocumentID)
+		document296 := (*documents)[0]
+		assert.Equal(t, 296, document296.DocumentID)
 	})
 }
 
@@ -343,10 +343,10 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(70), *count)
+		assert.Equal(t, int64(71), *count)
 
-		document294 := (*documents)[0]
-		assert.Equal(t, 294, document294.DocumentID)
+		document296 := (*documents)[0]
+		assert.Equal(t, 296, document296.DocumentID)
 	})
 }
 

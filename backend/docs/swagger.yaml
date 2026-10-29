@@ -123,6 +123,8 @@ components:
     CNVGeneOverlap:
       description: CNVGeneOverlap represents a gene overlap with a CNV
       properties:
+        biotype:
+          type: string
         cytoband:
           items:
             type: string
@@ -132,16 +134,35 @@ components:
           type: string
         gene_length:
           type: integer
+        gnomad_loeuf:
+          description: GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts
+            of the gene
+          type: number
+        gnomad_pli:
+          description: GnomadPli is the highest gnomAD pLI over the Ensembl transcripts
+            of the gene
+          type: number
         nb_exons:
+          description: NbExons counts the exons the CNV hits, on the transcript of
+            the gene with the most exons
           type: integer
         nb_overlap_bases:
           type: integer
+        omim_inheritance_code:
+          description: OmimInheritanceCode lists the OMIM inheritance modes of the
+            phenotypes of the gene
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         overlap_type:
           type: string
         overlapping_cnv_percent:
           type: number
         overlapping_gene_percent:
           type: number
+        strand:
+          type: string
         symbol:
           type: string
         tenant_gene_panels:
@@ -160,6 +181,179 @@ components:
       - overlapping_gene_percent
       - symbol
       - tenant_gene_panels
+      type: object
+    CNVProfile:
+      description: CNVProfile holds the copy ratio and B-allele frequency points,
+        the called CNVs, the regions of homozygosity and the cytobands of a sequencing
+      properties:
+        baf:
+          items:
+            $ref: '#/components/schemas/CNVProfileTrack'
+          type: array
+          uniqueItems: false
+        chromosomes:
+          items:
+            $ref: '#/components/schemas/CNVProfileChromosome'
+          type: array
+          uniqueItems: false
+        copy_ratio:
+          items:
+            $ref: '#/components/schemas/CNVProfileTrack'
+          type: array
+          uniqueItems: false
+        cytobands:
+          items:
+            $ref: '#/components/schemas/Cytoband'
+          type: array
+          uniqueItems: false
+        overview:
+          $ref: '#/components/schemas/CNVProfileOverview'
+        roh:
+          items:
+            $ref: '#/components/schemas/CNVProfileROH'
+          type: array
+          uniqueItems: false
+        segments:
+          items:
+            $ref: '#/components/schemas/CNVProfileSegment'
+          type: array
+          uniqueItems: false
+      required:
+      - baf
+      - chromosomes
+      - copy_ratio
+      - cytobands
+      - roh
+      - segments
+      type: object
+    CNVProfileChromosome:
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+      required:
+      - name
+      - size
+      type: object
+    CNVProfileOverview:
+      description: |-
+        Overview is set when the copy ratio and BAF are reduced, for a genome: the points of a
+        region come from the region endpoint.
+      properties:
+        baf_stride:
+          type: integer
+        copy_ratio_stride:
+          type: integer
+        region_max_span:
+          type: integer
+      required:
+      - baf_stride
+      - copy_ratio_stride
+      - region_max_span
+      type: object
+    CNVProfileROH:
+      properties:
+        chromosome:
+          type: string
+        end:
+          type: integer
+        nb_het:
+          type: integer
+        nb_hom:
+          type: integer
+        score:
+          type: number
+        start:
+          type: integer
+      required:
+      - chromosome
+      - end
+      - nb_het
+      - nb_hom
+      - score
+      - start
+      type: object
+    CNVProfileRegion:
+      description: CNVProfileRegion holds every copy ratio and BAF point of a region
+        of one chromosome
+      properties:
+        baf:
+          $ref: '#/components/schemas/CNVProfileTrack'
+        chromosome:
+          type: string
+        copy_ratio:
+          $ref: '#/components/schemas/CNVProfileTrack'
+        end:
+          type: integer
+        start:
+          type: integer
+      required:
+      - baf
+      - chromosome
+      - copy_ratio
+      - end
+      - start
+      type: object
+    CNVProfileSegment:
+      properties:
+        chromosome:
+          type: string
+        cn:
+          type: integer
+        cnv_id:
+          type: string
+        end:
+          type: integer
+        filter:
+          type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
+        gnomad_sf:
+          type: number
+        has_note:
+          type: boolean
+        length:
+          type: integer
+        nb_snv:
+          type: integer
+        quality:
+          type: number
+        sm:
+          type: number
+        start:
+          type: integer
+        type:
+          type: string
+      required:
+      - chromosome
+      - cnv_id
+      - end
+      - has_note
+      - length
+      - start
+      - type
+      type: object
+    CNVProfileTrack:
+      description: 'CNVProfileTrack holds the points of one chromosome as two parallel
+        arrays: the 0-based positions and their values'
+      properties:
+        chromosome:
+          type: string
+        positions:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        values:
+          items:
+            type: number
+          type: array
+          uniqueItems: false
+      required:
+      - chromosome
+      - positions
+      - values
       type: object
     CaseAssignee:
       description: User assigned to a case, as shown in the cases list and on the
@@ -1270,6 +1464,24 @@ components:
       required:
       - role_code
       type: object
+    Cytoband:
+      properties:
+        chromosome:
+          type: string
+        cytoband:
+          type: string
+        end:
+          type: integer
+        gie_stain:
+          type: string
+        start:
+          type: integer
+      required:
+      - chromosome
+      - cytoband
+      - end
+      - start
+      type: object
     DocumentFilters:
       properties:
         data_type_code:
@@ -2019,6 +2231,71 @@ components:
             type: string
           type: array
           uniqueItems: false
+      type: object
+    GeneTrackExon:
+      properties:
+        end:
+          type: integer
+        start:
+          type: integer
+      required:
+      - end
+      - start
+      type: object
+    GeneTrackGene:
+      description: GeneTrackGene is a gene of the gene track, with the exons of its
+        transcript with the most exons
+      properties:
+        biotype:
+          type: string
+        chromosome:
+          type: string
+        description:
+          type: string
+        end:
+          type: integer
+        exons:
+          items:
+            $ref: '#/components/schemas/GeneTrackExon'
+          type: array
+          uniqueItems: false
+        gene_id:
+          type: string
+        gnomad_loeuf:
+          description: GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts
+            of the gene
+          type: number
+        gnomad_pli:
+          description: GnomadPli is the highest gnomAD pLI over the Ensembl transcripts
+            of the gene
+          type: number
+        omim_conditions:
+          description: OmimConditions lists the OMIM phenotypes of the gene, with
+            their inheritance modes
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
+        omim_inheritance_code:
+          description: OmimInheritanceCode lists the OMIM inheritance modes of the
+            phenotypes of the gene
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        start:
+          type: integer
+        strand:
+          type: string
+        symbol:
+          type: string
+      required:
+      - chromosome
+      - end
+      - exons
+      - gene_id
+      - start
+      - symbol
       type: object
     GermlineCNVOccurrence:
       description: GermlineCNVOccurrence represents a germline CNV occurrence
@@ -6909,6 +7186,83 @@ paths:
       summary: Post search GeneResult list of matching input strings
       tags:
       - genes
+  /{tenant}/genes/track:
+    get:
+      description: |-
+        List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
+        with the exons of its transcript with the most exons. A symbol takes precedence over a region.
+      operationId: geneTrack
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Gene symbol, ignoring case
+        in: query
+        name: symbol
+        schema:
+          type: string
+      - description: Chromosome, without chr prefix; required without symbol
+        in: query
+        name: chromosome
+        schema:
+          type: string
+      - description: Region start; required without symbol
+        in: query
+        name: start
+        schema:
+          type: integer
+      - description: Region end; required without symbol
+        in: query
+        name: end
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GeneTrackGene'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: List the genes of a region
+      tags:
+      - genes
   /{tenant}/hpo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
@@ -8423,6 +8777,192 @@ paths:
       security:
       - bearerauth: []
       summary: List germline CNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile:
+    get:
+      description: |-
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the
+        DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the
+        cytobands. An exome has every point. A genome has an overview, a regular sample of the copy ratio bins
+        and of the BAF variants; the region endpoint serves every point of a region.
+      operationId: getGermlineCNVProfile
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CNVProfile'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The case has no such sequencing analysed by the task, or detail.missing
+            lists the tracks without a file (copy_ratio, baf)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get the CNV profile of a sequencing
+      tags:
+      - occurrences
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile/region:
+    get:
+      description: |-
+        Get every copy ratio and BAF point of a region of at most 10 Mb, read from the DRAGEN tn.bw and baf.bw
+        files: what the overview of a genome profile leaves out.
+      operationId: getGermlineCNVProfileRegion
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Chromosome, without chr prefix
+        in: query
+        name: chromosome
+        required: true
+        schema:
+          type: string
+      - description: Region start
+        in: query
+        name: start
+        required: true
+        schema:
+          type: integer
+      - description: Region end
+        in: query
+        name: end
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CNVProfileRegion'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The case has no such sequencing analysed by the task, or detail.missing
+            lists the tracks without a file (copy_ratio, baf)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get every point of a region of a CNV profile
       tags:
       - occurrences
   /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:

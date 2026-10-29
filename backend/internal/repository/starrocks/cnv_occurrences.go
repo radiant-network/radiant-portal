@@ -33,8 +33,17 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.TenantQualifiedName(ctx), panelsTable.Alias, alias, panelsTable.Alias))
 		}
 	}
-	utils.AddWhere(userQuery, tx)
+	if userQuery != nil {
+		utils.AddWhere(userQuery, tx)
+	}
 	return tx, nil
+}
+
+// joinCNVNoteAndFlag joins, as note and flag, the notes and the flag of the CNVs of a case and
+// sequencing: at most one row each per CNV.
+func joinCNVNoteAndFlag(ctx context.Context, tx *gorm.DB, alias string, caseId int, seqId int) *gorm.DB {
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
 }
 
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the
@@ -46,8 +55,7 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	alias := cnvTable.Alias
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	tx = joinCNVNoteAndFlag(ctx, tx, alias, caseId, seqId)
 	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
 	// row per occurrence, so filtering on them beats a second scan of the federated tables.
 	if userQuery != nil {
@@ -209,23 +217,46 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	if err = query.Find(&overlaps).Error; err != nil {
 		return nil, fmt.Errorf("error query gene overlap: %w", err)
 	}
+	symbols := make([]string, len(overlaps))
+	geneIDs := make([]string, len(overlaps))
+	for i, o := range overlaps {
+		symbols[i], geneIDs[i] = o.Symbol, o.GeneId
+	}
+	omim, err := omimGenes(ctx, db, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene overlap omim phenotypes: %w", err)
+	}
+	constraints, err := geneConstraints(ctx, db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene overlap constraint: %w", err)
+	}
+	exons, err := geneExons(ctx, db, geneIDs, func(tx *gorm.DB) *gorm.DB {
+		return tx.Where("end >= ? AND start <= ?", start, end)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene overlap exons: %w", err)
+	}
 	for i := range overlaps {
 		if overlaps[i].TenantGenePanels == nil {
 			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
 		}
+		overlaps[i].NbExons = len(exons[overlaps[i].GeneId])
+		overlaps[i].OmimInheritanceCode = omim[overlaps[i].Symbol].InheritanceCodes
+		overlaps[i].GnomadPli, overlaps[i].GnomadLoeuf = constraints[overlaps[i].GeneId].Pli, constraints[overlaps[i].GeneId].Loeuf
 	}
 	return overlaps, nil
 }
 
 func cnvGenesOverlapSQL(ctx context.Context) string {
 	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
-	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
-	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
+	cytoband := types.CytobandTable.TenantQualifiedName(ctx)
 	tenantGenePanels := types.TenantGenePanelTable.TenantQualifiedName(ctx)
 	return fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT
     	    g.gene_id,
     	    g.name AS symbol,
+    	    g.biotype,
+    	    g.strand,
     	    g.length AS gene_length,
     	    GREATEST(0, LEAST(g.end, @cnv_end) - GREATEST(g.start, @cnv_start)) AS nb_overlap_bases,
     	    g.start AS gene_start,
@@ -234,17 +265,6 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	WHERE g.chromosome = @cnv_chromosome
     	  AND g.end >= @cnv_start
     	  AND g.start <= @cnv_end
-     ),
-     exon_overlap AS (
-         SELECT
-             go.gene_id,
-             COUNT(DISTINCT e.exon_id) AS nb_exons
-         FROM gene_overlap go
-                  JOIN %s e
-                       ON go.gene_id = e.gene_id
-                           AND e.end >= @cnv_start
-                           AND e.start <= @cnv_end
-         GROUP BY go.gene_id
      ),
      gene_overlap_cytoband AS (
          SELECT
@@ -269,9 +289,10 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	gc.cytoband,
     	go.symbol,
     	go.gene_id,
+    	go.biotype,
+    	go.strand,
     	go.gene_length,
     	go.nb_overlap_bases,
-    	COALESCE(eo.nb_exons, 0) AS nb_exons,
     	ROUND(100.0 * go.nb_overlap_bases  / go.gene_length, 2) AS overlapping_gene_percent,
     	ROUND(100.0 * go.nb_overlap_bases  / @cnv_length, 2) AS overlapping_cnv_percent,
     	CASE
@@ -281,9 +302,8 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	    END AS overlap_type,
     	gtp.panels AS tenant_gene_panels
 		FROM gene_overlap go
-    	     LEFT JOIN exon_overlap eo ON go.gene_id = eo.gene_id
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
     	     LEFT JOIN gene_tenant_panels gtp ON go.symbol = gtp.symbol
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
-		ensemblGene, ensemblExon, cytoband, tenantGenePanels)
+		ensemblGene, cytoband, tenantGenePanels)
 }

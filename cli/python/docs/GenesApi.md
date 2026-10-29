@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**gene_auto_complete**](GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 [**gene_search**](GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
+[**gene_track**](GenesApi.md#gene_track) | **GET** /{tenant}/genes/track | List the genes of a region
 
 
 # **gene_auto_complete**
@@ -164,6 +165,97 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **gene_track**
+> List[GeneTrackGene] gene_track(tenant, symbol=symbol, chromosome=chromosome, start=start, end=end)
+
+List the genes of a region
+
+List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each
+with the exons of its transcript with the most exons. A symbol takes precedence over a region.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.gene_track_gene import GeneTrackGene
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.GenesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    symbol = 'symbol_example' # str | Gene symbol, ignoring case (optional)
+    chromosome = 'chromosome_example' # str | Chromosome, without chr prefix; required without symbol (optional)
+    start = 56 # int | Region start; required without symbol (optional)
+    end = 56 # int | Region end; required without symbol (optional)
+
+    try:
+        # List the genes of a region
+        api_response = api_instance.gene_track(tenant, symbol=symbol, chromosome=chromosome, start=start, end=end)
+        print("The response of GenesApi->gene_track:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling GenesApi->gene_track: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **symbol** | **str**| Gene symbol, ignoring case | [optional] 
+ **chromosome** | **str**| Chromosome, without chr prefix; required without symbol | [optional] 
+ **start** | **int**| Region start; required without symbol | [optional] 
+ **end** | **int**| Region end; required without symbol | [optional] 
+
+### Return type
+
+[**List[GeneTrackGene]**](GeneTrackGene.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

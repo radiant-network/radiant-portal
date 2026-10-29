@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,17 +26,22 @@ class CNVGeneOverlap(BaseModel):
     """
     CNVGeneOverlap represents a gene overlap with a CNV
     """ # noqa: E501
+    biotype: Optional[StrictStr] = None
     cytoband: List[StrictStr]
     gene_id: StrictStr
     gene_length: StrictInt
-    nb_exons: StrictInt
+    gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadLoeuf is the lowest gnomAD LOEUF over the Ensembl transcripts of the gene")
+    gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="GnomadPli is the highest gnomAD pLI over the Ensembl transcripts of the gene")
+    nb_exons: StrictInt = Field(description="NbExons counts the exons the CNV hits, on the transcript of the gene with the most exons")
     nb_overlap_bases: StrictInt
+    omim_inheritance_code: Optional[List[StrictStr]] = Field(default=None, description="OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene")
     overlap_type: StrictStr
     overlapping_cnv_percent: Union[StrictFloat, StrictInt]
     overlapping_gene_percent: Union[StrictFloat, StrictInt]
+    strand: Optional[StrictStr] = None
     symbol: StrictStr
     tenant_gene_panels: List[StrictStr]
-    __properties: ClassVar[List[str]] = ["cytoband", "gene_id", "gene_length", "nb_exons", "nb_overlap_bases", "overlap_type", "overlapping_cnv_percent", "overlapping_gene_percent", "symbol", "tenant_gene_panels"]
+    __properties: ClassVar[List[str]] = ["biotype", "cytoband", "gene_id", "gene_length", "gnomad_loeuf", "gnomad_pli", "nb_exons", "nb_overlap_bases", "omim_inheritance_code", "overlap_type", "overlapping_cnv_percent", "overlapping_gene_percent", "strand", "symbol", "tenant_gene_panels"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,14 +94,19 @@ class CNVGeneOverlap(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "biotype": obj.get("biotype"),
             "cytoband": obj.get("cytoband"),
             "gene_id": obj.get("gene_id"),
             "gene_length": obj.get("gene_length"),
+            "gnomad_loeuf": obj.get("gnomad_loeuf"),
+            "gnomad_pli": obj.get("gnomad_pli"),
             "nb_exons": obj.get("nb_exons"),
             "nb_overlap_bases": obj.get("nb_overlap_bases"),
+            "omim_inheritance_code": obj.get("omim_inheritance_code"),
             "overlap_type": obj.get("overlap_type"),
             "overlapping_cnv_percent": obj.get("overlapping_cnv_percent"),
             "overlapping_gene_percent": obj.get("overlapping_gene_percent"),
+            "strand": obj.get("strand"),
             "symbol": obj.get("symbol"),
             "tenant_gene_panels": obj.get("tenant_gene_panels")
         })

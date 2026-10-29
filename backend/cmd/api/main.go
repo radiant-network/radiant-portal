@@ -55,6 +55,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	// S3 URL Presigner for IGV returned URLs
 	s3Presigner := utils.NewS3PreSigner()
 
+	// S3 reader for the CNV profile files
+	s3Store, err := utils.NewS3Store()
+	if err != nil {
+		slog.Error("failed to create s3 store", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	// One lab notification template per tenant. A bad file warns and is skipped, never fatal:
 	// only that tenant's notify fails. The load outcome is exposed by GET /status.
 	notificationTemplates := notification.LoadTemplates(utils.GetEnvOrDefault(notification.TemplateDirEnv, ""))
@@ -87,6 +94,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
+	repoCNVProfile := starrocks.NewCNVProfileRepository(starrocksDB)
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
 	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
 	repoOrganizationsWrite := postgres.NewOrganizationRepository(postgresDB)
@@ -196,6 +204,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))
 	geneGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchGenesHandler(repoGenes))
+	geneGroup.GET("/track", requireAction(types.ActionSearchCase), server.GetGeneTrackHandler(repoGenes))
 
 	hpoGroup := tenantRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetHPOTermAutoComplete(repoTerms))
@@ -240,6 +249,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences, repoFacets))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/profile", requireAction(types.ActionSearchCase), server.GetGermlineCNVProfileHandler(repoCNVProfile, s3Store))
+	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/profile/region", requireAction(types.ActionSearchCase), server.GetGermlineCNVProfileRegionHandler(repoCNVProfile, s3Store))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))
