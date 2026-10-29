@@ -233,10 +233,10 @@ interface PatientImagingSession extends PatientDayDate {
   flywheel_url: string | null;
 }
 
-// Laboratory. Each analyte / component is its own latest result, so they may come from different draws or punctures.
-// Raw from the views: units are not normalized (ANC comes in /uL and x10E9/L, 1000x apart).
-interface PatientLabResult extends PatientDayDate { value: number | null; unit: string | null }
-interface PatientCbc { wbc: PatientLabResult; hemoglobin: PatientLabResult; platelets: PatientLabResult; anc: PatientLabResult }
+// Laboratory. Raw from the views: units are not normalized (ANC comes in /uL and x10E9/L, 1000x apart).
+// The CBC is the most recent panel: every analyte comes from it, so the day and date are the panel's.
+interface PatientLabResult { value: number | null; unit: string | null }
+interface PatientCbc extends PatientDayDate { wbc: PatientLabResult; hemoglobin: PatientLabResult; platelets: PatientLabResult; anc: PatientLabResult }
 
 // The view holds the latest score of either scale (one row per patient today); a list so one score per scale fits later.
 // The date is when the result was released (observation.issued): the source has no assessment date.

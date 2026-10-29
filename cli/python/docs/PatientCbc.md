@@ -1,12 +1,14 @@
 # PatientCbc
 
-Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **anc** | [**PatientLabResult**](PatientLabResult.md) |  | 
+**var_date** | **date** |  | [optional] 
+**day** | **int** |  | [optional] 
 **hemoglobin** | [**PatientLabResult**](PatientLabResult.md) |  | 
 **platelets** | [**PatientLabResult**](PatientLabResult.md) |  | 
 **wbc** | [**PatientLabResult**](PatientLabResult.md) |  | 

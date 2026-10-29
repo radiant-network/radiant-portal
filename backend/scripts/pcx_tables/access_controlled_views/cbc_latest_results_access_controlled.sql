@@ -11,8 +11,8 @@
    The tenant-facing schema holds NO unguarded PHI for CBC results.
 
    ACCESS MODEL (per row, keyed on organization_code):
-     can_read_phi TRUE  -> patient_id = mrn,        *_observed_at shown
-     can_read_phi FALSE -> patient_id = research_id, *_observed_at NULL
+     can_read_phi TRUE  -> patient_id = mrn,        panel_observed_at shown
+     can_read_phi FALSE -> patient_id = research_id, panel_observed_at NULL
    Collapsing the identifier pair into ONE column makes "never show mrn and
    research_id together" structurally impossible rather than policy-dependent.
 
@@ -20,10 +20,11 @@
    caller is granted some organizations but not others. patient_id_type
    discriminates per row.
 
-   THE AGES STAY OPEN, THE TIMESTAMPS DO NOT. age_at_<analyte>_days is the
-   de-identified counterpart of <analyte>_observed_at, exactly as age_at_*_days
-   pairs with a calendar date in the pcx_30 views, so the ages are visible to all
-   callers and the four calendar timestamps are gated. Note the ages are exact to
+   THE AGE STAYS OPEN, THE TIMESTAMP DOES NOT. All values come from the most
+   recent panel, so there is one date: age_at_panel_days is the de-identified
+   counterpart of panel_observed_at, exactly as age_at_*_days pairs with a
+   calendar date in the pcx_30 views, so the age is visible to all callers and
+   the timestamp is gated. Note the ages are exact to
    the day and one is ~59 years, so an age plus a known diagnosis is not
    automatically anonymous -- if the release needs HIPAA-style age capping, that
    belongs here, not downstream.
@@ -94,36 +95,31 @@ SELECT s.organization_name,
        CASE WHEN s.can_read_phi THEN 'mrn' ELSE 'research_id' END AS patient_id_type,
        s.radiant_patient_id,
 
+       CASE WHEN s.can_read_phi THEN s.panel_observed_at END AS panel_observed_at,
+       s.age_at_panel_days,
+       s.date_semantic,
+
        s.wbc_value,
        s.wbc_unit,
-       CASE WHEN s.can_read_phi THEN s.wbc_observed_at END AS wbc_observed_at,
-       s.age_at_wbc_days,
        s.wbc_loinc,
        s.wbc_source_code_text,
 
        s.hemoglobin_value,
        s.hemoglobin_unit,
-       CASE WHEN s.can_read_phi THEN s.hemoglobin_observed_at END AS hemoglobin_observed_at,
-       s.age_at_hemoglobin_days,
        s.hemoglobin_loinc,
        s.hemoglobin_source_code_text,
 
        s.platelets_value,
        s.platelets_unit,
-       CASE WHEN s.can_read_phi THEN s.platelets_observed_at END AS platelets_observed_at,
-       s.age_at_platelets_days,
        s.platelets_loinc,
        s.platelets_source_code_text,
 
        s.anc_value,
        s.anc_unit,
-       CASE WHEN s.can_read_phi THEN s.anc_observed_at END AS anc_observed_at,
-       s.age_at_anc_days,
        s.anc_loinc,
        s.anc_source_code_text,
 
        s.analytes_found,
-       s.administrative_dates,
        s.can_read_phi
 FROM (SELECT src.*,
              p.id AS radiant_patient_id,
