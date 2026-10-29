@@ -1051,6 +1051,7 @@
           "tr_c_gene": "TR C Gene",
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
+          "trna": "tRNA",
           "unitary_pseudogene": "Unitary Pseudogene",
           "unprocessed_pseudogene": "Unprocessed Pseudogene",
           "y_rna": "Y RNA",
