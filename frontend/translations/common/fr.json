@@ -1052,6 +1052,7 @@
           "tr_c_gene": "Gène TR C",
           "tr_v_gene": "Gène TR V",
           "tr_v_pseudogene": "Pseudogène TR V",
+          "trna": "ARNt",
           "unitary_pseudogene": "Pseudogène unitaire",
           "unprocessed_pseudogene": "Pseudogène non traité",
           "y_rna": "ARN Y",
