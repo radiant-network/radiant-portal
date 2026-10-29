@@ -39,18 +39,20 @@ export function normaliseCount(value: number, unit: string | undefined): CountNo
 
 type CbcTileProps = {
   result: PatientLabResult | undefined;
+  day?: number;
+  date?: string;
   label: string;
   normaliseAsCount: boolean;
 };
 
-function CbcTile({ result, label, normaliseAsCount }: CbcTileProps) {
+function CbcTile({ result, day, date, label, normaliseAsCount }: CbcTileProps) {
   const { t } = useI18n();
 
   if (!result || result.value == null) {
     return <LabTile label={label} />;
   }
 
-  const meta = <LabDate day={result.day} date={result.date} />;
+  const meta = <LabDate day={day} date={date} />;
 
   if (!normaliseAsCount) {
     return (
