@@ -2,15 +2,7 @@ import type { AxiosResponseHeaders, RawAxiosResponseHeaders } from 'axios';
 import axios, { HttpStatusCode } from 'axios';
 import * as process from 'node:process';
 
-import { getSessionAccessToken, refreshAccessToken } from '../auth/server';
-import { isTokenValid } from '../auth/tokens';
-
-// Refresh a token this close to expiry, so it cannot expire on its way to the agent.
-const TOKEN_MIN_VALIDITY_SECONDS = 30;
-
-// Refreshes in flight, keyed by the expired access token: the dashboard's cards query in
-// parallel, and one refresh serves them all instead of one each.
-const refreshing = new Map<string, ReturnType<typeof refreshAccessToken>>();
+import { ensureFreshAccessToken } from '../auth/server';
 
 // Request headers the YAC agent reads, relayed as-is. Authorization is never taken from the
 // browser: it is always the session's token. X-Conversation-Id groups the turns of one chat,
@@ -42,24 +34,6 @@ function forwardResponseHeaders(from: RawAxiosResponseHeaders | AxiosResponseHea
     }
   }
   return headers;
-}
-
-/**
- * The session's access token, refreshed when it is about to expire. The portal's axios client
- * refreshes on a 401, but the chat calls the agent with its own fetch, so the proxy does it here.
- * The cookies carry the refreshed tokens back to the browser.
- */
-async function sessionAccessToken(request: Request): Promise<{ accessToken: string; cookies: string[] } | null> {
-  const accessToken = await getSessionAccessToken(request);
-  if (!accessToken) return null;
-  if (isTokenValid(accessToken, TOKEN_MIN_VALIDITY_SECONDS)) return { accessToken, cookies: [] };
-
-  let refresh = refreshing.get(accessToken);
-  if (!refresh) {
-    refresh = refreshAccessToken(request).finally(() => refreshing.delete(accessToken));
-    refreshing.set(accessToken, refresh);
-  }
-  return refresh;
 }
 
 function cookieHeaders(cookies: string[]): Headers {
@@ -94,7 +68,12 @@ export function transformUrl(url: string): string {
  * returned as-is so the browser sees the agent's own 401/403/404 and its X-Usage-* headers.
  */
 export const proxyYac = async (request: Request) => {
-  const session = await sessionAccessToken(request);
+  let session;
+  try {
+    session = await ensureFreshAccessToken(request);
+  } catch {
+    return jsonError(HttpStatusCode.InternalServerError, 'session read failed');
+  }
   if (!session) {
     // No session, or one Keycloak no longer refreshes: the user has to log in again.
     return jsonError(HttpStatusCode.Unauthorized, 'no session');

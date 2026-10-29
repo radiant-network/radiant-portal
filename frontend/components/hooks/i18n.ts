@@ -22,9 +22,9 @@ const loadTranslations = async (lang: string) => {
   }
 };
 
-declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } };
+declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } } | undefined;
 
-const defaultLanguage = __PROJECT__.portal.default_language;
+const defaultLanguage = typeof __PROJECT__ !== 'undefined' ? __PROJECT__.portal.default_language : 'en';
 
 // Track initialization state
 let isInitialized = false;
