@@ -26,10 +26,9 @@ export function scaleAgeMismatch(scale: string | undefined, day: number | undefi
 
 type PerfSectionProps = {
   score: PatientPerformanceScore;
-  canReadPhi: boolean;
 };
 
-function PerfSection({ score, canReadPhi }: PerfSectionProps) {
+function PerfSection({ score }: PerfSectionProps) {
   const { t } = useI18n();
   const scaleKey = score.scale.toLowerCase();
   const scaleLabel = t(`patient_entity.laboratory.performance_status.scales.${scaleKey}`, score.scale);
@@ -62,7 +61,7 @@ function PerfSection({ score, canReadPhi }: PerfSectionProps) {
       ) : null}
       <div className="inline-flex gap-1 text-xs text-muted-foreground">
         <span>{t('patient_entity.laboratory.performance_status.released')}</span>
-        <LabDate day={score.day} date={score.date} canReadPhi={canReadPhi} showBoth />
+        <LabDate day={score.day} date={score.date} showBoth />
       </div>
     </div>
   );

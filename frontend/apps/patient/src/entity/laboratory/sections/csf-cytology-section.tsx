@@ -49,10 +49,9 @@ export function evidenceTierNoteKey(evidenceTier: string | undefined): string | 
 
 type CsfCytologySectionProps = {
   cytology: PatientCsfCytology;
-  canReadPhi: boolean;
 };
 
-function CsfCytologySection({ cytology, canReadPhi }: CsfCytologySectionProps) {
+function CsfCytologySection({ cytology }: CsfCytologySectionProps) {
   const { t } = useI18n();
   const titleId = useId();
   const mapping = cytologyMapping(cytology.malignant_cells);
@@ -101,7 +100,7 @@ function CsfCytologySection({ cytology, canReadPhi }: CsfCytologySectionProps) {
             {multiSpecimenValue}
           </InformationField>
           <InformationField label={t('patient_entity.laboratory.csf.cytology.fields.result_date')}>
-            <LabDate day={cytology.day} date={cytology.date} canReadPhi={canReadPhi} showBoth />
+            <LabDate day={cytology.day} date={cytology.date} showBoth />
           </InformationField>
         </div>
       </div>

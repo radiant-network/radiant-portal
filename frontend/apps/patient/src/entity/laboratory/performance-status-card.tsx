@@ -8,11 +8,10 @@ import PerfSection from './sections/perf-section';
 
 type PerformanceStatusCardProps = {
   performanceStatus?: PatientPerformanceScore[];
-  canReadPhi: boolean;
   isLoading?: boolean;
 } & CardProps;
 
-function PerformanceStatusCard({ performanceStatus, canReadPhi, isLoading, ...cardProps }: PerformanceStatusCardProps) {
+function PerformanceStatusCard({ performanceStatus, isLoading, ...cardProps }: PerformanceStatusCardProps) {
   const { t } = useI18n();
 
   if (isLoading) {
@@ -41,7 +40,7 @@ function PerformanceStatusCard({ performanceStatus, canReadPhi, isLoading, ...ca
         <CardContent>
           <div className="flex flex-col gap-3">
             {scores.map((score, index) => (
-              <PerfSection key={`${score.scale}-${index}`} score={score} canReadPhi={canReadPhi} />
+              <PerfSection key={`${score.scale}-${index}`} score={score} />
             ))}
           </div>
         </CardContent>
