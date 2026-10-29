@@ -53,6 +53,8 @@
       "grouped_by": "Regroupé par {{value}}",
       "pin_column": "Épingler la colonne",
       "pin_row": "Épingler la ligne",
+      "select_page_rows": "Sélectionner toutes les lignes de la page",
+      "select_row": "Sélectionner la ligne",
       "sort": "Trier",
       "sorted_asc": "Trié par ordre croissant",
       "sorted_desc": "Trié par ordre décroissant",
@@ -840,6 +842,10 @@
       "results": "Résultats {{from}} - {{to}} de {{total}}",
       "results_filtered": "{{shown}} affichés sur {{total}}",
       "no_result": "Aucun résultat",
+      "items_selected_one": "{{value}} élément sélectionné",
+      "items_selected_other": "{{value}} éléments sélectionnés",
+      "select_all": "Tout sélectionner",
+      "clear_selection": "Effacer la sélection",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
@@ -1968,6 +1974,19 @@
   },
   "variant": {
     "no_data_for_variant": "Aucune donnée pour ce variant.",
+    "report": {
+      "download": "Télécharger rapport",
+      "select_at_least_one": "Sélectionner au moins un élément",
+      "max_exceeded": {
+        "title": "Nombre maximum dépassé",
+        "description": "Un maximum de 100 éléments peut être exporté à la fois. Veuillez réduire votre sélection et réessayer."
+      },
+      "toast": {
+        "loading": "Génération du rapport…",
+        "success": "Rapport téléchargé",
+        "error": "Impossible de télécharger le rapport. Veuillez réessayer."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Substitution acide aminé",

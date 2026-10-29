@@ -53,6 +53,8 @@
       "grouped_by": "Grouped by {{value}}",
       "pin_column": "Pin column",
       "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
       "sort": "Sort",
       "sorted_asc": "Sorted ascending",
       "sorted_desc": "Sorted descending",
@@ -840,6 +842,10 @@
       "results": "Results {{from}} - {{to}} of {{total}}",
       "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
+      "items_selected_one": "{{value}} item selected",
+      "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
@@ -1967,6 +1973,19 @@
   },
   "variant": {
     "no_data_for_variant": "No data for this variant.",
+    "report": {
+      "download": "Download report",
+      "select_at_least_one": "Select at least one item",
+      "max_exceeded": {
+        "title": "Maximum number exceeded",
+        "description": "A maximum of 100 items can be exported at a time. Please narrow your selection and try again."
+      },
+      "toast": {
+        "loading": "Generating report…",
+        "success": "Report downloaded",
+        "error": "Unable to download the report. Please try again."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
