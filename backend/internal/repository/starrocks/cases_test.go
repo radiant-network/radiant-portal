@@ -1,6 +1,7 @@
 package starrocks
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1129,8 +1131,8 @@ func insertProbandSampleCase(t *testing.T, env *testutils.Env, id int, submitter
 	`, id, submitterSampleID).Error)
 	require.NoError(t, env.Postgres.Exec(`
 		INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
-		VALUES (?, ?, 'completed', ?, 'CQGC', 'radiant', 9999, ?, ?, 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
-	`, id, id, submitterSampleID, submitterSampleID, runDate).Error)
+		VALUES (?, ?, 'completed', ?, 'CQGC', 'radiant', ?, ?, ?, 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+	`, id, id, submitterSampleID, submitterSampleID, submitterSampleID, runDate).Error)
 	require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (1, ?), (?, ?)", id, id, id).Error)
 	return func() {
 		env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = ?", id)
@@ -1271,5 +1273,133 @@ func Test_SearchCases_OnProbandSubmitterSampleIds_NonProbandSample_NoResult(t *t
 		// SRX1091646 is case 71's normal sample and S-PRENAT-72 its fetus's: neither is a proband sample.
 		_, count := searchCasesByProbandSubmitterSampleIds(t, repo, "SRX1091646", "S-PRENAT-72")
 		assert.Equal(t, int64(0), count)
+	})
+}
+
+func caseRunNames(t *testing.T, env *testutils.Env, caseID int) types.JsonArray[string] {
+	t.Helper()
+	tx := env.Starrocks.WithContext(t.Context()).Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(t.Context()), types.CaseTable.Alias))
+	tx = joins.Starrocks().CaseWithRuns(tx)
+	var rows []struct {
+		RunNames types.JsonArray[string]
+	}
+	require.NoError(t, tx.Select(fmt.Sprintf("%s.%s AS run_names", types.CaseRunTable.Alias, types.CaseRunNamesField.Name)).Where(fmt.Sprintf("%s.id = ?", types.CaseTable.Alias), caseID).Scan(&rows).Error)
+	require.Len(t, rows, 1)
+	return rows[0].RunNames
+}
+
+func Test_CaseWithRuns_TrioCase_ListsProbandRunOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 1 also sequenced the mother and father, on runs 1618 and 1619.
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1))
+	})
+}
+
+func Test_CaseWithRuns_SomaticCase_KeepsTumoralRunOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 71 also sequenced the proband's normal sample, on run 1678.
+		assert.Equal(t, types.JsonArray[string]{"1679"}, caseRunNames(t, env, 71))
+	})
+}
+
+func Test_CaseWithRuns_PrenatalCase_LeavesFetusRunOut(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 72's proband is the mother; the fetus's sample also carries her patient_id.
+		assert.Equal(t, types.JsonArray[string]{"1704"}, caseRunNames(t, env, 72))
+	})
+}
+
+func Test_CaseWithRuns_PrenatalCase_OnlyFetusSequenced_EmptyArray(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Case 73 sequenced the fetus only; the mother, its proband, has no sequencing of her own.
+		assert.Equal(t, types.JsonArray[string]{}, caseRunNames(t, env, 73))
+	})
+}
+
+func Test_CaseWithRuns_SomaticCase_ListsEveryTumoralRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM sample WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM sequencing_experiment WHERE id = 1115")
+		defer env.Postgres.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id = 1115")
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1115, 62, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'somatic', 'postnatal', 'CHUSJ', 'CASE-RUN-TWO-TUMORS')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sample (id, type_code, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1115, 'dna', 'tumoral', 'SRX9999999-RELAPSE-RUN', 62, 'LDM-CHUSJ', 'radiant')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, run_name, run_alias, run_date, capture_kit, created_on, updated_on, experimental_strategy_code, sequencing_read_technology_code, platform_code)
+			VALUES (1115, 1115, 'completed', 'RELAPSE-RUN', 'CQGC', 'radiant', 'RUN-RELAPSE', 'RELAPSE_RUN', '2026-09-01', 'SureSelect Custom DNA Target', now(), now(), 'wgs', 'short_read', 'illumina')
+		`).Error)
+		// Seq 73 is the proband's normal (run 1678), seq 74 its first tumoral (run 1679, 2026-03-08).
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (73, 1115), (74, 1115), (1115, 1115)").Error)
+
+		assert.Equal(t, types.JsonArray[string]{"RUN-RELAPSE", "1679"}, caseRunNames(t, env, 1115))
+	})
+}
+
+func Test_CaseWithRuns_MostRecentRunFirst(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1110, "RUN-2026", "2026-01-01")()
+
+		assert.Equal(t, types.JsonArray[string]{"RUN-2026", "1617"}, caseRunNames(t, env, 1110))
+	})
+}
+
+func Test_CaseWithRuns_OrderedByRunDateNotSequencingId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// Sequencing 1111 is the latest loaded, but its run is older than run 1617, from 2021.
+		defer insertProbandSampleCase(t, env, 1111, "RUN-2020", "2020-01-01")()
+
+		assert.Equal(t, types.JsonArray[string]{"1617", "RUN-2020"}, caseRunNames(t, env, 1111))
+	})
+}
+
+func Test_CaseWithRuns_NoRunDateComesLast(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1112, "RUN-NO-DATE", nil)()
+
+		assert.Equal(t, types.JsonArray[string]{"1617", "RUN-NO-DATE"}, caseRunNames(t, env, 1112))
+	})
+}
+
+func Test_CaseWithRuns_EmptyRunName_LeftOut(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1116, "RUN-EMPTY", "2026-01-01")()
+		// The worker stores '' when a sequencing batch has no run_name.
+		require.NoError(t, env.Postgres.Exec("UPDATE sequencing_experiment SET run_name = '' WHERE id = 1116").Error)
+
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1116))
+	})
+}
+
+func Test_CaseWithRuns_RunSharedBySequencings_ListedOnce(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// The second sequencing ran on run 1617 too, like sequencing 1.
+		defer insertProbandSampleCase(t, env, 1113, "1617", "2021-08-17")()
+
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1113))
+	})
+}
+
+func Test_CaseWithRuns_EmptyArrayWithoutRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1114, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'germline', 'postnatal', 'CHUSJ', 'CASE-RUN-NONE')
+		`).Error)
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1114")
+
+		assert.Equal(t, types.JsonArray[string]{}, caseRunNames(t, env, 1114))
+	})
+}
+
+func Test_SearchCases_RunNames_TrioCase_ListsProbandRunOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		assert.Equal(t, types.JsonArray[string]{"1617"}, searchCaseById(t, repo, 1).RunNames)
 	})
 }

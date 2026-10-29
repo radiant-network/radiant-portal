@@ -74,6 +74,8 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
+	// Selected only, never filtered or sorted on: joined after the count so it does not pay it.
+	tx = r.joiner.CaseWithRuns(tx)
 	tx = tx.Select(columns)
 	utils.AddPaginationAndSort(tx, userQuery)
 

@@ -1450,6 +1450,12 @@ export interface CaseResult {
     'project_name'?: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'run_names': Array<string>;
+    /**
+     * 
      * @type {CaseStatus}
      * @memberof CaseResult
      */
