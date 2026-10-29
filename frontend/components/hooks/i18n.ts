@@ -22,7 +22,9 @@ const loadTranslations = async (lang: string) => {
   }
 };
 
-const defaultLanguage = import.meta.env.DEFAULT_LANGUAGE || 'en';
+declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } };
+
+const defaultLanguage = __PROJECT__.portal.default_language;
 
 // Track initialization state
 let isInitialized = false;

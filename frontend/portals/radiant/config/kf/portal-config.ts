@@ -296,6 +296,7 @@ export const kfConfig = {
   },
   portal: {
     name: 'Kids First',
+    default_language: 'en',
     navigation: {
       dashboard: true,
       variant: true,
