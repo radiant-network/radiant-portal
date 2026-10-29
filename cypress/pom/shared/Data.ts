@@ -100,7 +100,7 @@ export const data = {
     aa_change: 'p.His5889Gln',
     consequenceImpact: CommonSelectors.colorIndicator('amber'),
     maneC: true,
-    maneM: false,
+    maneM: true,
     maneP: false,
     tier: 'no_data',
     cmc: null,
