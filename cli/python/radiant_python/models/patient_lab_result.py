@@ -17,21 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import date
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
 class PatientLabResult(BaseModel):
     """
-    Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+    Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
     """ # noqa: E501
-    var_date: Optional[date] = Field(default=None, alias="date")
-    day: Optional[StrictInt] = None
     unit: Optional[StrictStr] = None
     value: Optional[Union[StrictFloat, StrictInt]] = None
-    __properties: ClassVar[List[str]] = ["date", "day", "unit", "value"]
+    __properties: ClassVar[List[str]] = ["unit", "value"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,8 +81,6 @@ class PatientLabResult(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "date": obj.get("date"),
-            "day": obj.get("day"),
             "unit": obj.get("unit"),
             "value": obj.get("value")
         })

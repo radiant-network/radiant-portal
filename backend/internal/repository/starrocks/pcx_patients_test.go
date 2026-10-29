@@ -432,10 +432,11 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				"initial_treatment_order": "chemo_before_radiation"
 			},
 			"cbc": {
-				"wbc": {"day": 3960, "date": "2025-12-01", "value": 6.2, "unit": "10*3/uL"},
-				"hemoglobin": {"day": 3960, "date": "2025-12-01", "value": 11.8, "unit": "g/dL"},
-				"platelets": {"day": 3960, "date": "2025-12-01", "value": 245, "unit": "10*3/uL"},
-				"anc": {"day": 3949, "date": "2025-11-20", "value": 2.9, "unit": "x10E9/L"}
+				"day": 3960, "date": "2025-12-01",
+				"wbc": {"value": 6.2, "unit": "10*3/uL"},
+				"hemoglobin": {"value": 11.8, "unit": "g/dL"},
+				"platelets": {"value": 245, "unit": "10*3/uL"},
+				"anc": {"value": 2.9, "unit": "x10E9/L"}
 			},
 			"performance_status": [
 				{"day": 3961, "date": "2025-12-02", "scale": "lansky", "score": 90,
@@ -487,10 +488,11 @@ func Test_GetPcxPatient_RestrictedPatientLabsHaveNoDates(t *testing.T) {
 		require.NoError(t, err)
 		assert.JSONEq(t, `{
 			"cbc": {
-				"wbc": {"day": 2900, "date": null, "value": 4.1, "unit": "10*3/uL"},
-				"hemoglobin": {"day": null, "date": null, "value": null, "unit": null},
-				"platelets": {"day": 2900, "date": null, "value": 180, "unit": "10*3/uL"},
-				"anc": {"day": 2900, "date": null, "value": 1500, "unit": "/uL"}
+				"day": 2900, "date": null,
+				"wbc": {"value": 4.1, "unit": "10*3/uL"},
+				"hemoglobin": {"value": null, "unit": null},
+				"platelets": {"value": 180, "unit": "10*3/uL"},
+				"anc": {"value": 1500, "unit": "/uL"}
 			},
 			"performance_status": [
 				{"day": 2950, "date": null, "scale": "karnofsky", "score": 70,

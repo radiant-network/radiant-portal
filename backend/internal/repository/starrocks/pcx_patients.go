@@ -490,21 +490,21 @@ func fillPcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIden
 	return nil
 }
 
-// pcxObserved selects the day and date of an analyte observed at <analyte>_observed_at.
-func pcxObserved(analyte string) string {
-	return pcxDayDate("age_at_"+analyte+"_days", analyte+"_observed_at", analyte)
+// pcxObserved selects the day and date of a component observed at <component>_observed_at.
+func pcxObserved(component string) string {
+	return pcxDayDate("age_at_"+component+"_days", component+"_observed_at", component)
 }
 
 func fillPcxCbc(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
 	var rows []struct {
-		WbcDay, HemoglobinDay, PlateletsDay, AncDay         *string
-		WbcDate, HemoglobinDate, PlateletsDate, AncDate     *types.DateISO8601
+		PanelDay                                            *string
+		PanelDate                                           *types.DateISO8601
 		WbcValue, HemoglobinValue, PlateletsValue, AncValue *float64
 		WbcUnit, HemoglobinUnit, PlateletsUnit, AncUnit     *string
 	}
-	selects := []string{}
+	selects := []string{pcxDayDate("age_at_panel_days", "panel_observed_at", "panel")}
 	for _, analyte := range []string{"wbc", "hemoglobin", "platelets", "anc"} {
-		selects = append(selects, pcxObserved(analyte), analyte+"_value", analyte+"_unit")
+		selects = append(selects, analyte+"_value", analyte+"_unit")
 	}
 	tx := pcxView(ctx, db, types.PcxCbcTable, id).Select(strings.Join(selects, ", ")).Limit(1)
 	if err := tx.Find(&rows).Error; err != nil {
@@ -515,10 +515,11 @@ func fillPcxCbc(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *ty
 	}
 	row := rows[0]
 	p.Cbc = &types.PatientCbc{
-		Wbc:        types.PatientLabResult{PatientDayDate: dayDate(row.WbcDay, row.WbcDate), Value: row.WbcValue, Unit: row.WbcUnit},
-		Hemoglobin: types.PatientLabResult{PatientDayDate: dayDate(row.HemoglobinDay, row.HemoglobinDate), Value: row.HemoglobinValue, Unit: row.HemoglobinUnit},
-		Platelets:  types.PatientLabResult{PatientDayDate: dayDate(row.PlateletsDay, row.PlateletsDate), Value: row.PlateletsValue, Unit: row.PlateletsUnit},
-		Anc:        types.PatientLabResult{PatientDayDate: dayDate(row.AncDay, row.AncDate), Value: row.AncValue, Unit: row.AncUnit},
+		PatientDayDate: dayDate(row.PanelDay, row.PanelDate),
+		Wbc:            types.PatientLabResult{Value: row.WbcValue, Unit: row.WbcUnit},
+		Hemoglobin:     types.PatientLabResult{Value: row.HemoglobinValue, Unit: row.HemoglobinUnit},
+		Platelets:      types.PatientLabResult{Value: row.PlateletsValue, Unit: row.PlateletsUnit},
+		Anc:            types.PatientLabResult{Value: row.AncValue, Unit: row.AncUnit},
 	}
 	return nil
 }

@@ -244,18 +244,18 @@ type PatientTreatmentSummary struct {
 }
 
 // PatientLabResult - Lab result of a patient
-// @Description Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+// @Description Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
 // @Name PatientLabResult
 type PatientLabResult struct {
-	PatientDayDate
 	Value *float64 `json:"value"`
 	Unit  *string  `json:"unit"`
 }
 
 // PatientCbc - Latest complete blood count of a patient
-// @Description Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+// @Description Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
 // @Name PatientCbc
 type PatientCbc struct {
+	PatientDayDate
 	Wbc        PatientLabResult `json:"wbc" validate:"required"`
 	Hemoglobin PatientLabResult `json:"hemoglobin" validate:"required"`
 	Platelets  PatientLabResult `json:"platelets" validate:"required"`

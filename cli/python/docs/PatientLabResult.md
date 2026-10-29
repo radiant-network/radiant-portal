@@ -1,13 +1,11 @@
 # PatientLabResult
 
-Latest result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**var_date** | **date** |  | [optional] 
-**day** | **int** |  | [optional] 
 **unit** | **str** |  | [optional] 
 **value** | **float** |  | [optional] 
 

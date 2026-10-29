@@ -2999,11 +2999,17 @@ components:
       - updated_on
       type: object
     PatientCbc:
-      description: Latest result of each CBC analyte. Each analyte is its own latest,
-        so they may come from different draws.
+      description: Most recent CBC panel. All its analytes come from that panel, so
+        they share its day and date.
       properties:
         anc:
           $ref: '#/components/schemas/PatientLabResult'
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
         hemoglobin:
           $ref: '#/components/schemas/PatientLabResult'
         platelets:
@@ -3464,15 +3470,9 @@ components:
       - latest_encounter
       type: object
     PatientLabResult:
-      description: 'Latest result of one analyte, raw from the source: units are not
-        normalized (ANC comes in /uL and x10E9/L)'
+      description: 'Result of one analyte, raw from the source: units are not normalized
+        (ANC comes in /uL and x10E9/L)'
       properties:
-        date:
-          example: "2020-01-31"
-          format: date
-          type: string
-        day:
-          type: integer
         unit:
           type: string
         value:

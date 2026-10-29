@@ -17,21 +17,24 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
+from datetime import date
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.patient_lab_result import PatientLabResult
 from typing import Optional, Set
 from typing_extensions import Self
 
 class PatientCbc(BaseModel):
     """
-    Latest result of each CBC analyte. Each analyte is its own latest, so they may come from different draws.
+    Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
     """ # noqa: E501
     anc: PatientLabResult
+    var_date: Optional[date] = Field(default=None, alias="date")
+    day: Optional[StrictInt] = None
     hemoglobin: PatientLabResult
     platelets: PatientLabResult
     wbc: PatientLabResult
-    __properties: ClassVar[List[str]] = ["anc", "hemoglobin", "platelets", "wbc"]
+    __properties: ClassVar[List[str]] = ["anc", "date", "day", "hemoglobin", "platelets", "wbc"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,6 +100,8 @@ class PatientCbc(BaseModel):
 
         _obj = cls.model_validate({
             "anc": PatientLabResult.from_dict(obj["anc"]) if obj.get("anc") is not None else None,
+            "date": obj.get("date"),
+            "day": obj.get("day"),
             "hemoglobin": PatientLabResult.from_dict(obj["hemoglobin"]) if obj.get("hemoglobin") is not None else None,
             "platelets": PatientLabResult.from_dict(obj["platelets"]) if obj.get("platelets") is not None else None,
             "wbc": PatientLabResult.from_dict(obj["wbc"]) if obj.get("wbc") is not None else None
