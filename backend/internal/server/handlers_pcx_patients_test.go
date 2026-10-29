@@ -309,20 +309,15 @@ const testPatientKey = "00000000-0000-4000-8000-000000000001"
 
 func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 	repo := &pcxPatientReaderMock{patient: &types.PatientEntity{
-		PatientListItem: types.PatientListItem{
-			PatientIdentity: types.PatientIdentity{PatientKey: testPatientKey, PatientID: "C100004", PatientIDType: "research_id",
-				OrganizationCode: "BCH", OrganizationName: "Boston Children's Hospital",
-				GivenName: "C100004_given_name", FamilyName: "C100004_family_name"},
-			Gender: "female", VitalStatus: "alive",
-		},
+		PatientIdentity: types.PatientIdentity{PatientKey: testPatientKey, PatientID: "C100004", PatientIDType: "research_id",
+			OrganizationCode: "BCH", OrganizationName: "Boston Children's Hospital",
+			GivenName: "C100004_given_name", FamilyName: "C100004_family_name"},
+		Gender: "female", VitalStatus: "alive",
 		KeyDates: types.PatientKeyDates{
 			InitialDiagnosis: types.PatientKeyDate{Source: "clinical"},
 			LatestEncounter:  types.PatientKeyDate{Source: "registry"},
 		},
-		Events: []types.PatientEvent{}, Surgeries: []types.PatientSurgery{}, Radiations: []types.PatientRadiation{},
-		Therapies: []types.PatientTherapy{}, Imaging: []types.PatientImagingSession{}, Cases: []types.PatientCase{},
-		Interpretations: []types.PatientInterpretation{}, PerformanceStatus: []types.PatientPerformanceScore{},
-		TrialEnrollments: []types.PatientTrialEnrollment{},
+		Events: []types.PatientEvent{},
 	}}
 
 	w := getPatientEntity(repo, testPatientKey)
@@ -334,12 +329,10 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		"can_read_phi": false, "radiant_patient_id": null, "organization_code": "BCH", "organization_name": "Boston Children's Hospital",
 		"given_name": "C100004_given_name", "family_name": "C100004_family_name", "birth_year": null, "gender": "female",
 		"cns_integrated_diagnosis": null, "cns_integrated_diagnosis_source": null, "vital_status": "alive",
-		"age_at_vital_status_days": null, "age_at_initial_dx_days": null, "survival_days": null, "has_imaging": false, "case_count": 0,
 		"birth_date": null, "race": null, "ethnicity": null, "postal_code": null, "diagnosis_type_cohort": null, "data_type_cohort": null,
 		"key_dates": {"initial_diagnosis": {"day": null, "date": null, "source": "clinical"}, "latest_encounter": {"day": null, "date": null, "source": "registry"}},
 		"initial_diagnosis_evidence_url": null, "vital_status_at": {"day": null, "date": null},
-		"events": [], "surgeries": [], "radiations": [], "therapies": [], "imaging": [], "treatment_summary": null,
-		"trial_enrollments": [], "cbc": null, "performance_status": [], "csf": null, "cases": [], "interpretations": []
+		"events": [], "treatment_summary": null
 	}`, w.Body.String())
 }
 
@@ -365,4 +358,123 @@ func Test_PatientEntityHandler_RepositoryError_500(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}
+
+type pcxPatientTabsReaderMock struct {
+	treatments *types.PatientTreatments
+	laboratory *types.PatientLaboratory
+	imaging    *types.PatientImaging
+	genomics   *types.PatientGenomics
+	err        error
+	key        string
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientTreatments(_ context.Context, patientKey string) (*types.PatientTreatments, error) {
+	m.key = patientKey
+	return m.treatments, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientLaboratory(_ context.Context, patientKey string) (*types.PatientLaboratory, error) {
+	m.key = patientKey
+	return m.laboratory, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientImaging(_ context.Context, patientKey string) (*types.PatientImaging, error) {
+	m.key = patientKey
+	return m.imaging, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientGenomics(_ context.Context, patientKey string) (*types.PatientGenomics, error) {
+	m.key = patientKey
+	return m.genomics, m.err
+}
+
+var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics"}
+
+func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/patients/:patient_key/treatments", PatientTreatmentsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/laboratory", PatientLaboratoryHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/imaging", PatientImagingHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/genomics", PatientGenomicsHandler(repo))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key+"/"+tab, nil))
+	return w
+}
+
+func Test_PatientTreatmentsHandler_ReturnsTheTreatments(t *testing.T) {
+	repo := &pcxPatientTabsReaderMock{treatments: &types.PatientTreatments{
+		Surgeries: []types.PatientSurgery{}, Radiations: []types.PatientRadiation{}, Therapies: []types.PatientTherapy{},
+		TrialEnrollments: []types.PatientTrialEnrollment{},
+	}}
+
+	w := getPatientTab(repo, "treatments", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"surgeries": [], "radiations": [], "therapies": [], "trial_enrollments": []}`, w.Body.String())
+}
+
+func Test_PatientLaboratoryHandler_ReturnsTheLaboratory(t *testing.T) {
+	repo := &pcxPatientTabsReaderMock{laboratory: &types.PatientLaboratory{PerformanceStatus: []types.PatientPerformanceScore{}}}
+
+	w := getPatientTab(repo, "laboratory", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"cbc": null, "performance_status": [], "csf": null}`, w.Body.String())
+}
+
+func Test_PatientImagingHandler_ReturnsTheSessions(t *testing.T) {
+	repo := &pcxPatientTabsReaderMock{imaging: &types.PatientImaging{Sessions: []types.PatientImagingSession{
+		{SessionID: "ses-1", SessionName: "MRI Brain"},
+	}}}
+
+	w := getPatientTab(repo, "imaging", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"sessions": [{"day": null, "date": null, "session_id": "ses-1", "session_name": "MRI Brain",
+		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null}]}`, w.Body.String())
+}
+
+func Test_PatientGenomicsHandler_ReturnsCasesAndInterpretations(t *testing.T) {
+	repo := &pcxPatientTabsReaderMock{genomics: &types.PatientGenomics{
+		Cases: []types.PatientCase{}, Interpretations: []types.PatientInterpretation{},
+	}}
+
+	w := getPatientTab(repo, "genomics", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"cases": [], "interpretations": []}`, w.Body.String())
+}
+
+func Test_PatientTabHandlers_UnknownKey_404(t *testing.T) {
+	for _, tab := range patientTabs {
+		w := getPatientTab(&pcxPatientTabsReaderMock{}, tab, testPatientKey)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, tab)
+		assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String(), tab)
+	}
+}
+
+func Test_PatientTabHandlers_MalformedKey_404WithoutQuery(t *testing.T) {
+	for _, tab := range patientTabs {
+		repo := &pcxPatientTabsReaderMock{}
+
+		w := getPatientTab(repo, tab, "MRN-0002")
+
+		assert.Equal(t, http.StatusNotFound, w.Code, tab)
+		assert.Empty(t, repo.key, tab)
+	}
+}
+
+func Test_PatientTabHandlers_RepositoryError_500(t *testing.T) {
+	for _, tab := range patientTabs {
+		w := getPatientTab(&pcxPatientTabsReaderMock{err: errors.New("boom")}, tab, testPatientKey)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code, tab)
+		assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String(), tab)
+	}
 }

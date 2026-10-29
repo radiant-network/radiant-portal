@@ -113,30 +113,60 @@ type PatientKeyDates struct {
 }
 
 // PatientEntity - Patient page
-// @Description Data of the patient page
+// @Description Header, sidebar and overview of the patient page; each other tab has its own endpoint
 // @Name PatientEntity
 type PatientEntity struct {
-	PatientListItem
-	BirthDate                   *DateISO8601              `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
-	Race                        *string                   `json:"race"`
-	Ethnicity                   *string                   `json:"ethnicity"`
-	PostalCode                  *string                   `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
-	DataTypeCohort              *string                   `json:"data_type_cohort"`
-	KeyDates                    PatientKeyDates           `json:"key_dates" validate:"required"`
-	InitialDiagnosisEvidenceURL *string                   `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
-	VitalStatusAt               PatientDayDate            `json:"vital_status_at" validate:"required"`
-	Events                      []PatientEvent            `json:"events" validate:"required"`
-	Surgeries                   []PatientSurgery          `json:"surgeries" validate:"required"`
-	Radiations                  []PatientRadiation        `json:"radiations" validate:"required"`
-	Therapies                   []PatientTherapy          `json:"therapies" validate:"required"`
-	TrialEnrollments            []PatientTrialEnrollment  `json:"trial_enrollments" validate:"required"` // Most recent first
-	Imaging                     []PatientImagingSession   `json:"imaging" validate:"required"`
-	TreatmentSummary            *PatientTreatmentSummary  `json:"treatment_summary"`
-	Cbc                         *PatientCbc               `json:"cbc"`
-	PerformanceStatus           []PatientPerformanceScore `json:"performance_status" validate:"required"`
-	Csf                         *PatientCsf               `json:"csf"`
-	Cases                       []PatientCase             `json:"cases" validate:"required"`
-	Interpretations             []PatientInterpretation   `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
+	PatientIdentity
+	BirthYear                    *int                     `json:"birth_year"`
+	Gender                       string                   `json:"gender" validate:"required" enums:"female,male,not_reported,not_available"`
+	DiagnosisTypeCohort          *string                  `json:"diagnosis_type_cohort"`
+	CnsIntegratedDiagnosis       *string                  `json:"cns_integrated_diagnosis"`        // From the initial event, as in the list
+	CnsIntegratedDiagnosisSource *string                  `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+	VitalStatus                  string                   `json:"vital_status" validate:"required" enums:"alive,deceased"`
+	BirthDate                    *DateISO8601             `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
+	Race                         *string                  `json:"race"`
+	Ethnicity                    *string                  `json:"ethnicity"`
+	PostalCode                   *string                  `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
+	DataTypeCohort               *string                  `json:"data_type_cohort"`
+	KeyDates                     PatientKeyDates          `json:"key_dates" validate:"required"`
+	InitialDiagnosisEvidenceURL  *string                  `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
+	VitalStatusAt                PatientDayDate           `json:"vital_status_at" validate:"required"`
+	Events                       []PatientEvent           `json:"events" validate:"required"`
+	TreatmentSummary             *PatientTreatmentSummary `json:"treatment_summary"`
+}
+
+// PatientTreatments - Treatments tab of the patient page
+// @Description Surgeries, radiations and medical therapies of a patient
+// @Name PatientTreatments
+type PatientTreatments struct {
+	Surgeries        []PatientSurgery         `json:"surgeries" validate:"required"`
+	Radiations       []PatientRadiation       `json:"radiations" validate:"required"`
+	Therapies        []PatientTherapy         `json:"therapies" validate:"required"`
+	TrialEnrollments []PatientTrialEnrollment `json:"trial_enrollments" validate:"required"` // Most recent first
+}
+
+// PatientLaboratory - Laboratory tab of the patient page
+// @Description Latest CBC, performance status and CSF of a patient
+// @Name PatientLaboratory
+type PatientLaboratory struct {
+	Cbc               *PatientCbc               `json:"cbc"`
+	PerformanceStatus []PatientPerformanceScore `json:"performance_status" validate:"required"`
+	Csf               *PatientCsf               `json:"csf"`
+}
+
+// PatientImaging - Imaging tab of the patient page
+// @Description Imaging sessions of a patient
+// @Name PatientImaging
+type PatientImaging struct {
+	Sessions []PatientImagingSession `json:"sessions" validate:"required"`
+}
+
+// PatientGenomics - Genomics tab of the patient page
+// @Description Portal cases of a patient and the variant interpretations recorded on them
+// @Name PatientGenomics
+type PatientGenomics struct {
+	Cases           []PatientCase           `json:"cases" validate:"required"`
+	Interpretations []PatientInterpretation `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
 }
 
 // PatientEvent - Disease event of a patient

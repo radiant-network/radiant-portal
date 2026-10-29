@@ -16,7 +16,7 @@ Every response is already filtered by the caller's PHI access: the API reads the
 
 ## Endpoints
 
-Five read-only routes (plus a tentative sixth for the tumor board report), all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
+Nine read-only routes (plus a tentative tenth for the tumor board report), all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
 
 | Method and path | Request | Response | Operation id |
 | --- | --- | --- | --- |
@@ -24,8 +24,14 @@ Five read-only routes (plus a tentative sixth for the tumor board report), all g
 | `GET /{tenant}/patients/autocomplete?prefix=&limit=` | query prefix (min. 1 character), limit (default 10) | `AutocompleteResult[]` = `[{ type, value }]`, the type shared with the case list | `autocompletePatients` |
 | `GET /{tenant}/patients/filters` | none | `PatientFilters` | `patientsFilters` |
 | `GET /{tenant}/patients/statistics` | none | `PatientStatistics` | `patientsStatistics` |
-| `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity` | `patientEntity` |
+| `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity`: header, sidebar and overview | `patientEntity` |
+| `GET /{tenant}/patients/{patient_key}/treatments` | path `patient_key` | `PatientTreatments`: treatments and timeline tabs | `patientTreatments` |
+| `GET /{tenant}/patients/{patient_key}/laboratory` | path `patient_key` | `PatientLaboratory` | `patientLaboratory` |
+| `GET /{tenant}/patients/{patient_key}/imaging` | path `patient_key` | `PatientImaging` | `patientImaging` |
+| `GET /{tenant}/patients/{patient_key}/genomics` | path `patient_key` | `PatientGenomics` | `patientGenomics` |
 | `GET /{tenant}/patients/{patient_key}/tumor-board/{report_id}/download` (tentative) | path `patient_key`, `report_id` | `{ url, expires_at }`: presigned S3 URL, only after the entity check passes | `patientTumorBoardReportDownload` |
+
+**One endpoint per tab.** Every secured view re-runs its grant lookups on each read (~200 ms for one patient), and the list view joins eight of them (~1.2 s even for one row). So no patient page endpoint reads the list view: each resolves `patient_key` through `v_pcx_30_patient_key`, then reads its views concurrently. The entity endpoint serves the header, sidebar and overview from demographics, vital status, events and treatment summary, the diagnosis picked from the events as the list view does; each other tab has its own endpoint, fetched the first time the tab is opened.
 
 **Search body.** The existing `ListBodyWithCriteria`: `search_criteria` (`field`, `value[]`, `operator`, default `in`), `limit`, `page_index`, `sort` (`field`, `order` asc/desc). Default sort: `can_read_phi` desc, then `organization_code` asc, then `patient_id` asc (patients the user can identify first, then by site, then by identifier; stable for pagination). Default limit 10.
 
@@ -147,7 +153,13 @@ interface PatientDayDate { day: number | null; date: string | null }
 interface PatientKeyDate extends PatientDayDate { source: KeyDateSource }
 interface PatientKeyDates { initial_diagnosis: PatientKeyDate; latest_encounter: PatientKeyDate } // hard-coded sources: clinical, registry
 
-interface PatientEntity extends PatientListItem {
+interface PatientEntity extends PatientIdentity {
+  birth_year: number | null;
+  gender: Gender;
+  diagnosis_type_cohort: string | null;
+  cns_integrated_diagnosis: string | null;        // from the initial event, as in the list
+  cns_integrated_diagnosis_source: string | null;
+  vital_status: VitalStatus;
   birth_date: string | null;
   race: string | null;
   ethnicity: string | null;
@@ -157,15 +169,25 @@ interface PatientEntity extends PatientListItem {
   initial_diagnosis_evidence_url: string | null; // BRIM link, format TBD
   vital_status_at: PatientDayDate;
   events: PatientEvent[];
+  treatment_summary: PatientTreatmentSummary | null;
+}
+
+interface PatientTreatments {
   surgeries: PatientSurgery[];
   radiations: PatientRadiation[];
   therapies: PatientTherapy[];
   trial_enrollments: PatientTrialEnrollment[];  // Clinical trials tab, most recent start first
-  imaging: PatientImagingSession[];
-  treatment_summary: PatientTreatmentSummary | null;
+}
+
+interface PatientLaboratory {
   cbc: PatientCbc | null;                       // null when the patient has no CBC
   performance_status: PatientPerformanceScore[];
   csf: PatientCsf | null;                       // null when the patient has no CSF result
+}
+
+interface PatientImaging { sessions: PatientImagingSession[] }
+
+interface PatientGenomics {
   cases: PatientCase[];
   interpretations: PatientInterpretation[];
 }

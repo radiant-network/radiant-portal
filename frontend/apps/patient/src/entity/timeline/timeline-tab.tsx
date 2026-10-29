@@ -11,10 +11,10 @@ import Timeline from '@/components/base/timeline/timeline';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { formatDose } from '../treatments/treatment-rows';
+import { usePatientTreatments } from '../use-patient-tab';
 
 type TimelineTabProps = {
   patient?: PatientEntity;
-  isLoading: boolean;
 };
 
 function dayToYears(day: number | undefined): number | undefined {
@@ -95,11 +95,12 @@ function mapRadiation(r: PatientRadiation, t: TFunction): ComponentProps<typeof 
 
 function TimelineTab({ patient }: TimelineTabProps) {
   const { t } = useI18n();
+  const { data: treatments } = usePatientTreatments();
 
   const events = useMemo(() => (patient?.events ?? []).map(e => mapEvent(e, t)), [patient, t]);
-  const surgeries = useMemo(() => (patient?.surgeries ?? []).map(mapSurgery), [patient]);
-  const chemotherapies = useMemo(() => (patient?.therapies ?? []).map(mapTherapy), [patient]);
-  const radiations = useMemo(() => (patient?.radiations ?? []).map(r => mapRadiation(r, t)), [patient, t]);
+  const surgeries = useMemo(() => (treatments?.surgeries ?? []).map(mapSurgery), [treatments]);
+  const chemotherapies = useMemo(() => (treatments?.therapies ?? []).map(mapTherapy), [treatments]);
+  const radiations = useMemo(() => (treatments?.radiations ?? []).map(r => mapRadiation(r, t)), [treatments, t]);
 
   return (
     <Card>

@@ -6264,23 +6264,11 @@ export interface PatientDose {
     'value'?: string;
 }
 /**
- * Data of the patient page
+ * Header, sidebar and overview of the patient page; each other tab has its own endpoint
  * @export
  * @interface PatientEntity
  */
 export interface PatientEntity {
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientEntity
-     */
-    'age_at_initial_dx_days'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientEntity
-     */
-    'age_at_vital_status_days'?: number;
     /**
      * 
      * @type {string}
@@ -6300,25 +6288,7 @@ export interface PatientEntity {
      */
     'can_read_phi': boolean;
     /**
-     * Portal cases, 0 outside the portal
-     * @type {number}
-     * @memberof PatientEntity
-     */
-    'case_count': number;
-    /**
-     * 
-     * @type {Array<PatientCase>}
-     * @memberof PatientEntity
-     */
-    'cases': Array<PatientCase>;
-    /**
-     * 
-     * @type {PatientCbc}
-     * @memberof PatientEntity
-     */
-    'cbc'?: PatientCbc;
-    /**
-     * From the initial event
+     * From the initial event, as in the list
      * @type {string}
      * @memberof PatientEntity
      */
@@ -6329,12 +6299,6 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'cns_integrated_diagnosis_source'?: string;
-    /**
-     * 
-     * @type {PatientCsf}
-     * @memberof PatientEntity
-     */
-    'csf'?: PatientCsf;
     /**
      * 
      * @type {string}
@@ -6378,29 +6342,11 @@ export interface PatientEntity {
      */
     'given_name': string;
     /**
-     * 
-     * @type {boolean}
-     * @memberof PatientEntity
-     */
-    'has_imaging': boolean;
-    /**
-     * 
-     * @type {Array<PatientImagingSession>}
-     * @memberof PatientEntity
-     */
-    'imaging': Array<PatientImagingSession>;
-    /**
      * BRIM link, format to be defined
      * @type {string}
      * @memberof PatientEntity
      */
     'initial_diagnosis_evidence_url'?: string;
-    /**
-     * Germline and somatic, of the patient\'s cases
-     * @type {Array<PatientInterpretation>}
-     * @memberof PatientEntity
-     */
-    'interpretations': Array<PatientInterpretation>;
     /**
      * 
      * @type {PatientKeyDates}
@@ -6438,12 +6384,6 @@ export interface PatientEntity {
      */
     'patient_key': string;
     /**
-     * 
-     * @type {Array<PatientPerformanceScore>}
-     * @memberof PatientEntity
-     */
-    'performance_status': Array<PatientPerformanceScore>;
-    /**
      * Full with PHI access, 3 digits + XX otherwise
      * @type {string}
      * @memberof PatientEntity
@@ -6463,40 +6403,10 @@ export interface PatientEntity {
     'radiant_patient_id'?: number;
     /**
      * 
-     * @type {Array<PatientRadiation>}
-     * @memberof PatientEntity
-     */
-    'radiations': Array<PatientRadiation>;
-    /**
-     * 
-     * @type {Array<PatientSurgery>}
-     * @memberof PatientEntity
-     */
-    'surgeries': Array<PatientSurgery>;
-    /**
-     * Vital status day minus initial diagnosis day
-     * @type {number}
-     * @memberof PatientEntity
-     */
-    'survival_days'?: number;
-    /**
-     * 
-     * @type {Array<PatientTherapy>}
-     * @memberof PatientEntity
-     */
-    'therapies': Array<PatientTherapy>;
-    /**
-     * 
      * @type {PatientTreatmentSummary}
      * @memberof PatientEntity
      */
     'treatment_summary'?: PatientTreatmentSummary;
-    /**
-     * Most recent first
-     * @type {Array<PatientTrialEnrollment>}
-     * @memberof PatientEntity
-     */
-    'trial_enrollments': Array<PatientTrialEnrollment>;
     /**
      * 
      * @type {string}
@@ -6666,6 +6576,38 @@ export interface PatientFilters {
      * @memberof PatientFilters
      */
     'vital_status': Array<FiltersValue>;
+}
+/**
+ * Portal cases of a patient and the variant interpretations recorded on them
+ * @export
+ * @interface PatientGenomics
+ */
+export interface PatientGenomics {
+    /**
+     * 
+     * @type {Array<PatientCase>}
+     * @memberof PatientGenomics
+     */
+    'cases': Array<PatientCase>;
+    /**
+     * Germline and somatic, of the patient\'s cases
+     * @type {Array<PatientInterpretation>}
+     * @memberof PatientGenomics
+     */
+    'interpretations': Array<PatientInterpretation>;
+}
+/**
+ * Imaging sessions of a patient
+ * @export
+ * @interface PatientImaging
+ */
+export interface PatientImaging {
+    /**
+     * 
+     * @type {Array<PatientImagingSession>}
+     * @memberof PatientImaging
+     */
+    'sessions': Array<PatientImagingSession>;
 }
 /**
  * Imaging session of a patient
@@ -6867,6 +6809,31 @@ export interface PatientLabResult {
      * @memberof PatientLabResult
      */
     'value'?: number;
+}
+/**
+ * Latest CBC, performance status and CSF of a patient
+ * @export
+ * @interface PatientLaboratory
+ */
+export interface PatientLaboratory {
+    /**
+     * 
+     * @type {PatientCbc}
+     * @memberof PatientLaboratory
+     */
+    'cbc'?: PatientCbc;
+    /**
+     * 
+     * @type {PatientCsf}
+     * @memberof PatientLaboratory
+     */
+    'csf'?: PatientCsf;
+    /**
+     * 
+     * @type {Array<PatientPerformanceScore>}
+     * @memberof PatientLaboratory
+     */
+    'performance_status': Array<PatientPerformanceScore>;
 }
 /**
  * A PCX patient in the patient list
@@ -7404,6 +7371,37 @@ export interface PatientTreatmentSummary {
      * @memberof PatientTreatmentSummary
      */
     'initial_treatment_order'?: string;
+}
+/**
+ * Surgeries, radiations and medical therapies of a patient
+ * @export
+ * @interface PatientTreatments
+ */
+export interface PatientTreatments {
+    /**
+     * 
+     * @type {Array<PatientRadiation>}
+     * @memberof PatientTreatments
+     */
+    'radiations': Array<PatientRadiation>;
+    /**
+     * 
+     * @type {Array<PatientSurgery>}
+     * @memberof PatientTreatments
+     */
+    'surgeries': Array<PatientSurgery>;
+    /**
+     * 
+     * @type {Array<PatientTherapy>}
+     * @memberof PatientTreatments
+     */
+    'therapies': Array<PatientTherapy>;
+    /**
+     * Most recent first
+     * @type {Array<PatientTrialEnrollment>}
+     * @memberof PatientTreatments
+     */
+    'trial_enrollments': Array<PatientTrialEnrollment>;
 }
 /**
  * Treatment protocol arm the patient was enrolled on, its medical therapies merged
@@ -17669,7 +17667,7 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * Retrieve PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientEntity patient entity
          * @param {string} tenant Tenant code
          * @param {string} patientKey Patient key
@@ -17682,6 +17680,174 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             // verify required parameter 'patientKey' is not null or undefined
             assertParamExists('patientEntity', 'patientKey', patientKey)
             const localVarPath = `/{tenant}/patients/{patient_key}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientGenomics of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientGenomics: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientGenomics', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientGenomics', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/genomics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientImaging of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientImaging: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientImaging', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientImaging', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/imaging`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientLaboratory of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientLaboratory: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientLaboratory', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientLaboratory', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/laboratory`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTreatments of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTreatments: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientTreatments', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientTreatments', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/treatments`
                 .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -17954,7 +18120,7 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * Retrieve PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientEntity patient entity
          * @param {string} tenant Tenant code
          * @param {string} patientKey Patient key
@@ -17965,6 +18131,62 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.patientEntity(tenant, patientKey, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientEntity']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientGenomics of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientGenomics(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientGenomics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientGenomics(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientGenomics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientImaging of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientImaging(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientImaging>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientImaging(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientImaging']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientLaboratory of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientLaboratory(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientLaboratory>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientLaboratory(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientLaboratory']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTreatments of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientTreatments(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientTreatments>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientTreatments(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientTreatments']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -18060,7 +18282,7 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.autocompletePatients(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * Retrieve PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientEntity patient entity
          * @param {string} tenant Tenant code
          * @param {string} patientKey Patient key
@@ -18069,6 +18291,50 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
          */
         patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientEntity> {
             return localVarFp.patientEntity(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientGenomics of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientGenomics(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientGenomics> {
+            return localVarFp.patientGenomics(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientImaging of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientImaging(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientImaging> {
+            return localVarFp.patientImaging(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientLaboratory of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientLaboratory(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientLaboratory> {
+            return localVarFp.patientLaboratory(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTreatments of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTreatments(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientTreatments> {
+            return localVarFp.patientTreatments(tenant, patientKey, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve PatientFilters patient list filters
@@ -18150,7 +18416,7 @@ export class PatientsApi extends BaseAPI {
     }
 
     /**
-     * Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * Retrieve PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
      * @summary Get PatientEntity patient entity
      * @param {string} tenant Tenant code
      * @param {string} patientKey Patient key
@@ -18160,6 +18426,58 @@ export class PatientsApi extends BaseAPI {
      */
     public patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientEntity(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientGenomics of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientGenomics(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientGenomics(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientImaging of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientImaging(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientImaging(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientLaboratory of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientLaboratory(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientLaboratory(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientTreatments of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientTreatments(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientTreatments(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
