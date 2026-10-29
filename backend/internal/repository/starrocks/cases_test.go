@@ -1366,6 +1366,16 @@ func Test_CaseWithRuns_NoRunDateComesLast(t *testing.T) {
 	})
 }
 
+func Test_CaseWithRuns_EmptyRunName_LeftOut(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1116, "RUN-EMPTY", "2026-01-01")()
+		// The worker stores '' when a sequencing batch has no run_name.
+		require.NoError(t, env.Postgres.Exec("UPDATE sequencing_experiment SET run_name = '' WHERE id = 1116").Error)
+
+		assert.Equal(t, types.JsonArray[string]{"1617"}, caseRunNames(t, env, 1116))
+	})
+}
+
 func Test_CaseWithRuns_RunSharedBySequencings_ListedOnce(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		// The second sequencing ran on run 1617 too, like sequencing 1.

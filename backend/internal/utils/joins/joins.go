@@ -109,8 +109,8 @@ func (j Joiner) CaseWithProbandSample(tx *gorm.DB) *gorm.DB {
 func (j Joiner) caseWithArray(tx *gorm.DB, rows string, column string, table types.Table, field types.Field) *gorm.DB {
 	// The empty array is the aggregate of the case's one NULL row, filtered out. An ifnull(..., []) literal
 	// instead breaks array_contains on StarRocks 3.4 (NULL or "get state failed"), which a single-value
-	// not-in filter uses.
-	perCase := fmt.Sprintf("SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL, array_agg(samples.%[5]s ORDER BY samples.run_date DESC NULLS LAST, samples.seq_id DESC)) AS %[2]s "+
+	// not-in filter uses. An empty value goes too: the worker stores a run_name a batch leaves out as ''.
+	perCase := fmt.Sprintf("SELECT %[1]s.id AS case_id, array_filter(x -> x IS NOT NULL AND x <> '', array_agg(samples.%[5]s ORDER BY samples.run_date DESC NULLS LAST, samples.seq_id DESC)) AS %[2]s "+
 		"FROM %[3]s %[1]s LEFT JOIN (%[4]s) samples ON samples.case_id = %[1]s.id GROUP BY %[1]s.id",
 		types.CaseTable.Alias, field.Name, j.name(types.CaseTable, tx), rows, column)
 	return tx.Joins(fmt.Sprintf("LEFT JOIN (%s) %s ON %s.case_id=%s.id", perCase, table.Alias, table.Alias, types.CaseTable.Alias))
