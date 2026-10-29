@@ -113,22 +113,22 @@ export default function App() {
                 <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
-                <TimelineTab patient={data} isLoading={isLoading} />
+                <TimelineTab patient={data} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
-                <TreatmentsTab patient={data} isLoading={isLoading} />
+                <TreatmentsTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
-                <GenomicsTab patient={data} isLoading={isLoading} />
+                <GenomicsTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.TumorBoard}>
                 <TumorBoardTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Laboratory}>
-                <LaboratoryTab patient={data} isLoading={isLoading} />
+                <LaboratoryTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Imaging}>
-                <ImagingTab patient={data} isLoading={isLoading} />
+                <ImagingTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
                 <ClinicalTrialsTab />

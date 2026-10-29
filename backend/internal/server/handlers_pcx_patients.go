@@ -153,7 +153,7 @@ func PatientsStatisticsHandler() gin.HandlerFunc {
 // PatientEntityHandler handles retrieving a PCX patient by its key
 // @Summary Get types.PatientEntity patient entity
 // @Id patientEntity
-// @Description Retrieve types.PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Description Retrieve types.PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
 // @Tags patients
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -167,25 +167,126 @@ func PatientsStatisticsHandler() gin.HandlerFunc {
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/{patient_key} [get]
 func PatientEntityHandler(repo pcxPatientReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatient)
+}
+
+type pcxPatientReader interface {
+	GetPatient(ctx context.Context, patientKey string) (*types.PatientEntity, error)
+}
+
+// PatientTreatmentsHandler handles retrieving the treatments of a PCX patient
+// @Summary Get types.PatientTreatments of a patient
+// @Id patientTreatments
+// @Description Retrieve types.PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} types.PatientTreatments
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/treatments [get]
+func PatientTreatmentsHandler(repo pcxPatientTreatmentsReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatientTreatments)
+}
+
+type pcxPatientTreatmentsReader interface {
+	GetPatientTreatments(ctx context.Context, patientKey string) (*types.PatientTreatments, error)
+}
+
+// PatientLaboratoryHandler handles retrieving the laboratory results of a PCX patient
+// @Summary Get types.PatientLaboratory of a patient
+// @Id patientLaboratory
+// @Description Retrieve types.PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} types.PatientLaboratory
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/laboratory [get]
+func PatientLaboratoryHandler(repo pcxPatientLaboratoryReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatientLaboratory)
+}
+
+type pcxPatientLaboratoryReader interface {
+	GetPatientLaboratory(ctx context.Context, patientKey string) (*types.PatientLaboratory, error)
+}
+
+// PatientImagingHandler handles retrieving the imaging sessions of a PCX patient
+// @Summary Get types.PatientImaging of a patient
+// @Id patientImaging
+// @Description Retrieve types.PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} types.PatientImaging
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/imaging [get]
+func PatientImagingHandler(repo pcxPatientImagingReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatientImaging)
+}
+
+type pcxPatientImagingReader interface {
+	GetPatientImaging(ctx context.Context, patientKey string) (*types.PatientImaging, error)
+}
+
+// PatientGenomicsHandler handles retrieving the portal cases and interpretations of a PCX patient
+// @Summary Get types.PatientGenomics of a patient
+// @Id patientGenomics
+// @Description Retrieve types.PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} types.PatientGenomics
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/genomics [get]
+func PatientGenomicsHandler(repo pcxPatientGenomicsReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatientGenomics)
+}
+
+type pcxPatientGenomicsReader interface {
+	GetPatientGenomics(ctx context.Context, patientKey string) (*types.PatientGenomics, error)
+}
+
+// patientPartHandler answers 404 for a malformed key without reading, and for a key the caller cannot see.
+func patientPartHandler[T any](get func(ctx context.Context, patientKey string) (*T, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		key := c.Param("patient_key")
 		if _, err := uuid.Parse(key); err != nil {
 			HandleNotFoundError(c, "patient")
 			return
 		}
-		patient, err := repo.GetPatient(c.Request.Context(), key)
+		part, err := get(c.Request.Context(), key)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		if patient == nil {
+		if part == nil {
 			HandleNotFoundError(c, "patient")
 			return
 		}
-		c.JSON(http.StatusOK, patient)
+		c.JSON(http.StatusOK, part)
 	}
-}
-
-type pcxPatientReader interface {
-	GetPatient(ctx context.Context, patientKey string) (*types.PatientEntity, error)
 }

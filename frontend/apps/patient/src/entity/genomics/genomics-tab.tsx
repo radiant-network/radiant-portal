@@ -1,18 +1,15 @@
-import type { PatientEntity } from '@/api/api';
+import { usePatientGenomics } from '../use-patient-tab';
 
 import GenomicCasesCard from './genomic-cases/genomic-cases-card';
 import VariantInterpretationsCard from './variant-interpretations/variant-interpretations-card';
 
-type GenomicsTabProps = {
-  patient?: PatientEntity;
-  isLoading: boolean;
-};
+function GenomicsTab() {
+  const { data: genomics, isLoading } = usePatientGenomics();
 
-function GenomicsTab({ patient, isLoading }: GenomicsTabProps) {
   return (
     <div className="flex flex-col gap-3">
-      <VariantInterpretationsCard interpretations={patient?.interpretations ?? []} isLoading={isLoading} />
-      <GenomicCasesCard cases={patient?.cases ?? []} isLoading={isLoading} />
+      <VariantInterpretationsCard interpretations={genomics?.interpretations ?? []} isLoading={isLoading} />
+      <GenomicCasesCard cases={genomics?.cases ?? []} isLoading={isLoading} />
     </div>
   );
 }

@@ -1,23 +1,20 @@
 import { useMemo } from 'react';
 
-import type { PatientEntity } from '@/api/api';
 import DisplayTable from '@/components/base/data-table/display-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { usePatientImaging } from '../use-patient-tab';
+
 import { getImagingColumns } from './imaging-table-settings';
 
-type ImagingTabProps = {
-  patient?: PatientEntity;
-  isLoading: boolean;
-};
-
-function ImagingTab({ patient, isLoading }: ImagingTabProps) {
+function ImagingTab() {
   const { t } = useI18n();
+  const { data: imaging, isLoading } = usePatientImaging();
 
   const columns = useMemo(() => getImagingColumns(t), [t]);
-  const rows = patient?.imaging ?? [];
+  const rows = imaging?.sessions ?? [];
 
   return (
     <Card>

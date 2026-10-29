@@ -1,4 +1,4 @@
-import type { PatientDose, PatientEntity, PatientRadiation } from '@/api/api';
+import type { PatientDose, PatientRadiation, PatientTreatments } from '@/api/api';
 
 export type TreatmentType = 'surgery' | 'radiation' | 'medical_therapy';
 
@@ -34,7 +34,7 @@ export function toTreatmentRows({
   surgeries,
   radiations,
   therapies,
-}: Pick<PatientEntity, 'surgeries' | 'radiations' | 'therapies'>): TreatmentRow[] {
+}: Pick<PatientTreatments, 'surgeries' | 'radiations' | 'therapies'>): TreatmentRow[] {
   const rows: TreatmentRow[] = [
     ...surgeries.map(surgery => ({
       day: surgery.day ?? null,

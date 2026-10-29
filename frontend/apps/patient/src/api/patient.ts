@@ -1,4 +1,12 @@
-import type { ListBodyWithCriteria, PatientFilters, PatientsSearchResponse } from '@/api/api';
+import type {
+  ListBodyWithCriteria,
+  PatientFilters,
+  PatientGenomics,
+  PatientImaging,
+  PatientLaboratory,
+  PatientsSearchResponse,
+  PatientTreatments,
+} from '@/api/api';
 import { patientsApi } from '@/utils/api';
 
 export async function fetchPatientsList(
@@ -11,6 +19,26 @@ export async function fetchPatientsList(
 
 export async function fetchPatientFilters(tenant: string): Promise<PatientFilters> {
   const response = await patientsApi.patientsFilters(tenant);
+  return response.data;
+}
+
+export async function fetchPatientTreatments(tenant: string, patientKey: string): Promise<PatientTreatments> {
+  const response = await patientsApi.patientTreatments(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientLaboratory(tenant: string, patientKey: string): Promise<PatientLaboratory> {
+  const response = await patientsApi.patientLaboratory(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientImaging(tenant: string, patientKey: string): Promise<PatientImaging> {
+  const response = await patientsApi.patientImaging(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientGenomics(tenant: string, patientKey: string): Promise<PatientGenomics> {
+  const response = await patientsApi.patientGenomics(tenant, patientKey);
   return response.data;
 }
 
