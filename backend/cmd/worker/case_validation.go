@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
 	"regexp"
 	"slices"
 	"strings"
@@ -79,6 +80,7 @@ const (
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
 	TaskTypeDoesNotSupportMultipleAliquots      = "TASK-007"
+	TaskAlreadyAttached                         = "TASK-008"
 )
 
 // Documents error codes
@@ -206,6 +208,9 @@ type CaseValidationRecord struct {
 	Documents             map[string]*types.Document
 	DocumentsInTasks      map[string][]*DocumentRelation
 	TaskContexts          map[int][]*types.TaskContext
+	ExistingTasks         map[int]*types.Task              // Key: task ID
+	ExistingTaskDocuments map[int][]*types.TaskHasDocument // Key: task ID
+	SkippedTasks          map[int]struct{}                 // Key: index in Case.Tasks
 }
 
 // caseResourceLabel names the entity in report messages. It is deliberately not the batch
@@ -228,6 +233,9 @@ func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchv
 		Documents:             make(map[string]*types.Document),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		TaskContexts:          make(map[int][]*types.TaskContext),
+		ExistingTasks:         make(map[int]*types.Task),
+		ExistingTaskDocuments: make(map[int][]*types.TaskHasDocument),
+		SkippedTasks:          make(map[int]struct{}),
 	}
 }
 
@@ -598,6 +606,33 @@ func (cr *CaseValidationRecord) fetchFromTasks(ctx context.Context) error {
 
 		if err := cr.fetchOutputDocumentsFromTask(ctx, t); err != nil {
 			return fmt.Errorf("failed to fetch output documents from task: %w", err)
+		}
+	}
+	return cr.fetchTasksOwningOutputDocuments(ctx)
+}
+
+func (cr *CaseValidationRecord) fetchTasksOwningOutputDocuments(ctx context.Context) error {
+	for _, relations := range cr.DocumentsInTasks {
+		for _, dr := range relations {
+			if dr.Type != "output" {
+				continue
+			}
+			if _, ok := cr.ExistingTasks[dr.TaskID]; ok {
+				continue
+			}
+			task, err := cr.Cache.GetTaskById(ctx, dr.TaskID)
+			if err != nil {
+				return fmt.Errorf("failed to get task by id %d: %w", dr.TaskID, err)
+			}
+			if task == nil {
+				continue
+			}
+			cr.ExistingTasks[dr.TaskID] = task
+			docs, err := cr.Cache.GetTaskHasDocumentByTaskId(ctx, dr.TaskID)
+			if err != nil {
+				return fmt.Errorf("failed to get documents of task %d: %w", dr.TaskID, err)
+			}
+			cr.ExistingTaskDocuments[dr.TaskID] = docs
 		}
 	}
 	return nil
@@ -1184,15 +1219,17 @@ func (cr *CaseValidationRecord) validateTasks() error {
 
 // Documents validation
 
-func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
-	hasDiff := false
+type documentFieldDiff struct {
+	name        string
+	existingVal any
+	newVal      any
+}
 
+func documentFieldDiffs(new *types.OutputDocumentBatch, existing *types.Document) []documentFieldDiff {
+	var diffs []documentFieldDiff
 	check := func(name string, newVal, existingVal any) {
 		if newVal != existingVal {
-			hasDiff = true
-			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
-				new.Url, name, existingVal, newVal)
-			cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+			diffs = append(diffs, documentFieldDiff{name, existingVal, newVal})
 		}
 	}
 
@@ -1202,17 +1239,24 @@ func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocument
 	check("data_category_code", new.DataCategoryCode, existing.DataCategoryCode)
 	check("hash", new.Hash, existing.Hash)
 
-	if new.Size == nil {
-		hasDiff = true
-		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> nil).", new.Url, existing.Size)
-		cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
-	} else if existing.Size != *new.Size {
-		hasDiff = true
-		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> %d).", new.Url, existing.Size, *new.Size)
+	switch {
+	case new.Size == nil:
+		diffs = append(diffs, documentFieldDiff{"size", existing.Size, "nil"})
+	case existing.Size != *new.Size:
+		diffs = append(diffs, documentFieldDiff{"size", existing.Size, *new.Size})
+	}
+	return diffs
+}
+
+func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
+	diffs := documentFieldDiffs(new, existing)
+	for _, d := range diffs {
+		msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
+			new.Url, d.name, d.existingVal, d.newVal)
 		cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
 	}
 
-	if !hasDiff {
+	if len(diffs) == 0 {
 		msg := "Document " + new.Url + " already exists, skipped."
 		cr.AddInfos(msg, DocumentDuplicateInDB, path)
 	}
@@ -1316,8 +1360,104 @@ func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode
 	}
 }
 
+// isTaskAlreadyAttached reports whether the incoming task is, field for field, one single existing
+// task: same type, pipeline and genome build, same sequencing experiments (and case, for a
+// case-related type), the same input documents and exactly the same output documents.
+func (cr *CaseValidationRecord) isTaskAlreadyAttached(t *types.CaseTaskBatch) bool {
+	owners := map[int]struct{}{}
+	for _, doc := range t.OutputDocuments {
+		existing, ok := cr.Documents[doc.Url]
+		if !ok || len(documentFieldDiffs(doc, existing)) > 0 {
+			return false
+		}
+		owned := false
+		for _, dr := range cr.DocumentsInTasks[doc.Url] {
+			if dr.Type == "output" {
+				owners[dr.TaskID] = struct{}{}
+				owned = true
+			}
+		}
+		if !owned {
+			return false
+		}
+	}
+	if len(owners) != 1 {
+		return false
+	}
+
+	var taskID int
+	for id := range owners {
+		taskID = id
+	}
+	existing, ok := cr.ExistingTasks[taskID]
+	if !ok || existing.TaskTypeCode != t.TypeCode || existing.PipelineName != t.PipelineName ||
+		existing.PipelineVersion != t.PipelineVersion || existing.GenomeBuild != t.GenomeBuild {
+		return false
+	}
+	if !cr.hasSameDocuments(taskID, t) {
+		return false
+	}
+
+	expected := map[int]struct{}{}
+	for _, se := range cr.SequencingExperiments {
+		if slices.Contains(t.Aliquots, se.Aliquot) {
+			expected[se.ID] = struct{}{}
+		}
+	}
+
+	_, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]
+	actual := map[int]struct{}{}
+	for _, tc := range cr.TaskContexts[taskID] {
+		// A case-related task attached to another case is not this case's task.
+		if isCaseRelated && (tc.CaseID == nil || cr.CaseID == nil || *tc.CaseID != *cr.CaseID) {
+			return false
+		}
+		actual[tc.SequencingExperimentID] = struct{}{}
+	}
+
+	return len(expected) > 0 && maps.Equal(expected, actual)
+}
+
+// hasSameDocuments: the incoming outputs are already known to be outputs of taskID, so the counts
+// are what rule out an existing task holding more documents than the ones re-sent.
+func (cr *CaseValidationRecord) hasSameDocuments(taskID int, t *types.CaseTaskBatch) bool {
+	inputs, outputs := 0, 0
+	for _, d := range cr.ExistingTaskDocuments[taskID] {
+		switch d.Type {
+		case "input":
+			inputs++
+		case "output":
+			outputs++
+		}
+	}
+	if outputs != len(t.OutputDocuments) || inputs != len(t.InputDocuments) {
+		return false
+	}
+	for _, in := range t.InputDocuments {
+		if !cr.hasDocumentRelation(in.Url, taskID, "input") {
+			return false
+		}
+	}
+	return true
+}
+
+func (cr *CaseValidationRecord) hasDocumentRelation(url string, taskID int, relationType string) bool {
+	for _, dr := range cr.DocumentsInTasks[url] {
+		if dr.TaskID == taskID && dr.Type == relationType {
+			return true
+		}
+	}
+	return false
+}
+
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
+		if cr.isTaskAlreadyAttached(t) {
+			msg := fmt.Sprintf("Task %s on aliquots [%s] is already attached, skipped.", t.TypeCode, strings.Join(t.Aliquots, ", "))
+			cr.AddInfos(msg, TaskAlreadyAttached, cr.formatFieldPath("tasks", &tid, "", nil))
+			cr.SkippedTasks[tid] = struct{}{}
+			continue
+		}
 		for did, doc := range t.OutputDocuments {
 			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
 			cr.validateDocumentDataTypeForTaskType(t.TypeCode, doc, path)
@@ -1670,7 +1810,10 @@ func persistFamilyHistory(ctx context.Context, sc *StorageContext, cr *CaseValid
 }
 
 func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
-	for _, t := range cr.Case.Tasks {
+	for i, t := range cr.Case.Tasks {
+		if _, skipped := cr.SkippedTasks[i]; skipped {
+			continue
+		}
 		task := types.Task{
 			TaskTypeCode:    t.TypeCode,
 			PipelineName:    t.PipelineName,
