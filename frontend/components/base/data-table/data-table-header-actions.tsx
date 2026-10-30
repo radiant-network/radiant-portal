@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import type { ColumnPinningPosition, Header, RowData, SortDirection } from '@tanstack/react-table';
+import type { ColumnPinningPosition, ColumnSort, Header, RowData, SortDirection } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
 import { ArrowDown, ArrowDownUp, ArrowUp, Pin, PinIcon, PinOff } from 'lucide-react';
 
@@ -13,7 +13,6 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { cn } from '@/lib/utils';
 
 import type { AppFeatures } from './data-table';
 
@@ -58,6 +57,18 @@ function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: So
   return t('common.table.sort.clear');
 }
 
+function getSortingAriaLabel(t: TFunction<string, undefined>, sortingOrder: SortDirection | boolean): string {
+  if (sortingOrder === 'asc') {
+    return t('a11y.data_table.sorted_asc');
+  }
+
+  if (sortingOrder === 'desc') {
+    return t('a11y.data_table.sorted_desc');
+  }
+
+  return t('a11y.data_table.sort');
+}
+
 /**
  * TableHeaderActions
  * Display a list of actions a header can do
@@ -66,9 +77,15 @@ function getSortingHeaderTitle(t: TFunction<string, undefined>, sortingOrder: So
  */
 type TableHeaderActionsProps<TData extends RowData> = {
   header: Header<AppFeatures, TData, unknown>;
+  defaultSort?: ColumnSort;
 };
 
-function TableHeaderActions<TData extends RowData>({ header }: TableHeaderActionsProps<TData>) {
+const VISIBLE_ACTION = 'size-6 ml-0.5';
+// Not display:none, so the button stays reachable with Tab and shows on keyboard focus
+const HIDDEN_UNTIL_HOVER_OR_FOCUS =
+  'h-6 w-0 opacity-0 overflow-hidden group-hover/header:w-6 group-hover/header:ml-0.5 group-hover/header:opacity-100 group-has-[:focus-visible]/header:w-6 group-has-[:focus-visible]/header:ml-0.5 group-has-[:focus-visible]/header:opacity-100';
+
+function TableHeaderActions<TData extends RowData>({ header, defaultSort }: TableHeaderActionsProps<TData>) {
   const { t } = useI18n();
 
   // Header group contains subgroup, they shouldn't have actions
@@ -78,7 +95,8 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
   const [isPinningDropdownActive, setIsPinningDropdownActive] = useState<boolean>(false);
 
   const hasActions = header.column.getCanPin() || header.column.getCanSort();
-  const isSorted = header.column.getIsSorted();
+  const defaultDirection = defaultSort && (defaultSort.desc ? 'desc' : 'asc');
+  const isSorted = header.column.getIsSorted() || defaultDirection || false;
 
   if (!hasActions || isHeaderGroup) return null;
 
@@ -89,7 +107,7 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
    * This is required because the action items needs to be hidden when the header is not hovered so the title can have more space..
    */
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center">
       {/* Pin/Unpin column */}
       {header.column.getCanPin() && (
         <DropdownMenu onOpenChange={open => setIsPinningDropdownActive(open)}>
@@ -97,9 +115,8 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 hidden group-hover/header:flex', {
-                flex: isPinningDropdownActive,
-              })}
+              aria-label={t('a11y.data_table.pin_column')}
+              className={isPinningDropdownActive ? VISIBLE_ACTION : HIDDEN_UNTIL_HOVER_OR_FOCUS}
             >
               <Pin />
             </Button>
@@ -130,9 +147,8 @@ function TableHeaderActions<TData extends RowData>({ header }: TableHeaderAction
             <Button
               variant="ghost"
               iconOnly
-              className={cn('size-6 hidden group-hover/header:flex', {
-                flex: isSorted || isPinningDropdownActive,
-              })}
+              aria-label={getSortingAriaLabel(t, isSorted)}
+              className={isSorted || isPinningDropdownActive ? VISIBLE_ACTION : HIDDEN_UNTIL_HOVER_OR_FOCUS}
               onClick={header.column.getToggleSortingHandler()}
             >
               {{

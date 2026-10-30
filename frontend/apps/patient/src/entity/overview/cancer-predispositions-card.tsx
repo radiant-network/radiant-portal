@@ -24,15 +24,13 @@ function CancerPredispositionsCard({ cancer_predisposition, isLoading, ...cardPr
 
   return (
     <Card data-cy="cancer-predispositions-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.cancer_predispositions.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
-        {cancer_predisposition && cancer_predisposition.length > 0 && (
-          <InformationField label={t('patient_entity.overview.cancer_predispositions.cancer_predisposition')}>
-            {cancer_predisposition.join(', ')}
-          </InformationField>
-        )}
+        <InformationField label={t('patient_entity.overview.cancer_predispositions.cancer_predisposition')}>
+          {cancer_predisposition?.join(', ')}
+        </InformationField>
       </CardContent>
     </Card>
   );

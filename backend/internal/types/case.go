@@ -175,37 +175,39 @@ type CaseStatusChangeResult struct {
 // @Description Line represented a case in case list
 // @Name CaseResult
 type CaseResult struct {
-	CaseID                   int                     `json:"case_id" validate:"required"`
-	ProbandID                int                     `json:"proband_id,omitempty"`
-	SubmitterProbandId       string                  `json:"submitter_proband_id,omitempty"`
-	PriorityCode             string                  `json:"priority_code,omitempty"`
-	StatusCode               CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
-	CaseTypeCode             string                  `json:"-"`
-	AnalysisCatalogCode      string                  `json:"analysis_catalog_code,omitempty"`
-	AnalysisCatalogName      string                  `json:"analysis_catalog_name,omitempty"`
-	CaseType                 string                  `json:"case_type,omitempty"`
-	PrimaryConditionID       string                  `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName     string                  `json:"primary_condition_name,omitempty"`
-	OrderingOrganizationCode string                  `json:"ordering_organization_code,omitempty"`
-	OrderingOrganizationName string                  `json:"ordering_organization_name,omitempty"`
-	ProjectCode              string                  `json:"project_code,omitempty"`
-	ProjectName              string                  `json:"project_name,omitempty"`
-	CreatedOn                time.Time               `json:"created_on" validate:"required"`
-	UpdatedOn                time.Time               `json:"updated_on" validate:"required"`
-	Prescriber               string                  `json:"prescriber,omitempty"`
-	DiagnosisLabCode         string                  `json:"diagnosis_lab_code" validate:"required"`
-	DiagnosisLabName         string                  `json:"diagnosis_lab_name,omitempty"`
-	OrganizationCode         string                  `json:"organization_code,omitempty"`
-	OrganizationName         string                  `json:"organization_name,omitempty"`
-	HasVariants              bool                    `json:"has_variants" validate:"required"`
-	PanelCode                string                  `json:"panel_code,omitempty"`
-	PanelName                string                  `json:"panel_name,omitempty"`
-	CaseCategoryCode         string                  `json:"case_category_code,omitempty"`
-	ProbandJhn               string                  `json:"proband_jhn,omitempty"`
-	ProbandLifeStatusCode    string                  `json:"proband_life_status_code,omitempty"`
-	ProbandFirstName         string                  `json:"proband_first_name,omitempty"`
-	ProbandLastName          string                  `json:"proband_last_name,omitempty"`
-	Assignees                JsonArray[CaseAssignee] `json:"assignees" validate:"required"`
+	CaseID                    int                     `json:"case_id" validate:"required"`
+	ProbandID                 int                     `json:"proband_id,omitempty"`
+	SubmitterProbandId        string                  `json:"submitter_proband_id,omitempty"`
+	ProbandSubmitterSampleIds JsonArray[string]       `json:"proband_submitter_sample_ids" validate:"required"`
+	RunNames                  JsonArray[string]       `json:"run_names" validate:"required"`
+	PriorityCode              string                  `json:"priority_code,omitempty"`
+	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+	CaseTypeCode              string                  `json:"-"`
+	AnalysisCatalogCode       string                  `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName       string                  `json:"analysis_catalog_name,omitempty"`
+	CaseType                  string                  `json:"case_type,omitempty"`
+	PrimaryConditionID        string                  `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName      string                  `json:"primary_condition_name,omitempty"`
+	OrderingOrganizationCode  string                  `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName  string                  `json:"ordering_organization_name,omitempty"`
+	ProjectCode               string                  `json:"project_code,omitempty"`
+	ProjectName               string                  `json:"project_name,omitempty"`
+	CreatedOn                 time.Time               `json:"created_on" validate:"required"`
+	UpdatedOn                 time.Time               `json:"updated_on" validate:"required"`
+	Prescriber                string                  `json:"prescriber,omitempty"`
+	DiagnosisLabCode          string                  `json:"diagnosis_lab_code" validate:"required"`
+	DiagnosisLabName          string                  `json:"diagnosis_lab_name,omitempty"`
+	OrganizationCode          string                  `json:"organization_code,omitempty"`
+	OrganizationName          string                  `json:"organization_name,omitempty"`
+	HasVariants               bool                    `json:"has_variants" validate:"required"`
+	PanelCode                 string                  `json:"panel_code,omitempty"`
+	PanelName                 string                  `json:"panel_name,omitempty"`
+	CaseCategoryCode          string                  `json:"case_category_code,omitempty"`
+	ProbandJhn                string                  `json:"proband_jhn,omitempty"`
+	ProbandLifeStatusCode     string                  `json:"proband_life_status_code,omitempty"`
+	ProbandFirstName          string                  `json:"proband_first_name,omitempty"`
+	ProbandLastName           string                  `json:"proband_last_name,omitempty"`
+	Assignees                 JsonArray[CaseAssignee] `json:"assignees" validate:"required"`
 }
 
 // CaseEntity - Case Entity data
@@ -250,6 +252,7 @@ type CaseEntity struct {
 type CaseSequencingExperiment struct {
 	SeqID                    int       `json:"seq_id" validate:"required"`
 	PatientID                int       `json:"patient_id" validate:"required"`
+	FetusID                  *int      `json:"fetus_id,omitempty"`
 	RelationshipToProband    string    `json:"relationship_to_proband" validate:"required"`
 	SampleID                 int       `json:"sample_id" validate:"required"`
 	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
@@ -325,6 +328,16 @@ var CaseHasSequencingExperimentTable = Table{
 	Alias:          "chseq",
 }
 
+var CaseProbandSampleTable = Table{
+	Name:  "proband_sample",
+	Alias: "proband_sample",
+}
+
+var CaseRunTable = Table{
+	Name:  "case_run",
+	Alias: "case_run",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -355,6 +368,8 @@ var CasesFields = []Field{
 	CaseOrderingPhysicianField,
 	CaseOrderingOrganizationNameField,
 	CaseOrderingOrganizationCodeField,
+	CaseProbandSubmitterSampleIdsField,
+	CaseRunNamesField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -367,6 +382,7 @@ var CasesFields = []Field{
 	ProbandLifeStatusCodeField,
 	ProbandFirstNameField,
 	ProbandLastNameField,
+	CaseGroupField,
 }
 
 var CasesDefaultFields = []Field{
@@ -380,6 +396,8 @@ var CasesDefaultFields = []Field{
 	AnalysisCatalogNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
+	CaseProbandSubmitterSampleIdsField,
+	CaseRunNamesField,
 	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
@@ -521,6 +539,23 @@ var CaseOrderingOrganizationNameField = Field{
 	Alias:         "ordering_organization_name",
 	CanBeSelected: true,
 	Table:         OrderingOrganizationTable,
+}
+
+var CaseProbandSubmitterSampleIdsField = Field{
+	Name:          "submitter_sample_ids",
+	Alias:         "proband_submitter_sample_ids",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Table:         CaseProbandSampleTable,
+}
+
+var CaseRunNamesField = Field{
+	Name:          "run_names",
+	Alias:         "run_names",
+	CanBeSelected: true,
+	IsArray:       true,
+	Table:         CaseRunTable,
 }
 
 var CaseSequencingExperimentIdField = Field{

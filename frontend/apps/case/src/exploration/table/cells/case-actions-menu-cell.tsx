@@ -21,7 +21,13 @@ function CaseActionsMenuCell({ row }: CellContext<AppFeatures, CaseResult, any>)
     <div className="flex items-center justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button iconOnly variant="outline" onClick={row.getToggleExpandedHandler()} className="size-6">
+          <Button
+            iconOnly
+            variant="outline"
+            aria-label={t('a11y.case_actions_menu.open')}
+            onClick={row.getToggleExpandedHandler()}
+            className="size-6"
+          >
             {<EllipsisVertical />}
           </Button>
         </DropdownMenuTrigger>

@@ -389,10 +389,10 @@ export const FilesTable = {
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(30);
-        expect(req.body.page_index).to.deep.equal(2);
+        expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest3');
-      FilesTable.actions.clickPaginationButton('next');
+      FilesTable.actions.clickPaginationButton('previous');
       cy.wait('@searchRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -401,7 +401,7 @@ export const FilesTable = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest4');
-      FilesTable.actions.clickPaginationButton('previous');
+      FilesTable.actions.clickPaginationButton('next');
       cy.wait('@searchRequest4');
       cy.waitWhileLoad(60 * 1000);
 

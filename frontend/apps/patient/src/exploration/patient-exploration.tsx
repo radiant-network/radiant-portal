@@ -1,143 +1,163 @@
-import { Link } from 'react-router';
-import { LineChart, Search } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
-import AnchorLink from '@/components/base/navigation/anchor-link';
+import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
-import { Button } from '@/components/base/shadcn/button';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Card, CardContent } from '@/components/base/shadcn/card';
-import { Input } from '@/components/base/shadcn/input';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/base/shadcn/table';
 import { useI18n } from '@/components/hooks/i18n';
-import { useLocalPath } from '@/components/hooks/use-local-path';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
 
-import { fetchPatientsList, type Patient, type PatientsSearchResponse } from '../api/patient';
+import { fetchPatientsList } from '../api/patient';
 
-const COLUMN_KEYS = [
-  'patient',
-  'mrn',
-  'birth_year',
-  'sex',
-  'site',
-  'cns_diagnosis',
-  'vital_status',
-  'survival',
-] as const;
+import TableFilters from './table/patient-exploration-table-filters';
+import { defaultSettings, getPatientExplorationColumns } from './table/patient-exploration-table-settings';
+import PatientExplorationChat from './patient-exploration-chat';
+import { PatientExplorationTabs } from './patient-exploration-tabs';
 
-const SKELETON_ROW_COUNT = 10;
+type PatientListInput = {
+  key: string;
+  tenant: string;
+  listBodyWithCriteria: ListBodyWithCriteria;
+};
 
-function formatSurvival(days: number | null): string {
-  if (days == null) return '—';
-  return `${days.toLocaleString()} d`;
+const TAB_ORDER: { value: PatientExplorationTabs; i18nKey: string }[] = [
+  { value: PatientExplorationTabs.CohortAnalytics, i18nKey: 'patient_exploration.tabs.cohort_analytics' },
+  { value: PatientExplorationTabs.PatientList, i18nKey: 'patient_exploration.tabs.patient_list' },
+];
+
+const PATIENTS_DEFAULT_SORTING: SortBody[] = [
+  { field: 'can_read_phi', order: 'desc' },
+  { field: 'organization_code', order: 'asc' },
+  { field: 'patient_id', order: 'asc' },
+];
+
+async function fetchPatients(input: PatientListInput) {
+  return fetchPatientsList(input.tenant, input.listBodyWithCriteria);
 }
 
 function PatientExploration() {
   const { t } = useI18n();
-  const localPath = useLocalPath();
-  const { data, isLoading } = useSWR<PatientsSearchResponse>('patient-exploration', fetchPatientsList, {
-    revalidateOnFocus: false,
+  const { tenant } = useTenant();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<PatientExplorationTabs>(
+    (searchParams.get('tab') as PatientExplorationTabs) ?? PatientExplorationTabs.CohortAnalytics,
+  );
+  const [sorting, setSorting] = useState<SortBody[]>(PATIENTS_DEFAULT_SORTING);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
+  const [chatExpanded, setChatExpanded] = useState(false);
 
-  const rows = data?.list ?? [];
-  const total = data?.count ?? 0;
+  const { data, isLoading, isValidating } = useSWR<PatientsSearchResponse, any, PatientListInput>(
+    {
+      key: 'patients-search',
+      tenant,
+      listBodyWithCriteria: {
+        additional_fields: additionalFields,
+        search_criteria: searchCriteria,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        sort: sorting,
+      },
+    },
+    fetchPatients,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const columns = useMemo(() => getPatientExplorationColumns(t), [t]);
+
+  const handleOnTabChange = useCallback(
+    (value: PatientExplorationTabs) => {
+      setSearchParams({ tab: value });
+      setActiveTab(value);
+    },
+    [setSearchParams],
+  );
+
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as PatientExplorationTabs);
+      return;
+    }
+    setActiveTab(PatientExplorationTabs.CohortAnalytics);
+    setSearchParams({ tab: PatientExplorationTabs.CohortAnalytics });
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as PatientExplorationTabs);
+    }
+  }, [searchParams.get('tab')]);
 
   return (
     <>
-      <HeaderNavigation
-        isLoading={false}
-        title={t('patient_exploration.title')}
-        description={t('patient_exploration.description')}
-        variant="info"
-        buttons={[
-          {
-            variant: 'outline',
-            size: 'sm',
-            disabled: true,
-            children: (
-              <>
-                <LineChart />
-                {t('patient_exploration.actions.visualize_survival')}
-              </>
-            ),
-          },
-        ]}
-      />
-      <main className="bg-muted h-screen overflow-auto p-3">
-        <Card className="h-auto size-max w-full">
-          <CardContent>
-            <div className="flex items-center gap-2 py-4">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-8" placeholder={t('patient_exploration.search_placeholder')} disabled />
-              </div>
-            </div>
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {COLUMN_KEYS.map(key => (
-                    <TableHead key={key}>{t(`patient_exploration.columns.${key}`)}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading
-                  ? Array.from({ length: SKELETON_ROW_COUNT }).map((_, rowIndex) => (
-                      <TableRow key={rowIndex}>
-                        {COLUMN_KEYS.map(key => (
-                          <TableCell key={key}>
-                            <Skeleton className="h-4 w-full" />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  : rows.map(patient => (
-                      <PatientRow key={patient.patient_id} patient={patient} localPath={localPath} />
-                    ))}
-              </TableBody>
-            </Table>
-
-            <div className="flex items-center justify-between pt-4">
-              <span className="text-muted-foreground text-sm">
-                {isLoading
-                  ? t('patient_exploration.footer.awaiting_data')
-                  : t('patient_exploration.footer.total', { count: total })}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled>
-                  {t('patient_exploration.pagination.previous')}
-                </Button>
-                <Button variant="outline" size="sm" disabled>
-                  {t('patient_exploration.pagination.next')}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div inert={chatExpanded} className="contents">
+        <HeaderNavigation
+          isLoading={isLoading}
+          title={t('patient_exploration.title', { total: data?.count ?? 0 })}
+          description={t('patient_exploration.description')}
+          statuses={[<LibreChatDavid key="librechat-david" />]}
+        />
+      </div>
+      <main className={cn('bg-muted h-screen', chatExpanded ? 'overflow-hidden' : 'overflow-auto')}>
+        <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
+          <TabsList inert={chatExpanded} className="pt-4 px-3 bg-background" contentClassName="mx-auto">
+            {TAB_ORDER.map(({ value, i18nKey }) => (
+              <TabsListItem key={value} value={value}>
+                {t(i18nKey)}
+              </TabsListItem>
+            ))}
+          </TabsList>
+          <div className="p-3 space-y-3">
+            <TabsContent value={PatientExplorationTabs.CohortAnalytics}>
+              <PatientExplorationChat onExpandedChange={setChatExpanded} />
+            </TabsContent>
+            <TabsContent value={PatientExplorationTabs.PatientList}>
+              <Card className="h-auto size-max w-full">
+                <CardContent>
+                  <div className="bg-background">
+                    <DataTable
+                      id="patient-exploration"
+                      columns={columns}
+                      TableFilters={
+                        <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
+                      }
+                      data={data?.list ?? []}
+                      defaultColumnSettings={defaultSettings}
+                      loadingStates={{
+                        total: isLoading,
+                        list: isLoading,
+                      }}
+                      pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+                      total={data?.count ?? 0}
+                      enableColumnOrdering
+                      enableFullscreen
+                      tableIndexResultPosition="bottom"
+                      serverOptions={{
+                        setAdditionalFields,
+                        defaultSorting: PATIENTS_DEFAULT_SORTING,
+                        onSortingChange: setSorting,
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </TabsNav>
       </main>
     </>
-  );
-}
-
-function PatientRow({ patient, localPath }: { patient: Patient; localPath: (path: string) => string }) {
-  const overviewPath = localPath(`/patient/entity/${patient.patient_id}`);
-  return (
-    <TableRow>
-      <TableCell>
-        <AnchorLink component={Link} to={overviewPath} size="sm" className="font-medium">
-          {patient.name}
-        </AnchorLink>
-        <div className="text-muted-foreground text-xs">{patient.patient_id}</div>
-      </TableCell>
-      <TableCell className="font-mono text-xs">{patient.mrn}</TableCell>
-      <TableCell>{patient.birth_year}</TableCell>
-      <TableCell>{patient.sex}</TableCell>
-      <TableCell>{patient.site}</TableCell>
-      <TableCell>{patient.cns_diagnosis}</TableCell>
-      <TableCell className="capitalize">{patient.vital_status}</TableCell>
-      <TableCell className="text-right tabular-nums">{formatSurvival(patient.survival_days)}</TableCell>
-    </TableRow>
   );
 }
 

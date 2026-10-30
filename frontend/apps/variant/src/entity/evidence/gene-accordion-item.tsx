@@ -24,18 +24,24 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
 
   return (
     <AccordionItem value={symbol} className="border rounded">
-      <AccordionTrigger asChild className="py-4 px-5">
-        <div className="flex flex-1 ml-4 items-center gap-2">
-          <span className="font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
-          {symbol && (
-            <Link to={getOmimOrgUrl({ symbol })} target="_blank" rel="noreferrer">
-              <Button iconOnly size="xs" variant="ghost">
-                {<ArrowUpRight className="size-4!" />}
-              </Button>
+      {/* The trigger stretches over the whole row; the link sits above it with z-10 */}
+      <div className="relative flex items-center gap-2 py-4 px-5">
+        <AccordionTrigger className="w-auto py-0 after:absolute after:inset-0">
+          <span className="ml-4 font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
+        </AccordionTrigger>
+        {symbol && (
+          <Button asChild iconOnly size="xs" variant="ghost" className="relative z-10">
+            <Link
+              to={getOmimOrgUrl({ symbol })}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('a11y.omim_link.open', { symbol })}
+            >
+              <ArrowUpRight className="size-4!" />
             </Link>
-          )}
-        </div>
-      </AccordionTrigger>
+          </Button>
+        )}
+      </div>
       <AccordionContent className="py-4 pt-2 px-5 space-y-4">
         {conditions?.length === 0 ? (
           <Empty

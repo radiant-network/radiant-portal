@@ -1,0 +1,5 @@
+organization_name	organization_code	patient_id	patient_id_type	radiant_patient_id	event_type	event_date	age_at_event_days	metastasis	metastasis_location	metastasis_location_other	cns_diagnosis_category	cns_integrated_diagnosis	cns_integrated_diagnosis_source	tumor_locations	tumor_location_other	can_read_phi
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	Progressive	2021-11-14 00:00:00	2500	Yes	Brain;Spine	NULL	Atypical teratoid/rhabdoid tumor	ATRT	CBTN	Cerebellum/Posterior Fossa	Not Applicable	true
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	Initial CNS Tumor	2017-11-29 00:00:00	1000	No	Not Applicable	Not Applicable	Atypical teratoid/rhabdoid tumor	ATRT	CBTN	Ventricles; Spine NOS	Not Applicable	true
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	Not Reported	NULL	-1	Not Reported	Not Applicable	Not Applicable	Not Reported	NULL	CBTN	Not Applicable	Not Applicable	true
+Boston Children's Hospital	BCH	C100004	research_id	22	Initial CNS Tumor	NULL	1000	No	Not Applicable	Not Applicable	Atypical teratoid/rhabdoid tumor	ATRT	CBTN	Cerebellum/Posterior Fossa	Not Applicable	false

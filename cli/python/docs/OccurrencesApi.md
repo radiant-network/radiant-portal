@@ -15,6 +15,8 @@ Method | HTTP request | Description
 [**get_expanded_germline_snv_occurrence**](OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 [**get_expanded_somatic_snv_occurrence**](OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 [**get_germline_snv_dictionary**](OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
+[**get_germline_snv_transcript_reports_xlsx**](OccurrencesApi.md#get_germline_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of germline SNV occurrences of a case
+[**get_somatic_snv_transcript_reports_xlsx**](OccurrencesApi.md#get_somatic_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of somatic SNV occurrences of a case
 [**list_germline_cnv_genes_overlap**](OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 [**list_germline_cnv_occurrences**](OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
 [**list_germline_snv_occurrences**](OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
@@ -1033,6 +1035,188 @@ Name | Type | Description  | Notes
 **403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_germline_snv_transcript_reports_xlsx**
+> str get_germline_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+
+Download the transcript report (xlsx) of germline SNV occurrences of a case
+
+Fill the tenant's germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    locus_ids = 'locus_ids_example' # str | Comma-separated locus ids, 1 to 100
+
+    try:
+        # Download the transcript report (xlsx) of germline SNV occurrences of a case
+        api_response = api_instance.get_germline_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+        print("The response of OccurrencesApi->get_germline_snv_transcript_reports_xlsx:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_germline_snv_transcript_reports_xlsx: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_ids** | **str**| Comma-separated locus ids, 1 to 100 | 
+
+### Return type
+
+**str**
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | xlsx workbook |  * Content-Disposition - attachment; filename&#x3D;&lt;MRN&gt;_&lt;case id&gt;_&lt;UTC timestamp&gt;.xlsx <br>  |
+**400** | Zero, more than 100 or malformed locus ids |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | A locus is not an occurrence of the task |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+**503** | The tenant has no transcript report template loaded |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_somatic_snv_transcript_reports_xlsx**
+> str get_somatic_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+
+Download the transcript report (xlsx) of somatic SNV occurrences of a case
+
+Fill the tenant's somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor sequence ID
+    task_id = 56 # int | Task ID
+    locus_ids = 'locus_ids_example' # str | Comma-separated locus ids, 1 to 100
+
+    try:
+        # Download the transcript report (xlsx) of somatic SNV occurrences of a case
+        api_response = api_instance.get_somatic_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+        print("The response of OccurrencesApi->get_somatic_snv_transcript_reports_xlsx:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_somatic_snv_transcript_reports_xlsx: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_ids** | **str**| Comma-separated locus ids, 1 to 100 | 
+
+### Return type
+
+**str**
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | xlsx workbook |  * Content-Disposition - attachment; filename&#x3D;&lt;MRN&gt;_&lt;case id&gt;_&lt;UTC timestamp&gt;.xlsx <br>  |
+**400** | Zero, more than 100 or malformed locus ids |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | A locus is not an occurrence of the task |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+**503** | The tenant has no transcript report template loaded |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

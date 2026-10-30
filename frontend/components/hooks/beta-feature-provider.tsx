@@ -27,7 +27,7 @@ type BetaFeatures = {
   [key: string]: boolean | string;
 };
 
-type FeatureDefinitions = {
+export type FeatureDefinitions = {
   [key: string]: FeatureBooleanDefinition | FeatureSelectDefinition | FeatureLinkDefinition;
 };
 
@@ -37,7 +37,7 @@ type BetaFeatureContextType = {
   featureDefinitions: FeatureDefinitions;
 };
 
-const defaultFeatureDefinitions: FeatureDefinitions = {
+export const defaultFeatureDefinitions: FeatureDefinitions = {
   orientation: {
     type: 'select',
     defaultValue: 'top',
@@ -50,26 +50,11 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
-  // QA preview only: two links to view both landing variants in a single build.
-  // In prod the variant should be driven by the build THEME on a single `/landing`
-  // route, so these links and the `/landing/*` preview routes should be removed.
   analysis: {
     type: 'link',
     link: '/analysis',
     label: 'Analysis',
     description: 'Access analysis page',
-  },
-  landingInclude: {
-    type: 'link',
-    link: '/landing/include',
-    label: 'Landing (Include)',
-    description: 'Access the Include landing page',
-  },
-  landingKidsfirst: {
-    type: 'link',
-    link: '/landing/kidsfirst',
-    label: 'Landing (Kids First)',
-    description: 'Access the Kids First landing page',
   },
   study: {
     type: 'link',
@@ -100,32 +85,42 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);
 
 // `link` features are shortcuts rather than toggles: they carry no defaultValue.
-const buildDefaultFeatures = (): BetaFeatures =>
-  Object.entries(defaultFeatureDefinitions).reduce<BetaFeatures>(
+const buildDefaultFeatures = (definitions: FeatureDefinitions): BetaFeatures =>
+  Object.entries(definitions).reduce<BetaFeatures>(
     (acc, [key, def]) => (def.type === 'link' ? acc : { ...acc, [key]: def.defaultValue }),
     {},
   );
 
-export const BetaFeatureProvider = ({ children }: { children: ReactNode }) => {
+type BetaFeatureProviderProps = {
+  children: ReactNode;
+  definitions?: FeatureDefinitions;
+  storageKey?: string;
+};
+
+export const BetaFeatureProvider = ({
+  children,
+  definitions = defaultFeatureDefinitions,
+  storageKey = 'betaFeatures',
+}: BetaFeatureProviderProps) => {
   const [features, setFeatures] = useState<BetaFeatures>(() => {
     if (typeof window === 'undefined') {
-      return buildDefaultFeatures();
+      return buildDefaultFeatures(definitions);
     }
 
-    const savedFeatures = localStorage.getItem('betaFeatures');
+    const savedFeatures = localStorage.getItem(storageKey);
     if (savedFeatures) {
       try {
         return JSON.parse(savedFeatures);
       } catch {
-        return buildDefaultFeatures();
+        return buildDefaultFeatures(definitions);
       }
     }
-    return buildDefaultFeatures();
+    return buildDefaultFeatures(definitions);
   });
 
   useEffect(() => {
-    localStorage.setItem('betaFeatures', JSON.stringify(features));
-  }, [features]);
+    localStorage.setItem(storageKey, JSON.stringify(features));
+  }, [features, storageKey]);
 
   const setFeature = (key: string, value: boolean | string) => {
     setFeatures(prev => ({
@@ -135,7 +130,7 @@ export const BetaFeatureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <BetaFeatureContext.Provider value={{ features, setFeature, featureDefinitions: defaultFeatureDefinitions }}>
+    <BetaFeatureContext.Provider value={{ features, setFeature, featureDefinitions: definitions }}>
       {children}
     </BetaFeatureContext.Provider>
   );

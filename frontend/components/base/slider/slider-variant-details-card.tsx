@@ -5,6 +5,7 @@ import { ArrowUpRight, AudioLines, Diamond, Flame } from 'lucide-react';
 
 import type { OmimGenePanel, VepImpact } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import EmptyField from '@/components/base/information/empty-field';
@@ -15,8 +16,9 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
+import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
+import { getDbSnpUrl, getEnsemblUrl, getFranklinSnvUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
@@ -99,6 +101,10 @@ const SliderVariantDetailsCard = ({
   locus,
   locusId,
   hotspot,
+  cmc_sample_mutated,
+  cmc_sample_ratio,
+  cmc_tier,
+  cmc_mutation_url,
 }: SliderVariantDetailsCardProps) => {
   const { t } = useI18n();
 
@@ -188,6 +194,10 @@ const SliderVariantDetailsCard = ({
           locus={locus}
           locusId={locusId}
           hotspot={hotspot}
+          cmc_sample_mutated={cmc_sample_mutated}
+          cmc_sample_ratio={cmc_sample_ratio}
+          cmc_tier={cmc_tier}
+          cmc_mutation_url={cmc_mutation_url}
         />
         <ClinicalAssociationCard omim_conditions={omim_conditions} locus_id={locus_id} />
       </div>
@@ -312,6 +322,10 @@ type PredictionCardProps = SliderVariantType & {
   locus?: string;
   locusId?: string;
   hotspot?: boolean;
+  cmc_sample_mutated?: number;
+  cmc_sample_ratio?: number;
+  cmc_tier?: string;
+  cmc_mutation_url?: string;
 };
 export const PredictionCard = ({
   type,
@@ -352,6 +366,10 @@ export const PredictionCard = ({
   locus,
   locusId,
   hotspot,
+  cmc_sample_mutated,
+  cmc_sample_ratio,
+  cmc_tier,
+  cmc_mutation_url,
 }: PredictionCardProps) => {
   const { t } = useI18n();
   const localPath = useLocalPath();
@@ -406,6 +424,43 @@ export const PredictionCard = ({
           >
             {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
           </AnchorLink>
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
+    // COSMIC
+    frequencies.push(
+      <DescriptionRow
+        key="cosmic"
+        label={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex gap-1 items-center">
+                {t('preview_sheet.variant_details.sections.frequencies.cosmic')}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('preview_sheet.variant_details.sections.frequencies.cosmic_tooltip')}</TooltipContent>
+          </Tooltip>
+        }
+      >
+        {cmc_sample_mutated ? (
+          <span className="inline-flex gap-1 font-mono text-sm">
+            {cmc_mutation_url ? (
+              <AnchorLink
+                size="sm"
+                href={cmc_mutation_url}
+                target="_blank"
+                mono
+                aria-label={t('a11y.cmc.open_cosmic', { count: cmc_sample_mutated })}
+              >
+                {cmc_sample_mutated}
+              </AnchorLink>
+            ) : (
+              cmc_sample_mutated
+            )}
+            {cmc_sample_ratio && `(${toExponentialNotation(cmc_sample_ratio)})`}
+          </span>
         ) : (
           <EmptyField />
         )}
@@ -584,6 +639,15 @@ export const PredictionCard = ({
     );
   }
 
+  // cosmic
+  if (cmc_tier) {
+    classification.push(
+      <DescriptionRow key="cosmic" label={t('preview_sheet.variant_details.sections.classification.cosmic')}>
+        <CmcTierBadge value={cmc_tier} href={locus ? getFranklinSnvUrl(locus) : undefined} />
+      </DescriptionRow>,
+    );
+  }
+
   // hotspot
   if (hotspot) {
     classification.push(
@@ -746,7 +810,7 @@ export const GeneCard = ({
     <div className="@container/gene-card rounded-md border border-border p-3">
       <div className="flex flex-col @md/gene-card:flex-row @md/gene-card:flex-wrap gap-4 @md/gene-card:gap-20 w-full">
         {hasGene && (
-          <div className="flex flex-1 flex-col grow gap-2">
+          <div className="flex flex-1 flex-col grow gap-2 min-w-0">
             <AnchorLink
               className="font-semibold text-lg"
               external
@@ -755,7 +819,7 @@ export const GeneCard = ({
             >
               {symbol}
             </AnchorLink>
-            {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}
+            {aa_change && <AminoAcidChange value={aa_change} className="font-semibold text-sm" />}
             {ensembl_gene_id && (
               <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}

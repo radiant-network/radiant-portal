@@ -1,5 +1,4 @@
 import { type ComponentProps, useMemo } from 'react';
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CaseTask } from '@/api/api';
@@ -7,6 +6,7 @@ import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import type { TableColumnDef } from '@/components/base/data-table/data-table';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import {
@@ -75,7 +75,7 @@ function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
 
   return (
     <Card data-cy="bioinformatics-card" {...props}>
-      <CardHeader className="border-b [.border-b]:pb-4">
+      <CardHeader bordered className="pb-4">
         <CardTitle size="xl">{t('case_entity.details.bioinformatics')}</CardTitle>
       </CardHeader>
       <CardContent>

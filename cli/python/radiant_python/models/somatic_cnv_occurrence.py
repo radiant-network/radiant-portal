@@ -60,13 +60,19 @@ class SomaticCNVOccurrence(BaseModel):
     sd: Optional[Union[StrictFloat, StrictInt]] = None
     seq_id: StrictInt = Field(description="The tumor sequencing id. Somatic CNV spells this seq_id, not tumor_seq_id as somatic SNV does, and has no normal_seq_id.")
     sm: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pc_to_wgs: Optional[StrictInt] = None
+    somatic_pc_to_wxs: Optional[StrictInt] = None
+    somatic_pf_to_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pf_to_wxs: Optional[Union[StrictFloat, StrictInt]] = None
+    somatic_pn_to_wgs: Optional[StrictInt] = None
+    somatic_pn_to_wxs: Optional[StrictInt] = None
     start: StrictInt
     svlen: Optional[StrictInt] = None
     svtype: Optional[StrictStr] = None
     symbol: Optional[List[StrictStr]] = None
     task_id: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "ascn_as", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnf", "cnq", "cnv_id", "cytoband", "end", "filter", "flag_type", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "maf", "mcn", "mcnf", "mcnq", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "sd", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "ascn_as", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnf", "cnq", "cnv_id", "cytoband", "end", "filter", "flag_type", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "maf", "mcn", "mcnf", "mcnq", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "sd", "seq_id", "sm", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "start", "svlen", "svtype", "symbol", "task_id", "type"]
 
     @field_validator('type')
     def type_validate_enum(cls, value):
@@ -159,6 +165,12 @@ class SomaticCNVOccurrence(BaseModel):
             "sd": obj.get("sd"),
             "seq_id": obj.get("seq_id"),
             "sm": obj.get("sm"),
+            "somatic_pc_to_wgs": obj.get("somatic_pc_to_wgs"),
+            "somatic_pc_to_wxs": obj.get("somatic_pc_to_wxs"),
+            "somatic_pf_to_wgs": obj.get("somatic_pf_to_wgs"),
+            "somatic_pf_to_wxs": obj.get("somatic_pf_to_wxs"),
+            "somatic_pn_to_wgs": obj.get("somatic_pn_to_wgs"),
+            "somatic_pn_to_wxs": obj.get("somatic_pn_to_wxs"),
             "start": obj.get("start"),
             "svlen": obj.get("svlen"),
             "svtype": obj.get("svtype"),

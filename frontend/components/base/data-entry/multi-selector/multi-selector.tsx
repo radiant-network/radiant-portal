@@ -358,6 +358,7 @@ function MultiSelector({
       shouldFilter={commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch} // When onSearch is provided, we don't want to filter the options. You can still override it.
       filter={commandFilter()}
     >
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the inner input is focusable */}
       <div
         ref={dropdownRef}
         className={cn(
@@ -451,6 +452,7 @@ function MultiSelector({
         </div>
         <button
           type="button"
+          aria-label={t('a11y.multi_selector.clear_all')}
           onClick={() => {
             setSelected(selected.filter(s => s.fixed));
             onChange?.(selected.filter(s => s.fixed).map(o => o.value));

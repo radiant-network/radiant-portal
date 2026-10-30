@@ -12,7 +12,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
 
   return (
     <Card id="case-overview-card" data-cy="case-overview-card" {...props}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle size="xl">{t('case_entity.details.case_overview')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
@@ -113,7 +113,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
         {/* Case note */}
         <div className="flex flex-col p-4 gap-1.5 border rounded-md">
           <div className="text-foreground text-base font-semibold">{t('case_entity.details.case_note')}</div>
-          <div className="text-foreground text-sm font-normal">{data.note}</div>
+          <div className="text-foreground text-sm font-normal whitespace-pre-line">{data.note}</div>
         </div>
       </CardContent>
     </Card>

@@ -4,6 +4,8 @@ import { tv } from 'tailwind-variants';
 
 import { Separator } from '@/components/base/shadcn/separator';
 import { useSidebar } from '@/components/base/shadcn/sidebar';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
 
 import BetaFeaturesSheet from '../admin/beta-features-sheet';
@@ -95,6 +97,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           )}
           {/* Desktop NavBar */}
           <div className={navbarStyles.base()}>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- hidden developer shortcut */}
             <div
               data-cy="logo-desktop"
               className="flex mr-2 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
@@ -142,12 +145,15 @@ function MobileNavbar({
   logo: React.ReactNode;
   onBurgerClick: () => void;
 }) {
+  const { t } = useI18n();
+  const { tenants } = useTenant();
   const navbarStyles = navbarVariant();
+  const isSingleTenant = tenants.length <= 1;
 
   return (
     <div className={navbarStyles.base({ className: 'h-[56px] px-3 flex md:hidden' })}>
       <MainNavbarItem
-        title="Burger"
+        title={isOpen ? t('a11y.main_navbar.close_menu') : t('a11y.main_navbar.open_menu')}
         iconOnly
         icon={isOpen ? <XIcon /> : <MenuIcon />}
         onClick={onBurgerClick}
@@ -155,7 +161,10 @@ function MobileNavbar({
         responsive={false}
       />
       <div className="flex flex-1 items-center justify-center gap-1.5">
-        <div data-cy="logo-mobile" className="flex h-8 text-primary">
+        <div
+          data-cy="logo-mobile"
+          className={cn('flex text-primary [&_svg]:h-full [&_img]:h-full', isSingleTenant ? 'h-8' : 'h-7')}
+        >
           {logo}
         </div>
         <MainNavbarTenantSwitcher hideSingleTenantLabel />

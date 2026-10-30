@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useId } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -23,23 +23,33 @@ interface ConsequenceAccordionItemProps {
 
 function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps) {
   const { t } = useI18n();
+  const symbolId = useId();
 
   return (
     <AccordionItem value={value}>
       <Card className="py-4 gap-0">
         <CardHeader>
-          <AccordionTrigger>
+          {/* The trigger stretches over the whole row; links and tooltips sit above it with z-10 */}
+          <div className="relative flex items-center py-2">
+            <AccordionTrigger className="w-auto py-0 after:absolute after:inset-0" aria-labelledby={symbolId} />
             <div className="flex flex-1 ml-4 items-center gap-2">
-              <span className="font-semibold text-base">{data.symbol || t('common.no_gene')}</span>
+              <span id={symbolId} className="font-semibold text-base">
+                {data.symbol || t('common.no_gene')}
+              </span>
               {/* ref: https://d3b.atlassian.net/browse/SJRA-146 */}
               {/* TODO when vep_impact is added to the api if data.is_picked == true */}
               {/* <ImpactIndicator value="HIGH" size={16} /> */}
               {data.symbol && (
-                <Link to={getOmimOrgUrl({ symbol: data.symbol })} target="_blank" rel="noreferrer">
-                  <Button iconOnly size="xs" variant="ghost">
-                    {<ArrowUpRight className="size-4!" />}
-                  </Button>
-                </Link>
+                <Button asChild iconOnly size="xs" variant="ghost" className="relative z-10">
+                  <Link
+                    to={getOmimOrgUrl({ symbol: data.symbol })}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={t('a11y.omim_link.open', { symbol: data.symbol })}
+                  >
+                    <ArrowUpRight className="size-4!" />
+                  </Link>
+                </Button>
               )}
             </div>
             <div className="flex flex-1">
@@ -68,7 +78,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
                     <div className="space-x-1">
                       {data.spliceai_type.map(type => (
                         <Tooltip key={type}>
-                          <TooltipTrigger>
+                          <TooltipTrigger className="relative z-10">
                             <Badge variant="outline">{type}</Badge>
                           </TooltipTrigger>
                           <TooltipContent>{t(`variant.splice_ai.${type}`)}</TooltipContent>
@@ -79,7 +89,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
                 </div>
               </div>
             </div>
-          </AccordionTrigger>
+          </div>
         </CardHeader>
         <CardContent className="py-0">
           <AccordionContent className="pt-2 px-5">

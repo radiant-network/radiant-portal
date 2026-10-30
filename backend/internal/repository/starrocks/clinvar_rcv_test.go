@@ -3,6 +3,7 @@ package starrocks
 import (
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -18,15 +19,15 @@ func Test_GetClinvarRCV(t *testing.T) {
 
 		// Sort result by DateLastEvaluated descending
 		sort.Slice(clinvarRcv, func(i, j int) bool {
-			return clinvarRcv[i].DateLastEvaluated.After(clinvarRcv[j].DateLastEvaluated)
+			return time.Time(*clinvarRcv[i].DateLastEvaluated).After(time.Time(*clinvarRcv[j].DateLastEvaluated))
 		})
 
 		if assert.Len(t, clinvarRcv, 2) {
 			assert.Equal(t, "123456", clinvarRcv[0].ClinvarId)
 			assert.Equal(t, types.JsonArray[string]{"Pathogenic"}, clinvarRcv[0].ClinicalSignificance)
 			assert.Equal(t, 1, clinvarRcv[0].SubmissionCount)
-			assert.Equal(t, "2025-01-01 00:00:00 +0000 UTC", clinvarRcv[0].DateLastEvaluated.String())
-			assert.Equal(t, "2024-01-01 00:00:00 +0000 UTC", clinvarRcv[1].DateLastEvaluated.String())
+			assert.Equal(t, time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), time.Time(*clinvarRcv[0].DateLastEvaluated))
+			assert.Equal(t, time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), time.Time(*clinvarRcv[1].DateLastEvaluated))
 		}
 	})
 }
@@ -44,7 +45,7 @@ func Test_GetClinvarRCV_ExcludesRowsWithNullOrZeroSubmissionCount(t *testing.T) 
 	})
 }
 
-func Test_GetClinvarRCV_NullDateLastEvaluated_IsZero(t *testing.T) {
+func Test_GetClinvarRCV_NullDateLastEvaluated_IsNil(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "clinvar"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewClinvarRCVRepository(database.StarrocksDB{DB: env.Starrocks})
 		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 2000)
@@ -52,7 +53,7 @@ func Test_GetClinvarRCV_NullDateLastEvaluated_IsZero(t *testing.T) {
 
 		if assert.Len(t, clinvarRcv, 1) {
 			assert.Equal(t, "RCV000006", clinvarRcv[0].Accession)
-			assert.True(t, clinvarRcv[0].DateLastEvaluated.IsZero())
+			assert.Nil(t, clinvarRcv[0].DateLastEvaluated)
 		}
 	})
 }

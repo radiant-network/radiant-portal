@@ -241,6 +241,11 @@ export const CaseEntity_Variants_CNV_Table = {
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
             switch (columnID) {
+              case 'genes':
+              case 'cytoband':
+              case 'nb_genes':
+                cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.linkButton).clickAndWait({ force: true });
+                break;
               default:
                 cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
                 break;

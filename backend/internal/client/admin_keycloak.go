@@ -20,7 +20,7 @@ import (
 // client is defined in Realm, so Realm is also the token-endpoint realm.
 type KeycloakConfig struct {
 	BaseURL      string // e.g. http://localhost:8080
-	Realm        string // realm the users live in and the client is defined in, e.g. CQDG
+	Realm        string // realm the users live in and the client is defined in, e.g. radiant
 	ClientID     string // confidential client with a service account (realm-management roles)
 	ClientSecret string
 	DefaultGroup string // group every provisioned user joins; empty = no group assignment

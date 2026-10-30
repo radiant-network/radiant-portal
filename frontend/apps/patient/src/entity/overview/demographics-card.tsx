@@ -40,31 +40,19 @@ function DemographicsCard({
 
   return (
     <Card data-cy="demographics-card" {...cardProps}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle>{t('patient_entity.overview.demographics.title')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
-        {mrn && <InformationField label={t('patient_entity.overview.demographics.mrn')}>{mrn}</InformationField>}
-        {birth_year !== undefined && (
-          <InformationField label={t('patient_entity.overview.demographics.birth_year')}>{birth_year}</InformationField>
-        )}
-        {gender && (
-          <InformationField label={t('patient_entity.overview.demographics.gender')}>{gender}</InformationField>
-        )}
-        {race && <InformationField label={t('patient_entity.overview.demographics.race')}>{race}</InformationField>}
-        {ethnicity && (
-          <InformationField label={t('patient_entity.overview.demographics.ethnicity')}>{ethnicity}</InformationField>
-        )}
-        {postal_code && (
-          <InformationField label={t('patient_entity.overview.demographics.postal_code')}>
-            {postal_code}
-          </InformationField>
-        )}
-        {organization_name && (
-          <InformationField label={t('patient_entity.overview.demographics.organization_name')}>
-            {organization_name}
-          </InformationField>
-        )}
+        <InformationField label={t('patient_entity.overview.demographics.mrn')}>{mrn}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.birth_year')}>{birth_year}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.gender')}>{gender}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.race')}>{race}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.ethnicity')}>{ethnicity}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.postal_code')}>{postal_code}</InformationField>
+        <InformationField label={t('patient_entity.overview.demographics.organization_name')}>
+          {organization_name}
+        </InformationField>
       </CardContent>
     </Card>
   );

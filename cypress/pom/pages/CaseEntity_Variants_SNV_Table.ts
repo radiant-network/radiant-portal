@@ -1,8 +1,19 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getUrlLink, shouldHaveTableResultsCount, stringToRegExp } from '../shared/Utils';
+import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getTier, getUrlLink, shouldHaveTableResultsCount, stringToRegExp } from '../shared/Utils';
 
 const tableGermlineSNVColumns = [
+  {
+    id: 'row_selection',
+    name: '',
+    apiField: '',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
   {
     id: 'interpretation',
     name: '',
@@ -11,7 +22,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -22,7 +33,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -33,7 +44,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -44,7 +55,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'left',
     isSortable: true,
     isPinnable: true,
-    position: 1,
+    position: 2,
     tooltip: null,
   },
   {
@@ -55,7 +66,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 2,
+    position: 3,
     tooltip: null,
   },
   {
@@ -66,7 +77,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 3,
+    position: 4,
     tooltip: 'Amino acid change',
   },
   {
@@ -77,7 +88,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 4,
+    position: 5,
     tooltip: null,
   },
   {
@@ -88,7 +99,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 5,
+    position: 6,
     tooltip: 'Most deleterious consequence annotated using VEP',
   },
   {
@@ -99,7 +110,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 6,
+    position: 7,
     tooltip: null,
   },
   {
@@ -110,7 +121,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 7,
+    position: 8,
     tooltip: null,
   },
   {
@@ -121,8 +132,30 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 8,
+    position: 9,
     tooltip: 'MIM inheritance modes',
+  },
+  {
+    id: 'tier',
+    name: 'Tier',
+    apiField: 'cmc_tier',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 10,
+    tooltip: 'CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
+  },
+  {
+    id: 'cmc',
+    name: 'CMC',
+    apiField: 'cmc_sample_mutated',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 11,
+    tooltip: 'Number of samples in COSMIC with this mutation followed by its ratio',
   },
   {
     id: 'clinvar',
@@ -132,7 +165,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 9,
+    position: 12,
     tooltip: null,
   },
   {
@@ -143,7 +176,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 13,
     tooltip: 'Exomiser score based on variant properties and patient phenotypes',
   },
   {
@@ -154,7 +187,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 14,
     tooltip: 'Exomiser ACMG',
   },
   {
@@ -165,7 +198,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 15,
     tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
@@ -176,7 +209,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 16,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -187,7 +220,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 17,
     tooltip: 'Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -198,7 +231,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 18,
     tooltip: 'Zygosity',
   },
   {
@@ -209,7 +242,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 19,
     tooltip: null,
   },
   {
@@ -220,12 +253,23 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 17,
+    position: 20,
     tooltip: null,
   },
 ];
 
 const tableSomaticSNVColumns = [
+  {
+    id: 'row_selection',
+    name: '',
+    apiField: '',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
   {
     id: 'interpretation',
     name: '',
@@ -234,7 +278,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -245,7 +289,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -256,7 +300,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
-    position: 0,
+    position: 1,
     tooltip: null,
   },
   {
@@ -267,7 +311,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'left',
     isSortable: true,
     isPinnable: true,
-    position: 1,
+    position: 2,
     tooltip: null,
   },
   {
@@ -278,7 +322,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 2,
+    position: 3,
     tooltip: null,
   },
   {
@@ -289,7 +333,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 3,
+    position: 4,
     tooltip: 'Amino acid change',
   },
   {
@@ -300,7 +344,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 4,
+    position: 5,
     tooltip: null,
   },
   {
@@ -311,7 +355,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 5,
+    position: 6,
     tooltip: 'Most deleterious consequence annotated using VEP',
   },
   {
@@ -322,7 +366,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 6,
+    position: 7,
     tooltip: null,
   },
   {
@@ -333,7 +377,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 7,
+    position: 8,
     tooltip: null,
   },
   {
@@ -344,7 +388,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 8,
+    position: 9,
     tooltip: 'MIM inheritance modes for the gene associated with the most deleterious consequence',
   },
   {
@@ -355,8 +399,30 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 9,
+    position: 10,
     tooltip: 'Hotspot Cancer',
+  },
+  {
+    id: 'tier',
+    name: 'Tier',
+    apiField: 'cmc_tier',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 11,
+    tooltip: 'CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
+  },
+  {
+    id: 'cmc',
+    name: 'CMC',
+    apiField: 'cmc_sample_mutated',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 12,
+    tooltip: 'Number of samples in COSMIC with this mutation followed by its ratio',
   },
   {
     id: 'clinvar',
@@ -366,7 +432,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 10,
+    position: 13,
     tooltip: null,
   },
   {
@@ -377,7 +443,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 14,
     tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
@@ -388,7 +454,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 15,
     tooltip: 'Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -399,7 +465,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 16,
     tooltip: 'Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -410,7 +476,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 17,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -421,7 +487,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 15,
+    position: 18,
     tooltip: 'Somatic Quality',
   },
   {
@@ -432,7 +498,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 19,
     tooltip: 'Systematic noise score (AQ)',
   },
   {
@@ -443,7 +509,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 17,
+    position: 20,
     tooltip: 'Allele depth ratio ALT/(ALT+REF)',
   },
   {
@@ -454,7 +520,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 18,
+    position: 21,
     tooltip: null,
   },
 ];
@@ -503,6 +569,18 @@ const sharedContentHandlers: Record<string, ContentHandler> = {
     cy.validateTableFirstRowContent(dataVariant.gnomad, position);
     cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
   },
+  cmc: ({ position, dataVariant }) => {
+    if (dataVariant.cmc) {
+      cy.validateTableFirstRowContent(dataVariant.cmc.sample_mutated, position);
+      cy.validateTableFirstRowContent(dataVariant.cmc.sample_ratio, position);
+    } else {
+      cy.validateTableFirstRowContent(null, position);
+    }
+  },
+  tier: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(getTier(dataVariant.tier).display, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tag(getTier(dataVariant.tier).color), position);
+  },
   actions: ({ position }) => {
     cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
     cy.validateTableFirstRowClass(CommonSelectors.actionButton, position);
@@ -516,14 +594,14 @@ const germlineContentHandlers: Record<string, ContentHandler> = {
     cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
   },
   clinvar: ({ position, dataVariant }) => {
-    cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
-    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
+    cy.validateTableFirstRowContent(getClass(dataVariant.clinvar_evidence.classification).abbrev, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(dataVariant.clinvar_evidence.classification).color), position);
   },
   acmg_exomiser: ({ position, dataVariant }) => {
     dataVariant.acmg_exomiser.forEach((value: string) => {
       cy.validateTableFirstRowContent(getClass(value).abbrev, position);
+      cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(value).color), position);
     });
-    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
   },
 };
 
@@ -585,6 +663,8 @@ const generateSNVTableActions = (config: SNVTableConfig) => {
               } else {
                 cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
               }
+            } else if (columnID === 'variant') {
+              cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.linkButton).clickAndWait({ force: true });
             } else {
               cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
             }
@@ -1030,7 +1110,7 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
 const germlineConfig: SNVTableConfig = {
   tableColumns: tableGermlineSNVColumns,
   selectors: { tab: '[data-cy="variants-tab"]', toggle: '[data-cy="tabs-trigger-SNV"]' },
-  newTabLinkColumns: ['variant', 'freq'],
+  newTabLinkColumns: ['freq'],
   contentHandlers: germlineContentHandlers,
   linkResolver: (columnID, dataVariant) => getUrlLink(columnID, dataVariant),
 };
@@ -1038,7 +1118,7 @@ const germlineConfig: SNVTableConfig = {
 const somaticConfig: SNVTableConfig = {
   tableColumns: tableSomaticSNVColumns,
   selectors: { tab: '[data-cy="variants-tab"]' },
-  newTabLinkColumns: ['variant', 'freq_to', 'freq_tn', 'freq_g'],
+  newTabLinkColumns: ['freq_to', 'freq_tn', 'freq_g'],
   contentHandlers: somaticContentHandlers,
   linkResolver: (columnID, dataVariant) => {
     switch (columnID) {
@@ -1083,6 +1163,43 @@ export const CaseEntity_Variants_SNV_Table = {
   somatic: (() => {
     const actions = generateSNVTableActions(somaticConfig);
     const validations = generateSNVTableValidations(somaticConfig, actions);
-    return { actions, validations };
+    const { selectors } = somaticConfig;
+    const cohortToggle = (cohort: 'TN' | 'TO') => CommonSelectors.tabsTrigger(`SNV_${cohort}`);
+    return {
+      actions: {
+        ...actions,
+        /**
+         * Clicks the sub-tab of the given cohort.
+         * @param cohort The cohort to select.
+         */
+        selectCohort(cohort: 'TN' | 'TO') {
+          cy.get(cohortToggle(cohort)).clickAndWait({ force: true });
+        },
+      },
+      validations: {
+        ...validations,
+        /**
+         * Checks that the tab and the sub-tab of the given cohort are active.
+         * @param cohort The cohort expected to be active.
+         */
+        shouldHaveActiveCohort(cohort: 'TN' | 'TO') {
+          cy.get(selectors.tab).shouldBeActiveTab();
+          cy.get(cohortToggle(cohort)).shouldBeDataState('active');
+        },
+        /**
+         * Validates that every list request sent on page load targets the task of the given cohort.
+         * @param dataCase The case object.
+         * @param cohort The cohort to open.
+         */
+        shouldRequestOnCohortTask(dataCase: any, cohort: 'TN' | 'TO') {
+          const taskId = dataCase[`task_${cohort.toLowerCase()}`].task_id;
+          cy.intercept('POST', '**/list', req => {
+            expect(req.url).to.include(`/${dataCase.case}/${dataCase.seq.seq_id}/${taskId}/list`);
+          }).as('cohortListRequest');
+          cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV', { cohort });
+          cy.wait('@cohortListRequest');
+        },
+      },
+    };
   })(),
 };

@@ -46,7 +46,10 @@ func (m *CaseValidationMockRepo) CreateTaskHasDocument(_ context.Context, thd *p
 	return nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskById(taskId int) (*postgres.Task, error) {
+func (m *CaseValidationMockRepo) GetTaskById(_ context.Context, taskId int) (*postgres.Task, error) {
+	if taskId == 300 {
+		return &postgres.Task{ID: 300, TaskTypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode}, nil
+	}
 	return nil, nil
 }
 
@@ -54,7 +57,10 @@ func (m *CaseValidationMockRepo) GetTaskContextByTaskId(taskId int) ([]*postgres
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*postgres.TaskHasDocument, error) {
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(_ context.Context, taskId int) ([]*postgres.TaskHasDocument, error) {
+	if taskId == 300 {
+		return []*postgres.TaskHasDocument{{TaskID: 300, DocumentID: 1, Type: "output"}}, nil
+	}
 	return nil, nil
 }
 
@@ -261,7 +267,7 @@ func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organizatio
 func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType postgres.ValueSetType) ([]string, error) {
 	switch setType {
 	case postgres.ValueSetTaskType:
-		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "radiant_germline_cnv_annotation", "exomiser", "exomiser_cnv", "rnaseq_analysis"}, nil
+		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "radiant_germline_cnv_annotation", "rnaseq_analysis"}, nil
 	}
 	return nil, nil
 }
@@ -908,8 +914,6 @@ func Test_fetchTaskTypeCodes_OK(t *testing.T) {
 		"tumor_only_variant_calling",
 		"radiant_germline_annotation",
 		"radiant_germline_cnv_annotation",
-		"exomiser",
-		"exomiser_cnv",
 		"rnaseq_analysis",
 	}, mockRecord.TaskTypeCodes)
 }
@@ -1186,6 +1190,8 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Patients:              make(map[batchval.PatientKey]*types.Patient),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
+		ExistingTasks:         make(map[int]*types.Task),
+		ExistingTaskDocuments: make(map[int][]*types.TaskHasDocument),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-TASK-TEST",
 			Tasks: []*types.CaseTaskBatch{
@@ -1206,6 +1212,8 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	assert.Len(t, record.Documents, 1)
 	assert.Contains(t, record.Documents, "file://bucket/file.bam")
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
+	assert.Contains(t, record.ExistingTasks, 300)
+	assert.Contains(t, record.ExistingTaskDocuments, 300)
 }
 
 func Test_fetchFromTasks_DocumentError(t *testing.T) {
@@ -3864,72 +3872,6 @@ func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 	assert.Equal(t, expected, record.Errors[0])
 }
 
-func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Case: types.CaseBatch{
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-				},
-				{
-					Aliquot: "ALIQUOT-2",
-				},
-			},
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserTaskTypeCode,
-					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
-				},
-			},
-		},
-	}
-	record.validateTaskAliquot(0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-007",
-		Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
-func Test_validateTaskAliquot_ErrorExomiserCNVNotExactly1Aliquot(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Case: types.CaseBatch{
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-				},
-				{
-					Aliquot: "ALIQUOT-2",
-				},
-			},
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserCNVTaskTypeCode,
-					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
-				},
-			},
-		},
-	}
-	record.validateTaskAliquot(0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-007",
-		Message: "Task type exomiser_cnv doesn't support being associated with more than 1 aliquot value.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
 func Test_validateTaskAliquot_RadiantGermlineCNVAnnotationMultipleAliquots_OK(t *testing.T) {
 	record := CaseValidationRecord{
 		TenantCode: types.DefaultTenantCode,
@@ -4145,42 +4087,6 @@ func Test_validateTaskDocuments_MissingInputDocumentsError_RadiantGermlineCNVAnn
 	expected := types.BatchMessage{
 		Code:    "TASK-003",
 		Message: "Missing input documents for case 0 - task 0 of type radiant_germline_cnv_annotation.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
-}
-
-func Test_validateTaskDocuments_MissingInputDocumentsError_ExomiserCNV(t *testing.T) {
-	record := CaseValidationRecord{
-		TenantCode: types.DefaultTenantCode,
-		Documents: map[string]*types.Document{
-			"s3://input/foo/bar.txt": {},
-		},
-		TaskContexts: map[int][]*types.TaskContext{
-			0: {{TaskID: 0, SequencingExperimentID: 0}},
-		},
-		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode: types.ExomiserCNVTaskTypeCode,
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://output/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	record.validateTaskDocuments(record.Case.Tasks[0], 0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-003",
-		Message: "Missing input documents for case 0 - task 0 of type exomiser_cnv.",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -5165,4 +5071,238 @@ func Test_validateExamCode_RejectsUnknownCodeOnANonExamObservation(t *testing.T)
 	record.validateExamCode(types.ObsCodePhenotype, "irmc", "case[0].patients[0].observations_categorical[0]", "res")
 
 	assert.Len(t, record.Errors, 1)
+}
+
+type stubMetadataGetter struct{}
+
+func (stubMetadataGetter) GetMetadata(string) (*utils.FileMetadata, error) {
+	return &utils.FileMetadata{Size: 11}, nil
+}
+
+const attachedTaskURL = "s3://bucket/attached.cram"
+
+// newAttachedTaskRecord builds a record where attachedTaskURL is the output of existing task 300
+// (alignment_germline_variant_calling on sequencing experiment 10, aliquot A1).
+func newAttachedTaskRecord(tasks ...*types.CaseTaskBatch) *CaseValidationRecord {
+	bctx := &batchval.BatchValidationContext{S3FS: stubMetadataGetter{}}
+	cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{Tasks: tasks}, 0, types.DefaultTenantCode)
+	cr.Documents[attachedTaskURL] = &types.Document{ID: 1, Name: "attached.cram", DataCategoryCode: "genomic", DataTypeCode: "alignment", FileFormatCode: "cram", Size: 11, Url: attachedTaskURL}
+	cr.DocumentsInTasks[attachedTaskURL] = []*DocumentRelation{{TaskID: 300, Type: "output"}}
+	cr.ExistingTasks[300] = &types.Task{ID: 300, TaskTypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode, PipelineName: "dragen", PipelineVersion: "4.2", GenomeBuild: "GRCh38"}
+	cr.ExistingTaskDocuments[300] = []*types.TaskHasDocument{{TaskID: 300, DocumentID: 1, Type: "output"}}
+	cr.SequencingExperiments[10] = &types.SequencingExperiment{ID: 10, Aliquot: "A1"}
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 10}}
+	cr.DocumentDataCategoryCodes = []string{"genomic"}
+	cr.DocumentDataTypeCodes = []string{"alignment"}
+	cr.DocumentFormatCodes = []string{"cram"}
+	return cr
+}
+
+func newAttachedTaskBatch(typeCode string, urls ...string) *types.CaseTaskBatch {
+	size := int64(11)
+	task := &types.CaseTaskBatch{TypeCode: typeCode, Aliquots: []string{"A1"}, PipelineName: "dragen", PipelineVersion: "4.2", GenomeBuild: "GRCh38"}
+	for _, url := range urls {
+		name := url[strings.LastIndex(url, "/")+1:]
+		task.OutputDocuments = append(task.OutputDocuments, &types.OutputDocumentBatch{
+			DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: name, Size: &size, Url: url,
+		})
+	}
+	return task
+}
+
+func Test_validateDocuments_SameTaskReSent_SkippedWithInfo(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL))
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.Empty(t, cr.Errors)
+	assert.Empty(t, cr.Warnings)
+	assert.Equal(t, []types.BatchMessage{{
+		Code:    TaskAlreadyAttached,
+		Message: "Task alignment_germline_variant_calling on aliquots [A1] is already attached, skipped.",
+		Path:    "case[0].tasks[0]",
+	}}, cr.Infos)
+	assert.Equal(t, map[int]struct{}{0: {}}, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameUrlsOtherTaskType_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentSomaticVariantCallingTaskTypeCode, attachedTaskURL))
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.False(t, hasErrorCode(cr.Infos, TaskAlreadyAttached))
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameUrlsOtherExperiments_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL))
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 11}}
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.False(t, hasErrorCode(cr.Infos, TaskAlreadyAttached))
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_PartialReSendWithNewUrl_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL, "s3://bucket/new.cram"))
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.Equal(t, []types.BatchMessage{{
+		Code:    DocumentAlreadyOutputOfAnotherTask,
+		Message: "A document with same url " + attachedTaskURL + " has been found in the output of a different task.",
+		Path:    "case[0].tasks[0].output_documents[0]",
+	}}, cr.Errors)
+	assert.False(t, hasErrorCode(cr.Infos, TaskAlreadyAttached))
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameUrlsOtherPipelineVersion_Document005(t *testing.T) {
+	task := newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL)
+	task.PipelineVersion = "4.3"
+	cr := newAttachedTaskRecord(task)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.False(t, hasErrorCode(cr.Infos, TaskAlreadyAttached))
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameUrlsOtherGenomeBuild_Document005(t *testing.T) {
+	task := newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL)
+	task.GenomeBuild = "GRCh37"
+	cr := newAttachedTaskRecord(task)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+// The re-sent task carries one of the two outputs of the existing one: not the same task.
+func Test_validateDocuments_ExistingTaskHasMoreOutputs_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL))
+	cr.ExistingTaskDocuments[300] = append(cr.ExistingTaskDocuments[300], &types.TaskHasDocument{TaskID: 300, DocumentID: 2, Type: "output"})
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+// Same URL, different content: the usual DOCUMENT-004 warning plus DOCUMENT-005, never a skip.
+func Test_validateDocuments_SameUrlsOtherHash_Document005(t *testing.T) {
+	task := newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL)
+	task.OutputDocuments[0].Hash = "other-hash"
+	cr := newAttachedTaskRecord(task)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Warnings, DocumentDuplicateWithDifferentFieldValue), "expected %s, got %+v", DocumentDuplicateWithDifferentFieldValue, cr.Warnings)
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+const attachedTaskInputURL = "s3://bucket/attached-input.cram"
+
+func withAttachedInput(cr *CaseValidationRecord) {
+	cr.Documents[attachedTaskInputURL] = &types.Document{ID: 3, Url: attachedTaskInputURL}
+	cr.DocumentsInTasks[attachedTaskInputURL] = []*DocumentRelation{{TaskID: 300, Type: "input"}}
+	cr.ExistingTaskDocuments[300] = append(cr.ExistingTaskDocuments[300], &types.TaskHasDocument{TaskID: 300, DocumentID: 3, Type: "input"})
+}
+
+func Test_validateDocuments_SameInputsAndOutputs_SkippedWithInfo(t *testing.T) {
+	task := newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL)
+	task.InputDocuments = []*types.InputDocumentBatch{{Url: attachedTaskInputURL}}
+	cr := newAttachedTaskRecord(task)
+	withAttachedInput(cr)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.Empty(t, cr.Errors)
+	assert.True(t, hasErrorCode(cr.Infos, TaskAlreadyAttached), "expected %s, got %+v", TaskAlreadyAttached, cr.Infos)
+	assert.Equal(t, map[int]struct{}{0: {}}, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_ExistingTaskHasInputReSentWithout_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL))
+	withAttachedInput(cr)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameOutputsOtherInput_Document005(t *testing.T) {
+	task := newAttachedTaskBatch(types.AlignmentGermlineVariantCallingTaskTypeCode, attachedTaskURL)
+	task.InputDocuments = []*types.InputDocumentBatch{{Url: "s3://bucket/other-input.cram"}}
+	cr := newAttachedTaskRecord(task)
+	withAttachedInput(cr)
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_documentFieldDiffs_Identical_Empty(t *testing.T) {
+	size := int64(11)
+	new := &types.OutputDocumentBatch{FormatCode: "cram", Name: "a.cram", DataTypeCode: "alignment", DataCategoryCode: "genomic", Hash: "h", Size: &size}
+	existing := &types.Document{FileFormatCode: "cram", Name: "a.cram", DataTypeCode: "alignment", DataCategoryCode: "genomic", Hash: "h", Size: 11}
+
+	assert.Empty(t, documentFieldDiffs(new, existing))
+}
+
+func Test_documentFieldDiffs_NilSizeAndOtherName_TwoDiffs(t *testing.T) {
+	new := &types.OutputDocumentBatch{FormatCode: "cram", Name: "b.cram", DataTypeCode: "alignment", DataCategoryCode: "genomic", Hash: "h"}
+	existing := &types.Document{FileFormatCode: "cram", Name: "a.cram", DataTypeCode: "alignment", DataCategoryCode: "genomic", Hash: "h", Size: 11}
+
+	assert.Equal(t, []documentFieldDiff{
+		{"name", "a.cram", "b.cram"},
+		{"size", int64(11), "nil"},
+	}, documentFieldDiffs(new, existing))
+}
+
+func Test_validateDocuments_SameUrlsCaseRelatedTaskOfOtherCase_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.RadiantGermlineAnnotationTask, attachedTaskURL))
+	caseID, otherCaseID := 100, 200
+	cr.CaseID = &caseID
+	cr.ExistingTasks[300].TaskTypeCode = types.RadiantGermlineAnnotationTask
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 10, CaseID: &otherCaseID}}
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SameUrlsCaseRelatedTaskOfSameCase_SkippedWithInfo(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch(types.RadiantGermlineAnnotationTask, attachedTaskURL))
+	caseID := 100
+	cr.CaseID = &caseID
+	cr.ExistingTasks[300].TaskTypeCode = types.RadiantGermlineAnnotationTask
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 10, CaseID: &caseID}}
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.Empty(t, cr.Errors)
+	assert.True(t, hasErrorCode(cr.Infos, TaskAlreadyAttached), "expected %s, got %+v", TaskAlreadyAttached, cr.Infos)
+	assert.Equal(t, map[int]struct{}{0: {}}, cr.SkippedTasks)
+}
+
+func Test_fetchTasksOwningOutputDocuments_LoadsOnlyOutputOwners(t *testing.T) {
+	bctx := &batchval.BatchValidationContext{TaskRepo: &CaseValidationMockRepo{}}
+	cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{}, 0, types.DefaultTenantCode)
+	cr.DocumentsInTasks["s3://bucket/a.cram"] = []*DocumentRelation{{TaskID: 300, Type: "output"}, {TaskID: 301, Type: "input"}}
+	cr.DocumentsInTasks["s3://bucket/b.cram"] = []*DocumentRelation{{TaskID: 302, Type: "output"}}
+
+	assert.NoError(t, cr.fetchTasksOwningOutputDocuments(t.Context()))
+
+	assert.Equal(t, map[int]*types.Task{300: {ID: 300, TaskTypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode}}, cr.ExistingTasks)
+	assert.Equal(t, map[int][]*types.TaskHasDocument{300: {{TaskID: 300, DocumentID: 1, Type: "output"}}}, cr.ExistingTaskDocuments)
 }

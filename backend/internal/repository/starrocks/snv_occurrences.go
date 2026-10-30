@@ -2,6 +2,7 @@ package starrocks
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -24,12 +25,42 @@ func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB 
 	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.TenantQualifiedName(utils.CtxOf(tx)), types.VariantTable.Alias, types.VariantTable.Alias, snvTable.Alias))
 }
 
+// SNVVariantFrequencyColumns returns the select list of the internal frequency columns of the variant table
+func SNVVariantFrequencyColumns() string {
+	columns := make([]string, len(types.SNVVariantFrequencyFields))
+	for i, field := range types.SNVVariantFrequencyFields {
+		columns[i] = fmt.Sprintf("%s.%s", field.Table.Alias, field.Name)
+	}
+	return strings.Join(columns, ", ")
+}
+
 func JoinSNVOccurrencesWithTopMedBravo(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s topmed ON topmed.locus_id=%s.locus_id", types.TopmedTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
+// JoinSNVOccurrencesWithComphet adds `ch.comphet_of`, the loci each occurrence is a compound heterozygous partner
+// of in the same sample. One row per occurrence (aggregated), so the join never duplicates an occurrence.
+func JoinSNVOccurrencesWithComphet(snvTable types.Table, seqId int, taskId int, part int, tx *gorm.DB) *gorm.DB {
+	comphetTable := types.GermlineSNVComphetTable
+	pairs := fmt.Sprintf("SELECT DISTINCT partner_locus_id, locus_id FROM %s WHERE part = ? AND seq_id = ? AND task_id = ?", comphetTable.TenantQualifiedName(utils.CtxOf(tx)))
+	joinClause := fmt.Sprintf("LEFT JOIN (SELECT p.partner_locus_id, array_agg(p.locus_id) AS comphet_of FROM (%s) p GROUP BY p.partner_locus_id) %s ON %s.partner_locus_id=%s.locus_id", pairs, comphetTable.Alias, comphetTable.Alias, snvTable.Alias)
+	return tx.Joins(joinClause, part, seqId, taskId)
+}
+
 func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", types.ThousandGenomesTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
+}
+
+// JoinSNVOccurrencesWithSortedFrequencyTables joins, on the outer query of a TOP-N list, the frequency tables
+// that the inner query joined on demand: the outer query re-applies the sort, which may be on one of them.
+func JoinSNVOccurrencesWithSortedFrequencyTables(snvTable types.Table, userQuery types.ListQuery, tx *gorm.DB) *gorm.DB {
+	if userQuery.HasFieldFromTables(types.TopmedTable) {
+		tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)
+	}
+	if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
+		tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
+	}
+	return tx
 }
 
 // occurrenceQuery is what the list and count builders need from a query: the filter tree, plus the
@@ -57,6 +88,9 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, tas
 
 		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
 			tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
+		}
+		if userQuery.HasFieldFromTables(types.GermlineSNVComphetTable) {
+			tx = JoinSNVOccurrencesWithComphet(snvTable, seqId, taskId, part, tx)
 		}
 
 		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
@@ -142,6 +176,9 @@ func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, taskId int,
 		}
 		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
 			tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
+		}
+		if userQuery.HasFieldFromTables(types.GermlineSNVComphetTable) {
+			tx = JoinSNVOccurrencesWithComphet(snvTable, seqId, taskId, part, tx)
 		}
 		utils.AddWhere(userQuery, tx)
 

@@ -139,6 +139,23 @@ func Test_RangerAdminClient_EnsureAccessPolicy_CreatesWhenMissing(t *testing.T) 
 	assert.EqualValues(t, 0, fake.createdPolicy["policyType"])
 }
 
+func Test_RangerAdminClient_EnsureWarehouseAccessPolicy_CreatesWithUsersAndAccesses(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureWarehouseAccessPolicy(context.Background(),
+		"sr_access_warehouse", []string{"*"}, []string{"root", "admin"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy, "missing policy is created via POST")
+	assert.EqualValues(t, 0, fake.createdPolicy["policyType"])
+	assert.Contains(t, fake.createdPolicy["resources"].(map[string]any), "warehouse",
+		"warehouse is a top-level resource, not under catalog/database")
+	item := fake.createdPolicy["policyItems"].([]any)[0].(map[string]any)
+	assert.Equal(t, []any{"root", "admin"}, item["users"], "granted to users, not roles")
+}
+
 func Test_RangerAdminClient_EnsureAccessPolicy_UpdatesInPlaceWhenExists(t *testing.T) {
 	fake := &fakeRangerTenant{existingPolicies: map[string]int64{"sr_access_demo": 7}}
 	srv := fake.server()

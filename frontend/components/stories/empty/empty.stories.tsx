@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dna } from 'lucide-react';
 
 import Empty from '@/components/base/empties/empty';
+import { Button } from '@/components/base/shadcn/button';
 
 import { StorySection } from '../story-section';
 
@@ -90,6 +91,27 @@ export const WithBorder: Story = {
     <StorySection title="With border">
       <div className="w-full">
         <Empty {...args} />
+      </div>
+    </StorySection>
+  ),
+};
+
+export const WithAction: Story = {
+  args: {
+    title: 'Optional Header',
+    description: 'No data message',
+    size: 'default',
+    iconType: 'custom',
+    icon: Dna,
+  },
+  render: args => (
+    <StorySection title="With action">
+      <div className="w-full">
+        <Empty {...args}>
+          <Button size="sm" variant="outline">
+            Action
+          </Button>
+        </Empty>
       </div>
     </StorySection>
   ),

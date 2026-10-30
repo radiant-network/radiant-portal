@@ -40,7 +40,6 @@ export const Sizes: Story = {
             }}
             className="max-w-[300px]"
             placeholder="Placeholder"
-            autoFocus
             searchButtonProps={{
               color: 'primary',
               variant: 'default',

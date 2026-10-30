@@ -141,7 +141,7 @@ stack. The admin UI is exposed on http://localhost:6080.
 
 Then use this .env in front-end
 ```
-KEYCLOAK_REALM=CQDG
+KEYCLOAK_REALM=radiant
 KEYCLOAK_HOST=http://localhost:8080
 KEYCLOAK_CLIENT=radiant
 KEYCLOAK_CLIENT_SECRET=ShutThisIsASecret!

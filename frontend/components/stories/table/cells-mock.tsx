@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { User } from 'lucide-react';
 
 import type { CaseEntity, CaseStatus, Term, VepImpact } from '@/api/api';
@@ -16,6 +16,7 @@ import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
 import type { AvatarUser } from '@/components/base/avatar';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
@@ -25,6 +26,7 @@ import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import BooleanCell from '@/components/base/data-table/cells/boolean-cell';
 import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
@@ -141,11 +143,15 @@ export type BaseCellMockData = {
   rsnumber?: string;
   symbol?: string;
   gnomad_v3_af?: number;
+  cmc_sample_mutated?: number;
+  cmc_sample_ratio?: number;
+  cmc_mutation_url?: string;
   is_canonical?: boolean;
   is_mane_plus?: boolean;
   is_mane_select?: boolean;
   vep_impact?: VepImpact;
   aa_change?: string;
+  aa_change_description?: string;
   picked_consequences?: string[];
   omim_inheritance_code?: string[];
   germline_pf_wgs?: number;
@@ -426,6 +432,7 @@ export const firstSetCellData = [
  *   - GnomadCell
  *   - ManeCell
  *   - MostDeleteriousConsequenceCell
+ *   - AminoAcidChangeCell
  *   - OmimCell
  *   - ParticipantFrequencyCell
  *   - ZygosityCell
@@ -458,6 +465,17 @@ export const secondSetCellColumns = [
     header: 'GnomadCell',
   }),
   baseCellColumnHelper.accessor(row => row, {
+    id: 'cmc_sample_mutated',
+    cell: info => (
+      <CmcCell
+        sampleMutated={info.getValue().cmc_sample_mutated}
+        sampleRatio={info.getValue().cmc_sample_ratio}
+        mutationUrl={info.getValue().cmc_mutation_url}
+      />
+    ),
+    header: 'CmcCell',
+  }),
+  baseCellColumnHelper.accessor(row => row, {
     id: 'mane-cell',
     cell: info => (
       <ManeCell
@@ -479,6 +497,13 @@ export const secondSetCellColumns = [
     header: 'MostDeleteriousConsequenceCell',
     size: 225,
     minSize: 160,
+  }),
+  baseCellColumnHelper.accessor(row => row.aa_change, {
+    id: 'aa_change',
+    cell: info => <AminoAcidChangeCell value={info.getValue()} description={info.row.original.aa_change_description} />,
+    header: 'AminoAcidChangeCell',
+    size: 124,
+    minSize: 40,
   }),
   baseCellColumnHelper.accessor(row => row.omim_inheritance_code, {
     id: 'omim_inheritance_code',
@@ -508,6 +533,9 @@ export const secondSetCellData = [
     rsnumber: '123',
     symbol: 'PCDHB8',
     gnomad_v3_af: 100,
+    cmc_sample_mutated: 3,
+    cmc_sample_ratio: 0.0000693,
+    cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000',
     is_mane_plus: true,
     aa_change: 'p.Val234GlyfsTer4',
     picked_consequences: ['frameshift_variant'],
@@ -522,8 +550,11 @@ export const secondSetCellData = [
     rsnumber: '12312312',
     symbol: 'HLA-B',
     gnomad_v3_af: 1,
+    cmc_sample_mutated: 6,
+    cmc_sample_ratio: 0.000134,
     is_canonical: true,
     aa_change: 'p.Val234GlyfsTer4',
+    aa_change_description: 'Amino acid substitution',
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'MODERATE',
     omim_inheritance_code: ['IC', 'Mi', 'Mu', 'NA'],
@@ -536,14 +567,16 @@ export const secondSetCellData = [
     rsnumber: '89978213',
     symbol: 'PLXNA1',
     gnomad_v3_af: 0.2,
+    cmc_sample_mutated: 12,
+    cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1001',
     is_mane_select: true,
-    aa_change: 'p.Val234GlyfsTer4',
+    aa_change: 'p.Glu182_Leu183insProLeuSerGlnGluSerGlnValGluGluProLeuSerGlnGluSerGlnValGluGlu',
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'LOW',
     omim_inheritance_code: ['NRT', 'SMo', 'Smu', 'XL'],
     germline_pf_wgs: 100,
     locus_id: '-7485572602358923261',
-    zygosity: 'HET',
+    zygosity: 'HOM',
   },
   {
     clinvar: [
@@ -555,6 +588,9 @@ export const secondSetCellData = [
     rsnumber: '123123129',
     symbol: 'USF1',
     gnomad_v3_af: 0.1,
+    cmc_sample_mutated: 1,
+    cmc_sample_ratio: 0,
+    cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1002',
     is_mane_plus: true,
     is_canonical: true,
     is_mane_select: true,
@@ -564,7 +600,7 @@ export const secondSetCellData = [
     omim_inheritance_code: ['XLD', 'XLR', 'YL'],
     germline_pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
-    zygosity: 'HEM',
+    zygosity: 'WT',
   },
   {
     clinvar: [
@@ -576,6 +612,9 @@ export const secondSetCellData = [
     rsnumber: '2',
     symbol: 'NEGR1',
     gnomad_v3_af: 0.01,
+    cmc_sample_mutated: 245,
+    cmc_sample_ratio: 0.0123,
+    cmc_mutation_url: 'https://cancer.sanger.ac.uk/cosmic/search?q=COSV1003',
     is_mane_plus: true,
     is_mane_select: true,
     aa_change: 'p.Val234GlyfsTer4',
@@ -584,7 +623,7 @@ export const secondSetCellData = [
     omim_inheritance_code: ['NRT', 'SMo'],
     germline_pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
-    zygosity: 'HEM',
+    zygosity: 'UNK',
   },
   {
     clinvar: ['likely_risk_allele', 'drug_response', 'benign', 'confers_sensitivity', ''],
@@ -621,6 +660,9 @@ export const secondSetCellData = [
     rsnumber: undefined,
     symbol: undefined,
     gnomad_v3_af: undefined,
+    cmc_sample_mutated: undefined,
+    cmc_sample_ratio: undefined,
+    cmc_mutation_url: undefined,
     is_mane_plus: undefined,
     is_canonical: undefined,
     is_mane_select: undefined,

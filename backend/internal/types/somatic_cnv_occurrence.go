@@ -49,6 +49,13 @@ type SomaticCNVOccurrence struct {
 	SD     *float32 `json:"sd,omitempty"`
 	ASCNAS *int     `json:"ascn_as,omitempty" gorm:"column:ascn_as"`
 
+	SomaticPcToWgs *int     `json:"somatic_pc_to_wgs,omitempty"`
+	SomaticPnToWgs *int     `json:"somatic_pn_to_wgs,omitempty"`
+	SomaticPfToWgs *float64 `json:"somatic_pf_to_wgs,omitempty"`
+	SomaticPcToWxs *int     `json:"somatic_pc_to_wxs,omitempty"`
+	SomaticPnToWxs *int     `json:"somatic_pn_to_wxs,omitempty"`
+	SomaticPfToWxs *float64 `json:"somatic_pf_to_wxs,omitempty"`
+
 	HasNote  bool               `json:"has_note" validate:"required"`
 	FlagType OccurrenceFlagType `json:"flag_type,omitempty" enums:"flag,pin,star"`
 }
@@ -385,6 +392,72 @@ var SomaticCNVASField = Field{
 	Table:         SomaticCNVOccurrenceTable,
 }
 
+var SomaticCNVVariantFrequencyTable = Table{
+	Name:      "somatic__cnv__variant_frequency",
+	Alias:     "scnvf",
+	PerTenant: true,
+}
+
+var SomaticCNVPcToWgsField = Field{
+	Name:          "pc_to_wgs",
+	Alias:         "somatic_pc_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
+var SomaticCNVPnToWgsField = Field{
+	Name:          "pn_to_wgs",
+	Alias:         "somatic_pn_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
+var SomaticCNVPfToWgsField = Field{
+	Name:          "pf_to_wgs",
+	Alias:         "somatic_pf_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
+var SomaticCNVPcToWxsField = Field{
+	Name:          "pc_to_wxs",
+	Alias:         "somatic_pc_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
+var SomaticCNVPnToWxsField = Field{
+	Name:          "pn_to_wxs",
+	Alias:         "somatic_pn_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
+var SomaticCNVPfToWxsField = Field{
+	Name:          "pf_to_wxs",
+	Alias:         "somatic_pf_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticCNVVariantFrequencyTable,
+}
+
 var SomaticCNVOccurrencesFields = []Field{
 	SomaticCNVSeqIdField,
 	SomaticCNVTaskIdField,
@@ -429,6 +502,13 @@ var SomaticCNVOccurrencesFields = []Field{
 	CosmicGenePanelField,
 	OmimInheritanceField,
 	OrphanetGenePanelField,
+	TenantGenePanelField,
+	SomaticCNVPcToWgsField,
+	SomaticCNVPnToWgsField,
+	SomaticCNVPfToWgsField,
+	SomaticCNVPcToWxsField,
+	SomaticCNVPnToWxsField,
+	SomaticCNVPfToWxsField,
 }
 
 var SomaticCNVOccurrencesDefaultFields = []Field{

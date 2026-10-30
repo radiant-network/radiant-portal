@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import type { CaseEntity, CaseSequencingExperiment, SortBody } from '@/api/api';
 import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
@@ -11,13 +11,17 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import { useCanDownloadVariantsReport } from '../../../permissions/use-case-permissions';
 import { type SomaticSNVCohort, SomaticVariantInterface } from '../constants';
 import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
+import VariantsReportButton from '../table/variants-report-button';
 
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
 import { defaultSomaticSNVSettings, getSomaticSNVColumns } from './table/somatic-snv-table-settings';
+
+const SOMATIC_SNV_DEFAULT_SORTING: SortBody[] = [{ field: 'max_impact_score', order: 'desc' }];
 
 type SomaticOccurrencesProps = {
   /**
@@ -42,10 +46,17 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
       : config.somatic_snv_tn_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
+  const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
-    () => getSomaticSNVColumns({ t, caseEntity, patientId: patient?.patient_id }),
-    [t, caseEntity, patient?.patient_id],
+    () =>
+      getSomaticSNVColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
   );
 
   if (!isValidSeqId(seqId)) {
@@ -82,10 +93,21 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
           swrId={`${seqId}-${taskId}`}
           columns={columns}
           defaultColumnSettings={defaultSomaticSNVSettings}
+          defaultSorting={SOMATIC_SNV_DEFAULT_SORTING}
           enableColumnOrdering
           enableFullscreen
           extras={[<SliderSomaticOccurrenceSheet key={`${appId}-sheet`} patientSelected={patientSelected} />]}
           TableFilters={<AnnotationsTableQuickfilters />}
+          selection={
+            canDownloadVariantsReport
+              ? {
+                  idField: 'locus_id',
+                  renderActions: selection => (
+                    <VariantsReportButton kind="somatic" seqId={seqId} taskId={taskId} selection={selection} />
+                  ),
+                }
+              : undefined
+          }
         />
       </QueryBuilder>
       <VariantsOnboardingWizard />

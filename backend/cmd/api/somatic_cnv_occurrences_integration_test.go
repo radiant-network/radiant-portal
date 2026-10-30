@@ -168,5 +168,6 @@ func Test_Somatic_CNV_GenesOverlap(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Contains(t, w.Body.String(), "TSPAN6")
+		assert.Contains(t, w.Body.String(), `"overlap_type":"full_gene","tenant_gene_panels":["EPILEP","ONCO"]`)
 	})
 }

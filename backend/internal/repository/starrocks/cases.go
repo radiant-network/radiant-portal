@@ -55,8 +55,12 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 
-	columns = append(columns, "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type")
+	columns = append(columns, caseTypeColumn)
 	columns = append(columns, "stg.case_id IS NOT NULL AS has_variants")
+	// Group membership is many-to-many: a case in two of the requested groups would come back twice.
+	if userQuery.HasFieldFromTables(types.CaseGroupTable) {
+		tx = tx.Distinct(fmt.Sprintf("%s.id", types.CaseTable.Alias))
+	}
 	if err = tx.Count(&count).Error; err != nil {
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
@@ -66,12 +70,12 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
-	// COUNT DISTINCT ignores NULL, so counting family_member_id alone drops every fetus-only row
-	// and undercounts a prenatal case's members.
-	txMembersCount := db.Table(types.FamilyTable.TenantQualifiedName(ctx)).Select("case_id, count(distinct CASE WHEN fetus_id IS NOT NULL THEN CONCAT('f:', fetus_id) ELSE CONCAT('p:', family_member_id) END) as distinct_members_count").Group("case_id")
+	txMembersCount := caseMembersCount(ctx, db)
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
+	// Selected only, never filtered or sorted on: joined after the count so it does not pay it.
+	tx = r.joiner.CaseWithRuns(tx)
 	tx = tx.Select(columns)
 	utils.AddPaginationAndSort(tx, userQuery)
 
@@ -101,7 +105,11 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	tx := db.Table("(? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId)
+	subQueryProbandSampleId := db.Table(fmt.Sprintf("(%s) %s", r.joiner.ProbandSamples(db), types.CaseProbandSampleTable.Alias))
+	subQueryProbandSampleId = subQueryProbandSampleId.Select(fmt.Sprintf("\"%s\" as type, submitter_sample_id as value", types.CaseProbandSubmitterSampleIdsField.GetAlias()))
+	subQueryProbandSampleId = subQueryProbandSampleId.Where("LOWER(submitter_sample_id) LIKE ?", strings.ToLower(searchInput))
+
+	tx := db.Table("(? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId)
 	tx = tx.Order("value asc, type asc")
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
@@ -215,6 +223,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProband(tx, userQuery)
 	tx = r.joiner.CaseWithAnalysisCatalog(tx)
 	tx = r.joiner.CaseWithProject(tx)
+	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 
@@ -240,6 +249,10 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 
 		if userQuery.HasFieldFromTables(types.CaseHasSequencingExperimentTable) {
 			tx = r.joiner.CaseWithCaseHasSeqExp(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.CaseGroupTable) {
+			tx = r.joiner.CaseWithCaseGroup(tx)
 		}
 	}
 	return tx, nil
@@ -280,7 +293,9 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context,
 		Select("DISTINCT(seq_id)").
 		Where("ingested_at is not null and (task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral')) and case_id = ?", caseId)
 	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)
-	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
+	// patient_id and fetus_id both appear: a fetal sample is drawn from the mother, so patient_id
+	// is hers while fetus_id names whose genome was sequenced.
+	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, spl.fetus_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
@@ -544,4 +559,16 @@ func calculateCaseType(caseEntity CaseEntity) string {
 	} else {
 		return fmt.Sprintf("%s_family", caseEntity.CaseTypeCode)
 	}
+}
+
+// caseTypeColumn is the case type of the case list: germline_family for a germline case with more than one
+// member. It needs the caseMembersCount subquery joined as members_count.
+const caseTypeColumn = "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type"
+
+// caseMembersCount counts the members of each case. COUNT DISTINCT ignores NULL, so counting family_member_id
+// alone drops every fetus-only row and undercounts a prenatal case's members.
+func caseMembersCount(ctx context.Context, db *gorm.DB) *gorm.DB {
+	return db.Table(types.FamilyTable.TenantQualifiedName(ctx)).
+		Select("case_id, count(distinct CASE WHEN fetus_id IS NOT NULL THEN CONCAT('f:', fetus_id) ELSE CONCAT('p:', family_member_id) END) as distinct_members_count").
+		Group("case_id")
 }

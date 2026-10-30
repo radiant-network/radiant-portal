@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { ListFilter, X } from 'lucide-react';
 
 import type { SearchCriterion } from '@/api/api';
@@ -35,13 +35,15 @@ type DataTableFilters = {
   filterButtons: IFilterButton[];
   criterias: Record<string, CriteriaProps>;
   defaultFilters: Record<string, string[]>;
+  extraFilters?: ReactNode;
+  onClear?: () => void;
 };
 
 /**
  * Should be used by parent component to order options
  */
 export function sortOptions(options: IFilterButtonItem[]) {
-  return options.sort((a, b) => (a.label as string).localeCompare(b.label as string));
+  return options.sort((a, b) => ((a.label as string) ?? a.key).localeCompare((b.label as string) ?? b.key));
 }
 
 /**
@@ -167,6 +169,8 @@ function DataTableFilters({
   filterSearch,
   criterias,
   defaultFilters,
+  extraFilters,
+  onClear,
 }: DataTableFilters) {
   const { t } = useI18n();
 
@@ -192,7 +196,9 @@ function DataTableFilters({
    * Check if any filters are active
    */
   const hasActiveFilters =
-    filterButtons.some((option: IFilterButton) => option.selectedItems.length > 0) || changedFilterButtons.length > 0;
+    filterButtons.some((option: IFilterButton) => option.selectedItems.length > 0) ||
+    changedFilterButtons.length > 0 ||
+    !!extraFilters;
 
   /*
    * Clear all filters function
@@ -201,6 +207,7 @@ function DataTableFilters({
     setFilters(defaultFilters);
     setChangedFilterButtons([]);
     setOpenFilters({});
+    onClear?.();
   };
 
   /*
@@ -279,6 +286,7 @@ function DataTableFilters({
         />
       )}
       <div className="flex flex-wrap gap-2 items-end">
+        {extraFilters}
         {/* Show visible filters */}
         {filterButtons
           .filter(filter => filter.isVisible)

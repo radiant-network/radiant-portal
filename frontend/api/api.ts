@@ -333,6 +333,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'symbol': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CNVGeneOverlap
+     */
+    'tenant_gene_panels': Array<string>;
 }
 /**
  * User assigned to a case, as shown in the cases list and on the case entity page. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
@@ -1047,6 +1053,12 @@ export interface CaseGroupResponse {
      * @type {string}
      * @memberof CaseGroupResponse
      */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseGroupResponse
+     */
     'name': string;
     /**
      * 
@@ -1420,6 +1432,12 @@ export interface CaseResult {
     'proband_life_status_code'?: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'proband_submitter_sample_ids': Array<string>;
+    /**
+     * 
      * @type {string}
      * @memberof CaseResult
      */
@@ -1430,6 +1448,12 @@ export interface CaseResult {
      * @memberof CaseResult
      */
     'project_name'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CaseResult
+     */
+    'run_names': Array<string>;
     /**
      * 
      * @type {CaseStatus}
@@ -1469,6 +1493,12 @@ export interface CaseSequencingExperiment {
      * @memberof CaseSequencingExperiment
      */
     'experimental_strategy_code': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'fetus_id'?: number;
     /**
      * 
      * @type {boolean}
@@ -1894,6 +1924,25 @@ export interface ClinvarVariantConditions {
      * @memberof ClinvarVariantConditions
      */
     'conditions'?: Array<ClinvarRCV>;
+}
+/**
+ * ComphetGene is the number of compound heterozygous partners of a variant in one gene
+ * @export
+ * @interface ComphetGene
+ */
+export interface ComphetGene {
+    /**
+     * 
+     * @type {number}
+     * @memberof ComphetGene
+     */
+    'nb': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ComphetGene
+     */
+    'symbol': string;
 }
 /**
  * Count represents count result
@@ -2379,12 +2428,6 @@ export interface ExpandedGermlineSNVOccurrence {
      */
     'ad_total'?: number;
     /**
-     * TODO
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'af'?: number;
-    /**
      * 
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
@@ -2499,6 +2542,84 @@ export interface ExpandedGermlineSNVOccurrence {
      */
     'genotype_quality': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wgs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
@@ -2510,6 +2631,24 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -2533,6 +2672,30 @@ export interface ExpandedGermlineSNVOccurrence {
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
      */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'germline_pn_wgs_affected'?: number;
     /**
      * 
@@ -2540,6 +2703,24 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -2679,6 +2860,126 @@ export interface ExpandedGermlineSNVOccurrence {
      */
     'sift_score'?: number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
@@ -2791,6 +3092,30 @@ export interface ExpandedSomaticSNVOccurrence {
     'clinvar'?: Array<string>;
     /**
      * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_mutation_url'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_sample_mutated'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_sample_ratio'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cmc_tier'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
@@ -2843,6 +3168,186 @@ export interface ExpandedSomaticSNVOccurrence {
      * @memberof ExpandedSomaticSNVOccurrence
      */
     'filter'?: string;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -2970,11 +3475,65 @@ export interface ExpandedSomaticSNVOccurrence {
      */
     'sift_score'?: number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
     'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -2986,7 +3545,19 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -2998,13 +3569,31 @@ export interface ExpandedSomaticSNVOccurrence {
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_tn_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof ExpandedSomaticSNVOccurrence
      */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
     'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -3365,6 +3954,114 @@ export interface GermlineCNVOccurrence {
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'gnomad_sc'?: number;
     /**
      * 
@@ -3532,6 +4229,12 @@ export interface GermlineSNVOccurrence {
      */
     'cmc_tier'?: string;
     /**
+     * Number of compound heterozygous partners per gene
+     * @type {Array<ComphetGene>}
+     * @memberof GermlineSNVOccurrence
+     */
+    'comphet_genes'?: Array<ComphetGene>;
+    /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
@@ -3586,11 +4289,113 @@ export interface GermlineSNVOccurrence {
      */
     'genotype_quality': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
     'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -3602,13 +4407,79 @@ export interface GermlineSNVOccurrence {
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'germline_pn_wgs'?: number;
     /**
      * 
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'gnomad_v3_af': number;
+    /**
+     * True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_comphet'?: boolean;
     /**
      * 
      * @type {boolean}
@@ -3687,6 +4558,126 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'seq_id': number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -3802,6 +4793,37 @@ export interface GetBatchResponse {
 /**
  * 
  * @export
+ * @interface IGVPublicTrack
+ */
+export interface IGVPublicTrack {
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'indexURL': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'indexURLExpireAt': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVPublicTrack
+     */
+    'url': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVPublicTrack
+     */
+    'urlExpireAt': number;
+}
+/**
+ * 
+ * @export
  * @interface IGVTrackEnriched
  */
 export interface IGVTrackEnriched {
@@ -3828,6 +4850,12 @@ export interface IGVTrackEnriched {
      * @type {string}
      * @memberof IGVTrackEnriched
      */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
     'indexURL'?: string;
     /**
      * 
@@ -3847,6 +4875,18 @@ export interface IGVTrackEnriched {
      * @memberof IGVTrackEnriched
      */
     'patient_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof IGVTrackEnriched
+     */
+    'sample_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof IGVTrackEnriched
+     */
+    'sequencing_experiment_id': number;
     /**
      * 
      * @type {string}
@@ -3884,6 +4924,42 @@ export interface IGVTracks {
      * @memberof IGVTracks
      */
     'alignment'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'baf'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'capture_targets'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'cnv'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {{ [key: string]: IGVPublicTrack; }}
+     * @memberof IGVTracks
+     */
+    'public_tracks': { [key: string]: IGVPublicTrack; };
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'roh'?: Array<IGVTrackEnriched>;
+    /**
+     * 
+     * @type {Array<IGVTrackEnriched>}
+     * @memberof IGVTracks
+     */
+    'seg'?: Array<IGVTrackEnriched>;
 }
 /**
  * 
@@ -4873,10 +5949,22 @@ export interface PatientCase {
     'analysis_catalog_code'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof PatientCase
      */
     'case_id': number;
+    /**
+     * As in the case list: germline_family when the case has more than one member
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'case_type': PatientCaseCaseTypeEnum;
     /**
      * 
      * @type {string}
@@ -4889,6 +5977,30 @@ export interface PatientCase {
      * @memberof PatientCase
      */
     'diagnosis_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'ordering_organization_name'?: string;
+    /**
+     * MONDO id
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCase
+     */
+    'primary_condition_name'?: string;
     /**
      * 
      * @type {string}
@@ -4913,6 +6025,205 @@ export interface PatientCase {
      * @memberof PatientCase
      */
     'updated_on': string;
+}
+
+export const PatientCaseCaseTypeEnum = {
+    Somatic: 'somatic',
+    Germline: 'germline',
+    GermlineFamily: 'germline_family'
+} as const;
+
+export type PatientCaseCaseTypeEnum = typeof PatientCaseCaseTypeEnum[keyof typeof PatientCaseCaseTypeEnum];
+
+/**
+ * Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
+ * @export
+ * @interface PatientCbc
+ */
+export interface PatientCbc {
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'anc': PatientLabResult;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCbc
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCbc
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'hemoglobin': PatientLabResult;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'platelets': PatientLabResult;
+    /**
+     * 
+     * @type {PatientLabResult}
+     * @memberof PatientCbc
+     */
+    'wbc': PatientLabResult;
+}
+/**
+ * Latest result of each CSF component. Each component is its own latest, so they may come from different punctures.
+ * @export
+ * @interface PatientCsf
+ */
+export interface PatientCsf {
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientCsf
+     */
+    'cell_free_dna': PatientDayDate;
+    /**
+     * 
+     * @type {PatientCsfCytology}
+     * @memberof PatientCsf
+     */
+    'cytology': PatientCsfCytology;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'glucose': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'protein': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'rbc': PatientCsfResult;
+    /**
+     * 
+     * @type {PatientCsfResult}
+     * @memberof PatientCsf
+     */
+    'wbc': PatientCsfResult;
+}
+/**
+ * Latest CSF cytology, with the finding derived from the report
+ * @export
+ * @interface PatientCsfCytology
+ */
+export interface PatientCsfCytology {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfCytology
+     */
+    'day'?: number;
+    /**
+     * How the report was attributed to CSF
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'evidence_tier'?: PatientCsfCytologyEvidenceTierEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'malignant_cells'?: PatientCsfCytologyMalignantCellsEnum;
+    /**
+     * The finding may pertain to a non-CSF specimen
+     * @type {boolean}
+     * @memberof PatientCsfCytology
+     */
+    'multi_specimen_report'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfCytology
+     */
+    'test_name'?: string;
+}
+
+export const PatientCsfCytologyEvidenceTierEnum = {
+    Named: 'named',
+    TextConfirmed: 'text_confirmed',
+    SameDayOnly: 'same_day_only'
+} as const;
+
+export type PatientCsfCytologyEvidenceTierEnum = typeof PatientCsfCytologyEvidenceTierEnum[keyof typeof PatientCsfCytologyEvidenceTierEnum];
+export const PatientCsfCytologyMalignantCellsEnum = {
+    Positive: 'positive',
+    Suspicious: 'suspicious',
+    Negative: 'negative',
+    NonDiagnostic: 'non_diagnostic',
+    NoMalignancyStatement: 'no_malignancy_statement'
+} as const;
+
+export type PatientCsfCytologyMalignantCellsEnum = typeof PatientCsfCytologyMalignantCellsEnum[keyof typeof PatientCsfCytologyMalignantCellsEnum];
+
+/**
+ * Latest result of one CSF component. Read display: the comparator is load-bearing (\"<1.0\" is undetectable).
+ * @export
+ * @interface PatientCsfResult
+ */
+export interface PatientCsfResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'comparator'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfResult
+     */
+    'day'?: number;
+    /**
+     * Comparator, value and unit
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'display'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientCsfResult
+     */
+    'unit'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientCsfResult
+     */
+    'value'?: number;
 }
 /**
  * Age in days, and the calendar date when the caller can read PHI
@@ -5001,6 +6312,12 @@ export interface PatientEntity {
      */
     'cases': Array<PatientCase>;
     /**
+     * 
+     * @type {PatientCbc}
+     * @memberof PatientEntity
+     */
+    'cbc'?: PatientCbc;
+    /**
      * From the initial event
      * @type {string}
      * @memberof PatientEntity
@@ -5012,6 +6329,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'cns_integrated_diagnosis_source'?: string;
+    /**
+     * 
+     * @type {PatientCsf}
+     * @memberof PatientEntity
+     */
+    'csf'?: PatientCsf;
     /**
      * 
      * @type {string}
@@ -5073,6 +6396,12 @@ export interface PatientEntity {
      */
     'initial_diagnosis_evidence_url'?: string;
     /**
+     * Germline and somatic, of the patient\'s cases
+     * @type {Array<PatientInterpretation>}
+     * @memberof PatientEntity
+     */
+    'interpretations': Array<PatientInterpretation>;
+    /**
      * 
      * @type {PatientKeyDates}
      * @memberof PatientEntity
@@ -5108,6 +6437,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'patient_key': string;
+    /**
+     * 
+     * @type {Array<PatientPerformanceScore>}
+     * @memberof PatientEntity
+     */
+    'performance_status': Array<PatientPerformanceScore>;
     /**
      * Full with PHI access, 3 digits + XX otherwise
      * @type {string}
@@ -5156,6 +6491,12 @@ export interface PatientEntity {
      * @memberof PatientEntity
      */
     'treatment_summary'?: PatientTreatmentSummary;
+    /**
+     * Most recent first
+     * @type {Array<PatientTrialEnrollment>}
+     * @memberof PatientEntity
+     */
+    'trial_enrollments': Array<PatientTrialEnrollment>;
     /**
      * 
      * @type {string}
@@ -5284,11 +6625,35 @@ export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof t
  */
 export interface PatientFilters {
     /**
+     * Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'age_at_initial_dx_group': Array<FiltersValue>;
+    /**
+     * Lowercase, as recorded
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'chemotherapy_agents': Array<FiltersValue>;
+    /**
      * 
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
     'cns_integrated_diagnosis': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'diagnosis_type_cohort': Array<FiltersValue>;
+    /**
+     * Keys true, false; labels Yes, No
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
+    'got_radiation_ever': Array<FiltersValue>;
     /**
      * label = organization name
      * @type {Array<FiltersValue>}
@@ -5352,6 +6717,87 @@ export interface PatientImagingSession {
     'session_name': string;
 }
 /**
+ * Germline or somatic interpretation recorded on one of the patient\'s portal cases
+ * @export
+ * @interface PatientInterpretation
+ */
+export interface PatientInterpretation {
+    /**
+     * On the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'analysis_catalog_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'case_id': number;
+    /**
+     * Germline: LOINC answer code; somatic: oncogenicity, as the case module records them
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'classification'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'hgvsg'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'origin': PatientInterpretationOriginEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientInterpretation
+     */
+    'sequencing_id': number;
+    /**
+     * Gene of the interpreted transcript
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'symbol'?: string;
+    /**
+     * Last interpretation date
+     * @type {string}
+     * @memberof PatientInterpretation
+     */
+    'updated_at': string;
+}
+
+export const PatientInterpretationOriginEnum = {
+    Germline: 'germline',
+    Somatic: 'somatic'
+} as const;
+
+export type PatientInterpretationOriginEnum = typeof PatientInterpretationOriginEnum[keyof typeof PatientInterpretationOriginEnum];
+
+/**
  * Key date of the patient sidebar, with the source it comes from
  * @export
  * @interface PatientKeyDate
@@ -5404,6 +6850,25 @@ export interface PatientKeyDates {
     'latest_encounter': PatientKeyDate;
 }
 /**
+ * Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+ * @export
+ * @interface PatientLabResult
+ */
+export interface PatientLabResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientLabResult
+     */
+    'unit'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientLabResult
+     */
+    'value'?: number;
+}
+/**
  * A PCX patient in the patient list
  * @export
  * @interface PatientListItem
@@ -5451,6 +6916,12 @@ export interface PatientListItem {
      * @memberof PatientListItem
      */
     'cns_integrated_diagnosis_source'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'diagnosis_type_cohort'?: string;
     /**
      * Placeholder when can_read_phi is false
      * @type {string}
@@ -5577,6 +7048,51 @@ export interface PatientOrganizationVitalCount {
      */
     'organization_name': string;
 }
+/**
+ * Lansky or Karnofsky score. The date is when the result was released, not when it was assessed.
+ * @export
+ * @interface PatientPerformanceScore
+ */
+export interface PatientPerformanceScore {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientPerformanceScore
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'scale': PatientPerformanceScoreScaleEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientPerformanceScore
+     */
+    'score': number;
+    /**
+     * As recorded, e.g. \"90 - Minor restrictions in strenuous physical activity\"
+     * @type {string}
+     * @memberof PatientPerformanceScore
+     */
+    'score_text'?: string;
+}
+
+export const PatientPerformanceScoreScaleEnum = {
+    Lansky: 'lansky',
+    Karnofsky: 'karnofsky'
+} as const;
+
+export type PatientPerformanceScoreScaleEnum = typeof PatientPerformanceScoreScaleEnum[keyof typeof PatientPerformanceScoreScaleEnum];
+
 /**
  * Radiation course of a patient
  * @export
@@ -5888,6 +7404,49 @@ export interface PatientTreatmentSummary {
      * @memberof PatientTreatmentSummary
      */
     'initial_treatment_order'?: string;
+}
+/**
+ * Treatment protocol arm the patient was enrolled on, its medical therapies merged
+ * @export
+ * @interface PatientTrialEnrollment
+ */
+export interface PatientTrialEnrollment {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientTrialEnrollment
+     */
+    'chemotherapy_agents': Array<string>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PatientTrialEnrollment
+     */
+    'is_initial_treatment': boolean;
+    /**
+     * null when Not Applicable
+     * @type {string}
+     * @memberof PatientTrialEnrollment
+     */
+    'protocol_arm'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTrialEnrollment
+     */
+    'protocol_name': string;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTrialEnrollment
+     */
+    'start': PatientDayDate;
+    /**
+     * 
+     * @type {PatientDayDate}
+     * @memberof PatientTrialEnrollment
+     */
+    'stop': PatientDayDate;
 }
 /**
  * 
@@ -6709,6 +8268,42 @@ export interface SomaticCNVOccurrence {
      * @type {number}
      * @memberof SomaticCNVOccurrence
      */
+    'somatic_pc_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pf_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
     'start': number;
     /**
      * 
@@ -6830,6 +8425,78 @@ export interface SomaticSNVOccurrence {
      */
     'flag_type'?: OccurrenceFlagType;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wgs_not_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs_affected'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_af_wxs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wgs_not_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs_affected'?: number;
+    /**
+     * Number of patients with a HOM or HEM call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_hom_wxs_not_affected'?: number;
+    /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
@@ -6840,7 +8507,103 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pc_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'germline_pf_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pf_wxs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'germline_pn_wxs_not_affected'?: number;
     /**
      * 
      * @type {number}
@@ -6926,11 +8689,65 @@ export interface SomaticSNVOccurrence {
      */
     'seq_id': number;
     /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_tn_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_tn_wxs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_to_wgs'?: number;
+    /**
+     * Approximate allele frequency, (pc + hom) / (2 * pn). Assumes diploid genotypes; HEM is counted as HOM. Does not account for tumor purity, copy number or loss of heterozygosity.
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_af_to_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_tn_wxs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_to_wgs'?: number;
+    /**
+     * Number of patients with a HOM or HEM tumor call
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_hom_to_wxs'?: number;
+    /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
     'somatic_pc_tn_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -6942,13 +8759,55 @@ export interface SomaticSNVOccurrence {
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pc_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_tn_wgs': number;
     /**
      * 
      * @type {number}
      * @memberof SomaticSNVOccurrence
      */
+    'somatic_pf_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
     'somatic_pf_to_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pf_to_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wxs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_to_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'somatic_pn_to_wxs'?: number;
     /**
      * 
      * @type {number}
@@ -11386,7 +13245,7 @@ export class HpoApi extends BaseAPI {
 export const IgvApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -11438,7 +13297,7 @@ export const IgvApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IgvApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -11462,7 +13321,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
     const localVarFp = IgvApiFp(configuration)
     return {
         /**
-         * Get IGV tracks for a case
+         * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
          * @summary Get IGV
          * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
@@ -11483,7 +13342,7 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
  */
 export class IgvApi extends BaseAPI {
     /**
-     * Get IGV tracks for a case
+     * Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files, and the public reference tracks, all presigned
      * @summary Get IGV
      * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
@@ -13684,6 +15543,120 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVTranscriptReportsXlsx: async (tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'taskId', taskId)
+            // verify required parameter 'locusIds' is not null or undefined
+            assertParamExists('getGermlineSNVTranscriptReportsXlsx', 'locusIds', locusIds)
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (locusIds !== undefined) {
+                localVarQueryParameter['locus_ids'] = locusIds;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSomaticSNVTranscriptReportsXlsx: async (tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'taskId', taskId)
+            // verify required parameter 'locusIds' is not null or undefined
+            assertParamExists('getSomaticSNVTranscriptReportsXlsx', 'locusIds', locusIds)
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (locusIds !== undefined) {
+                localVarQueryParameter['locus_ids'] = locusIds;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -14438,6 +16411,40 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVTranscriptReportsXlsx']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getSomaticSNVTranscriptReportsXlsx']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -14773,6 +16780,34 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getGermlineSNVDictionary(tenant, facets, options).then((request) => request(axios, basePath));
         },
         /**
+         * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+         * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {string} locusIds Comma-separated locus ids, 1 to 100
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
          * @param {string} tenant Tenant code
@@ -15097,6 +17132,38 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getGermlineSNVDictionary(tenant: string, facets?: Array<string>, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(tenant, facets, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fill the tenant\'s germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+     * @summary Download the transcript report (xlsx) of germline SNV occurrences of a case
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} locusIds Comma-separated locus ids, 1 to 100
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getGermlineSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fill the tenant\'s somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+     * @summary Download the transcript report (xlsx) of somatic SNV occurrences of a case
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor sequence ID
+     * @param {number} taskId Task ID
+     * @param {string} locusIds Comma-separated locus ids, 1 to 100
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getSomaticSNVTranscriptReportsXlsx(tenant: string, caseId: number, seqId: number, taskId: number, locusIds: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getSomaticSNVTranscriptReportsXlsx(tenant, caseId, seqId, taskId, locusIds, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

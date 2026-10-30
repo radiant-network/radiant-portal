@@ -1,9 +1,12 @@
 import type { TFunction } from 'i18next';
 
 import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
@@ -11,13 +14,13 @@ import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/m
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
-import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
+import { getFranklinSnvUrl } from '@/components/base/variant/utils';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -31,10 +34,16 @@ const columnHelper = createAppColumnHelper<GermlineSNVOccurrence>();
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
+  canDownloadReport?: boolean;
   t: TFunction<string, undefined>;
 };
 
-function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
+function getGermlineSNVOccurrenceColumns({
+  t,
+  caseEntity,
+  patientId,
+  canDownloadReport,
+}: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -90,7 +99,7 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
     // AA Change
     columnHelper.accessor(row => row.aa_change, {
       id: 'aa_change',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <AminoAcidChangeCell value={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
       ),
@@ -171,6 +180,34 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
       size: 124,
       minSize: 40,
       enableSorting: false,
+    }),
+    // Tier
+    columnHelper.accessor(row => row, {
+      id: 'cmc_tier',
+      cell: info => <CmcTierBadge value={info.getValue().cmc_tier} href={getFranklinSnvUrl(info.getValue().locus)} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_tier_tooltip')}>{t('variant.headers.cmc_tier')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // CMC
+    columnHelper.accessor(row => row, {
+      id: 'cmc_sample_mutated',
+      cell: info => (
+        <CmcCell
+          sampleMutated={info.getValue().cmc_sample_mutated}
+          sampleRatio={info.getValue().cmc_sample_ratio}
+          mutationUrl={info.getValue().cmc_mutation_url}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_sample_mutated_tooltip')}>
+          {t('variant.headers.cmc_sample_mutated')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
     }),
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
@@ -265,7 +302,13 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} />,
+      cell: info => (
+        <OccurrenceActionsMenu
+          row={info.row}
+          caseEntity={caseEntity}
+          reportKind={canDownloadReport ? 'germline' : undefined}
+        />
+      ),
       size: 86,
       enableResizing: false,
       enablePinning: true,
@@ -326,6 +369,18 @@ const defaultGermlineSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.omim_inheritance_code',
     additionalFields: ['omim_inheritance_code'],
+  },
+  {
+    id: 'cmc_tier',
+    visible: false,
+    label: 'variant.headers.cmc_tier',
+    additionalFields: ['cmc_tier'],
+  },
+  {
+    id: 'cmc_sample_mutated',
+    visible: false,
+    label: 'variant.headers.cmc_sample_mutated',
+    additionalFields: ['cmc_sample_mutated', 'cmc_sample_ratio', 'cmc_mutation_url'],
   },
   {
     id: 'clinvar',

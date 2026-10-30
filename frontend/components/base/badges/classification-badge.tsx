@@ -30,6 +30,7 @@ export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
   conflicting_data_from_submitters: 'neutral',
   conflicting_interpretations_of_pathogenicity: 'yellow',
   no_classification_for_the_single_variant: 'neutral',
+  no_classifications_from_unflagged_records: 'neutral',
   not_provided: 'neutral',
   established_risk_allele: 'neutral',
   likely_risk_allele: 'neutral',

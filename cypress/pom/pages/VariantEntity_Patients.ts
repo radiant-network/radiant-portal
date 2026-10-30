@@ -349,6 +349,9 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         switch (columnID) {
+          case 'case':
+            cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.linkButton).clickAndWait({ force: true });
+            break;
           default:
             cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
             break;

@@ -29,15 +29,18 @@ class IGVTrackEnriched(BaseModel):
     family_role: Optional[StrictStr] = None
     fetus_id: Optional[StrictInt] = None
     format: Optional[StrictStr] = None
+    histology_code: Optional[StrictStr] = None
     index_url: Optional[StrictStr] = Field(default=None, alias="indexURL")
     index_url_expire_at: Optional[StrictInt] = Field(default=None, alias="indexURLExpireAt")
     name: Optional[StrictStr] = None
     patient_id: Optional[StrictInt] = None
+    sample_id: Optional[StrictStr] = None
+    sequencing_experiment_id: StrictInt
     sex: Optional[StrictStr] = None
     type: Optional[StrictStr] = None
     url: Optional[StrictStr] = None
     url_expire_at: Optional[StrictInt] = Field(default=None, alias="urlExpireAt")
-    __properties: ClassVar[List[str]] = ["family_role", "fetus_id", "format", "indexURL", "indexURLExpireAt", "name", "patient_id", "sex", "type", "url", "urlExpireAt"]
+    __properties: ClassVar[List[str]] = ["family_role", "fetus_id", "format", "histology_code", "indexURL", "indexURLExpireAt", "name", "patient_id", "sample_id", "sequencing_experiment_id", "sex", "type", "url", "urlExpireAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,10 +96,13 @@ class IGVTrackEnriched(BaseModel):
             "family_role": obj.get("family_role"),
             "fetus_id": obj.get("fetus_id"),
             "format": obj.get("format"),
+            "histology_code": obj.get("histology_code"),
             "indexURL": obj.get("indexURL"),
             "indexURLExpireAt": obj.get("indexURLExpireAt"),
             "name": obj.get("name"),
             "patient_id": obj.get("patient_id"),
+            "sample_id": obj.get("sample_id"),
+            "sequencing_experiment_id": obj.get("sequencing_experiment_id"),
             "sex": obj.get("sex"),
             "type": obj.get("type"),
             "url": obj.get("url"),

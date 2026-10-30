@@ -12,6 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/base/shadcn/command';
+import { Spinner } from '@/components/base/shadcn/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 
 export type AutocompleteApiFn = (
@@ -36,6 +37,7 @@ function getTypeIcon(type: string) {
   const iconMap: { [key: string]: any } = {
     case_id: FolderOpen,
     patient_id: User,
+    patient_name: User,
     submitter_patient_id: Barcode,
     sequencing_experiment_id: TestTubeDiagonal,
   };
@@ -60,6 +62,28 @@ async function onAutocomplete(prefix: string, minSearchLength: number, autocompl
   }, {} as GroupedAutocompleteResults);
 
   return grouped;
+}
+
+type SearchStatusProps = {
+  isBelowMinLength: boolean;
+  isSearching: boolean;
+  minSearchLength: number;
+};
+
+function SearchStatus({ isBelowMinLength, isSearching, minSearchLength }: SearchStatusProps) {
+  const { t } = useI18n();
+
+  if (isBelowMinLength) {
+    return <CommandEmpty>{t('common.table.filters.min_search_length', { count: minSearchLength })}</CommandEmpty>;
+  }
+  if (isSearching) {
+    return (
+      <div className="flex justify-center py-6">
+        <Spinner className="size-5" />
+      </div>
+    );
+  }
+  return <CommandEmpty>{t('common.table.filters.no_values_found')}</CommandEmpty>;
 }
 
 function TableFiltersSearch({
@@ -88,7 +112,7 @@ function TableFiltersSearch({
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const { data: groupedResults } = useSWR<GroupedAutocompleteResults, any, string | null>(
+  const { data: groupedResults, isLoading } = useSWR<GroupedAutocompleteResults, any, string | null>(
     debouncedSearchInput && debouncedSearchInput.length >= minSearchLength ? debouncedSearchInput : null,
     (key: string | null) => (key ? onAutocomplete(key, minSearchLength, api) : Promise.resolve({})),
     {
@@ -116,6 +140,8 @@ function TableFiltersSearch({
 
   // Check if we have any results to display
   const hasResults = groupedResults && Object.keys(groupedResults).length > 0;
+  const isBelowMinLength = searchInput.length < minSearchLength;
+  const isSearching = !isBelowMinLength && (searchInput !== debouncedSearchInput || isLoading);
 
   return (
     <div className="flex flex-col">
@@ -142,8 +168,15 @@ function TableFiltersSearch({
             className="absolute max-h-[240px] left-0 top-full z-50 mt-1 w-full overflow-auto rounded-md border bg-background shadow-lg"
             onMouseDown={e => e.preventDefault()}
           >
-            {!hasResults && <CommandEmpty>{t('common.table.filters.no_values_found')}</CommandEmpty>}
-            {hasResults &&
+            {(isBelowMinLength || isSearching || !hasResults) && (
+              <SearchStatus
+                isBelowMinLength={isBelowMinLength}
+                isSearching={isSearching}
+                minSearchLength={minSearchLength}
+              />
+            )}
+            {!isSearching &&
+              hasResults &&
               Object.keys(groupedResults || {}).map(category => (
                 <>
                   {Object.keys(groupedResults || {}).indexOf(category) !== 0 && (

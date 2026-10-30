@@ -11,9 +11,10 @@ interface NavbarLangSwitcherProps {
 }
 
 function NavbarLangSwitcher({ className }: NavbarLangSwitcherProps) {
-  const { currentLanguage, setLanguage } = useI18n();
+  const { t, currentLanguage, setLanguage } = useI18n();
 
   const [isLoading, setIsLoading] = useState(false);
+  const nextLanguage = currentLanguage === 'en' ? 'fr' : 'en';
 
   const handleLanguageChange = async (lang: string) => {
     setIsLoading(true);
@@ -38,9 +39,10 @@ function NavbarLangSwitcher({ className }: NavbarLangSwitcherProps) {
       iconOnly
       className={cn('text-muted-foreground px-3 text-base md:text-sm', className)}
       loading={isLoading}
-      onClick={() => handleLanguageChange(currentLanguage === 'en' ? 'fr' : 'en')}
+      aria-label={t(`a11y.lang_switcher.switch_to_${nextLanguage}`)}
+      onClick={() => handleLanguageChange(nextLanguage)}
     >
-      {currentLanguage === 'en' ? 'FR' : 'EN'}
+      {nextLanguage.toUpperCase()}
     </Button>
   );
 }

@@ -8,7 +8,7 @@ describe('Cases - Assignment Candidates - Result', () => {
   before(() => {
     const Auth = Cypress.expose('globalData').Authorization;
 
-    cy.apiCall('GET', `cases/${dataCandidates.case}/assignment_candidates`, '', Auth.token).then(res => {
+    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case}/assignment_candidates`, '', Auth.token).then(res => {
       response = res;
     });
   });

@@ -77,6 +77,7 @@ function MainNavbarLink({
         },
         className,
       )}
+      aria-label={iconOnly ? title : undefined}
       {...otherProps}
       {...rest}
     >

@@ -26,7 +26,7 @@ Every prototype screen is in scope, including the D.A.V.I.D assistant on LibreCh
 | Overview: cancer predispositions | Other team | Missing |
 | Timeline | Event, surgery, radiation, therapy views | Covered |
 | Treatments | Surgery, radiation, therapy views | Covered |
-| Genomics | Portal cases via `radiant_patient_id` | Covered for portal patients; empty state otherwise |
+| Genomics | Portal cases and their interpretations via `radiant_patient_id` | Covered for portal patients; empty state otherwise |
 | Tumor Board | A dedicated view from the other team (not ready yet); report through a presigned URL | Waiting for its view |
 | Laboratory | Four lab views (CBC, CSF results, CSF tumor analysis, Lansky/Karnofsky), seeded | Covered by data; in the demo if the PO confirms |
 | Imaging | MRI view (Flywheel links) | Covered |
@@ -69,7 +69,7 @@ A new `apps/patient` app reuses the case list and case entity building blocks; t
 - **Entity page.** Copy of `case-entity`: `HeaderNavigation` with diagnosis and vital status badges, `TabsNav` synced to `?tab=`, a context holding the entity, one component per tab built from shadcn `Card`s.
 - **Identity display.** When `can_read_phi` is false: "Restricted" with a lock instead of the placeholder names, research ID as the identifier. Dates as "Day N · age X.Xy", calendar date added when present.
 - **Timeline component.** Vertical list with phase bands opened at each disease event, glyphs per event type, kind toggles (diagnosis, surgery, radiation, treatment). No chart library. Needs a Storybook story.
-- **Genomics tab.** Case table with links to the existing case pages; empty state for patients outside the portal.
+- **Genomics tab.** Variant interpretations and genomic cases tables, linking to the variant and case pages; empty state for patients outside the portal.
 - **Missing-data tabs.** Laboratory (beyond CBC), Clinical Trials and predispositions render an empty "data coming" state until the other team's views exist.
 - **i18n.** `patient_exploration.*` and `patient_entity.*` keys in en and fr.
 
@@ -95,6 +95,8 @@ QA gets fake PCX data on tenant `radiant`, consistent with the portal's seeded p
 | PHI follows `view_data_dictionary_access_policy.csv` and the portal's `can_read_pii` rule (organization or diagnosis lab), not the Notion page's "closed list": all calendar dates and lab free text masked, birth year visible to all, one identifier column (MRN or research ID, never both) | The access policy is the source of truth; same rule as the portal's patient views (confirmed 2026-10-02) |
 | Search box behaves exactly like the case list's: autocomplete from 1 character, a selected suggestion becomes a filter, no free-text search | Consistency across the portal; the existing component is reused (2026-10-02) |
 | Default sort: patients the user can identify first, then site, then identifier | No "last updated" source exists; dates are PHI-only and can't drive the order (2026-10-02) |
+| Latest encounter key date = last known vital status date | The source records the vital status at an encounter; confirmed by the data team (2026-10-14) |
+| Genomics tab: cases and interpretations inside `PatientEntity`; "Analysis" is the case's analysis catalog, "Req. By" the ordering organization, `case_type` the case list's rule; no sample scope | Notion B6 spec update; a patient has few interpretations, so no separate paged endpoint (2026-10-20) |
 | Kaplan-Meier is done with YAC (HIDIVE); D.A.V.I.D on LibreChat is another track | Owned by other teams; we provide data and the entry points (2026-10-02) |
 | Tumor board comes from its own view (not ready), not derived from events; radiation doses stay raw as in the views | Data owners decide the content; no unit conversion in the API (2026-10-02) |
 
@@ -135,7 +137,7 @@ Jira tickets, timeline and milestones: [Realisation](03-realisation.md).
 | Reverse link from the case page: in or out? | Product owner |
 | When will the tumor board view be ready, and with which columns? | Product owner |
 | Who creates the 4 demo users in QA? | Dev team |
-| Who runs the patient-key insert after each source load (QA seed, PRD), and does `v_pcx_30_patient_key` live in RADIANT-Timeline-Abstraction with the other views? | Dev team / other team |
+| Who runs the patient-key insert after each source load in PRD, and does `v_pcx_30_patient_key` move to RADIANT-Timeline-Abstraction with the other views? The seed owns both for local and QA (`backend/scripts/seed/sql/pcx_30_patient_key.sql`, `views/v_pcx_30_patient_key.sql.tmpl`), which are the contract to hand over. | Other team |
 | Where are tumor board reports stored (S3 bucket, which view holds the URL), and are they PHI? | Other team |
 | What does the BRIM evidence link look like, and does it need its own login? | Other team |
 | How does D.A.V.I.D integrate with LibreChat (embed, API, SSO), and which patient data may it receive? | Product owner / dev team |

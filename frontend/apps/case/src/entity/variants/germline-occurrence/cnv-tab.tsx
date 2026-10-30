@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { CaseEntity } from '@/api/api';
+import type { CaseEntity, SortBody } from '@/api/api';
 import { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -18,6 +18,8 @@ import {
   defaultGermlineCNVSettings,
   getGermlineCNVOccurrenceColumns,
 } from './table/germline-cnv-occurrence-table-settings';
+
+const GERMLINE_CNV_DEFAULT_SORTING: SortBody[] = [{ field: 'seq_id', order: 'asc' }];
 
 type CNVTabProps = {
   seqId: number;
@@ -62,6 +64,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
         columns={columns}
         defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={DEFAULT_PAGE_SIZE}
+        defaultSorting={GERMLINE_CNV_DEFAULT_SORTING}
         enableColumnOrdering
         enableFullscreen
         TableFilters={<AnnotationsTableQuickfilters disabled={['interpretation']} />}

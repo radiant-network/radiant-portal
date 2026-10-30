@@ -36,6 +36,7 @@ function NotesPopover({ hasNotes, loading = false, canComment = true, ...props }
               iconOnly
               variant="ghost"
               aria-disabled
+              aria-label={t('notes.variant.tooltip.none')}
             >
               <MessageSquare className="text-muted-foreground/40" size={16} />
             </Button>
@@ -52,7 +53,13 @@ function NotesPopover({ hasNotes, loading = false, canComment = true, ...props }
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button className="relative size-6" iconOnly variant="ghost" loading={loading}>
+              <Button
+                className="relative size-6"
+                iconOnly
+                variant="ghost"
+                loading={loading}
+                aria-label={hasNotes ? t('notes.variant.tooltip.view') : t('notes.variant.tooltip.add')}
+              >
                 <MessageSquare
                   className={hasNotes ? 'text-primary fill-primary/20' : 'text-muted-foreground/40'}
                   size={16}

@@ -5,6 +5,20 @@ import { buildBilingualRegExp, findFacetData, findSectionData, getTextOperator }
 
 export const tableSNVFacets = [
   {
+    section: 'Panel',
+    facets: [
+      {
+        id: 'my_network',
+        name: 'My Network',
+        apiField: 'tenant_gene_panel',
+        position: 0,
+        tooltip: null,
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+    ],
+  },
+  {
     section: 'Variant',
     facets: [
       {
@@ -257,6 +271,33 @@ export const tableSNVFacets = [
         apiField: 'sift_pred',
         position: 13,
         tooltip: 'Sorting Intolerant From Tolerant',
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc',
+        name: 'CMC',
+        apiField: 'cmc_sample_mutated',
+        position: 14,
+        tooltip: 'Number of samples in COSMIC with this mutation',
+        defaultOperator: '<',
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc_ratio',
+        name: 'CMC Ratio',
+        apiField: 'cmc_sample_ratio',
+        position: 15,
+        tooltip: 'Ratio of samples in COSMIC with this mutation compared to the variant compared to all the samples',
+        defaultOperator: '<',
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc_tier',
+        name: 'CMC Tier',
+        apiField: 'cmc_tier',
+        position: 16,
+        tooltip: 'Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
         defaultOperator: null,
         hasDictionary: false,
       },
@@ -623,6 +664,20 @@ export const tableCNVFacets = [
 
 export const tableSomaticFacets = [
   {
+    section: 'Panel',
+    facets: [
+      {
+        id: 'my_network',
+        name: 'My Network',
+        apiField: 'tenant_gene_panel',
+        position: 0,
+        tooltip: null,
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+    ],
+  },
+  {
     section: 'Variant',
     facets: [
       {
@@ -848,6 +903,33 @@ export const tableSomaticFacets = [
         apiField: 'sift_pred',
         position: 10,
         tooltip: 'Sorting Intolerant From Tolerant',
+        defaultOperator: null,
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc',
+        name: 'CMC',
+        apiField: 'cmc_sample_mutated',
+        position: 11,
+        tooltip: 'Number of samples in COSMIC with this mutation',
+        defaultOperator: '<',
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc_ratio',
+        name: 'CMC Ratio',
+        apiField: 'cmc_sample_ratio',
+        position: 12,
+        tooltip: 'Ratio of samples in COSMIC with this mutation compared to the variant compared to all the samples',
+        defaultOperator: '<',
+        hasDictionary: false,
+      },
+      {
+        id: 'cmc_tier',
+        name: 'CMC Tier',
+        apiField: 'cmc_tier',
+        position: 13,
+        tooltip: 'Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)',
         defaultOperator: null,
         hasDictionary: false,
       },

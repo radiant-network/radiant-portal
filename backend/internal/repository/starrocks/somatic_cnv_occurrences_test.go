@@ -10,10 +10,11 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var allSomaticCnvFields = sliceutils.Map(types.SomaticCNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
-	return value.Name
+	return value.GetAlias()
 })
 
 var defaultSomaticCnvFieldsForTest = []types.Field{
@@ -569,5 +570,178 @@ func Test_SomaticCNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_W
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, count.FilteredCount)
 		assert.EqualValues(t, 2, count.Count)
+	})
+}
+
+func listSomaticCNVNamesMatching(t *testing.T, env *testutils.Env, sqon *types.Sqon) []string {
+	t.Helper()
+	repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	sort := []types.SortBody{{Field: "name", Order: "asc"}}
+	query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, sqon, nil, sort)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 1, 2, 2, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o SomaticCNVOccurrence, _ int, _ []SomaticCNVOccurrence) string {
+		return o.Name
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Return_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP"}}}
+		assert.Equal(t, []string{"SCNV3", "SCNV4"}, listSomaticCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Return_Occurrences_Matching_Multiple_Tenant_Gene_Panels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP", "ONCO"}}}
+		// SCNV4 overlaps BRAF and TP53, both in ONCO and BRAF also in EPILEP: it is listed once.
+		assert.Equal(t, []string{"SCNV3", "SCNV4", "SCNV5"}, listSomaticCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Return_Empty_List_When_Unknown_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"UNKNOWN"}}}
+		assert.Empty(t, listSomaticCNVNamesMatching(t, env, sqon))
+	})
+}
+
+func Test_SomaticCNV_CountOccurrences_Count_Each_Occurrence_Once_When_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.SomaticCNVOccurrencesFields)
+		require.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 1, 2, 2, query)
+		require.NoError(t, err)
+		// SCNV4 overlaps two ONCO genes (BRAF, TP53) and is counted once.
+		assert.EqualValues(t, 3, count.Count)
+	})
+}
+
+func Test_SomaticCNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_Hits(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.SomaticCNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
+		require.NoError(t, err)
+		// CARDIO (MYH7) overlaps no CNV of the case, so it is not a bucket. SCNV4 counts once in ONCO.
+		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 2}, {Bucket: "ONCO", Count: 3}}, aggregate)
+	})
+}
+
+func Test_SomaticCNV_GetGenesOverlap_Return_Tenant_Gene_Panels_Of_Each_Gene(t *testing.T) {
+	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly: the multi-tenant loader
+	// builds globally named databases, so a different Need recreates them under the other tests.
+	testutils.RunTest(t, testutils.Need{
+		Starrocks:        "simple",
+		Tenants:          []string{"tenant1", "tenant2"},
+		TenantKeyColumns: []string{"seq_id"},
+	},
+		func(t *testing.T, env *testutils.Env) {
+			repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+			overlaps, err := repo.GetGenesOverlap(env.TenantCtx("tenant1"), 71, 74, 85, 1)
+			require.NoError(t, err)
+			panelsBySymbol := map[string]types.JsonArray[string]{}
+			for _, overlap := range overlaps {
+				panelsBySymbol[overlap.Symbol] = overlap.TenantGenePanels
+			}
+			// One row per gene: a gene in two panels is not duplicated.
+			assert.Len(t, overlaps, 3)
+			assert.Equal(t, map[string]types.JsonArray[string]{
+				"TSPAN6": {"EPILEP", "ONCO"},
+				"DPM1":   {"ONCO"},
+				"TNMD":   {},
+			}, panelsBySymbol)
+		})
+}
+
+// In the simple fixture, seq 74 / task 85 holds SCNV1 (somatic_pf_to_wgs 0.2), SCNV2 (0.6) and SCNV3, which has no
+// frequency row.
+func listSomaticCNVNamesWithFrequencyQuery(t *testing.T, env *testutils.Env, sqon *types.Sqon, sort []types.SortBody) []string {
+	repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, nil, sqon, nil, sort)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o SomaticCNVOccurrence, _ int, _ []SomaticCNVOccurrence) string { return o.Name })
+}
+
+func Test_SomaticCNV_GetOccurrences_Return_Frequencies_When_Selected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		selected := []string{"somatic_pc_to_wgs", "somatic_pn_to_wgs", "somatic_pf_to_wgs", "somatic_pn_to_wxs", "somatic_pf_to_wxs"}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, selected, nil, nil, nil)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
+		require.NoError(t, err)
+		require.Len(t, occurrences, 3)
+
+		scnv2 := occurrences[1]
+		assert.Equal(t, "SCNV2", scnv2.Name)
+		assert.Equal(t, 6, *scnv2.SomaticPcToWgs)
+		assert.Equal(t, 10, *scnv2.SomaticPnToWgs)
+		assert.InDelta(t, 0.6, *scnv2.SomaticPfToWgs, 1e-9)
+		assert.Equal(t, 0, *scnv2.SomaticPnToWxs)
+		assert.Nil(t, scnv2.SomaticPfToWxs, "pf is NULL when the cohort is empty")
+
+		scnv3 := occurrences[2]
+		assert.Equal(t, "SCNV3", scnv3.Name)
+		assert.Nil(t, scnv3.SomaticPfToWgs, "no frequency row")
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Sort_By_Frequency_Asc_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		names := listSomaticCNVNamesWithFrequencyQuery(t, env, nil, []types.SortBody{{Field: "somatic_pf_to_wgs", Order: "asc"}})
+		assert.Equal(t, []string{"SCNV3", "SCNV1", "SCNV2"}, names, "NULL first in ascending order")
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Sort_By_Frequency_Desc_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		names := listSomaticCNVNamesWithFrequencyQuery(t, env, nil, []types.SortBody{{Field: "somatic_pf_to_wgs", Order: "desc"}})
+		assert.Equal(t, []string{"SCNV2", "SCNV1", "SCNV3"}, names)
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Filter_By_Frequency(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: ">=", Content: types.LeafContent{Field: "somatic_pf_to_wgs", Value: []interface{}{0.5}}}},
+			Op:      "and",
+		}
+		assert.Equal(t, []string{"SCNV2"}, listSomaticCNVNamesWithFrequencyQuery(t, env, sqon, nil))
+	})
+}
+
+func Test_SomaticCNV_CountOccurrences_Filter_By_Frequency(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "<", Content: types.LeafContent{Field: "somatic_pf_to_wgs", Value: []interface{}{0.5}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, nil, sqon, nil, nil)
+		require.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 71, 74, 85, query)
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), count.Count)
+	})
+}
+
+func Test_SomaticCNV_GetStatisticsOccurrences_Frequency(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("somatic_pf_to_wgs", nil, types.SomaticCNVOccurrencesFields)
+		require.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 85, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 0.2, statistics.Min)
+		assert.EqualValues(t, 0.6, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
 	})
 }

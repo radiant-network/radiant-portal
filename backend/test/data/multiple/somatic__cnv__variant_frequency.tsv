@@ -1,0 +1,5 @@
+cnv_id	pc_to_wgs	pn_to_wgs	pf_to_wgs	pc_to_wxs	pn_to_wxs	pf_to_wxs
+1	2	10	0.2	0	0	NULL
+2	6	10	0.6	0	0	NULL
+3	1	10	0.1	0	0	NULL
+10	3	10	0.3	0	0	NULL

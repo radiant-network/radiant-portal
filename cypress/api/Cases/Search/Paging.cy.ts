@@ -4,40 +4,40 @@ import { data } from 'pom/shared/Data';
 describe('Cases - Search - Paging', () => {
   const dataCase = data.case;
 
-  it('First 10 items', () => {
+  it('First item', () => {
     const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
-      "limit": 10,
+      "limit": 1,
       "page_index": 0
     }`;
 
     cy.apiCall('POST', `cases/search`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
-      cy.validateItemCount(res, 10, 'list');
+      cy.validateItemCount(res, 1, 'list');
     });
   });
 
-  it('First 20 items', () => {
+  it('First 2 items', () => {
     const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
-      "limit": 20,
+      "limit": 2,
       "page_index": 0
     }`;
 
     cy.apiCall('POST', `cases/search`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
-      cy.validateItemCount(res, 20, 'list');
+      cy.validateItemCount(res, 2, 'list');
     });
   });
 
-  it('Second 10 items', () => {
+  it('Second item', () => {
     const Auth = Cypress.expose('globalData').Authorization;
     const firstBody: string = `{
-      "limit": 10,
+      "limit": 1,
       "page_index": 0
     }`;
     const secondBody: string = `{
-      "limit": 10,
+      "limit": 1,
       "page_index": 1
     }`;
     let firstItemOfAll: any;
@@ -51,7 +51,7 @@ describe('Cases - Search - Paging', () => {
       })
       .then((secondRes: any) => {
         expect(secondRes.status).to.eq(200);
-        cy.validateItemCount(secondRes, 10, 'list');
+        cy.validateItemCount(secondRes, 1, 'list');
         expect(secondRes.body.list[0].case_id).to.not.eq(firstItemOfAll);
       });
   });

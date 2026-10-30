@@ -62,7 +62,8 @@ func NewFacetsRepository() *FacetsRepository {
 				"processed_pseudogene", "polymorphic_pseudogene", "retrotransposed", "transcribed_processed_pseudogene", "transcribed_unprocessed_pseudogene",
 				"transcribed_unitary_pseudogene", "translated_processed_pseudogene", "translated_unprocessed_pseudogene", "unitary_pseudogene", "unprocessed_pseudogene",
 				"artifact", "lincRNA", "macro_lncRNA", "3prime_overlapping_ncRNA", "disrupted_domain",
-				"vault_RNA", "bidirectional_promoter_lncRNA", "",
+				"vault_RNA", "bidirectional_promoter_lncRNA", "transcribed_pseudogene", "ncRNA_pseudogene", "ncRNA",
+				"Y_RNA", "RNase_P_RNA", "RNase_MRP_RNA", "telomerase_RNA", "tRNA", "",
 			},
 		},
 		"omim_inheritance": {
@@ -102,8 +103,8 @@ func NewFacetsRepository() *FacetsRepository {
 			Name: "transmission_mode",
 			Values: []string{
 				"autosomal_dominant_de_novo", "autosomal_dominant", "autosomal_recessive", "x_linked_dominant_de_novo", "x_linked_recessive_de_novo",
-				"x_linked_dominant", "x_linked_recessive", "non_carrier_proband", "unknown_parents_genotype", "unknown_father_genotype",
-				"unknown_mother_genotype", "unknown_proband_genotype",
+				"x_linked_dominant", "x_linked_recessive", "uniparental_disomy", "non_carrier_proband", "unknown_parents_genotype",
+				"unknown_father_genotype", "unknown_mother_genotype", "unknown_proband_genotype",
 			},
 		},
 		"type": {

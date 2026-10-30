@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getUrlLink, stringToRegExp } from 'pom/shared/Utils';
+import { getClass, getColumnPosition, getUrlLink, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="evidence-tab"]',
@@ -10,15 +10,15 @@ const selectors = {
   },
   condPhenCard: {
     omim: {
-      tableId: '[id="HPSE2-condition-phenotype-table"]',
+      tableId: '[id="ADGRV1-condition-phenotype-table"]',
     },
     orphanet: {
       tab: '[data-cy="orphanet-tab"]',
-      tableId: '[id="HPSE2-condition-phenotype-table"]',
+      tableId: '[id="ADGRV1-condition-phenotype-table"]',
     },
     hpo: {
       tab: '[data-cy="hpo-tab"]',
-      tableId: '[id="HPSE2-condition-phenotype-table"]',
+      tableId: '[id="ADGRV1-condition-phenotype-table"]',
     },
   },
 };
@@ -461,8 +461,8 @@ const clinvarColumnContentHandler = (columnID: string, dataClinVar: any, positio
   const tableId = selectors.clinvarCard.tableId;
   switch (columnID) {
     case 'classification':
-      cy.validateTableFirstRowContent(dataClinVar[columnID], position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position, tableId);
+      cy.validateTableFirstRowContent(getClass(dataClinVar[columnID]).abbrev, position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(dataClinVar[columnID]).color), position, tableId);
       break;
     case 'status':
       cy.get(CommonSelectors.tableRow(tableId))

@@ -37,7 +37,7 @@ describe('VariantEntity - Patients - Uninterpreted - Columns', () => {
     VariantEntity_Patients.uninterpreted.validations.shouldShowSortableColumns();
   });
 
-  it('Tooltip [SJRA-1111]', () => {
+  it('Tooltip', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnTooltips();
   });

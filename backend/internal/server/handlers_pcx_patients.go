@@ -1,14 +1,17 @@
 package server
 
 import (
+	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
-// The PCX patient handlers only publish the API contract for now: they answer 501 and are not
-// registered yet. Each story replaces its handler body and registers the route.
+// The PCX patient handlers not implemented yet answer 501; each story replaces its handler body.
 
 func notImplemented(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, types.ApiError{Status: http.StatusNotImplemented, Message: "Not Implemented"})
@@ -31,8 +34,33 @@ func notImplemented(c *gin.Context) {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/search [post]
-func SearchPatientsHandler() gin.HandlerFunc {
-	return notImplemented
+func SearchPatientsHandler(repo pcxPatientsSearcher) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body types.ListBodyWithCriteria
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if body.Limit == 0 {
+			body.Limit = types.PcxPatientListDefaultLimit
+		}
+		pagination := types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromCriteria(types.PcxPatientsQueryConfig, body.AdditionalFields, body.SearchCriteria, pagination, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		patients, count, err := repo.SearchPatients(c.Request.Context(), query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, types.PatientsSearchResponse{List: patients, Count: count})
+	}
+}
+
+type pcxPatientsSearcher interface {
+	SearchPatients(ctx context.Context, query types.ListQuery) ([]types.PatientListItem, int64, error)
 }
 
 // PatientsAutocompleteHandler handles retrieving PCX patient suggestions by prefix
@@ -51,8 +79,28 @@ func SearchPatientsHandler() gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/autocomplete [get]
-func PatientsAutocompleteHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientsAutocompleteHandler(repo pcxPatientsAutocompleter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		if prefix == "" {
+			c.JSON(http.StatusOK, []types.AutocompleteResult{})
+			return
+		}
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil || limit <= 0 {
+			limit = types.PcxPatientListDefaultLimit
+		}
+		results, err := repo.AutocompletePatients(c.Request.Context(), prefix, min(limit, utils.MaxLimit))
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, results)
+	}
+}
+
+type pcxPatientsAutocompleter interface {
+	AutocompletePatients(ctx context.Context, prefix string, limit int) ([]types.AutocompleteResult, error)
 }
 
 // PatientsFiltersHandler handles retrieving the patient list filters
@@ -69,8 +117,19 @@ func PatientsAutocompleteHandler() gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/filters [get]
-func PatientsFiltersHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientsFiltersHandler(repo pcxPatientsFiltersReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetPatientsFilters(c.Request.Context())
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}
+
+type pcxPatientsFiltersReader interface {
+	GetPatientsFilters(ctx context.Context) (*types.PatientFilters, error)
 }
 
 // PatientsStatisticsHandler handles retrieving the cohort analytics
@@ -107,6 +166,26 @@ func PatientsStatisticsHandler() gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/patients/{patient_key} [get]
-func PatientEntityHandler() gin.HandlerFunc {
-	return notImplemented
+func PatientEntityHandler(repo pcxPatientReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.Param("patient_key")
+		if _, err := uuid.Parse(key); err != nil {
+			HandleNotFoundError(c, "patient")
+			return
+		}
+		patient, err := repo.GetPatient(c.Request.Context(), key)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if patient == nil {
+			HandleNotFoundError(c, "patient")
+			return
+		}
+		c.JSON(http.StatusOK, patient)
+	}
+}
+
+type pcxPatientReader interface {
+	GetPatient(ctx context.Context, patientKey string) (*types.PatientEntity, error)
 }

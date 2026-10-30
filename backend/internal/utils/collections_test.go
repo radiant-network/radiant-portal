@@ -49,6 +49,20 @@ func Test_SortIgvTracksByLeadingThenName(t *testing.T) {
 	}, tracks)
 }
 
+func Test_SortIgvTracksByLeadingThenName_sameNameOrdersBySequencingExperimentId(t *testing.T) {
+	tracks := []types.IGVTrackEnriched{
+		{Name: "Reads: S0001 proband", SequencingExperimentId: 9},
+		{Name: "Reads: S0001 proband", SequencingExperimentId: 4},
+	}
+
+	SortIgvTracksByLeadingThenName(tracks, func(t types.IGVTrackEnriched) bool { return false })
+
+	assert.Equal(t, []types.IGVTrackEnriched{
+		{Name: "Reads: S0001 proband", SequencingExperimentId: 4},
+		{Name: "Reads: S0001 proband", SequencingExperimentId: 9},
+	}, tracks)
+}
+
 func Test_SortConsequences(t *testing.T) {
 	variantsConsequences := []types.VariantConsequence{
 		{IsPicked: false, Symbol: "CCC"},

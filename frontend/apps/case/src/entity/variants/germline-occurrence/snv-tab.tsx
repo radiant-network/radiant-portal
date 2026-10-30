@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import type { CaseEntity, CaseSequencingExperiment, SortBody } from '@/api/api';
 import { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -12,8 +12,10 @@ import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
+import { useCanDownloadVariantsReport } from '../../../permissions/use-case-permissions';
 import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
+import VariantsReportButton from '../table/variants-report-button';
 
 import { isValidSeqId } from './libs/seq-id';
 import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
@@ -21,6 +23,11 @@ import {
   defaultGermlineSNVSettings,
   getGermlineSNVOccurrenceColumns,
 } from './table/germline-snv-occurrence-table-settings';
+
+const GERMLINE_SNV_DEFAULT_SORTING: SortBody[] = [
+  { field: 'exomiser_gene_combined_score', order: 'desc' },
+  { field: 'max_impact_score', order: 'desc' },
+];
 
 type SNVTabProps = {
   seqId: number;
@@ -36,10 +43,17 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const appId = config.germline_snv_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
+  const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
-    () => getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id }),
-    [t, caseEntity, patient?.patient_id],
+    () =>
+      getGermlineSNVOccurrenceColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
   );
 
   if (!isValidSeqId(seqId)) {
@@ -71,9 +85,20 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
           columns={columns}
           defaultColumnSettings={defaultGermlineSNVSettings}
           defaultPageSize={DEFAULT_PAGE_SIZE}
+          defaultSorting={GERMLINE_SNV_DEFAULT_SORTING}
           enableColumnOrdering
           enableFullscreen
           TableFilters={<AnnotationsTableQuickfilters />}
+          selection={
+            canDownloadVariantsReport
+              ? {
+                  idField: 'locus_id',
+                  renderActions: selection => (
+                    <VariantsReportButton kind="germline" seqId={seqId} taskId={taskId} selection={selection} />
+                  ),
+                }
+              : undefined
+          }
           extras={[
             <SliderGermlineOccurrenceSheet key="germline-snv-occurrence-sheet" patientSelected={patientSelected} />,
           ]}

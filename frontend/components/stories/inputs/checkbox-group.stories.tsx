@@ -211,7 +211,7 @@ const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
     description: (
       <>
         This is option 1.{' '}
-        <a href="#" className="text-primary underline underline-offset-4">
+        <a href="https://example.com" className="text-primary underline underline-offset-4">
           View permissions
         </a>
       </>
@@ -243,7 +243,7 @@ const optionsWithExtraContent: CheckboxGroupFieldItem[] = [
     description: (
       <>
         This is option 2.{' '}
-        <a href="#" className="text-primary underline underline-offset-4">
+        <a href="https://example.com" className="text-primary underline underline-offset-4">
           View permissions
         </a>
       </>

@@ -1,0 +1,3 @@
+organization_name	organization_code	patient_id	patient_id_type	radiant_patient_id	panel_observed_at	age_at_panel_days	date_semantic	wbc_value	wbc_unit	wbc_loinc	wbc_source_code_text	hemoglobin_value	hemoglobin_unit	hemoglobin_loinc	hemoglobin_source_code_text	platelets_value	platelets_unit	platelets_loinc	platelets_source_code_text	anc_value	anc_unit	anc_loinc	anc_source_code_text	analytes_found	can_read_phi
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	2025-12-01 09:30:00	3960	clinical	6.2	10*3/uL	6690-2	WBC	11.8	g/dL	718-7	HGB	245	10*3/uL	777-3	PLT	2.9	x10E9/L	751-8	ANC	4	true
+Boston Children's Hospital	BCH	C100004	research_id	22	NULL	2900	clinical	4.1	10*3/uL	6690-2	WBC	NULL	NULL	NULL	NULL	180	10*3/uL	777-3	PLT	1500	/uL	751-8	ANC	3	false

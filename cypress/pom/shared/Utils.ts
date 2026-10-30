@@ -7,6 +7,8 @@ import { CommonTexts } from './Texts';
  */
 export const oneMinute = 60 * 1000;
 
+const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Builds a RegExp that matches either the English or French text from CommonTexts.
  * Special RegExp characters are automatically escaped.
@@ -14,7 +16,6 @@ export const oneMinute = 60 * 1000;
  * @returns A RegExp matching either EN or FR text exactly.
  */
 export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
-  const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const keyOfCommonTextsId = commonTextsId as keyof typeof CommonTexts.en;
 
   const enValue = CommonTexts.en[keyOfCommonTextsId];
@@ -26,6 +27,14 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
 
   return new RegExp(`^(${escapeRegExp(enValue)}|${escapeRegExp(frValue)})$`);
 };
+
+/**
+ * Builds a RegExp that matches the text exactly (e.g., 'Cypress_F1' does not match 'Cypress_F1 COPY').
+ * Special RegExp characters are automatically escaped.
+ * @param text The text to match.
+ * @returns A RegExp matching the text exactly.
+ */
+export const buildExactRegExp = (text: string): RegExp => new RegExp(`^${escapeRegExp(text)}$`);
 
 /**
  * Resolves a facet configuration from its section name and facet id.
@@ -91,6 +100,23 @@ export const getClass = (classification: string) => {
   };
 
   return mapping[classification];
+};
+
+/**
+ * Returns the color and display text for a given CMC tier.
+ * @param tier The CMC tier key (e.g., '1', '2', '3', 'Other', 'no_data').
+ * @returns An object containing { color, display } for the tier.
+ */
+export const getTier = (tier: string) => {
+  const mapping: Record<string, { color: string; display: string }> = {
+    '1': { color: 'red', display: 'Tier 1' },
+    '2': { color: 'orange', display: 'Tier 2' },
+    '3': { color: 'amber', display: 'Tier 3' },
+    Other: { color: 'neutral', display: 'Other' },
+    no_data: { color: 'neutral', display: 'ND' },
+  };
+
+  return mapping[tier];
 };
 
 /**
@@ -296,6 +322,8 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return undefined;
     case 'clinvar':
       return data.clinvar_name ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data.clinvar_name}` : undefined;
+    case 'cmc':
+      return data.cmc_id ? `https://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=37&id=${data.cmc_id}` : undefined;
     case 'cnv_variant':
       const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
       return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
@@ -317,6 +345,8 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return undefined;
     case 'omim_phenotype':
       return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
+    case 'tier':
+      return data.locus ? `https://franklin.genoox.com/clinical-db/variant/snpTumor/chr${data.locus}-hg38` : undefined;
     case 'rcv_link':
       return data.rcv_link ? `https://www.ncbi.nlm.nih.gov/clinvar/${data.rcv_link}.${data.version}` : undefined;
     case 'transcript_id':
@@ -412,6 +442,17 @@ export const shouldHaveTableResultsCount = (count: number | Cypress.Chainable<nu
   } else {
     count.then(compare);
   }
+};
+
+/**
+ * Converts a displayed file size (e.g. '54.08 KB', '1.4 GB') to bytes, so sizes in different units can be compared.
+ * @param size The displayed size.
+ * @returns The size in bytes, or NaN if the format is not recognized.
+ */
+export const sizeToBytes = (size: string): number => {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const match = size.trim().match(/^([\d.,]+)\s*([KMGT]?B)$/i);
+  return match ? parseFloat(match[1].replace(',', '')) * 1024 ** units.indexOf(match[2].toUpperCase()) : NaN;
 };
 
 /**

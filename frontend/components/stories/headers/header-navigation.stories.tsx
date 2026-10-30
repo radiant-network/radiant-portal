@@ -67,3 +67,28 @@ export const Default: Story = {
     </StorySection>
   ),
 };
+
+export const WithBackLink: Story = {
+  args: {
+    isLoading: false,
+    title: 'ID: C8832261',
+    backLink: { label: 'Patients', to: '/patient' },
+    badges: [
+      { variant: 'secondary', children: 'ATRT-SHH' },
+      { variant: 'green', children: 'Alive' },
+    ],
+    description: 'Born 2020 · Male · Children’s Hospital Los Angeles',
+  },
+  render: args => (
+    <StorySection
+      title="With back link"
+      description="Back link, separator and title on desktop; below the md breakpoint, only the chevron. Resize the window to see the mobile version."
+    >
+      <BrowserRouter>
+        <div className="w-full">
+          <HeaderNavigation {...args} />
+        </div>
+      </BrowserRouter>
+    </StorySection>
+  ),
+};

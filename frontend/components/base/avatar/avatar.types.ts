@@ -21,6 +21,7 @@ export interface AvatarProps {
   /** Show the assignees hovercard; off while the assignment picker is open. */
   showDetails?: boolean;
   buttonVariant?: AvatarButtonVariant;
+  onEdit?: () => void;
 }
 
 export interface BaseAvatarProps {
@@ -37,4 +38,5 @@ export interface UserAvatarProps {
   className?: string;
   popoverTitle?: string;
   showDetails?: boolean;
+  onEdit?: () => void;
 }

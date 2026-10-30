@@ -1,6 +1,7 @@
 import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useCreateAtom, useSelector } from '@tanstack/react-store';
 import {
+  type CellContext,
   type Column,
   type ColumnDef,
   columnFilteringFeature,
@@ -12,6 +13,7 @@ import {
   type ColumnPinningState,
   columnResizingFeature,
   columnSizingFeature,
+  type ColumnSort,
   columnVisibilityFeature,
   createExpandedRowModel,
   createFilteredRowModel,
@@ -23,6 +25,7 @@ import {
   FlexRender,
   type GroupingState,
   type Header,
+  type HeaderContext,
   metaHelper,
   type OnChangeFn,
   type PaginationState,
@@ -37,18 +40,24 @@ import {
   rowSelectionFeature,
   type RowSelectionState,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
   type SortingState,
   tableFeatures,
 } from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
 import { type SortBody, SortBodyOrderEnum } from '@/api/api';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
 import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import {
@@ -124,6 +133,8 @@ export const features = tableFeatures({
   rowSelectionFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
+  // sort functions resolved by name when a column's sortFn is 'auto'
+  sortFns: { alphanumeric: sortFn_alphanumeric, datetime: sortFn_datetime, text: sortFn_text },
   filteredRowModel: createFilteredRowModel(),
   expandedRowModel: createExpandedRowModel(),
   groupedRowModel: createGroupedRowModel(),
@@ -205,9 +216,14 @@ export type TableProps<TData extends RowData> = {
   tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  getRowId?: (row: TData) => string;
+  enableRowSelectionColumn?: boolean;
+  toolbarActions?: React.ReactNode;
+  selectionSummary?: React.ReactNode;
   pagination: PaginationSettings;
   serverOptions?: ServerOptions;
   extras?: React.ReactElement[];
+  emptyState?: React.ReactNode;
 };
 
 export interface BaseColumnSettings {
@@ -473,6 +489,7 @@ function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, T
 function getHeaderFlexRender<TData extends RowData>(
   table: ReactTable<AppFeatures, TData>,
   header: Header<AppFeatures, TData, unknown>,
+  defaultSort?: ColumnSort,
 ) {
   if (header.isPlaceholder) return null;
   return (
@@ -484,11 +501,12 @@ function getHeaderFlexRender<TData extends RowData>(
         </div>
 
         {/* Table Header Actions, only display on hover */}
-        <TableHeaderActions header={header} />
+        <TableHeaderActions header={header} defaultSort={defaultSort} />
       </div>
 
       {/* Resize Grip */}
       {header.column.getCanResize() && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mouse-only column resize
         <div
           onDoubleClick={() => header.column.resetSize()}
           onMouseDown={header.getResizeHandler()}
@@ -513,9 +531,11 @@ function getHeaderFlexRender<TData extends RowData>(
 function getRowFlexRender<T extends RowData>({
   subComponent,
   containerWidth,
+  t,
 }: {
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
+  t: TFunction<string, undefined>;
 }) {
   return (row: Row<AppFeatures, T>) => (
     <Fragment key={row.id}>
@@ -545,6 +565,8 @@ function getRowFlexRender<T extends RowData>({
                   size="xs"
                   variant="ghost"
                   iconOnly
+                  aria-label={row.getIsExpanded() ? t('a11y.data_table.collapse_row') : t('a11y.data_table.expand_row')}
+                  aria-expanded={row.getIsExpanded()}
                   onClick={row.getToggleExpandedHandler()}
                 >
                   {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
@@ -616,17 +638,8 @@ function getRowFlexRender<T extends RowData>({
  *   enablePinning: false,
  *  }]
  *
- * @DESCRIPTION: add a row selection checkbox for each row
- * @EXAMPLE:
- *  [{
- *   id: "rowSelection",
- *   header: (header: HeaderContext<AppFeatures, Occurrence, unknown>) => <RowSelectionHeader table={header.table} />,
- *   cell: info => <RowSelectionCell row={info.row} />,
- *   size: 48,
- *   maxSize: 48,
- *   enableResizing: false,
- *   enablePinning: false,
- *  }]
+ * @DESCRIPTION: add a row selection checkbox for each row with `enableRowSelectionColumn`: the column stays
+ *              pinned first whatever the saved preferences, and never enters them or the column settings
  *
  * @DESCRIPTION: add a `RowExpandCell`, expand a custom subcomponent
  * @EXAMPLE:
@@ -683,6 +696,27 @@ function getRowFlexRender<T extends RowData>({
  *   additionalFields: ['field1', 'field2'],
  * }
  */
+const ROW_SELECTION_COLUMN_ID = 'row-selection';
+
+const rowSelectionColumn = {
+  id: ROW_SELECTION_COLUMN_ID,
+  header: ({ table }: HeaderContext<AppFeatures, any, unknown>) => <RowSelectionHeader table={table} />,
+  cell: ({ row }: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={row} />,
+  size: 48,
+  maxSize: 48,
+  enableResizing: false,
+  enablePinning: false,
+  enableSorting: false,
+};
+
+function withRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: [ROW_SELECTION_COLUMN_ID, ...withoutRowSelectionPinned(pinning).start!] };
+}
+
+function withoutRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: (pinning.start ?? []).filter(id => id !== ROW_SELECTION_COLUMN_ID) };
+}
+
 // eslint-disable-next-line complexity
 function DataTable<T extends RowData>({
   id,
@@ -707,8 +741,13 @@ function DataTable<T extends RowData>({
   tableIndexResultPosition = 'top',
   rowSelection,
   onRowSelectionChange,
+  getRowId,
+  enableRowSelectionColumn = false,
+  toolbarActions,
+  selectionSummary,
   serverOptions,
   extras,
+  emptyState,
 }: TableProps<T>) {
   const { t } = useI18n();
 
@@ -744,12 +783,15 @@ function DataTable<T extends RowData>({
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [sorting, setSorting] = useState<SortingState>(
-    (serverOptions?.defaultSorting?.map(serverSorting => ({
-      id: serverSorting.field,
-      desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState) || [],
+  const defaultSortingState = useMemo<SortingState>(
+    () =>
+      (serverOptions?.defaultSorting?.map(serverSorting => ({
+        id: serverSorting.field,
+        desc: serverSorting.order === SortBodyOrderEnum.Desc,
+      })) as SortingState) ?? [],
+    [serverOptions?.defaultSorting],
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
 
   // Global Table State
@@ -791,11 +833,17 @@ function DataTable<T extends RowData>({
   // Ref to update only if additional fields change
   const lastFilteredAdditionalFields = useRef<string[]>([]);
 
+  const tableColumns = useMemo(
+    () => (enableRowSelectionColumn ? [rowSelectionColumn as TableColumnDef<T, any>, ...columns] : columns),
+    [columns, enableRowSelectionColumn],
+  );
+  const tableColumnPinning = enableRowSelectionColumn ? withRowSelectionPinned(columnPinning) : columnPinning;
+
   // Initialize tanstack table
   const table = useAppTable({
     // 'hidden' drives the slice through state instead, so no atom owns it
     atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
-    columns,
+    columns: tableColumns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     data,
@@ -806,7 +854,12 @@ function DataTable<T extends RowData>({
     keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
     manualPagination: pagination.type === 'server',
     manualSorting: serverOptions?.onSortingChange !== undefined, // client-side sorting when no server callback
-    onColumnPinningChange: setColumnPinning,
+    onColumnPinningChange: enableRowSelectionColumn
+      ? updater =>
+          setColumnPinning(prev =>
+            withoutRowSelectionPinned(typeof updater === 'function' ? updater(withRowSelectionPinned(prev)) : updater),
+          )
+      : setColumnPinning,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
@@ -816,12 +869,13 @@ function DataTable<T extends RowData>({
     ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
     onRowPinningChange: setRowPinning,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
+    ...(getRowId ? { getRowId: (row: T) => getRowId(row) } : {}),
     onSortingChange: setSorting,
     pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
     state: {
       columnOrder,
       columnVisibility,
-      columnPinning,
+      columnPinning: tableColumnPinning,
       grouping,
       columnSizing,
       expanded,
@@ -838,12 +892,13 @@ function DataTable<T extends RowData>({
    * Cache our row flexRender method
    */
   const rowFlexRender = useMemo(
-    () => getRowFlexRender<T>({ subComponent, containerWidth }),
-    [subComponent, containerWidth],
+    () => getRowFlexRender<T>({ subComponent, containerWidth, t }),
+    [subComponent, containerWidth, t],
   );
 
   // Table Index display position
-  const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
+  const hasUpperSettings =
+    tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen || !!toolbarActions;
 
   // Footer, check if any columns have footer definitions
   const footerGroups = table.getFooterGroups();
@@ -1010,20 +1065,7 @@ function DataTable<T extends RowData>({
         {/* Results with TableFilters */}
         {tableIndexResultPosition === 'top' && TableFilters !== undefined && (
           <div className={cn('mb-2', { invisible: pagination.type === 'hidden' })}>
-            <TableIndexResult
-              loading={loadingStates?.total}
-              pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-              pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
-              total={total}
-              quickfilters={quickfilters}
-            />
-          </div>
-        )}
-
-        <div className="w-full flex text-left justify-between items-end">
-          {/* Results without TableFilters */}
-          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
-            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+            {selectionSummary ?? (
               <TableIndexResult
                 loading={loadingStates?.total}
                 pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
@@ -1031,6 +1073,23 @@ function DataTable<T extends RowData>({
                 total={total}
                 quickfilters={quickfilters}
               />
+            )}
+          </div>
+        )}
+
+        <div className="w-full flex text-left justify-between items-end">
+          {/* Results without TableFilters */}
+          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
+            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+              {selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              )}
             </div>
           )}
 
@@ -1039,6 +1098,8 @@ function DataTable<T extends RowData>({
 
           {/* Right Menu Options */}
           <div className="flex justify-end">
+            {toolbarActions && <div className="flex items-center gap-2 mr-2">{toolbarActions}</div>}
+
             {/* GroupBy */}
             {groupByColumns.length > 0 && (
               <DataTableGroupBy
@@ -1110,13 +1171,15 @@ function DataTable<T extends RowData>({
       {/* Empty State */}
       {tableState === DataTableState.EMPTY && (
         <Card className="shadow-none">
-          <Empty
-            title={t('common.table.no_result')}
-            description={t('common.table.no_result_description')}
-            iconType="custom"
-            icon={SearchIcon}
-            size="mini"
-          />
+          {emptyState ?? (
+            <Empty
+              title={t('common.table.no_result')}
+              description={t('common.table.no_result_description')}
+              iconType="custom"
+              icon={SearchIcon}
+              size="mini"
+            />
+          )}
         </Card>
       )}
 
@@ -1150,7 +1213,13 @@ function DataTable<T extends RowData>({
                       colSpan={header.colSpan}
                       variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
                     >
-                      {getHeaderFlexRender(table, header)}
+                      {getHeaderFlexRender(
+                        table,
+                        header,
+                        sorting.length === 0
+                          ? defaultSortingState.find(sort => sort.id === header.column.id)
+                          : undefined,
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -1182,15 +1251,16 @@ function DataTable<T extends RowData>({
       {pagination.type !== 'hidden' && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
-            {tableIndexResultPosition === 'bottom' && (
-              <TableIndexResult
-                loading={loadingStates?.total}
-                pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
-                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
-                total={total}
-                quickfilters={quickfilters}
-              />
-            )}
+            {tableIndexResultPosition === 'bottom' &&
+              (selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              ))}
           </div>
           <div className="flex items-center gap-2">
             <div>

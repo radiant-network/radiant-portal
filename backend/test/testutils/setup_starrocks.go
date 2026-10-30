@@ -48,12 +48,16 @@ func fixtureStateFor(folderName string) *fixtureState {
 }
 
 var perTenantTables = map[string]bool{
-	types.GermlineSNVOccurrenceTable.Name: types.GermlineSNVOccurrenceTable.PerTenant,
-	types.SomaticSNVOccurrenceTable.Name:  types.SomaticSNVOccurrenceTable.PerTenant,
-	types.GermlineCNVOccurrenceTable.Name: types.GermlineCNVOccurrenceTable.PerTenant,
-	types.SomaticCNVOccurrenceTable.Name:  types.SomaticCNVOccurrenceTable.PerTenant,
-	types.ExomiserTable.Name:              types.ExomiserTable.PerTenant,
-	types.VariantTable.Name:               types.VariantTable.PerTenant,
+	types.GermlineSNVOccurrenceTable.Name:       types.GermlineSNVOccurrenceTable.PerTenant,
+	types.SomaticSNVOccurrenceTable.Name:        types.SomaticSNVOccurrenceTable.PerTenant,
+	types.GermlineCNVOccurrenceTable.Name:       types.GermlineCNVOccurrenceTable.PerTenant,
+	types.SomaticCNVOccurrenceTable.Name:        types.SomaticCNVOccurrenceTable.PerTenant,
+	types.ExomiserTable.Name:                    types.ExomiserTable.PerTenant,
+	types.VariantTable.Name:                     types.VariantTable.PerTenant,
+	types.TenantGenePanelTable.Name:             types.TenantGenePanelTable.PerTenant,
+	types.GermlineSNVComphetTable.Name:          types.GermlineSNVComphetTable.PerTenant,
+	types.GermlineCNVVariantFrequencyTable.Name: types.GermlineCNVVariantFrequencyTable.PerTenant,
+	types.SomaticCNVVariantFrequencyTable.Name:  types.SomaticCNVVariantFrequencyTable.PerTenant,
 }
 
 // TenantKeyOffset is added to each tenant key column, scaled by the tenant's index in Need.Tenants,
@@ -289,6 +293,8 @@ func loadTableInto(db *sql.DB, database, folderName string, file os.DirEntry, ke
 	return createTableAndPopulateData(db, folderName, file, keyOffset, keyColumns)
 }
 
+const sqlExpressionColumnSuffix = "@sql"
+
 func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry, keyOffset int, keyColumns map[string]bool) error {
 	if filepath.Ext(file.Name()) != ".tsv" {
 		return nil
@@ -325,32 +331,46 @@ func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry,
 		columns = strings.Split(header, "\t")
 	}
 
+	// A column whose header ends with sqlExpressionColumnSuffix holds SQL expressions, inlined as is: StarRocks
+	// cannot cast a string parameter to some types (e.g. ARRAY<STRUCT>), which are written as
+	// `[named_struct('symbol', 'BRCA2', 'nb', 2)]` instead.
+	sqlExpressionColumns := make(map[int]bool)
+	for i, column := range columns {
+		if name, found := strings.CutSuffix(column, sqlExpressionColumnSuffix); found {
+			columns[i] = name
+			sqlExpressionColumns[i] = true
+		}
+	}
 	columnNames := strings.Join(columns, ", ")
-	p := strings.Repeat("?, ", len(columns))
-	p = p[:len(p)-2]
-	insertQuery := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, columnNames, p)
 	for scanner.Scan() {
 		line := scanner.Text()
 		values := strings.Split(line, "\t")
 
 		// Convert to interface{} for stmt.Exec
-		args := make([]interface{}, len(values))
+		args := make([]interface{}, 0, len(values))
+		placeholders := make([]string, len(values))
 		for i, v := range values {
+			if sqlExpressionColumns[i] {
+				placeholders[i] = v
+				continue
+			}
+			placeholders[i] = "?"
 			switch {
 			case v == "NULL":
-				args[i] = nil
+				args = append(args, nil)
 			case keyOffset != 0 && i < len(columns) && keyColumns[columns[i]]:
 				n, err := strconv.Atoi(v)
 				if err != nil {
 					return fmt.Errorf("failed to offset key column %s value %q: %w", columns[i], v, err)
 				}
-				args[i] = n + keyOffset
+				args = append(args, n+keyOffset)
 			default:
-				args[i] = v // Database driver will handle type conversion
+				args = append(args, v) // Database driver will handle type conversion
 			}
 		}
 
 		// Execute the prepared statement
+		insertQuery := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, columnNames, strings.Join(placeholders, ", "))
 		_, err = db.Exec(insertQuery, args...)
 		if err != nil {
 			return fmt.Errorf("failed to insert row: %v", err)

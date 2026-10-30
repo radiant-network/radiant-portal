@@ -4,9 +4,6 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (3, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (4, 'family_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (5, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
-       (6, 'exomiser', NULL, '14.0.0', NULL, '2021-10-12 13:08:00', 'radiant'),
-       (7, 'exomiser', NULL, '14.0.0', NULL, '2021-10-12 13:08:00', 'radiant'),
-       (8, 'exomiser', NULL, '14.0.0', NULL, '2021-10-12 13:08:00', 'radiant'),
        (11, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (12, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (13, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
@@ -27,7 +24,6 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (28, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (29, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (30, 'radiant_germline_annotation', NULL, '1.0.0', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
-       (31, 'exomiser', NULL, '14.0.0', NULL, '2021-10-12 13:08:00', 'radiant'),
        (32, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (33, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
        (34, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00', 'radiant'),
@@ -85,7 +81,9 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        -- Covers both the fetus's and the mother's own sequencing for case 72 (Fix 7 test).
        (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
        -- Somatic CNV: tumor-only by definition, on the same tumoral seq 74 as tasks 74 and 82.
-       (85, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant')
+       (85, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant'),
+       -- Family-level germline CNV annotation of case 70: its gcnv VCF is never an IGV track.
+       (86, 'radiant_germline_cnv_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE task ALTER COLUMN id RESTART WITH 1000;

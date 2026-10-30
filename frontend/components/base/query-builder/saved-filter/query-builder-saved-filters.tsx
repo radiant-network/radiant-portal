@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useSavedFiltersContext } from './hooks/use-saved-filter';
@@ -10,7 +12,11 @@ import SaveFilterButton from './save-filter-button';
 import SavedFiltersList from './saved-filters-list';
 import UpdateFilterButton from './update-filter-button';
 
-function QueryBuilderSavedFilters() {
+type QueryBuilderSavedFiltersProps = {
+  renderTitle?: (title: ReactNode) => ReactNode;
+};
+
+function QueryBuilderSavedFilters({ renderTitle = title => title }: QueryBuilderSavedFiltersProps) {
   const { t } = useI18n();
   const { selectedSavedFilter, savedFilterType } = useSavedFiltersContext();
 
@@ -22,11 +28,14 @@ function QueryBuilderSavedFilters() {
 
   return (
     <div id="query-saved-filters" className="flex flex-1">
-      <div className="flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden py-4 pr-4">
-        <div className="text-ellipsis overflow-hidden text-base">
-          {selectedSavedFilter ? selectedSavedFilter.name : t('common.saved_filter.untitled_filter')}
-        </div>
-        <div className="flex items-center" onClick={e => e.stopPropagation()}>
+      <div className="flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden py-4 pr-4 pl-1 -ml-1">
+        {renderTitle(
+          <div className="text-ellipsis overflow-hidden text-base">
+            {selectedSavedFilter ? selectedSavedFilter.name : t('common.saved_filter.untitled_filter')}
+          </div>,
+        )}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
+        <div className="relative z-10 flex items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
             <UpdateFilterButton />
             <DiscardFilterButton />
@@ -34,7 +43,8 @@ function QueryBuilderSavedFilters() {
         </div>
       </div>
       <div className={'flex ml-auto py-4'}>
-        <div className="flex gap-4 items-center" onClick={e => e.stopPropagation()}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
+        <div className="relative z-10 flex gap-4 items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
             <NewFilterButton />
             <SaveFilterButton />

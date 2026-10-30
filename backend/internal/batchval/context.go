@@ -32,6 +32,8 @@ type sequencingExperimentReader interface {
 }
 
 type taskReader interface {
+	GetTaskById(ctx context.Context, taskId int) (*types.Task, error)
+	GetTaskHasDocumentByTaskId(ctx context.Context, taskId int) ([]*types.TaskHasDocument, error)
 	GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*types.TaskContext, error)
 	GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error)
 }

@@ -11,12 +11,29 @@ import { I18nProvider } from '@/components/hooks/I18nProvider';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
+import { featureDefinitions } from './beta-features';
+
 declare const __PROJECT__: PortalConfig;
+
+const CASE_VARIANTS_REPORT_ENV_SUFFIX = '_CASE_VARIANTS_REPORT_ENABLED';
+
+function getEnabledTenants(envSuffix: string): string[] {
+  return Object.entries(process.env)
+    .filter(([key, value]) => key.endsWith(envSuffix) && value === 'true')
+    .map(([key]) => key.slice(0, -envSuffix.length).toLowerCase());
+}
 
 export async function loader({ request }: Route.LoaderArgs) {
   // Just detect and return the language for consistent server/client behavior
   return {
     language: detectLanguageFromRequest(request),
+    features: {
+      caseVariantsReportTenants: getEnabledTenants(CASE_VARIANTS_REPORT_ENV_SUFFIX),
+    },
+    // Public-safe runtime config; never put secrets here — the loader data is serialized to the client.
+    runtimeConfig: {
+      librechatDavidUrl: process.env.APPS_LIBRECHAT_DAVID_URL ?? '',
+    },
   };
 }
 
@@ -41,44 +58,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{__PROJECT__.portal.name}</title>
         <meta property="og:title" content={__PROJECT__.portal.name} />
         <meta property="og:description" content="" />
         <meta name="theme-color" content="#FFFFFF" />
         <meta name="application-name" content={__PROJECT__.portal.name} />
         <Meta />
         <Links />
-        <link rel="icon" type="image/x-icon" href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon.ico`} />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-16x16.png`}
-          sizes="16x16"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-32x32.png`}
-          sizes="32x32"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-96x96.png`}
-          sizes="96x96"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-128x128.png`}
-          sizes="128x128"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          href={`/${__PROJECT__.portal.name.toLowerCase()}/favicon-196x196.png`}
-          sizes="196x196"
-        />
-        <link rel="manifest" href={`/${__PROJECT__.portal.name.toLowerCase()}/site.webmanifest`} />
+        <link rel="icon" type="image/x-icon" href={`/${import.meta.env.THEME}/favicon.ico`} />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-16x16.png`} sizes="16x16" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-32x32.png`} sizes="32x32" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-96x96.png`} sizes="96x96" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-128x128.png`} sizes="128x128" />
+        <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-196x196.png`} sizes="196x196" />
+        <link rel="manifest" href={`/${import.meta.env.THEME}/site.webmanifest`} />
         <script src="https://cdn.jsdelivr.net/npm/igv@3.7.0/dist/igv.min.js"></script>
       </head>
       <body>
@@ -87,7 +80,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
               <TooltipProvider>
                 <AlertDialogProvider>
-                  <BetaFeatureProvider>{children}</BetaFeatureProvider>
+                  <BetaFeatureProvider
+                    definitions={featureDefinitions}
+                    storageKey={`betaFeatures:${import.meta.env.THEME}`}
+                  >
+                    {children}
+                  </BetaFeatureProvider>
                 </AlertDialogProvider>
               </TooltipProvider>
               <Toaster position="top-right" />

@@ -8,9 +8,6 @@ VALUES (1, 1, NULL),
        (5, 1, 1),
        (5, 2, 1),
        (5, 3, 1),
-       (6, 1, 1),
-       (7, 2, 1),
-       (8, 3, 1),
 
        (11, 4, NULL),
        (12, 5, NULL),
@@ -50,7 +47,6 @@ VALUES (1, 1, NULL),
 
        (29, 22, NULL),
        (30, 22, NULL),
-       (31, 22, 8),
 
        (32, 23, NULL),
        (33, 24, NULL),
@@ -129,5 +125,10 @@ VALUES (1, 1, NULL),
        (84, 78, 72),
 
        -- Somatic CNV task on the tumoral seq 74 of case 71.
-       (85, 74, 71)
+       (85, 74, 71),
+
+       -- Germline CNV annotation of case 70, over the whole trio.
+       (86, 70, 70),
+       (86, 71, 70),
+       (86, 72, 70)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

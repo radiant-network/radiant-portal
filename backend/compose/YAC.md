@@ -1,15 +1,24 @@
 # YAC agent (local dev, POC)
 
 [YAC](https://github.com/hms-dbmi/udi-yac) is HIDIVE's agentic chat (chat UI + agent back-end). This
-runs its agent back-end (`packages/agent`, FastAPI) in the local compose stack, with a local Ollama
-as the LLM. Service definition: `yac-compose.yml`.
+runs its agent back-end (`packages/agent`, FastAPI) in the local compose stack. Service definition:
+`yac-compose.yml`. The chat sits above the patient exploration table (`/patient`).
 
-## Start
+Which LLM answers depends on the user:
+
+- **OpenAI**, for a user who enters their own OpenAI key in the chat (the key icon in the chat
+  header). The key is stored in the browser and sent per request as `X-OpenAI-Key`. Ollama is not
+  needed.
+- **Local Ollama** (`qwen3:14b`), for a user without a key. It needs Ollama on the host:
 
 ```bash
 ollama serve                 # on the host (GPU); skip if the Ollama app is already running
 ollama pull qwen3:14b
+```
 
+## Start
+
+```bash
 cd backend
 YAC_ENABLED=true make docker-run   # without YAC_ENABLED=true the agent is not started
 ```
@@ -47,52 +56,61 @@ points at the local StarRocks, and that StarRocks doesn't know remote users.
 | Variable | Default | Purpose |
 |---|---|---|
 | `YAC_ENABLED` | unset | `true` adds the `yac` profile in `make docker-run` |
-| `YAC_MODEL` | `qwen3:14b` | Ollama model. Needs tool calling and strict JSON-schema output |
-| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint |
+| `YAC_MODEL` | `qwen3:14b` | Model for requests without a user key. Needs tool calling and strict JSON-schema output |
+| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint, for requests without a user key. Requests with a user key always go to OpenAI |
 | `YAC_PORT` | `8007` | Host port |
 | `YAC_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins |
 | `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#main` | Git ref or local clone path (relative to `compose/`) |
-| `YAC_KEYCLOAK` | `http://keycloak:8080/realms/CQDG` | Keycloak realm URL the agent trusts. It is the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin` |
+| `YAC_KEYCLOAK` | unset | Keycloak realm URL of another environment, e.g. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin`. It becomes the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. |
 
-`YAC_KEYCLOAK` sets both the issuer and the key URL, so the realm URL must be reachable from the
-container **and** match the tokens' `iss` claim. That holds for QA. Locally it doesn't: tokens are
-minted through `http://localhost:8080/realms/CQDG`, so the default issuer doesn't match and local
-tokens get a 401.
+Unset, the agent trusts the local realm: the issuer is `http://localhost:8080/realms/radiant` (the URL
+tokens are minted through), and the keys are fetched in-network from `keycloak:8080`, since
+`localhost` inside the container is the container itself.
 
 ## Auth and data (JWT passthrough)
 
-The agent verifies Keycloak JWTs (realm `CQDG`, audience `radiant`, the same as the API) and runs
+The agent verifies Keycloak JWTs (realm `radiant`, audience `radiant`, the same as the API) and runs
 every StarRocks query **as the caller**: the token is forwarded as the StarRocks password and the
 StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore apply per user.
 
-`yac/backends.json` exposes two packages, `tenant_a` and `tenant_b` (the `patient` views from
-`scripts/02_starrocks_views.sql`). They need the seed data and demo users from `scripts/README.md`
-(steps 1 to 4).
+`yac/backends.json` exposes one package, `cbtn`: two views of tenant `cbtn`, in database
+`cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
 
-The demo users log in with their email (`alice@demo.org`, password `radiant123!`). `create-user`
-sets a temporary password, which blocks direct-grant logins until the `UPDATE_PASSWORD` required
-action is cleared in Keycloak (admin console, or the admin API with `radiant-admin-cli`).
+- `Efs` and `Os` (`v_pcx30_efs_all_dx_v6_months_cube`, `v_pcx30_os_all_dx_v6_months_cube`) are
+  pre-aggregated event-free and overall survival cubes (`udi:cube`): patient counts over diagnosis,
+  protocol arm, subtype and site, where NULL means the dimension is rolled up. `Os` links its
+  dimensions to `Efs`'s, so one filter reaches both. They are built from a newer data release
+  (`scripts/seed/data/cubes`, 970 patients) than the patient views.
+- The descriptions and cube settings come from the cubes' datapackage, so the LLM knows what each
+  column means.
+- The cubes hold counts only, no PHI: every user with access to the tenant sees the same rows.
+
+Log in with the seed's demo users (`cbtn-admin`, `cbtn-phi-chop`, `cbtn-phi-sch`, `cbtn-lab`,
+`cbtn-nophi`). The password is the username.
 
 ## Smoke test
 
 ```bash
+cd backend
 curl -s localhost:8007/        # {"status":"running"}
 
-tok() { curl -s -d client_id=radiant -d 'client_secret=ShutThisIsASecret!' -d "username=$1@demo.org" \
-  -d 'password=radiant123!' -d grant_type=password \
-  http://localhost:8080/realms/CQDG/protocol/openid-connect/token | jq -r .access_token; }
+SECRET=$(jq -r '.clients[] | select(.clientId=="radiant") | .secret' scripts/init-keycloak/radiant.json)
+tok() { curl -s -d client_id=radiant --data-urlencode "client_secret=$SECRET" -d "username=$1" \
+  -d "password=$1" -d grant_type=password \
+  http://localhost:8080/realms/radiant/protocol/openid-connect/token | jq -r .access_token; }
 
-# Same query, different users: alice sees patient 1003 masked, wendy sees it in clear.
-for u in alice wendy; do
+# Same query, different users, read as each of them: 24056 cube rows for every user.
+for u in cbtn-admin cbtn-phi-chop cbtn-nophi; do
   curl -s -X POST localhost:8007/v1/yac/query -H "Authorization: Bearer $(tok $u)" -H 'Content-Type: application/json' \
-    -d '{"package":"tenant_a","queries":[{"vizId":"q","source":[{"name":"patient","source":"patient"}],"transformation":[]}]}' \
-    | jq -c '[.results.q.displayData[] | {id, submitter_patient_id}]'
+    -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"Efs","source":"Efs"}],
+         "transformation":[{"rollup":{"n":{"op":"count"}}}]}]}' \
+    | jq -c "{user: \"$u\", result: .results.q.displayData}"
 done
 
 # Completion (browser-mode data, no StarRocks involved)
 curl -s https://raw.githubusercontent.com/hms-dbmi/udi-yac/main/sample-data/penguins/datapackage.json \
   | jq '{messages: [{role: "user", content: "Show body mass by species"}], dataSchema: tojson, dataDomains: "{}"}' \
-  | curl -s -X POST localhost:8007/v1/yac/completions -H "Authorization: Bearer $(tok alice)" \
+  | curl -s -X POST localhost:8007/v1/yac/completions -H "Authorization: Bearer $(tok cbtn-admin)" \
     -H 'Content-Type: application/json' -d @- | jq
 ```
 

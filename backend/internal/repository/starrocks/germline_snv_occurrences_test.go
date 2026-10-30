@@ -670,6 +670,86 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 	})
 }
 
+func listGermlineSNVLociMatching(t *testing.T, env *testutils.Env, sqon *types.Sqon) []string {
+	t.Helper()
+	repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	sort := []types.SortBody{{Field: "locus_id", Order: "asc"}}
+	query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, []string{"locus_id"}, sqon, nil, sort)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o GermlineSNVOccurrence, _ int, _ []GermlineSNVOccurrence) string {
+		return o.LocusId
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP"}}}
+		assert.Equal(t, []string{"1000", "1002"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Tenant_Gene_Panels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP", "ONCO"}}}
+		assert.Equal(t, []string{"1000", "1001", "1002"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Tenant_And_Omim_Gene_Panels(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: types.SqonArray{
+				{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}},
+				{Op: "in", Content: types.LeafContent{Field: "omim_gene_panel", Value: []interface{}{"panel3"}}},
+			},
+		}
+		// ONCO holds BRAF and TP53, OMIM panel3 only TP53: both must match the same consequence.
+		assert.Equal(t, []string{"1000", "1001"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Not_In_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "not-in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"EPILEP"}}}
+		// Same semantics as the public panels: a consequence in another panel matches, one in no panel does not.
+		assert.Equal(t, []string{"1000", "1001", "1002"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Empty_List_When_Unknown_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"UNKNOWN"}}}
+		assert.Empty(t, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 3, c.Count)
+	})
+}
+
+func Test_Germline_SNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_Hits(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		// CARDIO (MYH7) has no consequence in the case, so it is not a bucket.
+		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 2}, {Bucket: "ONCO", Count: 3}}, aggregate)
+	})
+}
+
 func Test_Germline_SNV_GetStatisticsOccurrences_Decimal(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -718,12 +798,32 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
 		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
 		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expandedOccurrence.ExomiserAcmgEvidence)
-		assert.Equal(t, 3, expandedOccurrence.GermlinePcWgsAffected)
-		assert.Equal(t, 3, expandedOccurrence.GermlinePnWgsAffected)
-		assert.Equal(t, float64(1.0), expandedOccurrence.GermlinePfWgsAffected)
-		assert.Equal(t, 0, expandedOccurrence.GermlinePcWgsNotAffected)
-		assert.Equal(t, 0, expandedOccurrence.GermlinePnWgsNotAffected)
-		assert.Equal(t, float64(0), expandedOccurrence.GermlinePfWgsNotAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgsAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePnWgsAffected)
+		assert.Equal(t, float64(1.0), *expandedOccurrence.GermlinePfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePcWgsNotAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePnWgsNotAffected)
+		assert.Equal(t, float64(0), *expandedOccurrence.GermlinePfWgsNotAffected)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgs)
+		assert.Nil(t, expandedOccurrence.GermlinePnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.GermlineAfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlineHomWgsAffected)
+		assert.Equal(t, 1.0, *expandedOccurrence.GermlineAfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlineHomWgsNotAffected)
+		assert.Equal(t, 0.0, *expandedOccurrence.GermlineAfWgsNotAffected)
+		assert.Equal(t, 4, *expandedOccurrence.GermlinePcWxs)
+		assert.Equal(t, 10, *expandedOccurrence.GermlinePnWxs)
+		assert.Equal(t, 0.4, *expandedOccurrence.GermlinePfWxs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWxs)
+		assert.Equal(t, 0.3, *expandedOccurrence.GermlineAfWxs)
+		assert.Equal(t, 1, *expandedOccurrence.GermlineHomWxsNotAffected)
+		assert.Equal(t, 0.2, *expandedOccurrence.GermlineAfWxsNotAffected)
+		assert.Equal(t, 11, *expandedOccurrence.SomaticPnTnWgs)
+		assert.Equal(t, 5, *expandedOccurrence.SomaticHomTnWgs)
+		assert.Equal(t, 0.125, *expandedOccurrence.SomaticAfTnWxs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticHomToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWxs)
 		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
 		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
@@ -1198,5 +1298,161 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Cmc_Sample_Ratio(t *testing.T) {
 		assert.EqualValues(t, 0.0003, statistics.Min)
 		assert.EqualValues(t, 0.0028, statistics.Max)
 		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("germline_af_wgs_affected", nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.05, statistics.Min)
+		assert.EqualValues(t, 0.5, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Somatic_Hom_To_Wxs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("somatic_hom_to_wxs", nil, types.GermlineSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, statistics.Min)
+		assert.EqualValues(t, 6, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Filter_By_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: ">=", Content: &types.LeafContent{Field: "germline_af_wgs_affected", Value: []interface{}{0.5}}}
+		occurrences := getGermlineCmcOccurrences(t, env, sqon, &types.Pagination{Limit: 50}, nil)
+		assert.ElementsMatch(t, []string{"1009", "1019"}, germlineLocusIds(occurrences))
+		for _, o := range occurrences {
+			assert.Equal(t, 0.5, *o.GermlineAfWgsAffected)
+		}
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Sort_By_Somatic_Hom_To_Wxs_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "somatic_hom_to_wxs", Order: "desc"}}
+		occurrences := getGermlineCmcOccurrences(t, env, nil, &types.Pagination{Limit: 4}, sorted)
+		assert.ElementsMatch(t, []string{"1006", "1013", "1020", "1027"}, germlineLocusIds(occurrences))
+	})
+}
+
+// gene_panels fixture, seq 1 / task 1: 1000 is paired with 1001 (in TP53 and TML1) and with 1003 (TML1), 1004 with
+// 1005 (TML1). The other sample (seq 2) pairs 1000 with 1004.
+func comphetOf(locusIds ...interface{}) *types.Sqon {
+	return &types.Sqon{Op: "in", Content: types.LeafContent{Field: "comphet_of", Value: locusIds}}
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Partners_Of_A_Variant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []string{"1001", "1003"}, listGermlineSNVLociMatching(t, env, comphetOf("1000")))
+		// The pair 1000-1004 of the other sample is ignored.
+		assert.Equal(t, []string{"1005"}, listGermlineSNVLociMatching(t, env, comphetOf("1004")))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_No_Comphet_Partner_For_A_Variant_Without_Pair(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		assert.Empty(t, listGermlineSNVLociMatching(t, env, comphetOf("1002")))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Partners_Of_A_Variant_In_A_Gene(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		// The symbol filter goes through the consequence semi-join, with the partner filter in its ON clause.
+		sqon := &types.Sqon{
+			Op: "and",
+			Content: types.SqonArray{
+				*comphetOf("1000"),
+				{Op: "in", Content: types.LeafContent{Field: "symbol", Value: []interface{}{"TP53"}}},
+			},
+		}
+		assert.Equal(t, []string{"1001"}, listGermlineSNVLociMatching(t, env, sqon))
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Return_Comphet_Summary(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "locus_id", Order: "asc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, []string{"locus_id", "has_comphet", "comphet_genes"}, comphetOf("1003", "1009"), nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "1000", occurrences[0].LocusId)
+			assert.True(t, *occurrences[0].HasComphet)
+			assert.Equal(t, types.JsonArray[types.ComphetGene]{{Symbol: "TML1", Nb: 2}, {Symbol: "TP53", Nb: 1}}, occurrences[0].ComphetGenes)
+		}
+	})
+}
+
+func Test_Germline_SNV_CountOccurrences_Return_Comphet_Partners_Once(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// 1001 is paired with 1000 in two genes: counted once.
+		query, err := types.NewOccurrenceCountQueryFromSqon(comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, c.Count)
+	})
+}
+
+func Test_Germline_SNV_AggregateOccurrences_By_Has_Comphet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("has_comphet", nil, types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		// 1010 has no summary (NULL) and is not counted.
+		assert.ElementsMatch(t, []Aggregation{{Bucket: "1", Count: 5}, {Bucket: "0", Count: 6}}, aggregate)
+	})
+}
+
+func Test_Germline_SNV_AggregateOccurrences_Filtered_On_Comphet_Partners(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("filter", comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.Equal(t, []Aggregation{{Bucket: "PASS", Count: 2}}, aggregate)
+	})
+}
+
+func Test_Germline_SNV_GetStatisticsOccurrences_Filtered_On_Comphet_Partners(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("genotype_quality", comphetOf("1000"), types.GermlineSNVOccurrencesFields)
+		require.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 30, statistics.Min)
+		assert.EqualValues(t, 80, statistics.Max)
+	})
+}
+
+// TOPMed is joined only when the query uses one of its fields: a sort alone must be enough.
+func Test_Germline_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "topmed_af", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		require.NoError(t, err)
+		locusIds := sliceutils.Map(occurrences, func(o GermlineSNVOccurrence, _ int, _ []GermlineSNVOccurrence) string { return o.LocusId })
+		assert.Equal(t, []string{"2000", "1000"}, locusIds)
 	})
 }

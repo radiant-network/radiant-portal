@@ -135,13 +135,13 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"proband", 
 				"submitter_sample_id":"S13224",
 				"size":3.03866839e+08, 
-				"task_id":6
+				"task_id":5
 			},
 			{
 				"case_id":1, 
 				"created_on":"2021-09-12T13:08:00Z",
 				"data_type_code":"snv", 
-				"document_id":147, 
+				"document_id":135, 
 				"format_code":"vcf", 
 				"name":"CEPH-1463.exomiser.vcf.gz", 
 				"patient_id":1, 
@@ -150,10 +150,10 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13225", 
 				"size":3.03866839e+08, 
-				"task_id":7
+				"task_id":5
 			}
 		], 
-		"count": 149}`
+		"count": 171}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
@@ -202,17 +202,22 @@ func Test_GetDocumentsFilters(t *testing.T) {
 		"data_type_code":[
 			{"key":"aggqc", "label":"Aggregate Quality Control Report"},
 			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"alirpg", "label":"Aligned Reads (masked)"},
+			{"key":"chrmr", "label":"Mitochondrial Report"},
 			{"key":"clinical_report", "label":"Clinical Report"},
 			{"key":"cnvvis", "label":"CNV Visualization"},
 			{"key":"covgene", "label":"Coverage by Gene Report"}, 
 			{"key":"exomiser", "label":"Exomiser Report"}, 
+			{"key":"exomiser_cnv", "label":"Exomiser CNV Report"},
 			{"key":"exp", "label":"Expression PNG"}, 
 			{"key":"gcnv", "label":"Germline CNV"}, 
 			{"key":"gsv", "label":"Germline SV"}, 
 			{"key":"igv", "label":"IGV Track"}, 
+			{"key":"nrrv", "label":"Annotated Variant Report"},
 			{"key":"qcrun", "label":"Sequencing Run QC Report"}, 
 			{"key":"scnv", "label":"Somatic CNV"}, 
 			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"snvpg", "label":"Germline SNV (masked/filtered)"},
 			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
 			{"key":"ssnv", "label":"Somatic SNV"}, 
 			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
@@ -226,12 +231,14 @@ func Test_GetDocumentsFilters(t *testing.T) {
 			{"key":"gvcf", "label":"gVCF File"}, 
 			{"key":"html", "label":"HTML File"}, 
 			{"key":"json", "label":"JSON File"}, 
+			{"key":"maf", "label":"MAF File"}, 
 			{"key":"pdf", "label":"PDF File"}, 
 			{"key":"png", "label":"PNG File"}, 
 			{"key":"tgz", "label":"TGZ Archive File"}, 
 			{"key":"tsv", "label":"TSV File"}, 
 			{"key":"txt", "label":"Text File"},
 			{"key":"vcf", "label":"VCF File"},
+			{"key":"xlsx", "label":"XLSX File"},
 			{"key":"zip", "label":"ZIP Archive File"}
 		], 
 		"diagnosis_lab_code":[

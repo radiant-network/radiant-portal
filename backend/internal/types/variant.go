@@ -257,6 +257,206 @@ var GermlinePfWgsNotAffectedField = Field{
 	Type:          DecimalType,
 	Table:         VariantTable,
 }
+var GermlineHomWgsField = Field{
+	Name:          "germline_hom_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWgsField = Field{
+	Name:          "germline_af_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlinePcWgsAffectedField = Field{
+	Name:          "germline_pc_wgs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePnWgsAffectedField = Field{
+	Name:          "germline_pn_wgs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineHomWgsAffectedField = Field{
+	Name:          "germline_hom_wgs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWgsAffectedField = Field{
+	Name:          "germline_af_wgs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlinePcWgsNotAffectedField = Field{
+	Name:          "germline_pc_wgs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePnWgsNotAffectedField = Field{
+	Name:          "germline_pn_wgs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineHomWgsNotAffectedField = Field{
+	Name:          "germline_hom_wgs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWgsNotAffectedField = Field{
+	Name:          "germline_af_wgs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlinePcWxsField = Field{
+	Name:          "germline_pc_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePnWxsField = Field{
+	Name:          "germline_pn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePfWxsField = Field{
+	Name:          "germline_pf_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlineHomWxsField = Field{
+	Name:          "germline_hom_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWxsField = Field{
+	Name:          "germline_af_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlinePcWxsAffectedField = Field{
+	Name:          "germline_pc_wxs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePnWxsAffectedField = Field{
+	Name:          "germline_pn_wxs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePfWxsAffectedField = Field{
+	Name:          "germline_pf_wxs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlineHomWxsAffectedField = Field{
+	Name:          "germline_hom_wxs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWxsAffectedField = Field{
+	Name:          "germline_af_wxs_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlinePcWxsNotAffectedField = Field{
+	Name:          "germline_pc_wxs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePnWxsNotAffectedField = Field{
+	Name:          "germline_pn_wxs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlinePfWxsNotAffectedField = Field{
+	Name:          "germline_pf_wxs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+var GermlineHomWxsNotAffectedField = Field{
+	Name:          "germline_hom_wxs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+var GermlineAfWxsNotAffectedField = Field{
+	Name:          "germline_af_wxs_not_affected",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
 var VariantClassField = Field{
 	Name:            "variant_class",
 	CanBeSelected:   true,
@@ -456,4 +656,203 @@ var SomaticPcToWgsField = Field{
 	CanBeSorted:   true,
 	Type:          IntegerType,
 	Table:         VariantTable,
+}
+
+var SomaticPnTnWgsField = Field{
+	Name:          "somatic_pn_tn_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticHomTnWgsField = Field{
+	Name:          "somatic_hom_tn_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticAfTnWgsField = Field{
+	Name:          "somatic_af_tn_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticPcTnWxsField = Field{
+	Name:          "somatic_pc_tn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticPnTnWxsField = Field{
+	Name:          "somatic_pn_tn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticPfTnWxsField = Field{
+	Name:          "somatic_pf_tn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticHomTnWxsField = Field{
+	Name:          "somatic_hom_tn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticAfTnWxsField = Field{
+	Name:          "somatic_af_tn_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticPnToWgsField = Field{
+	Name:          "somatic_pn_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticHomToWgsField = Field{
+	Name:          "somatic_hom_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticAfToWgsField = Field{
+	Name:          "somatic_af_to_wgs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticPcToWxsField = Field{
+	Name:          "somatic_pc_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticPnToWxsField = Field{
+	Name:          "somatic_pn_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticPfToWxsField = Field{
+	Name:          "somatic_pf_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticHomToWxsField = Field{
+	Name:          "somatic_hom_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         VariantTable,
+}
+
+var SomaticAfToWxsField = Field{
+	Name:          "somatic_af_to_wxs",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+// SNVVariantFrequencyFields lists the internal frequencies of a variant: pc, pn, pf, hom and af
+// for each germline (WGS, WXS × all, affected, not affected) and somatic (TN, TO × WGS, WXS) cohort.
+var SNVVariantFrequencyFields = []Field{
+	GermlinePcWgsField,
+	GermlinePnWgsField,
+	GermlinePfWgsField,
+	GermlineHomWgsField,
+	GermlineAfWgsField,
+	GermlinePcWgsAffectedField,
+	GermlinePnWgsAffectedField,
+	GermlinePfWgsAffectedField,
+	GermlineHomWgsAffectedField,
+	GermlineAfWgsAffectedField,
+	GermlinePcWgsNotAffectedField,
+	GermlinePnWgsNotAffectedField,
+	GermlinePfWgsNotAffectedField,
+	GermlineHomWgsNotAffectedField,
+	GermlineAfWgsNotAffectedField,
+	GermlinePcWxsField,
+	GermlinePnWxsField,
+	GermlinePfWxsField,
+	GermlineHomWxsField,
+	GermlineAfWxsField,
+	GermlinePcWxsAffectedField,
+	GermlinePnWxsAffectedField,
+	GermlinePfWxsAffectedField,
+	GermlineHomWxsAffectedField,
+	GermlineAfWxsAffectedField,
+	GermlinePcWxsNotAffectedField,
+	GermlinePnWxsNotAffectedField,
+	GermlinePfWxsNotAffectedField,
+	GermlineHomWxsNotAffectedField,
+	GermlineAfWxsNotAffectedField,
+	SomaticPcTnWgsField,
+	SomaticPnTnWgsField,
+	SomaticPfTnWgsField,
+	SomaticHomTnWgsField,
+	SomaticAfTnWgsField,
+	SomaticPcTnWxsField,
+	SomaticPnTnWxsField,
+	SomaticPfTnWxsField,
+	SomaticHomTnWxsField,
+	SomaticAfTnWxsField,
+	SomaticPcToWgsField,
+	SomaticPnToWgsField,
+	SomaticPfToWgsField,
+	SomaticHomToWgsField,
+	SomaticAfToWgsField,
+	SomaticPcToWxsField,
+	SomaticPnToWxsField,
+	SomaticPfToWxsField,
+	SomaticHomToWxsField,
+	SomaticAfToWxsField,
 }

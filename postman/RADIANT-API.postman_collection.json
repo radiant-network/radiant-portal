@@ -911,6 +911,47 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Reports (xlsx)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/reports/transcripts?locus_ids=-8318226658347712512",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "1",
+                "reports",
+                "transcripts"
+              ],
+              "query": [
+                {
+                  "key": "locus_ids",
+                  "value": "-8318226658347712512"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -1760,6 +1801,44 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"additional_fields\": [\n        \"case_type\"\n    ],\n    \"search_criteria\": [\n        {\n            \"field\": \"priority_code\",\n            \"value\": [\n                \"routine\",\n                \"urgent\"\n            ]\n        }\n    ],\n    \"limit\": 20,\n    \"page_index\": 0,\n    \"sort\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search by case group",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [],\n    \"search_criteria\": [\n        {\n            \"field\": \"case_group\",\n            \"operator\": \"in\",\n            \"value\": [\n                \"run_1\"\n            ]\n        },\n        {\n            \"field\": \"priority_code\",\n            \"operator\": \"in\",\n            \"value\": [\n                \"stat\"\n            ]\n        }\n    ],\n    \"limit\": 20,\n    \"page_index\": 0,\n    \"sort\": []\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3909,6 +3988,47 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Reports (xlsx)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/reports/transcripts?locus_ids=-8318226658347712512",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "somatic",
+                "snv",
+                "1",
+                "1",
+                "1",
+                "reports",
+                "transcripts"
+              ],
+              "query": [
+                {
+                  "key": "locus_ids",
+                  "value": "-8318226658347712512"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -4403,12 +4523,195 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"sort\": [\n        {\"field\": \"can_read_phi\", \"order\": \"desc\"},\n        {\"field\": \"organization_code\", \"order\": \"asc\"},\n        {\"field\": \"patient_id\", \"order\": \"asc\"}\n    ],\n    \"search_criteria\": [\n        {\"field\": \"vital_status\", \"value\": [\"deceased\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search with list filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"limit\": 10,\n    \"page_index\": 0,\n    \"search_criteria\": [\n        {\n            \"field\": \"diagnosis_type_cohort\",\n            \"value\": [\n                \"Atypical teratoid/rhabdoid tumor\"\n            ]\n        },\n        {\n            \"field\": \"age_at_initial_dx_group\",\n            \"value\": [\n                \"childhood\"\n            ]\n        },\n        {\n            \"field\": \"got_radiation_ever\",\n            \"value\": [\n                true\n            ]\n        },\n        {\n            \"field\": \"chemotherapy_agents\",\n            \"value\": [\n                \"methotrexate\"\n            ]\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/autocomplete?prefix=C1&limit=10",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "C1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Entity",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "tenant",
       "value": "radiant",
+      "type": "string"
+    },
+    {
+      "key": "patient_key",
+      "value": "",
       "type": "string"
     }
   ]

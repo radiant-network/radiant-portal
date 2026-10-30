@@ -537,7 +537,7 @@ export const CasesTable = {
               break;
             case 'status':
               cy.validateTableFirstRowContent(dataCase[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataCase[columnID])), position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagButton(getStatusColor(dataCase[columnID])), position);
               break;
             case 'type':
               cy.validateTableFirstRowClass(dataCase[columnID], position);

@@ -13,7 +13,7 @@ describe('Samples - Batch - Process worker - Sample007', () => {
           "submitter_patient_id": "MRN-283775",
           "patient_organization_code": "CHUSJ",
           "type_code": "dna",
-          "submitter_parent_sample_id": "S13227",
+          "submitter_parent_sample_id": "S13225",
           "histology_code": "normal",
           "submitter_sample_id": "Cypress0001",
           "sample_organization_code": "CQGC"
@@ -44,6 +44,6 @@ describe('Samples - Batch - Process worker - Sample007', () => {
   });
 
   it('Validate report sample[0] submitter_parent_sample_id', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-007', apiMessages.ProcessWorkerErrorNotSamePatient('sample', 'submitter_parent_sample_id', 'CQGC', 'Cypress0001', 'S13227'), 'sample[0].submitter_parent_sample_id');
+    cy.validateReport(response, 'error', 'SAMPLE-007', apiMessages.ProcessWorkerErrorNotSamePatient('sample', 'submitter_parent_sample_id', 'CQGC', 'Cypress0001', 'S13225'), 'sample[0].submitter_parent_sample_id');
   });
 });

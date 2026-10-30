@@ -1,5 +1,6 @@
 /* eslint-disable complexity */
-import { useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import type { CaseFilters, SearchCriterion } from '@/api/api';
@@ -9,7 +10,7 @@ import DataTableFilters, {
   getVisibleFiltersByCriterias,
   sortOptions,
 } from '@/components/base/data-table/filters/data-table-filters';
-import getItemPriority from '@/components/base/data-table/filters/options/option-priority';
+import getItemPriority, { PRIORITY_ORDER } from '@/components/base/data-table/filters/options/option-priority';
 import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
@@ -19,15 +20,17 @@ import { caseApi } from '@/utils/api';
 type FiltersGroupFormProps = {
   loading?: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
+  extraFilters?: ReactNode;
+  onClear?: () => void;
 };
 
 const CRITERIAS = {
   priority_code: { key: 'priority_code', weight: 1, visible: true },
   status_code: { key: 'status_code', weight: 2, visible: true },
   case_type_code: { key: 'case_type_code', weight: 3, visible: true },
+  diagnosis_lab_code: { key: 'diagnosis_lab_code', weight: 4, visible: true },
   project_code: { key: 'project_code', visible: false },
   analysis_catalog_code: { key: 'analysis_catalog_code', visible: false },
-  diagnosis_lab_code: { key: 'diagnosis_lab_code', visible: false },
   ordering_organization_code: { key: 'ordering_organization_code', visible: false },
   panel_code: { key: 'panel_code', visible: false },
   life_status_code: { key: 'proband_life_status_code', visible: false },
@@ -47,19 +50,35 @@ export const FILTER_DEFAULTS = {
   case_category_code: [],
 };
 
+const PRIORITY_PARAM = 'priority';
+
 async function fetchFilters(tenant: string) {
   const response = await caseApi.casesFilters(tenant);
   return response.data;
 }
 
-function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
+function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onClear }: FiltersGroupFormProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
     ...FILTER_DEFAULTS,
   });
+
+  useEffect(() => {
+    const priority = searchParams.get(PRIORITY_PARAM);
+    if (priority === null) return;
+    if (PRIORITY_ORDER.includes(priority)) setFilters({ ...FILTER_DEFAULTS, priority_code: [priority] });
+    setSearchParams(
+      params => {
+        params.delete(PRIORITY_PARAM);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams, setFilters]);
 
   const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(tenant), {
     revalidateOnFocus: false,
@@ -101,9 +120,16 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             ...baseOption,
             options: sortOptions(apiFilters[key] || []),
           };
+        case 'diagnosis_lab_code':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            options: sortOptions(apiFilters[key] || []),
+            showKey: true,
+            withTooltip: true,
+          };
         case 'project_code':
         case 'analysis_catalog_code':
-        case 'diagnosis_lab_code':
         case 'ordering_organization_code':
         case 'panel_code':
           return {
@@ -145,6 +171,8 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       setSearchCriteria={setSearchCriteria}
       criterias={CRITERIAS}
       defaultFilters={FILTER_DEFAULTS}
+      extraFilters={extraFilters}
+      onClear={onClear}
     />
   );
 }

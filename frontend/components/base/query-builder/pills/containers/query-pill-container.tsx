@@ -1,6 +1,7 @@
 import { XIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
 
 type QueryPillContainerProps = React.HTMLAttributes<HTMLDivElement> & {
   onRemovePill: () => void;
@@ -18,6 +19,8 @@ type QueryPillContainerProps = React.HTMLAttributes<HTMLDivElement> & {
  *          └────────────────────────────┘
  */
 function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps) {
+  const { t } = useI18n();
+
   return (
     <div
       data-cy="query-pill"
@@ -31,6 +34,7 @@ function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps)
         variant="ghost"
         size="sm"
         className="mr-0.5 ml-1 py-0.5 enabled:hover:bg-transparent size-4"
+        aria-label={t('a11y.query_pill.remove')}
         onClick={e => {
           e.stopPropagation();
           onRemovePill();

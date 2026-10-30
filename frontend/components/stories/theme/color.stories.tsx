@@ -28,6 +28,7 @@ export const Variants: Story = {
           <Color color="secondary foreground" colorClass="bg-secondary-foreground" />
           <Color color="muted" colorClass="bg-muted" />
           <Color color="muted foreground" colorClass="bg-muted-foreground" />
+          <Color color="muted subdued" colorClass="bg-muted-subdued" />
           <Color color="accent" colorClass="bg-accent" />
           <Color color="accent foreground" colorClass="bg-accent-foreground" />
           <Color color="destructive" colorClass="bg-destructive" />

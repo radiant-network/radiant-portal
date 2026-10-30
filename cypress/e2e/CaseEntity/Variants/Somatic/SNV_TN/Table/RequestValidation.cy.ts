@@ -9,6 +9,11 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Request Validati
     cy.login();
   };
 
+  it('Task', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnCohortTask(data.caseSomatic, 'TN');
+  });
+
   it('Sort', () => {
     setupTest();
     cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', { cohort: 'TN' });
@@ -17,7 +22,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Request Validati
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnSort('variant');
   });
 
-  it('Paging [SJRA-1684]', () => {
+  it('Paging', () => {
     setupTest();
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldRequestOnPageChange(data.caseSomatic, 'TN');
   });

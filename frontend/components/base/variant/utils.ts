@@ -22,3 +22,8 @@ export function getEnsemblGeneUrl(symbol: string): string {
 export function getDbSnpUrl(rsnumber: string): string {
   return `https://www.ncbi.nlm.nih.gov/snp/${rsnumber}`;
 }
+
+// locus in VCF representation: chromosome-position-reference-alternate
+export function getFranklinSnvUrl(locus: string): string {
+  return `https://franklin.genoox.com/clinical-db/variant/snpTumor/chr${locus}-hg38`;
+}

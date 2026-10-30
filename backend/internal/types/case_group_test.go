@@ -2,6 +2,7 @@ package types
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -48,8 +49,9 @@ func Test_CaseGroupRequest_Validate_InvalidName(t *testing.T) {
 }
 
 func Test_NewCaseGroupResponse(t *testing.T) {
-	resp := NewCaseGroupResponse(CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1"}, []int{3, 1, 3})
-	assert.Equal(t, CaseGroupResponse{Name: "run_1", TenantCode: "radiant", CaseIDs: []int{3, 1}}, resp)
+	createdOn := time.Date(2026, 9, 29, 14, 0, 0, 0, time.UTC)
+	resp := NewCaseGroupResponse(CaseGroup{ID: 7, TenantCode: "radiant", Name: "run_1", CreatedOn: createdOn}, []int{3, 1, 3})
+	assert.Equal(t, CaseGroupResponse{Name: "run_1", TenantCode: "radiant", CaseIDs: []int{3, 1}, CreatedOn: createdOn}, resp)
 }
 
 func Test_NewCaseGroupResponse_NoCases_EmptyList(t *testing.T) {

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { HttpStatusCode, isAxiosError } from 'axios';
 import useSWR from 'swr';
 
 import type { ApiError, PatientEntity } from '@/api/api';
@@ -10,8 +9,6 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { patientsApi } from '@/utils/api';
 import { usePatientIdFromParam } from '@/utils/helper';
-
-import { PATIENT_ENTITY_MOCK } from '../api/patient';
 
 import ClinicalTrialsTab from './clinical-trials/clinical-trials-tab';
 import GenomicsTab from './genomics/genomics-tab';
@@ -42,19 +39,9 @@ type PatientEntityInput = {
   patientId: string;
 };
 
-const MOCK_FALLBACK_STATUSES: number[] = [HttpStatusCode.NotFound, HttpStatusCode.NotImplemented];
-
 async function fetchPatientEntity(input: PatientEntityInput) {
-  try {
-    const response = await patientsApi.patientEntity(input.tenant, input.patientId);
-    return response.data;
-  } catch (error) {
-    // TODO: remove the mock fallback once the patient list sends real patient keys
-    if (isAxiosError(error) && MOCK_FALLBACK_STATUSES.includes(error.response?.status ?? 0)) {
-      return PATIENT_ENTITY_MOCK;
-    }
-    throw error;
-  }
+  const response = await patientsApi.patientEntity(input.tenant, input.patientId);
+  return response.data;
 }
 
 export default function App() {
@@ -67,7 +54,6 @@ export default function App() {
     (searchParams.get('tab') as PatientEntityTabs) ?? PatientEntityTabs.Overview,
   );
 
-  // TODO: use the patient_key of the clicked patient list row instead of the patient id
   const { data, isLoading } = useSWR<PatientEntity, ApiError, PatientEntityInput>(
     { key: 'patient-entity', tenant, patientId },
     fetchPatientEntity,
@@ -110,7 +96,7 @@ export default function App() {
 
   return (
     <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-      <Header patientId={patientId} />
+      <Header patient={data} isLoading={isLoading} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           {TAB_ORDER.map(({ value, i18nKey }) => (
@@ -127,22 +113,22 @@ export default function App() {
                 <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
-                <TimelineTab />
+                <TimelineTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
                 <TreatmentsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
-                <GenomicsTab />
+                <GenomicsTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.TumorBoard}>
                 <TumorBoardTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Laboratory}>
-                <LaboratoryTab />
+                <LaboratoryTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Imaging}>
-                <ImagingTab />
+                <ImagingTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
                 <ClinicalTrialsTab />

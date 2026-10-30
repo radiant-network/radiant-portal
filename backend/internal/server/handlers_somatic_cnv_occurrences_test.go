@@ -118,6 +118,7 @@ func (m *MockSomaticCNVRepository) GetGenesOverlap(ctx context.Context, caseId i
 			OverlappingGenePercent: 10,
 			OverlappingCNVPercent:  5,
 			OverlapType:            "partial",
+			TenantGenePanels:       []string{"EPILEP", "ONCO"},
 		},
 	}, nil
 }
@@ -304,7 +305,8 @@ func Test_SomaticCNVOccurrencesGenesOverlapHandler(t *testing.T) {
 			"nb_exons": 1,
 			"overlapping_gene_percent": 10,
 			"overlapping_cnv_percent": 5,
-			"overlap_type": "partial"
+			"overlap_type": "partial",
+			"tenant_gene_panels": ["EPILEP", "ONCO"]
 		}
 	]`
 	assert.Equal(t, http.StatusOK, w.Code)

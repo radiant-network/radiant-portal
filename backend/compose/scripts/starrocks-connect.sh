@@ -25,7 +25,7 @@
 set -euo pipefail
 
 KC_URL="${KC_URL:-http://localhost:8080}"
-REALM="${REALM:-CQDG}"
+REALM="${REALM:-radiant}"
 CLIENT_ID="${CLIENT_ID:-radiant}"
 CLIENT_SECRET="${CLIENT_SECRET:-ShutThisIsASecret!}"
 USER_PASSWORD="${USER_PASSWORD:-radiant123!}"

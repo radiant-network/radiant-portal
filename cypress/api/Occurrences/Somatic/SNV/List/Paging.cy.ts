@@ -11,7 +11,7 @@ describe('Occurrences - Somatic - SNV - List - Paging', () => {
       "page_index": 0
     }`;
 
-    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task.task_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task_tn.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 10);
     });
@@ -24,7 +24,7 @@ describe('Occurrences - Somatic - SNV - List - Paging', () => {
       "page_index": 0
     }`;
 
-    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task.task_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task_tn.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 20);
     });
@@ -42,12 +42,12 @@ describe('Occurrences - Somatic - SNV - List - Paging', () => {
     }`;
     let firstItemOfAll: any;
 
-    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task.task_id}/list`, firstBody, Auth.token)
+    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task_tn.task_id}/list`, firstBody, Auth.token)
       .then(firstRes => {
         firstItemOfAll = firstRes.body[0].locus_id;
       })
       .then(() => {
-        cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task.task_id}/list`, secondBody, Auth.token);
+        cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task_tn.task_id}/list`, secondBody, Auth.token);
       })
       .then((secondRes: any) => {
         expect(secondRes.status).to.eq(200);
@@ -63,7 +63,7 @@ describe('Occurrences - Somatic - SNV - List - Paging', () => {
       "page_index": 100000000
     }`;
 
-    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task.task_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/somatic/snv/${dataCase.caseSomatic.case}/${dataCase.caseSomatic.seq.seq_id}/${dataCase.caseSomatic.task_tn.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 0);
     });

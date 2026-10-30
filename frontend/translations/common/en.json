@@ -1,8 +1,21 @@
 {
   "a11y": {
+    "action_button": {
+      "more": "More actions"
+    },
     "assignment_picker": {
       "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
       "remove_user": "Remove {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Clear"
+    },
+    "back_link": {
+      "back_to": "Back to {{page}}"
+    },
+    "badge": {
+      "remove": "Remove"
     },
     "breadcrumb": {
       "more": "More"
@@ -11,17 +24,141 @@
       "next_slide": "Next slide",
       "previous_slide": "Previous slide"
     },
+    "case_actions_menu": {
+      "open": "Case actions"
+    },
+    "case_group_tag": {
+      "copy_name": "Copy group name",
+      "remove": "Remove the New data filter"
+    },
+    "classification_section": {
+      "open": "Go to {{title}}"
+    },
+    "clingen_cell": {
+      "open": "Open in ClinGen (new tab)"
+    },
+    "cmc": {
+      "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
+      "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "No data",
+      "open_franklin": "{{tier}}, open in Franklin (new tab)"
+    },
+    "data_table": {
+      "collapse_row": "Collapse row",
+      "column_settings": "Column settings",
+      "expand_row": "Expand row",
+      "group_by": "Group by",
+      "grouped_by": "Grouped by {{value}}",
+      "pin_column": "Pin column",
+      "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
+      "sort": "Sort",
+      "sorted_asc": "Sorted ascending",
+      "sorted_desc": "Sorted descending",
+      "unpin_row": "Unpin row"
+    },
+    "date_picker": {
+      "open_calendar": "Open calendar"
+    },
+    "editable_text": {
+      "edit": "Edit"
+    },
+    "facets_sidebar": {
+      "collapse": "Collapse filters",
+      "expand": "Expand filters"
+    },
+    "gene_cell": {
+      "add_to_query": "Add {{symbol}} to the query"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Switch to English (EN)",
+      "switch_to_fr": "Switch to French (FR)"
+    },
+    "list_item": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "share": "Share"
+    },
+    "main_navbar": {
+      "close_menu": "Close menu",
+      "open_menu": "Open menu"
+    },
+    "main_sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
+    },
     "message_scroller": {
       "scroll_to_end": "Scroll to end",
       "scroll_to_start": "Scroll to start"
+    },
+    "multi_selector": {
+      "clear_all": "Clear all"
+    },
+    "note": {
+      "actions": "Comment actions"
+    },
+    "notes": {
+      "open_count_one": "{{count}} comment",
+      "open_count_other": "{{count}} comments"
+    },
+    "occurrence_flag": {
+      "edit": "Edit flag"
+    },
+    "omim_link": {
+      "open": "Open {{symbol}} in OMIM (new tab)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Remove citation"
+    },
+    "query_bar": {
+      "delete": "Delete query",
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
+    },
+    "query_builder": {
+      "close_facets": "Close filters panel"
+    },
+    "query_pill": {
+      "remove": "Remove filter"
+    },
+    "saved_filter": {
+      "delete": "Delete filter",
+      "discard": "Discard unsaved changes",
+      "duplicate": "Duplicate filter",
+      "edit": "Edit filter",
+      "new": "New filter",
+      "save": "Save filter"
+    },
+    "slider": {
+      "next": "Next result",
+      "previous": "Previous result"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Sequencing details"
+    },
+    "theme_toggle": {
+      "to_dark": "Switch to dark theme",
+      "to_light": "Switch to light theme"
     },
     "sidebar": {
       "description": "Displays the mobile sidebar.",
       "title": "Sidebar",
       "toggle": "Toggle Sidebar"
     },
+    "tabs": {
+      "next": "Next tabs",
+      "previous": "Previous tabs"
+    },
     "spinner": {
       "loading": "Loading"
+    },
+    "timeline": {
+      "filters_group": "Filter timeline by type",
+      "results_count_one": "Showing {{count}} result",
+      "results_count_other": "Showing {{count}} results"
     }
   },
   "admin": {
@@ -332,7 +469,11 @@
       "month_day_hour": "MMMM d, h:mm a",
       "year_month_day": "yyyy-MM-dd",
       "year_month_day_hour": "MMMM d yyyy, h:mm a",
-      "year_month_day_at_hour": "{{date}} at {{time}}"
+      "year_month_day_at_hour": "{{date}} at {{time}}",
+      "month_day_year": "MMM dd, yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Pick a date"
     },
     "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
@@ -449,6 +590,9 @@
       "no_classification_for_the_single_variant": "No Classification for the Single Variant",
       "no_classification_for_the_single_variant.abbrev": "NC",
       "no_classification_for_the_single_variant.tooltip": "No Classification",
+      "no_classifications_from_unflagged_records": "No Classifications from Unflagged Records",
+      "no_classifications_from_unflagged_records.abbrev": "NCU",
+      "no_classifications_from_unflagged_records.tooltip": "No Classifications from Unflagged Records",
       "no_data": "No Data",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "No Data",
@@ -504,7 +648,10 @@
       "csv": "CSV File",
       "pdf": "PDF File",
       "txt": "Text File",
-      "gvcf": "GVCF File"
+      "gvcf": "GVCF File",
+      "zip": "ZIP Archive File",
+      "xlsx": "XLSX File",
+      "maf": "MAF File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",
@@ -522,7 +669,12 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
-      "clinical_report": "Clinical Report"
+      "clinical_report": "Clinical Report",
+      "aggqc": "Aggregate Quality Control Report",
+      "chrmr": "Mitochondrial Report",
+      "nrrv": "Annotated Variant Report",
+      "snvpg": "Germline SNV (masked/filtered)",
+      "alirpg": "Aligned Reads (masked)"
     },
     "query_bar": {
       "selector": "Q{{index}}",
@@ -547,7 +699,32 @@
       "sister": "Sister",
       "brother": "Brother",
       "sibling": "Sibling",
-      "fetus": "Fetus"
+      "fetus": "Fetus",
+      "child": "Child",
+      "daugther": "Daughter",
+      "ftwinbro": "Fraternal Twin Brother",
+      "ftwinsis": "Fraternal Twin Sister",
+      "granddaughter": "Granddaughter",
+      "grandson": "Grandson",
+      "hbro": "Half-Brother",
+      "hsis": "Half-Sister",
+      "itwinbro": "Identical Twin Brother",
+      "itwinsis": "Identical Twin Sister",
+      "matmem": "Maternal Family Member",
+      "maunt": "Maternal Aunt",
+      "mcousn": "Maternal Cousin",
+      "mgrfth": "Maternal Grandfather",
+      "mgrmth": "Maternal Grandmother",
+      "muncle": "Maternal Uncle",
+      "nephew": "Nephew",
+      "niece": "Niece",
+      "patmem": "Paternal Family Member",
+      "paunt": "Paternal Aunt",
+      "pcousn": "Paternal Cousin",
+      "pgrfth": "Paternal Grandfather",
+      "pgrmth": "Paternal Grandmother",
+      "puncle": "Paternal Uncle",
+      "sonc": "Son"
     },
     "toolbar": {
       "combine": "Combine",
@@ -640,10 +817,12 @@
       "filters": {
         "more": "More",
         "more_placeholder": "Filters",
+        "min_search_length": "Minimum {{count}} characters",
         "no_values_found": "No values found",
         "search": {
           "case_id": "Case",
           "patient_id": "Patient",
+          "patient_name": "Patient",
           "submitter_patient_id": "MRN",
           "run_name": "Run Name",
           "sample_id": "Sample ID",
@@ -667,6 +846,10 @@
       "results": "Results {{from}} - {{to}} of {{total}}",
       "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
+      "items_selected_one": "{{value}} item selected",
+      "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
@@ -736,6 +919,12 @@
         "chromosome": "Chromosome",
         "clinvar": "ClinVar",
         "clinvar_interpretation": "ClinVar",
+        "cmc_sample_mutated": "COSMIC CMC",
+        "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation",
+        "cmc_sample_ratio": "COSMIC CMC (Ratio)",
+        "cmc_sample_ratio_tooltip": "Ratio of samples in COSMIC with this mutation compared to the variant compared to all the samples",
+        "cmc_tier": "COSMIC CMC Tier",
+        "cmc_tier_tooltip": "Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
         "cn": "Copy Number",
         "cnv_end": "CNV End",
         "cnv_exomiser_gene_combined_score": "Exomiser Score",
@@ -819,6 +1008,7 @@
         "study_code": "Study Code",
         "study_id": "Study ID",
         "symbol": "Gene Symbol",
+        "tenant_gene_panel": "My Network",
         "thousand_genome_af": "1000 Genomes",
         "topmed_af": "TopMed",
         "transmission": "Transmission",
@@ -840,6 +1030,8 @@
           "ig_v_gene": "IG V Gene",
           "ig_v_pseudogene": "IG V Pseudogene",
           "lncrna": "lncRNA",
+          "ncrna": "ncRNA",
+          "ncrna_pseudogene": "ncRNA Pseudogene",
           "non_stop_decay": "Non Stop Decay",
           "nonsense_mediated_decay": "Nonsense Mediated Decay",
           "processed_pseudogene": "Processed Pseudogene",
@@ -848,15 +1040,28 @@
           "protein_coding_cds_not_defined": "Protein Coding CDS Not Defined",
           "protein_coding_lof": "Protein Coding LOF",
           "retained_intron": "Retained Intron",
+          "rnase_mrp_rna": "RNase MRP RNA",
+          "rnase_p_rna": "RNase P RNA",
           "tec": "TEC",
+          "telomerase_rna": "Telomerase RNA",
           "transcribed_processed_pseudogene": "Transcribed Processed Pseudogene",
+          "transcribed_pseudogene": "Transcribed Pseudogene",
           "transcribed_unitary_pseudogene": "Transcribed Unitary Pseudogene",
           "transcribed_unprocessed_pseudogene": "Transcribed Unprocessed Pseudogene",
           "tr_c_gene": "TR C Gene",
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
+          "trna": "tRNA",
           "unitary_pseudogene": "Unitary Pseudogene",
           "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "y_rna": "Y RNA",
+          "": "No Data"
+        },
+        "cmc_tier": {
+          "1": "Tier 1",
+          "2": "Tier 2",
+          "3": "Tier 3",
+          "other": "Other",
           "": "No Data"
         },
         "consequence": {
@@ -932,6 +1137,8 @@
           "autosomal_recessive_abbrev": "AR",
           "non_carrier_proband": "Non Carrier Proband",
           "non_carrier_proband_abbrev": "NCP",
+          "uniparental_disomy": "Uniparental Disomy",
+          "uniparental_disomy_abbrev": "UPD",
           "unknown_father_genotype": "Unknown Father Genotype",
           "unknown_father_genotype_abbrev": "UFG",
           "unknown_mother_genotype": "Unknown Mother Genotype",
@@ -1088,7 +1295,16 @@
   },
   "patient_entity": {
     "header": {
-      "title": "Patient {{id}}"
+      "title": "Patient {{id}}",
+      "research_id": "ID: {{id}}",
+      "born_date": "Born {{date}}",
+      "born_year": "Born {{year}}",
+      "phi_restricted": "Restricted",
+      "phi_restricted_tooltip": "Identity restricted outside your organisation",
+      "vital_status": {
+        "alive": "Alive",
+        "deceased": "Deceased"
+      }
     },
     "tabs": {
       "overview": "Overview",
@@ -1106,9 +1322,7 @@
         "cns_diagnosis_category": "CNS diagnosis category",
         "cns_integrated_diagnosis": "CNS integrated diagnosis",
         "event_date": "Date of diagnosis",
-        "day": "Day {{day}}",
-        "events_total": "{{count}} events total",
-        "view_timeline": "View timeline"
+        "day": "Day {{day}}"
       },
       "tumour_and_metastasis": {
         "title": "Tumour and metastasis",
@@ -1116,8 +1330,7 @@
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
-        "metastasis_location_other": "Extraneural site",
-        "most_recent_event": "Most recent event · {{type}} · Day {{day}}"
+        "metastasis_location_other": "Extraneural site"
       },
       "demographics": {
         "title": "Demographics",
@@ -1134,12 +1347,52 @@
         "cancer_predisposition": "Predisposition list"
       }
     },
+    "genomics": {
+      "day": "Day {{day}}",
+      "origin": {
+        "germline": "Germline",
+        "somatic": "Somatic"
+      },
+      "interpretations": {
+        "title": "Variant interpretations",
+        "aa_tooltip": "Amino acid change",
+        "date_tooltip": "Last interpretation date",
+        "headers": {
+          "variant": "Variant",
+          "gene": "Gene",
+          "aa": "AA",
+          "classification": "Classification",
+          "origin": "Origin",
+          "case": "Case",
+          "analysis": "Analysis",
+          "date": "Date"
+        }
+      },
+      "cases": {
+        "title": "Genomic cases",
+        "type": {
+          "somatic": "Somatic",
+          "germline": "Solo germline",
+          "germline_family": "Family germline"
+        },
+        "headers": {
+          "case": "Case",
+          "type": "Type",
+          "analysis": "Analysis",
+          "primary_condition": "Primary Condition",
+          "status": "Status",
+          "priority": "Priority",
+          "requested_by": "Req. By",
+          "updated": "Updated"
+        }
+      }
+    },
     "sidebar": {
       "key_dates": {
         "title": "Key Dates",
         "initial_diagnosis": "Initial diagnosis",
         "latest_encounter": "Latest encounter",
-        "day_age": "Day {{day}} · age {{age}}y",
+        "day_age": "{{age}}y · Day {{day}}",
         "sources": {
           "clinical": "Clinical",
           "registry": "Registry"
@@ -1152,6 +1405,29 @@
         "query_status_description": "QHIN record locate & retrieve",
         "linked": "Linked",
         "connected": "Connected"
+      }
+    },
+    "timeline": {
+      "title": "Clinical Timeline",
+      "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "event_type": {
+        "initial_cns_tumor": "Initial CNS Tumor",
+        "progressive": "Progressive",
+        "recurrence": "Recurrence",
+        "second_malignancy": "Second Malignancy",
+        "deceased": "Deceased",
+        "unavailable": "Unavailable",
+        "not_reported": "Not Reported"
+      },
+      "event_fields": {
+        "tumor_locations": "Tumor locations",
+        "metastasis": "Metastasis",
+        "metastasis_locations": "Metastasis locations"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
       }
     },
     "treatments": {
@@ -1174,14 +1450,140 @@
         "focal_boost": "Focal boost",
         "total_primary": "Total to primary"
       }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} imaging session",
+      "title_count_other": "{{count}} imaging sessions",
+      "day_age": "Day {{day}} · age {{age}}y",
+      "columns": {
+        "date": "Date",
+        "modality": "Modality",
+        "viewer": "Viewer"
+      }
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "No date on file",
+        "age_day": "{{age}}y · Day {{day}}",
+        "age_day_capped": "90+y · Day {{day}}"
+      },
+      "lab_tile": {
+        "no_result": "No result on file",
+        "reported": "reported {{reported}}",
+        "unverified": "unrecognised unit — not normalised",
+        "aria_empty": "{{label}}: no result on file",
+        "aria_value": "{{label}}: {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Latest blood counts",
+        "empty": "No complete blood count on file.",
+        "analytes": {
+          "wbc": "WBC",
+          "hemoglobin": "Hemoglobin",
+          "platelets": "Platelets",
+          "anc": "ANC"
+        }
+      },
+      "performance_status": {
+        "title": "Performance status",
+        "empty": "No performance status score on file.",
+        "released": "Released",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}}: {{score}} out of 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky recorded at age 16+",
+          "karnofsky-paediatric": "Karnofsky recorded under age 16"
+        }
+      },
+      "csf": {
+        "title": "CSF analysis",
+        "empty": "No CSF analysis on file.",
+        "analytes": {
+          "protein": "Protein",
+          "glucose": "Glucose",
+          "nucleated_cells": "Nucleated cells",
+          "rbc": "RBC"
+        },
+        "cytology": {
+          "title": "Cytology",
+          "multi_specimen_warning": "The report covers more than one specimen — the finding may pertain to a non-CSF sample.",
+          "multi_specimen": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "fields": {
+            "test_name": "Test name",
+            "multi_specimen": "Covers multiple specimens",
+            "result_date": "Result date"
+          },
+          "badge": {
+            "positive": "Malignant cells present",
+            "suspicious": "Suspicious for malignancy",
+            "negative": "No malignant cells reported",
+            "non_diagnostic": "Non-diagnostic specimen",
+            "no_malignancy_statement": "Report makes no malignancy statement",
+            "unknown": "Unrecognised cytology result",
+            "empty": "No cytology on file"
+          },
+          "tier_note": {
+            "text_confirmed": "Attributed to CSF from the report text.",
+            "same_day_only": "Attributed to CSF only because it was collected the same day — this result may not be from CSF."
+          }
+        },
+        "chemistry": {
+          "title": "Chemistry and cell count"
+        },
+        "specimen": {
+          "title": "Specimen collected — result not shown in RADIANT",
+          "cell_free_dna": "Cell-free DNA",
+          "collected": "Collected"
+        }
+      }
+    }
+  },
+  "timeline": {
+    "evidence": "Evidence",
+    "initial_treatment": "Initial treatment",
+    "marker": {
+      "day": "Day {{day}}",
+      "day_range": "Day {{start}} — {{end}}",
+      "day_unknown": "Day n/a",
+      "years": "{{value}}y"
+    },
+    "filters": {
+      "all": "All",
+      "events": "Disease events",
+      "surgery": "Surgery",
+      "chemotherapy": "Chemotherapy",
+      "radiation": "Radiation"
+    },
+    "empty": {
+      "title": "No results",
+      "description": "Adjust your filters and try again."
     }
   },
   "patient_exploration": {
-    "title": "Patients",
-    "description": "ATRT cohort · CHOP, UCSF and Seattle Children's",
+    "title": "{{total}} Patients",
+    "description": "",
     "search_placeholder": "Search by name, research ID or MRN",
-    "actions": {
-      "visualize_survival": "Visualize Cohort Survival"
+    "tabs": {
+      "cohort_analytics": "Cohort analytics",
+      "patient_list": "Patient list"
+    },
+    "chat": {
+      "title": "Cohort analytics",
+      "explore": "Explore charts",
+      "explore_tooltip": "Ask questions about these charts and generate new views with AI"
+    },
+    "cells": {
+      "patient": {
+        "research_id": "ID: {{id}}",
+        "masked_aria": "PHI masked"
+      }
     },
     "columns": {
       "patient": "Patient",
@@ -1189,9 +1591,18 @@
       "birth_year": "Birth year",
       "sex": "Sex",
       "site": "Site",
-      "cns_diagnosis": "CNS integrated diagnosis",
+      "cns_integrated_diagnosis": "CNS integrated diagnosis",
       "vital_status": "Vital status",
       "survival": "Survival"
+    },
+    "filters": {
+      "vital_status": "Vital status",
+      "organization_code": "Site",
+      "cns_integrated_diagnosis": "Diagnosis",
+      "age_at_initial_dx_group": "Age at diagnosis",
+      "chemotherapy_agents": "Chemotherapy agents",
+      "got_radiation_ever": "Radiation",
+      "diagnosis_type_cohort": "Cohort"
     },
     "pagination": {
       "previous": "Previous",
@@ -1240,6 +1651,17 @@
       "revoked": "Cancelled",
       "submitted": "Pending",
       "unresolved": "Unresolved"
+    },
+    "case_group": {
+      "label": "New data • {{date}}",
+      "count_one": "{{count}} case",
+      "count_other": "{{count}} cases",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "No cases found for this notification",
+        "description": "The link may be outdated, or you may not have access to these cases.",
+        "show_all": "Show all cases"
+      }
     },
     "case": {
       "title": "{{total}} Cases",
@@ -1542,6 +1964,7 @@
       "expand": "Expand",
       "organization": "RQDM Panel",
       "filters": {
+        "panel": "Panel",
         "variant": "Variant",
         "gene": "Gene",
         "frequency": "Frequency",
@@ -1554,6 +1977,19 @@
   },
   "variant": {
     "no_data_for_variant": "No data for this variant.",
+    "report": {
+      "download": "Download report",
+      "select_at_least_one": "Select at least one item",
+      "max_exceeded": {
+        "title": "Maximum number exceeded",
+        "description": "A maximum of 100 items can be exported at a time. Please narrow your selection and try again."
+      },
+      "toast": {
+        "loading": "Generating report…",
+        "success": "Report downloaded",
+        "error": "Unable to download the report. Please try again."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
@@ -1570,6 +2006,10 @@
       "clinical_interpretation": "Clinical Interpretation",
       "clingen": "ClinGen",
       "clinvar": "ClinVar",
+      "cmc_sample_mutated": "CMC",
+      "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
+      "cmc_tier": "Tier",
+      "cmc_tier_tooltip": "CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
       "cn": "CN",
       "cn_tooltip": "Estimated copy number",
       "cytoband": "Cytoband",
@@ -1703,6 +2143,13 @@
       "pli": "pLI",
       "no_prediction": "No prediction"
     },
+    "cmc_tiers": {
+      "1": "Tier 1",
+      "2": "Tier 2",
+      "3": "Tier 3",
+      "other": "Other",
+      "no_data": "ND"
+    },
     "classes": {
       "indel": "Indel",
       "insertion": "Insertion",
@@ -1725,7 +2172,7 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update:",
+      "last_update": "<strong>Last updated:</strong> {{name}} on <date/>",
       "header": {
         "germline": "Germline",
         "germline_family": "Germline",
@@ -1737,7 +2184,10 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": { "title": "Interpretation saved", "button": "View interpretation" },
+        "success": {
+          "title": "Interpretation saved",
+          "button": "View interpretation"
+        },
         "error": {
           "title": "Failed to save interpretation",
           "text": "Failed to save interpretation. Please try again."
@@ -1874,6 +2324,7 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
           "hotspot": "Hotspot",
           "no_data": "No classification data reported"
         },
@@ -1882,6 +2333,8 @@
           "affected": "Affected",
           "to": "Tumor-only",
           "tn": "Tumor-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
@@ -2042,9 +2495,11 @@
     },
     "patient_information": {
       "dob": "DOB",
+      "estimated_due_date": "Estimated Due Date",
       "father": "Father",
       "id": "ID",
       "jhn": "JHN",
+      "last_menstrual_period": "Last Menstrual Period",
       "life_status": "Vital Status",
       "managing_org": "Managing Org.",
       "managing_org_tooltip": "Organization managing the patient’s file",
@@ -2068,21 +2523,30 @@
       "case_type": "Type",
       "clinical_note": "Clinical Note",
       "clinical_overview": "Clinical",
+      "consanguinity": "Consanguinity",
       "created_on_female": "Created On",
       "created_on_male": "Created On",
       "date_format_tooltip": "yyyy-mm-dd",
       "description": "Description",
       "diag_lab": "Diag. Lab",
       "diag_lab_tooltip": "Molecular diagnostic laboratory",
+      "diagnosis_hypothesis": "Diagnosis Hypothesis",
       "ethnicity": "Ethnicity",
+      "exam_interpretation": {
+        "abnormal": "Abnormal",
+        "normal": "Normal"
+      },
       "experiment": "Experiment Details",
       "experimental_strategy_code": "Exp. Strat.",
       "experimental_strategy_code_tooltip": "Experimental Strategy",
+      "family_history": "Family History",
+      "fetus_numbered": "Fetus {{index}}",
       "histology_code": "Histology",
       "last_update": "Last Update",
       "no_phenotype": "No phenotype reported",
       "no_task_found": "No Task Found",
       "no_variants": "No variants for this case",
+      "observations": "Observations",
       "panel": "Panel",
       "patient": "Patient",
       "patient_id": "Patient ID",
@@ -2170,7 +2634,8 @@
     }
   },
   "file_entity": {
-    "title": "Files",
+    "count_one": "{{total}} File",
+    "count_other": "{{total}} Files",
     "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
     "name": "File Name",
     "format_code": "Format",
@@ -2483,7 +2948,7 @@
       "admin": "Admin",
       "analysis": "Analysis",
       "cases": "Cases",
-      "files": "Files",
+      "files": "File Archive",
       "patients": "Patients",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",
@@ -2514,6 +2979,16 @@
       "title": "You don't have access to RADIANT",
       "body": "To get access, contact your organization's RADIANT administrator.",
       "cta": "Back to sign in"
+    }
+  },
+  "librechat": {
+    "david": {
+      "title": "D.A.V.I.D",
+      "badge": "AI assistant",
+      "description": "AI-driven predictive analytics for personalized cancer care",
+      "frame_title": "D.A.V.I.D assistant",
+      "not_configured": "D.A.V.I.D is not configured for this environment.",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen"
     }
   }
 }

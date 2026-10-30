@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **affected_status_code** | **str** |  | 
 **experimental_strategy_code** | **str** |  | 
+**fetus_id** | **int** |  | [optional] 
 **has_variants** | **bool** |  | 
 **histology_code** | **str** |  | [optional] 
 **patient_id** | **int** |  | 

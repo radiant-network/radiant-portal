@@ -144,6 +144,11 @@ components:
           type: number
         symbol:
           type: string
+        tenant_gene_panels:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
       required:
       - cytoband
       - gene_id
@@ -154,6 +159,7 @@ components:
       - overlapping_cnv_percent
       - overlapping_gene_percent
       - symbol
+      - tenant_gene_panels
       type: object
     CaseAssignee:
       description: User assigned to a case, as shown in the cases list and on the
@@ -570,12 +576,15 @@ components:
             type: integer
           type: array
           uniqueItems: false
+        created_on:
+          type: string
         name:
           type: string
         tenant_code:
           type: string
       required:
       - case_ids
+      - created_on
       - name
       - tenant_code
       type: object
@@ -748,10 +757,20 @@ components:
           type: string
         proband_life_status_code:
           type: string
+        proband_submitter_sample_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         project_code:
           type: string
         project_name:
           type: string
+        run_names:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         status_code:
           $ref: '#/components/schemas/CaseStatus'
         submitter_proband_id:
@@ -764,6 +783,8 @@ components:
       - created_on
       - diagnosis_lab_code
       - has_variants
+      - proband_submitter_sample_ids
+      - run_names
       - status_code
       - updated_on
       type: object
@@ -774,6 +795,8 @@ components:
           type: string
         experimental_strategy_code:
           type: string
+        fetus_id:
+          type: integer
         has_variants:
           type: boolean
         histology_code:
@@ -1019,6 +1042,8 @@ components:
         clinvar_id:
           type: string
         date_last_evaluated:
+          example: "2020-07-08"
+          format: date
           type: string
         locus_id:
           type: string
@@ -1054,6 +1079,18 @@ components:
             $ref: '#/components/schemas/ClinvarRCV'
           type: array
           uniqueItems: false
+      type: object
+    ComphetGene:
+      description: ComphetGene is the number of compound heterozygous partners of
+        a variant in one gene
+      properties:
+        nb:
+          type: integer
+        symbol:
+          type: string
+      required:
+      - nb
+      - symbol
       type: object
     Count:
       description: Count represents count result
@@ -1338,9 +1375,6 @@ components:
           type: integer
         ad_total:
           type: integer
-        af:
-          description: TODO
-          type: number
         cadd_phred:
           type: number
         cadd_score:
@@ -1388,9 +1422,59 @@ components:
           type: string
         genotype_quality:
           type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
         germline_pc_wgs_affected:
           type: integer
         germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
@@ -1398,9 +1482,23 @@ components:
           type: number
         germline_pf_wgs_not_affected:
           type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
         germline_pn_wgs_affected:
           type: integer
         germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
           type: integer
         gnomad_loeuf:
           type: number
@@ -1457,6 +1555,62 @@ components:
           type: string
         sift_score:
           type: number
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         spliceai_ds:
           type: number
         spliceai_type:
@@ -1509,6 +1663,14 @@ components:
             type: string
           type: array
           uniqueItems: false
+        cmc_mutation_url:
+          type: string
+        cmc_sample_mutated:
+          type: integer
+        cmc_sample_ratio:
+          type: number
+        cmc_tier:
+          type: string
         dann_score:
           type: number
         dna_change:
@@ -1527,6 +1689,84 @@ components:
           type: number
         filter:
           type: string
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_loeuf:
           type: number
         gnomad_pli:
@@ -1575,17 +1815,61 @@ components:
           type: string
         sift_score:
           type: number
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
         somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
           type: integer
         somatic_pc_to_wgs:
           type: integer
+        somatic_pc_to_wxs:
+          type: integer
         somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
           type: number
         somatic_pf_to_wgs:
           type: number
+        somatic_pf_to_wxs:
+          type: number
         somatic_pn_tn_wgs:
           type: integer
+        somatic_pn_tn_wxs:
+          type: integer
         somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
           type: integer
         spliceai_ds:
           type: number
@@ -1781,6 +2065,42 @@ components:
           type: string
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_sc:
           type: integer
         gnomad_sf:
@@ -1859,6 +2179,12 @@ components:
           type: number
         cmc_tier:
           type: string
+        comphet_genes:
+          description: Number of compound heterozygous partners per gene
+          items:
+            $ref: '#/components/schemas/ComphetGene'
+          type: array
+          uniqueItems: false
         end:
           type: integer
         exomiser_acmg_classification:
@@ -1880,14 +2206,90 @@ components:
           $ref: '#/components/schemas/OccurrenceFlagType'
         genotype_quality:
           type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
         germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
         germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
           type: integer
         gnomad_v3_af:
           type: number
+        has_comphet:
+          description: True when the variant has a compound heterozygous partner (slivar),
+            false otherwise, absent when not computed
+          type: boolean
         has_interpretation:
           type: boolean
         has_note:
@@ -1919,6 +2321,62 @@ components:
         rsnumber:
           type: string
         seq_id:
+          type: integer
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
           type: integer
         start:
           type: integer
@@ -1984,6 +2442,22 @@ components:
         username:
           type: string
       type: object
+    IGVPublicTrack:
+      properties:
+        indexURL:
+          type: string
+        indexURLExpireAt:
+          type: integer
+        url:
+          type: string
+        urlExpireAt:
+          type: integer
+      required:
+      - indexURL
+      - indexURLExpireAt
+      - url
+      - urlExpireAt
+      type: object
     IGVTrackEnriched:
       properties:
         family_role:
@@ -1991,6 +2465,8 @@ components:
         fetus_id:
           type: integer
         format:
+          type: string
+        histology_code:
           type: string
         indexURL:
           type: string
@@ -2000,6 +2476,10 @@ components:
           type: string
         patient_id:
           type: integer
+        sample_id:
+          type: string
+        sequencing_experiment_id:
+          type: integer
         sex:
           type: string
         type:
@@ -2008,6 +2488,8 @@ components:
           type: string
         urlExpireAt:
           type: integer
+      required:
+      - sequencing_experiment_id
       type: object
     IGVTracks:
       properties:
@@ -2016,6 +2498,37 @@ components:
             $ref: '#/components/schemas/IGVTrackEnriched'
           type: array
           uniqueItems: false
+        baf:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        capture_targets:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        cnv:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        public_tracks:
+          additionalProperties:
+            $ref: '#/components/schemas/IGVPublicTrack'
+          type: object
+        roh:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+        seg:
+          items:
+            $ref: '#/components/schemas/IGVTrackEnriched'
+          type: array
+          uniqueItems: false
+      required:
+      - public_tracks
       type: object
     InputDocumentBatch:
       properties:
@@ -2484,11 +2997,30 @@ components:
       properties:
         analysis_catalog_code:
           type: string
+        analysis_catalog_name:
+          type: string
         case_id:
           type: integer
+        case_type:
+          description: 'As in the case list: germline_family when the case has more
+            than one member'
+          enum:
+          - somatic
+          - germline
+          - germline_family
+          type: string
         case_type_code:
           type: string
         diagnosis_lab_code:
+          type: string
+        ordering_organization_code:
+          type: string
+        ordering_organization_name:
+          type: string
+        primary_condition_id:
+          description: MONDO id
+          type: string
+        primary_condition_name:
           type: string
         priority_code:
           type: string
@@ -2501,11 +3033,110 @@ components:
           type: string
       required:
       - case_id
+      - case_type
       - case_type_code
       - diagnosis_lab_code
       - relationship
       - status_code
       - updated_on
+      type: object
+    PatientCbc:
+      description: Most recent CBC panel. All its analytes come from that panel, so
+        they share its day and date.
+      properties:
+        anc:
+          $ref: '#/components/schemas/PatientLabResult'
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        hemoglobin:
+          $ref: '#/components/schemas/PatientLabResult'
+        platelets:
+          $ref: '#/components/schemas/PatientLabResult'
+        wbc:
+          $ref: '#/components/schemas/PatientLabResult'
+      required:
+      - anc
+      - hemoglobin
+      - platelets
+      - wbc
+      type: object
+    PatientCsf:
+      description: Latest result of each CSF component. Each component is its own
+        latest, so they may come from different punctures.
+      properties:
+        cell_free_dna:
+          $ref: '#/components/schemas/PatientDayDate'
+        cytology:
+          $ref: '#/components/schemas/PatientCsfCytology'
+        glucose:
+          $ref: '#/components/schemas/PatientCsfResult'
+        protein:
+          $ref: '#/components/schemas/PatientCsfResult'
+        rbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+        wbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+      required:
+      - cell_free_dna
+      - cytology
+      - glucose
+      - protein
+      - rbc
+      - wbc
+      type: object
+    PatientCsfCytology:
+      description: Latest CSF cytology, with the finding derived from the report
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        evidence_tier:
+          description: How the report was attributed to CSF
+          enum:
+          - named
+          - text_confirmed
+          - same_day_only
+          type: string
+        malignant_cells:
+          enum:
+          - positive
+          - suspicious
+          - negative
+          - non_diagnostic
+          - no_malignancy_statement
+          type: string
+        multi_specimen_report:
+          description: The finding may pertain to a non-CSF specimen
+          type: boolean
+        test_name:
+          type: string
+      type: object
+    PatientCsfResult:
+      description: 'Latest result of one CSF component. Read display: the comparator
+        is load-bearing ("<1.0" is undetectable).'
+      properties:
+        comparator:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        display:
+          description: Comparator, value and unit
+          type: string
+        unit:
+          type: string
+        value:
+          type: number
       type: object
     PatientDayDate:
       description: Age in days, and the calendar date when the caller can read PHI
@@ -2550,12 +3181,16 @@ components:
             $ref: '#/components/schemas/PatientCase'
           type: array
           uniqueItems: false
+        cbc:
+          $ref: '#/components/schemas/PatientCbc'
         cns_integrated_diagnosis:
           description: From the initial event
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
           type: string
+        csf:
+          $ref: '#/components/schemas/PatientCsf'
         data_type_cohort:
           type: string
         diagnosis_type_cohort:
@@ -2590,6 +3225,12 @@ components:
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
+        interpretations:
+          description: Germline and somatic, of the patient's cases
+          items:
+            $ref: '#/components/schemas/PatientInterpretation'
+          type: array
+          uniqueItems: false
         key_dates:
           $ref: '#/components/schemas/PatientKeyDates'
         organization_code:
@@ -2607,6 +3248,11 @@ components:
           description: Opaque key for the patient page URL, the same for every user
           format: uuid
           type: string
+        performance_status:
+          items:
+            $ref: '#/components/schemas/PatientPerformanceScore'
+          type: array
+          uniqueItems: false
         postal_code:
           description: Full with PHI access, 3 digits + XX otherwise
           type: string
@@ -2635,6 +3281,12 @@ components:
           uniqueItems: false
         treatment_summary:
           $ref: '#/components/schemas/PatientTreatmentSummary'
+        trial_enrollments:
+          description: Most recent first
+          items:
+            $ref: '#/components/schemas/PatientTrialEnrollment'
+          type: array
+          uniqueItems: false
         vital_status:
           enum:
           - alive
@@ -2652,15 +3304,18 @@ components:
       - given_name
       - has_imaging
       - imaging
+      - interpretations
       - key_dates
       - organization_code
       - organization_name
       - patient_id
       - patient_id_type
       - patient_key
+      - performance_status
       - radiations
       - surgeries
       - therapies
+      - trial_enrollments
       - vital_status
       - vital_status_at
       type: object
@@ -2715,7 +3370,31 @@ components:
     PatientFilters:
       description: Values of the patient list filters
       properties:
+        age_at_initial_dx_group:
+          description: 'Always every key: congenital, neonatal, infantile, childhood,
+            juvenile, young_adult, middle_age, senior, unknown'
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        chemotherapy_agents:
+          description: Lowercase, as recorded
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
         cns_integrated_diagnosis:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        diagnosis_type_cohort:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        got_radiation_ever:
+          description: Keys true, false; labels Yes, No
           items:
             $ref: '#/components/schemas/FiltersValue'
           type: array
@@ -2732,7 +3411,11 @@ components:
           type: array
           uniqueItems: false
       required:
+      - age_at_initial_dx_group
+      - chemotherapy_agents
       - cns_integrated_diagnosis
+      - diagnosis_type_cohort
+      - got_radiation_ever
       - organization_code
       - vital_status
       type: object
@@ -2758,6 +3441,47 @@ components:
       required:
       - session_id
       - session_name
+      type: object
+    PatientInterpretation:
+      description: Germline or somatic interpretation recorded on one of the patient's
+        portal cases
+      properties:
+        aa_change:
+          description: On the interpreted transcript
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          description: 'Germline: LOINC answer code; somatic: oncogenicity, as the
+            case module records them'
+          type: string
+        hgvsg:
+          type: string
+        locus_id:
+          type: string
+        origin:
+          enum:
+          - germline
+          - somatic
+          type: string
+        sequencing_id:
+          type: integer
+        symbol:
+          description: Gene of the interpreted transcript
+          type: string
+        updated_at:
+          description: Last interpretation date
+          type: string
+      required:
+      - case_id
+      - locus_id
+      - origin
+      - sequencing_id
+      - updated_at
       type: object
     PatientKeyDate:
       description: Key date of the patient sidebar, with the source it comes from
@@ -2787,6 +3511,15 @@ components:
       - initial_diagnosis
       - latest_encounter
       type: object
+    PatientLabResult:
+      description: 'Result of one analyte, raw from the source: units are not normalized
+        (ANC comes in /uL and x10E9/L)'
+      properties:
+        unit:
+          type: string
+        value:
+          type: number
+      type: object
     PatientListItem:
       description: A PCX patient in the patient list
       properties:
@@ -2806,6 +3539,8 @@ components:
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+          type: string
+        diagnosis_type_cohort:
           type: string
         family_name:
           description: Placeholder when can_read_phi is false
@@ -2878,6 +3613,31 @@ components:
       - deceased
       - organization_code
       - organization_name
+      type: object
+    PatientPerformanceScore:
+      description: Lansky or Karnofsky score. The date is when the result was released,
+        not when it was assessed.
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        scale:
+          enum:
+          - lansky
+          - karnofsky
+          type: string
+        score:
+          type: integer
+        score_text:
+          description: As recorded, e.g. "90 - Minor restrictions in strenuous physical
+            activity"
+          type: string
+      required:
+      - scale
+      - score
       type: object
     PatientRadiation:
       description: Radiation course of a patient
@@ -3053,6 +3813,33 @@ components:
       - initial_chemo
       - initial_dx
       - initial_radiation
+      type: object
+    PatientTrialEnrollment:
+      description: Treatment protocol arm the patient was enrolled on, its medical
+        therapies merged
+      properties:
+        chemotherapy_agents:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        is_initial_treatment:
+          type: boolean
+        protocol_arm:
+          description: null when Not Applicable
+          type: string
+        protocol_name:
+          type: string
+        start:
+          $ref: '#/components/schemas/PatientDayDate'
+        stop:
+          $ref: '#/components/schemas/PatientDayDate'
+      required:
+      - chemotherapy_agents
+      - is_initial_treatment
+      - protocol_name
+      - start
+      - stop
       type: object
     PatientsSearchResponse:
       properties:
@@ -3453,6 +4240,18 @@ components:
           type: integer
         sm:
           type: number
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         start:
           type: integer
         svlen:
@@ -3514,10 +4313,84 @@ components:
           type: integer
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
         germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
           type: integer
         germline_pf_wgs:
           type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
         gnomad_v3_af:
           type: number
         has_interpretation:
@@ -3552,14 +4425,62 @@ components:
           type: string
         seq_id:
           type: integer
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
         somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
           type: integer
         somatic_pc_to_wgs:
           type: integer
+        somatic_pc_to_wxs:
+          type: integer
         somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
           type: number
         somatic_pf_to_wgs:
           type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         sq:
           type: number
         start:
@@ -6139,7 +7060,9 @@ paths:
       - hpo
   /{tenant}/igv/{case_id}:
     get:
-      description: Get IGV tracks for a case
+      description: |-
+        Get IGV tracks for a case: its alignment, CNV, Seg, BAF, ROH and capture targets files,
+        and the public reference tracks, all presigned
       operationId: getIGV
       parameters:
       - description: Tenant code
@@ -8013,6 +8936,107 @@ paths:
       summary: List germline SNV occurrences
       tags:
       - occurrences
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts:
+    get:
+      description: Fill the tenant's germline transcript report template with the
+        report object of each locus, one sheet per locus named after its hgvsg, and
+        return the workbook. 1 to 100 locus ids.
+      operationId: getGermlineSNVTranscriptReportsXlsx
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Comma-separated locus ids, 1 to 100
+        in: query
+        name: locus_ids
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                format: binary
+                type: string
+          description: xlsx workbook
+          headers:
+            Content-Disposition:
+              description: attachment; filename=<MRN>_<case id>_<UTC timestamp>.xlsx
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Zero, more than 100 or malformed locus ids
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A locus is not an occurrence of the task
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The tenant has no transcript report template loaded
+      security:
+      - bearerauth: []
+      summary: Download the transcript report (xlsx) of germline SNV occurrences of
+        a case
+      tags:
+      - occurrences
   /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
@@ -8927,6 +9951,107 @@ paths:
       security:
       - bearerauth: []
       summary: List somatic SNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts:
+    get:
+      description: Fill the tenant's somatic transcript report template with the report
+        object of each locus, one sheet per locus named after its hgvsg, and return
+        the workbook. 1 to 100 locus ids.
+      operationId: getSomaticSNVTranscriptReportsXlsx
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Comma-separated locus ids, 1 to 100
+        in: query
+        name: locus_ids
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                format: binary
+                type: string
+          description: xlsx workbook
+          headers:
+            Content-Disposition:
+              description: attachment; filename=<MRN>_<case id>_<UTC timestamp>.xlsx
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Zero, more than 100 or malformed locus ids
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A locus is not an occurrence of the task
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The tenant has no transcript report template loaded
+      security:
+      - bearerauth: []
+      summary: Download the transcript report (xlsx) of somatic SNV occurrences of
+        a case
       tags:
       - occurrences
   /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:
