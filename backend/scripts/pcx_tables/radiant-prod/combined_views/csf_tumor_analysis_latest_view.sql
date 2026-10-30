@@ -21,11 +21,11 @@
    organization_code from pcx_30_organization_ref.name -> .code, exactly as the
    pcx_30 combined views, v_cbc_latest_results and v_lansky_karnofsky_latest do.
    NOT interchangeable with the FHIR source vocabulary (chop / seattle / ucsf):
-   organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / BCH),
+   organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / UCSF-BCH),
    and only 'chop' coincides, so keying access control on the FHIR code would fail
    closed for every non-CHOP patient.
-   Resolves for 808 of 814 patients: CHOP 513, SCH 190, BCH 104, UAB 1.
-   pcx_30_organization_ref.name is unique across its 41 rows so that join cannot
+   Resolves for 808 of 814 patients: CHOP 513, SCH 190, UCSF-BCH 104, UAB 1.
+   pcx_30_organization_ref.name is unique across its 42 rows so that join cannot
    fan out; the roster CTE dedupes stg_cbtn_enrollment_final.
 
    *** THIS COHORT DOES REACH THE CURRENT TENANT GRANT -- unlike the Lansky one.

@@ -35,7 +35,7 @@
    7,116 distinct research_id, so the roster join can fan out on a multi-MRN
    patient. None of this cohort's imaging is affected today (8,920 rows = 8,920
    distinct session_id), but distinct guards it, as in the peer views.
-   pcx_30_organization_ref.name is unique across its 41 rows, so that LEFT JOIN
+   pcx_30_organization_ref.name is unique across its 42 rows, so that LEFT JOIN
    cannot fan out.
 
    NOTE on flywheel_url: the chop.flywheel.io host is correct for EVERY row

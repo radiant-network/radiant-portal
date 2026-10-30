@@ -1,7 +1,7 @@
 code,name,category_code,tenant_code
 ACH,Akron Children's Hospital,healthcare_provider,radiant
 APH,Orlando Health Arnold Palmer Hospital,healthcare_provider,radiant
-BCH,UCSF Benioff Children's Hospital,healthcare_provider,radiant
+BCH,Boston Children's Hospital,healthcare_provider,radiant
 CHOA,Children's Hospital of Atlanta (CHOA),healthcare_provider,radiant
 CHOP,The Children's Hospital of Philadelphia,healthcare_provider,radiant
 CNM,CBTN Non-Consortium Member,healthcare_provider,radiant
@@ -26,6 +26,7 @@ PNOC,PNOC,healthcare_provider,radiant
 Pitt,University of Pittsburgh,healthcare_provider,radiant
 SCH,Seattle Children's Hospital,healthcare_provider,radiant
 UAB,UAB,healthcare_provider,radiant
+UCSF-BCH,UCSF Benioff Children's Hospital,healthcare_provider,radiant
 UOI,University of Iowa,healthcare_provider,radiant
 UPenn,Penn,healthcare_provider,radiant
 WCMC,Weill Cornell Medical College,healthcare_provider,radiant
