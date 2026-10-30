@@ -1661,7 +1661,7 @@ func persistCaseHasSequencingExperiments(ctx context.Context, sc *StorageContext
 		}
 
 		if err := sc.CasesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
-			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %q: %w", cr.Index, se.ID, err)
+			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %d: %w", cr.Index, se.ID, err)
 		}
 	}
 	return nil

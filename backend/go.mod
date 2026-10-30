@@ -1,6 +1,6 @@
 module github.com/radiant-network/radiant-api
 
-go 1.25.0
+go 1.27.0
 
 require (
 	github.com/Goldziher/go-utils v1.8.1

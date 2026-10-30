@@ -255,9 +255,9 @@ These are hard constraints that apply across all options:
 **Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` — e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Tables in a colocation group must share the same `colocate_with` property, bucket count, replica count, and bucket-key types. **As of StarRocks 2.5.4, colocation groups can span multiple databases**, so the per-tenant database split (`cbtn_db`, `udn_db`) does not block colocation. Tables that need to participate in cross-tenant colocation (shared reference data; partitioned wide tables) can live in the `base` database; tenant users reach them through `SECURITY NONE` views in their tenant DB. Tenant-only tables (`patients`, `cases`, …) live directly in the tenant DB, where colocation is local to that DB. Row-filter and column-mask policies on individual tables do not affect colocation — the POC confirmed this.
 
 **Key references:**
-- [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
-- [StarRocks Column-Level Privileges](https://docs.starrocks.io/docs/administration/privilege_item/#column)
-- [StarRocks Apache Ranger Integration](https://docs.starrocks.io/docs/administration/ranger_plugin/)
+- [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/user_privs/authentication/#json-web-token-jwt-based-authentication)
+- [StarRocks Column-Level Privileges](https://docs.starrocks.io/docs/administration/user_privs/authorization/privilege_item/#column)
+- [StarRocks Apache Ranger Integration](https://docs.starrocks.io/docs/administration/user_privs/authorization/ranger_plugin/)
 - [StarRocks Resource Groups](https://docs.starrocks.io/docs/administration/management/resource_management/resource_group/)
 - [StarRocks Colocate Join](https://docs.starrocks.io/docs/using_starrocks/Colocate_join/)
 
@@ -1031,13 +1031,13 @@ The Go API uses the same pattern (`OR uor.org_id = '*'` in action checks).
 
 ## Appendix B: StarRocks 3.5 Documentation References
 
-- [Authentication overview](https://docs.starrocks.io/docs/administration/Authentication/)
-- [JWT-based authentication](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
-- [Privilege system](https://docs.starrocks.io/docs/administration/privilege_overview/)
-- [Column-level privileges](https://docs.starrocks.io/docs/administration/privilege_item/#column)
-- [Apache Ranger integration](https://docs.starrocks.io/docs/administration/ranger_plugin/)
+- [Authentication overview](https://docs.starrocks.io/docs/administration/user_privs/authentication/)
+- [JWT-based authentication](https://docs.starrocks.io/docs/administration/user_privs/authentication/#json-web-token-jwt-based-authentication)
+- [Privilege system](https://docs.starrocks.io/docs/administration/user_privs/authorization/user_privs/)
+- [Column-level privileges](https://docs.starrocks.io/docs/administration/user_privs/authorization/privilege_item/#column)
+- [Apache Ranger integration](https://docs.starrocks.io/docs/administration/user_privs/authorization/ranger_plugin/)
 - [Resource groups](https://docs.starrocks.io/docs/administration/management/resource_management/resource_group/)
-- [CREATE VIEW](https://docs.starrocks.io/docs/sql-reference/sql-statements/view/CREATE_VIEW/)
+- [CREATE VIEW](https://docs.starrocks.io/docs/sql-reference/sql-statements/View/CREATE_VIEW/)
 - [External JDBC catalog](https://docs.starrocks.io/docs/data_source/catalog/jdbc_catalog/)
 
 ## Appendix C: Current Codebase References

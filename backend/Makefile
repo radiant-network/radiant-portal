@@ -117,7 +117,7 @@ lint:
 		golangci-lint run; \
 	else \
 		echo "golangci-lint is not installed. Install it with:"; \
-		echo "  go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0"; \
+		echo "  go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0"; \
 		exit 1; \
 	fi
 
