@@ -167,3 +167,23 @@ jobs:
         with:
           version: v2.15.0
           working-directory: backend
+
+  govulncheck:
+    needs: [changes]
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.27'
+          cache: false
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - name: govulncheck
+        # Fails on a vulnerability reachable from the shipped code. test/testutils is left
+        # out: it links testcontainers and the docker client, which carry advisories with
+        # no fix that never reach a binary we deploy.
+        run: govulncheck ./cmd/... ./internal/...
+        working-directory: ./backend
