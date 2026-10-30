@@ -10,8 +10,8 @@ import type Surgery from '@/components/base/timeline/surgery';
 import Timeline from '@/components/base/timeline/timeline';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { usePatientTreatments } from '../hooks/use-patient-entity';
 import { formatDose } from '../treatments/treatment-rows';
-import { usePatientTreatments } from '../use-patient-tab';
 
 type TimelineTabProps = {
   patient?: PatientEntity;

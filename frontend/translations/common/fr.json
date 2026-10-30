@@ -1462,6 +1462,19 @@
         "viewer": "Visionneuse"
       }
     },
+    "clinical_trials": {
+      "title_count_one": "Inscriptions antérieures ({{count}} protocole)",
+      "title_count_other": "Inscriptions antérieures ({{count}} protocoles)",
+      "day_value": "Jour {{day}}",
+      "initial_badge": "Traitement initial",
+      "footer": "Protocoles auxquels le patient a été inscrit, selon les dossiers de thérapie médicale. Les traitements qui n'ont fait que suivre un protocole ne sont pas listés.",
+      "columns": {
+        "protocol": "Protocole",
+        "start": "Début",
+        "stop": "Fin",
+        "agents": "Agents"
+      }
+    },
     "laboratory": {
       "date": {
         "no_date_on_file": "Aucune date au dossier",

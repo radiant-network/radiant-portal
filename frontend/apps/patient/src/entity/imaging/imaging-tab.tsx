@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shad
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { usePatientImaging } from '../use-patient-tab';
+import { usePatientImaging } from '../hooks/use-patient-entity';
 
 import { getImagingColumns } from './imaging-table-settings';
 
