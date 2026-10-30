@@ -12,7 +12,7 @@
 --
 -- ORGANIZATION RESOLUTION is NOT interchangeable with the base table's
 -- org_short_code -- that is the FHIR vocabulary (chop/seattle/ucsf) while
--- organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP/SCH/BCH). Only
+-- organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP/SCH/UCSF-BCH). Only
 -- 'chop' coincides, so keying access control on org_short_code would fail closed for
 -- every non-CHOP patient. Resolves for 1,613 of 1,627 patients: CHOP 1,612, UAB 1.
 --

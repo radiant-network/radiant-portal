@@ -61,7 +61,7 @@
     every row from every institution, de-identified.
 
     FAIL-CLOSED, two levels. (1) organization_code comes from a LEFT JOIN on the
-    41-row pcx_30_organization_ref seed; a NULL organization_code cannot match
+    42-row pcx_30_organization_ref seed; a NULL organization_code cannot match
     org_grant.org_code. (2) An MRN that does not resolve to a portal patient leaves
     radiant_patient_id NULL, which cannot match lab_grant.patient_id. Either miss
     degrades the row to the de-identified values rather than leaking.

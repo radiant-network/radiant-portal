@@ -11,13 +11,15 @@ seeds:
       PROD that JDBC source holds only 1 row (chusj / CHU Ste-Justine) and
       cbtn_tenant.organization returns 0 -- so prod has nothing to join to. These 41
       rows were seeded from QA as of 2026-09-24, and verified unchanged in prod on
-      2026-10-12 before this seed replaced the hand-written INSERT.
+      2026-10-12 before this seed replaced the hand-written INSERT. BCH was
+      corrected to Boston Children's Hospital and UCSF Benioff moved to UCSF-BCH on
+      2026-10-29, bringing it to 42 rows.
 
       WHEN PROD'S SOURCE IS POPULATED, replace this seed with a model:
         select code, name, category_code, tenant_code from radiant_tenant.organization
       Dependents need no change -- they only reference .name and .code.
 
-      name and code are both unique across all 41 rows (verified), so the LEFT JOIN in
+      name and code are both unique across all 42 rows (verified), so the LEFT JOIN in
       every pcx_30 combined view cannot fan out.
     config:
       column_types:
