@@ -48,6 +48,18 @@ linters:
       - linters:
           - staticcheck
         text: QF1003
+      # The MySQL wire protocol packs lengths and capability flags into bytes on purpose:
+      # every byte(x) there is a deliberate truncation of a value the protocol bounds.
+      - path: internal/mysqlproxy/protocol\.go
+        linters:
+          - gosec
+        text: G115
+      # The boolean env parser logs the rejected value so a typo is visible; the value is
+      # operator-set configuration, quoted with %q, not request input.
+      - path: internal/utils/env\.go
+        linters:
+          - gosec
+        text: G706
 
 # Report every finding; do not truncate repeated issues so CI surfaces the full set.
 issues:
