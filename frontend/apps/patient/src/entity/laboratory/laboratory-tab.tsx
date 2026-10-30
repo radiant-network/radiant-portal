@@ -1,4 +1,4 @@
-import { usePatientLaboratory } from '../use-patient-tab';
+import { usePatientLaboratory } from '../hooks/use-patient-entity';
 
 import CbcCard from './cbc-card';
 import CsfCard from './csf-card';

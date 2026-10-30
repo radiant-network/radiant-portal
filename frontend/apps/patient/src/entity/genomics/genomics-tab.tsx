@@ -1,4 +1,4 @@
-import { usePatientGenomics } from '../use-patient-tab';
+import { usePatientGenomics } from '../hooks/use-patient-entity';
 
 import GenomicCasesCard from './genomic-cases/genomic-cases-card';
 import VariantInterpretationsCard from './variant-interpretations/variant-interpretations-card';
