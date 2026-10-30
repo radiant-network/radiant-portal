@@ -45,9 +45,11 @@ jobs:
           - name: radiant-toolbox
             context: ./backend
             file: ./backend/toolbox.Dockerfile
+          # npm packages block at critical only, as in dependency-review.yml
           - name: radiant-portal
             context: ./frontend
             file: ./frontend/Dockerfile.radiant
+            library-severity: CRITICAL
 
     steps:
       - name: Checkout repository
@@ -81,21 +83,42 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
-      - name: Scan the image
+      # The ruleset has one threshold for all Trivy alerts, so the severity of each
+      # package type is filtered here: OS packages and application packages separately
+      - name: Scan the OS packages
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ steps.image.outputs.ref }}
+          vuln-type: os
           format: sarif
-          output: trivy-image.sarif
+          output: trivy-os.sarif
           severity: HIGH,CRITICAL
           limit-severities-for-sarif: true
           ignore-unfixed: true
 
-      - name: Upload the results
+      - name: Scan the application packages
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.ref }}
+          vuln-type: library
+          format: sarif
+          output: trivy-library.sarif
+          severity: ${{ matrix.library-severity || 'HIGH,CRITICAL' }}
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
+          skip-setup-trivy: true
+
+      - name: Upload the OS results
         uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
-          sarif_file: trivy-image.sarif
-          category: trivy-image-${{ matrix.name }}
+          sarif_file: trivy-os.sarif
+          category: trivy-image-${{ matrix.name }}-os
+
+      - name: Upload the application results
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: trivy-library.sarif
+          category: trivy-image-${{ matrix.name }}-library
 
   config:
     runs-on: ubuntu-latest
