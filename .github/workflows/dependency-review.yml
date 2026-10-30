@@ -13,7 +13,7 @@ permissions:
 
 env:
   # Severities that block, per dependency review ecosystem
-  THRESHOLDS: '{"npm": ["critical"], "gomod": ["high", "critical"]}'
+  THRESHOLDS: '{"npm": ["critical"], "gomod": ["high", "critical"], "pip": ["high", "critical"]}'
 
 jobs:
   dependency-review:

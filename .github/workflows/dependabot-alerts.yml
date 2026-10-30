@@ -11,7 +11,7 @@ on:
 
 env:
   # Space-separated `ecosystem=severities` pairs, as accepted by the Dependabot alerts API
-  DEPENDABOT_THRESHOLDS: npm=critical go=high,critical
+  DEPENDABOT_THRESHOLDS: npm=critical go=high,critical pip=high,critical
   # Space-separated code scanning security severities reported for Trivy
   TRIVY_SEVERITIES: critical high
   LABEL: dependabot-gate
