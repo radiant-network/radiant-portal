@@ -18,14 +18,14 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
         return day == null ? <EmptyCell /> : t('patient_entity.treatments.day_value', { day });
       },
       header: t('patient_entity.treatments.columns.day'),
-      size: 112,
+      size: 64,
     }),
     columnHelper.accessor('type', {
       cell: info => (
         <BadgeCell variant="secondary">{t(`patient_entity.treatments.types.${info.getValue()}`)}</BadgeCell>
       ),
       header: t('patient_entity.treatments.columns.type'),
-      size: 160,
+      size: 96,
     }),
     columnHelper.accessor('description', {
       cell: info => {
@@ -43,6 +43,7 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
         );
       },
       header: t('patient_entity.treatments.columns.description'),
+      size: 200,
     }),
     columnHelper.accessor('doses', {
       cell: info => {
