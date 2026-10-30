@@ -17,10 +17,10 @@
    seven pcx_30 combined views do. This is NOT interchangeable with the base
    table's org_short_code: that is the FHIR source vocabulary (chop / seattle /
    ucsf) while organization_code is the pcx_30 / auth.pii_grant vocabulary
-   (CHOP / SCH / BCH). Only 'chop' coincides between the two, so keying access
+   (CHOP / SCH / UCSF-BCH). Only 'chop' coincides between the two, so keying access
    control on org_short_code would fail closed for every Seattle and UCSF patient.
-   Resolves for 2,405 of 2,421 patients: CHOP 1,837, SCH 336, BCH 231, UAB 1.
-   pcx_30_organization_ref.name is unique across its 41 rows, so that join cannot
+   Resolves for 2,405 of 2,421 patients: CHOP 1,837, SCH 336, UCSF-BCH 231, UAB 1.
+   pcx_30_organization_ref.name is unique across its 42 rows, so that join cannot
    fan out; the roster CTE dedupes stg_cbtn_enrollment_final, which holds 7,157
    rows for 7,116 distinct research_id.
 

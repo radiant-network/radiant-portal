@@ -40,7 +40,7 @@
 -- distinct research_id, so the roster join can fan out on a multi-MRN patient. None of
 -- this cohort's imaging is affected today (rows = distinct session_id), but distinct
 -- guards it, as in the peer views. pcx_30_organization_ref.name is unique across its
--- 41 rows, so that LEFT JOIN cannot fan out.
+-- 42 rows, so that LEFT JOIN cannot fan out.
 --
 -- NOTE on flywheel_url: the chop.flywheel.io host is correct for EVERY row regardless
 -- of contributing institution -- CHOP hosts all images for all sites.

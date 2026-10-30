@@ -13,10 +13,10 @@
 --
 -- ORGANIZATION RESOLUTION is NOT interchangeable with the base table's
 -- org_short_code -- that is the FHIR vocabulary (chop/seattle/ucsf) while
--- organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP/SCH/BCH). Only
+-- organization_code is the pcx_30 / auth.pii_grant vocabulary (CHOP/SCH/UCSF-BCH). Only
 -- 'chop' coincides, so keying access control on org_short_code would fail closed for
 -- every Seattle and UCSF patient. Resolves for 2,405 of 2,421: CHOP 1,837, SCH 336,
--- BCH 231, UAB 1 -- so unlike the performance-status domain this one DOES have
+-- UCSF-BCH 231, UAB 1 -- so unlike the performance-status domain this one DOES have
 -- non-CHOP patients a grant can reach.
 --
 -- *** 16 of 2,421 patients resolve to a NULL organization_code (14 chop + 2 seattle,

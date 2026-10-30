@@ -15,7 +15,7 @@
 -- WHY organization_name AND NOT org_short_code. The base tables already carry
 -- org_short_code, which is the FHIR source vocabulary (chop / seattle / ucsf).
 -- organization_code, resolved from this name via pcx_30_organization_ref, is the
--- pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / BCH). Only 'chop' coincides
+-- pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / UCSF-BCH). Only 'chop' coincides
 -- between the two, so keying access control on org_short_code would fail CLOSED for
 -- every non-CHOP patient. This is the join that makes the downstream grant check
 -- work at all.

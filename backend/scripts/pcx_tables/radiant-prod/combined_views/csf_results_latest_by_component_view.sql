@@ -35,8 +35,8 @@
    organization_code from pcx_30_organization_ref.name -> .code, exactly as the
    pcx_30 combined views and the other latest-result views do. NOT interchangeable
    with the FHIR source vocabulary (chop / seattle / ucsf): organization_code is the
-   pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / BCH) and only 'chop' coincides.
-   pcx_30_organization_ref.name is unique across its 41 rows so that join cannot fan
+   pcx_30 / auth.pii_grant vocabulary (CHOP / SCH / UCSF-BCH) and only 'chop' coincides.
+   pcx_30_organization_ref.name is unique across its 42 rows so that join cannot fan
    out; the roster CTE dedupes stg_cbtn_enrollment_final.
 
    IDENTIFIER JOIN
