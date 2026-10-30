@@ -1,0 +1,63 @@
+
+version: 2
+
+sources:
+  - name: dwh_source
+    database: default_catalog 
+    schema: radiant_data_dev 
+    description: "Raw data from d3b data warehouses."
+    
+    tables:
+      - name: participants
+        description: "direct copy of d3b dwh table prod_access.participants"
+      - name: diagnosis
+        description: "direct copy of d3b dwh table prod_access.diagnosis"
+      - name: updates
+        description: "direct copy of d3b dwh table prod_access.updates"
+      - name: treatment
+        description: "direct copy of d3b dwh table prod_access.treatment"
+      - name: imaging_sessions
+        description: "direct copy of d3b dwh table prod_access.imaging_sessions"
+      - name: stg_cbtn_enrollment_final
+        description: "direct copy of d3b identified warehouse table stg_cbtn.stg_cbtn_enrollment_final"
+      - name: openpedcan_histologies_annotated
+        description: "direct copy of d3b dwh bix table bix_reporting.openpedcan_histologies_annotated"
+
+
+  - name: radiant_fhir
+    database: radiant_iceberg_catalog 
+    schema: fhir_cbtn_tenant_db 
+    description: "Iceberg formatted data created by flattening FHIR resources"
+
+    tables:
+    - name: patient
+    - name: patient_identifier
+    # Observation / DiagnosticReport graph, read by the cbtn_clinical base models
+    # (cbc_latest_results, the two csf_* tables, lansky_karnofsky_latest).
+    - name: observation
+      description: "Scoring / result events. NOTE value_* columns are 0% populated for the Lansky/Karnofsky scales -- the score lives only in observation_component."
+    - name: observation_code_coding
+      description: "Coded identity of an observation. Join on observation_id. One target coding per observation (verified), so it cannot fan out."
+    - name: observation_component
+      description: "Per-component values. Carries the Lansky/Karnofsky score as free text in component_value_string."
+    - name: diagnostic_report
+      description: "Lab/pathology reports. code_text is the report name; effective_date_time is the clinical date."
+    - name: diagnostic_report_result
+      description: "Report -> Observation link. result_reference needs substring_index(...,'/',-1) to yield the observation id."
+    - name: diagnostic_report_category
+      description: "Report categories. Used NEGATIVELY, to exclude Radiology/Imaging reports from the CSF lab cohort."
+    - name: specimen
+      description: "Specimens. collection_collected_date_time dates the draw, used for the same-day CSF cytology attribution tier."
+    - name: specimen_type_coding
+      description: "Specimen type codings. CSF is matched on SNOMED code OR display -- Epic-local OIDs carry 'Cerebrospinal Fluid' under non-SNOMED codes."
+
+models:
+  - name: my_first_dbt_model
+    description: "A starter dbt model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+

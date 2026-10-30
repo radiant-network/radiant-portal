@@ -1,0 +1,809 @@
+# PCX-30 de-identified release tables -- schema reference
+#
+# GENERATED FILE. Do not hand-edit. Regenerate with:
+#     python3 docs/generate_pcx_30_deid_schema.py
+#
+# It is produced from the live StarRocks schema plus
+# radiant_data_dev.pcx_30_data_dictionary, so types and descriptions match what is
+# actually deployed. To change a DESCRIPTION, edit the dbt seed
+# seeds/pcx_30_data_dictionary_src.csv and regenerate. To change a TYPE or a column,
+# change the dbt model. To change a GRAIN or CAVEAT, edit the generator -- those two
+# are authored, not derived.
+#
+# Counts (row_count, populated, distinct_values) are a point-in-time snapshot as of
+# the `generated` date. The underlying models are rebuilt from live sources, so treat
+# them as indicative rather than guaranteed.
+#
+# `permitted_values` is emitted only for columns with 12 or fewer distinct values
+# and is the OBSERVED value set on the generated date -- it is not a declared
+# constraint, and a new source value can appear without warning. Where a dbt
+# accepted_values test enforces a set, that is noted under the table's dbt_tests.
+#
+# READ THE PER-TABLE `caveats` BEFORE ANALYSING. Several columns conflate "absent"
+# with "unknown", and two different unknown-value conventions are in use.
+
+version: 1
+title: PCX-30 de-identified release tables -- schema reference
+generated: '2026-10-14'
+generated_by: docs/generate_pcx_30_deid_schema.py
+generated_from:
+- radiant_data_dev.information_schema.columns (data types, nullability, ordinal position)
+- radiant_data_dev.pcx_30_data_dictionary (field and table descriptions; dbt seed pcx_30_data_dictionary_src)
+- live row / populated / distinct counts as of the generated date
+schema: radiant_data_dev
+dbt_project: starrocks_radiant
+scope: The seven pcx_30_*_deid release tables. The cbtn_clinical tables (cbc_latest_results, csf_results_latest_by_component,
+  csf_tumor_analysis_latest, lansky_karnofsky_latest) are NOT included -- they are not part of the
+  _deid release and are keyed on patient_fhir_id rather than research_id.
+conventions:
+  patient_key: research_id -- the de-identified patient identifier. Join key across all seven tables.
+  age_at_x_days: Whole days from date of birth to the event. Replaces calendar dates throughout;
+    no table in this release carries a real date.
+  de_identification: No MRN, no name, no calendar date, no full postal code. Dates are expressed
+    as ages in days; names are synthetic; postal codes are ZIP3-masked. research_id is a CODED identifier
+    -- a re-identification key exists outside this release, so treat these tables as a limited data
+    set rather than fully de-identified data.
+  multi_value_fields: Several fields hold ';'-separated lists (metastasis_location, tumor_locations,
+    tumor_location_other). Element ORDER is not guaranteed -- compare as sets.
+tables:
+- name: pcx_30_demographics_deid
+  dbt_model: pcx_30_demographics_deid
+  description: Patient demographic and cohort information, including birth year, race, ethnicity,
+    sex, geographic area, and the diagnosis and data source cohorts the patient belongs to.
+  grain: one row per patient
+  row_count: 966
+  distinct_patients: 966
+  dbt_tests:
+  - 'research_id: not_null'
+  caveats:
+  - given_name and family_name are SYNTHETIC placeholders derived from research_id; they contain
+    no real name information.
+  - birth_year replaces the full date of birth. Month and day are removed.
+  - address_postal_code is truncated to the first 3 digits plus 'XX', and fully suppressed to 'XXXXX'
+    for the 17 HIPAA low-population ZIP3 prefixes and for empty values.
+  - data_type_cohort is derived from whether the patient resolved in the FHIR identifier list, NOT
+    from the RADIANT MRN list used elsewhere in the slate. The two are probably equivalent but are
+    not provably so.
+  columns:
+  - name: organization_name
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 29
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: research_id
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 966
+    description: De-identified patient research identifier.
+  - name: given_name
+    position: 3
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 966
+    description: De-identification placeholder for the patient's first name; contains no real name
+      information.
+  - name: family_name
+    position: 4
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 966
+    description: De-identification placeholder for the patient's last name; contains no real name
+      information.
+  - name: birth_year
+    position: 5
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 48
+    description: Patient's year of birth. Month and day are removed for de-identification.
+  - name: race
+    position: 6
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 24
+    description: Patient's race as reported by the contributing institution.
+  - name: ethnicity
+    position: 7
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 4
+    description: Patient's ethnicity as reported by the contributing institution.
+    permitted_values:
+    - Hispanic or Latino
+    - Not Hispanic or Latino
+    - Unavailable
+    - Unknown
+  - name: gender
+    position: 8
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 4
+    description: Patient's administrative sex as recorded by the contributing institution.
+    permitted_values:
+    - female
+    - male
+    - not available
+    - not reported
+  - name: address_postal_code
+    position: 9
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 79
+    description: Patient's residential ZIP code, partially masked for de-identification.
+  - name: diagnosis_type_cohort
+    position: 10
+    data_type: varchar(500)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: The patient's primary diagnosis group used to define the cohort for this release.
+    permitted_values:
+    - Atypical teratoid/rhabdoid tumor
+    - Medulloblastoma
+  - name: data_type_cohort
+    position: 11
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: 'The source cohort the patient''s data came from: ''radiant'' for RADIANT patients,
+      ''cbtn-non-radiant'' for CBTN patients not in RADIANT.'
+    permitted_values:
+    - cbtn-non-radiant
+    - radiant
+- name: pcx_30_event_level_deid
+  dbt_model: pcx_30_event_level_deid
+  description: Disease events across the patient's cancer journey, including initial diagnosis,
+    progression, recurrence, second malignancy, and death, with the diagnosis, tumor location, and
+    metastasis status recorded at each event.
+  grain: one row per (patient, disease event)
+  row_count: 1856
+  distinct_patients: 966
+  dbt_tests:
+  - 'research_id: not_null'
+  caveats:
+  - age_at_event_days uses -1 as an UNKNOWN-DATE SENTINEL, not a real age. Filter it out before
+    any time-based analysis.
+  - cns_integrated_diagnosis may have been upgraded from the CBTN value to a more specific OpenPedCan
+    molecular subtype; cns_integrated_diagnosis_source records which source won ('CBTN' or 'OpenPedCan').
+  - A subtype upgrade is EVENT-SCOPED and never broadcast across a patient's other events, EXCEPT
+    that a partially-matched Initial CNS Tumor group is lifted whole. Test diagnosis attribution
+    at the per-ROW grain, not per (patient, event_type).
+  - 'KNOWN NON-DETERMINISM: metastasis_location and tumor_location_other are assembled with group_concat
+    and a non-total ORDER BY, so the order of the '';''-separated elements can differ between rebuilds.
+    Compare as a SET, not as a string.'
+  columns:
+  - name: organization_name
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 29
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: research_id
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 966
+    description: De-identified patient research identifier.
+  - name: event_type
+    position: 3
+    data_type: varchar(500)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 7
+    description: The type of diagnosis-related event determined via surgery, imaging, or clinical
+      observation.
+    permitted_values:
+    - Deceased
+    - Initial CNS Tumor
+    - Not Reported
+    - Progressive
+    - Recurrence
+    - Second Malignancy
+    - Unavailable
+  - name: age_at_event_days
+    position: 4
+    data_type: int(11)
+    nullable: true
+    populated: 1846 of 1856
+    distinct_values: 1594
+    description: Patient age in days at the diagnosis-related event. A value of -1 indicates an
+      unknown date.
+  - name: metastasis
+    position: 5
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 4
+    description: Whether metastatic disease was present at the time of the event.
+    permitted_values:
+    - 'No'
+    - Not Reported
+    - Unavailable
+    - 'Yes'
+  - name: metastasis_location
+    position: 6
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 31
+    description: The site of the metastasis.
+  - name: metastasis_location_other
+    position: 7
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 31
+    description: Free-text value supplied when the coded metastasis_location does not cover the
+      finding (the site of the metastasis).
+  - name: cns_diagnosis_category
+    position: 8
+    data_type: varchar(500)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 9
+    description: The diagnosis at the time of the event (broad diagnosis category).
+    permitted_values:
+    - Atypical teratoid/rhabdoid tumor
+    - CNS Sarcoma
+    - Glioneuronal and neuronal tumors
+    - High-Grade Glioma
+    - Low-Grade Glioma
+    - Medulloblastoma
+    - Not Reported
+    - Other
+    - Other CNS Embryonal tumors
+  - name: cns_integrated_diagnosis
+    position: 9
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 28
+    description: 'The diagnosis at the time of the event (WHO integrated histologic plus molecular
+      diagnosis). A more specific molecular subtype from OpenPedCan replaces the CBTN value in two
+      cases: where CBTN recorded only a non-specific "NOS or NEC" value, and where CBTN recorded
+      "Medulloblastoma, non-WNT/non-SHH" and OpenPedCan identified Group 3 or Group 4 (which are
+      non-WNT/non-SHH subtypes, so this narrows the diagnosis rather than contradicting it). cns_integrated_diagnosis_source
+      records which source won.'
+  - name: cns_integrated_diagnosis_source
+    position: 10
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 2
+    description: 'Which source supplied cns_integrated_diagnosis on this row: ''CBTN'' where the
+      value is as CBTN recorded it, or ''OpenPedCan'' where a more specific molecular subtype from
+      openpedcan_histologies_annotated replaced it, matched on the event''s biospecimen sample ID.
+      OpenPedCan wins in two cases: a non-specific CBTN "NOS or NEC" value, and a CBTN "Medulloblastoma,
+      non-WNT/non-SHH" value that OpenPedCan narrows to Group 3 or Group 4.'
+    permitted_values:
+    - CBTN
+    - OpenPedCan
+  - name: tumor_locations
+    position: 11
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 243
+    description: The anatomical site of the tumor.
+  - name: tumor_location_other
+    position: 12
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1856 of 1856
+    distinct_values: 57
+    description: Free-text value supplied when the coded tumor_locations does not cover the finding
+      (the anatomical site of the tumor).
+- name: pcx_30_medical_therapy_level_deid
+  dbt_model: pcx_30_medical_therapy_level_deid
+  description: Systemic therapy treatment, including the treatment protocol, whether the patient
+    was enrolled on that protocol, the treatment timing expressed as patient age in days, the chemotherapy
+    agents administered, and whether the regimen was part of the patient's initial treatment.
+  grain: one row per (patient, chemotherapy regimen)
+  row_count: 1267
+  distinct_patients: 810
+  dbt_tests:
+  - 'research_id: not_null'
+  caveats:
+  - age_at_regimen_start_days / age_at_regimen_stop_days are VARCHAR and carry the sentinel strings
+    'Not Available', 'Not Applicable' and 'Not Reported'. cast(... as int) yields NULL for those.
+    Test cast(age_at_regimen_start_days as int) is null -- NOT `is null`, which matches nothing.
+  - protocol_name and protocol_arm are derived by splitting protocol_name_and_arm on its FIRST colon.
+    protocol_arm keeps any further colons; it is 'Not Applicable' when there is no colon, which
+    covers BOTH a protocol with no arm AND a protocol that is itself unrecorded.
+  columns:
+  - name: organization_name
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 27
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: research_id
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 810
+    description: De-identified patient research identifier.
+  - name: protocol_name_and_arm
+    position: 3
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 86
+    description: Name of the treatment protocol the patient is enrolled on or being treated in accordance
+      with.
+  - name: protocol_name
+    position: 4
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 60
+    description: The protocol name alone, taken from protocol_name_and_arm by splitting on the first
+      colon. When the value has no colon the whole value is repeated here, so a sentinel such as
+      Not Applicable, Not Reported or Other appears unchanged. The same trial appears both with
+      and without an arm, and all of its rows share one protocol_name, so this column can be grouped
+      on.
+  - name: protocol_arm
+    position: 5
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 38
+    description: 'The arm, stratum or regimen within the protocol, taken from protocol_name_and_arm
+      by splitting on the first colon; any further colons are kept, for example Stratum N1: Standard
+      Risk. Not Applicable when the value has no colon, which covers both a protocol that genuinely
+      has no arm and a protocol that is itself unrecorded, so read protocol_name before treating
+      this as an absence of arm.'
+  - name: chemotherapy_type
+    position: 6
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 5
+    description: Whether the regimen followed a treatment protocol (with or without enrollment)
+      or other standard of care.
+    permitted_values:
+    - Not Reported
+    - Treatment follows a protocol and subject is enrolled on a protocol
+    - Treatment follows a protocol but subject is not enrolled
+    - Treatment follows other standard of care not associated with a current or past protocol
+    - Unavailable treatment
+  - name: age_at_regimen_start_days
+    position: 7
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 1038
+    description: Patient age in days at the start of the medical therapy regimen.
+  - name: age_at_regimen_stop_days
+    position: 8
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 893
+    description: Patient age in days at the end of the medical therapy regimen.
+  - name: chemotherapy_agents
+    position: 9
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 199
+    description: Therapeutic agent being administered.
+  - name: is_initial_treatment
+    position: 10
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1267 of 1267
+    distinct_values: 2
+    description: yes/no column indicating whether this regimen was part of the patient's initial
+      treatment (the treatment that occurred prior to the first relapse, progression, second malignancy,
+      or death). 'no' also covers rows where this could not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+- name: pcx_30_patient_level_deid
+  dbt_model: pcx_30_patient_level_deid
+  description: Patient survival information, including the most recent known vital status and the
+    patient age in days at which it was determined.
+  grain: one row per patient
+  row_count: 966
+  distinct_patients: 966
+  dbt_tests:
+  - 'research_id: not_null, unique'
+  - 'vital_status: not_null'
+  caveats:
+  - age_at_vital_status_days IS NULL means 'most recent status, date unknown' -- not 'no status'.
+    The source -1 unknown sentinel is mapped to NULL here, so -1 never appears.
+  - vital_status is 'deceased' when any source reports death (deceased outranks alive regardless
+    of recency); otherwise it is the raw lowercased clinical status from the source, so new source
+    vocabulary flows through rather than being bucketed.
+  columns:
+  - name: research_id
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 966
+    description: De-identified patient research identifier.
+  - name: age_at_vital_status_days
+    position: 2
+    data_type: int(11)
+    nullable: true
+    populated: 959 of 966
+    distinct_values: 900
+    description: Patient age in days at the most recent known vital status.
+  - name: vital_status
+    position: 3
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: The patient's most recent known vital status, as of the patient age in age_at_vital_status_days.
+    permitted_values:
+    - alive
+    - deceased
+- name: pcx_30_radiation_level_deid
+  dbt_model: pcx_30_radiation_level_deid
+  description: Radiation therapy treatment, including the treatment timing expressed as patient
+    age in days, the field or site treated, the radiation method delivered, the prescribed dose,
+    and whether the course was part of the patient's initial treatment.
+  grain: one row per (patient, radiation course)
+  row_count: 776
+  distinct_patients: 664
+  dbt_tests:
+  - 'research_id: not_null'
+  caveats:
+  - age_at_radiation_start_days / age_at_radiation_stop_days are VARCHAR and carry 'Not Available'
+    / 'Not Reported'. Catch with cast(... as int) is null. Unlike surgery there are no negative
+    values here.
+  - Doses are NOT unit-normalized -- read total_radiation_dose_unit alongside the value.
+  columns:
+  - name: organization_name
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 26
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: research_id
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 664
+    description: De-identified patient research identifier.
+  - name: age_at_radiation_start_days
+    position: 3
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 646
+    description: Patient age in days at the start of the radiation round.
+  - name: age_at_radiation_stop_days
+    position: 4
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 632
+    description: Patient age in days at the end of the radiation round.
+  - name: radiation_site
+    position: 5
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 6
+    description: Field or site of radiation.
+    permitted_values:
+    - Craniospinal with focal boost
+    - Focal/Tumor bed
+    - Not Reported
+    - Other
+    - Unavailable
+    - Whole Ventricular with focal boost
+  - name: radiation_site_other
+    position: 6
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 19
+    description: Free-text value supplied when the coded radiation_site does not cover the finding
+      (field or site of radiation).
+  - name: radiation_type
+    position: 7
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 7
+    description: Method or type of radiation delivered.
+    permitted_values:
+    - Combination of Protons and Photons
+    - Gamma Knife
+    - Not Reported
+    - Other
+    - Photons
+    - Protons
+    - Unavailable
+  - name: radiation_type_other
+    position: 8
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 8
+    description: Free-text value supplied when the coded radiation_type does not cover the finding
+      (method or type of radiation delivered).
+  - name: total_radiation_dose
+    position: 9
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 98
+    description: Dose of craniospinal radiation given.
+  - name: total_radiation_dose_unit
+    position: 10
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 6
+    description: Unit of measure for total_radiation_dose (dose of craniospinal radiation given).
+    permitted_values:
+    - CGE
+    - Gy
+    - Not Applicable
+    - Not Availale
+    - Not Reported
+    - cGy
+  - name: total_radiation_dose_focal
+    position: 11
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 151
+    description: Total radiation given to the primary site.
+  - name: total_radiation_dose_focal_unit
+    position: 12
+    data_type: varchar(1000)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 6
+    description: Unit of measure for total_radiation_dose_focal (total radiation given to the primary
+      site).
+    permitted_values:
+    - CGE
+    - Gy
+    - Not Applicable
+    - Not Available
+    - Not Reported
+    - cGy
+  - name: is_initial_treatment
+    position: 13
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 776 of 776
+    distinct_values: 2
+    description: yes/no column indicating whether this radiation course was part of the patient's
+      initial treatment (the treatment that occurred prior to the first relapse, progression, second
+      malignancy, or death), based on the course start age. 'no' also covers rows where this could
+      not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+- name: pcx_30_surgery_level_deid
+  dbt_model: pcx_30_surgery_level_deid
+  description: Tumor-directed surgery, including the patient age in days at the procedure, the extent
+    of tumor resection achieved, and whether the surgery was part of the patient's initial treatment.
+  grain: one row per (patient, surgical procedure)
+  row_count: 1285
+  distinct_patients: 951
+  dbt_tests:
+  - 'research_id: not_null'
+  caveats:
+  - 'age_at_surgery_days carries BOTH unknown conventions: string sentinels (which cast to NULL)
+    AND the value -1 / other negatives (which cast cleanly and compare as real numbers). Detecting
+    unknowns needs TWO tests: cast(... as int) is null AND cast(... as int) < 0.'
+  columns:
+  - name: organization_name
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 1285 of 1285
+    distinct_values: 29
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: research_id
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 1285 of 1285
+    distinct_values: 951
+    description: De-identified patient research identifier.
+  - name: age_at_surgery_days
+    position: 3
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1285 of 1285
+    distinct_values: 1145
+    description: Patient age in days when the tumor-related surgery (resection or biopsy) was performed.
+      A value of -1 indicates an unknown date.
+  - name: extent_of_tumor_resection
+    position: 4
+    data_type: varchar(1000)
+    nullable: true
+    populated: 1285 of 1285
+    distinct_values: 7
+    description: Extent of tumor resection performed during the surgery.
+    permitted_values:
+    - Biopsy only
+    - Gross/Near total resection
+    - N/A
+    - Not Applicable
+    - Not Reported
+    - Partial resection
+    - Unavailable
+  - name: is_initial_treatment
+    position: 5
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 1285 of 1285
+    distinct_values: 2
+    description: yes/no column indicating whether this surgery was part of the patient's initial
+      treatment (the treatment that occurred prior to the first relapse, progression, second malignancy,
+      or death). 'no' also covers rows where this could not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+- name: pcx_30_treatment_summary_deid
+  dbt_model: pcx_30_treatment_summary_deid
+  description: Summary measures of each patient's initial treatment, including patient age in days
+    at initial diagnosis and at first event, the age in days at the first-ever and first-initial
+    radiation and chemotherapy, the age at first-ever methotrexate, whether each was part of initial
+    treatment, and the order in which radiation and chemotherapy were given.
+  grain: one row per patient
+  row_count: 966
+  distinct_patients: 966
+  dbt_tests:
+  - 'research_id: not_null, unique'
+  caveats:
+  - TWO AGE SCALES, both published. age_at_first_*_ever_days is the first course EVER; age_at_initial_*_days
+    is the first course that is INITIAL (frontline) treatment. They differ, and the had_initial_*
+    flags and initial_treatment_order are computed from the latter.
+  - age_at_initial_dx_days and age_at_first_event_days pass the -1 UNKNOWN-DATE SENTINEL through
+    deliberately, unlike the per-row treatment tables which guard against it.
+  - age_at_first_event_days has no '_ever_' infix because it is a DISEASE EVENT, not a treatment.
+  columns:
+  - name: research_id
+    position: 1
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 966
+    description: De-identified patient research identifier.
+  - name: organization_name
+    position: 2
+    data_type: varchar(256)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 29
+    description: Name of the institution that contributed the patient's data to this release.
+  - name: age_at_initial_dx_days
+    position: 3
+    data_type: int(11)
+    nullable: true
+    populated: 944 of 966
+    distinct_values: 859
+    description: Patient age in days at initial CNS diagnosis. A value of -1 indicates an unknown
+      date.
+  - name: age_at_first_event_days
+    position: 4
+    data_type: int(11)
+    nullable: true
+    populated: 394 of 966
+    distinct_values: 380
+    description: Patient age in days at first event that is of event type progression, recurrence,
+      second malignancy, or deceased. A value of -1 indicates an unknown date.
+  - name: age_at_first_radiation_ever_days
+    position: 5
+    data_type: int(11)
+    nullable: true
+    populated: 596 of 966
+    distinct_values: 565
+    description: Patient age in days at the start of the patient's first radiation treatment ever,
+      whether or not it was part of initial treatment.
+  - name: age_at_initial_radiation_days
+    position: 6
+    data_type: int(11)
+    nullable: true
+    populated: 527 of 966
+    distinct_values: 503
+    description: Patient age in days at the start of the first radiation treatment that was part
+      of the patient's initial treatment. Null when no radiation fell within the initial treatment
+      window.
+  - name: age_at_first_chemo_ever_days
+    position: 7
+    data_type: int(11)
+    nullable: true
+    populated: 731 of 966
+    distinct_values: 693
+    description: Patient age in days at the start of the patient's first chemotherapy regimen ever,
+      for any agent, whether or not it was part of initial treatment.
+  - name: age_at_initial_chemo_days
+    position: 8
+    data_type: int(11)
+    nullable: true
+    populated: 687 of 966
+    distinct_values: 654
+    description: Patient age in days at the start of the first chemotherapy regimen that was part
+      of the patient's initial treatment. Null when no chemotherapy fell within the initial treatment
+      window.
+  - name: age_at_first_methotrexate_ever_days
+    position: 9
+    data_type: int(11)
+    nullable: true
+    populated: 177 of 966
+    distinct_values: 172
+    description: Patient age in days at the start of the patient's first methotrexate regimen ever,
+      whether or not it was part of initial treatment.
+  - name: had_initial_radiation
+    position: 10
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: Yes/No column indicating whether the patient had radiation as part of their initial
+      treatment (the treatment that occurred prior to the first relapse, progression, second malignancy,
+      or death). 'no' also covers rows where this could not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+  - name: had_initial_chemo
+    position: 11
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: Yes/No column indicating whether the patient had chemotherapy, for any agent, as
+      part of their initial treatment (the treatment that occurred prior to the first relapse, progression,
+      second malignancy, or death). 'no' also covers rows where this could not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+  - name: had_initial_methotrexate
+    position: 12
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 2
+    description: Yes/No column indicating whether the patient had methotrexate as part of their
+      initial treatment (the treatment that occurred prior to the first relapse, progression, second
+      malignancy, or death). 'no' also covers rows where this could not be determined.
+    permitted_values:
+    - 'no'
+    - 'yes'
+  - name: initial_treatment_order
+    position: 13
+    data_type: varchar(1048576)
+    nullable: true
+    populated: 966 of 966
+    distinct_values: 6
+    description: 'The order of initial treatments the patient received, specific to radiation, chemotherapy,
+      both, or neither. Values: radiation_before_chemotherapy, chemo_before_radiation, radiation_and_chemo_same_day,
+      chemo_only_no_initial_radiation, radiation_only_no_initial_chemo, no_initial_radiation_or_chemo.'
+    permitted_values:
+    - chemo_before_radiation
+    - chemo_only_no_initial_radiation
+    - no_initial_radiation_or_chemo
+    - radiation_and_chemo_same_day
+    - radiation_before_chemotherapy
+    - radiation_only_no_initial_chemo

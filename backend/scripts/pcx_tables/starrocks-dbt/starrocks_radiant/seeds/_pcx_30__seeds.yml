@@ -1,0 +1,84 @@
+version: 2
+
+seeds:
+  - name: pcx_30_organization_ref
+    description: >
+      Organization code/name reference for the pcx_30 views. Non-PHI -- public
+      institution names and short codes.
+
+      WHY A SEED, NOT A VIEW: the canonical source is radiant_jdbc.public.organization
+      (surfaced as radiant_tenant.organization). The QA cluster returns 41 rows, but in
+      PROD that JDBC source holds only 1 row (chusj / CHU Ste-Justine) and
+      cbtn_tenant.organization returns 0 -- so prod has nothing to join to. These 41
+      rows were seeded from QA as of 2026-09-24, and verified unchanged in prod on
+      2026-10-12 before this seed replaced the hand-written INSERT.
+
+      WHEN PROD'S SOURCE IS POPULATED, replace this seed with a model:
+        select code, name, category_code, tenant_code from radiant_tenant.organization
+      Dependents need no change -- they only reference .name and .code.
+
+      name and code are both unique across all 41 rows (verified), so the LEFT JOIN in
+      every pcx_30 combined view cannot fan out.
+    config:
+      column_types:
+        code: VARCHAR(64)
+        name: VARCHAR(256)
+        category_code: VARCHAR(64)
+        tenant_code: VARCHAR(64)
+    columns:
+      - name: code
+        description: "Organization short code; the value projected as organization_code."
+      - name: name
+        description: "Organization display name; join key to pcx_30 organization_name."
+      - name: category_code
+        description: "healthcare_provider | sequencing_center"
+      - name: tenant_code
+        description: "Source tenant filter."
+
+  - name: pcx_30_data_dictionary_src
+    description: >
+      AUTHORED SOURCE of the pcx_30 release data dictionary -- 74 rows of
+      hand-written field and table descriptions for the seven pcx_30_*_deid release
+      tables. Edit THIS FILE to change the dictionary.
+
+      WHY A SEED: the retired data_dictionary_table.sql held these same 74 rows as a
+      19 KB INSERT ... VALUES block, and its own column comment described
+      display_order as "authored row order from data_dictionary.csv" -- i.e. the SQL
+      was a hand transcription of a CSV that already existed
+      (prelim_30_deid_tables/data_dictionary.csv, also 74 records). Seeding removes
+      the transcription step. It also removes the escaping burden: 33 of the 74
+      descriptions contain an apostrophe, which needed '' doubling in SQL and needs
+      nothing at all in CSV, and 26 contain a comma, which CSV quoting handles
+      mechanically.
+
+      FOUR COLUMNS, NOT FIVE. The published table also carries table_name, which is
+      always source_file minus the '.csv' suffix (verified on all 74 rows). It is
+      DERIVED in the pcx_30_data_dictionary model rather than seeded, so the two can
+      never disagree.
+
+      display_order IS SEEDED, NOT DERIVED, and must be: a loaded table has no
+      inherent row order, so "authored CSV order" cannot be reconstructed after
+      load -- and both read views instruct consumers to ORDER BY it. When inserting a
+      row mid-list, renumber.
+
+      field_name is EMPTY for the 7 table-level rows (one per documented table). That
+      empty value is SEMANTIC -- it means "this row describes the table, not a
+      field" -- and the pcx_30_data_dictionary model coerces it to NULL with
+      nullif(), so an empty-string load cannot silently destroy the distinction.
+
+      Contains NO patient data: field names and prose descriptions only.
+    config:
+      column_types:
+        display_order: INT
+        source_file: VARCHAR(128)
+        field_name: VARCHAR(128)
+        description: VARCHAR(2000)
+    columns:
+      - name: display_order
+        description: "Authored row order. ORDER BY this to reproduce the published CSV order."
+      - name: source_file
+        description: "Original CSV filename of the release table being described."
+      - name: field_name
+        description: "Field described. EMPTY (-> NULL downstream) means the row describes the table itself."
+      - name: description
+        description: "Field or table description as published."
