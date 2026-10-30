@@ -33,7 +33,7 @@
    every row from every institution, de-identified. Matches the patient_level
    projection's behaviour.
 
-   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 41-row
+   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 42-row
    pcx_30_organization_ref seed. A NULL organization_code cannot match
    phi.org_code, so the row degrades to research_id + NULL date rather than
    leaking. Verified 2026-09-28: 0 of 8,920 rows have a NULL organization_code

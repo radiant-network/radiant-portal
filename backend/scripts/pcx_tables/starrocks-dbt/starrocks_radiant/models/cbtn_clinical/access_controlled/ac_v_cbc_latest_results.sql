@@ -23,7 +23,7 @@
 -- rather than per-analyte latest values.
 --
 -- UNLIKE THE PERFORMANCE-STATUS DOMAIN, this cohort has real non-CHOP membership
--- (CHOP 1,837, SCH 336, BCH 231, UAB 1), so an SCH grant holder genuinely sees
+-- (CHOP 1,837, SCH 336, UCSF-BCH 231, UAB 1), so an SCH grant holder genuinely sees
 -- identified rows here. It is the better domain to test the grant path against.
 --
 -- Values, units, LOINC codes and age_at_panel_days are all unguarded -- a lab value

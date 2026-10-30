@@ -34,7 +34,7 @@
    COLUMN MASKING ONLY -- no row filtering. A caller with zero grants still sees
    every row from every institution, de-identified.
 
-   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 41-row
+   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 42-row
    pcx_30_organization_ref seed. A NULL organization_code cannot match
    phi.org_code, so the row degrades to the de-identified values rather than
    leaking.
