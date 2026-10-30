@@ -25,19 +25,19 @@ function getClinicalTrialsColumns(t: TFunction<string, undefined>) {
         />
       ),
       header: t('patient_entity.clinical_trials.columns.protocol'),
-      size: 280,
+      size: 96,
     }),
     columnHelper.accessor(row => row.start.day, {
       id: 'start',
       cell: info => renderDay(info.getValue(), t),
       header: t('patient_entity.clinical_trials.columns.start'),
-      size: 128,
+      size: 64,
     }),
     columnHelper.accessor(row => row.stop.day, {
       id: 'stop',
       cell: info => renderDay(info.getValue(), t),
       header: t('patient_entity.clinical_trials.columns.stop'),
-      size: 128,
+      size: 64,
     }),
     columnHelper.accessor('chemotherapy_agents', {
       cell: info => <AgentsCell agents={info.getValue()} />,
