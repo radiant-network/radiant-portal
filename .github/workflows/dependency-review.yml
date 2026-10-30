@@ -1,0 +1,44 @@
+# Fails the PR when it adds or bumps a dependency with a known vulnerability at or
+# above the threshold of its ecosystem. Make the `dependency-review` job a required
+# status check of main so the failure blocks the merge.
+name: Dependency Review
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  # Severities that block, per dependency review ecosystem
+  THRESHOLDS: '{"npm": ["critical"], "gomod": ["high", "critical"], "pip": ["high", "critical"]}'
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      # The action has a single threshold: it only reports here, the next step decides
+      - name: Check dependencies changed by the PR
+        id: review
+        uses: actions/dependency-review-action@v4
+        with:
+          warn-only: true
+
+      - name: Fail above the ecosystem threshold
+        env:
+          CHANGES: ${{ steps.review.outputs.vulnerable-changes }}
+        run: |
+          BLOCKING=$(printf '%s' "${CHANGES:-[]}" | jq -r --argjson t "$THRESHOLDS" '
+            .[] | select(.change_type == "added")
+            | .ecosystem as $e | .name as $n | .version as $v | .manifest as $m
+            | .vulnerabilities[] | .severity as $s
+            | select(($t[$e] // []) | index($s))
+            | "\($s) \($e)/\($n)@\($v) in \($m): \(.advisory_summary) (\(.advisory_url))"')
+          if [ -n "$BLOCKING" ]; then
+            echo "Vulnerabilities at or above the threshold ($THRESHOLDS):"
+            echo "$BLOCKING"
+            exit 1
+          fi
+          echo "No vulnerability at or above the threshold ($THRESHOLDS)"
