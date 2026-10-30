@@ -2,8 +2,13 @@
 
 Expand the 7 `pcx_30_*_deid` release tables and their dependent views from the
 curated ATRT / Medulloblastoma cohort to **every `stg_cbtn_enrollment_final`
-patient who also has a row in `diagnosis`**, labelling the newly admitted
-patients `diagnosis_type_cohort = 'Not Applicable'`.
+patient who also has a `research_study_name = 'CBTN'` row in `diagnosis`**,
+labelling the newly admitted patients `diagnosis_type_cohort = 'Not Applicable'`.
+
+> The study qualifier was added 2026-10-30 — **§1b** carries it, and it moves the
+> expanded cohort from 6,963 to **6,957** patients. Figures elsewhere in this
+> document were measured 2026-10-23 against the unqualified rule and are left as
+> measured; where one says 6,963, §1b is what supersedes it.
 
 > **STATUS 2026-10-23 — awaiting a go/no-go decision, do not promote.**
 > A working prototype exists and has been measured end to end (§6), but the
@@ -65,6 +70,66 @@ The decision is to let the `unique` test (§4 step 7) FAIL rather than pick a
 silent winner: a build that blocks surfaces a genuine conflict against the stated
 requirement, where a deterministic tie-break would publish a choice nobody made.
 If that failure ever lands, the fix is a decision, not a retry.
+
+### 1b. The cohort also requires `research_study_name = 'CBTN'` (added 2026-10-30)
+
+Decided by the data owner 2026-10-30, after the condition below was measured.
+
+`int_pcx_30_diagnosis_cohort` now requires `research_study_name = 'CBTN'` on every
+arm — including the `not exists` probe in arm 2 — so the cohort chokepoint matches
+the filter `pcx_30_event_level_deid` has always carried.
+
+**What it fixes.** `pcx_30_event_level_deid` filters `research_study_name = 'CBTN'`
+on every union arm, inherited verbatim from
+`radiant-prod/tables/event_level_fields_openpedcan_prod.sql` (lines 277, 319, 498,
+540), whose header records the cohort as profiled with that filter. The cohort model
+did not carry it. Under `atrt_mb` the divergence is invisible; under `all_diagnosed`
+it admitted 6 patients to the roster — and so to demographics — that every other
+grain then dropped, because event_level feeds `int_pcx_30_initial_events`, which
+anchors `is_initial_treatment` and `treatment_summary`.
+
+Those 6 are the **`CHOP Fly RNASeq`** group (`participants.research_study_name`,
+6 patients): `C3360729`, `C3361344`, `C3361467`, `C3361590`, `C3361713`, `C3361836`,
+all at `CBTN Non-Consortium Member`. Each carries exactly one `diagnosis` row and it
+is a placeholder — `event_type 'Unavailable'`, `cns_diagnosis_category 'Not
+Reported'`, `diagnosis 'Other'`, `age_at_event_days 0`, `tumor_descriptor
+'Unavailable'` — plus one `treatment` row and no `updates` row. They export with
+`birth_year 1900`. They were the **entire** population the filter excludes: of 6,963
+roster patients, exactly 6 had no CBTN-study diagnosis row.
+
+**Measured on prod 2026-10-30, by executing the compiled model:**
+
+| | rows here | subjects here | patients downstream |
+|---|---|---|---|
+| `atrt_mb` before | 995 | 995 | 970 |
+| `atrt_mb` after | **970** | **970** | **970** |
+| `all_diagnosed` before | 12,517 | 12,517 | 6,963 |
+| `all_diagnosed` after | **6,957** | **6,957** | **6,957** |
+
+- **The curated release publishes identically.** All 25 subjects dropped from the
+  `atrt_mb` arm are absent from `stg_cbtn_enrollment_final`, and all three consumers
+  (`int_pcx_30_cohort_roster`, `pcx_30_demographics_deid`,
+  `v_pcx_30_demographics_combined`) inner-join this model. Curated patients lost: 0.
+- **No label flips.** The ATRT/MB grain is one category per subject before and after
+  (995 pairs / 995 subjects → 970 / 970), so no subject keeps one category while
+  losing another. §1a's dual-diagnosis edge is unaffected.
+- **Set difference against the live `_all_cbtn` roster is exactly those 6 leaving and
+  0 entering** — verified row by row, not by count, per §6 item 17.
+- The arm-2 `not exists` probe is filtered too. Unprobed, a subject admitted on a
+  CBTN-study row whose ATRT/MB label existed only under another study would be
+  dropped by arm 1 and excluded by arm 2 — vanishing entirely. Measured: **0**
+  subjects are in that position, so it is defence against a future load.
+
+**What this does NOT resolve.** 31 subjects carry an ATRT/MB diagnosis under a
+non-CBTN study (Penn NTTB 12, PNOC027 11, DGD 8). 6 of them are in the curated
+roster and all 6 *also* carry CBTN-study ATRT/MB rows, which is why the curated
+count does not move. An upstream study re-label is where the curated cohort would
+shrink — re-measure there before blaming this filter.
+
+It also narrows but does not close §9's open question 2 (patient-completeness):
+demographics and event_level now agree at 6,957, while `patient_level` stays at
+**6,932** — 31 patients still lack any vital-status row, which is a different cause
+(§6d).
 
 ---
 
