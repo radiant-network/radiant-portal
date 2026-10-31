@@ -17,6 +17,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 import CaseAssignmentCell from './cells/case-assignment-cell';
 import CaseStatusCell from './cells/case-status-cell';
+import ProbandSamplesCell from './cells/proband-samples-cell';
 
 const columnHelper = createAppColumnHelper<CaseResult>();
 
@@ -176,6 +177,19 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
       ),
       size: 48,
       minSize: 40,
+    }),
+    // Sample
+    columnHelper.accessor(row => row.proband_submitter_sample_ids, {
+      id: 'proband_submitter_sample_ids',
+      cell: info => <ProbandSamplesCell sampleIds={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.proband_submitter_sample_ids_tooltip')}>
+          {t('case_exploration.case.headers.proband_submitter_sample_ids')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
     }),
     // Project
     columnHelper.accessor(row => row.project_code, {
@@ -351,6 +365,11 @@ const defaultSettings = createColumnSettings([
     id: 'ordering_organization_code',
     visible: true,
     label: 'case_exploration.case.headers.ordering_organization_code',
+  },
+  {
+    id: 'proband_submitter_sample_ids',
+    visible: true,
+    label: 'case_exploration.case.headers.proband_submitter_sample_ids',
   },
   {
     id: 'project_code',

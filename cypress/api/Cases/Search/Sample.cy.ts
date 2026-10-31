@@ -1,0 +1,38 @@
+/// <reference types="cypress"/>
+import { data } from 'pom/shared/Data';
+
+describe('Cases - Search - Sample', () => {
+  const sample = data.case.sample;
+  let response: any;
+
+  before(() => {
+    const Auth = Cypress.expose('globalData').Authorization;
+    const body: string = `{
+      "additional_fields": [
+        "case_type"
+      ],
+      "search_criteria": [
+        {
+          "field": "proband_submitter_sample_ids",
+          "value": [
+            "${sample}"
+          ]
+        }
+      ],
+      "limit": 20,
+      "page_index": 0
+    }`;
+
+    cy.apiCall('POST', 'cases/search', body, Auth.token).then(res => {
+      response = res;
+    });
+  });
+
+  it('Request status', () => {
+    expect(response.status).to.eq(200);
+  });
+
+  it('Return content', () => {
+    expect(response.body.count).to.eq(1);
+  });
+});
