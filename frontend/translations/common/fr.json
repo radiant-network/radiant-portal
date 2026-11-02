@@ -2207,6 +2207,10 @@
       "chrm_hidden_reads": {
         "title": "Lectures masquées sur chrM",
         "description": "Certaines pistes sont très profondes sur chrM. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      },
+      "failed_tracks": {
+        "title_one": "Une piste n'a pas pu être chargée",
+        "title_other": "{{count}} pistes n'ont pas pu être chargées"
       }
     },
     "interpretation_form": {
