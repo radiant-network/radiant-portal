@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Document struct {
 	ID               int `gorm:"unique;primaryKey;autoIncrement"`
@@ -147,6 +150,10 @@ var DocumentTable = Table{
 func (Document) TableName() string {
 	return DocumentTable.Name
 }
+
+// NotQCMetricsJSON leaves out the QC pipeline's per-sample metrics.json, an ETL input that is neither
+// listed to users nor sent to the labs. It needs the document table under its DocumentTable alias.
+var NotQCMetricsJSON = fmt.Sprintf("NOT (%[1]s.data_type_code = 'aggqc' AND %[1]s.format_code = 'json')", DocumentTable.Alias)
 
 type DocumentFilters struct {
 	Project               []FiltersValue `json:"project_code,omitempty"`

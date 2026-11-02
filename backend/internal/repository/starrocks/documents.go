@@ -60,12 +60,12 @@ func (r *DocumentsRepository) SearchById(ctx context.Context, prefix string, lim
 	subQueryDocumentId := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
 	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
-	filterOutIndexFiles(subQueryDocumentId)
+	filterOutHiddenFiles(subQueryDocumentId)
 
 	subQueryDocumentName := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	subQueryDocumentName = subQueryDocumentName.Select("\"name\" as type, name as value")
 	subQueryDocumentName = subQueryDocumentName.Where("name LIKE ?", searchInput)
-	filterOutIndexFiles(subQueryDocumentName)
+	filterOutHiddenFiles(subQueryDocumentName)
 
 	subQueryRunName := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
 	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
@@ -167,18 +167,19 @@ func prepareDocumentsQuery(ctx context.Context, userQuery types.Query, r *Docume
 		utils.AddWhere(userQuery, tx)
 	}
 
-	filterOutIndexFiles(tx)
+	filterOutHiddenFiles(tx)
 	return tx
 }
 
-func filterOutIndexFiles(tx *gorm.DB) {
+func filterOutHiddenFiles(tx *gorm.DB) {
 	tx.Where(fmt.Sprintf("%s.format_code not in %s", types.DocumentTable.Alias, INDEX_FORMATS))
+	tx.Where(types.NotQCMetricsJSON)
 }
 
 func (r *DocumentsRepository) GetById(ctx context.Context, id int) (*Document, error) {
 	var document Document
 	// Keep Take (not First): First can build invalid SQL when the table name carries a database prefix.
-	// Index files (crai, tbi) are hidden from listings but stay downloadable by id.
+	// Index files (crai, tbi) and the QC metrics.json are hidden from listings but stay downloadable by id.
 	err := r.db.WithContext(ctx).Table(types.DocumentTable.TenantQualifiedName(ctx)).
 		Where("id = ?", id).
 		Take(&document).Error
