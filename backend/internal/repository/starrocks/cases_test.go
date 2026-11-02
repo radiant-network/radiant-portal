@@ -1397,6 +1397,20 @@ func Test_CaseWithRuns_EmptyArrayWithoutRun(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_RunNames_NotSelectedByDefault(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		criteria := []types.SearchCriterion{{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1}}}
+		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, nil, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, _, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		require.Len(t, *cases, 1)
+		// The Run column is user-defined: the runs are only joined when additional_fields asks for them.
+		assert.Nil(t, (*cases)[0].RunNames)
+	})
+}
+
 func Test_SearchCases_RunNames_TrioCase_ListsProbandRunOnly(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

@@ -179,7 +179,7 @@ type CaseResult struct {
 	ProbandID                 int                     `json:"proband_id,omitempty"`
 	SubmitterProbandId        string                  `json:"submitter_proband_id,omitempty"`
 	ProbandSubmitterSampleIds JsonArray[string]       `json:"proband_submitter_sample_ids" validate:"required"`
-	RunNames                  JsonArray[string]       `json:"run_names" validate:"required"`
+	RunNames                  JsonArray[string]       `json:"run_names,omitempty"`
 	PriorityCode              string                  `json:"priority_code,omitempty"`
 	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	CaseTypeCode              string                  `json:"-"`
@@ -397,7 +397,6 @@ var CasesDefaultFields = []Field{
 	CaseOrderingOrganizationCodeField,
 	CaseOrderingOrganizationNameField,
 	CaseProbandSubmitterSampleIdsField,
-	CaseRunNamesField,
 	CaseDiagnosisLabCodeField,
 	ProjectCodeField,
 	ProjectNameField,
