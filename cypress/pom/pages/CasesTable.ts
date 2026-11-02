@@ -120,6 +120,17 @@ const tableColumns = [
     tooltip: 'Requested by',
   },
   {
+    id: 'sample',
+    name: 'Sample',
+    apiField: 'proband_submitter_sample_ids',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 10,
+    tooltip: `Proband's sample ID (tumor sample for somatic cases)`,
+  },
+  {
     id: 'project',
     name: 'Project',
     apiField: 'project_code',
@@ -127,7 +138,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 11,
     tooltip: null,
   },
   {
@@ -138,7 +149,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 12,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
@@ -149,7 +160,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 13,
     tooltip: 'Date of last case modification (yyyy-mm-dd)',
   },
   {
@@ -160,7 +171,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Prescribing doctor',
   },
   {
@@ -171,7 +182,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 15,
     tooltip: 'Molecular diagnostic laboratory',
   },
   {
@@ -182,7 +193,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 16,
     tooltip: 'Organization managing the patient’s file',
   },
   {
@@ -193,7 +204,7 @@ const tableColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 16,
+    position: 17,
     tooltip: null,
   },
 ];
