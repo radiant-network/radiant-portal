@@ -101,6 +101,7 @@ const RelationshipProbandCode = "proband"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":                {},
+	"somatic_variant_calling":               {},
 	"tumor_only_variant_calling":            {},
 	types.RadiantGermlineAnnotationTask:     {},
 	types.RadiantGermlineCNVAnnotationTask:  {},
@@ -1866,21 +1867,23 @@ func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationReco
 		}
 
 		for _, doc := range t.OutputDocuments {
-			d := types.Document{
-				Name:             doc.Name,
-				DataCategoryCode: doc.DataCategoryCode,
-				DataTypeCode:     doc.DataTypeCode,
-				FileFormatCode:   doc.FormatCode,
-				Size:             *doc.Size,
-				Url:              doc.Url,
-				Hash:             doc.Hash,
-				TenantCode:       sc.TenantCode,
+			d, exists := cr.Documents[doc.Url]
+			if !exists || len(documentFieldDiffs(doc, d)) > 0 {
+				d = &types.Document{
+					Name:             doc.Name,
+					DataCategoryCode: doc.DataCategoryCode,
+					DataTypeCode:     doc.DataTypeCode,
+					FileFormatCode:   doc.FormatCode,
+					Size:             *doc.Size,
+					Url:              doc.Url,
+					Hash:             doc.Hash,
+					TenantCode:       sc.TenantCode,
+				}
+				if err := sc.DocRepo.CreateDocument(ctx, d); err != nil {
+					return fmt.Errorf("failed to persist document %q for case %d: %w", doc.Name, cr.Index, err)
+				}
+				cr.Documents[doc.Url] = d
 			}
-			err := sc.DocRepo.CreateDocument(ctx, &d)
-			if err != nil {
-				return fmt.Errorf("failed to persist document %q for case %d: %w", doc.Name, cr.Index, err)
-			}
-			cr.Documents[doc.Url] = &d
 
 			err = sc.TaskRepo.CreateTaskHasDocument(ctx, &types.TaskHasDocument{
 				TaskID:     task.ID,

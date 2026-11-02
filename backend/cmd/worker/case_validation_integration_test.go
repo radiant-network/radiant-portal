@@ -699,6 +699,60 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalTaskAlreadyAttached_Skippe
 	})
 }
 
+// A document row left without an output owner (its task was deleted) must be adopted by the
+// re-sent task, not duplicated: the second row would be the one GetDocumentByUrl misses and
+// TASK-008 would never hold again.
+func Test_ProcessBatch_Case_validateDocument_OrphanDocumentAdopted_ThenSkipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/validateDocument_OrphanDocumentAdopted.recal.crai"
+		payload := createBaseCasePayload("validateDocument_OrphanDocumentAdopted_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_OrphanDocumentAdopted.recal.crai"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var taskID int
+		env.Postgres.Raw("SELECT thd.task_id FROM task_has_document thd JOIN document d ON d.id = thd.document_id WHERE d.url = ? AND thd.type = 'output'", url).Scan(&taskID)
+		require.NotZero(t, taskID)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task_has_document WHERE task_id = ?", taskID).Error)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task_context WHERE task_id = ?", taskID).Error)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task WHERE id = ?", taskID).Error)
+
+		payload[0].SubmitterCaseId = "validateDocument_OrphanDocumentAdopted_2"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document " + url + " already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		payload[0].SubmitterCaseId = "validateDocument_OrphanDocumentAdopted_3"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos = []types.BatchMessage{
+			{
+				Code:    "TASK-008",
+				Message: "Task alignment_germline_variant_calling on aliquots [NA12891] is already attached, skipped.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		var docs, owners int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document thd").Joins("JOIN document d ON d.id = thd.document_id").Where("d.url = ? AND thd.type = ?", url, "output").Count(&owners)
+		assert.Equal(t, int64(1), docs)
+		assert.Equal(t, int64(1), owners)
+	})
+}
+
 // Same outputs, other pipeline version: not the same task, so the former DOCUMENT-005 stands.
 func Test_ProcessBatch_Case_validateDocument_SameOutputsOtherPipelineVersion_Document005(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
@@ -1582,5 +1636,60 @@ func Test_persistTask_SkippedTaskNotPersisted(t *testing.T) {
 		env.Postgres.Table("document").Where("url = ?", newURL).Count(&created)
 		assert.Equal(t, int64(0), skipped)
 		assert.Equal(t, int64(1), created)
+	})
+}
+
+func persistTaskRecord(env *testutils.Env, url string, hash string) (*StorageContext, *CaseValidationRecord) {
+	size := int64(11)
+	task := &types.CaseTaskBatch{
+		TypeCode:        types.AlignmentGermlineVariantCallingTaskTypeCode,
+		PipelineVersion: "1.0.0",
+		OutputDocuments: []*types.OutputDocumentBatch{
+			{DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: url[strings.LastIndex(url, "/")+1:], Size: &size, Url: url, Hash: hash},
+		},
+	}
+	bctx := &batchval.BatchValidationContext{}
+	cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{Tasks: []*types.CaseTaskBatch{task}}, 0, types.DefaultTenantCode)
+	sc := NewStorageContext(env.Postgres)
+	sc.TenantCode = types.DefaultTenantCode
+	return sc, cr
+}
+
+func Test_persistTask_IdenticalExistingDocumentReused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/persistTask_IdenticalExistingDocumentReused.cram"
+		sc, cr := persistTaskRecord(env, url, "h1")
+		existing := &types.Document{Name: "persistTask_IdenticalExistingDocumentReused.cram", DataCategoryCode: "genomic", DataTypeCode: "alignment", FileFormatCode: "cram", Size: 11, Url: url, Hash: "h1", TenantCode: types.DefaultTenantCode}
+		require.NoError(t, sc.DocRepo.CreateDocument(env.Ctx, existing))
+		cr.Documents[url] = existing
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var docs int64
+		var ownedIDs []int
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document").Where("document_id = ? AND type = ?", existing.ID, "output").Pluck("task_id", &ownedIDs)
+		assert.Equal(t, int64(1), docs)
+		assert.Len(t, ownedIDs, 1)
+	})
+}
+
+// Same url, other content: the DOCUMENT-004 path keeps creating its own row, as before.
+func Test_persistTask_DifferentExistingDocumentNotReused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/persistTask_DifferentExistingDocumentNotReused.cram"
+		sc, cr := persistTaskRecord(env, url, "h2")
+		existing := &types.Document{Name: "persistTask_DifferentExistingDocumentNotReused.cram", DataCategoryCode: "genomic", DataTypeCode: "alignment", FileFormatCode: "cram", Size: 11, Url: url, Hash: "h1", TenantCode: types.DefaultTenantCode}
+		require.NoError(t, sc.DocRepo.CreateDocument(env.Ctx, existing))
+		cr.Documents[url] = existing
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var docs, ownedExisting int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document").Where("document_id = ?", existing.ID).Count(&ownedExisting)
+		assert.Equal(t, int64(2), docs)
+		assert.Equal(t, int64(0), ownedExisting)
+		assert.NotEqual(t, existing.ID, cr.Documents[url].ID)
 	})
 }
