@@ -13,4 +13,6 @@ RUN apk add --no-cache ca-certificates
 FROM alpine:latest
 COPY --from=builder /app/bin/main /main
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Non-root: no passwd entry needed with a numeric UID (65532 is the distroless "nonroot" user)
+USER 65532:65532
 ENTRYPOINT ["/main"]
