@@ -77,13 +77,13 @@ function HeaderNavigation({
               <div className="flex items-center gap-4 flex-wrap">
                 {backLink && <BackLink to={backLink.to}>{backLink.label}</BackLink>}
                 <h1 className="text-2xl font-bold max-w-md text-ellipsis overflow-hidden whitespace-nowrap">{title}</h1>
-                <div className="flex items-center gap-2">
+                <div className="flex self-stretch items-center gap-2">
                   {(badges ?? []).map((badgeProps, index) => {
                     const { tooltipText, ...restBadgeProps } = badgeProps;
                     if (tooltipText) {
                       return (
                         <Tooltip key={index}>
-                          <TooltipTrigger>
+                          <TooltipTrigger asChild>
                             <Badge {...restBadgeProps} />
                           </TooltipTrigger>
                           <TooltipContent>{tooltipText}</TooltipContent>
