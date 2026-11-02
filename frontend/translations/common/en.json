@@ -1325,9 +1325,9 @@
         "event_date": "Date of diagnosis",
         "day": "Day {{day}}"
       },
-      "tumour_and_metastasis": {
-        "title": "Tumour and metastasis",
-        "tumor_locations": "Tumour locations",
+      "tumor_and_metastasis": {
+        "title": "Tumor and metastasis",
+        "tumor_locations": "Tumor locations",
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
