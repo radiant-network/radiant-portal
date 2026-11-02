@@ -414,6 +414,25 @@ func pcxView(ctx context.Context, db *gorm.DB, table types.Table, id pcxPatientI
 		Where("organization_code = ? AND patient_id_type = ? AND patient_id = ?", id.organizationCode, id.patientIDType, id.patientID)
 }
 
+// pcxPatientKeysByRadiantPatientID maps portal patient ids to the patient_key of the PCX patients the caller can see.
+func pcxPatientKeysByRadiantPatientID(ctx context.Context, db *gorm.DB, radiantPatientIDs []int) (map[int]string, error) {
+	var rows []struct {
+		RadiantPatientID int
+		PatientKey       string
+	}
+	tx := db.Table(types.PcxPatientKeyTable.TenantQualifiedName(ctx)).
+		Select("radiant_patient_id, patient_key").
+		Where("radiant_patient_id IN ?", radiantPatientIDs)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient keys: %w", err)
+	}
+	keys := make(map[int]string, len(rows))
+	for _, row := range rows {
+		keys[row.RadiantPatientID] = row.PatientKey
+	}
+	return keys, nil
+}
+
 func pcxRadiantPatientID(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*int, error) {
 	var rows []struct{ RadiantPatientID *int }
 	if err := pcxView(ctx, db, types.PcxDemographicsTable, id).Select("radiant_patient_id").Limit(1).Find(&rows).Error; err != nil {

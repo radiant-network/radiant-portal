@@ -1430,3 +1430,26 @@ func Test_SearchCases_RunNames_TrioCase_ListsProbandRunOnly(t *testing.T) {
 		assert.Equal(t, types.JsonArray[string]{"1617"}, searchCaseById(t, repo, 1).RunNames)
 	})
 }
+
+func Test_RetrieveCasePatients_PcxPatientKeysOff_NoPatientKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		members, err := repo.retrieveCasePatients(t.Context(), 1)
+		require.NoError(t, err)
+		for _, m := range *members {
+			assert.Nil(t, m.PatientKey)
+		}
+	})
+}
+
+func Test_RetrieveCasePatients_PcxPatientKeysOnWithoutPcxViews_NoPatientKeyAndNoError(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}).WithPcxPatientKeys(true)
+		members, err := repo.retrieveCasePatients(t.Context(), 1)
+		require.NoError(t, err)
+		require.Len(t, *members, 3)
+		for _, m := range *members {
+			assert.Nil(t, m.PatientKey)
+		}
+	})
+}

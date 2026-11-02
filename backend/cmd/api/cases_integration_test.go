@@ -207,20 +207,72 @@ func Test_GetCasesFilters(t *testing.T) {
 	assertGetCasesFilters(t, "simple", expected)
 }
 
+func getCaseEntityIntegration(t *testing.T, env *testutils.Env, patientViewEnabled bool, caseId string) *httptest.ResponseRecorder {
+	t.Helper()
+	repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}).WithPcxPatientKeys(patientViewEnabled)
+	igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
+	assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+	router := tenantRouter()
+	router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo, assignmentsRepo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/"+caseId, bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
-		assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
-		router := tenantRouter()
-		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo, assignmentsRepo))
-
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+		w := getCaseEntityIntegration(t, env, false, fmt.Sprint(caseId))
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+// caseMemberPatientKeys keeps only the identity and patient_key of each member, so the assertions stay on the link.
+func caseMemberPatientKeys(t *testing.T, body []byte) string {
+	t.Helper()
+	var entity struct {
+		Members []struct {
+			PatientID  *int    `json:"patient_id,omitempty"`
+			PatientKey *string `json:"patient_key,omitempty"`
+		} `json:"members"`
+	}
+	require.NoError(t, json.Unmarshal(body, &entity))
+	members, err := json.Marshal(entity.Members)
+	require.NoError(t, err)
+	return string(members)
+}
+
+func Test_CaseEntityHandler_PatientViewEnabled_MembersInPcxCarryTheirPatientKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getCaseEntityIntegration(t, env, true, "1")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[
+			{"patient_id": 3, "patient_key": "00000000-0000-4000-8000-000000000001"},
+			{"patient_id": 1},
+			{"patient_id": 2}
+		]`, caseMemberPatientKeys(t, w.Body.Bytes()))
+	})
+}
+
+func Test_CaseEntityHandler_PatientViewDisabled_NoPatientKeyEvenWithPcxViews(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getCaseEntityIntegration(t, env, false, "1")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[{"patient_id": 3}, {"patient_id": 1}, {"patient_id": 2}]`, caseMemberPatientKeys(t, w.Body.Bytes()))
+	})
+}
+
+func Test_CaseEntityHandler_PatientViewEnabledWithoutPcxViews_CaseServedWithoutPatientKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getCaseEntityIntegration(t, env, true, "1")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[{"patient_id": 3}, {"patient_id": 1}, {"patient_id": 2}]`, caseMemberPatientKeys(t, w.Body.Bytes()))
 	})
 }
 

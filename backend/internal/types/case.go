@@ -273,6 +273,7 @@ type CasePatientClinicalInformation struct {
 	AffectedStatusCode    string                       `json:"affected_status_code" validate:"required"`
 	PatientID             *int                         `json:"patient_id,omitempty"`
 	FetusID               *int                         `json:"fetus_id,omitempty"`
+	PatientKey            *string                      `json:"patient_key,omitempty" gorm:"-" format:"uuid"` // Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there
 	FirstName             string                       `json:"first_name,omitempty"`
 	LastName              string                       `json:"last_name,omitempty"`
 	DateOfBirth           *time.Time                   `json:"date_of_birth,omitempty"`

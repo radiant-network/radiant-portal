@@ -1256,6 +1256,12 @@ export interface CasePatientClinicalInformation {
      */
     'patient_id'?: number;
     /**
+     * Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there
+     * @type {string}
+     * @memberof CasePatientClinicalInformation
+     */
+    'patient_key'?: string;
+    /**
      * 
      * @type {string}
      * @memberof CasePatientClinicalInformation

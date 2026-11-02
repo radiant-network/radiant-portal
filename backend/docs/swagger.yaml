@@ -689,6 +689,11 @@ components:
           type: string
         patient_id:
           type: integer
+        patient_key:
+          description: Key of the PCX patient page, absent when the patient view is
+            off or the caller cannot see the patient there
+          format: uuid
+          type: string
         relationship_to_proband:
           type: string
         sex_code:
