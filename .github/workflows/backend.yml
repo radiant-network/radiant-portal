@@ -172,6 +172,9 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
       - uses: actions/checkout@v6
       - name: Set up Go
@@ -186,4 +189,3 @@ jobs:
         # out: it links testcontainers and the docker client, which carry advisories with
         # no fix that never reach a binary we deploy.
         run: govulncheck ./cmd/... ./internal/...
-        working-directory: ./backend
