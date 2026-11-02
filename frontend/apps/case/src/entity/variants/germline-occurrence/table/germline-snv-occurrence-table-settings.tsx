@@ -29,6 +29,8 @@ import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
+import ComphetGenesCell from './cells/comphet-genes-cell';
+
 const columnHelper = createAppColumnHelper<GermlineSNVOccurrence>();
 
 type GermlineSNVOccurrenceTableSettingsProps = {
@@ -289,6 +291,19 @@ function getGermlineSNVOccurrenceColumns({
       minSize: 40,
       enableSorting: false,
     }),
+    // Compound het.
+    columnHelper.accessor(row => row.comphet_genes, {
+      id: 'comphet_genes',
+      cell: info => <ComphetGenesCell genes={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.comphet_genes_tooltip')}>
+          {t('variant.headers.comphet_genes')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
     // Ratio PA
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
@@ -420,6 +435,12 @@ const defaultGermlineSNVSettings = createColumnSettings([
     id: 'zygosity',
     visible: true,
     label: 'variant.headers.zygosity',
+  },
+  {
+    id: 'comphet_genes',
+    visible: false,
+    label: 'variant.headers.comphet_genes',
+    additionalFields: ['comphet_genes'],
   },
   {
     id: 'ad_ratio',
