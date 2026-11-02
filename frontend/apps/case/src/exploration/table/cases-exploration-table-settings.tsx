@@ -9,6 +9,7 @@ import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
@@ -17,7 +18,6 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 import CaseAssignmentCell from './cells/case-assignment-cell';
 import CaseStatusCell from './cells/case-status-cell';
-import StringListCell from './cells/string-list-cell';
 
 const columnHelper = createAppColumnHelper<CaseResult>();
 
@@ -181,7 +181,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
     // Sample
     columnHelper.accessor(row => row.proband_submitter_sample_ids, {
       id: 'proband_submitter_sample_ids',
-      cell: info => <StringListCell values={info.getValue()} />,
+      cell: info => <TextListCell values={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.proband_submitter_sample_ids_tooltip')}>
           {t('case_exploration.case.headers.proband_submitter_sample_ids')}
@@ -194,7 +194,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
     // Run
     columnHelper.accessor(row => row.run_names, {
       id: 'run_names',
-      cell: info => <StringListCell values={info.getValue()} />,
+      cell: info => <TextListCell values={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.run_names_tooltip')}>
           {t('case_exploration.case.headers.run_names')}

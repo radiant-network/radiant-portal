@@ -1,10 +1,10 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
-type StringListCellProps = {
+type TextListCellProps = {
   values?: string[];
 };
 
-function StringListCell({ values }: StringListCellProps) {
+function TextListCell({ values }: TextListCellProps) {
   if (!values || values.length === 0) return <EmptyCell />;
 
   return (
@@ -16,4 +16,4 @@ function StringListCell({ values }: StringListCellProps) {
   );
 }
 
-export default StringListCell;
+export default TextListCell;
