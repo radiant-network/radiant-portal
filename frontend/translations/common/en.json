@@ -1711,6 +1711,8 @@
         "ordering_organization_code_tooltip": "Requested by",
         "proband_submitter_sample_ids": "Sample",
         "proband_submitter_sample_ids_tooltip": "Proband's sample ID (tumor sample for somatic cases)",
+        "run_names": "Run",
+        "run_names_tooltip": "Run ID for the proband's sample",
         "project_code": "Project",
         "updated_on": "Updated",
         "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",
