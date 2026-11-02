@@ -25,6 +25,7 @@ Name | Type | Description | Notes
 **organization_code** | **str** |  | [optional] 
 **organization_name** | **str** |  | [optional] 
 **patient_id** | **int** |  | [optional] 
+**patient_key** | **str** | Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there | [optional] 
 **relationship_to_proband** | **str** |  | 
 **sex_code** | **str** |  | 
 **submitter_patient_id** | **str** |  | [optional] 

@@ -77,7 +77,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
 	repoTerms := starrocks.NewTermsRepository(starrocksDB)
 	repoPcxPatients := starrocks.NewPcxPatientsRepository(starrocksDB)
-	repoCases := starrocks.NewCasesRepository(starrocksDB)
+	repoCases := starrocks.NewCasesRepository(starrocksDB).WithPcxPatientKeys(patientViewEnabled)
 	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := postgres.NewPostgresRepository(postgresDB)

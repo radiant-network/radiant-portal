@@ -878,3 +878,12 @@ func Test_GetPcxPatientGenomics_NoInterpretationsOnItsCases(t *testing.T) {
 		assert.Equal(t, []types.PatientInterpretation{}, genomics.Interpretations)
 	})
 }
+
+func Test_PcxPatientKeysByRadiantPatientID_OnlyPatientsWithAKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		keys, err := pcxPatientKeysByRadiantPatientID(t.Context(), env.Starrocks.WithContext(t.Context()), []int{3, 11, 22, 999})
+
+		require.NoError(t, err)
+		assert.Equal(t, map[int]string{3: pcxPatientKey("1"), 11: pcxPatientKey("2"), 22: pcxPatientKey("4")}, keys)
+	})
+}
