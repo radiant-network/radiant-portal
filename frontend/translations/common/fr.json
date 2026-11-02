@@ -1615,6 +1615,17 @@
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnostic",
       "age_at_initial_dx_group": "Âge au diagnostic",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congénital (à la naissance)",
+        "neonatal": "Néonatal (moins de 28 jours)",
+        "infantile": "Nourrisson (≥ 28 jours et < 1 an)",
+        "childhood": "Enfance (≥ 1 an et < 5 ans)",
+        "juvenile": "Juvénile (≥ 5 ans et < 16 ans)",
+        "young_adult": "Jeune adulte (≥ 16 ans et < 40 ans)",
+        "middle_age": "Âge moyen (≥ 40 ans et < 60 ans)",
+        "senior": "Aîné (≥ 60 ans)",
+        "unknown": "Inconnu (âge non disponible)"
+      },
       "chemotherapy_agents": "Agents de chimiothérapie",
       "got_radiation_ever": "Radiothérapie",
       "diagnosis_type_cohort": "Cohorte"
