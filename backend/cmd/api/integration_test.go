@@ -60,6 +60,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/patients/filters",
 			"radiant/patients/statistics",
 			"radiant/patients/0b8c3a52-6f2e-4b55-9d7a-2c1f0e4a9b31",
+			"radiant/patients/0b8c3a52-6f2e-4b55-9d7a-2c1f0e4a9b31/external_records",
 			"radiant/cases/1/assignment_candidates",
 			"radiant/genes/autocomplete",
 			"radiant/hpo/autocomplete",

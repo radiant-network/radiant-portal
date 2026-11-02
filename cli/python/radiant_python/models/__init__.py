@@ -116,9 +116,13 @@ from radiant_python.models.patient_csf import PatientCsf
 from radiant_python.models.patient_csf_cytology import PatientCsfCytology
 from radiant_python.models.patient_csf_result import PatientCsfResult
 from radiant_python.models.patient_day_date import PatientDayDate
+from radiant_python.models.patient_document_class import PatientDocumentClass
+from radiant_python.models.patient_document_type import PatientDocumentType
 from radiant_python.models.patient_dose import PatientDose
 from radiant_python.models.patient_entity import PatientEntity
 from radiant_python.models.patient_event import PatientEvent
+from radiant_python.models.patient_exchange_organization import PatientExchangeOrganization
+from radiant_python.models.patient_external_records import PatientExternalRecords
 from radiant_python.models.patient_filters import PatientFilters
 from radiant_python.models.patient_genomics import PatientGenomics
 from radiant_python.models.patient_imaging import PatientImaging

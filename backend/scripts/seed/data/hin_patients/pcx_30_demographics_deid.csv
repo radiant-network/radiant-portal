@@ -1,0 +1,6 @@
+organization_name,research_id,given_name,family_name,birth_year,race,ethnicity,gender,address_postal_code,diagnosis_type_cohort,data_type_cohort
+The Children's Hospital of Philadelphia,C1037013,C1037013_given_name,C1037013_family_name,2007,Asian,Not Hispanic or Latino,female,191XX,Medulloblastoma,cbtn-non-radiant
+The Children's Hospital of Philadelphia,C313158,C313158_given_name,C313158_family_name,2019,White,Not Hispanic or Latino,male,190XX,Atypical teratoid/rhabdoid tumor,cbtn-non-radiant
+The Children's Hospital of Philadelphia,C3556914,C3556914_given_name,C3556914_family_name,2020,White,Hispanic or Latino,female,194XX,Atypical teratoid/rhabdoid tumor,cbtn-non-radiant
+The Children's Hospital of Philadelphia,C6389358,C6389358_given_name,C6389358_family_name,2008,Black or African American,Not Hispanic or Latino,male,191XX,Medulloblastoma,cbtn-non-radiant
+The Children's Hospital of Philadelphia,C6859095,C6859095_given_name,C6859095_family_name,2012,White,Not Hispanic or Latino,female,080XX,Medulloblastoma,cbtn-non-radiant

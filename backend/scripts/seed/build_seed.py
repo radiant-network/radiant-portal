@@ -39,6 +39,8 @@ cli.add_argument("--tenant", default="cbtn", help="tenant code, [a-z][a-z0-9_]*"
 cli.add_argument("--name", help="tenant display name")
 cli.add_argument("--source-db", help="StarRocks database of the PCX source tables (default <tenant>_pcx_source; PRD: radiant_data_dev). "
                                      "One per tenant: the secured views read it without a tenant filter")
+cli.add_argument("--extra-deid", default=os.path.join(HERE, "data", "hin_patients"),
+                 help="local only: deid CSVs of patients added to --deid (default data/hin_patients: the TEFCA patients the cohort lacks)")
 cli.add_argument("--migrate-from", help="qa only: the deid directory the environment was seeded from. Instead of a full seed, writes "
                                         "migrate_postgres.sql and migrate_starrocks.sql, which bring it to --deid (see README)")
 cli.add_argument("--new-id-base", type=int, help="with --migrate-from: first integer id of the rows the migration adds, above every "
@@ -283,6 +285,29 @@ def cube_tables():
     return tables
 
 
+HIN_COLUMNS = {"hin_org_patient": ["research_id", "hin_org_name", "hin_short_code"],
+               "hin_document_metadata": ["count", "hin_bare_org_id", "hin_org_name", "document_type_name",
+                                         "document_class_name", "research_id"]}
+
+
+def hin_tables(deid_dir):
+    """The TEFCA / Carequality exchanges of the health information network (HIN), keyed on research_id: the organizations
+    linked to each patient, and the documents retrieved from them per type. The CSVs carry their export timestamp in their
+    name; the latest wins. A directory without them gives empty tables, so the views still have something to read."""
+    tables = {}
+    for name, names in HIN_COLUMNS.items():
+        cols = [(c, "INT" if c == "count" else "VARCHAR(255)") for c in names]
+        files = sorted(f for f in os.listdir(deid_dir) if f.startswith(f"{name}_") and f.endswith("_deid.csv"))
+        rows = []
+        if files:
+            path = os.path.join(deid_dir, files[-1])
+            if pcx.read_csv_header(path) != names:
+                sys.exit(f"{path}: expected the columns {names}")
+            rows = [[None if r[c] is None else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in pcx.read_csv(path)]
+        tables[name] = (cols, rows)
+    return tables
+
+
 def patient_keys(patients):
     """The URL keys (sql/pcx_30_patient_key.sql): the table is never dropped and only gets keys for patients without one,
     so a re-run keeps every link. Keys are uuid4 (cryptographic): the one part of the output that differs between builds."""
@@ -404,7 +429,7 @@ FROM (
 ) f
 WHERE snv__variant.locus_id = f.locus_id;""")
     S.append(f"DELETE FROM {TENANT_DB}.snv__variant WHERE germline_pc_wgs = 0 AND somatic_pc_tn_wgs = 0;")
-    S += source_tables(pcx_tables, swap=True) + patient_keys(patients)
+    S += source_tables(pcx_tables, swap=True) + source_tables(hin_tables(args.deid), swap=True) + patient_keys(patients)
 
     os.makedirs(args.out, exist_ok=True)
     for name, parts in [("migrate_postgres.sql", P), ("migrate_starrocks.sql", S)]:
@@ -423,7 +448,12 @@ org_ref = {r["code"]: r for r in organizations}
 old_patients = old_data = None
 if args.migrate_from:
     old_patients, old_data, _ = pcx.build(args.migrate_from, organizations)
-patients, data, pcx_tables = pcx.build(args.deid, organizations, old_patients and {rid: (p.mrn, p.dob) for rid, p in old_patients.items()})
+pins = old_patients and {rid: (p.mrn, p.dob) for rid, p in old_patients.items()}
+extra_deid = None if QA else args.extra_deid
+if extra_deid:
+    # The added patients would shift the MRNs of the cohort (an MRN depends on how many patients sort before it).
+    pins = {rid: (p.mrn, p.dob) for rid, p in pcx.build(args.deid, organizations)[0].items()}
+patients, data, pcx_tables = pcx.build(args.deid, organizations, pins, extra_deid)
 add_mri_labs_dictionary(pcx_tables, patients, data)
 providers = sorted({p.org for p in patients.values()})
 if args.migrate_from:
@@ -572,9 +602,10 @@ REFERENCE = [] if QA else [
 S += REFERENCE
 S += occurrence_rows(sr)
 
-# PCX source tables, MRI and labs, the data dictionary, and the URL keys.
+# PCX source tables, MRI and labs, the data dictionary, the URL keys and the HIN exchanges.
 S += source_tables(pcx_tables)
 S += patient_keys(patients)
+S += source_tables(hin_tables(args.deid))
 cubes = cube_tables()
 S += source_tables(cubes)
 

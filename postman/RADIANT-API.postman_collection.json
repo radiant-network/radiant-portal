@@ -4699,6 +4699,36 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "External records",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/external_records",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "external_records"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }

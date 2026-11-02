@@ -1,0 +1,9 @@
+organization_name,research_id,event_type,age_at_event_days,metastasis,metastasis_location,metastasis_location_other,cns_diagnosis_category,cns_integrated_diagnosis,cns_integrated_diagnosis_source,tumor_locations,tumor_location_other
+The Children's Hospital of Philadelphia,C1037013,Initial CNS Tumor,4300,No,Not Applicable,Not Applicable,Medulloblastoma,"Medulloblastoma, SHH-activated and TP53-wildtype",CBTN,Cerebellum/Posterior Fossa,Not Applicable
+The Children's Hospital of Philadelphia,C1037013,Recurrence,5200,Yes,Spine,Not Applicable,Medulloblastoma,"Medulloblastoma, SHH-activated and TP53-wildtype",CBTN,Cerebellum/Posterior Fossa;Spine NOS,Not Applicable
+The Children's Hospital of Philadelphia,C313158,Initial CNS Tumor,540,Yes,Leptomeningeal,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Frontal Lobe;Ventricles,Not Applicable
+The Children's Hospital of Philadelphia,C313158,Progressive,900,Yes,Leptomeningeal;Spine,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Frontal Lobe;Ventricles,Not Applicable
+The Children's Hospital of Philadelphia,C313158,Deceased,1300,Not Applicable,Not Applicable,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Not Applicable,Not Applicable
+The Children's Hospital of Philadelphia,C3556914,Initial CNS Tumor,410,No,Not Applicable,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-TYR,CBTN,Cerebellum/Posterior Fossa,Not Applicable
+The Children's Hospital of Philadelphia,C6389358,Initial CNS Tumor,3100,Yes,Leptomeningeal,Not Applicable,Medulloblastoma,"Medulloblastoma, non-WNT/non-SHH",CBTN,Cerebellum/Posterior Fossa;Ventricles,Not Applicable
+The Children's Hospital of Philadelphia,C6859095,Initial CNS Tumor,2200,No,Not Applicable,Not Applicable,Medulloblastoma,"Medulloblastoma, non-WNT/non-SHH",OpenPedCan,Cerebellum/Posterior Fossa,Not Applicable

@@ -28,6 +28,7 @@ var patientViewRoutes = []string{
 	"GET /:tenant/patients/:patient_key/laboratory",
 	"GET /:tenant/patients/:patient_key/imaging",
 	"GET /:tenant/patients/:patient_key/genomics",
+	"GET /:tenant/patients/:patient_key/external_records",
 }
 
 func registeredRoutes(router *gin.Engine) map[string]bool {
@@ -201,6 +202,7 @@ func getPatientIntegration(t *testing.T, env *testutils.Env, path string) *httpt
 	router.GET("/:tenant/patients/:patient_key/laboratory", server.PatientLaboratoryHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/imaging", server.PatientImagingHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/genomics", server.PatientGenomicsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/external_records", server.PatientExternalRecordsHandler(repo))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+path, nil))
 	return w
@@ -239,9 +241,19 @@ func Test_PatientGenomics_ReturnsTheCasesOfThePatient(t *testing.T) {
 	})
 }
 
+func Test_PatientExternalRecords_ReturnsTheOrganizationsOfThePatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000002/external_records")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"organization_count": 1, "document_count": 3, "document_class_count": 1, "organizations": [{"name": "Tower Health",
+			"network": "tefca", "document_count": 3, "document_classes": [{"name": "Lab", "document_count": 3, "types": []}]}]}`, w.Body.String())
+	})
+}
+
 func Test_PatientTabs_UnknownKey_404(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
-		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics"} {
+		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics", "external_records"} {
 			w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000999/"+tab)
 
 			assert.Equal(t, http.StatusNotFound, w.Code, tab)

@@ -270,6 +270,30 @@ type pcxPatientGenomicsReader interface {
 	GetPatientGenomics(ctx context.Context, patientKey string) (*types.PatientGenomics, error)
 }
 
+// PatientExternalRecordsHandler handles retrieving the health information network exchanges of a PCX patient
+// @Summary Get types.PatientExternalRecords of a patient
+// @Id patientExternalRecords
+// @Description Retrieve types.PatientExternalRecords, the organizations linked to the patient through TEFCA or Carequality and the documents retrieved from them, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} types.PatientExternalRecords
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/external_records [get]
+func PatientExternalRecordsHandler(repo pcxPatientExternalRecordsReader) gin.HandlerFunc {
+	return patientPartHandler(repo.GetPatientExternalRecords)
+}
+
+type pcxPatientExternalRecordsReader interface {
+	GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error)
+}
+
 // patientPartHandler answers 404 for a malformed key without reading, and for a key the caller cannot see.
 func patientPartHandler[T any](get func(ctx context.Context, patientKey string) (*T, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {

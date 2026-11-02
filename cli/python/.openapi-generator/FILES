@@ -119,9 +119,13 @@ docs/PatientCsf.md
 docs/PatientCsfCytology.md
 docs/PatientCsfResult.md
 docs/PatientDayDate.md
+docs/PatientDocumentClass.md
+docs/PatientDocumentType.md
 docs/PatientDose.md
 docs/PatientEntity.md
 docs/PatientEvent.md
+docs/PatientExchangeOrganization.md
+docs/PatientExternalRecords.md
 docs/PatientFilters.md
 docs/PatientGenomics.md
 docs/PatientImaging.md
@@ -340,9 +344,13 @@ radiant_python/models/patient_csf.py
 radiant_python/models/patient_csf_cytology.py
 radiant_python/models/patient_csf_result.py
 radiant_python/models/patient_day_date.py
+radiant_python/models/patient_document_class.py
+radiant_python/models/patient_document_type.py
 radiant_python/models/patient_dose.py
 radiant_python/models/patient_entity.py
 radiant_python/models/patient_event.py
+radiant_python/models/patient_exchange_organization.py
+radiant_python/models/patient_external_records.py
 radiant_python/models/patient_filters.py
 radiant_python/models/patient_genomics.py
 radiant_python/models/patient_imaging.py
