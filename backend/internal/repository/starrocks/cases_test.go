@@ -1411,6 +1411,19 @@ func Test_SearchCases_RunNames_NotSelectedByDefault(t *testing.T) {
 	})
 }
 
+func Test_SearchCases_RunNames_SelectedWhenRequested(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		criteria := []types.SearchCriterion{{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1}}}
+		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, []string{types.CaseRunNamesField.GetAlias()}, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, _, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		require.Len(t, *cases, 1)
+		assert.Equal(t, types.JsonArray[string]{"1617"}, (*cases)[0].RunNames)
+	})
+}
+
 func Test_SearchCases_RunNames_TrioCase_ListsProbandRunOnly(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
