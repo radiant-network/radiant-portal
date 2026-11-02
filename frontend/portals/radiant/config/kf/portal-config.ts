@@ -142,7 +142,7 @@ export const kfConfig = {
         ],
       },
       occurrence: {
-        items: [],
+        items: [{ key: 'has_comphet', translation_key: 'has_comphet', type: FilterTypes.BOOLEAN }],
       },
     },
   },
