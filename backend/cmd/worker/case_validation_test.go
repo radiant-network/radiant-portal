@@ -5295,6 +5295,35 @@ func Test_validateDocuments_SameUrlsCaseRelatedTaskOfSameCase_SkippedWithInfo(t 
 	assert.Equal(t, map[int]struct{}{0: {}}, cr.SkippedTasks)
 }
 
+// somatic_variant_calling pairs the aliquots of one case: a task_context without that case
+// (what the worker wrote before it was case-related) is not this case's task.
+func Test_validateDocuments_SomaticVariantCallingWithoutCase_Document005(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch("somatic_variant_calling", attachedTaskURL))
+	caseID := 100
+	cr.CaseID = &caseID
+	cr.ExistingTasks[300].TaskTypeCode = "somatic_variant_calling"
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 10}}
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.True(t, hasErrorCode(cr.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, cr.Errors)
+	assert.Empty(t, cr.SkippedTasks)
+}
+
+func Test_validateDocuments_SomaticVariantCallingOfSameCase_SkippedWithInfo(t *testing.T) {
+	cr := newAttachedTaskRecord(newAttachedTaskBatch("somatic_variant_calling", attachedTaskURL))
+	caseID := 100
+	cr.CaseID = &caseID
+	cr.ExistingTasks[300].TaskTypeCode = "somatic_variant_calling"
+	cr.TaskContexts[300] = []*types.TaskContext{{TaskID: 300, SequencingExperimentID: 10, CaseID: &caseID}}
+
+	assert.NoError(t, cr.validateDocuments())
+
+	assert.Empty(t, cr.Errors)
+	assert.True(t, hasErrorCode(cr.Infos, TaskAlreadyAttached), "expected %s, got %+v", TaskAlreadyAttached, cr.Infos)
+	assert.Equal(t, map[int]struct{}{0: {}}, cr.SkippedTasks)
+}
+
 func Test_fetchTasksOwningOutputDocuments_LoadsOnlyOutputOwners(t *testing.T) {
 	bctx := &batchval.BatchValidationContext{TaskRepo: &CaseValidationMockRepo{}}
 	cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{}, 0, types.DefaultTenantCode)
