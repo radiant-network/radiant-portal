@@ -82,3 +82,6 @@ var PcxTreatmentSummaryTable = Table{Name: "v_pcx_30_treatment_summary_combined"
 var PcxCbcTable = Table{Name: "v_cbc_latest_results", Alias: "cbc", PerTenant: true}
 var PcxPerformanceStatusTable = Table{Name: "v_lansky_karnofsky_latest", Alias: "lk", PerTenant: true}
 var PcxCsfTable = Table{Name: "v_csf_results_latest_by_component", Alias: "csf", PerTenant: true}
+
+// Radiant's own view over the health information network exchanges (scripts/seed/views).
+var PcxHinExchangeTable = Table{Name: "v_pcx_30_hin_exchange", Alias: "hin", PerTenant: true}

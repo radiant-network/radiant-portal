@@ -6245,6 +6245,50 @@ export interface PatientDayDate {
     'day'?: number;
 }
 /**
+ * Documents of one class retrieved from an organization, with its document types
+ * @export
+ * @interface PatientDocumentClass
+ */
+export interface PatientDocumentClass {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientDocumentClass
+     */
+    'document_count': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientDocumentClass
+     */
+    'name': string;
+    /**
+     * Most documents first, then by name; empty when the class\'s only type has its own name
+     * @type {Array<PatientDocumentType>}
+     * @memberof PatientDocumentClass
+     */
+    'types': Array<PatientDocumentType>;
+}
+/**
+ * Number of documents of one type within a document class
+ * @export
+ * @interface PatientDocumentType
+ */
+export interface PatientDocumentType {
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientDocumentType
+     */
+    'document_count': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientDocumentType
+     */
+    'name': string;
+}
+/**
  * Radiation dose, raw from the source, not normalized. The unit is Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not Available.
  * @export
  * @interface PatientDose
@@ -6528,6 +6572,76 @@ export const PatientEventEventTypeEnum = {
 
 export type PatientEventEventTypeEnum = typeof PatientEventEventTypeEnum[keyof typeof PatientEventEventTypeEnum];
 
+/**
+ * Organization linked to a patient through TEFCA or Carequality. Linked with no document means nothing was retrieved from it.
+ * @export
+ * @interface PatientExchangeOrganization
+ */
+export interface PatientExchangeOrganization {
+    /**
+     * Most documents first, then by name
+     * @type {Array<PatientDocumentClass>}
+     * @memberof PatientExchangeOrganization
+     */
+    'document_classes': Array<PatientDocumentClass>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientExchangeOrganization
+     */
+    'document_count': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientExchangeOrganization
+     */
+    'name': string;
+    /**
+     * null when documents came from an organization the patient is not linked to
+     * @type {string}
+     * @memberof PatientExchangeOrganization
+     */
+    'network'?: PatientExchangeOrganizationNetworkEnum;
+}
+
+export const PatientExchangeOrganizationNetworkEnum = {
+    Tefca: 'tefca',
+    Carequality: 'carequality'
+} as const;
+
+export type PatientExchangeOrganizationNetworkEnum = typeof PatientExchangeOrganizationNetworkEnum[keyof typeof PatientExchangeOrganizationNetworkEnum];
+
+/**
+ * Organizations linked to the patient through the health information network (TEFCA or Carequality), and the documents retrieved from them
+ * @export
+ * @interface PatientExternalRecords
+ */
+export interface PatientExternalRecords {
+    /**
+     * Distinct document classes across the organizations
+     * @type {number}
+     * @memberof PatientExternalRecords
+     */
+    'document_class_count': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientExternalRecords
+     */
+    'document_count': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientExternalRecords
+     */
+    'organization_count': number;
+    /**
+     * Most documents first, then by name
+     * @type {Array<PatientExchangeOrganization>}
+     * @memberof PatientExternalRecords
+     */
+    'organizations': Array<PatientExchangeOrganization>;
+}
 /**
  * Values of the patient list filters
  * @export
@@ -17709,6 +17823,48 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Retrieve PatientExternalRecords, the organizations linked to the patient through TEFCA or Carequality and the documents retrieved from them, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientExternalRecords of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientExternalRecords: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientExternalRecords', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientExternalRecords', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/external_records`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientGenomics of a patient
          * @param {string} tenant Tenant code
@@ -18134,6 +18290,20 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve PatientExternalRecords, the organizations linked to the patient through TEFCA or Carequality and the documents retrieved from them, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientExternalRecords of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientExternalRecords(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientExternalRecords>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientExternalRecords(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientExternalRecords']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientGenomics of a patient
          * @param {string} tenant Tenant code
@@ -18293,6 +18463,17 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.patientEntity(tenant, patientKey, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve PatientExternalRecords, the organizations linked to the patient through TEFCA or Carequality and the documents retrieved from them, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientExternalRecords of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientExternalRecords(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientExternalRecords> {
+            return localVarFp.patientExternalRecords(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientGenomics of a patient
          * @param {string} tenant Tenant code
@@ -18426,6 +18607,19 @@ export class PatientsApi extends BaseAPI {
      */
     public patientEntity(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientEntity(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientExternalRecords, the organizations linked to the patient through TEFCA or Carequality and the documents retrieved from them, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientExternalRecords of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientExternalRecords(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientExternalRecords(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

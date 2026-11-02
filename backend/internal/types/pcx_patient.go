@@ -169,6 +169,43 @@ type PatientGenomics struct {
 	Interpretations []PatientInterpretation `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
 }
 
+// PatientExternalRecords - External records of the patient sidebar
+// @Description Organizations linked to the patient through the health information network (TEFCA or Carequality), and the documents retrieved from them
+// @Name PatientExternalRecords
+type PatientExternalRecords struct {
+	OrganizationCount  int                           `json:"organization_count" validate:"required"`
+	DocumentCount      int                           `json:"document_count" validate:"required"`
+	DocumentClassCount int                           `json:"document_class_count" validate:"required"` // Distinct document classes across the organizations
+	Organizations      []PatientExchangeOrganization `json:"organizations" validate:"required"`        // Most documents first, then by name
+}
+
+// PatientExchangeOrganization - Organization linked to a patient through the health information network
+// @Description Organization linked to a patient through TEFCA or Carequality. Linked with no document means nothing was retrieved from it.
+// @Name PatientExchangeOrganization
+type PatientExchangeOrganization struct {
+	Name            string                 `json:"name" validate:"required"`
+	Network         *string                `json:"network" enums:"tefca,carequality"` // null when documents came from an organization the patient is not linked to
+	DocumentCount   int                    `json:"document_count" validate:"required"`
+	DocumentClasses []PatientDocumentClass `json:"document_classes" validate:"required"` // Most documents first, then by name
+}
+
+// PatientDocumentClass - Documents of one class retrieved from an organization
+// @Description Documents of one class retrieved from an organization, with its document types
+// @Name PatientDocumentClass
+type PatientDocumentClass struct {
+	Name          string                `json:"name" validate:"required"`
+	DocumentCount int                   `json:"document_count" validate:"required"`
+	Types         []PatientDocumentType `json:"types" validate:"required"` // Most documents first, then by name; empty when the class's only type has its own name
+}
+
+// PatientDocumentType - Documents of one type within a document class
+// @Description Number of documents of one type within a document class
+// @Name PatientDocumentType
+type PatientDocumentType struct {
+	Name          string `json:"name" validate:"required"`
+	DocumentCount int    `json:"document_count" validate:"required"`
+}
+
 // PatientEvent - Disease event of a patient
 // @Description Disease event of a patient
 // @Name PatientEvent

@@ -3147,6 +3147,37 @@ components:
         day:
           type: integer
       type: object
+    PatientDocumentClass:
+      description: Documents of one class retrieved from an organization, with its
+        document types
+      properties:
+        document_count:
+          type: integer
+        name:
+          type: string
+        types:
+          description: Most documents first, then by name; empty when the class's
+            only type has its own name
+          items:
+            $ref: '#/components/schemas/PatientDocumentType'
+          type: array
+          uniqueItems: false
+      required:
+      - document_count
+      - name
+      - types
+      type: object
+    PatientDocumentType:
+      description: Number of documents of one type within a document class
+      properties:
+        document_count:
+          type: integer
+        name:
+          type: string
+      required:
+      - document_count
+      - name
+      type: object
     PatientDose:
       description: Radiation dose, raw from the source, not normalized. The unit is
         Gy, cGy or CGE, or a sentinel such as Not Applicable, Not Reported or Not
@@ -3298,6 +3329,55 @@ components:
       - event_type
       - metastasis_locations
       - tumor_locations
+      type: object
+    PatientExchangeOrganization:
+      description: Organization linked to a patient through TEFCA or Carequality.
+        Linked with no document means nothing was retrieved from it.
+      properties:
+        document_classes:
+          description: Most documents first, then by name
+          items:
+            $ref: '#/components/schemas/PatientDocumentClass'
+          type: array
+          uniqueItems: false
+        document_count:
+          type: integer
+        name:
+          type: string
+        network:
+          description: null when documents came from an organization the patient is
+            not linked to
+          enum:
+          - tefca
+          - carequality
+          type: string
+      required:
+      - document_classes
+      - document_count
+      - name
+      type: object
+    PatientExternalRecords:
+      description: Organizations linked to the patient through the health information
+        network (TEFCA or Carequality), and the documents retrieved from them
+      properties:
+        document_class_count:
+          description: Distinct document classes across the organizations
+          type: integer
+        document_count:
+          type: integer
+        organization_count:
+          type: integer
+        organizations:
+          description: Most documents first, then by name
+          items:
+            $ref: '#/components/schemas/PatientExchangeOrganization'
+          type: array
+          uniqueItems: false
+      required:
+      - document_class_count
+      - document_count
+      - organization_count
+      - organizations
       type: object
     PatientFilters:
       description: Values of the patient list filters
@@ -10399,6 +10479,69 @@ paths:
       security:
       - bearerauth: []
       summary: Get PatientEntity patient entity
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/external_records:
+    get:
+      description: Retrieve PatientExternalRecords, the organizations linked
+        to the patient through TEFCA or Carequality and the documents retrieved from
+        them, by its patient_key. 404 for an unknown or malformed key, with no hint
+        that the patient exists.
+      operationId: patientExternalRecords
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientExternalRecords'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientExternalRecords of a patient
       tags:
       - patients
   /{tenant}/patients/{patient_key}/genomics:

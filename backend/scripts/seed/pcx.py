@@ -139,18 +139,35 @@ def read_organization_ref(pcx_dir):
     return rows + [o for o in PENDING_ORGS if o["name"] not in names]
 
 
-def build(deid_dir, organizations, pins=None):
+def read_deid(deid_dir, name, extra_dir=None, extra_rids=None):
+    """A deid CSV, plus the rows of extra_dir's file of the same name for the research ids of extra_rids."""
+    rows = read_csv(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv"))
+    extra = os.path.join(extra_dir, f"pcx_30_{name}_deid.csv") if extra_dir else None
+    if extra and os.path.exists(extra):
+        if read_csv_header(extra) != read_csv_header(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv")):
+            raise SystemExit(f"{extra}: its columns differ from the deid CSV")
+        rows += [r for r in read_csv(extra) if extra_rids is None or r["research_id"] in extra_rids]
+    return rows
+
+
+def build(deid_dir, organizations, pins=None, extra_dir=None):
     """Read the deid CSVs, give every patient a fake identity. Returns (patients by rid, {table: (cols, rows)}).
     pins: (mrn, birth date) by research id, the identities an environment already holds; the MRN of a patient seen before
-    never changes, and a new patient never gets the MRN of another one, even one the CSVs dropped."""
+    never changes, and a new patient never gets the MRN of another one, even one the CSVs dropped.
+    extra_dir: deid CSVs of patients to add; a research id the deid CSVs already hold keeps its own rows only."""
     codes = {r["name"]: r["code"] for r in organizations}
     demo = read_csv(os.path.join(deid_dir, "pcx_30_demographics_deid.csv"))
+    extra_rids = None
+    if extra_dir:
+        extra_demo = read_csv(os.path.join(extra_dir, "pcx_30_demographics_deid.csv"))
+        extra_rids = {r["research_id"] for r in extra_demo} - {r["research_id"] for r in demo}
+        demo += [r for r in extra_demo if r["research_id"] in extra_rids]
     patients = {}
     for r in demo:
         if r["organization_name"] not in codes:
             raise SystemExit(f"{r['research_id']}: organization {r['organization_name']!r} is not in the organization reference")
         patients[r["research_id"]] = Patient(r, codes[r["organization_name"]])
-    data = {name: read_csv(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv")) for name in TABLES}
+    data = {name: read_deid(deid_dir, name, extra_dir, extra_rids) for name in TABLES}
     for rows in data.values():
         for r in rows:
             p = patients[r["research_id"]]

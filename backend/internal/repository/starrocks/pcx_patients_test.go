@@ -375,6 +375,14 @@ func getPcxPatientImaging(t *testing.T, env *testutils.Env, key string) *types.P
 	return imaging
 }
 
+func getPcxPatientExternalRecords(t *testing.T, env *testutils.Env, key string) *types.PatientExternalRecords {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	records, err := repo.GetPatientExternalRecords(t.Context(), key)
+	require.NoError(t, err)
+	return records
+}
+
 func getPcxPatientGenomics(t *testing.T, env *testutils.Env, key string) *types.PatientGenomics {
 	t.Helper()
 	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -404,6 +412,7 @@ func Test_GetPcxPatientTabs_UnknownKeyIsNil(t *testing.T) {
 		assert.Nil(t, getPcxPatientLaboratory(t, env, key))
 		assert.Nil(t, getPcxPatientImaging(t, env, key))
 		assert.Nil(t, getPcxPatientGenomics(t, env, key))
+		assert.Nil(t, getPcxPatientExternalRecords(t, env, key))
 	})
 }
 
@@ -497,6 +506,41 @@ func Test_GetPcxPatientImaging_SessionsOfAPatientWithPhiAccess(t *testing.T) {
 				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-2"}
 			]
 		}`, imaging)
+	})
+}
+
+func Test_GetPcxPatientExternalRecords_OrganizationsWithTheirDocumentClasses(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, records)
+		assertJSON(t, `{
+			"organization_count": 4, "document_count": 18, "document_class_count": 3,
+			"organizations": [
+				{"name": "Johns Hopkins Medicine", "network": "tefca", "document_count": 10, "document_classes": [
+					{"name": "Progress Note", "document_count": 8, "types": [
+						{"name": "Office Visit", "document_count": 5},
+						{"name": "Telephone", "document_count": 3}
+					]},
+					{"name": "Lab", "document_count": 2, "types": []}
+				]},
+				{"name": "Temple Health", "network": "tefca", "document_count": 7, "document_classes": [
+					{"name": "Progress Note", "document_count": 7, "types": [{"name": "Telephone", "document_count": 7}]}
+				]},
+				{"name": "Health Gorilla", "network": null, "document_count": 1, "document_classes": [
+					{"name": "Patient Summary", "document_count": 1, "types": []}
+				]},
+				{"name": "MedStar Health", "network": "carequality", "document_count": 0, "document_classes": []}
+			]
+		}`, records)
+	})
+}
+
+func Test_GetPcxPatientExternalRecords_PatientWithoutExchangeHasNoOrganization(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"organization_count": 0, "document_count": 0, "document_class_count": 0, "organizations": []}`, records)
 	})
 }
 
