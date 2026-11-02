@@ -828,6 +828,7 @@
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
           "sequencing_experiment_id": "Séquençage",
+          "proband_submitter_sample_ids": "Échantillon",
           "placeholder": "Rechercher..."
         },
         "buttons": {
@@ -1052,6 +1053,7 @@
           "tr_c_gene": "Gène TR C",
           "tr_v_gene": "Gène TR V",
           "tr_v_pseudogene": "Pseudogène TR V",
+          "trna": "ARNt",
           "unitary_pseudogene": "Pseudogène unitaire",
           "unprocessed_pseudogene": "Pseudogène non traité",
           "y_rna": "ARN Y",
@@ -1324,7 +1326,7 @@
         "event_date": "Date du diagnostic",
         "day": "Jour {{day}}"
       },
-      "tumour_and_metastasis": {
+      "tumor_and_metastasis": {
         "title": "Tumeur et métastases",
         "tumor_locations": "Localisations tumorales",
         "tumor_location_other": "Autre localisation",
@@ -1459,6 +1461,19 @@
         "date": "Date",
         "modality": "Modalité",
         "viewer": "Visionneuse"
+      }
+    },
+    "clinical_trials": {
+      "title_count_one": "Inscriptions antérieures ({{count}} protocole)",
+      "title_count_other": "Inscriptions antérieures ({{count}} protocoles)",
+      "day_value": "Jour {{day}}",
+      "initial_badge": "Traitement initial",
+      "footer": "Protocoles auxquels le patient a été inscrit, selon les dossiers de thérapie médicale. Les traitements qui n'ont fait que suivre un protocole ne sont pas listés.",
+      "columns": {
+        "protocol": "Protocole",
+        "start": "Début",
+        "stop": "Fin",
+        "agents": "Agents"
       }
     },
     "laboratory": {
@@ -1600,6 +1615,17 @@
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnostic",
       "age_at_initial_dx_group": "Âge au diagnostic",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congénital (à la naissance)",
+        "neonatal": "Néonatal (moins de 28 jours)",
+        "infantile": "Nourrisson (≥ 28 jours et < 1 an)",
+        "childhood": "Enfance (≥ 1 an et < 5 ans)",
+        "juvenile": "Juvénile (≥ 5 ans et < 16 ans)",
+        "young_adult": "Jeune adulte (≥ 16 ans et < 40 ans)",
+        "middle_age": "Âge moyen (≥ 40 ans et < 60 ans)",
+        "senior": "Aîné (≥ 60 ans)",
+        "unknown": "Inconnu (âge non disponible)"
+      },
       "chemotherapy_agents": "Agents de chimiothérapie",
       "got_radiation_ever": "Radiothérapie",
       "diagnosis_type_cohort": "Cohorte"
@@ -1695,6 +1721,8 @@
         "analysis_catalog_code": "Analyse",
         "ordering_organization_code": "Req. par",
         "ordering_organization_code_tooltip": "Requête faite par",
+        "proband_submitter_sample_ids": "Échantillon",
+        "proband_submitter_sample_ids_tooltip": "Identifiant d'échantillon du proband (échantillon tumoral pour les cas somatiques)",
         "project_code": "Projet",
         "updated_on": "Dernière modification",
         "updated_on_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",

@@ -6,6 +6,10 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**autocomplete_patients**](PatientsApi.md#autocomplete_patients) | **GET** /{tenant}/patients/autocomplete | Get AutocompleteResult list of PCX patients matching prefix
 [**patient_entity**](PatientsApi.md#patient_entity) | **GET** /{tenant}/patients/{patient_key} | Get PatientEntity patient entity
+[**patient_genomics**](PatientsApi.md#patient_genomics) | **GET** /{tenant}/patients/{patient_key}/genomics | Get PatientGenomics of a patient
+[**patient_imaging**](PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
+[**patient_laboratory**](PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
+[**patient_treatments**](PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
 [**patients_filters**](PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 [**patients_statistics**](PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 [**post_patient_batch**](PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -103,7 +107,7 @@ Name | Type | Description  | Notes
 
 Get PatientEntity patient entity
 
-Retrieve PatientEntity by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+Retrieve PatientEntity, the header, sidebar and overview of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
 
 ### Example
 
@@ -160,6 +164,342 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PatientEntity**](PatientEntity.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_genomics**
+> PatientGenomics patient_genomics(tenant, patient_key)
+
+Get PatientGenomics of a patient
+
+Retrieve PatientGenomics, the genomics tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_genomics import PatientGenomics
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientGenomics of a patient
+        api_response = api_instance.patient_genomics(tenant, patient_key)
+        print("The response of PatientsApi->patient_genomics:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_genomics: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientGenomics**](PatientGenomics.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_imaging**
+> PatientImaging patient_imaging(tenant, patient_key)
+
+Get PatientImaging of a patient
+
+Retrieve PatientImaging, the imaging tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_imaging import PatientImaging
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientImaging of a patient
+        api_response = api_instance.patient_imaging(tenant, patient_key)
+        print("The response of PatientsApi->patient_imaging:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_imaging: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientImaging**](PatientImaging.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_laboratory**
+> PatientLaboratory patient_laboratory(tenant, patient_key)
+
+Get PatientLaboratory of a patient
+
+Retrieve PatientLaboratory, the laboratory tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_laboratory import PatientLaboratory
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientLaboratory of a patient
+        api_response = api_instance.patient_laboratory(tenant, patient_key)
+        print("The response of PatientsApi->patient_laboratory:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_laboratory: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientLaboratory**](PatientLaboratory.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_treatments**
+> PatientTreatments patient_treatments(tenant, patient_key)
+
+Get PatientTreatments of a patient
+
+Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_treatments import PatientTreatments
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientTreatments of a patient
+        api_response = api_instance.patient_treatments(tenant, patient_key)
+        print("The response of PatientsApi->patient_treatments:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_treatments: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientTreatments**](PatientTreatments.md)
 
 ### Authorization
 

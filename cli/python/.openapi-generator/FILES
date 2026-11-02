@@ -123,11 +123,14 @@ docs/PatientDose.md
 docs/PatientEntity.md
 docs/PatientEvent.md
 docs/PatientFilters.md
+docs/PatientGenomics.md
+docs/PatientImaging.md
 docs/PatientImagingSession.md
 docs/PatientInterpretation.md
 docs/PatientKeyDate.md
 docs/PatientKeyDates.md
 docs/PatientLabResult.md
+docs/PatientLaboratory.md
 docs/PatientListItem.md
 docs/PatientOrganizationVitalCount.md
 docs/PatientPerformanceScore.md
@@ -137,6 +140,7 @@ docs/PatientSurgery.md
 docs/PatientSurvival.md
 docs/PatientTherapy.md
 docs/PatientTreatmentSummary.md
+docs/PatientTreatments.md
 docs/PatientTrialEnrollment.md
 docs/PatientsApi.md
 docs/PatientsSearchResponse.md
@@ -340,11 +344,14 @@ radiant_python/models/patient_dose.py
 radiant_python/models/patient_entity.py
 radiant_python/models/patient_event.py
 radiant_python/models/patient_filters.py
+radiant_python/models/patient_genomics.py
+radiant_python/models/patient_imaging.py
 radiant_python/models/patient_imaging_session.py
 radiant_python/models/patient_interpretation.py
 radiant_python/models/patient_key_date.py
 radiant_python/models/patient_key_dates.py
 radiant_python/models/patient_lab_result.py
+radiant_python/models/patient_laboratory.py
 radiant_python/models/patient_list_item.py
 radiant_python/models/patient_organization_vital_count.py
 radiant_python/models/patient_performance_score.py
@@ -354,6 +361,7 @@ radiant_python/models/patient_surgery.py
 radiant_python/models/patient_survival.py
 radiant_python/models/patient_therapy.py
 radiant_python/models/patient_treatment_summary.py
+radiant_python/models/patient_treatments.py
 radiant_python/models/patient_trial_enrollment.py
 radiant_python/models/patients_search_response.py
 radiant_python/models/pubmed_citation.py
@@ -408,4 +416,3 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_patient_trial_enrollment.py

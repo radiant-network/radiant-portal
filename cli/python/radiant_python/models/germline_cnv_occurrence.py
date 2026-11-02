@@ -39,6 +39,24 @@ class GermlineCNVOccurrence(BaseModel):
     end: StrictInt
     filter: Optional[StrictStr] = None
     flag_type: Optional[OccurrenceFlagType] = None
+    germline_pc_wgs: Optional[StrictInt] = None
+    germline_pc_wgs_affected: Optional[StrictInt] = None
+    germline_pc_wgs_not_affected: Optional[StrictInt] = None
+    germline_pc_wxs: Optional[StrictInt] = None
+    germline_pc_wxs_affected: Optional[StrictInt] = None
+    germline_pc_wxs_not_affected: Optional[StrictInt] = None
+    germline_pf_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wxs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pn_wgs: Optional[StrictInt] = None
+    germline_pn_wgs_affected: Optional[StrictInt] = None
+    germline_pn_wgs_not_affected: Optional[StrictInt] = None
+    germline_pn_wxs: Optional[StrictInt] = None
+    germline_pn_wxs_affected: Optional[StrictInt] = None
+    germline_pn_wxs_not_affected: Optional[StrictInt] = None
     gnomad_sc: Optional[StrictInt] = None
     gnomad_sf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_sn: Optional[StrictInt] = None
@@ -58,7 +76,7 @@ class GermlineCNVOccurrence(BaseModel):
     symbol: Optional[List[StrictStr]] = None
     task_id: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "flag_type", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "flag_type", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -123,6 +141,24 @@ class GermlineCNVOccurrence(BaseModel):
             "end": obj.get("end"),
             "filter": obj.get("filter"),
             "flag_type": obj.get("flag_type"),
+            "germline_pc_wgs": obj.get("germline_pc_wgs"),
+            "germline_pc_wgs_affected": obj.get("germline_pc_wgs_affected"),
+            "germline_pc_wgs_not_affected": obj.get("germline_pc_wgs_not_affected"),
+            "germline_pc_wxs": obj.get("germline_pc_wxs"),
+            "germline_pc_wxs_affected": obj.get("germline_pc_wxs_affected"),
+            "germline_pc_wxs_not_affected": obj.get("germline_pc_wxs_not_affected"),
+            "germline_pf_wgs": obj.get("germline_pf_wgs"),
+            "germline_pf_wgs_affected": obj.get("germline_pf_wgs_affected"),
+            "germline_pf_wgs_not_affected": obj.get("germline_pf_wgs_not_affected"),
+            "germline_pf_wxs": obj.get("germline_pf_wxs"),
+            "germline_pf_wxs_affected": obj.get("germline_pf_wxs_affected"),
+            "germline_pf_wxs_not_affected": obj.get("germline_pf_wxs_not_affected"),
+            "germline_pn_wgs": obj.get("germline_pn_wgs"),
+            "germline_pn_wgs_affected": obj.get("germline_pn_wgs_affected"),
+            "germline_pn_wgs_not_affected": obj.get("germline_pn_wgs_not_affected"),
+            "germline_pn_wxs": obj.get("germline_pn_wxs"),
+            "germline_pn_wxs_affected": obj.get("germline_pn_wxs_affected"),
+            "germline_pn_wxs_not_affected": obj.get("germline_pn_wxs_not_affected"),
             "gnomad_sc": obj.get("gnomad_sc"),
             "gnomad_sf": obj.get("gnomad_sf"),
             "gnomad_sn": obj.get("gnomad_sn"),

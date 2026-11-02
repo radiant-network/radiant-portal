@@ -3,10 +3,12 @@
 import { initReactI18next } from 'react-i18next';
 import i18next, { type i18n } from 'i18next';
 
+declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } };
+
 // Get the current theme from environment variable
 const getCurrentTheme = () => process.env.THEME || 'radiant';
 
-const getDefaultLanguage = () => process.env.DEFAULT_LANGUAGE || 'en';
+const getDefaultLanguage = () => __PROJECT__.portal.default_language;
 
 // Simple language detection for consistent server/client behavior
 export const detectLanguageFromRequest = (request: Request): string => {

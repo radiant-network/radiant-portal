@@ -24,6 +24,10 @@ var patientViewRoutes = []string{
 	"GET /:tenant/patients/filters",
 	"GET /:tenant/patients/statistics",
 	"GET /:tenant/patients/:patient_key",
+	"GET /:tenant/patients/:patient_key/treatments",
+	"GET /:tenant/patients/:patient_key/laboratory",
+	"GET /:tenant/patients/:patient_key/imaging",
+	"GET /:tenant/patients/:patient_key/genomics",
 }
 
 func registeredRoutes(router *gin.Engine) map[string]bool {
@@ -188,34 +192,60 @@ func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
 	})
 }
 
-func getPatientEntityIntegration(t *testing.T, env *testutils.Env, key string) *httptest.ResponseRecorder {
+func getPatientIntegration(t *testing.T, env *testutils.Env, path string) *httptest.ResponseRecorder {
 	t.Helper()
 	repo := starrocks.NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
 	router := tenantRouter()
 	router.GET("/:tenant/patients/:patient_key", server.PatientEntityHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/treatments", server.PatientTreatmentsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/laboratory", server.PatientLaboratoryHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/imaging", server.PatientImagingHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/genomics", server.PatientGenomicsHandler(repo))
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key, nil))
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+path, nil))
 	return w
 }
 
 func Test_PatientEntity_ReturnsThePatientPage(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000002")
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000002")
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var patient types.PatientEntity
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &patient))
 		assert.Equal(t, "MRN-0001", patient.PatientID)
-		require.Len(t, patient.Cases, 1)
-		assert.Equal(t, "father", patient.Cases[0].Relationship)
+		assert.NotNil(t, patient.Events)
 	})
 }
 
 func Test_PatientEntity_UnknownKey_404(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getPatientEntityIntegration(t, env, "00000000-0000-4000-8000-000000000999")
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000999")
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 		assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String())
+	})
+}
+
+func Test_PatientGenomics_ReturnsTheCasesOfThePatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000002/genomics")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var genomics types.PatientGenomics
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &genomics))
+		require.Len(t, genomics.Cases, 1)
+		assert.Equal(t, "father", genomics.Cases[0].Relationship)
+	})
+}
+
+func Test_PatientTabs_UnknownKey_404(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics"} {
+			w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000999/"+tab)
+
+			assert.Equal(t, http.StatusNotFound, w.Code, tab)
+			assert.JSONEq(t, `{"status":404,"message":"patient not found"}`, w.Body.String(), tab)
+		}
 	})
 }

@@ -30,6 +30,10 @@ export async function loader({ request }: Route.LoaderArgs) {
     features: {
       caseVariantsReportTenants: getEnabledTenants(CASE_VARIANTS_REPORT_ENV_SUFFIX),
     },
+    // Public-safe runtime config; never put secrets here — the loader data is serialized to the client.
+    runtimeConfig: {
+      librechatDavidUrl: process.env.APPS_LIBRECHAT_DAVID_URL ?? '',
+    },
   };
 }
 

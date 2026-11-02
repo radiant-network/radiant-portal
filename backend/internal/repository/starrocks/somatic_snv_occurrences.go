@@ -58,6 +58,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 		Select(columns).
 		Where("s_snv_o.tumor_seq_id = ? and s_snv_o.task_id = ? and part=? and v.locus_id = s_snv_o.locus_id and s_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
+	tx = JoinSNVOccurrencesWithSortedFrequencyTables(types.SomaticSNVOccurrenceTable, userQuery, tx)
 	utils.AddSort(tx, userQuery) //We re-apply the sort on the outer query
 
 	if err = tx.Find(&occurrences).Error; err != nil {

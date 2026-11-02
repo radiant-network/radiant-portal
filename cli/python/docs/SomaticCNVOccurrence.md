@@ -39,6 +39,12 @@ Name | Type | Description | Notes
 **sd** | **float** |  | [optional] 
 **seq_id** | **int** | The tumor sequencing id. Somatic CNV spells this seq_id, not tumor_seq_id as somatic SNV does, and has no normal_seq_id. | 
 **sm** | **float** |  | [optional] 
+**somatic_pc_to_wgs** | **int** |  | [optional] 
+**somatic_pc_to_wxs** | **int** |  | [optional] 
+**somatic_pf_to_wgs** | **float** |  | [optional] 
+**somatic_pf_to_wxs** | **float** |  | [optional] 
+**somatic_pn_to_wgs** | **int** |  | [optional] 
+**somatic_pn_to_wxs** | **int** |  | [optional] 
 **start** | **int** |  | 
 **svlen** | **int** |  | [optional] 
 **svtype** | **str** |  | [optional] 

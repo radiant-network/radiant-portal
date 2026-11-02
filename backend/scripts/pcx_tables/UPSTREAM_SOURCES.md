@@ -1,6 +1,6 @@
 # pcx_30 upstream sources and refresh procedure
 
-How the five source tables in `radiant_data_dev` get there, what contract they
+How the seven source tables in `radiant_data_dev` get there, what contract they
 satisfy, and what a refresh has to do. Written 2026-10-01; every number in here was
 measured against live prod on that date and is labelled with its measurement, so a
 later reader can re-measure rather than trust it.
@@ -14,15 +14,35 @@ tables, 12 `radiant_data_dev` views, 12 `cbtn_tenant` guarded views and the data
 dictionary are current, and §7's four verification queries pass. The §7 reference row
 counts are re-based below. A third script hazard was found and is documented in §5.
 
-Everything downstream — 7 `pcx_30_*_deid` release tables, their identified twins,
-12 `radiant_data_dev` combined views, 12 `cbtn_tenant` guarded views, and the data
-dictionary — is derived from these six tables. Nothing else is an input.
+**Updated 2026-10-21:** `imaging_sessions` was **added to the loader**, taking stage 1
+from five warehouse tables to six and the total source count from six to seven. It had
+been declared in the dbt project's `dwh_source` but had no loader anywhere in the repo,
+so it sat at whatever vintage it was last hand-loaded at (2026-09-28, 46,420 rows) while
+the other five refreshed around it — exactly the mixed-vintage condition §4 warns about.
+It needed no DDL: its 9 columns already matched the StarRocks target in ordinal order.
+Two consequences are documented below: it is a **second** type-flattening exception (§3,
+`age_at_session_days`), and the de-identified column total moves 134 → 143. All six
+warehouse tables were then refreshed to the 2026-10-21 vintage (§4). The one remaining
+uncovered source is `openpedcan_histologies_annotated` — see §6 item 5.
+
+Everything downstream — 7 `pcx_30_*_deid` release tables, 13 `radiant_data_dev` combined
+views, 13 `cbtn_tenant` guarded views, and the data dictionary — is derived from these
+seven tables. Nothing else is an input.
+
+**The identified twins no longer exist** (observed 2026-10-21). Earlier drafts of this doc
+listed a non-`_deid` twin beside each release table; `radiant_data_dev` now holds only the
+7 `_deid` tables plus `pcx_30_data_dictionary`, `pcx_30_data_dictionary_src` and
+`pcx_30_organization_ref`, and the dbt project has no models for the twins. Identity is
+re-attached at the **view** layer instead — the combined views join `mrn` / `research_id`
+from `radiant_patient_mrn_list` onto the de-identified tables, and the `cbtn_tenant` views
+gate that behind `can_read_phi`. This is a cleaner boundary (PHI exists only in views that
+can gate it), but it means §7 check (b) now has 9 objects to find rather than 12.
 
 ---
 
-## 1. The six source tables
+## 1. The seven source tables
 
-Five are loaded from two external warehouses. The sixth is built inside StarRocks
+Six are loaded from two external warehouses. The seventh is built inside StarRocks
 from the FHIR Iceberg catalog by a SQL script — a different mechanism entirely.
 
 | table | source | schema | engine | cols | PHI | downstream pcx_30 SQL files |
@@ -33,6 +53,7 @@ from the FHIR Iceberg catalog by a SQL script — a different mechanism entirely
 | `treatment` | de-identified DWH | `prod_access` | PostgreSQL 16.11 | 36 | no | 6 |
 | `participants` | de-identified DWH | `prod_access` | PostgreSQL 16.11 | 21 | no | 2 |
 | `updates` | de-identified DWH | `prod_access` | PostgreSQL 16.11 | 12 | no | 2 |
+| `imaging_sessions` | de-identified DWH | `prod_access` | PostgreSQL 16.11 | 9 | no | 2 |
 
 The identified warehouse also holds `stg_cbtn.stg_cbtn_enrollment` — same row count
 as `_final` (7,202 on 2026-10-01). **Use `_final`.** The non-final sibling is not the
@@ -40,14 +61,17 @@ pcx_30 input; nothing downstream references it.
 
 ### PHI boundary
 
-**Two** of the six cross it. `stg_cbtn_enrollment_final` carries `first_name`,
+**Two** of the seven cross it. `stg_cbtn_enrollment_final` carries `first_name`,
 `last_name`, `mrn`, `dob`, `subject_consent_date`; `radiant_patient_mrn_list` carries
-`mrn` (2,804 rows on 2026-10-02, one MRN per FHIR patient id). The four de-identified
-warehouse tables do not: `participants` carries `dob_year`, never `dob`.
+`mrn` (2,804 rows on 2026-10-02, one MRN per FHIR patient id). The five de-identified
+warehouse tables do not: `participants` carries `dob_year`, never `dob`, and
+`imaging_sessions` carries only `age_at_session_days` — the calendar `session_date` is
+*derived downstream* by adding that offset to `pt_roster.dob`, so the date is
+manufactured inside the gated view layer and never lands in the source table.
 
 This matters because it is the *only* reason `radiant_data_dev` is a PHI-bearing
 schema, which is in turn why `cbtn_tenant` exposes nothing but grant-guarded views.
-Automating the de-identified four needs no PHI handling; automating the fifth does.
+Automating the de-identified five needs no PHI handling; automating the sixth does.
 
 The two warehouses use **separate credentials in separate files**, deliberately, so a
 job that only needs de-identified data cannot accidentally hold an identified
@@ -55,7 +79,7 @@ connection. Do not merge them.
 
 ### Identifier families
 
-Three, and they do not share a key space. Any automation that treats these five as
+Three, and they do not share a key space. Any automation that treats these six as
 one homogeneous batch will get the joins wrong.
 
 | family | columns | tables |
@@ -63,6 +87,13 @@ one homogeneous batch will get the joins wrong.
 | REDCap longitudinal | `subject`, `redcap_record_id`, `event_id`, `redcap_event_name` | `diagnosis`, `treatment`, `updates` |
 | registry / warehouse | `unique_participant_key`, `research_id`, `kids_first_participant_id`, `bp_number`, `family_id` | `participants` |
 | identity bridge | `ehb_protocol_code`, `redcap_subject_record_id`, `research_id`, `mrn` | `stg_cbtn_enrollment_final` |
+| imaging / Flywheel | `subject`, `flywheel_subject_id`, `flywheel_project_id`, `session_id` | `imaging_sessions` |
+
+`imaging_sessions.subject` is in the **same `C#######` space** as the other `subject`
+columns, so it joins the same way (measured 2026-10-21: 3,031 distinct subjects, 3,025
+matching `participants.research_id`, 3,018 matching `diagnosis.subject`). Its Flywheel
+columns are a fourth key space, but nothing downstream joins on them — they are carried
+through to the view as payload for PACS lookup, not as join keys.
 
 The join the downstream SQL actually relies on:
 
@@ -128,26 +159,30 @@ psql -h "$DWH_HOST" -p "$DWH_PORT" -U "$DWH_USER" -d "$DWH_DATABASE"
 ## 3. The load contract: strict, verbatim, type-faithful
 
 The load is a **strict export and import** — no renames, no filters, no reordering.
-Column names and order are verbatim for **all five** warehouse tables (134/134 on the
-de-identified four, 15/15 on the identified one, matched by
-`(ordinal_position, column_name)` with zero differences). Types are faithful on the
-de-identified four but **not** on the identified one — see the exception below.
+Column names and order are verbatim for **all six** warehouse tables (143/143 on the
+de-identified five, 15/15 on the identified one, matched by
+`(ordinal_position, column_name)` with zero differences). Types are faithful on four of
+the de-identified five but **not** on `imaging_sessions` and **not** on the identified
+one — see the two exceptions below.
 
-Verified 2026-10-01 across all four de-identified tables:
+Verified 2026-10-01 across the original four de-identified tables, re-measured
+2026-10-21 with `imaging_sessions` added:
 
-- **Column names identical**, including order: 134/134 columns matched by
+- **Column names identical**, including order: 143/143 columns matched by
   `(ordinal_position, column_name)` with zero differences.
-- **Column counts identical**: 65 / 36 / 21 / 12.
-- **Types map 1:1** with no information loss:
+- **Column counts identical**: 65 / 36 / 21 / 12 / 9.
+- **Types map 1:1 on the original four**, with one flattening introduced by
+  `imaging_sessions`:
 
   | PostgreSQL source | count | StarRocks | count |
   |---|---|---|---|
-  | `text` + `character varying` | 73 + 55 = 128 | `varchar` | 128 |
+  | `text` + `character varying` | 81 + 55 = 136 | `varchar` | 136 |
+  | `bigint` | 1 | `varchar` | 1 — **FLATTENED**, see below |
   | `integer` | 3 | `int` | 3 |
   | `boolean` | 2 | `tinyint` | 2 |
   | `double precision` | 1 | `float` | 1 |
 
-### Exception: `stg_cbtn_enrollment_final` is type-FLATTENED
+### Exception 1: `stg_cbtn_enrollment_final` is type-FLATTENED
 
 All 15 columns arrive in StarRocks as `varchar`, but 4 are typed in the source. Column
 names and order still match exactly; only the types differ:
@@ -161,11 +196,36 @@ names and order still match exactly; only the types differ:
 
 Harmless today: three of the four are unreferenced, and `dob_year` is consumed as a
 display string (demographics `birth_year`), not compared numerically. But it means the
-load is **not uniform across the five tables**, so a generic "copy with source types"
+load is **not uniform across the six tables**, so a generic "copy with source types"
 job would silently *change* these four columns' types. If that is the automation you
 build, either accept the change deliberately and re-verify the 4 `dob_year` consumers,
 or pin these columns to `varchar` to preserve current behaviour. Do not let it happen
 by accident.
+
+### Exception 2: `imaging_sessions.age_at_session_days` is type-FLATTENED
+
+Found 2026-10-21 when the table was added to the loader. 8 of its 9 columns are `text`
+→ `varchar` 1:1; the ninth is not:
+
+| column | source type | StarRocks type | used downstream? |
+|---|---|---|---|
+| `age_at_session_days` | `bigint` | `varchar` | **yes — 2 files** |
+
+**Already handled downstream, and must stay handled.** Both consumers wrap it in an
+explicit cast to build the calendar date:
+
+```sql
+date_add(pt_roster.dob, interval cast(imaging_sessions.age_at_session_days as int) day)
+    as session_date
+```
+
+That cast is load-bearing twice over. It is required because the column is `varchar`,
+and `as int` specifically — not a bare arithmetic promotion — because of the same trap
+that bit `age_at_event_days` on 2026-10-02: StarRocks promotes an untyped numeric
+through aggregation to `decimal(38,9)` and publishes `5541.000000000` instead of `5541`.
+If a future load ever imports this column as a real `bigint`, the casts stay correct
+(an `int` cast of a `bigint` is a no-op here — the values are day offsets in the
+thousands), so there is no coupling to fix in the other direction.
 
 ### Do not "improve" the typing
 
@@ -267,6 +327,34 @@ Compare against `is not null AND <> ''`.
 
 ## 4. Current state and how to check staleness
 
+**Latest refresh: 2026-10-21.** All six warehouse tables loaded clean — every final
+count matched its extract and its preflight figure exactly:
+
+| table | was (10-19) | now | delta |
+|---|---|---|---|
+| `participants` | 16,117 | **16,126** | +9 |
+| `diagnosis` | 21,075 | **21,085** | +10 |
+| `treatment` | 43,061 | **43,087** | +26 |
+| `updates` | 29,535 | **29,548** | +13 |
+| `imaging_sessions` | 46,420 *(09-28)* | **47,304** | **+884** |
+| `stg_cbtn_enrollment_final` | 7,234 | **7,240** | +6 |
+
+The five small deltas are two days of accrual (there was a 2026-10-19 refresh of those
+five). `imaging_sessions` carries the large delta because this was its first loader-driven
+refresh — it had been sitting at its 2026-09-28 hand-load for three weeks.
+
+**A refresh can SHRINK the cohort, and a net-positive count will hide it.** On the
+2026-10-19 refresh the patient grain read 966 → 969, which looks like pure growth. It
+was **+6 new, −3 removed**: `C112791`, `C530007` and `C530622` all left the cohort
+because upstream re-curated their `cns_diagnosis_category` off Medulloblastoma (→ `Other
+CNS Embryonal tumors` / `Glioneuronal and neuronal tumors`). They still have
+`participants`, `enrollment`, `diagnosis` and `treatment` rows — they simply no longer
+satisfy the §5 cohort filter. That is a correct upstream correction flowing through, not
+a defect, but it means **the §7 count checks cannot detect a departure**. Diff the deid
+CSVs at row level (see §5 step 9) if you need to know who left.
+
+### Previous refresh: 2026-10-02
+
 **All six sources were refreshed on 2026-10-02** to the 2026-10-01 extract vintage. Every
 loaded count matched its extract exactly:
 
@@ -327,7 +415,7 @@ Before the 10-02 refresh those `update_time` values spanned **four different day
 across these sources, so a partial refresh silently produces a cohort assembled from
 mixed vintages: a patient present in a fresh `diagnosis` but absent from a stale
 `stg_cbtn_enrollment_final` is dropped by the `inner join` in `pt_roster` without any
-error. Automation should refresh **all six, then rebuild everything downstream**, and
+error. Automation should refresh **all seven, then rebuild everything downstream**, and
 record one timestamp for the batch.
 
 This is not hypothetical. On 2026-10-01 a subset load left `diagnosis` and `updates` at
@@ -358,24 +446,50 @@ order by update_time;
 ## 5. Refresh procedure
 
 Stage 1 is scripted as of 2026-10-02 — `../load_upstream_tables.py` does the strict
-export of all five warehouse tables and the import into StarRocks **over port 80**:
+export of all six warehouse tables and the import into StarRocks **over port 80**.
+
+**Use the dbt venv interpreter, not a system `python3`.** `pymysql` is absent from every
+python3 on the authoring machine (homebrew, /usr/local, framework, anaconda). The import
+check lands *after* the extract phase — extract shells out to `psql`, which does not need
+pymysql — so a plain `python3 --extract --load` pulls all six extracts, including the PHI
+one, and only then dies. The venv already has pymysql 2.2.8:
 
 ```bash
-# preflight every table against its live schema, write nothing
-python3 load_upstream_tables.py --load --dry-run
+cd backend/scripts/pcx_tables
+P=starrocks-dbt/.starrocks-dbt/bin/python3
 
-# extract fresh from both warehouses, then load all five
-python3 load_upstream_tables.py --extract --load
+# preflight every table against its live schema, write nothing
+$P load_upstream_tables.py --load --dry-run
+
+# extract fresh from both warehouses, then load all six
+$P load_upstream_tables.py --extract --load
 
 # load extracts of a known vintage (stamp = extract date, not today)
-python3 load_upstream_tables.py --load --stamp 20261001
+$P load_upstream_tables.py --load --stamp 20261021
 ```
+
+`--extract` still runs under `--dry-run`, so `--extract --load --dry-run` is the safe
+first move: it writes fresh CSVs and validates them without touching StarRocks, and a
+following `--load --stamp <same date>` reuses them rather than re-pulling.
 
 Read its module docstring before use; it records why port 80, why `\N` is the NULL marker,
 and why it preflights every table before truncating any. **It is not a dry run by
 default** — `--load` without `--dry-run` truncates and loads immediately.
 
-Stages 1b and 2–8 are still run by hand, statement by statement.
+**Stages 1b–8 are now dbt models**, in `starrocks-dbt/starrocks_radiant` (profile
+`starrocks_radiant`, target `dev` → `radiant_data_dev` on the same prod cluster over port
+80). A single `dbt run` rebuilds `radiant_patient_mrn_list`, the `int_pcx_30_*`
+intermediates, the 7 `_deid` release tables, the 8 combined views, the 8
+access-controlled `cbtn_tenant` views and the 3 data-dictionary objects, in dependency
+order — so the hand-ordered walk below is no longer the normal path. The `.sql` files in
+`radiant-prod/`, `access_controlled_views/` and `data_dictionary/` remain the record of
+what each object does, and the three script hazards below still apply **if you run them
+by hand**. dbt resolves `ref()` ordering itself, which removes the 1→1b and 2→4→5
+footguns, but it does NOT remove the §4 mixed-vintage risk: dbt has no visibility into
+whether stage 1 loaded all six sources at one vintage.
+
+Stage 9 (static CSV export of the `_deid` tables) is scripted as of 2026-10-19 —
+`../export_deid_tables.py`, same venv interpreter, `--dry-run` / `--archive`.
 
 ### Why port 80 and not Stream Load
 
@@ -388,10 +502,12 @@ notes and the Stream Load section of the root `CLAUDE.md`.
 ### Required order
 
 Each stage depends on every stage above it. Steps 2+ are all in this directory.
+**Stages 1b–8 are handled in dependency order by `dbt run`** — this table is the
+by-hand fallback and the record of what depends on what.
 
 | # | stage | objects |
 |---|---|---|
-| 1 | **load the 5 warehouse sources** | `participants`, `diagnosis`, `treatment`, `updates`, `stg_cbtn_enrollment_final` — `../load_upstream_tables.py` |
+| 1 | **load the 6 warehouse sources** | `participants`, `diagnosis`, `treatment`, `updates`, `imaging_sessions`, `stg_cbtn_enrollment_final` — `../load_upstream_tables.py` |
 | 1b | **rebuild the Iceberg-derived source** | `radiant_patient_mrn_list` — `radiant-prod/patient_mrn_list_prod.sql` (see §3a: run the temp-swap, not the bare script) |
 | 2 | event level | `event_level_fields_openpedcan_prod.sql` → `pcx_30_event_level` + `_deid` (supersedes `event_level_fields_prod.sql`, archived 2026-10-05; it builds the same two tables but without the OpenPedCan NOS/NEC diagnosis upgrade, so running it would revert 187 rows and drop `cns_integrated_diagnosis_source`) |
 | 3 | demographics / patient level | `demographics_prod.sql`, `patient_level_prod.sql` |
@@ -400,6 +516,7 @@ Each stage depends on every stage above it. Steps 2+ are all in this directory.
 | 6 | combined views | `radiant-prod/combined_views/*.sql` |
 | 7 | guarded views | `access_controlled_views/*.sql` (render the `.sql.tmpl` first) |
 | 8 | data dictionary | `data_dictionary/data_dictionary_table.sql` |
+| 9 | static deid CSVs | `prelim_30_deid_tables/*.csv` — `../export_deid_tables.py --archive` (optional; only if the demo payloads need refreshing) |
 
 Step 1 must precede step 1b: `radiant_patient_mrn_list` derives `research_id` by LEFT
 JOINing `stg_cbtn_enrollment_final`, so building it first under-populates that column
@@ -458,31 +575,40 @@ the `is_initial_treatment` column those tables produce.
    Automation needs a decision: scheduled, or on-demand with a staleness check.
 3. ~~**No loader script exists anywhere in the repo.**~~ **RESOLVED 2026-10-02** for
    stage 1: `../load_upstream_tables.py` does export → preflight-all → truncate → batched
-   `INSERT` over port 80, reporting counts before and after. Three gaps remain. It covers
-   **only the five warehouse tables** — stage 1b and stages 2–8 are still manual. Its
-   truncate-and-load is **not atomic**, so a mid-load failure leaves one named table
-   partial (it reports which, and the re-run command). And its subset warning is advisory
-   only — it does not refuse a partial refresh, which is how the 10-01 mixed-vintage state
-   arose. Making the subset case opt-in rather than warn-only is the obvious next
-   hardening.
-4. **Load is full-replace, not incremental.** Deltas are small (+6 to +507 rows), so
+   `INSERT` over port 80, reporting counts before and after. It covers **all six warehouse
+   tables** as of 2026-10-21 (`imaging_sessions` added), and stages 1b–8 are now `dbt run`
+   (§5), so the manual surface is much smaller than this item originally described. Two
+   gaps remain. Its truncate-and-load is **not atomic**, so a mid-load failure leaves one
+   named table partial (it reports which, and the re-run command). And its subset warning
+   is advisory only — it does not refuse a partial refresh, which is how the 10-01
+   mixed-vintage state arose. Making the subset case opt-in rather than warn-only is the
+   obvious next hardening.
+4. **Load is full-replace, not incremental.** Deltas are small (+6 to +884 rows), so
    incremental loading is possible, but no source table has a reliable
    updated-at column identified yet. Full replace is correct and simple; confirm before
    optimising.
-5. **Decide the `stg_cbtn_enrollment_final` typing question** in §3 before writing a
+5. **`openpedcan_histologies_annotated` has no loader.** The last of the seven sources
+   still outside stage 1 (76 cols, 56,246 rows on 2026-10-21). It feeds
+   `int_pcx_30_openpedcan_subtype` → the NOS/NEC molecular-subtype upgrade on
+   `pcx_30_event_level_deid`, so leaving it stale means a newly-admitted patient arrives
+   with an un-upgraded subtype rather than being dropped — degraded, not wrong. Adding it
+   is NOT a one-line registry entry like `imaging_sessions` was: it lives in
+   **`bix_reporting`**, not `prod_access`, so it needs its own source schema, and its
+   type map is unverified. Deferred deliberately 2026-10-21.
+6. **Decide the `stg_cbtn_enrollment_final` typing question** in §3 before writing a
    generic loader, so the 4 flattened columns change deliberately or not at all.
-6. **No post-refresh verification suite — still unautomated, but the content now
+7. **No post-refresh verification suite — still unautomated, but the content now
    exists.** §7's four queries were all run by hand on 2026-10-02 and all passed, and §7
    carries the re-baselined expected counts plus the generalised all-12-view PHI sweep.
    What is missing is a *runner*: something that executes them, diffs the counts against
    the recorded baseline, and exits non-zero. Until then "verified" depends on whoever
    ran the refresh remembering to check.
-7. **The `--`-comment-with-semicolon hazard is only partly remediated.** Two files are
+8. **The `--`-comment-with-semicolon hazard is only partly remediated.** Two files are
    fixed; six table scripts still carry it (§5 hazard 3). They are safe under
    `--skip-comments`, so this is latent rather than live, but any automation MUST pass
    that flag — or the six should be re-punctuated so correctness does not depend on a
    caller-supplied flag. A `grep` guard in CI would stop new ones appearing.
-8. **`pcx_30_medical_therapy_level` reads `protocol_name_unmasked_internal_use`**, while
+9. **`pcx_30_medical_therapy_level` reads `protocol_name_unmasked_internal_use`**, while
    the source also carries `protocol_name_masked_for_release` (`Not Available` on 1,041
    of 42,745 rows). Both the identified and `_deid` builds choose the unmasked column
    explicitly, so the `_deid` release table — and the extracted CSV — publishes protocol
@@ -512,7 +638,11 @@ from cols full outer join doc
   on doc.table_name=cols.table_name and doc.field_name=cols.column_name
 where doc.field_name is null or cols.column_name is null;
 
--- b. the initial-treatment flag reached all 12 objects. Expect 12.
+-- b. the initial-treatment flag reached every object that should carry it. Expect 9
+--    as of 2026-10-21 (was 12 before the identified twins were retired -- see §1).
+--    The 9 = 3 treatment grains (radiation / medical_therapy / surgery) x 3 objects
+--    (_deid table, radiant_data_dev view, cbtn_tenant view). treatment_summary
+--    DERIVES had_initial_* from these and does not carry the raw flag itself.
 select count(*) from information_schema.columns where column_name='is_initial_treatment';
 
 -- c. treatment_summary agrees with the per-row flags it derives from. Expect 0 and 0.
@@ -536,48 +666,72 @@ select patient_id_type, count(*) rows_n,
 from cbtn_tenant.v_pcx_30_medical_therapy_level_combined group by 1;
 ```
 
-All four passed on the 2026-10-02 rebuild: (a) zero rows, (b) 12, (c) 0 and 0,
-(d) all 1,267 rows `research_id` with both dates NULL on every row.
+**Run 2026-10-21** (post-refresh, post-`dbt run`): (a) zero rows — PASS, (b) **9** —
+PASS against the revised expectation above, (c) 0 and 0 — PASS, (shape) 12 columns on
+`pcx_30_event_level_deid` — PASS. Check (d) was NOT re-run; it needs a login holding no
+`pii_grant` and this session's login holds one.
 
-Check (d) generalises usefully — every one of the 12 guarded views was confirmed to
+All four passed on the 2026-10-02 rebuild: (a) zero rows, (b) 12 *(under the pre-retirement
+object set)*, (c) 0 and 0, (d) all 1,267 rows `research_id` with both dates NULL on every
+row.
+
+Check (d) generalises usefully — every one of the guarded views was confirmed to
 return `research_id` on every row, `can_read_phi` false, and **NULL in every date-typed
 column**, for a login holding no grant. Two notes if you re-run it that way. First,
 `v_pcx_30_demographics_combined` has no date-typed column at all (`birth_year` is
-varchar), so it has nothing to assert. Second, scope the sweep to these 12 views:
+varchar), so it has nothing to assert. Second, scope the sweep to the pcx_30 views:
 `cbtn_tenant` holds ~63 objects, and the others are a different surface (portal tenant
 views such as `patient`, `document`, `task`, `cases`, `sequencing_experiment`) which DO
 return dates to an ungranted caller and are governed separately — not a pcx_30 finding.
 
-**Re-baselined 2026-10-02** (post-refresh, post-rebuild), with the
-`pcx_30_data_dictionary` figure revised **2026-10-05** for the OpenPedCan upgrade (§4).
-Expected row counts after a clean rebuild:
+**Re-baselined 2026-10-21** (post-refresh of all six warehouse sources, post-`dbt run`
+at 10:49). Expected row counts after a clean rebuild:
 
-| object | rows |
-|---|---|
-| `pcx_30_event_level` / `_deid` | 1,856 |
-| `pcx_30_surgery_level` / `_deid` | 1,285 |
-| `pcx_30_medical_therapy_level` / `_deid` | 1,267 |
-| `pcx_30_radiation_level` / `_deid` | 776 |
-| `pcx_30_demographics`, `pcx_30_patient_level`, `pcx_30_treatment_summary_deid` | 966 each |
-| `pcx_30_data_dictionary` | 74 |
+| object | rows | was (10-02) |
+|---|---|---|
+| `pcx_30_event_level` / `_deid` | **1,869** | 1,856 |
+| `pcx_30_surgery_level` / `_deid` | **1,289** | 1,285 |
+| `pcx_30_medical_therapy_level` / `_deid` | **1,283** | 1,267 |
+| `pcx_30_radiation_level` / `_deid` | **786** | 776 |
+| `pcx_30_demographics`, `pcx_30_patient_level`, `pcx_30_treatment_summary_deid` | **970** each | 966 |
+| `pcx_30_data_dictionary` | 74 | 74 |
+| `radiant_patient_mrn_list` | **2,990** | 2,804 |
+
+Treat these as a **floor-and-shape** baseline, not an equality assertion. §4 records a
+refresh in which the patient grain grew by 3 net while 3 patients *left* the cohort, so a
+matching count does not prove a matching population.
 
 Row counts alone will NOT catch a reverted event-level build: running the archived
-`event_level_fields_prod.sql` still yields 1,856 rows, but with 11 columns instead of 12
-and 187 rows silently back to `%NOS or NEC%`. Check the shape and the provenance split,
-not just the count:
+`event_level_fields_prod.sql` yields the same row count, but with 11 columns instead of 12
+and the OpenPedCan rows silently back to `%NOS or NEC%`. Check the shape and the
+provenance split, not just the count:
 
 ```sql
--- expect 12 columns, and 1,669 CBTN / 187 OpenPedCan
+-- expect 12 columns, and (2026-10-21) 1,626 CBTN / 243 OpenPedCan
 select count(*) from information_schema.columns
 where table_schema='radiant_data_dev' and table_name='pcx_30_event_level_deid';
 select cns_integrated_diagnosis_source, count(*)
 from radiant_data_dev.pcx_30_event_level_deid group by 1;
 ```
 
+The OpenPedCan share **grew 187 → 243 without `openpedcan_histologies_annotated` being
+refreshed** (it is still at its older vintage — §6 item 5). That is expected: the
+annotation table did not move, but the refreshed `diagnosis` rows it joins against did, so
+more events now find a match. Do not read a changed split as evidence the annotation
+source was reloaded.
+
 Every base view and its `cbtn_tenant` counterpart return the SAME count as the table
 (masking only, no row filtering) — so a base/guarded count divergence is a defect signal.
-The non-pcx_30 views in the same directories read the Iceberg FHIR catalog, not these six
-sources, and are unaffected by an upstream refresh: `v_pcx_30_mri_images_combined` 8,853 ·
+
+**`v_pcx_30_mri_images_combined` is NO LONGER refresh-invariant** — corrected 2026-10-21.
+It was previously grouped with the clinical views below as reading only the Iceberg FHIR
+catalog, but it reads `imaging_sessions`, which became a loader-driven source on
+2026-10-21. It moved **8,853 → 9,085** on that refresh. It is the ONLY object affected by
+the imaging source: none of the 7 `_deid` release tables read `imaging_sessions`, so a
+refresh that includes imaging changes this view and nothing else downstream of it.
+
+The remaining non-pcx_30 views in the same directories do read the Iceberg FHIR catalog
+rather than these seven sources, and are genuinely unaffected by an upstream refresh:
 `v_cbc_latest_results` 2,421 · `v_lansky_karnofsky_latest` 1,627 ·
 `v_csf_results_latest_by_component` 1,054 · `v_csf_tumor_analysis_latest` 814.
 

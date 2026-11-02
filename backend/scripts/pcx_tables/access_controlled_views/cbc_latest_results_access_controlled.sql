@@ -36,7 +36,7 @@
 
    org_short_code is NOT projected either -- it is the FHIR source vocabulary
    (chop / seattle / ucsf), a different namespace from organization_code
-   (CHOP / SCH / BCH), and carrying both invites keying access control on the
+   (CHOP / SCH / UCSF-BCH), and carrying both invites keying access control on the
    wrong one. organization_code is the vocabulary auth.pii_grant uses.
 
    COLUMN MASKING ONLY -- no row filtering. A caller with zero grants still sees

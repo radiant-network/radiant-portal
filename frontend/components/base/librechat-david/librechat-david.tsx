@@ -5,9 +5,8 @@ import { SparklesIcon } from 'lucide-react';
 import { Button, type ButtonProps } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useRuntimeConfig } from '@/components/hooks/use-runtime-config';
 import { cn } from '@/components/lib/utils';
-
-const DAVID_URL = import.meta.env.APPS_LIBRECHAT_DAVID_URL;
 
 type LibreChatDavidProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'> & {
   demoMode?: boolean;
@@ -15,17 +14,18 @@ type LibreChatDavidProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'>
 
 function LibreChatDavid({ className, demoMode = false, ...buttonProps }: LibreChatDavidProps) {
   const { t } = useI18n();
+  const { librechatDavidUrl } = useRuntimeConfig();
   const { patientId, caseId } = useParams<{ patientId?: string; caseId?: string }>();
 
   const href = useMemo(() => {
-    if (!DAVID_URL) return undefined;
-    const url = new URL(DAVID_URL);
+    if (!librechatDavidUrl) return undefined;
+    const url = new URL(librechatDavidUrl);
     if (patientId) url.searchParams.set('patient', patientId);
     if (caseId) url.searchParams.set('case', caseId);
     return url.toString();
-  }, [patientId, caseId]);
+  }, [librechatDavidUrl, patientId, caseId]);
 
-  if (!DAVID_URL && !demoMode) return null;
+  if (!librechatDavidUrl && !demoMode) return null;
 
   return (
     <Tooltip>

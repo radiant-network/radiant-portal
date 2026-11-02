@@ -482,6 +482,46 @@ CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__occurrence` (
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
 
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__variant_frequency`
+(
+    `cnv_id` BIGINT NOT NULL,
+    `pc_wgs` BIGINT,
+    `pn_wgs` BIGINT,
+    `pf_wgs` DOUBLE,
+    `pc_wgs_affected` BIGINT,
+    `pn_wgs_affected` BIGINT,
+    `pf_wgs_affected` DOUBLE,
+    `pc_wgs_not_affected` BIGINT,
+    `pn_wgs_not_affected` BIGINT,
+    `pf_wgs_not_affected` DOUBLE,
+    `pc_wxs` BIGINT,
+    `pn_wxs` BIGINT,
+    `pf_wxs` DOUBLE,
+    `pc_wxs_affected` BIGINT,
+    `pn_wxs_affected` BIGINT,
+    `pf_wxs_affected` DOUBLE,
+    `pc_wxs_not_affected` BIGINT,
+    `pn_wxs_not_affected` BIGINT,
+    `pf_wxs_not_affected` DOUBLE
+)
+ENGINE = OLAP
+DISTRIBUTED BY HASH(`cnv_id`)
+BUCKETS 10;
+
+CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__variant_frequency`
+(
+    `cnv_id` BIGINT NOT NULL,
+    `pc_to_wgs` BIGINT,
+    `pn_to_wgs` BIGINT,
+    `pf_to_wgs` DOUBLE,
+    `pc_to_wxs` BIGINT,
+    `pn_to_wxs` BIGINT,
+    `pf_to_wxs` DOUBLE
+)
+ENGINE = OLAP
+DISTRIBUTED BY HASH(`cnv_id`)
+BUCKETS 10;
+
 CREATE TABLE IF NOT EXISTS {tenant}.`somatic__snv__occurrence`
 (
     part                            INT    NOT NULL,

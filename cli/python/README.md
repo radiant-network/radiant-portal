@@ -166,6 +166,10 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
 *PatientsApi* | [**autocomplete_patients**](docs/PatientsApi.md#autocomplete_patients) | **GET** /{tenant}/patients/autocomplete | Get AutocompleteResult list of PCX patients matching prefix
 *PatientsApi* | [**patient_entity**](docs/PatientsApi.md#patient_entity) | **GET** /{tenant}/patients/{patient_key} | Get PatientEntity patient entity
+*PatientsApi* | [**patient_genomics**](docs/PatientsApi.md#patient_genomics) | **GET** /{tenant}/patients/{patient_key}/genomics | Get PatientGenomics of a patient
+*PatientsApi* | [**patient_imaging**](docs/PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
+*PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
+*PatientsApi* | [**patient_treatments**](docs/PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
 *PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 *PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -317,11 +321,14 @@ Class | Method | HTTP request | Description
  - [PatientEntity](docs/PatientEntity.md)
  - [PatientEvent](docs/PatientEvent.md)
  - [PatientFilters](docs/PatientFilters.md)
+ - [PatientGenomics](docs/PatientGenomics.md)
+ - [PatientImaging](docs/PatientImaging.md)
  - [PatientImagingSession](docs/PatientImagingSession.md)
  - [PatientInterpretation](docs/PatientInterpretation.md)
  - [PatientKeyDate](docs/PatientKeyDate.md)
  - [PatientKeyDates](docs/PatientKeyDates.md)
  - [PatientLabResult](docs/PatientLabResult.md)
+ - [PatientLaboratory](docs/PatientLaboratory.md)
  - [PatientListItem](docs/PatientListItem.md)
  - [PatientOrganizationVitalCount](docs/PatientOrganizationVitalCount.md)
  - [PatientPerformanceScore](docs/PatientPerformanceScore.md)
@@ -331,6 +338,7 @@ Class | Method | HTTP request | Description
  - [PatientSurvival](docs/PatientSurvival.md)
  - [PatientTherapy](docs/PatientTherapy.md)
  - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
+ - [PatientTreatments](docs/PatientTreatments.md)
  - [PatientTrialEnrollment](docs/PatientTrialEnrollment.md)
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)

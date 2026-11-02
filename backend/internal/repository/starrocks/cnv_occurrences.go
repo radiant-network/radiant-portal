@@ -14,7 +14,7 @@ import (
 // prepareCNVQuery scopes a query to one segment set of cnvTable. Germline and somatic CNV need no
 // branching here: both key on plain seq_id, which for somatic holds the tumor sequencing id — there
 // is no tumor_seq_id/normal_seq_id pair as there is for somatic SNV.
-func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.Query) (*gorm.DB, error) {
+func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, frequencyTable types.Table, seqId int, taskId int, userQuery types.Query) (*gorm.DB, error) {
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
@@ -33,15 +33,18 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.TenantQualifiedName(ctx), panelsTable.Alias, alias, panelsTable.Alias))
 		}
 	}
+	if userQuery != nil && userQuery.HasFieldFromTables(frequencyTable) {
+		tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.cnv_id = %s.cnv_id", frequencyTable.TenantQualifiedName(ctx), frequencyTable.Alias, frequencyTable.Alias, alias))
+	}
 	utils.AddWhere(userQuery, tx)
 	return tx, nil
 }
 
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the
 // same column-agnostic query and differ solely in which DTO the rows are scanned into.
-func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]T, error) {
+func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.Table, frequencyTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceListQuery) ([]T, error) {
 	var occurrences []T
-	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
+	tx, err := prepareCNVQuery(ctx, db, cnvTable, frequencyTable, seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -77,7 +80,7 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 		// LEFT JOIN omim_gene_panel om ON array_contains(cnvo.symbol, om.symbol)
 		// WHERE (seq_id = 1 and part=1) AND om.panel IN ('panel1', 'panel2') GROUP BY `cnv_id`
 		// ORDER BY name asc LIMIT 10
-		tx = tx.Group("cnv_id")
+		tx = tx.Group(fmt.Sprintf("%s.cnv_id", alias))
 		var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 			if field.Name == "cnv_id" {
 				return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
@@ -114,9 +117,9 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 	return occurrences, nil
 }
 
-func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, frequencyTable types.Table, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
 	return countWithAndWithoutAnnotations(userQuery, func(query types.OccurrenceCountQuery) (int64, error) {
-		tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, query)
+		tx, err := prepareCNVQuery(ctx, db, cnvTable, frequencyTable, seqId, taskId, query)
 		if err != nil {
 			return 0, fmt.Errorf("error during query preparation %w", err)
 		}
@@ -134,8 +137,8 @@ func countCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table,
 	})
 }
 
-func aggregateCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
+func aggregateCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Table, frequencyTable types.Table, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	tx, err := prepareCNVQuery(ctx, db, cnvTable, frequencyTable, seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -163,8 +166,8 @@ func aggregateCNVOccurrences(ctx context.Context, db *gorm.DB, cnvTable types.Ta
 	return aggregation, nil
 }
 
-func cnvOccurrencesStatistics(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	tx, err := prepareCNVQuery(ctx, db, cnvTable, seqId, taskId, userQuery)
+func cnvOccurrencesStatistics(ctx context.Context, db *gorm.DB, cnvTable types.Table, frequencyTable types.Table, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, err := prepareCNVQuery(ctx, db, cnvTable, frequencyTable, seqId, taskId, userQuery)
 	var statistics types.Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)

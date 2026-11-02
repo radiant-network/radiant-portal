@@ -861,6 +861,7 @@ export const includeConfig = {
   },
   portal: {
     name: 'INCLUDE',
+    default_language: 'en',
     navigation: {
       dashboard: true,
       variant: true,

@@ -30,4 +30,5 @@ RUN npm run build:radiant
 FROM node:26.12.1-alpine AS production
 COPY --from=build-env /workspace /workspace
 WORKDIR /workspace/portals/radiant
+USER node
 CMD ["npm", "run", "start:docker"]

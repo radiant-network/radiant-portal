@@ -16,6 +16,10 @@
     "value": "Mock mrn"
   },
   {
+    "type": "proband_submitter_sample_ids",
+    "value": "Mock proband_submitter_sample_ids"
+  },
+  {
     "type": "other field",
     "value": "Mock other field"
   }

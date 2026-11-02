@@ -287,3 +287,30 @@ func Test_NewAggregationQueryFromCriteria_Valid_Criteria(t *testing.T) {
 		assert.True(t, query.HasFieldFromTables(DepartmentTable, EmployeeTable))
 	}
 }
+
+func Test_NewOccurrenceListQueryFromSqon_HasFieldFromTables_Return_True_If_Contains_Field_In_SortedFields_Only(t *testing.T) {
+	t.Parallel()
+	sort := []SortBody{{Field: "germline_pf_wgs", Order: "desc"}}
+	query, err := NewOccurrenceListQueryFromSqon(GermlineCNVOccurrencesQueryConfig, nil, nil, nil, sort)
+	if assert.NoError(t, err) {
+		assert.True(t, query.HasFieldFromTables(GermlineCNVVariantFrequencyTable))
+	}
+}
+
+func Test_NewOccurrenceListQueryFromSqon_GetFieldsFromTables_Return_Sorted_Field_Once_When_Also_Selected(t *testing.T) {
+	t.Parallel()
+	sort := []SortBody{{Field: "germline_pf_wgs", Order: "desc"}}
+	query, err := NewOccurrenceListQueryFromSqon(GermlineCNVOccurrencesQueryConfig, []string{"germline_pf_wgs"}, nil, nil, sort)
+	if assert.NoError(t, err) {
+		assert.Equal(t, []Field{GermlineCNVPfWgsField}, query.GetFieldsFromTables(GermlineCNVVariantFrequencyTable))
+	}
+}
+
+func Test_NewListQueryFromCriteria_HasFieldFromTables_Return_True_If_Contains_Field_In_SortedFields_Only(t *testing.T) {
+	t.Parallel()
+	sort := []SortBody{{Field: "germline_pf_wgs", Order: "asc"}}
+	query, err := NewListQueryFromCriteria(GermlineCNVOccurrencesQueryConfig, nil, nil, nil, sort)
+	if assert.NoError(t, err) {
+		assert.True(t, query.HasFieldFromTables(GermlineCNVVariantFrequencyTable))
+	}
+}

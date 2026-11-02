@@ -34,10 +34,16 @@ const columnHelper = createAppColumnHelper<GermlineSNVOccurrence>();
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
+  canDownloadReport?: boolean;
   t: TFunction<string, undefined>;
 };
 
-function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
+function getGermlineSNVOccurrenceColumns({
+  t,
+  caseEntity,
+  patientId,
+  canDownloadReport,
+}: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -296,7 +302,13 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} />,
+      cell: info => (
+        <OccurrenceActionsMenu
+          row={info.row}
+          caseEntity={caseEntity}
+          reportKind={canDownloadReport ? 'germline' : undefined}
+        />
+      ),
       size: 86,
       enableResizing: false,
       enablePinning: true,

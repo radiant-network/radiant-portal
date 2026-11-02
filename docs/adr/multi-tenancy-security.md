@@ -4,7 +4,7 @@
 - **Date:** 2026-04-28
 - **Authors:** Architecture Team
 - **Stakeholders:** Security reviewers, compliance officers, platform engineers
-- **POC note:** This proposal is informed by a working POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md), which validates the recommended architecture end-to-end. Each tenant has its own StarRocks database (`cbtn_db`, `udn_db`, …); database visibility is gated by Ranger access policies bound to per-tenant **Ranger roles** (`cbtn_member`, `udn_member`) — `SHOW DATABASES` naturally hides tenants the user doesn't belong to. `auth_db` remains the single source of truth: the admin API maintains Ranger user records and role membership inline with each grant/revoke. Cross-tenant tables (`base.*`) are root-only and exposed to tenant users via `SECURITY NONE` views. PHI access is action-driven: domain roles (geneticist, bioinformatician, …) carry explicit actions (`can_read_pii`, `can_create_case`, …) which Ranger column-mask subqueries read from `auth_db`. Several earlier shapes were explored before settling on this one; only the recommendation and a brief description of the closest alternative (view-based + per-user JWT) are documented here. See [POC validation summary](#poc-validation-summary) for what the POC proved.
+- **POC note:** This proposal is informed by a working POC at [`docs/adr/ranger-poc/`](https://github.com/radiant-network/radiant-portal/tree/06ebb761c/docs/adr/ranger-poc) (removed from the repo, link to the last commit that contains it), which validates the recommended architecture end-to-end. Each tenant has its own StarRocks database (`cbtn_db`, `udn_db`, …); database visibility is gated by Ranger access policies bound to per-tenant **Ranger roles** (`cbtn_member`, `udn_member`) — `SHOW DATABASES` naturally hides tenants the user doesn't belong to. `auth_db` remains the single source of truth: the admin API maintains Ranger user records and role membership inline with each grant/revoke. Cross-tenant tables (`base.*`) are root-only and exposed to tenant users via `SECURITY NONE` views. PHI access is action-driven: domain roles (geneticist, bioinformatician, …) carry explicit actions (`can_read_pii`, `can_create_case`, …) which Ranger column-mask subqueries read from `auth_db`. Several earlier shapes were explored before settling on this one; only the recommendation and a brief description of the closest alternative (view-based + per-user JWT) are documented here. See [POC validation summary](#poc-validation-summary) for what the POC proved.
 
 ---
 
@@ -255,9 +255,9 @@ These are hard constraints that apply across all options:
 **Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` — e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Tables in a colocation group must share the same `colocate_with` property, bucket count, replica count, and bucket-key types. **As of StarRocks 2.5.4, colocation groups can span multiple databases**, so the per-tenant database split (`cbtn_db`, `udn_db`) does not block colocation. Tables that need to participate in cross-tenant colocation (shared reference data; partitioned wide tables) can live in the `base` database; tenant users reach them through `SECURITY NONE` views in their tenant DB. Tenant-only tables (`patients`, `cases`, …) live directly in the tenant DB, where colocation is local to that DB. Row-filter and column-mask policies on individual tables do not affect colocation — the POC confirmed this.
 
 **Key references:**
-- [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
-- [StarRocks Column-Level Privileges](https://docs.starrocks.io/docs/administration/privilege_item/#column)
-- [StarRocks Apache Ranger Integration](https://docs.starrocks.io/docs/administration/ranger_plugin/)
+- [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/user_privs/authentication/#json-web-token-jwt-based-authentication)
+- [StarRocks Column-Level Privileges](https://docs.starrocks.io/docs/administration/user_privs/authorization/privilege_item/#column)
+- [StarRocks Apache Ranger Integration](https://docs.starrocks.io/docs/administration/user_privs/authorization/ranger_plugin/)
 - [StarRocks Resource Groups](https://docs.starrocks.io/docs/administration/management/resource_management/resource_group/)
 - [StarRocks Colocate Join](https://docs.starrocks.io/docs/using_starrocks/Colocate_join/)
 
@@ -265,7 +265,7 @@ These are hard constraints that apply across all options:
 
 ### Recommended Architecture -- Ranger + `auth_db` (POC-validated)
 
-**Summary:** Deploy Apache Ranger to enforce database visibility, row-filtering, and column masking at the StarRocks level. **Authorization data (roles, actions, assignments) lives in StarRocks `auth_db` tables, not in Ranger or OpenFGA.** Each tenant has its own StarRocks database (`cbtn_db`, `udn_db`, …); per-tenant **Ranger roles** (`cbtn_member`, `udn_member`) back the access policies that gate those databases. Ranger row-filter and column-mask still drive auth_db self-access and PHI access via SQL subqueries. Every access path — Go API, Jupyter, BI, MCP — is enforced identically. This is the POC-validated architecture ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)).
+**Summary:** Deploy Apache Ranger to enforce database visibility, row-filtering, and column masking at the StarRocks level. **Authorization data (roles, actions, assignments) lives in StarRocks `auth_db` tables, not in Ranger or OpenFGA.** Each tenant has its own StarRocks database (`cbtn_db`, `udn_db`, …); per-tenant **Ranger roles** (`cbtn_member`, `udn_member`) back the access policies that gate those databases. Ranger row-filter and column-mask still drive auth_db self-access and PHI access via SQL subqueries. Every access path — Go API, Jupyter, BI, MCP — is enforced identically. This is the POC-validated architecture ([`docs/adr/ranger-poc/`](https://github.com/radiant-network/radiant-portal/tree/06ebb761c/docs/adr/ranger-poc) (removed from the repo, link to the last commit that contains it)).
 
 ```mermaid
 graph LR
@@ -880,7 +880,7 @@ For direct StarRocks access (Jupyter, BI, MCP), the client issues SQL against a 
 
 ## 6. POC-validated details
 
-This section collects findings from the POC ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)) that are too operational to sit inside the main options discussion but are required to reproduce the recommended architecture.
+This section collects findings from the POC ([`docs/adr/ranger-poc/`](https://github.com/radiant-network/radiant-portal/tree/06ebb761c/docs/adr/ranger-poc) (removed from the repo, link to the last commit that contains it)) that are too operational to sit inside the main options discussion but are required to reproduce the recommended architecture.
 
 ### TLS requirement for OIDC
 
@@ -1031,13 +1031,13 @@ The Go API uses the same pattern (`OR uor.org_id = '*'` in action checks).
 
 ## Appendix B: StarRocks 3.5 Documentation References
 
-- [Authentication overview](https://docs.starrocks.io/docs/administration/Authentication/)
-- [JWT-based authentication](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
-- [Privilege system](https://docs.starrocks.io/docs/administration/privilege_overview/)
-- [Column-level privileges](https://docs.starrocks.io/docs/administration/privilege_item/#column)
-- [Apache Ranger integration](https://docs.starrocks.io/docs/administration/ranger_plugin/)
+- [Authentication overview](https://docs.starrocks.io/docs/administration/user_privs/authentication/)
+- [JWT-based authentication](https://docs.starrocks.io/docs/administration/user_privs/authentication/#json-web-token-jwt-based-authentication)
+- [Privilege system](https://docs.starrocks.io/docs/administration/user_privs/authorization/user_privs/)
+- [Column-level privileges](https://docs.starrocks.io/docs/administration/user_privs/authorization/privilege_item/#column)
+- [Apache Ranger integration](https://docs.starrocks.io/docs/administration/user_privs/authorization/ranger_plugin/)
 - [Resource groups](https://docs.starrocks.io/docs/administration/management/resource_management/resource_group/)
-- [CREATE VIEW](https://docs.starrocks.io/docs/sql-reference/sql-statements/view/CREATE_VIEW/)
+- [CREATE VIEW](https://docs.starrocks.io/docs/sql-reference/sql-statements/View/CREATE_VIEW/)
 - [External JDBC catalog](https://docs.starrocks.io/docs/data_source/catalog/jdbc_catalog/)
 
 ## Appendix C: Current Codebase References

@@ -63,6 +63,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 		Select(columns).
 		Where("g_snv_o.seq_id = ? and g_snv_o.task_id = ? and part=? and v.locus_id = g_snv_o.locus_id and g_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
+	tx = JoinSNVOccurrencesWithSortedFrequencyTables(types.GermlineSNVOccurrenceTable, userQuery, tx)
 	utils.AddSort(tx, userQuery) //We re-apply the sort on the outer query
 
 	if err = tx.Find(&occurrences).Error; err != nil {

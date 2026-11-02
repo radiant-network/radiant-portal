@@ -23,7 +23,7 @@ import (
 // body only sees non-nil values; it is written to be correct on its own regardless.
 func notnull(fl validator.FieldLevel) bool {
 	switch fl.Field().Kind() {
-	case reflect.Ptr, reflect.Interface, reflect.Map, reflect.Slice:
+	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice:
 		return !fl.Field().IsNil()
 	default:
 		return true

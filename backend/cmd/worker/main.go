@@ -160,7 +160,7 @@ func StartHealthProbe(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 	go func() {
 		defer wg.Done()
 		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), utils.ShutdownTimeout())
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), utils.ShutdownTimeout())
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
 			slog.Error("health probe shutdown error", slog.Any("error", err))

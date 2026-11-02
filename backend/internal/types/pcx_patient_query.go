@@ -9,6 +9,9 @@ var PcxPatientListTable = Table{
 	PerTenant: true,
 }
 
+// PcxPatientKeyTable maps a patient_key to the identifier the caller sees, without the joins of the list view.
+var PcxPatientKeyTable = Table{Name: "v_pcx_30_patient_key", Alias: "pk", PerTenant: true}
+
 const PcxPatientListDefaultLimit = 10
 
 var PcxPatientKeyField = Field{Name: "patient_key", CanBeSelected: true, Table: PcxPatientListTable}

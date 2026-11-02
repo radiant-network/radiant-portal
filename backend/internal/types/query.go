@@ -90,22 +90,19 @@ type occurrenceListQuery struct {
 }
 
 func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
-	return sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
-		return slices.Contains(tables, field.Table)
-	}) || sliceutils.Some(l.selectedFields, func(field Field, index int, slice []Field) bool {
-		return slices.Contains(tables, field.Table)
-	})
-
+	return len(l.GetFieldsFromTables(tables...)) > 0
 }
 
+// GetFieldsFromTables includes the sorted fields: a table joined only when the query uses it must also be
+// joined for a sort on one of its fields that is neither selected nor filtered.
 func (l *listQuery) GetFieldsFromTables(tables ...Table) []Field {
-	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+	inTables := func(field Field, index int, slice []Field) bool {
 		return slices.Contains(tables, field.Table)
+	}
+	sorted := sliceutils.Map(l.sortedFields, func(sort SortField, index int, slice []SortField) Field {
+		return sort.Field
 	})
-	selected := sliceutils.Filter(l.selectedFields, func(field Field, index int, slice []Field) bool {
-		return slices.Contains(tables, field.Table)
-	})
-	return sliceutils.Unique(sliceutils.Merge(filtered, selected))
+	return sliceutils.Unique(sliceutils.Filter(sliceutils.Merge(l.filteredFields, l.selectedFields, sorted), inTables))
 }
 
 func (l *listQuery) Filters() FilterNode {

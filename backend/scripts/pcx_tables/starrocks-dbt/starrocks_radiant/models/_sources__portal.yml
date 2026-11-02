@@ -1,0 +1,37 @@
+version: 2
+
+sources:
+  # Portal-side tables consumed ONLY by the pcx_30 access-controlled views, to
+  # resolve the portal patient surrogate key and evaluate PHI grants.
+  # Locations verified against prod 2026-10-12.
+
+  - name: portal_jdbc
+    database: radiant_jdbc
+    schema: public
+    tables:
+      - name: patient
+        description: >
+          Portal patient records. Joined on a zero-stripped submitter_patient_id to
+          resolve radiant_patient_id, which the lab-grant arm matches against.
+          CONTAINS PHI (first_name, last_name, jhn, date_of_birth) -- the
+          access-controlled views utilize only `id` from it.
+
+  - name: portal_auth
+    database: default_catalog
+    schema: auth
+    description: >
+      Portal authorization tables. `auth` is a database in default_catalog, not a
+      separate catalog.
+    tables:
+      - name: pii_grant
+        description: >
+          Per-user ORG grants. A row means the user may read PHI for that
+          organization_code within that tenant. user_id holds portal UUIDs, matched
+          against the StarRocks login name.
+      - name: pii_lab_patient
+        description: >
+          Per-user LAB grants, drived from pii_grant: it re-reads the same
+          org_code as cases.diagnosis_lab_code and returns that lab's probands plus
+          their family members. Grants PHI on a lab-relationship basis.
+          A lab-granted caller can read PHI for that lab's patients at any
+           enrolling institution.

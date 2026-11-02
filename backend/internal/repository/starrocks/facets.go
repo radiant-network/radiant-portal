@@ -63,7 +63,7 @@ func NewFacetsRepository() *FacetsRepository {
 				"transcribed_unitary_pseudogene", "translated_processed_pseudogene", "translated_unprocessed_pseudogene", "unitary_pseudogene", "unprocessed_pseudogene",
 				"artifact", "lincRNA", "macro_lncRNA", "3prime_overlapping_ncRNA", "disrupted_domain",
 				"vault_RNA", "bidirectional_promoter_lncRNA", "transcribed_pseudogene", "ncRNA_pseudogene", "ncRNA",
-				"Y_RNA", "RNase_P_RNA", "RNase_MRP_RNA", "telomerase_RNA", "",
+				"Y_RNA", "RNase_P_RNA", "RNase_MRP_RNA", "telomerase_RNA", "tRNA", "",
 			},
 		},
 		"omim_inheritance": {

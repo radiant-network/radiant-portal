@@ -828,6 +828,7 @@
           "sample_id": "Sample ID",
           "task_id": "Task",
           "sequencing_experiment_id": "Sequencing",
+          "proband_submitter_sample_ids": "Sample",
           "placeholder": "Search..."
         },
         "buttons": {
@@ -1051,6 +1052,7 @@
           "tr_c_gene": "TR C Gene",
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
+          "trna": "tRNA",
           "unitary_pseudogene": "Unitary Pseudogene",
           "unprocessed_pseudogene": "Unprocessed Pseudogene",
           "y_rna": "Y RNA",
@@ -1323,9 +1325,9 @@
         "event_date": "Date of diagnosis",
         "day": "Day {{day}}"
       },
-      "tumour_and_metastasis": {
-        "title": "Tumour and metastasis",
-        "tumor_locations": "Tumour locations",
+      "tumor_and_metastasis": {
+        "title": "Tumor and metastasis",
+        "tumor_locations": "Tumor locations",
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
@@ -1458,6 +1460,19 @@
         "date": "Date",
         "modality": "Modality",
         "viewer": "Viewer"
+      }
+    },
+    "clinical_trials": {
+      "title_count_one": "Previous enrollment ({{count}} protocol)",
+      "title_count_other": "Previous enrollment ({{count}} protocols)",
+      "day_value": "Day {{day}}",
+      "initial_badge": "Initial treatment",
+      "footer": "Protocols the patient was enrolled on, from the medical therapy records. Treatment that only followed a protocol is not listed.",
+      "columns": {
+        "protocol": "Protocol",
+        "start": "Start",
+        "stop": "Stop",
+        "agents": "Agents"
       }
     },
     "laboratory": {
@@ -1599,6 +1614,17 @@
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnosis",
       "age_at_initial_dx_group": "Age at diagnosis",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congenital (at birth)",
+        "neonatal": "Neonatal (under 28 days)",
+        "infantile": "Infantile (≥ 28 days and < 1 year)",
+        "childhood": "Childhood (≥ 1 year and < 5 years)",
+        "juvenile": "Juvenile (≥ 5 years and < 16 years)",
+        "young_adult": "Young Adult (≥ 16 years and < 40 years)",
+        "middle_age": "Middle Age (≥ 40 years and < 60 years)",
+        "senior": "Senior (≥ 60 years)",
+        "unknown": "Unknown (age not available)"
+      },
       "chemotherapy_agents": "Chemotherapy agents",
       "got_radiation_ever": "Radiation",
       "diagnosis_type_cohort": "Cohort"
@@ -1694,6 +1720,8 @@
         "primary_condition": "Primary Condition",
         "ordering_organization_code": "Req. By",
         "ordering_organization_code_tooltip": "Requested by",
+        "proband_submitter_sample_ids": "Sample",
+        "proband_submitter_sample_ids_tooltip": "Proband's sample ID (tumor sample for somatic cases)",
         "project_code": "Project",
         "updated_on": "Updated",
         "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",

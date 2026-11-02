@@ -46,8 +46,14 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const canDownloadVariantsReport = useCanDownloadVariantsReport();
 
   const columns = useMemo(
-    () => getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id }),
-    [t, caseEntity, patient?.patient_id],
+    () =>
+      getGermlineSNVOccurrenceColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
   );
 
   if (!isValidSeqId(seqId)) {

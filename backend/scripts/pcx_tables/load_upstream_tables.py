@@ -4,7 +4,7 @@
 Companion to UPSTREAM_SOURCES.md in this directory; read that first for the source
 map, the PHI boundary, and the downstream rebuild order.
 
-    # load today's existing extracts (all five tables)
+    # load today's existing extracts (all six tables)
     python3 load_upstream_tables.py --load
 
     # extract fresh, then load
@@ -73,6 +73,7 @@ REGISTRY = {
     "diagnosis":                 ("deid",       "prod_access"),
     "treatment":                 ("deid",       "prod_access"),
     "updates":                   ("deid",       "prod_access"),
+    "imaging_sessions":          ("deid",       "prod_access"),
     "stg_cbtn_enrollment_final": ("identified", "stg_cbtn"),
 }
 
@@ -214,7 +215,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tables", default=",".join(REGISTRY),
-                    help="comma-separated subset (default: all five)")
+                    help="comma-separated subset (default: all six)")
     ap.add_argument("--extract", action="store_true", help="re-extract from the warehouses first")
     ap.add_argument("--load", action="store_true", help="load extracts into StarRocks")
     ap.add_argument("--dry-run", action="store_true",
