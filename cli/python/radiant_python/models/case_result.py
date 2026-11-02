@@ -56,7 +56,7 @@ class CaseResult(BaseModel):
     proband_submitter_sample_ids: List[StrictStr]
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
-    run_names: List[StrictStr]
+    run_names: Optional[List[StrictStr]] = None
     status_code: CaseStatus
     submitter_proband_id: Optional[StrictStr] = None
     updated_on: StrictStr

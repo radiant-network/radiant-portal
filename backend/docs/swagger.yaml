@@ -784,7 +784,6 @@ components:
       - diagnosis_lab_code
       - has_variants
       - proband_submitter_sample_ids
-      - run_names
       - status_code
       - updated_on
       type: object
