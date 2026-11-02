@@ -212,6 +212,23 @@ func Test_ListDocuments_OutputDocumentsOfCase_IndexFilesIncluded(t *testing.T) {
 	})
 }
 
+func Test_ListDocuments_QCMetricsJSONLeftOut(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		testutils.InsertQCTaskDocuments(t, env.Postgres)
+		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
+
+		rows, err := repo.ListDocuments(t.Context(), "radiant", []int{1})
+		require.NoError(t, err)
+
+		ids := map[int]bool{}
+		for _, row := range rows {
+			ids[row.DocumentID] = true
+		}
+		assert.True(t, ids[testutils.QCReportDocumentID], "the MultiQC report stays in the manifest")
+		assert.False(t, ids[testutils.QCMetricsJSONDocID], "the QC metrics.json is not sent to the labs")
+	})
+}
+
 func Test_ListDocuments_OnlyGivenCases_OtherTenantEmpty(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseGroupsRepository(database.PostgresDB{DB: env.Postgres})
