@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Plot from 'react-plotly.js';
-import type { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
+import type { Annotation, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
 
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import type { SwarmPlotPoint, SwarmPlotProps } from '@/components/base/charts/type';
@@ -60,7 +60,7 @@ function SwarmPlot<T extends Record<string, unknown>>({
     [groups, colors, tooltip],
   );
 
-  const annotations: Partial<Annotations>[] = annotation
+  const annotations: Partial<Annotation>[] = annotation
     ? groups.flatMap((group, index) =>
         group.points
           .filter(point => selectedPoints.includes(point))
@@ -138,7 +138,8 @@ function SwarmPlot<T extends Record<string, unknown>>({
       useResizeHandler
       config={{
         displaylogo: false,
-        modeBarButtonsToRemove: ['toImage', 'resetGeo', 'lasso2d', 'sendDataToCloud', 'zoomIn2d', 'zoomOut2d', 'pan2d'],
+        showSendToCloud: false,
+        modeBarButtonsToRemove: ['toImage', 'resetGeo', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'pan2d'],
       }}
       onClick={onPointClick ? handleClick : undefined}
       onSelecting={onSelect ? handleSelect : undefined}
