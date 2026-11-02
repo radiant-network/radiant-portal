@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 
 import type { IGVTracks } from '@/api/api';
@@ -8,6 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { igvApi } from '@/utils/api';
 
+import { buildCaseTracks } from './case-tracks';
 import IGV from './igv';
 
 type IGVDialogProps = {
@@ -40,6 +41,8 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
     },
   );
 
+  const caseTracks = useMemo(() => buildCaseTracks(fetchIGV.data), [fetchIGV.data]);
+
   useEffect(() => {
     if (open) {
       fetchIGV.mutate();
@@ -50,7 +53,8 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger?.(() => setOpen(true))}
       <DialogContent size="full" variant="stickyHeader">
-        {fetchIGV.isLoading ? (
+        {/* The cached response of an earlier opening may hold expired URLs: IGV waits for the refetch. */}
+        {fetchIGV.isValidating ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
@@ -60,7 +64,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
               <DialogTitle>{t('variant.igv.title')}</DialogTitle>
             </DialogHeader>
             <DialogBody className="relative max-h-[85vh] overflow-y-auto">
-              <IGV tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
+              <IGV tracks={caseTracks} locus={formatLocus(start, chromosome, 100)} />
             </DialogBody>
           </div>
         )}

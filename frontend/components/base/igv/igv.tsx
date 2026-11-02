@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Browser, TrackLoad, Tracks } from 'igv';
+import type { Browser, Tracks } from 'igv';
 import { toast } from 'sonner';
 
-import type { IGVTrackEnriched } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import { throttleAlignmentRequests } from './alignment-request-throttle';
+import { type CaseTrack, loadCaseTracks } from './case-tracks';
 import {
   type AlignmentSettings,
   type AlignmentTrack,
@@ -47,23 +47,15 @@ const HG38_REFERENCE: IGVReference = {
 };
 
 const CHRM_HIDDEN_READS_TOAST_ID = 'igv-chrm-hidden-reads';
+const FAILED_TRACKS_TOAST_ID = 'igv-failed-tracks';
 
 type ReferenceFrame = { chr: string; start: number; end: number };
-
-// The API types every field as optional and the format as a plain string.
-const toAlignmentTrack = ({ format, url = '', ...track }: IGVTrackEnriched, order: number): TrackLoad<'alignment'> => ({
-  ...track,
-  type: 'alignment',
-  format: format as Tracks.AlignmentFormat,
-  url,
-  order,
-});
 
 type IGVProps = {
   id?: string;
   className?: string;
   locus: string;
-  tracks: IGVTrackEnriched[];
+  tracks: CaseTrack[];
 };
 
 const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) => {
@@ -76,6 +68,7 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
   const chrMSavedSettings = useRef(new Map<AlignmentTrack, AlignmentSettings>());
   const [browser, setBrowser] = useState<Browser>();
   const [chrMHiddenReadsWindow, setChrMHiddenReadsWindow] = useState<number>();
+  const [failedTrackNames, setFailedTrackNames] = useState<string[]>([]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -119,13 +112,20 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
     if (!browser || tracks.length === 0 || caseTracksLoaded.current) return;
     caseTracksLoaded.current = true;
 
-    const countedTracks = tracks.map((track, index) =>
-      browser.loadTrack(toAlignmentTrack(track, index + 1)).then(async loaded => {
-        const alignmentTrack = loaded as AlignmentTrack;
-        chrMSliceCounts.current.set(alignmentTrack, await countChrMSlices(alignmentTrack));
-      }),
+    const { loads, failedTrackNames: failedNames } = loadCaseTracks(browser, tracks);
+    failedNames.then(names => {
+      if (liveBrowser.current === browser) setFailedTrackNames(names);
+    });
+
+    const countedTracks = loads.map((load, index) =>
+      tracks[index].type !== 'alignment'
+        ? load
+        : load.then(async loaded => {
+            const alignmentTrack = loaded as AlignmentTrack;
+            chrMSliceCounts.current.set(alignmentTrack, await countChrMSlices(alignmentTrack));
+          }),
     );
-    // igv.js logs a failed load; a track whose count fails keeps the smallest window on chrM.
+    // A track whose count fails keeps the smallest window on chrM.
     Promise.allSettled(countedTracks).then(() => {
       if (liveBrowser.current !== browser) return;
       // The rule runs on locus change: searching the current locus applies all the counts at once.
@@ -150,6 +150,14 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
       }),
     });
   }, [chrMHiddenReadsWindow, t]);
+
+  useEffect(() => {
+    if (failedTrackNames.length === 0) return;
+    toast.error(t('variant.igv.failed_tracks.title', { count: failedTrackNames.length }), {
+      id: FAILED_TRACKS_TOAST_ID,
+      description: failedTrackNames.join(', '),
+    });
+  }, [failedTrackNames, t]);
 
   return <div id={id} ref={containerRef} className={className} />;
 };
