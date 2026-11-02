@@ -36,6 +36,8 @@ Name | Type | Description | Notes
 **germline_pn_wxs** | **int** |  | [optional] 
 **germline_pn_wxs_affected** | **int** |  | [optional] 
 **germline_pn_wxs_not_affected** | **int** |  | [optional] 
+**gnomad_ac** | **int** |  | [optional] 
+**gnomad_af** | **float** |  | [optional] 
 **gnomad_sc** | **int** |  | [optional] 
 **gnomad_sf** | **float** |  | [optional] 
 **gnomad_sn** | **int** |  | [optional] 

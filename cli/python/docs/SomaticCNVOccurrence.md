@@ -21,6 +21,8 @@ Name | Type | Description | Notes
 **end** | **int** |  | 
 **filter** | **str** |  | [optional] 
 **flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
+**gnomad_ac** | **int** |  | [optional] 
+**gnomad_af** | **float** |  | [optional] 
 **gnomad_sc** | **int** | NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment correctly matches nothing. | [optional] 
 **gnomad_sf** | **float** |  | [optional] 
 **gnomad_sn** | **int** |  | [optional] 

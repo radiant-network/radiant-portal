@@ -833,3 +833,92 @@ func Test_GermlineCNV_GetOccurrences_Filter_By_Frequency_And_Panel(t *testing.T)
 		}
 	})
 }
+
+func listGermlineCNVNamesSortedBy(t *testing.T, env *testutils.Env, field string, order string) []string {
+	repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, []string{field}, nil, nil, []types.SortBody{{Field: field, Order: order}})
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o types.GermlineCNVOccurrence, _ int, _ []types.GermlineCNVOccurrence) string { return o.Name })
+}
+
+func Test_GermlineCNV_GetOccurrences_Return_GnomadAF_And_AC(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, []string{"gnomad_af", "gnomad_ac"}, nil, nil, []types.SortBody{{Field: "name", Order: "asc"}})
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		require.Len(t, occurrences, 2)
+
+		assert.Equal(t, "CNV1", occurrences[0].Name)
+		if assert.NotNil(t, occurrences[0].GnomadAF) && assert.NotNil(t, occurrences[0].GnomadAC) {
+			assert.InDelta(t, 0.001, *occurrences[0].GnomadAF, 1e-6)
+			assert.Equal(t, 15, *occurrences[0].GnomadAC)
+		}
+		assert.Equal(t, "CNV2", occurrences[1].Name)
+		if assert.NotNil(t, occurrences[1].GnomadAF) && assert.NotNil(t, occurrences[1].GnomadAC) {
+			assert.InDelta(t, 0.25, *occurrences[1].GnomadAF, 1e-6)
+			assert.Equal(t, 3800, *occurrences[1].GnomadAC)
+		}
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Sort_By_GnomadAC_Asc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []string{"CNV1", "CNV2"}, listGermlineCNVNamesSortedBy(t, env, "gnomad_ac", "asc"))
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Sort_By_GnomadAC_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []string{"CNV2", "CNV1"}, listGermlineCNVNamesSortedBy(t, env, "gnomad_ac", "desc"))
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Sort_By_GnomadAF_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		assert.Equal(t, []string{"CNV2", "CNV1"}, listGermlineCNVNamesSortedBy(t, env, "gnomad_af", "desc"))
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Filter_By_GnomadAF(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: ">", Content: types.LeafContent{Field: "gnomad_af", Value: []interface{}{0.1}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV2", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_Filter_By_GnomadAC(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "<", Content: types.LeafContent{Field: "gnomad_ac", Value: []interface{}{100}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
+	names := sliceutils.Map(types.GermlineCNVOccurrencesDefaultFields, func(f types.Field, _ int, _ []types.Field) string { return f.Name })
+	assert.NotContains(t, names, "gnomad_af")
+	assert.NotContains(t, names, "gnomad_ac")
+}

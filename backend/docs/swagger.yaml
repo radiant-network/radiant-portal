@@ -2100,6 +2100,10 @@ components:
           type: integer
         germline_pn_wxs_not_affected:
           type: integer
+        gnomad_ac:
+          type: integer
+        gnomad_af:
+          type: number
         gnomad_sc:
           type: integer
         gnomad_sf:
@@ -4199,6 +4203,10 @@ components:
           type: string
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        gnomad_ac:
+          type: integer
+        gnomad_af:
+          type: number
         gnomad_sc:
           description: |-
             NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment

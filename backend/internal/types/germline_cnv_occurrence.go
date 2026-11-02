@@ -32,6 +32,8 @@ type GermlineCNVOccurrence struct {
 	GnomadSC                 *int               `json:"gnomad_sc,omitempty" gorm:"column:gnomad_sc"`
 	GnomadSN                 *int               `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
 	GnomadSF                 *float32           `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
+	GnomadAF                 *float32           `json:"gnomad_af,omitempty" gorm:"column:gnomad_af"`
+	GnomadAC                 *int               `json:"gnomad_ac,omitempty" gorm:"column:gnomad_ac"`
 	GermlinePcWgs            *int               `json:"germline_pc_wgs,omitempty"`
 	GermlinePnWgs            *int               `json:"germline_pn_wgs,omitempty"`
 	GermlinePfWgs            *float64           `json:"germline_pf_wgs,omitempty"`
@@ -265,6 +267,15 @@ var GermlineCNVNbSNVField = Field{
 	Table:         GermlineCNVOccurrenceTable,
 }
 
+var GermlineCNVGnomadAF = Field{
+	Name:          "gnomad_af",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
 var GermlineCNVGnomadSC = Field{
 	Name:          "gnomad_sc",
 	CanBeSelected: true,
@@ -289,6 +300,15 @@ var GermlineCNVGnomadSF = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVGnomadAC = Field{
+	Name:          "gnomad_ac",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
 
@@ -520,9 +540,11 @@ var GermlineCNVOccurrencesFields = []Field{
 	GermlineCNVCIPosField,
 	GermlineCNVNbGenesField,
 	GermlineCNVNbSNVField,
+	GermlineCNVGnomadAF,
 	GermlineCNVGnomadSC,
 	GermlineCNVGnomadSN,
 	GermlineCNVGnomadSF,
+	GermlineCNVGnomadAC,
 	GermlineCNVCytobandField,
 	GermlineCNVSymbolField,
 	OmimGenePanelField,

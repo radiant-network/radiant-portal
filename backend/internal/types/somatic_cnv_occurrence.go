@@ -37,6 +37,8 @@ type SomaticCNVOccurrence struct {
 	GnomadSC *int     `json:"gnomad_sc,omitempty" gorm:"column:gnomad_sc"`
 	GnomadSN *int     `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
 	GnomadSF *float32 `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
+	GnomadAF *float32 `json:"gnomad_af,omitempty" gorm:"column:gnomad_af"`
+	GnomadAC *int     `json:"gnomad_ac,omitempty" gorm:"column:gnomad_ac"`
 	// DRAGEN allele-specific copy number (ASCN). 3.10.8 does not emit these at all and 4.2.4
 	// declares but omits them per record, so expect them to be mostly NULL.
 	CN     *int     `json:"cn,omitempty"`
@@ -262,6 +264,15 @@ var SomaticCNVNbSNVField = Field{
 	Table:         SomaticCNVOccurrenceTable,
 }
 
+var SomaticCNVGnomadAF = Field{
+	Name:          "gnomad_af",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticCNVOccurrenceTable,
+}
+
 var SomaticCNVGnomadSC = Field{
 	Name:          "gnomad_sc",
 	CanBeSelected: true,
@@ -286,6 +297,15 @@ var SomaticCNVGnomadSF = Field{
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
+	Table:         SomaticCNVOccurrenceTable,
+}
+
+var SomaticCNVGnomadAC = Field{
+	Name:          "gnomad_ac",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
 	Table:         SomaticCNVOccurrenceTable,
 }
 
@@ -482,9 +502,11 @@ var SomaticCNVOccurrencesFields = []Field{
 	SomaticCNVCIPosField,
 	SomaticCNVNbGenesField,
 	SomaticCNVNbSNVField,
+	SomaticCNVGnomadAF,
 	SomaticCNVGnomadSC,
 	SomaticCNVGnomadSN,
 	SomaticCNVGnomadSF,
+	SomaticCNVGnomadAC,
 	SomaticCNVCytobandField,
 	SomaticCNVSymbolField,
 	SomaticCNVCNField,
