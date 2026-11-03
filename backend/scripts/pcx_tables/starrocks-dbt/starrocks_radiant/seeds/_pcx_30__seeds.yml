@@ -7,20 +7,67 @@ seeds:
       institution names and short codes.
 
       WHY A SEED, NOT A VIEW: the canonical source is radiant_jdbc.public.organization
-      (surfaced as radiant_tenant.organization). The QA cluster returns 41 rows, but in
-      PROD that JDBC source holds only 1 row (chusj / CHU Ste-Justine) and
-      cbtn_tenant.organization returns 0 -- so prod has nothing to join to. These 41
-      rows were seeded from QA as of 2026-09-24, and verified unchanged in prod on
+      (surfaced as radiant_tenant.organization). The QA cluster returns 41 rows. These
+      41 rows were seeded from QA as of 2026-09-24, and verified unchanged in prod on
       2026-10-12 before this seed replaced the hand-written INSERT. BCH was
       corrected to Boston Children's Hospital and UCSF Benioff moved to UCSF-BCH on
-      2026-10-29, bringing it to 42 rows.
+      2026-10-29, bringing it to 42 rows. CHLA (Children's Hospital Los Angeles),
+      NYULH (NYU Langone Health) and Nicklaus (Nicklaus Children's Hospital) were
+      added 2026-11-03 from live prod, bringing it to 45 rows, and BCH and UCSF-BCH
+      had tenant_code corrected from 'radiant' to 'cbtn' on the same date to match it.
+      CHLA is the enrolling institution for a patient carrying a PNOC035 eligibility
+      verdict, and without it that patient's organization_code resolves to NULL.
 
-      WHEN PROD'S SOURCE IS POPULATED, replace this seed with a model:
+      THIS FILE IS AT EXACT PARITY WITH LIVE PROD as of 2026-11-03: 45 rows, no
+      row present on one side only, and no value differing on any shared code
+      (verified field-by-field against radiant_data_dev.pcx_30_organization_ref).
+      That is the point of the reconciliation -- a `dbt seed`, or any `dbt build`
+      which runs seeds, OVERWRITES the live table, so parity is what makes those
+      commands safe. Before this, seeding would have deleted CHLA, NYULH and
+      Nicklaus and flipped two tenant_codes.
+
+      Keep it that way: diff this file against the live table before running either
+      command, and treat any difference as a question rather than something to seed
+      over.
+
+      The two tenant_code flips (BCH and UCSF-BCH, 'radiant' -> 'cbtn' on 2026-11-03)
+      were made to reach that parity and are inert for this repo's consumers:
+      grepped across every combined view, access-controlled view and dbt model, NO
+      consumer reads organization_ref.tenant_code at all. Those views join this
+      reference on .name and project .code. The 'cbtn' tenant filter that does appear
+      in 13 of the templates applies to radiant_jdbc.public.patient.tenant_code -- a
+      different column on a different table -- so it is unaffected. An earlier draft
+      of this work called the tenant_code difference access-control-sensitive; that
+      was wrong, and is recorded here because the BCH/UCSF-BCH pair has already
+      caused one real access-control bug via the name/code conflation and invites
+      that assumption.
+
+      THE "PROD HAS NOTHING TO JOIN TO" PREMISE HAS EXPIRED. An earlier revision of
+      this block said the JDBC source holds only 1 row and cbtn_tenant.organization
+      returns 0. Re-measured 2026-11-03: radiant_jdbc.public.organization holds 52
+      rows and cbtn_tenant.organization holds 51; only radiant_tenant.organization is
+      still the single chusj row. So the retirement condition below is now met on
+      paper -- but a straight swap is NOT safe, for three measured reasons:
+        - 39 shared codes disagree on tenant_code (canonical 'cbtn' vs this file's
+          'radiant'), so this is a differently-populated list, not a stale copy;
+        - 4 codes exist here and NOT in canonical -- CNM, NA, O, PNOC -- which look
+          like pcx_30-local sentinels and would be dropped, failing those rows closed;
+        - 10 canonical codes are absent here (CBTN, CBTN-DL, CHOP-BGI, DGD-DL,
+          DGD-SC, HUP, MCI, NCH-DL, NCH-SC, ON), mostly sequencing/data-lab codes.
+      Retiring the seed therefore needs a decision on tenant_code semantics and on
+      those four sentinels. It is not a rename.
+
+      WHEN THAT IS SETTLED, replace this seed with a model:
         select code, name, category_code, tenant_code from radiant_tenant.organization
       Dependents need no change -- they only reference .name and .code.
 
-      name and code are both unique across all 42 rows (verified), so the LEFT JOIN in
+      name and code are both unique across all 45 rows (verified), so the LEFT JOIN in
       every pcx_30 combined view cannot fan out.
+
+      ADDING AN ORGANIZATION IS A REQUEST TO THE PORTAL / CHU STE-JUSTINE OWNERS
+      FIRST. They maintain the list in the portal's own system, outside dbt and
+      outside this repo; this seed is an explicit stop-gap copy. The CHLA, NYULH and
+      Nicklaus rows below were copied from live prod, not authored here.
     config:
       column_types:
         code: VARCHAR(64)
