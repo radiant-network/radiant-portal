@@ -181,6 +181,42 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
       minSize: 40,
       enableSorting: true,
     }),
+    columnHelper.accessor(row => row.gnomad_af, {
+      id: 'gnomad_af',
+      cell: info => <GnomadCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sv_af_tooltip')}>
+          {t('variant.headers.gnomad_sv_af')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    columnHelper.accessor(row => row.gnomad_ac, {
+      id: 'gnomad_ac',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sv_ac_tooltip')}>
+          {t('variant.headers.gnomad_sv_ac')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    columnHelper.accessor(row => row.gnomad_sc, {
+      id: 'gnomad_sc',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sv_sc_tooltip')}>
+          {t('variant.headers.gnomad_sv_sc')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
     // # Genes
     columnHelper.accessor(row => row.nb_genes, {
       id: 'nb_genes',
@@ -315,6 +351,24 @@ const defaultGermlineCNVSettings = createColumnSettings([
     id: 'gnomad_sf',
     visible: true,
     label: 'variant.headers.gnomad_sf',
+  },
+  {
+    id: 'gnomad_af',
+    visible: false,
+    label: 'variant.headers.gnomad_sv_af',
+    additionalFields: ['gnomad_af'],
+  },
+  {
+    id: 'gnomad_ac',
+    visible: false,
+    label: 'variant.headers.gnomad_sv_ac',
+    additionalFields: ['gnomad_ac'],
+  },
+  {
+    id: 'gnomad_sc',
+    visible: false,
+    label: 'variant.headers.gnomad_sv_sc',
+    additionalFields: ['gnomad_sc'],
   },
   {
     id: 'nb_genes',
