@@ -1401,11 +1401,20 @@
       },
       "external_records": {
         "title": "External Records",
-        "tefca_exchange": "TEFCA exchange",
-        "query_status": "Query status",
-        "query_status_description": "QHIN record locate & retrieve",
-        "linked": "Linked",
-        "connected": "Connected"
+        "organizations": "Organizations",
+        "documents": "Documents",
+        "document_types": "Document types",
+        "view_details": "View details",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organizations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "title": "No connection found",
+          "description": "Health information exchange not linked"
+        }
       }
     },
     "timeline": {

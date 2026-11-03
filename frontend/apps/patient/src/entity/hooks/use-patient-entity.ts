@@ -5,6 +5,7 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import { usePatientIdFromParam } from '@/utils/helper';
 
 import {
+  fetchPatientExternalRecords,
   fetchPatientGenomics,
   fetchPatientImaging,
   fetchPatientLaboratory,
@@ -35,3 +36,5 @@ export const usePatientTreatments = () => usePatientEntity('patient-treatments',
 export const usePatientLaboratory = () => usePatientEntity('patient-laboratory', fetchPatientLaboratory);
 export const usePatientImaging = () => usePatientEntity('patient-imaging', fetchPatientImaging);
 export const usePatientGenomics = () => usePatientEntity('patient-genomics', fetchPatientGenomics);
+export const usePatientExternalRecords = () =>
+  usePatientEntity('patient-external-records', fetchPatientExternalRecords);

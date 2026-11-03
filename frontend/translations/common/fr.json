@@ -1402,11 +1402,20 @@
       },
       "external_records": {
         "title": "Dossiers externes",
-        "tefca_exchange": "Échange TEFCA",
-        "query_status": "Statut de la requête",
-        "query_status_description": "Localisation et récupération des dossiers QHIN",
-        "linked": "Lié",
-        "connected": "Connecté"
+        "organizations": "Organisations",
+        "documents": "Documents",
+        "document_types": "Types de document",
+        "view_details": "Voir le détail",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organisations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "title": "Aucune connexion trouvée",
+          "description": "Échange d'information clinique non lié"
+        }
       }
     },
     "timeline": {

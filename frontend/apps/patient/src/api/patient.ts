@@ -1,5 +1,6 @@
 import type {
   ListBodyWithCriteria,
+  PatientExternalRecords,
   PatientFilters,
   PatientGenomics,
   PatientImaging,
@@ -42,22 +43,12 @@ export async function fetchPatientGenomics(tenant: string, patientKey: string): 
   return response.data;
 }
 
+export async function fetchPatientExternalRecords(tenant: string, patientKey: string): Promise<PatientExternalRecords> {
+  const response = await patientsApi.patientExternalRecords(tenant, patientKey);
+  return response.data;
+}
+
 const MOCK_LATENCY_MS = 300;
-
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientExternalRecords = {
-  organization: string;
-  linked: boolean;
-  connected: boolean;
-};
-
-// Same placeholder for every patient, lifted from the v6.2 wireframe (Kai Ellery).
-// TODO: replace once the backend provides external records
-export const PATIENT_EXTERNAL_RECORDS_MOCK: PatientExternalRecords = {
-  organization: "The Children's Hospital of Philadelphia",
-  linked: true,
-  connected: true,
-};
 
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists.
 // Not in the SJRA-1998 PatientEntity contract — lower priority for November (Build readiness)
