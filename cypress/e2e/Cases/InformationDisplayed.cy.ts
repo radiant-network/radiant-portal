@@ -59,6 +59,11 @@ describe('Cases - Information displayed', () => {
     CasesTable.validations.shouldShowColumnContent('sample', data.case);
   });
 
+  it('Run', () => {
+    setupTest();
+    CasesTable.validations.shouldShowColumnContent('run', data.case);
+  });
+
   it('Project', () => {
     setupTest();
     CasesTable.validations.shouldShowColumnContent('project', data.case);

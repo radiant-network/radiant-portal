@@ -48,6 +48,7 @@ import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
+import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
@@ -139,6 +140,7 @@ export type BaseCellMockData = {
   boolean_value?: boolean;
   number_value?: number;
   number_list_value?: number[];
+  text_list_value?: string[];
   clinvar?: string[];
   rsnumber?: string;
   symbol?: string;
@@ -208,6 +210,8 @@ const baseCellColumnHelper = createAppColumnHelper<BaseCellMockData>();
  *   - PhenotypeConditionLinkCell
  *   - TextTooltipCell
  *   - NumberCell
+ *   - NumberListCell
+ *   - TextListCell
  *   - DateCell
  *   - BooleanCell
  */
@@ -298,6 +302,11 @@ export const firstSetCellColumns = [
     header: 'NumberListCell',
     minSize: 250,
   }),
+  baseCellColumnHelper.accessor(row => row.text_list_value, {
+    id: 'text_list_value',
+    cell: info => <TextListCell values={info.getValue()} />,
+    header: 'TextListCell',
+  }),
   baseCellColumnHelper.accessor(row => row.date, {
     id: 'date',
     cell: info => <DateCell date={info.getValue()} />,
@@ -323,6 +332,7 @@ export const firstSetCellData = [
     text: 'no tooltips',
     tooltips: undefined,
     number_list_value: [10, 20, 30],
+    text_list_value: ['RUN-2026', '1617'],
     boolean_value: true,
   },
   {
@@ -338,6 +348,7 @@ export const firstSetCellData = [
     tooltips: undefined,
     number_value: 100,
     number_list_value: [5.5, 12.75, 8.25, 15.0],
+    text_list_value: ['1679'],
   },
   {
     link: 'AnchorLinkCell 3',
@@ -351,6 +362,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 1,
     number_list_value: [100.123, 200.456],
+    text_list_value: ['RUN-RELAPSE', '1704', '1617'],
     boolean_value: true,
   },
   {
@@ -366,6 +378,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 0.1,
     number_list_value: [1, 2, 3, 4, 5],
+    text_list_value: [],
   },
   {
     link: 'AnchorLinkCell 5',
@@ -421,6 +434,7 @@ export const firstSetCellData = [
     tooltips: undefined,
     number_value: undefined,
     number_list_value: undefined,
+    text_list_value: undefined,
   },
 ];
 

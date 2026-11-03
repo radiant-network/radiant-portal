@@ -21,6 +21,7 @@ export const data = {
     primary_condition_id: 'MONDO:0700092',
     req_by: 'CHUSJ',
     sample: 'S13224',
+    run: '1617',
     project: 'N1',
     created_on: '2026-09-21',
     updated_on: UPDATED_DATE_VALUE,

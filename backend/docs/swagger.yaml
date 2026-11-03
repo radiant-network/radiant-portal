@@ -3242,6 +3242,12 @@ components:
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
+        initial_tumor_resections:
+          description: Extent of tumor resection of each initial treatment surgery
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         key_dates:
           $ref: '#/components/schemas/PatientKeyDates'
         organization_code:
@@ -3282,6 +3288,7 @@ components:
       - family_name
       - gender
       - given_name
+      - initial_tumor_resections
       - key_dates
       - organization_code
       - organization_name

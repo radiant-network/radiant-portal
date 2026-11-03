@@ -446,6 +446,7 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "cns_integrated_diagnosis": null, "cns_integrated_diagnosis_source": "CBTN", "tumor_locations": [],
 				 "tumor_location_other": "Not Applicable", "metastasis": "Not Reported", "metastasis_locations": [], "metastasis_location_other": "Not Applicable"}
 			],
+			"initial_tumor_resections": ["Gross/Near total resection"],
 			"treatment_summary": {
 				"initial_dx": {"day": 1000, "date": "2017-11-29"}, "first_event": {"day": 1000, "date": "2017-11-29"},
 				"first_radiation_ever": {"day": 1047, "date": "2018-01-15"}, "initial_radiation": {"day": 1047, "date": "2018-01-15"},
@@ -658,6 +659,7 @@ func Test_GetPcxPatient_RestrictedPatientHasNoDates(t *testing.T) {
 		assert.Equal(t, types.PatientDayDate{Day: ptr(3000)}, patient.VitalStatusAt)
 		require.Len(t, patient.Events, 1)
 		assert.Equal(t, types.PatientDayDate{Day: ptr(1000)}, patient.Events[0].PatientDayDate)
+		assert.Equal(t, []string{"Biopsy only"}, patient.InitialTumorResections)
 		assert.Equal(t, types.PatientKeyDate{PatientDayDate: types.PatientDayDate{Day: ptr(1000)}, Source: "clinical"}, patient.KeyDates.InitialDiagnosis)
 		assert.Equal(t, types.PatientKeyDate{PatientDayDate: types.PatientDayDate{Day: ptr(3000)}, Source: "registry"}, patient.KeyDates.LatestEncounter)
 	})
@@ -723,10 +725,10 @@ func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 		genomics := getPcxPatientGenomics(t, env, key)
 
 		require.NotNil(t, patient)
-		assertJSON(t, `{"Events": [], "TreatmentSummary": null, "VitalStatusAt": {"day": null, "date": null}}`, struct {
-			Events, TreatmentSummary any
-			VitalStatusAt            types.PatientDayDate
-		}{patient.Events, patient.TreatmentSummary, patient.VitalStatusAt})
+		assertJSON(t, `{"Events": [], "TreatmentSummary": null, "InitialTumorResections": [], "VitalStatusAt": {"day": null, "date": null}}`, struct {
+			Events, TreatmentSummary, InitialTumorResections any
+			VitalStatusAt                                    types.PatientDayDate
+		}{patient.Events, patient.TreatmentSummary, patient.InitialTumorResections, patient.VitalStatusAt})
 		assertJSON(t, `{"surgeries": [], "radiations": [], "therapies": [], "trial_enrollments": []}`, treatments)
 		assertJSON(t, `{"cbc": null, "performance_status": [], "csf": null}`, laboratory)
 		assertJSON(t, `{"sessions": []}`, imaging)
