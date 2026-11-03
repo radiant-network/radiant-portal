@@ -211,6 +211,10 @@ func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey strin
 		patient.TreatmentSummary, err = pcxTreatmentSummary(gctx, db, *id)
 		return err
 	})
+	g.Go(func() (err error) {
+		patient.InitialTumorResections, err = pcxInitialTumorResections(gctx, db, *id)
+		return err
+	})
 	if err := g.Wait(); err != nil {
 		return nil, err
 	}
@@ -594,6 +598,26 @@ func pcxSurgeries(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]
 			ExtentOfTumorResection: row.ExtentOfTumorResection, IsInitialTreatment: pcxYesNo(row.IsInitialTreatment)}
 	}
 	return surgeries, nil
+}
+
+func pcxInitialTumorResections(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]string, error) {
+	var rows []struct {
+		ExtentOfTumorResection *string
+		IsInitialTreatment     *string
+	}
+	tx := pcxView(ctx, db, types.PcxSurgeryLevelTable, id).
+		Select("extent_of_tumor_resection, is_initial_treatment").
+		Order(pcxOrderByDay("age_at_surgery_days"))
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient initial tumor resections: %w", err)
+	}
+	resections := []string{}
+	for _, row := range rows {
+		if initial := pcxYesNo(row.IsInitialTreatment); initial != nil && *initial && row.ExtentOfTumorResection != nil {
+			resections = append(resections, *row.ExtentOfTumorResection)
+		}
+	}
+	return resections, nil
 }
 
 func pcxRadiations(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientRadiation, error) {

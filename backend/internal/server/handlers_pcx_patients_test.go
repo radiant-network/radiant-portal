@@ -317,7 +317,8 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 			InitialDiagnosis: types.PatientKeyDate{Source: "clinical"},
 			LatestEncounter:  types.PatientKeyDate{Source: "registry"},
 		},
-		Events: []types.PatientEvent{},
+		Events:                 []types.PatientEvent{},
+		InitialTumorResections: []string{"Gross/Near total resection"},
 	}}
 
 	w := getPatientEntity(repo, testPatientKey)
@@ -332,7 +333,7 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		"birth_date": null, "race": null, "ethnicity": null, "postal_code": null, "diagnosis_type_cohort": null, "data_type_cohort": null,
 		"key_dates": {"initial_diagnosis": {"day": null, "date": null, "source": "clinical"}, "latest_encounter": {"day": null, "date": null, "source": "registry"}},
 		"initial_diagnosis_evidence_url": null, "vital_status_at": {"day": null, "date": null},
-		"events": [], "treatment_summary": null
+		"events": [], "initial_tumor_resections": ["Gross/Near total resection"], "treatment_summary": null
 	}`, w.Body.String())
 }
 

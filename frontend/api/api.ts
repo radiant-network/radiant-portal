@@ -6398,6 +6398,12 @@ export interface PatientEntity {
      */
     'initial_diagnosis_evidence_url'?: string;
     /**
+     * Extent of tumor resection of each initial treatment surgery
+     * @type {Array<string>}
+     * @memberof PatientEntity
+     */
+    'initial_tumor_resections': Array<string>;
+    /**
      * 
      * @type {PatientKeyDates}
      * @memberof PatientEntity

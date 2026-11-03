@@ -44,6 +44,7 @@ class PatientEntity(BaseModel):
     gender: StrictStr
     given_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
     initial_diagnosis_evidence_url: Optional[StrictStr] = Field(default=None, description="BRIM link, format to be defined")
+    initial_tumor_resections: List[StrictStr] = Field(description="Extent of tumor resection of each initial treatment surgery")
     key_dates: PatientKeyDates
     organization_code: StrictStr
     organization_name: StrictStr
@@ -56,7 +57,7 @@ class PatientEntity(BaseModel):
     treatment_summary: Optional[PatientTreatmentSummary] = None
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["birth_date", "birth_year", "can_read_phi", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "initial_diagnosis_evidence_url", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["birth_date", "birth_year", "can_read_phi", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "initial_diagnosis_evidence_url", "initial_tumor_resections", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "treatment_summary", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -159,6 +160,7 @@ class PatientEntity(BaseModel):
             "gender": obj.get("gender"),
             "given_name": obj.get("given_name"),
             "initial_diagnosis_evidence_url": obj.get("initial_diagnosis_evidence_url"),
+            "initial_tumor_resections": obj.get("initial_tumor_resections"),
             "key_dates": PatientKeyDates.from_dict(obj["key_dates"]) if obj.get("key_dates") is not None else None,
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),

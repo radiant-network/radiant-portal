@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **gender** | **str** |  | 
 **given_name** | **str** | Placeholder when can_read_phi is false | 
 **initial_diagnosis_evidence_url** | **str** | BRIM link, format to be defined | [optional] 
+**initial_tumor_resections** | **List[str]** | Extent of tumor resection of each initial treatment surgery | 
 **key_dates** | [**PatientKeyDates**](PatientKeyDates.md) |  | 
 **organization_code** | **str** |  | 
 **organization_name** | **str** |  | 
