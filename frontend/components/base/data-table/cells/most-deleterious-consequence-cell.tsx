@@ -19,7 +19,7 @@ type MostDeleteriousConsequenceCellProps = {
  * @fixme aa_change is empty in api at the moment
  */
 function MostDeleteriousConsequenceCell({ vepImpact, consequences }: MostDeleteriousConsequenceCellProps) {
-  if (vepImpact === undefined || consequences === undefined) return <EmptyCell />;
+  if (vepImpact === undefined || !consequences) return <EmptyCell />;
 
   return (
     <div className={cn('flex items-center gap-2')}>
