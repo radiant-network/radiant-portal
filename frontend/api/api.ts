@@ -4068,6 +4068,18 @@ export interface GermlineCNVOccurrence {
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
+    'gnomad_ac'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'gnomad_af'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
     'gnomad_sc'?: number;
     /**
      * 
@@ -8279,6 +8291,18 @@ export interface SomaticCNVOccurrence {
      * @memberof SomaticCNVOccurrence
      */
     'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'gnomad_ac'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticCNVOccurrence
+     */
+    'gnomad_af'?: number;
     /**
      * NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment correctly matches nothing.
      * @type {number}

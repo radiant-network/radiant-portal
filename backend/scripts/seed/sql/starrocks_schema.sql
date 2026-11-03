@@ -427,7 +427,8 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__occurrence` (
      gnomad_sn int(11) NULL,
      gnomad_sf FLOAT NULL,
      gnomad_sc_hom int(11) NULL,
-     gnomad_sc_het int(11) NULL
+     gnomad_sc_het int(11) NULL,
+     gnomad_ac int(11) NULL
 ) ENGINE=OLAP
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
@@ -477,7 +478,8 @@ CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__occurrence` (
      gnomad_sn int(11) NULL,
      gnomad_sf FLOAT NULL,
      gnomad_sc_hom int(11) NULL,
-     gnomad_sc_het int(11) NULL
+     gnomad_sc_het int(11) NULL,
+     gnomad_ac int(11) NULL
 ) ENGINE=OLAP
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);

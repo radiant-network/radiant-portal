@@ -745,3 +745,91 @@ func Test_SomaticCNV_GetStatisticsOccurrences_Frequency(t *testing.T) {
 		assert.EqualValues(t, types.DecimalType, statistics.Type)
 	})
 }
+
+func listSomaticCNVNamesWithGnomad(t *testing.T, env *testutils.Env, sqon *types.Sqon, sort []types.SortBody) []string {
+	repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, []string{"gnomad_af", "gnomad_ac"}, sqon, nil, sort)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
+	require.NoError(t, err)
+	return sliceutils.Map(occurrences, func(o types.SomaticCNVOccurrence, _ int, _ []types.SomaticCNVOccurrence) string { return o.Name })
+}
+
+// SCNV2 is a CNLOH: it matches no gnomAD SV call, so it keeps NULL in AF and AC and is left out of
+// the sort assertions, which only pin the order of the two matched segments.
+var somaticCNVWithGnomad = &types.Sqon{
+	Content: types.SqonArray{{Op: "not-in", Content: types.LeafContent{Field: "name", Value: []interface{}{"SCNV2"}}}},
+	Op:      "and",
+}
+
+func Test_SomaticCNV_GetOccurrences_Return_GnomadAF_And_AC(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, []string{"gnomad_af", "gnomad_ac"}, nil, nil, []types.SortBody{{Field: "name", Order: "asc"}})
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 85, query)
+		require.NoError(t, err)
+		require.Len(t, occurrences, 3)
+
+		assert.Equal(t, "SCNV1", occurrences[0].Name)
+		if assert.NotNil(t, occurrences[0].GnomadAF) && assert.NotNil(t, occurrences[0].GnomadAC) {
+			assert.InDelta(t, 0.02, *occurrences[0].GnomadAF, 1e-6)
+			assert.Equal(t, 300, *occurrences[0].GnomadAC)
+		}
+		assert.Equal(t, "SCNV2", occurrences[1].Name)
+		assert.Nil(t, occurrences[1].GnomadAF)
+		assert.Nil(t, occurrences[1].GnomadAC)
+		assert.Equal(t, "SCNV3", occurrences[2].Name)
+		if assert.NotNil(t, occurrences[2].GnomadAF) && assert.NotNil(t, occurrences[2].GnomadAC) {
+			assert.InDelta(t, 0.3, *occurrences[2].GnomadAF, 1e-6)
+			assert.Equal(t, 4500, *occurrences[2].GnomadAC)
+		}
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Sort_By_GnomadAC_Asc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		names := listSomaticCNVNamesWithGnomad(t, env, somaticCNVWithGnomad, []types.SortBody{{Field: "gnomad_ac", Order: "asc"}})
+		assert.Equal(t, []string{"SCNV1", "SCNV3"}, names)
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Sort_By_GnomadAC_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		names := listSomaticCNVNamesWithGnomad(t, env, somaticCNVWithGnomad, []types.SortBody{{Field: "gnomad_ac", Order: "desc"}})
+		assert.Equal(t, []string{"SCNV3", "SCNV1"}, names)
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Sort_By_GnomadAF_Desc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		names := listSomaticCNVNamesWithGnomad(t, env, somaticCNVWithGnomad, []types.SortBody{{Field: "gnomad_af", Order: "desc"}})
+		assert.Equal(t, []string{"SCNV3", "SCNV1"}, names)
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Filter_By_GnomadAF(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: ">", Content: types.LeafContent{Field: "gnomad_af", Value: []interface{}{0.1}}}},
+			Op:      "and",
+		}
+		assert.Equal(t, []string{"SCNV3"}, listSomaticCNVNamesWithGnomad(t, env, sqon, nil))
+	})
+}
+
+func Test_SomaticCNV_GetOccurrences_Filter_By_GnomadAC(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "<", Content: types.LeafContent{Field: "gnomad_ac", Value: []interface{}{1000}}}},
+			Op:      "and",
+		}
+		assert.Equal(t, []string{"SCNV1"}, listSomaticCNVNamesWithGnomad(t, env, sqon, nil))
+	})
+}
+
+func Test_SomaticCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
+	names := sliceutils.Map(types.SomaticCNVOccurrencesDefaultFields, func(f types.Field, _ int, _ []types.Field) string { return f.Name })
+	assert.NotContains(t, names, "gnomad_af")
+	assert.NotContains(t, names, "gnomad_ac")
+}
