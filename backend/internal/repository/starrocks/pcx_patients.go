@@ -304,6 +304,87 @@ func (r *PcxPatientsRepository) GetPatientImaging(ctx context.Context, patientKe
 	return &types.PatientImaging{Sessions: sessions}, nil
 }
 
+func (r *PcxPatientsRepository) GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var rows []struct {
+		HinOrgName    string
+		Network       *string
+		ClassName     string
+		TypeName      string
+		DocumentCount *int
+	}
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxHinExchangeTable, *id).
+		Select("hin_org_name, network, coalesce(document_class_name, document_type_name, '') AS class_name, " +
+			"coalesce(document_type_name, document_class_name, '') AS type_name, document_count").
+		Order("document_count DESC, type_name")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient exchanges: %w", err)
+	}
+
+	byName := map[string]*types.PatientExchangeOrganization{}
+	classes := map[string]map[string]*types.PatientDocumentClass{}
+	organization := func(name string) *types.PatientExchangeOrganization {
+		if o, ok := byName[name]; ok {
+			return o
+		}
+		o := &types.PatientExchangeOrganization{Name: name}
+		byName[name], classes[name] = o, map[string]*types.PatientDocumentClass{}
+		return o
+	}
+	records := types.PatientExternalRecords{Organizations: []types.PatientExchangeOrganization{}}
+	distinctClasses := map[string]bool{}
+	for _, row := range rows {
+		o := organization(row.HinOrgName)
+		if o.Network == nil {
+			o.Network = row.Network
+		}
+		if row.DocumentCount == nil {
+			continue
+		}
+		count := *row.DocumentCount
+		c, ok := classes[row.HinOrgName][row.ClassName]
+		if !ok {
+			c = &types.PatientDocumentClass{Name: row.ClassName, Types: []types.PatientDocumentType{}}
+			classes[row.HinOrgName][row.ClassName] = c
+		}
+		c.Types = append(c.Types, types.PatientDocumentType{Name: row.TypeName, DocumentCount: count})
+		c.DocumentCount += count
+		o.DocumentCount += count
+		records.DocumentCount += count
+		distinctClasses[row.ClassName] = true
+	}
+	for name, o := range byName {
+		o.DocumentClasses = []types.PatientDocumentClass{}
+		for _, c := range classes[name] {
+			if len(c.Types) == 1 && c.Types[0].Name == c.Name {
+				c.Types = []types.PatientDocumentType{}
+			}
+			o.DocumentClasses = append(o.DocumentClasses, *c)
+		}
+		sort.Slice(o.DocumentClasses, func(i, j int) bool {
+			a, b := o.DocumentClasses[i], o.DocumentClasses[j]
+			if a.DocumentCount != b.DocumentCount {
+				return a.DocumentCount > b.DocumentCount
+			}
+			return a.Name < b.Name
+		})
+		records.Organizations = append(records.Organizations, *o)
+	}
+	sort.Slice(records.Organizations, func(i, j int) bool {
+		a, b := records.Organizations[i], records.Organizations[j]
+		if a.DocumentCount != b.DocumentCount {
+			return a.DocumentCount > b.DocumentCount
+		}
+		return a.Name < b.Name
+	})
+	records.OrganizationCount = len(records.Organizations)
+	records.DocumentClassCount = len(distinctClasses)
+	return &records, nil
+}
+
 func (r *PcxPatientsRepository) GetPatientGenomics(ctx context.Context, patientKey string) (*types.PatientGenomics, error) {
 	id, err := r.patientIdentifier(ctx, patientKey)
 	if err != nil || id == nil {
@@ -331,6 +412,25 @@ func (r *PcxPatientsRepository) GetPatientGenomics(ctx context.Context, patientK
 func pcxView(ctx context.Context, db *gorm.DB, table types.Table, id pcxPatientIdentifier) *gorm.DB {
 	return db.Table(table.TenantQualifiedName(ctx)).
 		Where("organization_code = ? AND patient_id_type = ? AND patient_id = ?", id.organizationCode, id.patientIDType, id.patientID)
+}
+
+// pcxPatientKeysByRadiantPatientID maps portal patient ids to the patient_key of the PCX patients the caller can see.
+func pcxPatientKeysByRadiantPatientID(ctx context.Context, db *gorm.DB, radiantPatientIDs []int) (map[int]string, error) {
+	var rows []struct {
+		RadiantPatientID int
+		PatientKey       string
+	}
+	tx := db.Table(types.PcxPatientKeyTable.TenantQualifiedName(ctx)).
+		Select("radiant_patient_id, patient_key").
+		Where("radiant_patient_id IN ?", radiantPatientIDs)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient keys: %w", err)
+	}
+	keys := make(map[int]string, len(rows))
+	for _, row := range rows {
+		keys[row.RadiantPatientID] = row.PatientKey
+	}
+	return keys, nil
 }
 
 func pcxRadiantPatientID(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*int, error) {

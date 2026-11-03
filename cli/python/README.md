@@ -166,6 +166,7 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
 *PatientsApi* | [**autocomplete_patients**](docs/PatientsApi.md#autocomplete_patients) | **GET** /{tenant}/patients/autocomplete | Get AutocompleteResult list of PCX patients matching prefix
 *PatientsApi* | [**patient_entity**](docs/PatientsApi.md#patient_entity) | **GET** /{tenant}/patients/{patient_key} | Get PatientEntity patient entity
+*PatientsApi* | [**patient_external_records**](docs/PatientsApi.md#patient_external_records) | **GET** /{tenant}/patients/{patient_key}/external_records | Get PatientExternalRecords of a patient
 *PatientsApi* | [**patient_genomics**](docs/PatientsApi.md#patient_genomics) | **GET** /{tenant}/patients/{patient_key}/genomics | Get PatientGenomics of a patient
 *PatientsApi* | [**patient_imaging**](docs/PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
 *PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
@@ -317,9 +318,13 @@ Class | Method | HTTP request | Description
  - [PatientCsfCytology](docs/PatientCsfCytology.md)
  - [PatientCsfResult](docs/PatientCsfResult.md)
  - [PatientDayDate](docs/PatientDayDate.md)
+ - [PatientDocumentClass](docs/PatientDocumentClass.md)
+ - [PatientDocumentType](docs/PatientDocumentType.md)
  - [PatientDose](docs/PatientDose.md)
  - [PatientEntity](docs/PatientEntity.md)
  - [PatientEvent](docs/PatientEvent.md)
+ - [PatientExchangeOrganization](docs/PatientExchangeOrganization.md)
+ - [PatientExternalRecords](docs/PatientExternalRecords.md)
  - [PatientFilters](docs/PatientFilters.md)
  - [PatientGenomics](docs/PatientGenomics.md)
  - [PatientImaging](docs/PatientImaging.md)

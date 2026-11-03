@@ -1,0 +1,8 @@
+organization_code	patient_id_type	patient_id	hin_org_name	network	document_class_name	document_type_name	document_count
+CHOP	mrn	MRN-0002	Temple Health	tefca	Progress Note	Telephone	7
+CHOP	mrn	MRN-0002	MedStar Health	carequality	NULL	NULL	NULL
+CHOP	mrn	MRN-0002	Johns Hopkins Medicine	tefca	Lab	Lab	2
+CHOP	mrn	MRN-0002	Johns Hopkins Medicine	tefca	Progress Note	Office Visit	5
+CHOP	mrn	MRN-0002	Johns Hopkins Medicine	tefca	Progress Note	Telephone	3
+CHOP	mrn	MRN-0002	Health Gorilla	NULL	Patient Summary	NULL	1
+CHOP	mrn	MRN-0001	Tower Health	tefca	Lab	Lab	3

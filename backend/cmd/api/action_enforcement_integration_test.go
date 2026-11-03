@@ -316,6 +316,7 @@ var expectedTenantActions = map[string]string{
 	"GET /:tenant/patients/:patient_key/laboratory":              types.ActionSearchCase,
 	"GET /:tenant/patients/:patient_key/imaging":                 types.ActionSearchCase,
 	"GET /:tenant/patients/:patient_key/genomics":                types.ActionSearchCase,
+	"GET /:tenant/patients/:patient_key/external_records":        types.ActionSearchCase,
 	"GET /:tenant/cases/:case_id/assignment_candidates":          types.ActionEditCase,
 	"PUT /:tenant/cases/:case_id/assignments":                    types.ActionEditCase,
 	"GET /:tenant/cases/:case_id":                                types.ActionSearchCase,

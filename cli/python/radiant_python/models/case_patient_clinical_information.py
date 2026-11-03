@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_exam import CaseExam
 from radiant_python.models.case_family_history import CaseFamilyHistory
@@ -49,10 +49,11 @@ class CasePatientClinicalInformation(BaseModel):
     organization_code: Optional[StrictStr] = None
     organization_name: Optional[StrictStr] = None
     patient_id: Optional[StrictInt] = None
+    patient_key: Optional[StrictStr] = Field(default=None, description="Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there")
     relationship_to_proband: StrictStr
     sex_code: StrictStr
     submitter_patient_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["affected_status_code", "consanguinity", "date_of_birth", "estimated_due_date", "ethnicities", "exams", "family_history", "fetus_id", "first_name", "jhn", "last_menstrual_period", "last_name", "life_status_code", "non_observed_phenotypes", "notes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "relationship_to_proband", "sex_code", "submitter_patient_id"]
+    __properties: ClassVar[List[str]] = ["affected_status_code", "consanguinity", "date_of_birth", "estimated_due_date", "ethnicities", "exams", "family_history", "fetus_id", "first_name", "jhn", "last_menstrual_period", "last_name", "life_status_code", "non_observed_phenotypes", "notes", "observed_phenotypes", "organization_code", "organization_name", "patient_id", "patient_key", "relationship_to_proband", "sex_code", "submitter_patient_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -162,6 +163,7 @@ class CasePatientClinicalInformation(BaseModel):
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),
             "patient_id": obj.get("patient_id"),
+            "patient_key": obj.get("patient_key"),
             "relationship_to_proband": obj.get("relationship_to_proband"),
             "sex_code": obj.get("sex_code"),
             "submitter_patient_id": obj.get("submitter_patient_id")

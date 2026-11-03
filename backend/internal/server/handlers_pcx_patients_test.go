@@ -365,6 +365,7 @@ type pcxPatientTabsReaderMock struct {
 	laboratory *types.PatientLaboratory
 	imaging    *types.PatientImaging
 	genomics   *types.PatientGenomics
+	external   *types.PatientExternalRecords
 	err        error
 	key        string
 }
@@ -389,7 +390,12 @@ func (m *pcxPatientTabsReaderMock) GetPatientGenomics(_ context.Context, patient
 	return m.genomics, m.err
 }
 
-var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics"}
+func (m *pcxPatientTabsReaderMock) GetPatientExternalRecords(_ context.Context, patientKey string) (*types.PatientExternalRecords, error) {
+	m.key = patientKey
+	return m.external, m.err
+}
+
+var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics", "external_records"}
 
 func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.ResponseRecorder {
 	router := gin.Default()
@@ -397,6 +403,7 @@ func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.Re
 	router.GET("/:tenant/patients/:patient_key/laboratory", PatientLaboratoryHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/imaging", PatientImagingHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/genomics", PatientGenomicsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/external_records", PatientExternalRecordsHandler(repo))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key+"/"+tab, nil))
 	return w
@@ -436,6 +443,20 @@ func Test_PatientImagingHandler_ReturnsTheSessions(t *testing.T) {
 	assert.Equal(t, testPatientKey, repo.key)
 	assert.JSONEq(t, `{"sessions": [{"day": null, "date": null, "session_id": "ses-1", "session_name": "MRI Brain",
 		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null}]}`, w.Body.String())
+}
+
+func Test_PatientExternalRecordsHandler_ReturnsTheOrganizations(t *testing.T) {
+	network := "tefca"
+	repo := &pcxPatientTabsReaderMock{external: &types.PatientExternalRecords{OrganizationCount: 1, DocumentCount: 2, DocumentClassCount: 1,
+		Organizations: []types.PatientExchangeOrganization{{Name: "Temple Health", Network: &network, DocumentCount: 2,
+			DocumentClasses: []types.PatientDocumentClass{{Name: "Lab", DocumentCount: 2, Types: []types.PatientDocumentType{}}}}}}}
+
+	w := getPatientTab(repo, "external_records", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"organization_count": 1, "document_count": 2, "document_class_count": 1, "organizations": [{"name": "Temple Health",
+		"network": "tefca", "document_count": 2, "document_classes": [{"name": "Lab", "document_count": 2, "types": []}]}]}`, w.Body.String())
 }
 
 func Test_PatientGenomicsHandler_ReturnsCasesAndInterpretations(t *testing.T) {
