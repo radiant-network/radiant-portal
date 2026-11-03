@@ -15,10 +15,41 @@ type EventProps = {
   startDay?: number;
   years?: number;
   showLine?: boolean;
+  open?: boolean;
+  onToggle?: () => void;
 };
 
-function Event({ type, cnsIntegratedDiagnosis, description, evidenceHref, startDay, years, showLine }: EventProps) {
+function Event({
+  type,
+  cnsIntegratedDiagnosis,
+  description,
+  evidenceHref,
+  startDay,
+  years,
+  showLine,
+  open,
+  onToggle,
+}: EventProps) {
   const { t } = useI18n();
+  const collapsible = onToggle !== undefined;
+
+  const header = (
+    <div className="flex items-center gap-2 text-base font-semibold">
+      <span>{type}</span>
+      {cnsIntegratedDiagnosis && (
+        <>
+          <span>•</span>
+          <span>{cnsIntegratedDiagnosis}</span>
+        </>
+      )}
+      {evidenceHref && (
+        <AnchorLink href={evidenceHref} external size="xs">
+          {t('timeline.evidence')}
+        </AnchorLink>
+      )}
+    </div>
+  );
+
   return (
     <TimelineRow
       badge={<TimelineBadge type="event" />}
@@ -26,20 +57,18 @@ function Event({ type, cnsIntegratedDiagnosis, description, evidenceHref, startD
       showLine={showLine}
       className="bg-muted"
     >
-      <div className="flex items-center gap-2 text-base font-semibold">
-        <span>{type}</span>
-        {cnsIntegratedDiagnosis && (
-          <>
-            <span>•</span>
-            <span>{cnsIntegratedDiagnosis}</span>
-          </>
-        )}
-        {evidenceHref && (
-          <AnchorLink href={evidenceHref} external size="xs">
-            {t('timeline.evidence')}
-          </AnchorLink>
-        )}
-      </div>
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between gap-2 text-left"
+        >
+          {header}
+        </button>
+      ) : (
+        header
+      )}
       {description && description.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {description.map((item, i) => (

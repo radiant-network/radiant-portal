@@ -1,4 +1,4 @@
-import { type ComponentProps, useCallback, useMemo, useState } from 'react';
+import { type ComponentProps, useCallback, useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 
 import { Toggle } from '@/components/base/shadcn/toggle';
@@ -13,20 +13,25 @@ import TimelineBadge, { type TimelineBadgeType } from './timeline-badge';
 
 type TypeKind = 'event' | 'surgery' | 'radiation' | 'chemotherapy';
 
+type EventPropsWithDefault = ComponentProps<typeof Event> & { defaultOpen?: boolean };
+
 type TimelineProps = {
   title?: string;
   description?: string;
-  events?: ComponentProps<typeof Event>[];
+  events?: EventPropsWithDefault[];
   surgeries?: ComponentProps<typeof Surgery>[];
   radiations?: ComponentProps<typeof Radiation>[];
   chemotherapies?: ComponentProps<typeof Chemotherapy>[];
 };
 
-type TimelineItem =
-  | { kind: 'event'; day: number | undefined; props: ComponentProps<typeof Event> }
-  | { kind: 'surgery'; day: number | undefined; props: ComponentProps<typeof Surgery> }
-  | { kind: 'radiation'; day: number | undefined; props: ComponentProps<typeof Radiation> }
-  | { kind: 'chemotherapy'; day: number | undefined; props: ComponentProps<typeof Chemotherapy> };
+type EventItem = { kind: 'event'; day: number | undefined; props: EventPropsWithDefault };
+type SurgeryItem = { kind: 'surgery'; day: number | undefined; props: ComponentProps<typeof Surgery> };
+type RadiationItem = { kind: 'radiation'; day: number | undefined; props: ComponentProps<typeof Radiation> };
+type ChemoItem = { kind: 'chemotherapy'; day: number | undefined; props: ComponentProps<typeof Chemotherapy> };
+type TimelineItem = EventItem | SurgeryItem | RadiationItem | ChemoItem;
+type TreatmentItem = SurgeryItem | RadiationItem | ChemoItem;
+
+type Group = { event: (EventItem & { eventIndex: number }) | null; treatments: TreatmentItem[] };
 
 type TypeButton = {
   kind: TypeKind;
@@ -76,16 +81,75 @@ function Timeline({
     return items.sort((a, b) => (a.day ?? Infinity) - (b.day ?? Infinity));
   }, [events, surgeries, radiations, chemotherapies]);
 
+  const groups = useMemo<Group[]>(() => {
+    const out: Group[] = [];
+    let currentEventIdx = -1;
+    let current: Group | null = null;
+    for (const item of sorted) {
+      if (item.kind === 'event') {
+        currentEventIdx += 1;
+        current = { event: { ...item, eventIndex: currentEventIdx }, treatments: [] };
+        out.push(current);
+      } else {
+        if (!current) {
+          current = { event: null, treatments: [] };
+          out.push(current);
+        }
+        current.treatments.push(item);
+      }
+    }
+    return out;
+  }, [sorted]);
+
+  const [openEventIndices, setOpenEventIndices] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const initial = new Set<number>();
+    for (const group of groups) {
+      if (group.event?.props.defaultOpen) initial.add(group.event.eventIndex);
+    }
+    setOpenEventIndices(initial);
+  }, [groups]);
+
+  const toggleEvent = useCallback((idx: number) => {
+    setOpenEventIndices(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
+
   const counts = useMemo(() => {
     const perKind: Record<TypeKind, number> = { event: 0, surgery: 0, radiation: 0, chemotherapy: 0 };
     for (const item of sorted) perKind[item.kind] += 1;
     return { all: sorted.length, ...perKind };
   }, [sorted]);
 
-  const visible = useMemo(
-    () => (isAllActive ? sorted : sorted.filter(item => selected.has(item.kind))),
-    [sorted, selected, isAllActive],
-  );
+  const visible = useMemo<Array<{ item: TimelineItem; open?: boolean; onToggle?: () => void }>>(() => {
+    if (!isAllActive) {
+      return sorted.filter(item => selected.has(item.kind)).map(item => ({ item }));
+    }
+    const result: Array<{ item: TimelineItem; open?: boolean; onToggle?: () => void }> = [];
+    for (const group of groups) {
+      if (group.event) {
+        const idx = group.event.eventIndex;
+        const hasTreatments = group.treatments.length > 0;
+        const open = openEventIndices.has(idx);
+        result.push({
+          item: group.event,
+          open: hasTreatments ? open : undefined,
+          onToggle: hasTreatments ? () => toggleEvent(idx) : undefined,
+        });
+        if (hasTreatments && open) {
+          for (const treatment of group.treatments) result.push({ item: treatment });
+        }
+      } else {
+        for (const treatment of group.treatments) result.push({ item: treatment });
+      }
+    }
+    return result;
+  }, [groups, sorted, selected, isAllActive, openEventIndices, toggleEvent]);
 
   const handleAllClick = useCallback(() => {
     setSelected(prev => (prev.size === 0 ? prev : new Set()));
@@ -151,13 +215,13 @@ function Timeline({
         </div>
       ) : (
         <ol className="list-none pl-0">
-          {visible.map((item, i) => {
+          {visible.map(({ item, open, onToggle }, i) => {
             const showLine = i < visible.length - 1;
             const key = `${item.kind}-${item.day}-${i}`;
             let row: React.ReactNode;
             switch (item.kind) {
               case 'event':
-                row = <Event {...item.props} showLine={showLine} />;
+                row = <Event {...item.props} showLine={showLine} open={open} onToggle={onToggle} />;
                 break;
               case 'surgery':
                 row = <Surgery {...item.props} showLine={showLine} />;
