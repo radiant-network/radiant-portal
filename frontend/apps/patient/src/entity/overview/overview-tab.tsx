@@ -28,6 +28,10 @@ function OverviewTab({ patient, isLoading }: OverviewTabProps) {
           cns_diagnosis_category={initialEvent?.cns_diagnosis_category}
           cns_integrated_diagnosis={initialEvent?.cns_integrated_diagnosis}
           event_day={initialEvent?.day}
+          tumor_locations={initialEvent?.tumor_locations}
+          tumor_location_other={initialEvent?.tumor_location_other}
+          metastasis={initialEvent?.metastasis}
+          initial_tumor_resections={patient?.initial_tumor_resections}
           isLoading={isLoading}
         />
         <TumorAndMetastasisCard

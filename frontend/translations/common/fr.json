@@ -1324,7 +1324,11 @@
         "cns_diagnosis_category": "Catégorie de diagnostic SNC",
         "cns_integrated_diagnosis": "Diagnostic intégré SNC",
         "event_date": "Date du diagnostic",
-        "day": "Jour {{day}}"
+        "day": "Jour {{day}}",
+        "tumor_locations": "Localisations tumorales",
+        "tumor_location_other": "Autre localisation",
+        "metastasis": "Métastase",
+        "initial_tumor_resections": "Résections tumorales initiales"
       },
       "tumor_and_metastasis": {
         "title": "Tumeur et métastases",
