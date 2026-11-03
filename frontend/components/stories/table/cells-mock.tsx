@@ -6,6 +6,7 @@ import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
+import ComphetGenesCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/comphet-genes-cell';
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
 import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlapping-gene-link-cell';
 import InterpretationCell from '@/apps/case/src/entity/variants/interpretation/interpretation-cell';
@@ -1060,6 +1061,18 @@ export const applicationFirstSetCellColumns = [
     enableSorting: false,
   }),
   baseCellColumnHelper.accessor(row => row, {
+    id: 'comphet_genes',
+    cell: info => {
+      const row = info.row.original as any;
+      return <ComphetGenesCell genes={row.comphet_genes} locusId={row.locus_id} />;
+    },
+    header: 'ComphetGenesCell (Variant-Tab/SNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
     id: 'cnv_name',
     cell: info => <CNVNameCell occurrence={info.getValue() as any} />,
     header: 'CNVNameCell(Variant-Tab/CNV)',
@@ -1195,6 +1208,11 @@ export const applicationCellData = [
     task_id: 1,
     transcript_id: 'NM_000000.1',
     has_interpretation: true,
+    comphet_genes: [
+      { symbol: 'TTN', nb: 1 },
+      { symbol: 'BRCA2', nb: 3 },
+      { symbol: 'ABCA4', nb: 1 },
+    ],
   },
   {
     locus_id: '-7485572602358923261',
@@ -1224,6 +1242,7 @@ export const applicationCellData = [
     task_id: 2,
     transcript_id: 'NM_000000.1',
     has_interpretation: false,
+    comphet_genes: [{ symbol: 'CFTR', nb: 2 }],
   },
   {
     locus_id: '-7485572602358923261',
