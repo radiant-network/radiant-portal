@@ -1323,7 +1323,11 @@
         "cns_diagnosis_category": "CNS diagnosis category",
         "cns_integrated_diagnosis": "CNS integrated diagnosis",
         "event_date": "Date of diagnosis",
-        "day": "Day {{day}}"
+        "day": "Day {{day}}",
+        "tumor_locations": "Tumor locations",
+        "tumor_location_other": "Other location",
+        "metastasis": "Metastasis",
+        "initial_tumor_resections": "Initial tumor resections"
       },
       "tumor_and_metastasis": {
         "title": "Tumor and metastasis",
