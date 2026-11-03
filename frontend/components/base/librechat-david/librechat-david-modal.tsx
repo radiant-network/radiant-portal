@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { Badge } from '@/components/base/shadcn/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
@@ -12,7 +12,6 @@ function LibreChatDavidModal() {
   const { t } = useI18n();
   const { librechatDavidUrl } = useRuntimeConfig();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { patientId } = useParams<{ patientId: string }>();
 
   const open = searchParams.get(OPEN_PARAM) === '1';
 
@@ -31,14 +30,6 @@ function LibreChatDavidModal() {
     [setSearchParams],
   );
 
-  const iframeSrc = useMemo(() => {
-    if (!librechatDavidUrl) return undefined;
-    if (!patientId) return librechatDavidUrl;
-    const url = new URL(librechatDavidUrl);
-    url.searchParams.set('patient', patientId);
-    return url.toString();
-  }, [librechatDavidUrl, patientId]);
-
   if (!librechatDavidUrl) return null;
 
   return (
@@ -49,16 +40,10 @@ function LibreChatDavidModal() {
           <Badge variant="outline" className="text-[11px] font-medium px-1.5 py-0">
             {t('librechat.david.badge')}
           </Badge>
-          {patientId && (
-            <span className="ml-auto text-right text-xs text-muted-foreground truncate max-w-56">
-              {t('patient_entity.header.title', { id: patientId })}
-            </span>
-          )}
         </DialogHeader>
         <div className="w-full h-full border-t">
           <iframe
-            key={iframeSrc}
-            src={iframeSrc}
+            src={librechatDavidUrl}
             title={t('librechat.david.frame_title')}
             className="w-full h-full border-0"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
