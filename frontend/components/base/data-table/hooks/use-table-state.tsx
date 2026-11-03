@@ -9,7 +9,7 @@ import { userPreferenceApi } from '@/utils/api';
 
 import type { AppFeatures, ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
 import type { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
-import { getFilteredAdditionalFields } from '../utils';
+import { completeSavedColumnSettings, getFilteredAdditionalFields } from '../utils';
 
 export enum DataTableState {
   PENDING,
@@ -125,17 +125,21 @@ export function useTableGetPreferenceEffect({
     }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
-      setColumnOrder(tablePreference.columnOrder);
+      // Columns added since the preference was saved take their default visibility and position
+      const { columnOrder, columnVisibility } = completeSavedColumnSettings({
+        columnOrder: tablePreference.columnOrder,
+        columnVisibility: tablePreference.columnVisibility,
+        defaultColumnSettings,
+      });
+      setColumnOrder(columnOrder);
       setColumnPinning(normalizeColumnPinning(tablePreference.columnPinning));
       setColumnSizing(tablePreference.columnSizing);
-      setColumnVisibility(tablePreference.columnVisibility);
+      setColumnVisibility(columnVisibility);
       setPagination({
         pageSize: Math.max(tablePreference.pagination?.pageSize ?? DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE),
         pageIndex: 0,
       });
-      setAdditionalFields?.(
-        getFilteredAdditionalFields({ columnVisibility: tablePreference.columnVisibility, defaultColumnSettings }),
-      );
+      setAdditionalFields?.(getFilteredAdditionalFields({ columnVisibility, defaultColumnSettings }));
       setFetched(true);
     }
   }, [tableUserPreference.isLoading, tableUserPreference.isValidating, tableUserPreference.data]);
