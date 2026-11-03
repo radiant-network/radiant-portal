@@ -35,6 +35,7 @@ export const Default: Story = {
             description: [
               { label: 'Tumor locations', value: 'Posterior fossa' },
               { label: 'Metastasis', value: 'Yes' },
+              { label: 'Metastasis locations', value: 'Spine, Lung' },
             ],
             evidenceHref: '#',
             startDay: 1135,
