@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-BCiCTKAo.js";import{t}from"./jsx-runtime-BB9-612F.js";function n(){return(0,r.jsx)(`span`,{children:`-`})}var r;function i(){return(i=e((()=>{r=t(),n.__docgenInfo={description:``,methods:[],displayName:`EmptyField`}})))()}export{i as n,n as t};

@@ -1,0 +1,1 @@
+import{n as e,o as t}from"./rolldown-runtime-BCiCTKAo.js";import{t as n}from"./react-Cva3sfk7.js";import{i as r,r as i}from"./dist-DtwcwoLo.js";function a(e){let[t,n]=o.useState(s());return r(()=>{e||n(e=>e??String(c++))},[e]),e||(t?`radix-${t}`:``)}var o,s,c;function l(){return(l=e((()=>{o=t(n(),1),i(),s=o.useId||(()=>void 0),c=0})))()}export{a as n,l as t};
