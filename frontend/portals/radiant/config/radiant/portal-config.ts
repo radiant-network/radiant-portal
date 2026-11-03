@@ -623,7 +623,6 @@ export const radiantConfig = {
       occurrence: {
         items: [
           { key: 'zygosity', translation_key: 'zygosity', type: FilterTypes.MULTIPLE },
-          { key: 'has_comphet', translation_key: 'has_comphet', type: FilterTypes.BOOLEAN },
           {
             key: 'zygosity_divider_parental_analysis',
             translation_key: 'zygosity_divider_parental_analysis',
@@ -638,6 +637,7 @@ export const radiantConfig = {
             type: FilterTypes.MULTIPLE,
             withDictionary: true,
           },
+          { key: 'has_comphet', translation_key: 'has_comphet', type: FilterTypes.BOOLEAN },
           {
             key: 'occurrence_metrics_divider',
             translation_key: 'occurrence_metrics_divider',

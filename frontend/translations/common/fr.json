@@ -45,6 +45,9 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Afficher les {{count}} variants hét. composés dans {{gene}} dans une nouvelle requête"
+    },
     "data_table": {
       "collapse_row": "Replier la ligne",
       "column_settings": "Paramètres des colonnes",
@@ -960,6 +963,7 @@
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "comphet_of": "Hét. composé de",
         "has_comphet": "Hét. composé",
         "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
         "hotspot": "Hotspot",
@@ -1117,6 +1121,10 @@
         "fathmm_pred": {
           "t": "Toléré",
           "d": "Délétère"
+        },
+        "has_comphet": {
+          "0": "Non",
+          "1": "Oui"
         },
         "lrt_pred": {
           "n": "Neutre",
