@@ -2539,7 +2539,8 @@
       "sex": "Sex",
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
-      "title": "Patient Information"
+      "title": "Patient Information",
+      "view_patient": "View patient"
     },
     "details": {
       "aliquot": "Aliquot",

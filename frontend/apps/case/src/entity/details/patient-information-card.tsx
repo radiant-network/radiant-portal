@@ -1,12 +1,16 @@
 import { type ComponentProps, useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { ArrowUpRightIcon, UserIcon } from 'lucide-react';
 
 import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
 import { CopyButton } from '@/components/base/buttons/copy-button';
 import InformationField from '@/components/base/information/information-field';
 import ScrollableTabsList from '@/components/base/navigation/scrollable-tabs-list';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
 import { byProbandFirst, getFetusRank, getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
 import { formatDate } from '@/components/lib/date';
 import { titleCase } from '@/components/lib/string-format';
@@ -107,6 +111,7 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
 
 function PatientInformationCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
+  const localPath = useLocalPath();
 
   const isFamilyCase = data.case_type === CaseType.germline_family;
   const members = [...(data.members || [])].sort(byProbandFirst);
@@ -118,11 +123,25 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
     }
   }, [members, activeTab]);
 
+  const activeMember =
+    isFamilyCase && members.length > 1 ? members.find(m => getMemberKey(m) === activeTab) : members[0];
+
+  const headerAction = activeMember?.patient_key && (
+    <CardAction>
+      <Button asChild>
+        <Link to={localPath(`/patient/entity/${activeMember.patient_key}?tab=overview`)}>
+          <UserIcon /> {t('case_entity.patient_information.view_patient')} <ArrowUpRightIcon />
+        </Link>
+      </Button>
+    </CardAction>
+  );
+
   if (isFamilyCase && members.length > 1) {
     return (
       <Card data-cy="patient-information-card" {...props}>
         <CardHeader bordered>
           <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
+          {headerAction}
         </CardHeader>
         <CardContent className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -147,15 +166,14 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
     );
   }
 
-  // Solo case or family case with only one member - show the first member only
-  const firstMember = members[0];
   return (
     <Card data-cy="patient-information-card" {...props}>
       <CardHeader bordered>
         <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
+        {headerAction}
       </CardHeader>
       <CardContent className="space-y-6">
-        <PatientInfoDisplay member={firstMember} />
+        <PatientInfoDisplay member={activeMember} />
       </CardContent>
     </Card>
   );
