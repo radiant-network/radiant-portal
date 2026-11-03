@@ -132,6 +132,7 @@ type PatientEntity struct {
 	InitialDiagnosisEvidenceURL  *string                  `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
 	VitalStatusAt                PatientDayDate           `json:"vital_status_at" validate:"required"`
 	Events                       []PatientEvent           `json:"events" validate:"required"`
+	InitialTumorResections       []string                 `json:"initial_tumor_resections" validate:"required"` // Extent of tumor resection of each initial treatment surgery
 	TreatmentSummary             *PatientTreatmentSummary `json:"treatment_summary"`
 }
 
