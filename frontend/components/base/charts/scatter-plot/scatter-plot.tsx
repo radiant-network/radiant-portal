@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Plot from 'react-plotly.js';
-import type { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
+import type { Annotation, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
 
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import type { ScatterPlotPoint, ScatterPlotProps } from '@/components/base/charts/type';
@@ -118,7 +118,7 @@ function ScatterPlot<T extends Record<string, unknown>>({
   // Reset the view (dropping any manual zoom) and remount whenever the
   // annotated points or axes change, so the annotated point is re-centered.
   useEffect(() => {
-    const annotations: Partial<Annotations>[] = annotation
+    const annotations: Partial<Annotation>[] = annotation
       ? series.flatMap(serie =>
           serie.points
             .filter(point => selectedPoints.includes(point))
@@ -163,7 +163,7 @@ function ScatterPlot<T extends Record<string, unknown>>({
   const handleRelayout = (eventData: any) => {
     const isZoom = eventData['xaxis.range[0]'] !== undefined || eventData['yaxis.range[0]'] !== undefined;
     setLayout(prevLayout => {
-      const currentAnnotations = (prevLayout.annotations as Partial<Annotations>[]) ?? [];
+      const currentAnnotations = (prevLayout.annotations as Partial<Annotation>[]) ?? [];
       if (!isSelectionZoom && isZoom && currentAnnotations.length > 0) {
         const first = currentAnnotations[0];
         const spanX = (eventData['xaxis.range[1]'] - eventData['xaxis.range[0]']) / 2;
@@ -191,7 +191,8 @@ function ScatterPlot<T extends Record<string, unknown>>({
       useResizeHandler
       config={{
         displaylogo: false,
-        modeBarButtonsToRemove: ['toImage', 'resetGeo', 'sendDataToCloud', 'pan2d'],
+        showSendToCloud: false,
+        modeBarButtonsToRemove: ['toImage', 'resetGeo', 'pan2d'],
       }}
       onClick={onPointClick ? handleClick : undefined}
       onSelected={onSelect ? handleSelect : undefined}
