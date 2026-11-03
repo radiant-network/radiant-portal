@@ -16,6 +16,20 @@ sources:
         description: "direct copy of d3b dwh table prod_access.updates"
       - name: treatment
         description: "direct copy of d3b dwh table prod_access.treatment"
+      - name: brim_output
+        description: >
+          BRIM detailed-export rows, append-only across patients and export
+          vintages. NOT a dbt model and must never become one -- it is
+          CREATE-IF-NOT-EXISTS and the only record of its contents, so a table
+          model's drop-and-recreate would destroy it. DDL + loader:
+          radiant-prod/tables/brim_output_table.sql, load_brim_outputs.py.
+      - name: pcx_30_pnoc035_brim_url
+        description: >
+          Curated BRIM UI deep links for the PNOC035 eligibility variable. Same
+          never-a-dbt-model reasoning as brim_output: hand-curated, recorded
+          nowhere else. Both its columns identify, so its ROWS are populated out
+          of band and must never be committed. DDL:
+          radiant-prod/tables/pnoc035_brim_url_table.sql.
       - name: imaging_sessions
         description: "direct copy of d3b dwh table prod_access.imaging_sessions"
       - name: stg_cbtn_enrollment_final
