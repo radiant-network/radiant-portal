@@ -1123,8 +1123,8 @@
           "d": "Délétère"
         },
         "has_comphet": {
-          "0": "Non",
-          "1": "Oui"
+          "0": "Faux",
+          "1": "Vrai"
         },
         "lrt_pred": {
           "n": "Neutre",

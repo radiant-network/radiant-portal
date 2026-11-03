@@ -1122,8 +1122,8 @@
           "d": "Damaging"
         },
         "has_comphet": {
-          "0": "No",
-          "1": "Yes"
+          "0": "False",
+          "1": "True"
         },
         "lrt_pred": {
           "n": "Neutral",
