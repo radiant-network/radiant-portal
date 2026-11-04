@@ -3,7 +3,7 @@
     tags=['pcx_30', 'intermediate']
 ) }}
 
-{%- set cohort_scope = var('pcx_30_cohort_scope', 'atrt_mb') -%}
+{%- set cohort_scope = var('pcx_30_cohort_scope', 'all_diagnosed') -%}
 
 -- The `subj` CTE, lifted out of the five prelim_30_sql/prod scripts that each
 -- carried a verbatim copy: the distinct (subject, cns_diagnosis_category) pairs
@@ -26,41 +26,43 @@
 -- (which 6 of the 7 _deid models and all 8 combined views inner-join) and
 -- pcx_30_demographics_deid (which joins this model directly) both read it.
 --
---   pcx_30_cohort_scope = 'atrt_mb'        DEFAULT. The curated ATRT /
---                                          Medulloblastoma cohort -- 970 subjects
---                                          here, 970 patients after the enrollment
---                                          inner join downstream. Publishes
---                                          identically to the pre-var definition
---                                          (see the study-filter note below).
+--   pcx_30_cohort_scope = 'all_diagnosed'  DEFAULT since 2026-11-04. Every subject
+--                                          with a CBTN-study diagnosis row. ATRT/MB
+--                                          keep their real category; everyone else
+--                                          collapses to exactly ONE 'Not Applicable'
+--                                          row. 6,957 subjects here, 6,957 patients
+--                                          downstream.
 --
---   pcx_30_cohort_scope = 'all_diagnosed'  Every subject with a CBTN-study diagnosis
---                                          row. ATRT/MB keep their real category;
---                                          everyone else collapses to exactly ONE
---                                          'Not Applicable' row. 6,957 subjects
---                                          here, 6,957 patients downstream.
+--   pcx_30_cohort_scope = 'atrt_mb'        The curated ATRT / Medulloblastoma
+--                                          cohort -- 970 subjects here, 970 patients
+--                                          after the enrollment inner join
+--                                          downstream. Retained as the route back,
+--                                          and it publishes identically to the
+--                                          pre-var definition (see the study-filter
+--                                          note below).
 --
--- WHY A VAR AND NOT AN EDIT: UPSTREAM_SOURCES.md section 5 instructs an operator to
--- refresh all seven sources and then rebuild everything downstream. Without this
--- gate, the next routine `dbt run` -- by anyone, for an unrelated source refresh --
--- would silently publish a 7x cohort. Expanding must be a deliberate act with its
--- own command line:
+-- THE EXPANSION WAS APPROVED FOR DOWNSTREAM USE 2026-11-04 (owner), AND THE DEFAULT
+-- WAS FLIPPED WITH IT. See COHORT_EXPANSION_PLAN.md in backend/scripts/pcx_tables --
+-- section 5 carries the governance checkpoint and its signed record, and section 1
+-- the authoritative statement of the collapse rule.
 --
---   dbt run --vars '{pcx_30_cohort_scope: all_diagnosed}'
+-- WHY THE DEFAULT MOVED, because the reasoning INVERTED and the old comment here
+-- said the opposite. While the expansion was unapproved, a default-off var stopped
+-- an accidental 7x publish: UPSTREAM_SOURCES.md section 5 tells an operator to
+-- refresh all seven sources and rebuild everything downstream, so without the gate
+-- the next routine `dbt run` by anyone would have silently published a 7x cohort.
+-- Now that the expanded cohort is the approved steady state, that SAME default
+-- points the wrong way -- a routine rebuild for an unrelated source refresh would
+-- silently REVERT the release to 970, a regression for consumers who were given
+-- 6,957. Section 5a anticipated exactly this and says to flip once the expansion is
+-- the steady state. So a plain `dbt run` now reproduces the approved release, and
+-- narrowing back to the curated cohort is the act that needs its own command line:
 --
--- THE EXPANSION WAS APPROVED FOR DOWNSTREAM USE 2026-11-04 (owner). See
--- COHORT_EXPANSION_PLAN.md in backend/scripts/pcx_tables -- section 5 carries the
--- governance checkpoint and its signed record, and section 1 the authoritative
--- statement of the collapse rule.
+--   dbt run --vars '{pcx_30_cohort_scope: atrt_mb}'
 --
--- THE DEFAULT IS STILL 'atrt_mb', AND THAT NOW CUTS THE OTHER WAY. While the
--- expansion was unapproved, a default-off var stopped an accidental 7x publish.
--- Now that the expanded cohort is the approved steady state, the same default means
--- a routine `dbt run` for an unrelated source refresh silently REVERTS the release
--- to 970 -- a regression for consumers who were given 6,957. Flipping the default
--- (or retiring the var) is the plan's own section 5a instruction once the expansion
--- is the steady state; it is held pending the owner's call, and until then every
--- rebuild of this model's subtree must carry
--- --vars '{pcx_30_cohort_scope: all_diagnosed}' explicitly.
+-- The var is deliberately NOT retired. It is the documented route back to 970 and
+-- the only thing that makes the curated definition reproducible; section 7 of the
+-- plan depends on it.
 --
 -- AND NOTE THIS MODEL IS NOT SUFFICIENT ON ITS OWN. pcx_30_event_level_deid
 -- re-filters cns_diagnosis_category to the same two categories in its own WHERE

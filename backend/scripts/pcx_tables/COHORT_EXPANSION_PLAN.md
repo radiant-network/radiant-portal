@@ -341,6 +341,30 @@ Three layers, because each catches a failure the others do not.
 
 ### 5a. A default-off scope var — stops an accident
 
+> **THE DEFAULT WAS FLIPPED 2026-11-04, on the owner's decision, when the
+> expansion was approved.** The live model reads
+> `var('pcx_30_cohort_scope', 'all_diagnosed')`. Everything below describes the
+> pre-approval posture and is kept because its *reasoning* is what justified the
+> flip — not because it describes the current default.
+>
+> The inversion is the point. A default-off var was right while the expansion was
+> unapproved: it stopped a routine refresh from publishing a 7x cohort by accident.
+> Once the expanded cohort became the approved steady state, the same default
+> pointed the wrong way — a routine `dbt run` would have silently REVERTED the
+> release to 970, which is a regression for consumers who were given 6,957. This
+> section's own last paragraph anticipated that and said to flip once the expansion
+> is the steady state.
+>
+> So the deliberate-act-with-its-own-command-line is now NARROWING, not expanding:
+>
+> ```
+> dbt run --vars '{pcx_30_cohort_scope: atrt_mb}'     # back to the curated 970
+> dbt run                                             # the approved 6,957 release
+> ```
+>
+> The var is **not** retired. It is the documented route back and the only thing
+> that keeps the curated definition reproducible; §7 depends on it.
+
 Gate `int_pcx_30_diagnosis_cohort.sql` on a dbt var that defaults to today's cohort:
 
 ```sql
@@ -372,13 +396,25 @@ forgotten sentence.
 
 | field | value |
 |---|---|
-| Approved by (name, role) | _unsigned_ |
-| Date approved | _unsigned_ |
-| Patient count approved | _unsigned_ (expected ~6,963 — record the MEASURED count) |
-| Cohort rule approved | §1 as written / amended (state how) |
-| Static CSVs may be refreshed? | yes / no |
-| Scope of use approved | _unsigned_ (demo payload / external hand-off / both) |
-| Re-review trigger | _unsigned_ (e.g. next cohort-rule change, or a refresh moving the patient grain >5%) |
+| Approved by (name, role) | **PENDING — to be supplied by the owner.** Approval itself was given 2026-11-04; the attribution has not yet been recorded. This row is deliberately left visible rather than filled with a guess. |
+| Date approved | 2026-11-04 |
+| Patient count approved | **6,957 — MEASURED on prod after the build, not the plan's expected ~6,963.** The difference is the §1b `research_study_name = 'CBTN'` qualifier, which excludes the 6 'CHOP Fly RNASeq' placeholder patients. All seven relations and all three layers agree; see §8. |
+| Cohort rule approved | §1 as written, with the §1b study qualifier. The `'Not Applicable'` collapse was accepted as-is (§9 question 1). |
+| Static CSVs may be refreshed? | **Yes, permitted** — the owner confirmed 2026-11-04 that a refresh is harmless. NOT done in this pass because they were not needed; the release directory still holds the pre-change 970 CSVs, which is also what preserves that release. §5c was consequently NOT built — see the note below. |
+| Scope of use approved | **PENDING — to be supplied by the owner** (demo payload / external hand-off / both). |
+| Re-review trigger | **PENDING — to be supplied by the owner.** |
+
+> **§5c was deliberately NOT built, and the reason is recorded so nobody rebuilds
+> it for the wrong reason.** The export-path refusal was specified to guard against
+> an unacknowledged cohort jump reaching the demo CSVs. The owner ruled 2026-11-04
+> that a CSV refresh is harmless, which removes the hazard the guard existed for, so
+> building it would have been a gate against a non-problem. If the CSVs ever become
+> a controlled hand-off, that ruling changes and §5c should be revisited.
+>
+> Note what this means for the CSVs today: the warehouse is at 6,957 and the
+> release directory is at 970. That is a known, accepted divergence, not drift —
+> and it is what keeps the pre-change release recoverable without an archive run.
+> All 7 on-disk CSVs were verified row-for-row against the pre-build live tables.
 
 Record the **measured** count, not the expected one: approving "~7,000" and
 shipping 8,400 after an upstream refresh is the failure this row prevents.
@@ -750,38 +786,93 @@ drop table if exists radiant_data_dev.int_pcx_30_diagnosis_cohort_all_cbtn;
 
 ## 8. Status
 
-**NOT EXECUTED** as of 2026-10-23. Prod still carries the 970-patient
-ATRT/Medulloblastoma cohort as its published release. No test, seed or CSV has been
-changed, and no live table or view has been rebuilt.
+**EXECUTED 2026-11-04.** The expanded cohort is published. Measured on prod
+immediately after the build, all three layers in agreement:
 
-Three things HAVE landed, all deliberately inert under the default scope:
+| relation | rows | patients |
+|---|---|---|
+| `pcx_30_demographics_deid` | 6,957 | 6,957 |
+| `pcx_30_event_level_deid` | 13,275 | 6,957 |
+| `pcx_30_patient_level_deid` | 6,932 | 6,932 |
+| `pcx_30_surgery_level_deid` | 9,326 | 6,506 |
+| `pcx_30_radiation_level_deid` | 3,279 | 2,565 |
+| `pcx_30_medical_therapy_level_deid` | 5,676 | 3,170 |
+| `pcx_30_treatment_summary_deid` | 6,957 | 6,957 |
 
-- `int_pcx_30_diagnosis_cohort.sql` carries the `pcx_30_cohort_scope` var (§5a),
-  defaulting to `atrt_mb`. Verified by compiling both arms: the default renders the
-  pre-var SQL exactly, so a plain `dbt run` is byte-identical to before.
-- `pcx_30_event_level_deid.sql` carries the third union arm (§6d). Self-gating on
-  `diagnosis_type_cohort = 'Not Applicable'`, which the default scope never
-  produces. Verified read-only against the live published table: zero differences
-  on every column not built by `group_concat`, both directions (§6e explains why
-  that qualifier is needed).
-- The 11 temporary `_all_cbtn` tables of §7 exist in `radiant_data_dev`. They are
-  measurement scaffolding, not a release.
+The 9 `radiant_data_dev` combined views and the 9 `cbtn_tenant` guarded views
+return the SAME counts as their tables, relation for relation. That equality is
+the thing §6g item 1 existed to secure, and it is the first time it has held
+under an expanded cohort.
 
-Decisions settled 2026-10-23: the cohort rule (§1), the collapse granularity, the
-treatment of ATRT/MB patients, the §1a fail-loud posture, and the §6d
-first-initial-diagnosis rule for the non-ATRT/MB cohort.
+`dbt run --select int_pcx_30_diagnosis_cohort+` → 29 models PASS (11 table, 18
+view). `dbt test` on the same selector → 22 PASS, 0 fail, including the
+`accepted_values` on `diagnosis_type_cohort` now that `'Not Applicable'` is
+listed. The data dictionary seed reloaded at 74 rows.
 
-Open, in rough priority order:
+### What the verification actually establishes
 
-1. **Port arm 3 to `v_pcx_30_event_level_combined.sql`** (§6g item 1) — mechanical,
-   but required before an expanded build can be published, or the table and the
-   view publish different populations.
-2. **The §6e `group_concat` ordering fix** — pre-existing, cheap, and until it is
-   done the row-level CSV diff that Phase 6 step 17 depends on cannot be trusted.
-3. **The §6f cross-category OpenPedCan question** — 4 patients, a clinical call.
-4. **The §6d tie-break** for the 14 patients whose earliest initial row is
-   ambiguous on category — currently alphabetical, for determinism only.
-5. **The §5b governance sign-off.**
+Three checks, because a count alone proves none of this:
+
+1. **No curated patient was lost.** The label split is 792 Medulloblastoma + 178
+   ATRT = **exactly 970**, and comparing the 970 `research_id`s in the pre-change
+   demographics CSV against the post-build table gives **0 missing**. This is the
+   check `UPSTREAM_SOURCES.md` §4 insists on — net growth from 970 to 6,957 would
+   hide a departure completely.
+2. **No curated patient's data changed.** All 970 curated demographics rows are
+   byte-identical pre and post, compared row-level across all 11 columns.
+3. **The grain reconciled rather than fragmenting.** §9 question 2 warned that a
+   consumer joining on `research_id` would meet three populations (demographics
+   6,963 / event_level 6,957 / patient_level 6,932). It is now **two**:
+   demographics and event_level both land on 6,957, because the §1b study
+   qualifier excludes the same 6 placeholder patients at the chokepoint that
+   event_level was already excluding. The residual 6,932 on `patient_level` is
+   unchanged and explained in §6d.
+
+### The three repo changes, and where they live now
+
+They are **no longer on `pcx30-cohort-expansion-prototype`**. That branch had
+become unreachable from `main` — `main` acquired a separately-authored copy of
+this entire `pcx_tables` tree, so none of its 15 commits were ancestors and a
+cherry-pick was unavailable. All three were re-applied by hand onto `main` and
+re-verified. `v_pcx_30_event_level_combined`'s third arm was never written on the
+prototype branch at all; it was authored fresh here.
+
+### A divergence this work surfaced, worth keeping
+
+Before this landed, the live `int_pcx_30_diagnosis_cohort` already read 970 while
+`main`'s model — which carries no study filter — would produce 995. The live
+relation had last been built from the prototype branch during the 2026-10-30
+accidental expansion and its revert, so **prod had been silently ahead of `main`'s
+definition since then**. Nothing published wrongly: the 25 affected subjects are
+absent from `stg_cbtn_enrollment_final` either way, re-measured 2026-11-04. But do
+not read a count on prod as evidence of what the committed code produces. This
+work reconciled them.
+
+### Still open, and NOT closed by this
+
+- **§6f** — 4 patients whose CBTN category is `'Other CNS Embryonal tumors'` but
+  which receive a Medulloblastoma integrated diagnosis. Accepted as-is and
+  documented, owner 2026-11-04. A clinical question, not a blocker.
+- **§6d tie-break** — 14 patients whose earliest initial-diagnosis row is
+  ambiguous on category, resolved alphabetically for determinism only. Same
+  disposition.
+- **§6c `is_initial_treatment`** — the `'no'` population still conflates "not
+  frontline" with "cannot tell". The expansion improved it enormously (8,169 →
+  1,243 rows) but did not fix the conflation, which predates this work.
+  Publishing NULL instead of `'no'` when the anchor is missing remains the right
+  fix and is independent of the cohort.
+- **`openpedcan_histologies_annotated` is stale** (no loader, `UPSTREAM_SOURCES.md`
+  §6 item 5), so newly admitted patients are under-upgraded. Degraded, not wrong.
+- **The §5b attribution rows** — approver, scope of use, re-review trigger.
+- **The dictionary `diagnosis_type_cohort` description** is now corrected in the
+  seed and live, so this is no longer open.
+
+### The 11 `_all_cbtn` preview tables
+
+Still present in `radiant_data_dev` (§7). They served as the comparison baseline
+for this build and every count matched them exactly. They are now redundant and
+can be dropped at the owner's convenience; §7 carries the statements. Nothing
+reads them.
 
 ---
 
