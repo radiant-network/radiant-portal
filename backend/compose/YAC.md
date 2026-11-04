@@ -76,11 +76,12 @@ StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore app
 `yac/backends.json` exposes one package, `cbtn`: two views of tenant `cbtn`, in database
 `cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
 
-- `Efs` and `Os` (`v_pcx30_efs_all_dx_v6_months_cube`, `v_pcx30_os_all_dx_v6_months_cube`) are
+- `Efs` and `Os` (`v_pcx__30_efs_pooled_v7_months_cube`, `v_pcx__30_os_pooled_v7_months_cube`) are
   pre-aggregated event-free and overall survival cubes (`udi:cube`): patient counts over diagnosis,
-  protocol arm, subtype and site, where NULL means the dimension is rolled up. `Os` links its
-  dimensions to `Efs`'s, so one filter reaches both. They are built from a newer data release
-  (`scripts/seed/data/cubes`, 970 patients) than the patient views.
+  protocol arm, subtype, site and data source, where NULL means the dimension is rolled up. `Os`
+  links its dimensions to `Efs`'s, so one filter reaches both. They pool CBTN PCX 30 V7 with
+  Cumulus-BCH (`scripts/seed/data/cubes`, 7,440 patients), so they hold far more patients than the
+  patient views.
 - The descriptions and cube settings come from the cubes' datapackage, so the LLM knows what each
   column means.
 - The cubes hold counts only, no PHI: every user with access to the tenant sees the same rows.
@@ -99,7 +100,7 @@ tok() { curl -s -d client_id=radiant --data-urlencode "client_secret=$SECRET" -d
   -d "password=$1" -d grant_type=password \
   http://localhost:8080/realms/radiant/protocol/openid-connect/token | jq -r .access_token; }
 
-# Same query, different users, read as each of them: 24056 cube rows for every user.
+# Same query, different users, read as each of them: 249587 cube rows for every user.
 for u in cbtn-admin cbtn-phi-chop cbtn-nophi; do
   curl -s -X POST localhost:8007/v1/yac/query -H "Authorization: Bearer $(tok $u)" -H 'Content-Type: application/json' \
     -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"Efs","source":"Efs"}],
