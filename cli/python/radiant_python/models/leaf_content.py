@@ -27,8 +27,9 @@ class LeafContent(BaseModel):
     LeafContent
     """ # noqa: E501
     var_field: Optional[StrictStr] = Field(default=None, alias="field")
+    override_values_name: Optional[StrictStr] = Field(default=None, description="OverrideValuesName is a display label for the values (e.g. a variant's HGVSg instead of its locus_id). It is stored with saved filters and has no effect on the query.", alias="overrideValuesName")
     value: Optional[List[Any]] = None
-    __properties: ClassVar[List[str]] = ["field", "value"]
+    __properties: ClassVar[List[str]] = ["field", "overrideValuesName", "value"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,6 +83,7 @@ class LeafContent(BaseModel):
 
         _obj = cls.model_validate({
             "field": obj.get("field"),
+            "overrideValuesName": obj.get("overrideValuesName"),
             "value": obj.get("value")
         })
         return _obj

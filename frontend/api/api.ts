@@ -5395,6 +5395,12 @@ export interface LeafContent {
      */
     'field'?: string;
     /**
+     * OverrideValuesName is a display label for the values (e.g. a variant\'s HGVSg instead of its locus_id). It is stored with saved filters and has no effect on the query.
+     * @type {string}
+     * @memberof LeafContent
+     */
+    'overrideValuesName'?: string;
+    /**
      * 
      * @type {Array<any>}
      * @memberof LeafContent
