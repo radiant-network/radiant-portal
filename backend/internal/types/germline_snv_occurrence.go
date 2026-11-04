@@ -573,8 +573,6 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	GermlineSNVExomiserAcmgEvidenceField,
 	GermlineSNVExomiserGeneCombinedScoreField,
 	GermlineSNVExomiserVariantScoreField,
-	GermlineSNVHasComphetField,
-	GermlineSNVComphetGenesField,
 }
 
 var GermlineSNVOccurrencesDefaultSort = []SortField{{Field: GermlineSNVExomiserGeneCombinedScoreField, Order: "desc"}, {Field: PickedImpactScoreField, Order: "desc"}}
