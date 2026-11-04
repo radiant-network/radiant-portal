@@ -18,6 +18,7 @@ type IGVDialogProps = {
   seqId: number;
   locus: string;
   start: number;
+  end?: number;
   chromosome: string;
   renderTrigger?: (handleOpen: () => void) => ReactNode;
 };
@@ -25,7 +26,7 @@ type IGVDialogProps = {
 const fetchIGVForCaseId = async ({ caseId }: { caseId: number }, tenant: string) =>
   igvApi.getIGV(tenant, caseId.toString()).then(response => response.data);
 
-const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
+const IGVDialog = ({ caseId, seqId, locus, start, end, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const fetchIGV = useSWR<IGVTracks>(
@@ -64,7 +65,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
               <DialogTitle>{t('variant.igv.title')}</DialogTitle>
             </DialogHeader>
             <DialogBody className="relative max-h-[85vh] overflow-y-auto">
-              <IGV tracks={caseTracks} locus={formatLocus(start, chromosome, 100)} />
+              <IGV tracks={caseTracks} locus={formatLocus(start, chromosome, 100, end)} />
             </DialogBody>
           </div>
         )}

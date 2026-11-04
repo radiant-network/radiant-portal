@@ -5,6 +5,7 @@ import type { CaseEntity, CaseStatus, Term, VepImpact } from '@/api/api';
 import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
+import CNVIGVCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-igv-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
 import ComphetGenesCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/comphet-genes-cell';
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
@@ -929,6 +930,7 @@ export const thirdSetCellData = [
  *   - CaseActionsMenuCell (Case-Exploration)
  *   - CNVNameCell (Variant-Entity/CNV)
  *   - ClingenCell (Variant-Entity/CNV)
+ *   - CNVIGVCell (Variant-Entity/CNV)
  */
 const STORYBOOK_TENANT = 'radiant';
 const STORYBOOK_DIAGNOSIS_LAB = 'CHUSJ';
@@ -1107,6 +1109,24 @@ export const applicationFirstSetCellColumns = [
       </OverlappingGeneLinkCell>
     ),
     header: 'Clingen (Variant-Tab/CNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'cnv_igv',
+    cell: info => <CNVIGVCell occurrence={info.getValue() as any} hasIGVFiles />,
+    header: 'CNVIGVCell (Variant-Tab/CNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'cnv_igv_no_files',
+    cell: info => <CNVIGVCell occurrence={info.getValue() as any} hasIGVFiles={false} />,
+    header: 'CNVIGVCell (no IGV files)',
     size: 150,
     enablePinning: false,
     enableResizing: false,
