@@ -15,7 +15,7 @@
             "function": {
               "name": "RenderVisualization",
               "arguments": {
-                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx__30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": [{\"mark\": \"rect\", \"mapping\": [{\"encoding\": \"color\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"x\", \"field\": \"diagnosis\", \"type\": \"nominal\"}]}, {\"mark\": \"text\", \"mapping\": [{\"encoding\": \"text\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"x\", \"field\": \"diagnosis\", \"type\": \"nominal\"}, {\"encoding\": \"color\", \"value\": \"black\"}], \"stroke\": \"white\", \"strokeWidth\": 3, \"strokeOpacity\": 0.7}]}",
+                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": [{\"mark\": \"rect\", \"mapping\": [{\"encoding\": \"color\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"x\", \"field\": \"diagnosis\", \"type\": \"nominal\"}]}, {\"mark\": \"text\", \"mapping\": [{\"encoding\": \"text\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"x\", \"field\": \"diagnosis\", \"type\": \"nominal\"}, {\"encoding\": \"color\", \"value\": \"black\"}], \"stroke\": \"white\", \"strokeWidth\": 3, \"strokeOpacity\": 0.7}]}",
                 "titleTemplate": "{enc:color} by {enc:x} and {enc:y}",
                 "summaryTemplate": "Displays {enc:color} for each pairing of {enc:x} and {enc:y}, as a grid of shaded, labelled cells."
               },
@@ -75,7 +75,7 @@
             "function": {
               "name": "RenderVisualization",
               "arguments": {
-                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx__30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"color\", \"field\": \"data_source\", \"type\": \"nominal\"}]}}",
+                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"site\", \"type\": \"nominal\"}, {\"encoding\": \"color\", \"field\": \"data_source\", \"type\": \"nominal\"}]}}",
                 "titleTemplate": "{enc:x} by {enc:y} and {enc:color}",
                 "summaryTemplate": "Displays {enc:x} for each {enc:y} category as horizontal bars, split by {enc:color}."
               },
@@ -135,7 +135,7 @@
             "function": {
               "name": "RenderVisualization",
               "arguments": {
-                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx__30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"data_source\", \"type\": \"nominal\"}]}}",
+                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"data_source\", \"type\": \"nominal\"}]}}",
                 "titleTemplate": "{enc:x} by {enc:y}",
                 "summaryTemplate": "Displays {enc:x} for each {enc:y} category as horizontal bars."
               },
@@ -182,7 +182,7 @@
             "function": {
               "name": "RenderVisualization",
               "arguments": {
-                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx__30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"diagnosis\", \"type\": \"nominal\"}]}}",
+                "spec": "{\"source\": {\"name\": \"Os\", \"source\": \"v_pcx30_os_pooled_v7_months_cube\"}, \"transformation\": [{\"filter\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"&&\", \"left\": {\"op\": \"==\", \"left\": {\"field\": \"overall_survival_months\"}, \"right\": {\"literal\": null}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"vital_status\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"!=\", \"left\": {\"field\": \"diagnosis\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"protocol_name_and_arm\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"subtype\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"site\"}, \"right\": {\"literal\": null}}}, \"right\": {\"op\": \"==\", \"left\": {\"field\": \"data_source\"}, \"right\": {\"literal\": null}}}}], \"representation\": {\"mark\": \"bar\", \"mapping\": [{\"encoding\": \"x\", \"field\": \"cnt\", \"type\": \"quantitative\"}, {\"encoding\": \"y\", \"field\": \"diagnosis\", \"type\": \"nominal\"}]}}",
                 "titleTemplate": "{enc:x} by {enc:y}",
                 "summaryTemplate": "Displays {enc:x} for each {enc:y} category as horizontal bars."
               },
@@ -241,7 +241,7 @@
       "spec": {
         "source": {
           "name": "Os",
-          "source": "v_pcx__30_os_pooled_v7_months_cube"
+          "source": "v_pcx30_os_pooled_v7_months_cube"
         },
         "transformation": [
           {
@@ -424,7 +424,7 @@
       "spec": {
         "source": {
           "name": "Os",
-          "source": "v_pcx__30_os_pooled_v7_months_cube"
+          "source": "v_pcx30_os_pooled_v7_months_cube"
         },
         "transformation": [
           {
@@ -579,7 +579,7 @@
       "spec": {
         "source": {
           "name": "Os",
-          "source": "v_pcx__30_os_pooled_v7_months_cube"
+          "source": "v_pcx30_os_pooled_v7_months_cube"
         },
         "transformation": [
           {
@@ -715,7 +715,7 @@
       "spec": {
         "source": {
           "name": "Os",
-          "source": "v_pcx__30_os_pooled_v7_months_cube"
+          "source": "v_pcx30_os_pooled_v7_months_cube"
         },
         "transformation": [
           {

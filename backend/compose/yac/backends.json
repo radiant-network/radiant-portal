@@ -12,8 +12,8 @@
       }
     },
     "tables": {
-      "Efs": "v_pcx__30_efs_pooled_v7_months_cube",
-      "Os": "v_pcx__30_os_pooled_v7_months_cube"
+      "Efs": "v_pcx30_efs_pooled_v7_months_cube",
+      "Os": "v_pcx30_os_pooled_v7_months_cube"
     },
     "schemas": {
       "Efs": {

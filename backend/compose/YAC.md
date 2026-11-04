@@ -76,7 +76,7 @@ StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore app
 `yac/backends.json` exposes one package, `cbtn`: two views of tenant `cbtn`, in database
 `cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
 
-- `Efs` and `Os` (`v_pcx__30_efs_pooled_v7_months_cube`, `v_pcx__30_os_pooled_v7_months_cube`) are
+- `Efs` and `Os` (`v_pcx30_efs_pooled_v7_months_cube`, `v_pcx30_os_pooled_v7_months_cube`) are
   pre-aggregated event-free and overall survival cubes (`udi:cube`): patient counts over diagnosis,
   protocol arm, subtype, site and data source, where NULL means the dimension is rolled up. `Os`
   links its dimensions to `Efs`'s, so one filter reaches both. They pool CBTN PCX 30 V7 with
