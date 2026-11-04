@@ -45,6 +45,9 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Afficher les {{count}} variants hét. composés dans {{gene}} dans une nouvelle requête"
+    },
     "data_table": {
       "collapse_row": "Replier la ligne",
       "column_settings": "Paramètres des colonnes",
@@ -960,6 +963,9 @@
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "comphet_of": "Hét. composé de",
+        "has_comphet": "Hét. composé",
+        "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1115,6 +1121,10 @@
         "fathmm_pred": {
           "t": "Toléré",
           "d": "Délétère"
+        },
+        "has_comphet": {
+          "0": "Faux",
+          "1": "Vrai"
         },
         "lrt_pred": {
           "n": "Neutre",
@@ -2053,6 +2063,8 @@
       "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
       "cmc_tier": "Tier",
       "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
+      "comphet_genes": "HC",
+      "comphet_genes_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
       "cn": "CN",
       "cn_tooltip": "Nombre de copies estimé",
       "cytoband": "Cytobande",
