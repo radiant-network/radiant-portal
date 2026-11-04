@@ -60,7 +60,7 @@ points at the local StarRocks, and that StarRocks doesn't know remote users.
 | `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint, for requests without a user key. Requests with a user key always go to OpenAI |
 | `YAC_PORT` | `8007` | Host port |
 | `YAC_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins |
-| `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#main` | Git ref or local clone path (relative to `compose/`) |
+| `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.1` | Git ref or local clone path (relative to `compose/`) |
 | `YAC_KEYCLOAK` | unset | Keycloak realm URL of another environment, e.g. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin`. It becomes the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. |
 
 Unset, the agent trusts the local realm: the issuer is `http://localhost:8080/realms/radiant` (the URL
