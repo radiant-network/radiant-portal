@@ -96,10 +96,12 @@ export function BooleanFacet({ field }: BooleanFacetProps) {
     }
   }, [activeQueryId]);
 
+  const isFirstLoad = isLoading && items.length === 0;
+
   return (
     <>
       <CardContent size="sm" variant="outline">
-        {isLoading &&
+        {isFirstLoad &&
           Array.from({ length: 2 }, (_, i) => (
             <div className="flex justify-between items-center py-2 space-x-2" key={`skeleton-${i}`}>
               <Skeleton className="w-full h-6 rounded" />
@@ -111,7 +113,7 @@ export function BooleanFacet({ field }: BooleanFacetProps) {
           <div className="text-muted-foreground py-4">{t('common.facets.no_values_found')}</div>
         )}
 
-        {!isLoading && items.length > 0 && (
+        {items.length > 0 && (
           <RadioGroup value={selectedItem ?? ''} onValueChange={handleSelect} className="gap-0 pt-3">
             {items.map(item => {
               const id = `${field.key}-${item.key}`;
