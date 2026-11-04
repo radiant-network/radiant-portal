@@ -84,4 +84,9 @@ describe('germline CNV gnomAD SV columns', () => {
     expect(en.variant.headers.gnomad_sf_tooltip).toContain('Site Frequency');
     expect(fr.variant.headers.gnomad_sf_tooltip).toContain('fréquence de site');
   });
+
+  it('names the SF column like its AF, AC and SC neighbours', () => {
+    expect(en.variant.headers.gnomad_sf).toBe('gnomAD SF');
+    expect(fr.variant.headers.gnomad_sf).toBe('gnomAD SF');
+  });
 });

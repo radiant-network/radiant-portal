@@ -2073,7 +2073,7 @@
       "gene_length_tooltip": "Longueur du gène en bases",
       "genotype_quality": "QG",
       "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences.",
-      "gnomad_sf": "gnomAD",
+      "gnomad_sf": "gnomAD SF",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence de site)",
       "gnomad_sv_ac": "gnomAD AC",
       "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (nombre d'allèles)",

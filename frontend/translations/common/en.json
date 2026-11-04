@@ -2072,7 +2072,7 @@
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
       "genotype_quality_tooltip": "Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
-      "gnomad_sf": "gnomAD",
+      "gnomad_sf": "gnomAD SF",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (Site Frequency)",
       "gnomad_sv_ac": "gnomAD AC",
       "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (Allele Count)",
