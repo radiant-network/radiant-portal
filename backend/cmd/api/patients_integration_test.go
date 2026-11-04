@@ -29,6 +29,7 @@ var patientViewRoutes = []string{
 	"GET /:tenant/patients/:patient_key/imaging",
 	"GET /:tenant/patients/:patient_key/genomics",
 	"GET /:tenant/patients/:patient_key/external_records",
+	"GET /:tenant/patients/:patient_key/trial_eligibilities",
 }
 
 func registeredRoutes(router *gin.Engine) map[string]bool {
@@ -203,6 +204,7 @@ func getPatientIntegration(t *testing.T, env *testutils.Env, path string) *httpt
 	router.GET("/:tenant/patients/:patient_key/imaging", server.PatientImagingHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/genomics", server.PatientGenomicsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/external_records", server.PatientExternalRecordsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/trial_eligibilities", server.PatientTrialEligibilitiesHandler(repo))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+path, nil))
 	return w
@@ -251,9 +253,20 @@ func Test_PatientExternalRecords_ReturnsTheOrganizationsOfThePatient(t *testing.
 	})
 }
 
+func Test_PatientTrialEligibilities_ReturnsTheVerdictsOfThePatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000002/trial_eligibilities")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Eligible", "generated_verdict": "Eligible", "confidence": "0.9",
+			"review_status": null, "reasoning": "Note of 2018-01-10 for MRN-0001.", "brim_url": "https://brim.example/p/2",
+			"loaded_at": "2026-10-20T10:00:00Z"}]}`, w.Body.String())
+	})
+}
+
 func Test_PatientTabs_UnknownKey_404(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
-		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics", "external_records"} {
+		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities"} {
 			w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000999/"+tab)
 
 			assert.Equal(t, http.StatusNotFound, w.Code, tab)

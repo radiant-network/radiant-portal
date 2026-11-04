@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**patient_imaging**](PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
 [**patient_laboratory**](PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
 [**patient_treatments**](PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
+[**patient_trial_eligibilities**](PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
 [**patients_filters**](PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 [**patients_statistics**](PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 [**post_patient_batch**](PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -585,6 +586,90 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PatientTreatments**](PatientTreatments.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_trial_eligibilities**
+> PatientTrialEligibilities patient_trial_eligibilities(tenant, patient_key)
+
+Get PatientTrialEligibilities of a patient
+
+Retrieve PatientTrialEligibilities, the eligibility verdicts BRIM extracted from the patient's notes, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_trial_eligibilities import PatientTrialEligibilities
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientTrialEligibilities of a patient
+        api_response = api_instance.patient_trial_eligibilities(tenant, patient_key)
+        print("The response of PatientsApi->patient_trial_eligibilities:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_trial_eligibilities: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientTrialEligibilities**](PatientTrialEligibilities.md)
 
 ### Authorization
 

@@ -1,0 +1,4 @@
+organization_name,research_id,variable_name,generated_value,eligibility_value,confidence,review_status,brim_scope,brim_loaded_at
+Children's Hospital Los Angeles,C8832261,3.6 PNOC035 Eligibility,Ineligible Permanent,Ineligible Permanent,0.95,,One Label Per Patient,2026-11-03 11:57:31
+Seattle Children's Hospital,C7617267,3.6 PNOC035 Eligibility,Ineligible Modifiable,Ineligible Modifiable,0.95,,One Label Per Patient,2026-11-04 09:50:55
+The Children's Hospital of Philadelphia,C1100235,3.6 PNOC035 Eligibility,Ineligible Permanent,Ineligible Permanent,0.95,,One Label Per Patient,2026-10-23 17:00:26

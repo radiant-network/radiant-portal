@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -367,6 +368,7 @@ type pcxPatientTabsReaderMock struct {
 	imaging    *types.PatientImaging
 	genomics   *types.PatientGenomics
 	external   *types.PatientExternalRecords
+	trials     *types.PatientTrialEligibilities
 	err        error
 	key        string
 }
@@ -396,7 +398,12 @@ func (m *pcxPatientTabsReaderMock) GetPatientExternalRecords(_ context.Context, 
 	return m.external, m.err
 }
 
-var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics", "external_records"}
+func (m *pcxPatientTabsReaderMock) GetPatientTrialEligibilities(_ context.Context, patientKey string) (*types.PatientTrialEligibilities, error) {
+	m.key = patientKey
+	return m.trials, m.err
+}
+
+var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities"}
 
 func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.ResponseRecorder {
 	router := gin.Default()
@@ -405,6 +412,7 @@ func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.Re
 	router.GET("/:tenant/patients/:patient_key/imaging", PatientImagingHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/genomics", PatientGenomicsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/external_records", PatientExternalRecordsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/trial_eligibilities", PatientTrialEligibilitiesHandler(repo))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key+"/"+tab, nil))
 	return w
@@ -458,6 +466,19 @@ func Test_PatientExternalRecordsHandler_ReturnsTheOrganizations(t *testing.T) {
 	assert.Equal(t, testPatientKey, repo.key)
 	assert.JSONEq(t, `{"organization_count": 1, "document_count": 2, "document_class_count": 1, "organizations": [{"name": "Temple Health",
 		"network": "tefca", "document_count": 2, "document_classes": [{"name": "Lab", "document_count": 2, "types": []}]}]}`, w.Body.String())
+}
+
+func Test_PatientTrialEligibilitiesHandler_ReturnsTheAssessments(t *testing.T) {
+	confidence := "0.95"
+	repo := &pcxPatientTabsReaderMock{trials: &types.PatientTrialEligibilities{Assessments: []types.PatientTrialEligibility{
+		{VariableName: "3.6 PNOC035 Eligibility", Verdict: "Ineligible Permanent", Confidence: &confidence, LoadedAt: time.Date(2026, 10, 23, 17, 0, 26, 0, time.UTC)}}}}
+
+	w := getPatientTab(repo, "trial_eligibilities", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Ineligible Permanent", "generated_verdict": null, "confidence": "0.95",
+		"review_status": null, "reasoning": null, "brim_url": null, "loaded_at": "2026-10-23T17:00:26Z"}]}`, w.Body.String())
 }
 
 func Test_PatientGenomicsHandler_ReturnsCasesAndInterpretations(t *testing.T) {

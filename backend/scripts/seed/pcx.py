@@ -205,7 +205,47 @@ def build(deid_dir, organizations, pins=None, extra_dir=None):
                     row.append(r[c])
             rows.append(row)
         tables[table] = (cols, rows)
+    tables["v_pcx_30_pnoc035_eligibility_combined"] = (ELIGIBILITY_COLS, eligibility(deid_dir, patients, codes))
     return patients, data, tables
+
+
+ELIGIBILITY_COLS = IDENT + [("variable_name", "VARCHAR(256)"), ("generated_value", S), ("eligibility_value", S), ("reasoning", S), ("confidence", "VARCHAR(64)"),
+                            ("review_status", "VARCHAR(128)"), ("brim_scope", "VARCHAR(128)"), ("brim_url", "VARCHAR(512)"),
+                            ("note_id", "VARCHAR(256)"), ("source_file", "VARCHAR(256)"), ("brim_loaded_at", "DATETIME")]
+BRIM = "https://brim.example.org"
+
+
+def eligibility(deid_dir, patients, codes):
+    """The PNOC035 verdicts, with fake PHI in reasoning, brim_url and source_file. In PRD a verdict can belong to a patient outside the
+    cohort (resolved through enrollment): such a patient gets an MRN of its own and no portal patient. No CSV, no rows."""
+    path = os.path.join(deid_dir, "pcx_30_pnoc035_eligibility_deid.csv")
+    if not os.path.exists(path):
+        return []
+    used = {p.mrn for p in patients.values()}
+    rows = []
+    for r in read_csv(path):
+        rid, p = r["research_id"], patients.get(r["research_id"])
+        if p:
+            org_name, org, mrn = p.org_name, p.org, p.mrn
+        else:
+            org_name = r["organization_name"]
+            if org_name not in codes:
+                raise SystemExit(f"{rid}: organization {org_name!r} is not in the organization reference")
+            org, mrn, retry = codes[org_name], None, 0
+            while mrn is None or mrn in used:
+                mrn = str(10_000_000 + h("mrn", rid, "outside", retry) % 90_000_000)
+                retry += 1
+            used.add(mrn)
+        note = dt.date(2025, 1, 1) + dt.timedelta(days=h("note", rid) % 365)
+        reasoning = (f"Per the neuro-oncology note of {note.isoformat()} for MRN {mrn}, the patient does not meet the PNOC035 "
+                     f"inclusion criteria: {r['eligibility_value']}.")
+        # BRIM names its exports after the patient's MRN, so source_file is PHI too.
+        source_file = f"{r['brim_loaded_at'][:10]}-Radiant-BRIM-Development-patient-{mrn}.csv"
+        rows.append([org_name, org, mrn, rid, r["variable_name"], r["generated_value"], r["eligibility_value"], reasoning,
+                     r["confidence"], r["review_status"], r["brim_scope"],
+                     f"{BRIM}/overview/project/54/visualize_variable/?var_ids=3610&patient_id={h('brim', rid) % 1_000_000}",
+                     f"note-{h('note_id', rid) % 100_000_000}", source_file, r["brim_loaded_at"]])
+    return rows
 
 
 def read_csv_header(path):

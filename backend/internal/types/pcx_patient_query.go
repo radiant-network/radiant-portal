@@ -85,3 +85,5 @@ var PcxCsfTable = Table{Name: "v_csf_results_latest_by_component", Alias: "csf",
 
 // Radiant's own view over the health information network exchanges (scripts/seed/views).
 var PcxHinExchangeTable = Table{Name: "v_pcx_30_hin_exchange", Alias: "hin", PerTenant: true}
+
+var PcxPnoc035EligibilityTable = Table{Name: "v_pcx_30_pnoc035_eligibility_combined", Alias: "pnoc035", PerTenant: true}
