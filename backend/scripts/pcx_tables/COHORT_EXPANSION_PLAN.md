@@ -10,7 +10,8 @@ labelling the newly admitted patients `diagnosis_type_cohort = 'Not Applicable'`
 > document were measured 2026-10-23 against the unqualified rule and are left as
 > measured; where one says 6,963, §1b is what supersedes it.
 
-> **STATUS 2026-11-04 — APPROVED for downstream use by the owner. In execution.**
+> **STATUS 2026-11-04 — APPROVED for downstream use. Executed; see §8.**
+> Approved by **Hannah Calkins, Adam Resnick, Allison Heath and Devin Lange**.
 > The external evaluation that §9 was written for has concluded and the approach
 > was accepted. §9 is retained as the record of what was asked and answered, not
 > as an open question. The §5b sign-off table below carries the approval details.
@@ -396,7 +397,7 @@ forgotten sentence.
 
 | field | value |
 |---|---|
-| Approved by (name, role) | **PENDING — to be supplied by the owner.** Approval itself was given 2026-11-04; the attribution has not yet been recorded. This row is deliberately left visible rather than filled with a guess. |
+| Approved by (name, role) | **Hannah Calkins, Adam Resnick, Allison Heath, Devin Lange** — recorded 2026-11-04 as supplied. Roles were not stated and are deliberately not inferred here; add them if this record is ever needed for an audit that turns on role. |
 | Date approved | 2026-11-04 |
 | Patient count approved | **6,957 — MEASURED on prod after the build, not the plan's expected ~6,963.** The difference is the §1b `research_study_name = 'CBTN'` qualifier, which excludes the 6 'CHOP Fly RNASeq' placeholder patients. All seven relations and all three layers agree; see §8. |
 | Cohort rule approved | §1 as written, with the §1b study qualifier. The `'Not Applicable'` collapse was accepted as-is (§9 question 1). |
@@ -863,7 +864,9 @@ work reconciled them.
   fix and is independent of the cohort.
 - **`openpedcan_histologies_annotated` is stale** (no loader, `UPSTREAM_SOURCES.md`
   §6 item 5), so newly admitted patients are under-upgraded. Degraded, not wrong.
-- **The §5b attribution rows** — approver, scope of use, re-review trigger.
+- **Two §5b rows** — scope of use, and the re-review trigger. The approvers are
+  recorded (four names, 2026-11-04); their roles were not supplied and are not
+  inferred.
 - **The dictionary `diagnosis_type_cohort` description** is now corrected in the
   seed and live, so this is no longer open.
 

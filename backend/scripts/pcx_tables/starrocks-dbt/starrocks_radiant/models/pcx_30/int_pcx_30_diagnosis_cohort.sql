@@ -41,10 +41,11 @@
 --                                          pre-var definition (see the study-filter
 --                                          note below).
 --
--- THE EXPANSION WAS APPROVED FOR DOWNSTREAM USE 2026-11-04 (owner), AND THE DEFAULT
--- WAS FLIPPED WITH IT. See COHORT_EXPANSION_PLAN.md in backend/scripts/pcx_tables --
--- section 5 carries the governance checkpoint and its signed record, and section 1
--- the authoritative statement of the collapse rule.
+-- THE EXPANSION WAS APPROVED FOR DOWNSTREAM USE 2026-11-04, AND THE DEFAULT WAS
+-- FLIPPED WITH IT. Approved by Hannah Calkins, Adam Resnick, Allison Heath and
+-- Devin Lange. See COHORT_EXPANSION_PLAN.md in backend/scripts/pcx_tables --
+-- section 5b carries the signed record and the measured count (6,957), and
+-- section 1 the authoritative statement of the collapse rule.
 --
 -- WHY THE DEFAULT MOVED, because the reasoning INVERTED and the old comment here
 -- said the opposite. While the expansion was unapproved, a default-off var stopped
