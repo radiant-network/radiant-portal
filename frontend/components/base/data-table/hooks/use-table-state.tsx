@@ -125,13 +125,14 @@ export function useTableGetPreferenceEffect({
     }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
-      const { columnOrder, columnVisibility } = completeSavedColumnSettings({
+      const { columnOrder, columnPinning, columnVisibility } = completeSavedColumnSettings({
         columnOrder: tablePreference.columnOrder,
+        columnPinning: normalizeColumnPinning(tablePreference.columnPinning),
         columnVisibility: tablePreference.columnVisibility,
         defaultColumnSettings,
       });
       setColumnOrder(columnOrder);
-      setColumnPinning(normalizeColumnPinning(tablePreference.columnPinning));
+      setColumnPinning(columnPinning);
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(columnVisibility);
       setPagination({

@@ -18,6 +18,15 @@ const defaultColumnSettings: ColumnSettings[] = [
 const savedOrder = ['sf', 'name', 'type', 'calls'];
 const savedVisibility = { sf: true, name: true, type: false, calls: true };
 
+// A table whose pinned `igv` column was added after the user saved, next to the pinned `row-info`.
+const pinnedDefaultColumnSettings: ColumnSettings[] = [
+  { id: 'row-info', visible: true, index: 0, pinningPosition: 'start' },
+  { id: 'igv', visible: true, index: 1, pinningPosition: 'start' },
+  { id: 'symbol', visible: true, index: 2 },
+  { id: 'export', visible: true, index: 3, pinningPosition: 'end' },
+  { id: 'actions', visible: true, index: 4, pinningPosition: 'end' },
+];
+
 describe('completeSavedColumnSettings', () => {
   it('gives a column the saved settings do not know its default visibility', () => {
     const { columnVisibility } = completeSavedColumnSettings({
@@ -112,5 +121,34 @@ describe('completeSavedColumnSettings', () => {
     expect(getFilteredAdditionalFields({ columnVisibility, defaultColumnSettings: withVisibleAf })).toContain(
       'gnomad_af',
     );
+  });
+
+  it('pins a new column on its default side, right after the pinned column that precedes it', () => {
+    const { columnPinning } = completeSavedColumnSettings({
+      columnOrder: ['row-info', 'symbol', 'actions'],
+      columnPinning: { start: ['row-info'], end: ['actions'] },
+      columnVisibility: {},
+      defaultColumnSettings: pinnedDefaultColumnSettings,
+    });
+
+    expect(columnPinning).toEqual({ start: ['row-info', 'igv'], end: ['export', 'actions'] });
+  });
+
+  it('keeps the pinning the user saved for the columns they knew', () => {
+    const { columnPinning } = completeSavedColumnSettings({
+      columnOrder: ['row-info', 'symbol', 'export', 'actions'],
+      columnPinning: { start: ['row-info', 'symbol'], end: ['actions'] },
+      columnVisibility: {},
+      defaultColumnSettings: pinnedDefaultColumnSettings,
+    });
+
+    // `export` was known and left unpinned by the user; only `igv` is new
+    expect(columnPinning).toEqual({ start: ['row-info', 'igv', 'symbol'], end: ['actions'] });
+  });
+
+  it('returns the default pinning when nothing was saved', () => {
+    const { columnPinning } = completeSavedColumnSettings({ defaultColumnSettings: pinnedDefaultColumnSettings });
+
+    expect(columnPinning).toEqual({ start: ['row-info', 'igv'], end: ['export', 'actions'] });
   });
 });

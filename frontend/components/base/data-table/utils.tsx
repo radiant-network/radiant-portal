@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import type { ColumnPinningState } from '@tanstack/react-table';
 
 import type { ColumnSettings } from './data-table';
 
@@ -23,26 +24,49 @@ export const getFilteredAdditionalFields = ({
 
 type CompleteSavedColumnSettingsProps = {
   columnOrder?: string[];
+  columnPinning?: ColumnPinningState;
   columnVisibility?: Record<string, boolean>;
   defaultColumnSettings: ColumnSettings[];
 };
 
+type CompletedColumnSettings = {
+  columnOrder: string[];
+  columnPinning: ColumnPinningState;
+  columnVisibility: Record<string, boolean>;
+};
+
+const insertAfterClosestKnownDefault = (ids: string[], defaults: ColumnSettings[], position: number) => {
+  const previous = defaults
+    .slice(0, position)
+    .reverse()
+    .find(candidate => ids.includes(candidate.id));
+  ids.splice(previous ? ids.indexOf(previous.id) + 1 : 0, 0, defaults[position].id);
+};
+
 export const completeSavedColumnSettings = ({
   columnOrder,
+  columnPinning,
   columnVisibility,
   defaultColumnSettings,
-}: CompleteSavedColumnSettingsProps): { columnOrder: string[]; columnVisibility: Record<string, boolean> } => {
+}: CompleteSavedColumnSettingsProps): CompletedColumnSettings => {
   const defaults = [...defaultColumnSettings].sort((a, b) => a.index - b.index);
+  const savedOrder = columnOrder ?? [];
 
-  const completedOrder = [...(columnOrder ?? [])];
+  const completedOrder = [...savedOrder];
   defaults.forEach((setting, position) => {
-    if (completedOrder.includes(setting.id)) return;
-    const previous = defaults
-      .slice(0, position)
-      .reverse()
-      .find(candidate => completedOrder.includes(candidate.id));
-    const insertAt = previous ? completedOrder.indexOf(previous.id) + 1 : 0;
-    completedOrder.splice(insertAt, 0, setting.id);
+    if (!completedOrder.includes(setting.id)) {
+      insertAfterClosestKnownDefault(completedOrder, defaults, position);
+    }
+  });
+
+  const completedPinning: ColumnPinningState = {
+    start: [...(columnPinning?.start ?? [])],
+    end: [...(columnPinning?.end ?? [])],
+  };
+  defaults.forEach((setting, position) => {
+    const side = setting.pinningPosition;
+    if (!side || savedOrder.includes(setting.id) || completedPinning[side].includes(setting.id)) return;
+    insertAfterClosestKnownDefault(completedPinning[side], defaults, position);
   });
 
   const completedVisibility = { ...(columnVisibility ?? {}) };
@@ -52,7 +76,7 @@ export const completeSavedColumnSettings = ({
     }
   });
 
-  return { columnOrder: completedOrder, columnVisibility: completedVisibility };
+  return { columnOrder: completedOrder, columnPinning: completedPinning, columnVisibility: completedVisibility };
 };
 
 type UpdateAdditionalFieldProps = {
