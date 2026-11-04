@@ -294,7 +294,14 @@ function getGermlineSNVOccurrenceColumns({
     // Compound het.
     columnHelper.accessor(row => row.comphet_genes, {
       id: 'comphet_genes',
-      cell: info => <ComphetGenesCell genes={info.getValue()} locusId={info.row.original.locus_id} />,
+      cell: info => (
+        <ComphetGenesCell
+          genes={info.getValue()}
+          locusId={info.row.original.locus_id}
+          hgvsg={info.row.original.hgvsg}
+          locus={info.row.original.locus}
+        />
+      ),
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.comphet_genes_tooltip')}>
           {t('variant.headers.comphet_genes')}

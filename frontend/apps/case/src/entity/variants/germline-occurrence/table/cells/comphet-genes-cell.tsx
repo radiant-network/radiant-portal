@@ -12,9 +12,11 @@ const SYMBOL_FIELD = 'symbol';
 type ComphetGenesCellProps = {
   genes?: ComphetGene[];
   locusId: string;
+  hgvsg?: string;
+  locus?: string;
 };
 
-function ComphetGenesCell({ genes = [], locusId }: ComphetGenesCellProps) {
+function ComphetGenesCell({ genes = [], locusId, hgvsg, locus }: ComphetGenesCellProps) {
   const { t } = useI18n();
   const { sqons } = useQBContext();
   const dispatch = useQBDispatch();
@@ -39,10 +41,13 @@ function ComphetGenesCell({ genes = [], locusId }: ComphetGenesCellProps) {
       });
       dispatch({
         type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
-        payload: { content: { field: COMPHET_OF_FIELD, value: [locusId] }, op: SqonOpEnum.In },
+        payload: {
+          content: { field: COMPHET_OF_FIELD, value: [locusId], overrideValuesName: hgvsg || locus },
+          op: SqonOpEnum.In,
+        },
       });
     },
-    [sqons, dispatch, locusId],
+    [sqons, dispatch, locusId, hgvsg, locus],
   );
 
   if (sortedGenes.length === 0) return <EmptyCell />;
