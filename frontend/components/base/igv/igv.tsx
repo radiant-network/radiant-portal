@@ -30,6 +30,8 @@ const HG38_REFERENCE: IGVReference = {
     'https://1000genomes.s3.amazonaws.com/technical/reference/GRCh38_reference_genome' +
     '/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai',
   cytobandURL: 'https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz',
+  // The chromosome menu lists these only: the fasta also holds alt, random and decoy contigs, and igv.js would drop chrM.
+  chromosomeOrder: [...Array.from({ length: 22 }, (_, i) => `chr${i + 1}`), 'chrX', 'chrY', 'chrM'],
   tracks: [
     {
       name: 'Refseq Genes',
@@ -82,7 +84,9 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
       if (cancelled) return;
       // igv.js adds its sequence track to the reference tracks.
       const reference = structuredClone(HG38_REFERENCE);
-      const created = await igv.createBrowser(container, { reference, locus: browserLocus.current });
+      // igv.js reads showAllChromosomes, which its types leave out.
+      const options = { reference, locus: browserLocus.current, showAllChromosomes: false };
+      const created = await igv.createBrowser(container, options);
       if (cancelled) {
         igv.removeBrowser(created);
         return;
