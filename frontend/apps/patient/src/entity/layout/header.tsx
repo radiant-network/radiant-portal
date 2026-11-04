@@ -2,7 +2,7 @@ import { Lock } from 'lucide-react';
 
 import type { PatientEntity } from '@/api/api';
 import { PatientEntityVitalStatusEnum } from '@/api/api';
-import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
+import LibrechatButton from '@/components/base/librechat/librechat-button';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import type { BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
@@ -80,7 +80,7 @@ function Header({ patient, isLoading }: HeaderProps) {
       description={description}
       badges={badges}
       backLink={{ label: t('main_navbar.links.patients'), to: `/patient?tab=${PatientExplorationTabs.PatientList}` }}
-      statuses={[<LibreChatDavid key="librechat-david" />]}
+      statuses={patient?.patient_id ? [<LibrechatButton key="librechat" patientId={patient.patient_id} />] : []}
     />
   );
 }

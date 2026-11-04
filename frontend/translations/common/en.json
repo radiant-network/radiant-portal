@@ -3073,8 +3073,13 @@
       "badge": "AI assistant",
       "description": "AI-driven predictive analytics for personalized cancer care",
       "frame_title": "D.A.V.I.D assistant",
+      "new_analysis": "New analysis",
       "not_configured": "D.A.V.I.D is not configured for this environment.",
-      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen"
+      "open_in_new_tab": "Open in a new tab",
+      "resume_history": "Resume history",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen",
+      "prompt_case": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
+      "prompt_patient": "Context: patient {{patientId}} (tenant {{tenant}}). Load this patient's context and give a brief clinical summary. Then wait for the user's questions."
     }
   }
 }
