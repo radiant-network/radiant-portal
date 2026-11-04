@@ -625,14 +625,14 @@ for file, path in sorted(templates.items()):
         continue
     sql = open(path, encoding="utf-8").read()
     sql = sql[sql.index("CREATE OR REPLACE VIEW"):].rstrip().rstrip(";")
-    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql).group(1)
+    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql, re.I).group(1)
     if source not in seeded:
         sys.exit(f"{file} reads {TEMPLATE_SOURCE_DB}.{source}, which the seed does not create")
     # StarRocks 4.0.16 drops a slot ("slot_id not found") when it broadcasts this JDBC table against a regexp_replace
     # join key; a shuffle join avoids it. The templates are upstream's, so the hint is added here.
-    if sql.count(JDBC_PATIENT_JOIN) != 1:
+    sql, joins = re.subn(re.escape(JDBC_PATIENT_JOIN), JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"), sql, flags=re.I)
+    if joins != 1:
         sys.exit(f"{file}: expected one '{JDBC_PATIENT_JOIN}' to add the [SHUFFLE] hint to")
-    sql = sql.replace(JDBC_PATIENT_JOIN, JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"))
     sql = (sql.replace("{{.TenantCode}}", TENANT).replace(f"{TEMPLATE_VIEW_DB}.", f"{TENANT_DB}.")
               .replace(f"{TEMPLATE_SOURCE_DB}.", f"{SOURCE_DB}."))
     if "{{" in sql:

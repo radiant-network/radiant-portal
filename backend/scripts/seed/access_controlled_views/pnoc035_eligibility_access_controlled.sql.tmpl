@@ -1,46 +1,53 @@
 /*
    cbtn_tenant.v_pcx_30_pnoc035_eligibility_combined  (VIEW, access-controlled)
 
-   Stand-in for a template upstream does not ship: upstream builds this view with the dbt model
-   pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/access_controlled/ac_v_pcx_30_pnoc035_eligibility_combined.sql,
-   and this is the access_controlled_view macro rendered with its column spec. build_seed.py skips it once
-   pcx_tables/access_controlled_views holds a file of the same name.
-   reasoning, brim_url and source_file (BRIM names its exports after the MRN) are PHI; note_id is not projected.
+   Upstream builds this view with dbt only (ac_v_pcx_30_pnoc035_eligibility_combined.sql) and ships no template.
+   This is PRD's SHOW CREATE VIEW of 2026-11-04, with the tenant and the identifier quoting put back for the seed.
+   build_seed.py skips it once pcx_tables/access_controlled_views holds a file of the same name.
  */
 
-CREATE OR REPLACE VIEW cbtn_tenant.v_pcx_30_pnoc035_eligibility_combined AS
-SELECT s.organization_name,
-       s.organization_code,
-       CASE WHEN s.can_read_phi THEN s.mrn ELSE s.research_id END AS patient_id,
-       CASE WHEN s.can_read_phi THEN 'mrn' ELSE 'research_id' END AS patient_id_type,
-       s.radiant_patient_id,
-       s.variable_name,
-       s.generated_value,
-       s.eligibility_value,
-       CASE WHEN s.can_read_phi THEN s.reasoning END AS reasoning,
-       s.confidence,
-       s.review_status,
-       s.brim_scope,
-       CASE WHEN s.can_read_phi THEN s.brim_url END AS brim_url,
-       CASE WHEN s.can_read_phi THEN s.source_file END AS source_file,
-       s.brim_loaded_at,
-       s.can_read_phi
-FROM (SELECT src.*,
-             p.id AS radiant_patient_id,
-             (org_grant.org_code IS NOT NULL OR lab_grant.patient_id IS NOT NULL) AS can_read_phi
-      FROM radiant_data_dev.v_pcx_30_pnoc035_eligibility_combined src
-      LEFT JOIN radiant_jdbc.public.patient p
-        ON p.tenant_code = '{{.TenantCode}}'
-       AND p.organization_code = src.organization_code
-       AND p.submitter_patient_id_type = 'mrn'
-       AND regexp_replace(src.mrn, '^0+', '') <> ''
-       AND regexp_replace(p.submitter_patient_id, '^0+', '')
+CREATE OR REPLACE VIEW cbtn_tenant.v_pcx_30_pnoc035_eligibility_combined AS select
+    s.organization_name,
+    s.organization_code,
+    case when s.can_read_phi then s.mrn else s.research_id end as patient_id,
+    case when s.can_read_phi then 'mrn' else 'research_id' end as patient_id_type,
+    s.radiant_patient_id,
+    s.variable_name,
+    s.generated_value,
+    s.eligibility_value,
+    case when s.can_read_phi then s.reasoning end as reasoning,
+    s.confidence,
+    s.review_status,
+    s.brim_scope,
+    case when s.can_read_phi then s.brim_url end as brim_url,
+    case when s.can_read_phi then s.source_file end as source_file,
+    s.brim_loaded_at,
+    s.can_read_phi
+from (
+    select
+        src.*,
+        p.id as radiant_patient_id,
+        (org_grant.org_code is not null or lab_grant.patient_id is not null) as can_read_phi
+    from radiant_data_dev.v_pcx_30_pnoc035_eligibility_combined src
+    left join radiant_jdbc.public.patient p
+        on p.tenant_code = '{{.TenantCode}}'
+       and p.organization_code = src.organization_code
+       and p.submitter_patient_id_type = 'mrn'
+       and regexp_replace(src.mrn, '^0+', '') <> ''
+       and regexp_replace(p.submitter_patient_id, '^0+', '')
            = regexp_replace(src.mrn, '^0+', '')
-      LEFT JOIN (SELECT DISTINCT org_code FROM auth.pii_grant
-                 WHERE user_id = substring_index(substr(current_user(), 2), char(39), 1)
-                   AND tenant_code = '{{.TenantCode}}') org_grant
-        ON org_grant.org_code = src.organization_code
-      LEFT JOIN (SELECT DISTINCT patient_id FROM auth.pii_lab_patient
-                 WHERE user_id = substring_index(substr(current_user(), 2), char(39), 1)
-                   AND tenant_code = '{{.TenantCode}}') lab_grant
-        ON lab_grant.patient_id = p.id) s
+    left join (
+        select distinct org_code
+        from `default_catalog`.`auth`.`pii_grant`
+        where user_id = substring_index(substr(current_user(), 2), char(39), 1)
+          and tenant_code = '{{.TenantCode}}'
+    ) org_grant
+        on org_grant.org_code = src.organization_code
+    left join (
+        select distinct patient_id
+        from `default_catalog`.`auth`.`pii_lab_patient`
+        where user_id = substring_index(substr(current_user(), 2), char(39), 1)
+          and tenant_code = '{{.TenantCode}}'
+    ) lab_grant
+        on lab_grant.patient_id = p.id
+) s;
