@@ -49,6 +49,7 @@ select
     mrn_list.research_id,
 
     -- the verdict
+    elig.variable_name,
     elig.generated_value,
     elig.eligibility_value,
     elig.reasoning,

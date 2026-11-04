@@ -274,6 +274,7 @@ v_pcx_30_pnoc035_eligibility_combined,organization_code,"Short code for the cont
 v_pcx_30_pnoc035_eligibility_combined,patient_id,Patient identifier. Holds the mrn for callers with PHI access and the research_id otherwise; patient_id_type says which.,Identified value shown for PHI access only; de-identified value otherwise.
 v_pcx_30_pnoc035_eligibility_combined,patient_id_type,Discriminates which identifier namespace patient_id holds for this row ('mrn' or 'research_id').,OK to show to all users.
 v_pcx_30_pnoc035_eligibility_combined,radiant_patient_id,Portal surrogate key for the patient. Projected unconditionally; treated as non-identifying (decision of 2026-09-30).,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,variable_name,"The BRIM variable the verdict was abstracted for. Reads '3.6 PNOC035 Eligibility' on every row today, because the base table filters to that one variable.",OK to show to all users.
 v_pcx_30_pnoc035_eligibility_combined,generated_value,"The PNOC035 eligibility verdict as produced by BRIM, before any human review edit.",OK to show to all users.
 v_pcx_30_pnoc035_eligibility_combined,eligibility_value,The PNOC035 eligibility verdict after any human review edit. This is the operative value.,OK to show to all users.
 v_pcx_30_pnoc035_eligibility_combined,reasoning,"BRIM's free-text justification for the verdict. Generated from the patient's own notes and may quote names, MRNs and dates verbatim.",Show for PHI access only.

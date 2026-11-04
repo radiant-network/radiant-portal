@@ -22,6 +22,11 @@
 -- appear twice with disagreeing values. The variable is one-per-patient scope, so
 -- there is no per-note fan-out to collapse.
 --
+-- variable_name carries the BRIM variable the verdict came from. It is PROJECTED
+-- from brim_output.name, not written as a literal: today the WHERE pins it to one
+-- value so every row reads '3.6 PNOC035 Eligibility', but a literal would keep
+-- saying that after the filter admits a second variable, and a projection cannot.
+--
 -- THREE EXCLUSIONS. (1) Blank verdicts -- 20 patients carry the row, 3 a value; a
 -- blank is not an eligibility finding. BRIM's non-answer vocabulary ('No evidence',
 -- 'Not Applicable', zero-date sentinels) is NON-blank and would survive this
@@ -41,6 +46,7 @@ with synthetic_patients as (
 eligibility as (
     select
         b.patient_id,
+        b.name,
         b.generated_value,
         b.value,
         b.reasoning,
@@ -64,6 +70,7 @@ eligibility as (
 
 select
     cast(e.patient_id as varchar(128))        as patient_mrn,
+    cast(e.name as varchar(256))              as variable_name,
     cast(e.generated_value as varchar(65533)) as generated_value,
     cast(e.value as varchar(65533))           as eligibility_value,
     cast(e.reasoning as varchar(65533))       as reasoning,
