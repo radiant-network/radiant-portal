@@ -82,9 +82,12 @@ Decide per theme whether the app is included, in the `apps` of `config/<theme>/b
 // config/radiant/bundle.ts
 export const radiantBundle = {
   apps: ['VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN', 'PATIENT', 'STUDY', 'COMMUNITY', 'MY_NEW_APP'],
+  home: 'PATIENT',
   extras: ['PROXY_YAC'],
 } satisfies BundleDefinition;
 ```
+
+To let a theme use the app as its `home`, add its path to `HOME_PATHS` in `config/catalog.ts` (e.g. `MY_NEW_APP: 'my-new-app'`).
 
 `app/routes.ts` builds the routes from that list. A theme that doesn't list `MY_NEW_APP` ships zero of its code. Verify after build:
 
@@ -137,7 +140,7 @@ apps/my-new-app/src/
 | `apps/<name>/src/*` | app code |
 | `portals/radiant/tsconfig.json` | add `<name>/*` alias |
 | `portals/radiant/app/routes/<area>/*.tsx` | thin route wrapper(s) |
-| `portals/radiant/config/catalog.ts` | add `'<NAME>'` to `APP_NAMES` |
+| `portals/radiant/config/catalog.ts` | add `'<NAME>'` to `APP_NAMES`; also add it to `HOME_PATHS` if a theme may use it as `home` |
 | `portals/radiant/config/<theme>/bundle.ts` | add `'<NAME>'` to `apps` in each theme that exposes the app |
 | `portals/radiant/config/routes.module.ts` | `<NAME>` entry in `APP_ROUTES` |
 | `portals/radiant/app/layout/protected-navbar.tsx` | nav link guarded by `import.meta.env.APPS_<NAME>` (optional) |
