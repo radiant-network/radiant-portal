@@ -10,7 +10,7 @@ Writes, in load order:
                       the API creates at startup (VIEW_REFRESH_ON_STARTUP_ENABLED)
 Everything is derived from the CSVs and hashes of the research ids: the same input gives the same SQL, except the\npatient URL keys (uuid4), which are only inserted for patients without one.
 """
-import argparse, datetime as dt, json, os, re, sys, uuid
+import argparse, csv, datetime as dt, gzip, json, os, re, sys, uuid
 
 import genomics, pcx
 
@@ -19,7 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PCX_DIR = os.path.join(HERE, "..", "pcx_tables")
 # The upstream templates hard-code PRD's names; only the tenant code is a placeholder.
 TEMPLATE_VIEW_DB, TEMPLATE_SOURCE_DB = "cbtn_tenant", "radiant_data_dev"
-# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V6, 2026-10-21 delivery), read by the YAC agent (compose/yac/backends.json).
+# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V7, 2026-11-02 delivery, pooled with Cumulus-BCH), read by the YAC agent
+# (compose/yac/backends.json). Gzipped CSVs: about 250,000 rows each.
 CUBES_DIR = os.path.join(HERE, "data", "cubes")
 SHARED_DB = "radiant"
 JDBC_PATIENT_JOIN = "LEFT JOIN radiant_jdbc.public.patient p"
@@ -276,13 +277,15 @@ def source_tables(pcx_tables, swap=False):
 
 
 def cube_tables():
-    """The survival cubes of data/cubes, one source table per CSV. NULL in a dimension means rolled up, never missing."""
+    """The survival cubes of data/cubes, one source table per .csv.gz. An empty cell is NULL: in a dimension it means rolled
+    up, never missing."""
     tables = {}
     for file in sorted(os.listdir(CUBES_DIR)):
-        path = os.path.join(CUBES_DIR, file)
-        cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in pcx.read_csv_header(path)]
-        rows = [[None if r[c] is None else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in pcx.read_csv(path)]
-        tables[file.removesuffix(".csv")] = (cols, rows)
+        with gzip.open(os.path.join(CUBES_DIR, file), "rt", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in reader.fieldnames]
+            rows = [[None if r[c] == "" else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in reader]
+        tables[file.removesuffix(".csv.gz")] = (cols, rows)
     return tables
 
 
