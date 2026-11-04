@@ -18,11 +18,17 @@
 -- The model is named ac_* so it does not collide with the combined model's name;
 -- `alias` puts the real relation name back.
 --
--- TWO phi COLUMNS A READER MIGHT NOT EXPECT. reasoning is BRIM's free-text
+-- THREE phi COLUMNS A READER MIGHT NOT EXPECT. reasoning is BRIM's free-text
 -- justification, generated from the patient's own notes, so it may quote names,
--- MRNs and dates -- gated for the same reason the csf_* views gate pathology text,
--- and the one hole if left open since the columns around it carry no PHI. brim_url
--- embeds BRIM's internal patient id and re-identifies in the BRIM UI.
+-- MRNs and dates -- gated for the same reason the csf_* views gate pathology text.
+-- brim_url embeds BRIM's internal patient id and re-identifies in the BRIM UI.
+-- source_file is a BRIM EXPORT FILENAME, and BRIM names its exports after the
+-- patient: '<date>-<project>-patient-<MRN>-....csv'. Measured on this view before
+-- it was gated, 2 of 3 rows returned research_id in patient_id and then handed the
+-- MRN straight back in the filename, which defeats the collapse-into-one-column
+-- rule entirely. Not every basename carries one ('detailed_batch03.csv' does not),
+-- so this cannot be left to naming discipline. brim_loaded_at stays plain and
+-- gives an un-granted caller the vintage without the filename.
 --
 -- note_id is deliberately NOT PROJECTED: it is the closest analogue to
 -- patient_fhir_id / subject_reference / observation_id, all PHI-only and absent
@@ -42,7 +48,7 @@
         ['review_status',     'plain'],
         ['brim_scope',        'plain'],
         ['brim_url',          'phi'],
-        ['source_file',       'plain'],
+        ['source_file',       'phi'],
         ['brim_loaded_at',    'plain'],
         ['can_read_phi',      'plain'],
     ]

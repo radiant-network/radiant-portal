@@ -34,10 +34,14 @@ WHY IT IS BUILT THIS WAY
   (`source_file`, `loaded_at`) are load provenance, stamped here, and are deliberately
   NOT in the export. The 28 are the BRIM header verbatim, snake_cased, in order.
 
-* The BRIM export schema DRIFTS between versions. An older 25-column export exists
-  (`brim_output_20260911_notstructured.csv`); the current 28-column form is a strict
-  superset -- it adds `Value Start Offset`, `Value End Offset` and `Patient Link`, and
-  keeps the shared columns in the same relative order. This script therefore accepts
+* The BRIM export schema DRIFTS between versions -- twice so far, both times as a
+  strict superset keeping shared columns in the same relative order. 25 -> 28 added
+  `Value Start Offset`, `Value End Offset` and `Patient Link`; 28 -> 29 (seen
+  2026-11-04) added `Value Offset Type`, positioned BETWEEN `Comment last edited`
+  and `Result Link`. A new column must therefore be added to the target table in its
+  export position (`alter table ... add column ... after <prev>`), NOT appended:
+  the ordered-subset check below compares header position against the table's
+  column order, so an appended column makes a conforming export look out of order. This script therefore accepts
   any header that is an ordered subset of the 28, filling the absent columns with NULL,
   and reports which were missing. A header with an UNKNOWN column is refused.
 
@@ -91,6 +95,7 @@ HEADER_MAP = {
     "Comment": "comment",
     "Comment last edited by": "comment_last_edited_by",
     "Comment last edited": "comment_last_edited",
+    "Value Offset Type": "value_offset_type",
     "Result Link": "result_link",
     "Patient Link": "patient_link",
 }
