@@ -41,6 +41,7 @@
         ['organization_code', 'plain'],
         ['patient_id',        'id_pair'],
         ['radiant_patient_id','plain'],
+        ['variable_name',     'plain'],
         ['generated_value',   'plain'],
         ['eligibility_value', 'plain'],
         ['reasoning',         'phi'],
