@@ -269,8 +269,9 @@ def source_tables(pcx_tables, swap=False):
         out.append(f"CREATE TABLE {table} (\n    {coldefs}\n)\nDUPLICATE KEY(`{cols[0][0]}`)\n"
                    f"DISTRIBUTED BY HASH(`{cols[0][0]}`) BUCKETS 1\nPROPERTIES (\"replication_num\" = \"1\");")
         out.append(insert(table, [f"`{c}`" for c, _ in cols], rows))
-        if swap:
-            out += [f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
+        if swap:  # a table the environment does not hold yet gets an empty one to swap with
+            out += [f"CREATE TABLE IF NOT EXISTS {SOURCE_DB}.`{name}` LIKE {table};",
+                    f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
     return out
 
 
@@ -614,11 +615,15 @@ V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tab
    RADIANT-Timeline-Abstraction team), then Radiant's own views (scripts/seed/views).
    Needs the auth.* and {TENANT_DB}.* views the API creates at startup. */"""]
 views_dir = os.path.join(PCX_DIR, "access_controlled_views")
+# Stand-ins for the views upstream builds with dbt only, dropped as soon as upstream ships the template.
+local_views_dir = os.path.join(HERE, "access_controlled_views")
+templates = {f: os.path.join(local_views_dir, f) for f in os.listdir(local_views_dir)}
+templates.update({f: os.path.join(views_dir, f) for f in os.listdir(views_dir)})
 seeded = set(pcx_tables)
-for file in sorted(os.listdir(views_dir)):
+for file, path in sorted(templates.items()):
     if not file.endswith(".sql.tmpl"):
         continue
-    sql = open(os.path.join(views_dir, file), encoding="utf-8").read()
+    sql = open(path, encoding="utf-8").read()
     sql = sql[sql.index("CREATE OR REPLACE VIEW"):].rstrip().rstrip(";")
     source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql).group(1)
     if source not in seeded:

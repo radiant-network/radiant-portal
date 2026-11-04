@@ -383,6 +383,14 @@ func getPcxPatientExternalRecords(t *testing.T, env *testutils.Env, key string) 
 	return records
 }
 
+func getPcxPatientTrialEligibilities(t *testing.T, env *testutils.Env, key string) *types.PatientTrialEligibilities {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	eligibilities, err := repo.GetPatientTrialEligibilities(t.Context(), key)
+	require.NoError(t, err)
+	return eligibilities
+}
+
 func getPcxPatientGenomics(t *testing.T, env *testutils.Env, key string) *types.PatientGenomics {
 	t.Helper()
 	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -413,6 +421,7 @@ func Test_GetPcxPatientTabs_UnknownKeyIsNil(t *testing.T) {
 		assert.Nil(t, getPcxPatientImaging(t, env, key))
 		assert.Nil(t, getPcxPatientGenomics(t, env, key))
 		assert.Nil(t, getPcxPatientExternalRecords(t, env, key))
+		assert.Nil(t, getPcxPatientTrialEligibilities(t, env, key))
 	})
 }
 
@@ -542,6 +551,33 @@ func Test_GetPcxPatientExternalRecords_PatientWithoutExchangeHasNoOrganization(t
 		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("3"))
 
 		assertJSON(t, `{"organization_count": 0, "document_count": 0, "document_class_count": 0, "organizations": []}`, records)
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_VerdictOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("1"))
+
+		assertJSON(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Ineligible Temporary", "generated_verdict": "Eligible",
+			"confidence": "0.82", "review_status": "review", "reasoning": "Note of 2019-03-02 for MRN-0002: progression on MRI.",
+			"brim_url": "https://brim.example/p/1", "loaded_at": "2026-10-30T09:15:00Z"}]}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_UnreviewedVerdictWithoutPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("4"))
+
+		assertJSON(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Ineligible Permanent", "generated_verdict": "Ineligible Permanent",
+			"confidence": "0.95", "review_status": null, "reasoning": null, "brim_url": null, "loaded_at": "2026-10-23T17:00:26Z"}]}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_PatientWithoutVerdictHasNoAssessment(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"assessments": []}`, eligibilities)
 	})
 }
 

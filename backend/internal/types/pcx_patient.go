@@ -282,6 +282,27 @@ type PatientTrialEnrollment struct {
 	IsInitialTreatment bool           `json:"is_initial_treatment" validate:"required"`
 }
 
+// PatientTrialEligibilities - Trial eligibility assessments of the clinical trials tab
+// @Description Clinical trial eligibility verdicts of a patient, extracted from the patient's notes by BRIM
+// @Name PatientTrialEligibilities
+type PatientTrialEligibilities struct {
+	Assessments []PatientTrialEligibility `json:"assessments" validate:"required"` // Most recently loaded first
+}
+
+// PatientTrialEligibility - Eligibility verdict of a patient for one clinical trial
+// @Description Eligibility verdict of a patient for one clinical trial. reasoning and brim_url are PHI: null without PHI access.
+// @Name PatientTrialEligibility
+type PatientTrialEligibility struct {
+	VariableName     string    `json:"variable_name" validate:"required" example:"3.6 PNOC035 Eligibility"` // The BRIM variable assessed, naming the trial
+	Verdict          string    `json:"verdict" validate:"required" example:"Ineligible Permanent"`          // After any human review edit, the operative value
+	GeneratedVerdict *string   `json:"generated_verdict"`                                                   // As BRIM produced it, before review
+	Confidence       *string   `json:"confidence" example:"0.95"`                                           // BRIM's score, as BRIM writes it
+	ReviewStatus     *string   `json:"review_status"`                                                       // null when not reviewed
+	Reasoning        *string   `json:"reasoning"`                                                           // Quotes the patient's notes
+	BrimURL          *string   `json:"brim_url"`                                                            // Re-identifies the patient in BRIM
+	LoadedAt         time.Time `json:"loaded_at" validate:"required"`                                       // When the BRIM export was loaded, not a clinical date
+}
+
 // PatientImagingSession - Imaging session of a patient
 // @Description Imaging session of a patient
 // @Name PatientImagingSession

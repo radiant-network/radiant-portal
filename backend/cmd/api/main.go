@@ -345,6 +345,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 		patientsGroup.GET("/:patient_key/imaging", requireAction(types.ActionSearchCase), server.PatientImagingHandler(repoPcxPatients))
 		patientsGroup.GET("/:patient_key/genomics", requireAction(types.ActionSearchCase), server.PatientGenomicsHandler(repoPcxPatients))
 		patientsGroup.GET("/:patient_key/external_records", requireAction(types.ActionSearchCase), server.PatientExternalRecordsHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/trial_eligibilities", requireAction(types.ActionSearchCase), server.PatientTrialEligibilitiesHandler(repoPcxPatients))
 	}
 
 	samplesGroup := tenantRoutes.Group("/samples")

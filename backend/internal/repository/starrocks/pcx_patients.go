@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -306,6 +307,37 @@ func (r *PcxPatientsRepository) GetPatientImaging(ctx context.Context, patientKe
 		return nil, err
 	}
 	return &types.PatientImaging{Sessions: sessions}, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientTrialEligibilities(ctx context.Context, patientKey string) (*types.PatientTrialEligibilities, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var rows []struct {
+		VariableName     string
+		EligibilityValue string
+		GeneratedValue   *string
+		Confidence       *string
+		ReviewStatus     *string
+		Reasoning        *string
+		BrimURL          *string `gorm:"column:brim_url"`
+		BrimLoadedAt     time.Time
+	}
+	// BRIM writes '' for an unreviewed verdict, not NULL.
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxPnoc035EligibilityTable, *id).
+		Select("variable_name, eligibility_value, generated_value, confidence, nullif(review_status, '') AS review_status, reasoning, brim_url, brim_loaded_at").
+		Order("brim_loaded_at DESC, variable_name")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient trial eligibilities: %w", err)
+	}
+	assessments := make([]types.PatientTrialEligibility, len(rows))
+	for i, row := range rows {
+		assessments[i] = types.PatientTrialEligibility{VariableName: row.VariableName, Verdict: row.EligibilityValue,
+			GeneratedVerdict: row.GeneratedValue, Confidence: row.Confidence, ReviewStatus: row.ReviewStatus,
+			Reasoning: row.Reasoning, BrimURL: row.BrimURL, LoadedAt: row.BrimLoadedAt}
+	}
+	return &types.PatientTrialEligibilities{Assessments: assessments}, nil
 }
 
 func (r *PcxPatientsRepository) GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error) {
