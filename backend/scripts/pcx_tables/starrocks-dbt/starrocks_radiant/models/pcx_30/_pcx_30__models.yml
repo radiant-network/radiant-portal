@@ -21,14 +21,27 @@ models:
         description: "Date of birth, cast to date. PHI -- used only to derive day offsets."
 
       - name: diagnosis_type_cohort
-        description: "Which of the two PCX-30 diagnosis cohorts this row represents."
+        description: >
+          Which PCX-30 diagnosis cohort this row represents. Under the default
+          pcx_30_cohort_scope ('atrt_mb') only the two curated categories occur.
+          Under 'all_diagnosed' every patient outside those two collapses to the
+          single label 'Not Applicable', which stands in for 12 real registry
+          categories -- including 'Not Reported', 'Low-Grade Glioma' and
+          'High-Grade Glioma'. It does NOT mean the patient has no diagnosis
+          category; it means this release does not publish which one. See
+          COHORT_EXPANSION_PLAN.md section 1.
         data_tests:
           - not_null
+          # 'Not Applicable' is the expanded-cohort label. It is listed here
+          # unconditionally rather than gated on the scope var, so the test passes
+          # under both scopes: accepted_values asserts no value OUTSIDE the list, so
+          # naming a value the default scope never produces cannot make it fail.
           - accepted_values:
               arguments:
                 values:
                   - 'Atypical teratoid/rhabdoid tumor'
                   - 'Medulloblastoma'
+                  - 'Not Applicable'
 
       - name: data_type_cohort
         description: "Whether the patient is in the RADIANT MRN list or CBTN-only."

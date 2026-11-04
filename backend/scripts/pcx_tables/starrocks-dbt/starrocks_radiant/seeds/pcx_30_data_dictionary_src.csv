@@ -9,7 +9,7 @@ display_order,source_file,field_name,description
 8,pcx_30_demographics_deid.csv,ethnicity,Patient's ethnicity as reported by the contributing institution.
 9,pcx_30_demographics_deid.csv,gender,Patient's administrative sex as recorded by the contributing institution.
 10,pcx_30_demographics_deid.csv,address_postal_code,"Patient's residential ZIP code, partially masked for de-identification."
-11,pcx_30_demographics_deid.csv,diagnosis_type_cohort,The patient's primary diagnosis group used to define the cohort for this release.
+11,pcx_30_demographics_deid.csv,diagnosis_type_cohort,"The patient's primary diagnosis group used to define the cohort for this release. 'Atypical teratoid/rhabdoid tumor' and 'Medulloblastoma' are the curated diagnosis groups. 'Not Applicable' means this release does not publish which diagnosis group the patient belongs to -- not that the patient has none."
 12,pcx_30_demographics_deid.csv,data_type_cohort,"The source cohort the patient's data came from: 'radiant' for RADIANT patients, 'cbtn-non-radiant' for CBTN patients not in RADIANT."
 13,pcx_30_event_level_deid.csv,,"Disease events across the patient's cancer journey, including initial diagnosis, progression, recurrence, second malignancy, and death, with the diagnosis, tumor location, and metastasis status recorded at each event."
 14,pcx_30_event_level_deid.csv,organization_name,Name of the institution that contributed the patient's data to this release.
