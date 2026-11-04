@@ -2847,7 +2847,7 @@
         "af": "Frequency",
         "af_tooltip": "Allele Frequency",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Genomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Genomes"
       }
     },

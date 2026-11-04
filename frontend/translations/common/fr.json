@@ -2848,7 +2848,7 @@
         "af": "Fréquence",
         "af_tooltip": "Fréquence allélique",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Génomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Génomes"
       }
     },
