@@ -2554,7 +2554,7 @@
       "submitter_patient_id": "ID patient org.",
       "submitter_patient_id_tooltip": "ID patient de l’organisation",
       "title": "Information du patient",
-      "view_patient": "Voir le patient"
+      "view_patient": "Voir patient"
     },
     "details": {
       "aliquot": "Aliquot",

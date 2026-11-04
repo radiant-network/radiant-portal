@@ -2553,7 +2553,7 @@
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
       "title": "Patient Information",
-      "view_patient": "View patient"
+      "view_patient": "View Patient"
     },
     "details": {
       "aliquot": "Aliquot",
