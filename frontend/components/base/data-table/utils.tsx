@@ -27,15 +27,6 @@ type CompleteSavedColumnSettingsProps = {
   defaultColumnSettings: ColumnSettings[];
 };
 
-/**
- * Complete the column order and visibility a user saved with the table defaults.
- *
- * A saved preference only knows the columns the table had when it was saved. A column added since
- * takes its default visibility, and its default position: right after the closest column that
- * precedes it in the defaults and that the saved order knows, or first when there is none. Without
- * this, the new column would end up last, unchecked, and its additional fields never requested.
- * Everything the user saved is kept as is.
- */
 export const completeSavedColumnSettings = ({
   columnOrder,
   columnVisibility,

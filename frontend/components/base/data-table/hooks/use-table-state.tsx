@@ -125,7 +125,6 @@ export function useTableGetPreferenceEffect({
     }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
-      // Columns added since the preference was saved take their default visibility and position
       const { columnOrder, columnVisibility } = completeSavedColumnSettings({
         columnOrder: tablePreference.columnOrder,
         columnVisibility: tablePreference.columnVisibility,
