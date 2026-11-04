@@ -114,6 +114,40 @@ func Test_CreateSavedFilter(t *testing.T) {
 	})
 }
 
+func Test_CreateSavedFilter_KeepsOverrideValuesName(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSavedFiltersRepository(database.PostgresDB{DB: env.Postgres})
+		savedFilterInput := types.SavedFilterCreationInput{
+			Name: "new_saved_filter_with_override_values_name",
+			Type: types.GERMLINE_SNV_OCCURRENCE,
+			Queries: types.JsonArray[types.Sqon]{
+				{
+					Id: "UUID_of_the_query_1",
+					Op: "and",
+					Content: types.SqonArray{
+						{
+							Op: "in",
+							Content: types.LeafContent{
+								Field:              "comphet_of",
+								Value:              []interface{}{"-8889630551825186816"},
+								OverrideValuesName: "chr1:g.169542092T>C",
+							},
+						},
+					},
+				},
+			},
+		}
+		created, err := repo.CreateSavedFilter(t.Context(), savedFilterInput, "3")
+		assert.NoError(t, err)
+		assert.NotNil(t, created)
+
+		savedFilter, err := repo.GetSavedFilterByID(t.Context(), created.ID)
+		assert.NoError(t, err)
+		assert.NotNil(t, savedFilter)
+		assert.Equal(t, savedFilterInput.Queries, savedFilter.Queries)
+	})
+}
+
 func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSavedFiltersRepository(database.PostgresDB{DB: env.Postgres})
