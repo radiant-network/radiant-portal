@@ -2553,7 +2553,8 @@
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
       "submitter_patient_id_tooltip": "ID patient de l’organisation",
-      "title": "Information du patient"
+      "title": "Information du patient",
+      "view_patient": "Voir le patient"
     },
     "details": {
       "aliquot": "Aliquot",
