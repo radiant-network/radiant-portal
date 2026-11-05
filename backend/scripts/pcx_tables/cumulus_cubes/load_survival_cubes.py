@@ -82,8 +82,11 @@ DDL_PATH = Path(__file__).resolve().parent / "sql" / "pcx30_survival_cubes.sql"
 # filtered, so Stream Load is unavailable on prod -- batched INSERT is the only
 # bulk path. QA is the opposite and has tunnels; see docs/ and the CLAUDE.md
 # StarRocks notes.
-PROD_HOST = ("celerdata-private-nlb-hnsIFJjH-47198fe90f6ce7c2"
-             ".elb.us-east-1.amazonaws.com")
+#
+# The HOST is deliberately NOT in the repo. It comes from STARROCKS_PROD_HOST in
+# ~/.radiant/starrocks-prod.env, resolved through the same host_var mechanism QA
+# already uses. Docs refer to it as <starrocks-prod-host>. The PORT stays here: 80
+# is not a secret and is not carried in the credential file.
 PROD_PORT = 80
 
 
@@ -92,8 +95,10 @@ class Target:
 
     The two clusters do NOT share a credential convention: QA exports
     ``STARROCKS_*`` from ``mcp-credentials.env`` while prod exports
-    ``STARROCKS_PROD_*`` from its own file and carries no host/port in the
-    environment at all. Binding each target to its own env var names is what
+    ``STARROCKS_PROD_*`` from its own file. Both now carry their HOST in the
+    environment -- prod's was a literal in this file until 2026-11-05, when it was
+    moved out to ``STARROCKS_PROD_HOST`` so the endpoint is not in the repo. Prod
+    still carries no PORT (80 is pinned here). Binding each target to its own env var names is what
     keeps a QA password from being sent to the prod FE (and vice versa) when
     both files have been sourced into one shell -- which is the normal state of
     an operator terminal, and would otherwise be silently resolved by whichever
@@ -134,8 +139,8 @@ TARGETS = {
         view_db="cbtn_tenant",
         user_var="STARROCKS_PROD_USER",
         password_var="STARROCKS_PROD_PASSWORD",
-        host=PROD_HOST, port=PROD_PORT,
-        host_var=None, port_var=None,
+        host=None, port=PROD_PORT,
+        host_var="STARROCKS_PROD_HOST", port_var=None,
         credential_hint=(
             "set -a; . ~/.radiant/starrocks-prod.env; set +a\n"
             "  (after a rotation: bash ~/.radiant/set-starrocks-prod-pw.sh, "

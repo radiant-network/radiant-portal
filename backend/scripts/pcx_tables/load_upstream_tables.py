@@ -128,6 +128,19 @@ def extract(table: str, stamp: str) -> Path:
 
 # ---------------------------------------------------------------- StarRocks
 
+def starrocks_host(cfg: dict[str, str]) -> str:
+    """The prod FE endpoint, from the credential file -- never hardcoded here.
+
+    Deliberately NOT in the repo, alongside the user and password the same file
+    already supplies. Docs refer to it as <starrocks-prod-host>.
+    """
+    host = cfg.get("STARROCKS_PROD_HOST", "").strip()
+    if not host:
+        sys.exit(f"STARROCKS_PROD_HOST is not set in {STARROCKS_ENV}\n"
+                 f"  add:  export STARROCKS_PROD_HOST=<starrocks-prod-host>")
+    return host
+
+
 def connect_starrocks():
     try:
         import pymysql
@@ -135,7 +148,7 @@ def connect_starrocks():
         sys.exit("pymysql is required:  python3 -m pip install pymysql")
     cfg = read_env(STARROCKS_ENV)
     return pymysql.connect(
-        host="celerdata-private-nlb-hnsIFJjH-47198fe90f6ce7c2.elb.us-east-1.amazonaws.com",
+        host=starrocks_host(cfg),
         port=80, user=cfg["STARROCKS_PROD_USER"], password=cfg["STARROCKS_PROD_PASSWORD"],
         autocommit=True, charset="utf8mb4", local_infile=False,
     )
