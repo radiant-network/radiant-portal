@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import type { IGVTracks } from '@/api/api';
@@ -10,6 +10,8 @@ import { igvApi } from '@/utils/api';
 
 import { buildCaseTracks } from './case-tracks';
 import IGV from './igv';
+import IGVTracksMenu from './igv-tracks-menu';
+import { buildPublicTracks, type PublicTrackId } from './public-tracks';
 import type { IGVContext } from './types';
 
 type IGVDialogProps = {
@@ -55,13 +57,34 @@ const IGVDialog = ({
     },
   );
 
+  // Back to the defaults at each opening.
+  const [shownPublicTrackIds, setShownPublicTrackIds] = useState<PublicTrackId[]>();
+
   const caseTracks = useMemo(() => buildCaseTracks(fetchIGV.data), [fetchIGV.data]);
+  const publicTrackOptions = useMemo(
+    () => buildPublicTracks(context, fetchIGV.data?.public_tracks, id => t(`variant.igv.public_tracks.${id}`)),
+    [context, fetchIGV.data, t],
+  );
+  const shownIds = useMemo(
+    () =>
+      shownPublicTrackIds ??
+      publicTrackOptions.filter(({ shownByDefault }) => shownByDefault).map(({ track }) => track.id),
+    [shownPublicTrackIds, publicTrackOptions],
+  );
+  const publicTracks = useMemo(
+    () => publicTrackOptions.map(({ track }) => track).filter(track => shownIds.includes(track.id)),
+    [publicTrackOptions, shownIds],
+  );
 
   useEffect(() => {
     if (open) {
+      setShownPublicTrackIds(undefined);
       fetchIGV.mutate();
     }
   }, [open]);
+
+  const handlePublicTrackShownChange = (id: PublicTrackId, shown: boolean) =>
+    setShownPublicTrackIds(shown ? [...shownIds, id] : shownIds.filter(shownId => shownId !== id));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -75,10 +98,25 @@ const IGVDialog = ({
         ) : (
           <div>
             <DialogHeader>
-              <DialogTitle>{t('variant.igv.title')}</DialogTitle>
+              <div className="flex items-center gap-4">
+                <DialogTitle>{t('variant.igv.title')}</DialogTitle>
+                {publicTrackOptions.length > 0 && (
+                  <IGVTracksMenu
+                    tracks={publicTrackOptions.map(({ track }) => track)}
+                    shownTrackIds={shownIds}
+                    onShownChange={handlePublicTrackShownChange}
+                  />
+                )}
+              </div>
             </DialogHeader>
             <DialogBody className="relative max-h-[85vh] overflow-y-auto">
-              <IGV tracks={caseTracks} context={context} locus={formatLocus(start, chromosome, 100, end)} />
+              <IGV
+                tracks={caseTracks}
+                context={context}
+                publicTracks={publicTracks}
+                onPublicTrackRemoved={id => handlePublicTrackShownChange(id, false)}
+                locus={formatLocus(start, chromosome, 100, end)}
+              />
             </DialogBody>
           </div>
         )}

@@ -14,6 +14,7 @@ import {
   CHRM,
   countChrMSlices,
 } from './chrm-density';
+import { createPublicTrackLoader, type PublicTrack, type PublicTrackId } from './public-tracks';
 import { applyReadsDisplayMode, getInitialReadsDisplayMode, withReadsDisplayMode } from './reads-display-mode';
 import type { IGVContext, IGVReference } from './types';
 
@@ -54,19 +55,35 @@ const FAILED_TRACKS_TOAST_ID = 'igv-failed-tracks';
 
 type ReferenceFrame = { chr: string; start: number; end: number };
 
+// The message lists every track that failed since the dialog opened.
+const withFailedTrackNames = (names: string[]) => (failed: string[]) =>
+  names.length === 0 ? failed : [...new Set([...failed, ...names])];
+
 type IGVProps = {
   id?: string;
   className?: string;
   locus: string;
   context: IGVContext;
   tracks: CaseTrack[];
+  publicTracks: PublicTrack[];
+  onPublicTrackRemoved: (id: PublicTrackId) => void;
 };
 
-const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IGVProps) => {
+const IGV = ({
+  id = 'igvContainer',
+  className = '',
+  locus,
+  context,
+  tracks,
+  publicTracks,
+  onPublicTrackRemoved,
+}: IGVProps) => {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const browserLocus = useRef(locus);
   const liveBrowser = useRef<Browser | undefined>(undefined);
+  const publicTrackLoader = useRef<ReturnType<typeof createPublicTrackLoader> | undefined>(undefined);
+  const publicTrackRemoved = useRef(onPublicTrackRemoved);
   const caseTracksLoaded = useRef(false);
   const readsDisplayMode = useRef(getInitialReadsDisplayMode(context, locus));
   const chrMSliceCounts = useRef(new Map<AlignmentTrack, number | undefined>());
@@ -74,6 +91,10 @@ const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IG
   const [browser, setBrowser] = useState<Browser>();
   const [chrMHiddenReadsWindow, setChrMHiddenReadsWindow] = useState<number>();
   const [failedTrackNames, setFailedTrackNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    publicTrackRemoved.current = onPublicTrackRemoved;
+  }, [onPublicTrackRemoved]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -105,9 +126,19 @@ const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IG
           applyChrMDensityRule(alignmentTracks, chrMSliceCounts.current, chrMSavedSettings.current, view),
         );
       });
+      const loader = createPublicTrackLoader(created, name => {
+        if (liveBrowser.current === created) setFailedTrackNames(withFailedTrackNames([name]));
+      });
+      // igv.js passes the removed track itself, not the array of its types.
+      created.on('trackremoved', removed => {
+        const removedId = loader.forget(removed as unknown as Tracks.Track);
+        if (removedId) publicTrackRemoved.current(removedId);
+      });
       liveBrowser.current = created;
+      publicTrackLoader.current = loader;
       removeBrowser = () => {
         liveBrowser.current = undefined;
+        publicTrackLoader.current = undefined;
         igv.removeBrowser(created);
       };
       setBrowser(created);
@@ -129,7 +160,7 @@ const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IG
       withReadsDisplayMode(tracks, readsDisplayMode.current),
     );
     failedNames.then(names => {
-      if (liveBrowser.current === browser) setFailedTrackNames(names);
+      if (liveBrowser.current === browser) setFailedTrackNames(withFailedTrackNames(names));
     });
 
     const countedTracks = loads.map((load, index) =>
@@ -148,6 +179,10 @@ const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IG
       if (currentLocus.split(':')[0] === CHRM) browser.search(currentLocus);
     });
   }, [browser, tracks]);
+
+  useEffect(() => {
+    if (browser) publicTrackLoader.current?.sync(publicTracks);
+  }, [browser, publicTracks]);
 
   useEffect(() => {
     if (!browser || locus === browserLocus.current) return;
