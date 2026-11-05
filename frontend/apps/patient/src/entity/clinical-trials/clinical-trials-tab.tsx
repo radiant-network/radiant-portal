@@ -60,14 +60,11 @@ function ClinicalTrialsTab({ patient }: ClinicalTrialsTabProps) {
           {isLoading ? (
             <Skeleton className="h-5 w-48" />
           ) : (
-            <CardTitle>{t('patient_entity.clinical_trials.title_count', { count: rows.length })}</CardTitle>
+            <CardTitle>{t('patient_entity.clinical_trials.title')}</CardTitle>
           )}
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
-          {!isLoading && rows.length > 0 && (
-            <p className="text-muted-foreground text-sm">{t('patient_entity.clinical_trials.footer')}</p>
-          )}
         </CardContent>
       </Card>
     </div>
