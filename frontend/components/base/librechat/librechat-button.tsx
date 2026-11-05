@@ -21,6 +21,9 @@ type LibrechatButtonProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'
 
 type LibrechatMode = 'new' | 'resume';
 
+// LibreChat model spec (librechat.yaml) holding the clinical instructions and the Radiant MCP tools
+const LIBRECHAT_MODEL_SPEC = 'radiant-clinical';
+
 function LibrechatButton({ className, demoMode = false, caseId, patientId, ...buttonProps }: LibrechatButtonProps) {
   const { t } = useI18n();
   const { librechatDavidUrl } = useRuntimeConfig();
@@ -33,7 +36,9 @@ function LibrechatButton({ className, demoMode = false, caseId, patientId, ...bu
 
   let newChatUrl = '';
   if (librechatDavidUrl) {
-    const url = new URL(librechatDavidUrl);
+    // LibreChat reads the query params on /c/new only: its root redirects there and drops them
+    const url = new URL('c/new', librechatDavidUrl.replace(/\/?$/, '/'));
+    url.searchParams.set('spec', LIBRECHAT_MODEL_SPEC);
     let prompt = '';
     if (caseId != null) prompt = t('librechat.david.prompt_case', { caseId, tenant });
     else if (patientId != null) prompt = t('librechat.david.prompt_patient', { patientId, tenant });
