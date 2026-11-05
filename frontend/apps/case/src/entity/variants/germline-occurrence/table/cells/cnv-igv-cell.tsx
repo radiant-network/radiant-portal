@@ -42,6 +42,7 @@ function CNVIGVCell({ occurrence, hasIGVFiles }: CNVIGVCellProps) {
       </Tooltip>
       {hasIGVFiles && (
         <IGVDialog
+          context="cnv"
           open={igvOpen}
           setOpen={setIGVOpen}
           caseId={caseId}
