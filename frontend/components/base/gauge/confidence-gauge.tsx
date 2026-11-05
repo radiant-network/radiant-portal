@@ -12,8 +12,8 @@ export function parseConfidenceToPercent(confidence?: string): number | null {
 
 export function rangeFor(percent: number | null): ConfidenceRange {
   if (percent == null) return 'none';
-  if (percent > 90) return 'high';
-  if (percent >= 75) return 'mid';
+  if (percent >= 95) return 'high';
+  if (percent >= 85) return 'mid';
   return 'low';
 }
 
