@@ -1435,6 +1435,7 @@
     "timeline": {
       "title": "Chronologie clinique",
       "description": "Événements de maladie, chirurgies, radiothérapie et traitement médical selon l'âge en jours depuis la naissance.",
+      "empty": "Aucune chronologie clinique pour ce patient.",
       "event_type": {
         "initial_cns_tumor": "Tumeur SNC initiale",
         "progressive": "Progression",

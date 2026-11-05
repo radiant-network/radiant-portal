@@ -1434,6 +1434,7 @@
     "timeline": {
       "title": "Clinical Timeline",
       "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "empty": "No clinical timeline for this patient.",
       "event_type": {
         "initial_cns_tumor": "Initial CNS Tumor",
         "progressive": "Progressive",

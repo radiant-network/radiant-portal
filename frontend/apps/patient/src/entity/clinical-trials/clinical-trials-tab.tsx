@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import type { PatientEntity } from '@/api/api';
 import DisplayTable from '@/components/base/data-table/display-table';
+import Empty from '@/components/base/empties/empty';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
@@ -46,9 +47,11 @@ function ClinicalTrialsTab({ patient }: ClinicalTrialsTabProps) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              {t('patient_entity.clinical_trials.trial_eligibilities.empty')}
-            </p>
+            <Empty
+              size="inline"
+              showIcon={false}
+              description={t('patient_entity.clinical_trials.trial_eligibilities.empty')}
+            />
           )}
         </CardContent>
       </Card>

@@ -118,12 +118,14 @@ function TimelineTab({ patient }: TimelineTabProps) {
   const chemotherapies = useMemo(() => (treatments?.therapies ?? []).map(mapTherapy), [treatments]);
   const radiations = useMemo(() => (treatments?.radiations ?? []).map(r => mapRadiation(r, t)), [treatments, t]);
 
+  const isEmpty = events.length + surgeries.length + chemotherapies.length + radiations.length === 0;
+
   return (
     <Card>
       <CardContent>
         <Timeline
           title={t('patient_entity.timeline.title')}
-          description={t('patient_entity.timeline.description')}
+          description={t(isEmpty ? 'patient_entity.timeline.empty' : 'patient_entity.timeline.description')}
           events={events}
           surgeries={surgeries}
           chemotherapies={chemotherapies}
