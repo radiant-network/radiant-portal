@@ -90,6 +90,7 @@ SELECT s.organization_name,
        s.age_at_surgery_days,
        s.extent_of_tumor_resection,
        s.is_initial_treatment,
+       CASE WHEN s.can_read_phi THEN s.evidence_url END AS evidence_url,
        s.can_read_phi
 FROM (SELECT src.*,
              p.id AS radiant_patient_id,

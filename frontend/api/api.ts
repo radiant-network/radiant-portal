@@ -7345,6 +7345,12 @@ export interface PatientSurgery {
      */
     'day'?: number;
     /**
+     * BRIM link to the source of the surgery
+     * @type {string}
+     * @memberof PatientSurgery
+     */
+    'evidence_url'?: string;
+    /**
      * 
      * @type {string}
      * @memberof PatientSurgery

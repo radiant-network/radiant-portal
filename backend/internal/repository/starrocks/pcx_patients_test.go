@@ -475,8 +475,9 @@ func Test_GetPcxPatientTreatments_EveryTreatmentOfAPatientWithPhiAccess(t *testi
 		require.NotNil(t, treatments)
 		assertJSON(t, `{
 			"surgeries": [
-				{"day": 1002, "date": "2017-12-01", "extent_of_tumor_resection": "Gross/Near total resection", "is_initial_treatment": true},
-				{"day": null, "date": null, "extent_of_tumor_resection": "Partial resection", "is_initial_treatment": false}
+				{"day": 1002, "date": "2017-12-01", "extent_of_tumor_resection": "Gross/Near total resection", "is_initial_treatment": true,
+				 "evidence_url": "https://brim.example/evidence/1"},
+				{"day": null, "date": null, "extent_of_tumor_resection": "Partial resection", "is_initial_treatment": false, "evidence_url": null}
 			],
 			"radiations": [
 				{"start": {"day": 1047, "date": "2018-01-15"}, "stop": {"day": 1092, "date": "2018-03-01"},

@@ -3804,6 +3804,9 @@ components:
           type: string
         day:
           type: integer
+        evidence_url:
+          description: BRIM link to the source of the surgery
+          type: string
         extent_of_tumor_resection:
           type: string
         is_initial_treatment:
