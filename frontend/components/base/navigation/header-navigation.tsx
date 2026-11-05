@@ -84,7 +84,10 @@ function HeaderNavigation({
                       return (
                         <Tooltip key={index}>
                           <TooltipTrigger asChild>
-                            <Badge {...restBadgeProps} />
+                            <Badge {...restBadgeProps}>
+                              {restBadgeProps.children}
+                              <span className="sr-only">{tooltipText}</span>
+                            </Badge>
                           </TooltipTrigger>
                           <TooltipContent>{tooltipText}</TooltipContent>
                         </Tooltip>

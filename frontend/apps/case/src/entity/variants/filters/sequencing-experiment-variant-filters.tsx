@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { formatDate } from 'date-fns';
 import { DotIcon } from 'lucide-react';
 
@@ -104,6 +105,7 @@ function SequencingVariantFilters({
   onTaskChange,
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
+  const descriptionBaseId = useId();
 
   const orderedSequencingExperiments = [...sequencingExperiments].sort(bySubjectFirst);
   const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === selectedSeqId);
@@ -133,6 +135,7 @@ function SequencingVariantFilters({
               value={value}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               data-cy={`tabs-trigger-${value}`}
+              aria-describedby={tooltip ? `${descriptionBaseId}-${value}` : undefined}
               onClick={() => {
                 onActiveInterfaceChange(value);
               }}
@@ -152,6 +155,13 @@ function SequencingVariantFilters({
             </TabsTrigger>
           ))}
         </TabsList>
+        {options.map(({ tooltip, value }: SequencingVariantFiltersOption) =>
+          tooltip ? (
+            <span key={value} id={`${descriptionBaseId}-${value}`} className="sr-only">
+              {tooltip}
+            </span>
+          ) : null,
+        )}
       </Tabs>
       <Separator className="h-7" orientation="vertical" />
       <div id="sequencing-experiment-seq-id">

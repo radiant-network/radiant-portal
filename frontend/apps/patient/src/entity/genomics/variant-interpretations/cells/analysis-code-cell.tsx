@@ -13,6 +13,7 @@ function AnalysisCodeCell({ code, name }: AnalysisCodeCellProps) {
   const badge = (
     <Badge className="uppercase" variant="secondary">
       {code}
+      {name && <span className="sr-only">{name}</span>}
     </Badge>
   );
 

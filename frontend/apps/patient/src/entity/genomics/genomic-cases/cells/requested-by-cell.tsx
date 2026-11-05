@@ -13,6 +13,7 @@ function RequestedByCell({ code, name }: RequestedByCellProps) {
   const badge = (
     <Badge className="uppercase" variant="secondary">
       {code}
+      {name && <span className="sr-only">{name}</span>}
     </Badge>
   );
 

@@ -175,6 +175,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
             {t(`common.facets.labels.${translation_key}_tooltip`)}
           </TooltipContent>
         </Tooltip>
+        <span className="sr-only">{t(`common.facets.labels.${translation_key}_tooltip`)}</span>
       </div>
       <MultiSelector
         value={selectedValues}

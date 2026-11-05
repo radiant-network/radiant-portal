@@ -157,6 +157,11 @@ const SliderOccurrenceDetailsCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
                 <PedigreeMaleNotAffectedIcon size={13} />
+                <span className="sr-only">
+                  {father_calls && father_calls[0] > 0
+                    ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                    : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                </span>
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -176,6 +181,11 @@ const SliderOccurrenceDetailsCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
                 <PedigreeFemaleNotAffectedIcon size={13} />
+                <span className="sr-only">
+                  {mother_calls && mother_calls[0] > 0
+                    ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                    : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                </span>
               </span>
             </TooltipTrigger>
             <TooltipContent>

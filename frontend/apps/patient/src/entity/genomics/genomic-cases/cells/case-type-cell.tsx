@@ -21,6 +21,7 @@ function CaseTypeCell({ code, caseType }: CaseTypeCellProps) {
       <TooltipTrigger asChild>
         <Badge variant="outline" className="uppercase">
           {code}
+          <span className="sr-only">{t(`patient_entity.genomics.cases.type.${key}`)}</span>
         </Badge>
       </TooltipTrigger>
       <TooltipContent>{t(`patient_entity.genomics.cases.type.${key}`)}</TooltipContent>
