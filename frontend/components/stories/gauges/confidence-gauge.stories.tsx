@@ -17,9 +17,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const RANGES: { label: string; percent: number | null }[] = [
-  { label: 'High (>90%)', percent: 95 },
-  { label: 'Mid (75–90%)', percent: 80 },
-  { label: 'Low (<75%)', percent: 50 },
+  { label: 'High (≥95%)', percent: 97 },
+  { label: 'Mid (85–95%)', percent: 90 },
+  { label: 'Low (<85%)', percent: 70 },
   { label: 'None (no value)', percent: null },
 ];
 
