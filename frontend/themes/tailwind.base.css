@@ -296,6 +296,8 @@
   --color-green: var(--radiant-green-300);
   --color-green-foreground: var(--radiant-green-800);
 
+  --color-emerald: var(--radiant-emerald-600);
+
   --color-cyan: var(--radiant-cyan-400);
   --color-cyan-foreground: var(--radiant-cyan-800);
 

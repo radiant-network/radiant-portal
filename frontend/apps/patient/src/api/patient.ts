@@ -7,6 +7,7 @@ import type {
   PatientLaboratory,
   PatientsSearchResponse,
   PatientTreatments,
+  PatientTrialEligibilities,
 } from '@/api/api';
 import { patientsApi } from '@/utils/api';
 
@@ -45,6 +46,14 @@ export async function fetchPatientGenomics(tenant: string, patientKey: string): 
 
 export async function fetchPatientExternalRecords(tenant: string, patientKey: string): Promise<PatientExternalRecords> {
   const response = await patientsApi.patientExternalRecords(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientTrialEligibilities(
+  tenant: string,
+  patientKey: string,
+): Promise<PatientTrialEligibilities> {
+  const response = await patientsApi.patientTrialEligibilities(tenant, patientKey);
   return response.data;
 }
 
