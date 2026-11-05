@@ -117,3 +117,49 @@ The whole row stays clickable through the trigger's `::after`; the other control
 **A `Select` only holds options.** Its content is navigated with the arrows between `SelectItem`s and Tab is blocked, so an extra button inside (e.g. "Manage filters") can't be reached. Use a `DropdownMenu` when a list mixes choices and actions.
 
 **Focus ring and `overflow-hidden`.** The 3px ring is drawn outside the element: a parent with `overflow-hidden` clips it when the element touches its edge. Give the parent a little padding (`pl-1 -ml-1`).
+
+### Tooltips
+
+A tooltip is shown on hover, and Radix only links it to its trigger while it is open: a screen reader never reads the tooltip of an element that can't take focus (a column title, a label, a badge). Don't add a Tab stop for it; expose the text instead, so it is read at the same stop as the element.
+
+- **Inside the trigger** (default): copy the tooltip text in an `sr-only` span.
+
+  ```tsx
+  <TooltipTrigger asChild>
+    <span>
+      {label}
+      <span className="sr-only">{tooltip}</span>
+    </span>
+  </TooltipTrigger>
+  ```
+
+- **The trigger sits inside a focusable control** (accordion trigger, tab) **or is an icon next to a field**: link a `hidden` copy with `aria-describedby`, so the control's name stays short.
+
+  ```tsx
+  const descriptionId = useId();
+
+  <AccordionTrigger aria-describedby={descriptionId}>…</AccordionTrigger>
+  <span id={descriptionId} hidden>{tooltip}</span>
+  ```
+
+- **Disabled control**: a disabled button is skipped by Tab but still read when browsing, as "dimmed". Its tooltip gives the reason: link it with `aria-describedby` only while disabled. An icon-only button's `aria-label` replaces its content, so an `sr-only` span inside it is never read.
+
+  ```tsx
+  <>
+    <Button
+      disabled={!selected}
+      aria-label={t('a11y.saved_filter.delete')}
+      aria-describedby={!selected ? reasonId : undefined}
+    >
+      <TrashIcon />
+    </Button>
+    {!selected && (
+      <span id={reasonId} hidden>
+        {t('common.saved_filter.no_filter_selected')}
+      </span>
+    )}
+  </>
+  ```
+
+- Never put the text in an `sr-only` sibling: it becomes a second stop, read only after another move.
+- A tooltip that repeats truncated text needs nothing: `truncate` is visual, the screen reader already reads the whole text.
