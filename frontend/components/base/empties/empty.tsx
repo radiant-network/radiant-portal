@@ -6,11 +6,11 @@ import { cn } from '@/components/lib/utils';
 
 const emptyVariants = tv({
   slots: {
-    base: 'flex flex-col justify-center',
+    base: 'flex flex-col',
     iconsContainer: 'text-neutral',
     textContainer: '',
-    title: 'text-center font-semibold',
-    description: 'text-center text-muted-foreground font-normal',
+    title: 'font-semibold',
+    description: 'text-muted-foreground font-normal',
     customIcon: 'flex items-center justify-center border rounded-md',
   },
   variants: {
@@ -21,20 +21,24 @@ const emptyVariants = tv({
     },
     size: {
       mini: {
-        base: 'py-6 gap-3',
+        base: 'justify-center py-6 gap-3',
         iconsContainer: '[&_svg]:size-4',
         textContainer: 'space-y-2',
-        title: 'text-base',
-        description: 'text-xs',
+        title: 'text-center text-base',
+        description: 'text-center text-xs',
         customIcon: 'size-9 [&_svg]:size-6',
       },
       default: {
-        base: 'py-8 gap-6',
+        base: 'justify-center py-8 gap-6',
         iconsContainer: '[&_svg]:size-6',
         textContainer: 'space-y-2',
-        title: 'text-lg',
-        description: 'text-sm',
+        title: 'text-center text-lg',
+        description: 'text-center text-sm',
         customIcon: 'size-12',
+      },
+      inline: {
+        title: 'text-sm',
+        description: 'text-sm',
       },
     },
   },

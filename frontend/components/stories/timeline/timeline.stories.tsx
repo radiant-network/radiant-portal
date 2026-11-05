@@ -94,10 +94,7 @@ export const Default: Story = {
 export const Empty: Story = {
   render: () => (
     <div className="w-[720px]">
-      <Timeline
-        title="Clinical Timeline"
-        description="Disease events, surgeries, radiation and medical therapy by age in days since birth."
-      />
+      <Timeline title="Clinical Timeline" description="No clinical timeline for this patient." />
     </div>
   ),
 };

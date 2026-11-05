@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     size: {
       control: { type: 'select' },
-      options: ['mini', 'default'],
+      options: ['mini', 'default', 'inline'],
     },
     iconType: {
       control: { type: 'select' },
@@ -89,6 +89,21 @@ export const WithBorder: Story = {
   },
   render: args => (
     <StorySection title="With border">
+      <div className="w-full">
+        <Empty {...args} />
+      </div>
+    </StorySection>
+  ),
+};
+
+export const Inline: Story = {
+  args: {
+    description: 'No data message',
+    size: 'inline',
+    showIcon: false,
+  },
+  render: args => (
+    <StorySection title="Inline">
       <div className="w-full">
         <Empty {...args} />
       </div>
