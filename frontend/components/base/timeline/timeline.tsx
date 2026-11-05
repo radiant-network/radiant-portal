@@ -229,7 +229,7 @@ function Timeline({
               <p className="text-muted-foreground text-sm">{t('timeline.empty.description')}</p>
             </div>
           ) : (
-            <ol className="list-none pl-0">
+            <ol className="flex list-none flex-col gap-2 pl-0">
               {visible.map(({ item, open, onToggle }, i) => {
                 const showLine = i < visible.length - 1;
                 const key = `${item.kind}-${item.day}-${i}`;
