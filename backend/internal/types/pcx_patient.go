@@ -230,6 +230,7 @@ type PatientSurgery struct {
 	PatientDayDate
 	ExtentOfTumorResection *string `json:"extent_of_tumor_resection"`
 	IsInitialTreatment     *bool   `json:"is_initial_treatment"` // null when Not Reported
+	EvidenceURL            *string `json:"evidence_url"`         // BRIM link to the source of the surgery
 }
 
 // PatientDose - Radiation dose
