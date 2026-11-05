@@ -12,42 +12,46 @@
       }
     },
     "tables": {
-      "Efs": "v_pcx30_efs_all_dx_v6_months_cube",
-      "Os": "v_pcx30_os_all_dx_v6_months_cube"
+      "Efs": "v_pcx30_efs_pooled_v7_months_cube",
+      "Os": "v_pcx30_os_pooled_v7_months_cube"
     },
     "schemas": {
       "Efs": {
-        "description": "Event-free survival cube, full cohort: ATRT and Medulloblastoma (CBTN PCX 30 V6, 2026-10-21 revised delivery), durations in months. Pre-aggregated marginal cube (Presto GROUP BY CUBE, 64 grouping sets, 24,056 rows): each row counts patients over its non-null dimensions; null means the dimension is rolled up, never missing data. Missing data is a literal 'Not Reported' / 'Not Applicable' string, or -1 for durations. 970 patients, 397 events. Every patient in the PCX 30 patient table; none excluded. Use event_free_survival_months with efs_status for survival curves. No small-cell suppression (17,619 rows have cnt = 1).",
+        "description": "Event-free survival cube, pooled CBTN PCX 30 V7 (2026-11-02 delivery) + Cumulus-BCH, all CBTN diagnoses, every diagnosis subtyped, durations in months. Pre-aggregated marginal cube (Presto GROUP BY CUBE, 128 grouping sets, 249,587 rows): each row counts patients over its non-null dimensions; null means the dimension is rolled up, never missing data. Missing data is a literal 'Not Reported' / 'Not Applicable' string, or -1 for durations. 7,440 patients, 3,364 events. Use event_free_survival_months with efs_status for survival curves. No small-cell suppression (173,192 rows have cnt = 1).",
         "title": "Patients",
         "fields": [
           {
             "name": "cnt",
-            "description": "Count of distinct patients in the cell (COUNT(DISTINCT research_id)). Within any grouping set the counts sum to the cohort (970); do not sum overlapping cube cells.",
+            "description": "Patient count for the combination of dimension values in the row (SUM of patient counts; CBTN and Cumulus-BCH patients each count once). Within any grouping set the counts sum to the cohort (7,440); do not sum overlapping cube cells.",
             "title": "Patient count"
           },
           {
             "name": "event_free_survival_months",
-            "description": "Time from initial diagnosis to the first progression, recurrence, second malignancy or death; if none, to the most recent vital status, in whole months: floor(days / 30.4375), where 30.4375 = 365.25 / 12. 0 means under one month of follow-up, not missing. 120 means 120 months (10 years) or more. -1 means the duration is unknown (no initial diagnosis date, no vital-status date, or an end date before diagnosis); exclude it from survival curves. Read with efs_status. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Time from initial diagnosis to the first progression, recurrence, second malignancy or death; if none, to the most recent vital status, in whole months: floor(days / 30.4375), where 30.4375 = 365.25 / 12. 0 means under one month of follow-up, not missing. 120 means 120 months (10 years) or more. -1 means the duration is unknown (no initial diagnosis date, no vital-status record, or an end date before diagnosis); exclude it from survival curves. Read with efs_status. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "efs_status",
-            "description": "Whether the EFS clock stopped on an event. 'event' = first progression, recurrence, second malignancy or death observed; 'event-free' = none of these, censored at most recent vital status. Conventional EFS: death without a prior event counts as an event (unlike CBTN's workbook definition, which censors those deaths). Null when the row aggregates over (rolls up) this dimension."
+            "description": "Whether the EFS clock stopped on an event. 'event' = first progression, recurrence, second malignancy or death observed; 'event-free' = none of these, censored at most recent vital status. 'Not Reported' = no patient-table row. Conventional EFS: death without a prior event counts as an event (unlike CBTN's workbook definition, which censors those deaths). Cumulus-BCH's EFS event rule is not confirmed to match. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "diagnosis",
-            "description": "Patient's diagnosis cohort: CBTN demographics.diagnosis_type_cohort as delivered; if absent, the CNS diagnosis category of the patient's Initial CNS Tumor event (else earliest event). Levels: ATRT, Medulloblastoma. Filter to one value for a single-diagnosis view. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Patient's diagnosis: CBTN demographics.diagnosis_type_cohort when it names a diagnosis ('Atypical teratoid/rhabdoid tumor' shown as 'ATRT'); otherwise the CNS diagnosis category of the patient's Initial CNS Tumor event (else earliest event); 'Choroid plexus tumors' is folded into 'Choroid Plexus tumors'. Levels: ATRT, Choroid Plexus tumors, CNS Germ Cell Tumors, CNS Sarcoma, Craniopharyngioma, Ependymoma, Glioneuronal and neuronal tumors, High-Grade Glioma, Low-Grade Glioma, Medulloblastoma, Not Reported, Other, Other CNS Embryonal tumors. 'Other CNS Embryonal tumors' includes pineoblastoma and ETMR; see subtype. Filter to one value for a single-diagnosis view. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "protocol_name_and_arm",
-            "description": "protocol_name_and_arm of the patient's first medical-therapy regimen, ordered by regimen start (ties and undated regimens fall back to the order in CBTN's table). Taken from any point after diagnosis, not limited to the initial treatment window. CBTN labels as delivered; a protocol without an arm suffix (e.g. 'ACNS0331') means the arm was not recorded. 'Not Applicable' = no medical-therapy record; 'Not Reported' = regimen recorded, protocol not recorded; 'Other' = CBTN's label for a protocol outside its list. Because this is the first regimen at any time, a regimen started only after relapse can appear for a patient with no initial chemotherapy. Null when the row aggregates over (rolls up) this dimension."
+            "description": "protocol_name_and_arm of the patient's first medical-therapy regimen, ordered by regimen start (ties and undated regimens fall back to CBTN's row order), at any point after diagnosis, not limited to the initial treatment window. A protocol without an arm suffix (e.g. 'ACNS0331') means the arm was not recorded. 'Not Applicable' = no medical-therapy record; 'Not Reported' = regimen recorded, protocol not recorded; 'Other' = CBTN's label for a protocol outside its list. Because this is the first regimen at any time, a regimen started only after relapse can appear. For Cumulus-BCH patients with several protocols the first is a best guess. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "subtype",
-            "description": "Molecular subtype at initial diagnosis, from cns_integrated_diagnosis. Every value carries its diagnosis as a prefix ('MB-' or 'ATRT-'), so subtypes never pool across diagnoses when diagnosis is rolled up. Medulloblastoma: refined with OpenPedCan molecular subtype where CBTN supplied it; SHH TP53-wildtype and SHH TP53-mutant are pooled as 'MB-SHH'. ATRT: CBTN label as delivered, no refinement. Levels: MB-Group 3, MB-Group 4, MB-non-WNT/non-SHH, MB-NOS/NEC, MB-SHH, MB-WNT, ATRT-MYC, ATRT-NOS/NEC, ATRT-SHH, ATRT-TYR. 'MB-NOS/NEC' and 'ATRT-NOS/NEC' = no molecular subtype recorded; 'MB-non-WNT/non-SHH' = Group 3 or 4 not resolved further. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Subtype at initial diagnosis, from cns_integrated_diagnosis taken within the patient's diagnosis. Medulloblastoma: 'MB-' prefix, OpenPedCan-refined where CBTN supplied it, SHH TP53-wildtype and TP53-mutant pooled as 'MB-SHH'. ATRT: 'ATRT-' prefix. Every other diagnosis: CBTN's integrated diagnosis exactly as delivered (no prefix). Four WHO types occur under both High-Grade and Low-Grade Glioma (Astroblastoma, MN1-altered; Astrocytoma, IDH-mutant; Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted; Pleomorphic xanthoastrocytoma), so they combine across the two when diagnosis is rolled up; filter or group by diagnosis too to keep them apart. 'NOS or NEC' / '-NOS/NEC' = no more specific type recorded; 'MB-non-WNT/non-SHH' = Group 3 or 4 not resolved further. 'Legacy SPNET' comes from Cumulus-BCH only (retired PNET term, no CBTN equivalent); 'NR-' subtypes are Cumulus-BCH patients with a subtype but no diagnosis. 'Not Reported' = subtype not recorded, CBTN's placeholder 'Specify', or diagnosis not reported. Values by diagnosis (diagnosis: subtype | subtype; ...): ATRT: ATRT-MYC | ATRT-NOS/NEC | ATRT-SHH | ATRT-TYR; CNS Germ Cell Tumors: CNS Germ Cell Tumors, NOS or NEC | CNS Germinoma | CNS Non-Germinomatous Germ Cell Tumor; CNS Sarcoma: CIC-rearranged sarcoma | CNS Sarcoma, NOS or NEC | Ewing sarcoma | Histiocytic sarcoma | Intracranial mesenchymal tumor, FET-CREB fusion-positive | Mesenchymal chondrosarcoma | Primary intracranial sarcoma, DICER1-mutant | Rhabdomyosarcoma; Choroid Plexus tumors: Atypical choroid plexus papilloma | Choroid plexus carcinoma | Choroid plexus papilloma | Choroid plexus tumors, NOS or NEC; Craniopharyngioma: Adamantinomatous craniopharyngioma | Craniopharyngioma, NOS or NEC | Papillary craniopharyngioma; Ependymoma: Ependymoma, NOS or NEC | Myxopapillary ependymoma | Posterior fossa ependymoma, group PFA | Posterior fossa ependymoma, group PFB | Posterior fossa ependymoma, NOS or NEC | Spinal ependymoma, MYCN-amplified | Spinal ependymoma, NOS or NEC | Subependymoma | Supratentorial ependymoma, NOS or NEC | Supratentorial ependymoma, YAP1 fusion-positive | Supratentorial ependymoma, ZFTA fusion-positive; Glioneuronal and neuronal tumors: Central neurocytoma | Desmoplastic infantile ganglioglioma / desmoplastic infantile astrocytoma | Diffuse glioneuronal tumor with oligodendroglioma-like features and nuclear clusters | Diffuse leptomeningeal glioneuronal tumor | Dysembryoplastic neuroepithelial tumor | Extraventricular neurocytoma | Ganglioglioma | Glioneuronal and neuronal tumors, NOS or NEC | Multinodular and vacuolating neuronal tumor | Myxoid glioneuronal tumor | Papillary glioneuronal tumor | Rosette-forming glioneuronal tumor; High-Grade Glioma: Astroblastoma, MN1-altered | Astrocytoma, IDH-mutant | Diffuse hemispheric glioma, H3 G34-mutant | Diffuse midline glioma, H3 K27-altered | Diffuse pediatric-type high-grade glioma, H3-wildtype and IDH-wildtype | Glioblastoma, IDH-wildtype | High-grade astrocytoma with piloid features | High-Grade Glioma, NOS or NEC | Infant-type hemispheric glioma | Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted | Pleomorphic xanthoastrocytoma; Low-Grade Glioma: Angiocentric glioma | Astroblastoma, MN1-altered | Astrocytoma, IDH-mutant | Diffuse astrocytoma, MYB- or MYBL1-altered | Diffuse low-grade glioma, MAPK pathway-altered | Low-Grade Glioma, NOS or NEC | Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted | Pilocytic astrocytoma | Pleomorphic xanthoastrocytoma | Polymorphous low-grade neuroepithelial tumor of the young | Subependymal giant cell astrocytoma; Medulloblastoma: MB-Group 3 | MB-Group 4 | MB-non-WNT/non-SHH | MB-NOS/NEC | MB-SHH | MB-WNT; Not Reported: NR-SHH | NR-WNT | Not Reported; Other: Anaplastic large cell lymphoma (ALK+/ALK−) | Anaplastic Meningioma | Atypical Meningioma | Chordoma (including poorly differentiated chordoma) | Erdheim-Chester disease | Hemangioblastoma | Hemangiomas and vascular malformations | Hybrid nerve sheath tumor | Juvenile xanthogranuloma | Langerhans cell histiocytosis | Malignant peripheral nerve sheath tumor | Meningeal melanocytic neoplasms (includes melanoma) | Meningioma | Neurofibroma | Not a primary CNS tumor | Papillary tumor of the pineal region | Paraganglioma | Perineurioma | Pineal parenchymal tumor of intermediate differentiation | Pineocytoma | Pituitary adenoma/PitNET | Pituitary blastoma | Primary diffuse large B-cell lymphoma of the CNS | Schwannoma | Solitary fibrous tumor | T-cell and NK/T-cell lymphomas | Not Reported; Other CNS Embryonal tumors: CNS embryonal tumor, NOS or NEC | CNS neuroblastoma, FOXR2-activated | Cribriform neuroepithelial tumor | Embryonal tumor with multilayered rosettes, C19MC altered | Embryonal tumor with multilayered rosettes, NOS | Legacy SPNET | Medulloblastoma, Group 4 | Medulloblastoma, WNT-activated | Pineoblastoma. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "site",
-            "description": "CBTN organization_name as delivered (the treating organization on the patient's event records). Not grouped by consent or RADIANT status. 'CBTN Non-Consortium Member' is a CBTN-supplied label for patients from organizations outside the consortium. Null when the row aggregates over (rolls up) this dimension."
+            "description": "CBTN organization_name as delivered (the organization on the patient's event records); 'Cumulus-BCH' for every patient from the Cumulus-BCH cube. 'CBTN Non-Consortium Member' is a CBTN-supplied label for organizations outside the consortium. Null when the row aggregates over (rolls up) this dimension."
+          },
+          {
+            "name": "data_source",
+            "description": "'Radiant Connected' for every patient from the three RADIANT sites (The Children's Hospital of Philadelphia, Seattle Children's Hospital, UCSF Benioff Children's Hospital), by organization regardless of the patient's own consent; 'Federated Network' for every other organization, including Cumulus-BCH. Determined by site, so every site sits under exactly one data_source. Null when the row aggregates over (rolls up) this dimension."
           }
         ],
         "udi:cube": true,
@@ -60,40 +64,46 @@
           "diagnosis",
           "protocol_name_and_arm",
           "subtype",
-          "site"
+          "site",
+          "data_source"
         ]
       },
       "Os": {
-        "description": "Overall survival cube, full cohort: ATRT and Medulloblastoma (CBTN PCX 30 V6, 2026-10-21 revised delivery), durations in months. Pre-aggregated marginal cube (Presto GROUP BY CUBE, 64 grouping sets, 24,352 rows): each row counts patients over its non-null dimensions; null means the dimension is rolled up, never missing data. Missing data is a literal 'Not Reported' / 'Not Applicable' string, or -1 for durations. 970 patients, 267 deaths. Every patient in the PCX 30 patient table; none excluded. Use overall_survival_months with vital_status for survival curves. No small-cell suppression (18,134 rows have cnt = 1).",
+        "description": "Overall survival cube, pooled CBTN PCX 30 V7 (2026-11-02 delivery) + Cumulus-BCH, all CBTN diagnoses, every diagnosis subtyped, durations in months. Pre-aggregated marginal cube (Presto GROUP BY CUBE, 128 grouping sets, 249,489 rows): each row counts patients over its non-null dimensions; null means the dimension is rolled up, never missing data. Missing data is a literal 'Not Reported' / 'Not Applicable' string, or -1 for durations. 7,440 patients, 1,545 deaths. Use overall_survival_months with vital_status for survival curves. No small-cell suppression (175,311 rows have cnt = 1).",
+        "title": "Patients (OS)",
         "fields": [
           {
             "name": "cnt",
-            "description": "Count of distinct patients in the cell (COUNT(DISTINCT research_id)). Within any grouping set the counts sum to the cohort (970); do not sum overlapping cube cells.",
+            "description": "Patient count for the combination of dimension values in the row (SUM of patient counts; CBTN and Cumulus-BCH patients each count once). Within any grouping set the counts sum to the cohort (7,440); do not sum overlapping cube cells.",
             "title": "Patient count"
           },
           {
             "name": "overall_survival_months",
-            "description": "Time from initial diagnosis to the most recent vital status, in whole months: floor(days / 30.4375), where 30.4375 = 365.25 / 12. 0 means under one month of follow-up, not missing. 120 means 120 months (10 years) or more. -1 means the duration is unknown (no initial diagnosis date, no vital-status date, or an end date before diagnosis); exclude it from survival curves. Read with vital_status. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Time from initial diagnosis to the most recent vital status, in whole months: floor(days / 30.4375), where 30.4375 = 365.25 / 12. 0 means under one month of follow-up, not missing. 120 means 120 months (10 years) or more. -1 means the duration is unknown (no initial diagnosis date, no vital-status record, or an end date before diagnosis); exclude it from survival curves. Read with vital_status. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "vital_status",
-            "description": "CBTN vital_status at the most recent vital-status record. 'deceased' = death observed; 'alive' = censored at most recent vital status. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Vital status at the most recent vital-status record. 'deceased' = death observed; 'alive' = censored at most recent vital status. 'Not Reported' = no patient-table row. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "diagnosis",
-            "description": "Patient's diagnosis cohort: CBTN demographics.diagnosis_type_cohort as delivered; if absent, the CNS diagnosis category of the patient's Initial CNS Tumor event (else earliest event). Levels: ATRT, Medulloblastoma. Filter to one value for a single-diagnosis view. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Patient's diagnosis: CBTN demographics.diagnosis_type_cohort when it names a diagnosis ('Atypical teratoid/rhabdoid tumor' shown as 'ATRT'); otherwise the CNS diagnosis category of the patient's Initial CNS Tumor event (else earliest event); 'Choroid plexus tumors' is folded into 'Choroid Plexus tumors'. Levels: ATRT, Choroid Plexus tumors, CNS Germ Cell Tumors, CNS Sarcoma, Craniopharyngioma, Ependymoma, Glioneuronal and neuronal tumors, High-Grade Glioma, Low-Grade Glioma, Medulloblastoma, Not Reported, Other, Other CNS Embryonal tumors. 'Other CNS Embryonal tumors' includes pineoblastoma and ETMR; see subtype. Filter to one value for a single-diagnosis view. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "protocol_name_and_arm",
-            "description": "protocol_name_and_arm of the patient's first medical-therapy regimen, ordered by regimen start (ties and undated regimens fall back to the order in CBTN's table). Taken from any point after diagnosis, not limited to the initial treatment window. CBTN labels as delivered; a protocol without an arm suffix (e.g. 'ACNS0331') means the arm was not recorded. 'Not Applicable' = no medical-therapy record; 'Not Reported' = regimen recorded, protocol not recorded; 'Other' = CBTN's label for a protocol outside its list. Because this is the first regimen at any time, a regimen started only after relapse can appear for a patient with no initial chemotherapy. Null when the row aggregates over (rolls up) this dimension."
+            "description": "protocol_name_and_arm of the patient's first medical-therapy regimen, ordered by regimen start (ties and undated regimens fall back to CBTN's row order), at any point after diagnosis, not limited to the initial treatment window. A protocol without an arm suffix (e.g. 'ACNS0331') means the arm was not recorded. 'Not Applicable' = no medical-therapy record; 'Not Reported' = regimen recorded, protocol not recorded; 'Other' = CBTN's label for a protocol outside its list. Because this is the first regimen at any time, a regimen started only after relapse can appear. For Cumulus-BCH patients with several protocols the first is a best guess. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "subtype",
-            "description": "Molecular subtype at initial diagnosis, from cns_integrated_diagnosis. Every value carries its diagnosis as a prefix ('MB-' or 'ATRT-'), so subtypes never pool across diagnoses when diagnosis is rolled up. Medulloblastoma: refined with OpenPedCan molecular subtype where CBTN supplied it; SHH TP53-wildtype and SHH TP53-mutant are pooled as 'MB-SHH'. ATRT: CBTN label as delivered, no refinement. Levels: MB-Group 3, MB-Group 4, MB-non-WNT/non-SHH, MB-NOS/NEC, MB-SHH, MB-WNT, ATRT-MYC, ATRT-NOS/NEC, ATRT-SHH, ATRT-TYR. 'MB-NOS/NEC' and 'ATRT-NOS/NEC' = no molecular subtype recorded; 'MB-non-WNT/non-SHH' = Group 3 or 4 not resolved further. Null when the row aggregates over (rolls up) this dimension."
+            "description": "Subtype at initial diagnosis, from cns_integrated_diagnosis taken within the patient's diagnosis. Medulloblastoma: 'MB-' prefix, OpenPedCan-refined where CBTN supplied it, SHH TP53-wildtype and TP53-mutant pooled as 'MB-SHH'. ATRT: 'ATRT-' prefix. Every other diagnosis: CBTN's integrated diagnosis exactly as delivered (no prefix). Four WHO types occur under both High-Grade and Low-Grade Glioma (Astroblastoma, MN1-altered; Astrocytoma, IDH-mutant; Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted; Pleomorphic xanthoastrocytoma), so they combine across the two when diagnosis is rolled up; filter or group by diagnosis too to keep them apart. 'NOS or NEC' / '-NOS/NEC' = no more specific type recorded; 'MB-non-WNT/non-SHH' = Group 3 or 4 not resolved further. 'Legacy SPNET' comes from Cumulus-BCH only (retired PNET term, no CBTN equivalent); 'NR-' subtypes are Cumulus-BCH patients with a subtype but no diagnosis. 'Not Reported' = subtype not recorded, CBTN's placeholder 'Specify', or diagnosis not reported. Values by diagnosis (diagnosis: subtype | subtype; ...): ATRT: ATRT-MYC | ATRT-NOS/NEC | ATRT-SHH | ATRT-TYR; CNS Germ Cell Tumors: CNS Germ Cell Tumors, NOS or NEC | CNS Germinoma | CNS Non-Germinomatous Germ Cell Tumor; CNS Sarcoma: CIC-rearranged sarcoma | CNS Sarcoma, NOS or NEC | Ewing sarcoma | Histiocytic sarcoma | Intracranial mesenchymal tumor, FET-CREB fusion-positive | Mesenchymal chondrosarcoma | Primary intracranial sarcoma, DICER1-mutant | Rhabdomyosarcoma; Choroid Plexus tumors: Atypical choroid plexus papilloma | Choroid plexus carcinoma | Choroid plexus papilloma | Choroid plexus tumors, NOS or NEC; Craniopharyngioma: Adamantinomatous craniopharyngioma | Craniopharyngioma, NOS or NEC | Papillary craniopharyngioma; Ependymoma: Ependymoma, NOS or NEC | Myxopapillary ependymoma | Posterior fossa ependymoma, group PFA | Posterior fossa ependymoma, group PFB | Posterior fossa ependymoma, NOS or NEC | Spinal ependymoma, MYCN-amplified | Spinal ependymoma, NOS or NEC | Subependymoma | Supratentorial ependymoma, NOS or NEC | Supratentorial ependymoma, YAP1 fusion-positive | Supratentorial ependymoma, ZFTA fusion-positive; Glioneuronal and neuronal tumors: Central neurocytoma | Desmoplastic infantile ganglioglioma / desmoplastic infantile astrocytoma | Diffuse glioneuronal tumor with oligodendroglioma-like features and nuclear clusters | Diffuse leptomeningeal glioneuronal tumor | Dysembryoplastic neuroepithelial tumor | Extraventricular neurocytoma | Ganglioglioma | Glioneuronal and neuronal tumors, NOS or NEC | Multinodular and vacuolating neuronal tumor | Myxoid glioneuronal tumor | Papillary glioneuronal tumor | Rosette-forming glioneuronal tumor; High-Grade Glioma: Astroblastoma, MN1-altered | Astrocytoma, IDH-mutant | Diffuse hemispheric glioma, H3 G34-mutant | Diffuse midline glioma, H3 K27-altered | Diffuse pediatric-type high-grade glioma, H3-wildtype and IDH-wildtype | Glioblastoma, IDH-wildtype | High-grade astrocytoma with piloid features | High-Grade Glioma, NOS or NEC | Infant-type hemispheric glioma | Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted | Pleomorphic xanthoastrocytoma; Low-Grade Glioma: Angiocentric glioma | Astroblastoma, MN1-altered | Astrocytoma, IDH-mutant | Diffuse astrocytoma, MYB- or MYBL1-altered | Diffuse low-grade glioma, MAPK pathway-altered | Low-Grade Glioma, NOS or NEC | Oligodendroglioma, IDH-mutant, and 1p/19q-codeleted | Pilocytic astrocytoma | Pleomorphic xanthoastrocytoma | Polymorphous low-grade neuroepithelial tumor of the young | Subependymal giant cell astrocytoma; Medulloblastoma: MB-Group 3 | MB-Group 4 | MB-non-WNT/non-SHH | MB-NOS/NEC | MB-SHH | MB-WNT; Not Reported: NR-SHH | NR-WNT | Not Reported; Other: Anaplastic large cell lymphoma (ALK+/ALK−) | Anaplastic Meningioma | Atypical Meningioma | Chordoma (including poorly differentiated chordoma) | Erdheim-Chester disease | Hemangioblastoma | Hemangiomas and vascular malformations | Hybrid nerve sheath tumor | Juvenile xanthogranuloma | Langerhans cell histiocytosis | Malignant peripheral nerve sheath tumor | Meningeal melanocytic neoplasms (includes melanoma) | Meningioma | Neurofibroma | Not a primary CNS tumor | Papillary tumor of the pineal region | Paraganglioma | Perineurioma | Pineal parenchymal tumor of intermediate differentiation | Pineocytoma | Pituitary adenoma/PitNET | Pituitary blastoma | Primary diffuse large B-cell lymphoma of the CNS | Schwannoma | Solitary fibrous tumor | T-cell and NK/T-cell lymphomas | Not Reported; Other CNS Embryonal tumors: CNS embryonal tumor, NOS or NEC | CNS neuroblastoma, FOXR2-activated | Cribriform neuroepithelial tumor | Embryonal tumor with multilayered rosettes, C19MC altered | Embryonal tumor with multilayered rosettes, NOS | Legacy SPNET | Medulloblastoma, Group 4 | Medulloblastoma, WNT-activated | Pineoblastoma. Null when the row aggregates over (rolls up) this dimension."
           },
           {
             "name": "site",
-            "description": "CBTN organization_name as delivered (the treating organization on the patient's event records). Not grouped by consent or RADIANT status. 'CBTN Non-Consortium Member' is a CBTN-supplied label for patients from organizations outside the consortium. Null when the row aggregates over (rolls up) this dimension."
+            "description": "CBTN organization_name as delivered (the organization on the patient's event records); 'Cumulus-BCH' for every patient from the Cumulus-BCH cube. 'CBTN Non-Consortium Member' is a CBTN-supplied label for organizations outside the consortium. Null when the row aggregates over (rolls up) this dimension."
+          },
+          {
+            "name": "data_source",
+            "description": "'Radiant Connected' for every patient from the three RADIANT sites (The Children's Hospital of Philadelphia, Seattle Children's Hospital, UCSF Benioff Children's Hospital), by organization regardless of the patient's own consent; 'Federated Network' for every other organization, including Cumulus-BCH. Determined by site, so every site sits under exactly one data_source. Null when the row aggregates over (rolls up) this dimension."
           }
         ],
         "udi:cube": true,
@@ -106,7 +116,8 @@
           "diagnosis",
           "protocol_name_and_arm",
           "subtype",
-          "site"
+          "site",
+          "data_source"
         ],
         "udi:linked_dimensions": {
           "diagnosis": {
@@ -124,6 +135,10 @@
           "site": {
             "entity": "Efs",
             "field": "site"
+          },
+          "data_source": {
+            "entity": "Efs",
+            "field": "data_source"
           }
         },
         "udi:hide_count": true
@@ -131,11 +146,11 @@
     },
     "examplePrompts": [
       "Show event-free survival curves by diagnosis.",
-      "Compare overall survival for SJMB12 patients against all other protocols.",
+      "Compare overall survival for medulloblastoma subtypes.",
       "How many patients are there by diagnosis?",
-      "Which molecular subtypes are most common?",
+      "How many patients come from each data source?",
+      "Which sites contributed the most patients?",
       "Which treatment protocols are most common?",
-      "Show patient counts by subtype and site as a heatmap.",
       "Filter to medulloblastoma patients.",
       "What does this dataset contain?"
     ]
