@@ -199,7 +199,7 @@ const tableGermlineSNVColumns = [
     isSortable: true,
     isPinnable: true,
     position: 15,
-    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
+    tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
     id: 'freq',
@@ -455,7 +455,7 @@ const tableSomaticSNVColumns = [
     isSortable: true,
     isPinnable: true,
     position: 14,
-    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
+    tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
     id: 'freq_to',

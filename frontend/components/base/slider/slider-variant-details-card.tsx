@@ -523,7 +523,7 @@ export const PredictionCard = ({
         {gnomad_v3_af ? (
           <AnchorLink
             size="sm"
-            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
+            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r4`}
             target="_blank"
             mono
           >

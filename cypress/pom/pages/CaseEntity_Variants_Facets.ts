@@ -334,8 +334,8 @@ export const tableSNVFacets = [
         hasDictionary: false,
       },
       {
-        id: 'gnomad_genome_312',
-        name: 'gnomAD Genome 3.1.2',
+        id: 'gnomad_genome',
+        name: 'gnomAD 4.1.0',
         apiField: 'gnomad_v3_af',
         position: 3,
         tooltip: null,
@@ -993,8 +993,8 @@ export const tableSomaticFacets = [
         hasDictionary: false,
       },
       {
-        id: 'gnomad_genome_312',
-        name: 'gnomAD Genome 3.1.2',
+        id: 'gnomad_genome',
+        name: 'gnomAD 4.1.0',
         apiField: 'gnomad_v3_af',
         position: 5,
         tooltip: null,
