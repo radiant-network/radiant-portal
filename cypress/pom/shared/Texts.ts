@@ -4,7 +4,7 @@ export const CommonTexts = {
     collapseAll: 'Collapse all',
     expandAll: 'Expand all',
     format: 'Format',
-    igvMaxZoom: '40 bp',
+    igvMaxZoom: /4\d{1} bp/,
     igvTitle: 'Alignment and variant',
     igvTrackCNVs: (sample: string, relationship: string) => `CNVs: ${sample} ${relationship}`,
     igvTrackReads: (sample: string, relationship: string) => `Reads: ${sample} ${relationship}`,

@@ -14,6 +14,7 @@ import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 
 import ClingenCell from './cells/clingen-cell';
+import CNVIGVCell from './cells/cnv-igv-cell';
 import CNVNameCell from './cells/cnv-name-cell';
 import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
@@ -47,6 +48,15 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
       ),
       header: () => null,
       size: 64,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    columnHelper.accessor(row => row, {
+      id: 'igv',
+      cell: info => <CNVIGVCell occurrence={info.getValue()} hasIGVFiles={caseEntity?.has_igv_files === true} />,
+      header: () => null,
+      size: 48,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
@@ -288,6 +298,12 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
 const defaultGermlineCNVSettings = createColumnSettings([
   {
     id: 'row-info',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'start',
+  },
+  {
+    id: 'igv',
     visible: true,
     fixed: true,
     pinningPosition: 'start',

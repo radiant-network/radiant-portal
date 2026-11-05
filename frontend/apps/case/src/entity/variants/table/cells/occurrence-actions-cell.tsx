@@ -63,6 +63,7 @@ function OccurrenceActionsMenu({ row, caseEntity, reportKind }: OccurrenceAction
     <>
       {caseEntity?.has_igv_files && (
         <IGVDialog
+          context="snv"
           open={igvOpen}
           setOpen={setIgvOpen}
           caseId={caseId}

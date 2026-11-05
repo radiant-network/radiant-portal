@@ -14,7 +14,8 @@ import {
   CHRM,
   countChrMSlices,
 } from './chrm-density';
-import type { IGVReference } from './types';
+import { applyReadsDisplayMode, getInitialReadsDisplayMode, withReadsDisplayMode } from './reads-display-mode';
+import type { IGVContext, IGVReference } from './types';
 
 import './igv.css';
 
@@ -57,15 +58,17 @@ type IGVProps = {
   id?: string;
   className?: string;
   locus: string;
+  context: IGVContext;
   tracks: CaseTrack[];
 };
 
-const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) => {
+const IGV = ({ id = 'igvContainer', className = '', locus, context, tracks }: IGVProps) => {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const browserLocus = useRef(locus);
   const liveBrowser = useRef<Browser | undefined>(undefined);
   const caseTracksLoaded = useRef(false);
+  const readsDisplayMode = useRef(getInitialReadsDisplayMode(context, locus));
   const chrMSliceCounts = useRef(new Map<AlignmentTrack, number | undefined>());
   const chrMSavedSettings = useRef(new Map<AlignmentTrack, AlignmentSettings>());
   const [browser, setBrowser] = useState<Browser>();
@@ -93,6 +96,11 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
       }
       created.on('locuschange', ([view]: ReferenceFrame[]) => {
         const alignmentTracks = created.findTracks('type', 'alignment') as AlignmentTrack[];
+        readsDisplayMode.current = applyReadsDisplayMode(
+          alignmentTracks,
+          readsDisplayMode.current,
+          view.end - view.start,
+        );
         setChrMHiddenReadsWindow(
           applyChrMDensityRule(alignmentTracks, chrMSliceCounts.current, chrMSavedSettings.current, view),
         );
@@ -116,7 +124,10 @@ const IGV = ({ id = 'igvContainer', className = '', locus, tracks }: IGVProps) =
     if (!browser || tracks.length === 0 || caseTracksLoaded.current) return;
     caseTracksLoaded.current = true;
 
-    const { loads, failedTrackNames: failedNames } = loadCaseTracks(browser, tracks);
+    const { loads, failedTrackNames: failedNames } = loadCaseTracks(
+      browser,
+      withReadsDisplayMode(tracks, readsDisplayMode.current),
+    );
     failedNames.then(names => {
       if (liveBrowser.current === browser) setFailedTrackNames(names);
     });

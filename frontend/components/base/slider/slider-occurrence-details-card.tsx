@@ -95,6 +95,7 @@ const SliderOccurrenceDetailsCard = ({
   if (has_igv_files && start && chromosome) {
     actions = (
       <IGVDialog
+        context="snv"
         open={igvOpen}
         setOpen={setIGVOpen}
         caseId={caseId}
