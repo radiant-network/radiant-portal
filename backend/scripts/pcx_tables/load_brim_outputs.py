@@ -64,8 +64,10 @@ TARGET_SCHEMA = "radiant_data_dev"
 TARGET_TABLE = "brim_output"
 PROVENANCE_COLS = ("source_file", "loaded_at")
 STARROCKS_ENV = Path.home() / ".radiant/starrocks-prod.env"
-STARROCKS_HOST = ("celerdata-private-nlb-hnsIFJjH-"
-                  "47198fe90f6ce7c2.elb.us-east-1.amazonaws.com")
+
+# The prod FE endpoint is deliberately NOT in the repo. It is read from
+# STARROCKS_PROD_HOST in the credential file above, beside the user and password that
+# file already supplies. Docs refer to it as <starrocks-prod-host>.
 
 # BRIM CSV header -> target column. Order is the export's order.
 HEADER_MAP = {
@@ -101,6 +103,15 @@ HEADER_MAP = {
 }
 
 
+def starrocks_host(cfg: dict[str, str]) -> str:
+    """The prod FE endpoint, from the credential file -- never hardcoded here."""
+    host = cfg.get("STARROCKS_PROD_HOST", "").strip()
+    if not host:
+        sys.exit(f"STARROCKS_PROD_HOST is not set in {STARROCKS_ENV}\n"
+                 f"  add:  export STARROCKS_PROD_HOST=<starrocks-prod-host>")
+    return host
+
+
 def read_env(path: Path) -> dict[str, str]:
     """Parse an `export K=V` credential file. Never logs values."""
     if not path.exists():
@@ -123,7 +134,7 @@ def connect():
         sys.exit("pymysql is required -- use starrocks-dbt/.starrocks-dbt/bin/python3")
     cfg = read_env(STARROCKS_ENV)
     return pymysql.connect(
-        host=STARROCKS_HOST, port=80,
+        host=starrocks_host(cfg), port=80,
         user=cfg["STARROCKS_PROD_USER"], password=cfg["STARROCKS_PROD_PASSWORD"],
         autocommit=True, charset="utf8mb4", local_infile=False,
     )

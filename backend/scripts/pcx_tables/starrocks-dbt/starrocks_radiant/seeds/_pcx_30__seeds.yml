@@ -4,7 +4,7 @@ seeds:
   - name: pcx_30_organization_ref
     description: >
       Organization code/name reference for the pcx_30 views. Non-PHI -- public
-      institution names and short codes. 45 rows.
+      institution names and short codes. 46 rows.
 
       WHY A SEED: the canonical source is radiant_jdbc.public.organization. 41 rows
       were seeded from QA 2026-09-24 and verified in prod 2026-10-12; BCH was
@@ -13,14 +13,28 @@ seeds:
       2026-11-03, with BCH and UCSF-BCH tenant_code corrected 'radiant' -> 'cbtn'
       to match (45). CHLA is the enrolling institution for a patient carrying a
       PNOC035 eligibility verdict; without it that patient's organization_code
-      resolves to NULL.
+      resolves to NULL. SCH-DEMO was added 2026-11-05 (46) -- see below.
 
-      AT EXACT PARITY WITH LIVE PROD as of 2026-11-03, verified field-by-field.
-      That is the point: `dbt seed` -- and any `dbt build`, which runs seeds --
+      ONE ROW AHEAD OF LIVE PROD as of 2026-11-05, and deliberately so: SCH-DEMO.
+      Everything else is at EXACT PARITY, verified field-by-field 2026-11-03 and
+      re-measured 2026-11-05 (live table 45 rows, this file's other 45 identical).
+      That matters because `dbt seed` -- and any `dbt build`, which runs seeds --
       OVERWRITES the live table, so parity is what makes those safe. Before the
-      reconciliation, seeding would have DELETED three rows and reverted two
-      tenant_codes. Diff this file against the live table before running either,
-      and treat any difference as a question rather than something to seed over.
+      2026-11-03 reconciliation, seeding would have DELETED three rows and
+      reverted two tenant_codes. Diff this file against the live table before
+      running either, and treat any difference OTHER than SCH-DEMO as a question
+      rather than something to seed over.
+
+      SCH-DEMO ("Seattle Children's Hospital Demo", tenant cbtn) was COPIED FROM
+      radiant_jdbc.public.organization, where the portal owners had already created
+      it -- it is not authored here, and the add-is-a-request rule below is
+      therefore satisfied. Measured 2026-11-05: the portal list holds 55 rows (54
+      cbtn + 1 radiant) and this seed was missing 14 of its codes; SCH-DEMO closes
+      one, leaving 13. It is INERT for access control -- auth.pii_grant's wildcard
+      arm joins radiant_jdbc.public.organization, not this seed -- and inert for
+      the Nov 2026 demo's own override path, which supplies a code directly via
+      pcx_30_organization_override. It is here so the organization_code vocabulary
+      the 13 combined views project is explainable from this one file.
 
       The tenant_code flips are inert for this repo: grepped across every combined
       view, access-controlled view and dbt model, NO consumer reads
@@ -44,8 +58,11 @@ seeds:
         select code, name, category_code, tenant_code from radiant_tenant.organization
       Dependents reference only .name and .code, so they need no change.
 
-      name and code are both unique across all 45 rows (verified), so the LEFT JOIN
-      in every pcx_30 combined view cannot fan out.
+      name and code are both unique across all 46 rows (verified), so the LEFT JOIN
+      in every pcx_30 combined view cannot fan out. SCH-DEMO's name is DISTINCT from
+      SCH's for exactly that reason: a second row spelled "Seattle Children's
+      Hospital" would double every SCH row in all 13 combined views and all 13
+      guarded views.
 
       ADDING AN ORGANIZATION IS A REQUEST TO THE PORTAL / CHU STE-JUSTINE OWNERS
       FIRST -- they maintain the list outside dbt and outside this repo; this seed
@@ -66,6 +83,99 @@ seeds:
         description: "healthcare_provider | sequencing_center"
       - name: tenant_code
         description: "Source tenant filter."
+
+  - name: pcx_30_organization_override
+    description: >
+      PER-PATIENT, TEMPORARY organization reassignment for the 13 pcx_30 /
+      cbtn_clinical combined views. One row per research_id. Contains NO PHI: a
+      C-prefixed research_id, a public organization code and a public organization
+      name. Never key this seed on mrn.
+
+      WHY IT EXISTS. organization_code is not stored per patient anywhere -- all 13
+      combined views derive it by joining pcx_30_organization_ref ON THE DISPLAY
+      NAME carried up from stg_cbtn_enrollment_final. That name is (a) upstream in
+      an identified warehouse table that load_upstream_tables.py truncate-and-
+      reloads, so a hand-edit there is a write to a PHI source AND is reverted on
+      the next refresh, and (b) a RELEASED attribution column in six of the seven
+      pcx_30_*_deid tables and their exported CSVs. So moving one patient by
+      editing the name at source would leak a demo organization into the
+      de-identified release. This seed moves the patient at the VIEW layer instead:
+      the _deid tables carry no organization_code at all and keep their
+      organization_name, so the release and prelim_30_deid_tables/ are untouched by
+      construction.
+
+      HOW IT IS READ. Each of the 12 views that joins pcx_30_organization_ref also
+      left-joins this seed on research_id and projects
+      coalesce(ovr.organization_name, <src>.organization_name) and
+      coalesce(ovr.organization_code, org.code). An absent research_id means both
+      coalesces fall through, so an EMPTY table is byte-identical to not having the
+      seed at all. v_pcx_30_treatment_summary_combined needs no join: it carries
+      both columns through from v_pcx_30_event_level_combined and groups by them.
+
+      THE unique TEST ON research_id IS LOAD-BEARING, not hygiene. A second row for
+      one patient fans out every one of those 12 left joins, silently multiplying
+      that patient's rows in both the PHI base views and the guarded views. The two
+      sibling seeds carry no tests; this one must.
+
+      organization_code SHOULD name a pcx_30_organization_ref code, but nothing
+      enforces it and the resolver does not consult the ref for an overridden row.
+      A code absent from auth.pii_grant fails CLOSED (the row degrades to the
+      de-identified projection) rather than leaking -- so a typo here costs the
+      demo, not the patient.
+
+      COUPLED SURFACES an override does NOT reach, each of which must be moved by
+      hand and moved back:
+        * radiant_jdbc.public.patient.organization_code -- the access-control macro
+          joins the portal patient on p.organization_code = src.organization_code,
+          so leaving it behind nulls radiant_patient_id for the patient, disables
+          the lab-grant arm and breaks the genomics re-link.
+        * radiant_data_dev.pcx_30_patient_key -- PRIMARY KEY (organization_code,
+          mrn), inner-joined by cbtn_tenant.v_pcx_30_patient_key, so until the key
+          row moves to the new code that view drops the patient and
+          v_pcx_30_patient_list (which LEFT-joins it) shows them with a NULL
+          patient_key -- the patient-list API's own id field. Move it with
+          `fill_patient_keys.py --move-patient <research_id> --to-org <code>
+          --apply`, which carries the SAME patient_key across so the patient's URL
+          does not change. Do NOT let `--apply` on its own supply the new row: it
+          mints a fresh uuid4, and the contract's never-change-an-existing-key rule
+          then prevents putting the old one back.
+        * public.user_role -- the grant itself. There is NO time-bounded grant
+          mechanism anywhere in the portal authorization model: no valid_to, no
+          expiry, no scheduled revoke. remove_by below is DOCUMENTATION, not
+          enforcement.
+
+      CURRENT CONTENT: one row, C7617267 -> SCH-DEMO, for the Nov 2026 demo,
+      remove_by 2026-11-19. When it is removed, delete the row AND drop
+      radiant_data_dev.pcx_30_organization_override -- `dbt seed` on a
+      header-only CSV is not a reliable way to empty a StarRocks table.
+    config:
+      column_types:
+        research_id: VARCHAR(64)
+        organization_code: VARCHAR(64)
+        organization_name: VARCHAR(256)
+        reason: VARCHAR(2000)
+        added_on: VARCHAR(16)
+        remove_by: VARCHAR(16)
+    columns:
+      - name: research_id
+        description: "The patient to reassign. Join key from every combined view."
+        data_tests:
+          - unique
+          - not_null
+      - name: organization_code
+        description: "Effective organization_code, replacing the name-resolved one. This is the vocabulary auth.pii_grant keys on."
+        data_tests:
+          - not_null
+      - name: organization_name
+        description: "Effective organization_name shown in the views. The _deid release tables keep the original."
+        data_tests:
+          - not_null
+      - name: reason
+        description: "Why this row exists. Documentation only; read by nothing."
+      - name: added_on
+        description: "ISO date the row was added. Documentation only."
+      - name: remove_by
+        description: "ISO date the row must be gone by. Documentation only -- NOT enforced."
 
   - name: pcx_30_data_dictionary_src
     description: >

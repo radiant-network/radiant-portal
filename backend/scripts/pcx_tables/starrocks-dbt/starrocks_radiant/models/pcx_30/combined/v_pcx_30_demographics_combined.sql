@@ -33,8 +33,10 @@ pts as (
 )
 
 select
-    stg_cbtn_enrollment_final.organization_name,
-    org.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical.
+    coalesce(ovr.organization_name, stg_cbtn_enrollment_final.organization_name) as organization_name,
+    coalesce(ovr.organization_code, org.code) as organization_code,
 
     -- identifier pair
     coalesce(pts.identifier_value, stg_cbtn_enrollment_final.mrn) as mrn,
@@ -79,3 +81,5 @@ left join {{ source('dwh_source', 'participants') }} participants
     on stg_cbtn_enrollment_final.research_id = participants.research_id
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = stg_cbtn_enrollment_final.organization_name
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = stg_cbtn_enrollment_final.research_id

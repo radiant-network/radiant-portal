@@ -28,6 +28,7 @@ OHSU,OHSU Doernbecher Children's Hospital,healthcare_provider,radiant
 PNOC,PNOC,healthcare_provider,radiant
 Pitt,University of Pittsburgh,healthcare_provider,radiant
 SCH,Seattle Children's Hospital,healthcare_provider,radiant
+SCH-DEMO,Seattle Children's Hospital Demo,healthcare_provider,cbtn
 UAB,UAB,healthcare_provider,radiant
 UCSF-BCH,UCSF Benioff Children's Hospital,healthcare_provider,cbtn
 UOI,University of Iowa,healthcare_provider,radiant

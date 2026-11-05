@@ -125,9 +125,17 @@ def main() -> int:
         print("\n--dry-run: nothing executed.")
         return 0
 
+    # The prod FE endpoint is deliberately NOT in the repo: it comes from
+    # STARROCKS_PROD_HOST in the credential file read above, beside the user and
+    # password. Docs refer to it as <starrocks-prod-host>.
+    host = env.get("STARROCKS_PROD_HOST", "").strip()
+    if not host:
+        raise SystemExit(
+            "STARROCKS_PROD_HOST is not set in ~/.radiant/starrocks-prod.env\n"
+            "  add:  export STARROCKS_PROD_HOST=<starrocks-prod-host>")
+
     conn = pymysql.connect(
-        host=("celerdata-private-nlb-hnsIFJjH-47198fe90f6ce7c2"
-              ".elb.us-east-1.amazonaws.com"),
+        host=host,
         port=80,
         user=env["STARROCKS_PROD_USER"],
         password=env["STARROCKS_PROD_PASSWORD"],
