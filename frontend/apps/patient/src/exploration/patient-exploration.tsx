@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import type { ListBodyWithCriteria, PatientsSearchResponse, SearchCriterion, SortBody } from '@/api/api';
 import type { PaginationState } from '@/components/base/data-table/data-table';
 import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
-import LibreChatDavid from '@/components/base/librechat-david/librechat-david';
+import LibrechatButton from '@/components/base/librechat/librechat-button';
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 import { Card, CardContent } from '@/components/base/shadcn/card';
@@ -107,7 +107,7 @@ function PatientExploration() {
           isLoading={isLoading}
           title={t('patient_exploration.title', { total: data?.count ?? 0 })}
           description={t('patient_exploration.description')}
-          statuses={[<LibreChatDavid key="librechat-david" />]}
+          statuses={[<LibrechatButton key="librechat" />]}
         />
       </div>
       <main className={cn('bg-muted h-screen', chatExpanded ? 'overflow-hidden' : 'overflow-auto')}>

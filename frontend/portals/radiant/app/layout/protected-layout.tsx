@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import { Outlet, useLoaderData } from 'react-router';
 import { tv } from 'tailwind-variants';
 
-import LibreChatDavidModal from '@/components/base/librechat-david/librechat-david-modal';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { LoginContext } from '@/components/hooks/use-login';
@@ -52,7 +51,6 @@ const _ProtectedLayout = () => {
             />
             <Outlet />
           </div>
-          <LibreChatDavidModal />
         </SidebarProvider>
       </TenantProvider>
     </LoginContext>
