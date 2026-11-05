@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ExternalLink, SparklesIcon } from 'lucide-react';
+import davidLogo from '@assets/logo/david.svg';
+import davidLogoDark from '@assets/logo/david-dark.svg';
+import { ArrowUpRight, SparklesIcon } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button, type ButtonProps } from '@/components/base/shadcn/button';
@@ -76,20 +78,21 @@ function LibrechatButton({ className, demoMode = false, caseId, patientId, ...bu
         <TooltipContent side="left">{t('librechat.david.tooltip')}</TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent size="xl" className="h-[85vh] grid-rows-[auto_1fr]">
+        <DialogContent size="lg" className="h-[85vh] grid-rows-[auto_1fr]">
           <DialogHeader className="flex-row items-center gap-2 space-y-0 px-4 py-3 pr-10 w-full">
-            <DialogTitle className="text-sm font-semibold leading-none">{t('librechat.david.title')}</DialogTitle>
-            <Badge variant="outline" className="text-[11px] font-medium px-1.5 py-0">
-              {t('librechat.david.badge')}
-            </Badge>
+            <DialogTitle className="leading-none">
+              <img src={davidLogo} alt={t('librechat.david.title')} className="h-5 dark:hidden" />
+              <img src={davidLogoDark} alt={t('librechat.david.title')} className="hidden h-5 dark:block" />
+            </DialogTitle>
+            <Badge variant="secondary">{t('librechat.david.badge')}</Badge>
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="3xs"
               onClick={() => window.open(activeUrl, '_blank', 'noopener,noreferrer')}
             >
-              <ExternalLink />
               {t('librechat.david.open_in_new_tab')}
+              <ArrowUpRight />
             </Button>
           </DialogHeader>
           <div className="w-full h-full border-t">
