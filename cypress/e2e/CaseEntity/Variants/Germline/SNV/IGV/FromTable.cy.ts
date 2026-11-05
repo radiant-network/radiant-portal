@@ -11,15 +11,14 @@ describe('Case Entity - Variants - Germline - SNV - IGV - From table', () => {
     CaseEntity_Variants_SNV_Table.germline.actions.selectAction(data.variantGermline, 'open_in_igv');
   };
 
-  // IGV doesn't work via Concourse. The message 'Oops! An unexpected error occurred' appears.
-  it.skip('Information displayed', () => {
+  it('Information displayed', () => {
     setupTest();
     IGV.validations.shouldHaveTitle();
-    //IGV.validations.shouldHaveTracks(); // Since the IGV update from 2.10.4 to 3.7.0, automated testing is no longer possible.
+    IGV.validations.shouldHaveTracks();
     IGV.validations.shouldNotHaveErrorMessage();
   });
 
-  it.skip('Zoom', () => {
+  it('Zoom', () => {
     setupTest();
     IGV.actions.maxZoom();
     IGV.actions.clickZoomOut();
