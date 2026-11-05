@@ -45,8 +45,10 @@ initial_events as (
 )
 
 select distinct
-    pt_roster.organization_name,
-    org.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical.
+    coalesce(ovr.organization_name, pt_roster.organization_name) as organization_name,
+    coalesce(ovr.organization_code, org.code) as organization_code,
 
     -- identifier pair
     -- (qualified: initial_events also exposes research_id / organization_name)
@@ -75,5 +77,7 @@ from {{ source('dwh_source', 'treatment') }} treatment
 inner join pt_roster on treatment.subject = pt_roster.research_id
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = pt_roster.organization_name
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where radiation = 'Yes'

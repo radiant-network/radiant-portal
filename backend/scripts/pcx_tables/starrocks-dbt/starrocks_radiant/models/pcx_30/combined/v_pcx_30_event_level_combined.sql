@@ -384,12 +384,17 @@ prelim as (
 )
 
 select
-    prelim.organization_name,
-    org.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical. Applied
+    -- HERE, outside the aggregation CTEs, which group by the raw organization_name.
+    coalesce(ovr.organization_name, prelim.organization_name) as organization_name,
+    coalesce(ovr.organization_code, org.code) as organization_code,
 
     -- identifier pair
-    mrn,
-    research_id,
+    -- (qualified: the override join also exposes research_id, so a bare reference
+    --  is ambiguous)
+    prelim.mrn,
+    prelim.research_id,
 
     event_type,
 
@@ -409,3 +414,5 @@ select
 from prelim
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = prelim.organization_name
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = prelim.research_id

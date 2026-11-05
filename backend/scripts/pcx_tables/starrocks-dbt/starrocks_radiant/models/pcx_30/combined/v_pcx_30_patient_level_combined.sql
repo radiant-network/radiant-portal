@@ -45,12 +45,16 @@ with ranked_statuses as (
 )
 
 select
-    ranked_statuses.organization_name,
-    org.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical.
+    coalesce(ovr.organization_name, ranked_statuses.organization_name) as organization_name,
+    coalesce(ovr.organization_code, org.code) as organization_code,
 
     -- identifier pair
-    mrn,
-    research_id,
+    -- (qualified: the override join also exposes research_id, so a bare reference
+    --  is ambiguous)
+    ranked_statuses.mrn,
+    ranked_statuses.research_id,
 
     -- timing pair
     date_add(dob, interval cast(age_at_vital_status_days as int) day) as vital_status_date,
@@ -61,4 +65,6 @@ select
 from ranked_statuses
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = ranked_statuses.organization_name
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = ranked_statuses.research_id
 where rn = 1

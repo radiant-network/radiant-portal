@@ -66,8 +66,11 @@ select
     c.subject_reference,
 
     -- organization (pcx_30 / auth.pii_grant vocabulary, not org_short_code)
-    r.organization_name,
-    o.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical. A row with
+    -- no usable research_id cannot be overridden -- it already fails closed.
+    coalesce(ovr.organization_name, r.organization_name) as organization_name,
+    coalesce(ovr.organization_code, o.code) as organization_code,
     c.org_short_code,
 
     -- the score
@@ -92,3 +95,5 @@ left join {{ ref('int_cbtn_organization_by_mrn') }} r
     on r.mrn = m.mrn
 left join {{ ref('pcx_30_organization_ref') }} o
     on o.name = r.organization_name
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = m.research_id

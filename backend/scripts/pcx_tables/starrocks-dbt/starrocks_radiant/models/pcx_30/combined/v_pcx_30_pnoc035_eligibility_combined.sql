@@ -41,8 +41,12 @@ with enrollment_org as (
 )
 
 select
-    coalesce(demo.organization_name, enr.organization_name) as organization_name,
-    org.code as organization_code,
+    -- pcx_30_organization_override wins where it carries the patient; see the seed's
+    -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical. A verdict
+    -- whose mrn does not resolve to a research_id cannot be overridden -- it already
+    -- gets a NULL code, which fails closed.
+    coalesce(ovr.organization_name, demo.organization_name, enr.organization_name) as organization_name,
+    coalesce(ovr.organization_code, org.code) as organization_code,
 
     -- identifier pair
     elig.patient_mrn as mrn,
@@ -71,3 +75,5 @@ left join enrollment_org enr
     on enr.mrn = elig.patient_mrn
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = coalesce(demo.organization_name, enr.organization_name)
+left join {{ ref('pcx_30_organization_override') }} ovr
+    on ovr.research_id = mrn_list.research_id

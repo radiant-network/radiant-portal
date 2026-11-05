@@ -1,0 +1,2 @@
+research_id,organization_code,organization_name,reason,added_on,remove_by
+C7617267,SCH-DEMO,Seattle Children's Hospital Demo,"Nov 2026 demo: consented PHI display scoped to a demo-only organization so one patient's PHI resolves for a SCH-DEMO-granted demo user and no other patient's does. TEMPORARY -- remove on or before remove_by.",2026-11-05,2026-11-19
