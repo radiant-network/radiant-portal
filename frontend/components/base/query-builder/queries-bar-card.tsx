@@ -26,6 +26,7 @@ import { BooleanOperators } from './type';
 
 type QueriesBarCardProps = {
   appId: ApplicationId;
+  swrId?: string;
 };
 
 /**
@@ -43,7 +44,7 @@ type QueriesBarCardProps = {
  * |  [New Query] (*) Label                                                  |
  * └─────────────────────────────────────────────────────────────────────────┘
  */
-function QueriesBarCard({ appId }: QueriesBarCardProps) {
+function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
   const { t } = useI18n();
   const settings = useQBSettings();
   const cache = useQBCache();
@@ -140,7 +141,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
           <AccordionContent className="py-4 px-6 space-y-4">
             <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
-                <QueryBar key={sqon.id} index={index} sqon={sqon} />
+                <QueryBar key={sqon.id} index={index} sqon={sqon} swrId={swrId} />
               ))}
             </div>
 
