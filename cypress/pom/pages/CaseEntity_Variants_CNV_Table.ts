@@ -268,6 +268,17 @@ const tableColumns = [
 export const CaseEntity_Variants_CNV_Table = {
   actions: {
     /**
+     * Clicks the IGV button of a given cnv.
+     * @param dataCNV The cnv object.
+     */
+    clickIGVButton(dataCNV: any) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'igv').then(position => {
+          cy.get(selectors.tableCell(dataCNV)).eq(position).find('button').clickAndWait({ force: true });
+        })
+      );
+    },
+    /**
      * Click the specific button to change table paging
      * @param buttonName The button name to click (first | last | previous | next | select)
      */

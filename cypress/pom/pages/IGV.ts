@@ -16,13 +16,12 @@ export const IGV = {
     },
     /**
      * Clicks on the zoom in button several times.
+     * @param clickCount The number of clicks needed to reach the max zoom (each click halves the window size).
      */
-    maxZoom() {
-      findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
-      findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
-      findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
-      findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
-      findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
+    maxZoom(clickCount: number = 5) {
+      for (let i = 0; i < clickCount; i++) {
+        findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
+      }
       IGV.validations.shouldBeMaxZoom();
     },
   },
