@@ -47,3 +47,21 @@ export const Large: Story = {
   args: { size: 64, strokeWidth: 6 },
   render: args => renderRanges(args, 'Large'),
 };
+
+const FILL_STEPS = Array.from({ length: 21 }, (_, i) => i * 5);
+
+export const FillSteps: Story = {
+  args: { size: 24 },
+  render: args => (
+    <StorySection title="Fill steps (0% → 100% by 5%)">
+      <div className="grid grid-cols-7 gap-4">
+        {FILL_STEPS.map(percent => (
+          <div key={percent} className="flex flex-col items-center gap-2">
+            <ConfidenceGauge {...args} percent={percent} />
+            <span className="text-xs text-muted-foreground">{percent}%</span>
+          </div>
+        ))}
+      </div>
+    </StorySection>
+  ),
+};
