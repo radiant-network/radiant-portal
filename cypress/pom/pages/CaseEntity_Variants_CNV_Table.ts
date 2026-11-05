@@ -143,15 +143,48 @@ const tableColumns = [
     tooltip: 'Estimated copy number',
   },
   {
-    id: 'gnomad',
-    name: 'gnomAD',
+    id: 'gnomad_sf',
+    name: 'gnomAD SF',
     apiField: 'gnomad_sf',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
     position: 12,
+    tooltip: 'gnomAD 4.1.0 (Site Frequency)',
+  },
+  {
+    id: 'gnomad_af',
+    name: 'gnomAD AF',
+    apiField: 'gnomad_af',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 13,
     tooltip: 'gnomAD 4.1.0 (Allele Frequency)',
+  },
+  {
+    id: 'gnomad_ac',
+    name: 'gnomAD AC',
+    apiField: 'gnomad_ac',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 14,
+    tooltip: 'gnomAD 4.1.0 (Allele Count)',
+  },
+  {
+    id: 'gnomad_sc',
+    name: 'gnomAD SC',
+    apiField: 'gnomad_sc',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 15,
+    tooltip: 'gnomAD 4.1.0 (Site Count)',
   },
   {
     id: 'nb_genes',
@@ -161,7 +194,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 16,
     tooltip: 'Number of genes overlapped by CNV',
   },
   {
@@ -172,7 +205,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 14,
+    position: 17,
     tooltip: 'Genotype',
   },
   {
@@ -183,7 +216,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 18,
     tooltip: null,
   },
   {
@@ -194,7 +227,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 16,
+    position: 19,
     tooltip: 'CNV Quality',
   },
   {
@@ -205,7 +238,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 17,
+    position: 20,
     tooltip: 'Number of bins in the region',
   },
   {
@@ -216,7 +249,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 18,
+    position: 21,
     tooltip: 'Number of improperly paired end reads at start and stop breakpoints',
   },
 ];
@@ -589,7 +622,7 @@ export const CaseEntity_Variants_CNV_Table = {
             case 'clingen':
               cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
               break;
-            case 'gnomad':
+            case 'gnomad_sf':
               cy.validateTableFirstRowContent(dataCNV[columnID], position);
               cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
               break;
