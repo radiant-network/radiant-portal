@@ -269,3 +269,19 @@ v_csf_results_latest_by_component,first_csf_result_at,Calendar timestamp of the 
 v_csf_results_latest_by_component,age_at_first_csf_result_days,Patient age in days at the earliest CSF result of any component. With age_at_last_csf_result_days it gives the span of CSF surveillance without exposing either date.,OK to show to all users.
 v_csf_results_latest_by_component,last_csf_result_at,Calendar timestamp of the patient's LATEST CSF result of any component (UTC). Identified counterpart to age_at_last_csf_result_days.,Show for PHI access only.
 v_csf_results_latest_by_component,age_at_last_csf_result_days,Patient age in days at the latest CSF result of any component. De-identified counterpart to last_csf_result_at.,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,organization_name,Name of the institution that contributed the patient's data to this release.,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,organization_code,"Short code for the contributing institution, resolved from pcx_30_organization_ref by name.",OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,patient_id,Patient identifier. Holds the mrn for callers with PHI access and the research_id otherwise; patient_id_type says which.,Identified value shown for PHI access only; de-identified value otherwise.
+v_pcx_30_pnoc035_eligibility_combined,patient_id_type,Discriminates which identifier namespace patient_id holds for this row ('mrn' or 'research_id').,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,radiant_patient_id,Portal surrogate key for the patient. Projected unconditionally; treated as non-identifying (decision of 2026-09-30).,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,variable_name,"The BRIM variable the verdict was abstracted for. Reads '3.6 PNOC035 Eligibility' on every row today, because the base table filters to that one variable.",OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,generated_value,"The PNOC035 eligibility verdict as produced by BRIM, before any human review edit.",OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,eligibility_value,The PNOC035 eligibility verdict after any human review edit. This is the operative value.,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,reasoning,"BRIM's free-text justification for the verdict. Generated from the patient's own notes and may quote names, MRNs and dates verbatim.",Show for PHI access only.
+v_pcx_30_pnoc035_eligibility_combined,confidence,"BRIM's confidence score for the verdict, as a string.",OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,review_status,BRIM review state for the verdict (e.g. 'review').,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,brim_scope,BRIM variable scope; 'One Label Per Patient' for this variable.,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,brim_url,"Deep link into the BRIM UI for this variable and patient. Embeds BRIM's internal patient id, so it is a re-identification vector.",Show for PHI access only.
+v_pcx_30_pnoc035_eligibility_combined,source_file,"Basename of the BRIM export the verdict was loaded from. BRIM names its exports after the patient, so the filename commonly contains the MRN.",Show for PHI access only.
+v_pcx_30_pnoc035_eligibility_combined,brim_loaded_at,Provenance: when the source export was loaded into brim_output. Not a clinical date.,OK to show to all users.
+v_pcx_30_pnoc035_eligibility_combined,can_read_phi,"Whether the current caller holds a PHI grant for this row, via org grant or lab grant.",OK to show to all users.

@@ -337,7 +337,7 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
     case 'gene':
       return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
     case 'gnomad':
-      return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3` : undefined;
+      return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r4` : undefined;
     case 'link':
       if (data.omim_id) return `https://omim.org/entry/${data.omim_id}`;
       if (data.orphanet_id) return `https://www.orpha.net/en/disease/detail/${data.orphanet_id}`;

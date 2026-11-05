@@ -32,6 +32,9 @@ func (SqonArray) IsLeaf() bool { return false }
 type LeafContent struct {
 	Field string        `json:"field"`
 	Value []interface{} `json:"value"`
+	// OverrideValuesName is a display label for the values (e.g. a variant's HGVSg instead of its locus_id).
+	// It is stored with saved filters and has no effect on the query.
+	OverrideValuesName string `json:"overrideValuesName,omitempty"`
 }
 
 func (LeafContent) IsLeaf() bool { return true }

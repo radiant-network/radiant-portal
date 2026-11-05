@@ -5395,6 +5395,12 @@ export interface LeafContent {
      */
     'field'?: string;
     /**
+     * OverrideValuesName is a display label for the values (e.g. a variant\'s HGVSg instead of its locus_id). It is stored with saved filters and has no effect on the query.
+     * @type {string}
+     * @memberof LeafContent
+     */
+    'overrideValuesName'?: string;
+    /**
      * 
      * @type {Array<any>}
      * @memberof LeafContent
@@ -7540,6 +7546,74 @@ export interface PatientTreatments {
      * @memberof PatientTreatments
      */
     'trial_enrollments': Array<PatientTrialEnrollment>;
+}
+/**
+ * Clinical trial eligibility verdicts of a patient, extracted from the patient\'s notes by BRIM
+ * @export
+ * @interface PatientTrialEligibilities
+ */
+export interface PatientTrialEligibilities {
+    /**
+     * Most recently loaded first
+     * @type {Array<PatientTrialEligibility>}
+     * @memberof PatientTrialEligibilities
+     */
+    'assessments': Array<PatientTrialEligibility>;
+}
+/**
+ * Eligibility verdict of a patient for one clinical trial. reasoning and brim_url are PHI: null without PHI access.
+ * @export
+ * @interface PatientTrialEligibility
+ */
+export interface PatientTrialEligibility {
+    /**
+     * Re-identifies the patient in BRIM
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'brim_url'?: string;
+    /**
+     * BRIM\'s score, as BRIM writes it
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'confidence'?: string;
+    /**
+     * As BRIM produced it, before review
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'generated_verdict'?: string;
+    /**
+     * When the BRIM export was loaded, not a clinical date
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'loaded_at': string;
+    /**
+     * Quotes the patient\'s notes
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'reasoning'?: string;
+    /**
+     * null when not reviewed
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'review_status'?: string;
+    /**
+     * The BRIM variable assessed, naming the trial
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'variable_name': string;
+    /**
+     * After any human review edit, the operative value
+     * @type {string}
+     * @memberof PatientTrialEligibility
+     */
+    'verdict': string;
 }
 /**
  * Treatment protocol arm the patient was enrolled on, its medical therapies merged
@@ -18069,6 +18143,48 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Retrieve PatientTrialEligibilities, the eligibility verdicts BRIM extracted from the patient\'s notes, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTrialEligibilities of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTrialEligibilities: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientTrialEligibilities', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientTrialEligibilities', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/trial_eligibilities`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18396,6 +18512,20 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve PatientTrialEligibilities, the eligibility verdicts BRIM extracted from the patient\'s notes, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTrialEligibilities of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientTrialEligibilities(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientTrialEligibilities>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientTrialEligibilities(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientTrialEligibilities']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18554,6 +18684,17 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.patientTreatments(tenant, patientKey, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve PatientTrialEligibilities, the eligibility verdicts BRIM extracted from the patient\'s notes, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTrialEligibilities of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTrialEligibilities(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientTrialEligibilities> {
+            return localVarFp.patientTrialEligibilities(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18708,6 +18849,19 @@ export class PatientsApi extends BaseAPI {
      */
     public patientTreatments(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientTreatments(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientTrialEligibilities, the eligibility verdicts BRIM extracted from the patient\'s notes, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientTrialEligibilities of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientTrialEligibilities(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientTrialEligibilities(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

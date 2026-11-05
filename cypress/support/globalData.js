@@ -277,6 +277,12 @@ const globalData = {
           count: /\d{1}/,
         },
         {
+          field: 'has_comphet',
+          value: '1',
+          op: 'in',
+          count: /\d{1}/,
+        },
+        {
           field: 'filter',
           value: 'PASS',
           op: 'in',

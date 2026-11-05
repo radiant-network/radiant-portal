@@ -10,7 +10,7 @@ Writes, in load order:
                       the API creates at startup (VIEW_REFRESH_ON_STARTUP_ENABLED)
 Everything is derived from the CSVs and hashes of the research ids: the same input gives the same SQL, except the\npatient URL keys (uuid4), which are only inserted for patients without one.
 """
-import argparse, datetime as dt, json, os, re, sys, uuid
+import argparse, csv, datetime as dt, gzip, json, os, re, sys, uuid
 
 import genomics, pcx
 
@@ -19,7 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PCX_DIR = os.path.join(HERE, "..", "pcx_tables")
 # The upstream templates hard-code PRD's names; only the tenant code is a placeholder.
 TEMPLATE_VIEW_DB, TEMPLATE_SOURCE_DB = "cbtn_tenant", "radiant_data_dev"
-# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V6, 2026-10-21 delivery), read by the YAC agent (compose/yac/backends.json).
+# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V7, 2026-11-02 delivery, pooled with Cumulus-BCH), read by the YAC agent
+# (compose/yac/backends.json). Gzipped CSVs: about 250,000 rows each.
 CUBES_DIR = os.path.join(HERE, "data", "cubes")
 SHARED_DB = "radiant"
 JDBC_PATIENT_JOIN = "LEFT JOIN radiant_jdbc.public.patient p"
@@ -269,19 +270,22 @@ def source_tables(pcx_tables, swap=False):
         out.append(f"CREATE TABLE {table} (\n    {coldefs}\n)\nDUPLICATE KEY(`{cols[0][0]}`)\n"
                    f"DISTRIBUTED BY HASH(`{cols[0][0]}`) BUCKETS 1\nPROPERTIES (\"replication_num\" = \"1\");")
         out.append(insert(table, [f"`{c}`" for c, _ in cols], rows))
-        if swap:
-            out += [f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
+        if swap:  # a table the environment does not hold yet gets an empty one to swap with
+            out += [f"CREATE TABLE IF NOT EXISTS {SOURCE_DB}.`{name}` LIKE {table};",
+                    f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
     return out
 
 
 def cube_tables():
-    """The survival cubes of data/cubes, one source table per CSV. NULL in a dimension means rolled up, never missing."""
+    """The survival cubes of data/cubes, one source table per .csv.gz. An empty cell is NULL: in a dimension it means rolled
+    up, never missing."""
     tables = {}
     for file in sorted(os.listdir(CUBES_DIR)):
-        path = os.path.join(CUBES_DIR, file)
-        cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in pcx.read_csv_header(path)]
-        rows = [[None if r[c] is None else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in pcx.read_csv(path)]
-        tables[file.removesuffix(".csv")] = (cols, rows)
+        with gzip.open(os.path.join(CUBES_DIR, file), "rt", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in reader.fieldnames]
+            rows = [[None if r[c] == "" else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in reader]
+        tables[file.removesuffix(".csv.gz")] = (cols, rows)
     return tables
 
 
@@ -614,20 +618,24 @@ V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tab
    RADIANT-Timeline-Abstraction team), then Radiant's own views (scripts/seed/views).
    Needs the auth.* and {TENANT_DB}.* views the API creates at startup. */"""]
 views_dir = os.path.join(PCX_DIR, "access_controlled_views")
+# Stand-ins for the views upstream builds with dbt only, dropped as soon as upstream ships the template.
+local_views_dir = os.path.join(HERE, "access_controlled_views")
+templates = {f: os.path.join(local_views_dir, f) for f in os.listdir(local_views_dir)}
+templates.update({f: os.path.join(views_dir, f) for f in os.listdir(views_dir)})
 seeded = set(pcx_tables)
-for file in sorted(os.listdir(views_dir)):
+for file, path in sorted(templates.items()):
     if not file.endswith(".sql.tmpl"):
         continue
-    sql = open(os.path.join(views_dir, file), encoding="utf-8").read()
+    sql = open(path, encoding="utf-8").read()
     sql = sql[sql.index("CREATE OR REPLACE VIEW"):].rstrip().rstrip(";")
-    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql).group(1)
+    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql, re.I).group(1)
     if source not in seeded:
         sys.exit(f"{file} reads {TEMPLATE_SOURCE_DB}.{source}, which the seed does not create")
     # StarRocks 4.0.16 drops a slot ("slot_id not found") when it broadcasts this JDBC table against a regexp_replace
     # join key; a shuffle join avoids it. The templates are upstream's, so the hint is added here.
-    if sql.count(JDBC_PATIENT_JOIN) != 1:
+    sql, joins = re.subn(re.escape(JDBC_PATIENT_JOIN), JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"), sql, flags=re.I)
+    if joins != 1:
         sys.exit(f"{file}: expected one '{JDBC_PATIENT_JOIN}' to add the [SHUFFLE] hint to")
-    sql = sql.replace(JDBC_PATIENT_JOIN, JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"))
     sql = (sql.replace("{{.TenantCode}}", TENANT).replace(f"{TEMPLATE_VIEW_DB}.", f"{TENANT_DB}.")
               .replace(f"{TEMPLATE_SOURCE_DB}.", f"{SOURCE_DB}."))
     if "{{" in sql:

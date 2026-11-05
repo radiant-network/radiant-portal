@@ -32,6 +32,7 @@ type QueryBuilderLayoutProps = {
   children: React.ReactElement;
   defaultSidebarOpen?: boolean;
   fetcher: IQBFetcher;
+  swrId?: string;
 };
 
 export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
@@ -42,7 +43,7 @@ export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
 /**
  * Query-Builder (facets + query-bar)
  */
-function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: QueryBuilderLayoutProps) {
+function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, children }: QueryBuilderLayoutProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
@@ -116,7 +117,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
                 </aside>
                 <main className="flex-1 shrink px-3 pb-3 overflow-auto">
                   <div className="py-3 space-y-2">
-                    <QueriesBarCard appId={appId} />
+                    <QueriesBarCard appId={appId} swrId={swrId} />
                   </div>
                   {children}
                 </main>

@@ -24,7 +24,7 @@ describe('Case Entity - Variants - Germline - CNV - Table - Sort', () => {
 
   it('Scientific number', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('gnomad', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('gnomad_sf', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Multiple', () => {

@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **var_field** | **str** |  | [optional] 
+**override_values_name** | **str** | OverrideValuesName is a display label for the values (e.g. a variant&#39;s HGVSg instead of its locus_id). It is stored with saved filters and has no effect on the query. | [optional] 
 **value** | **List[object]** |  | [optional] 
 
 ## Example

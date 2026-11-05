@@ -171,6 +171,7 @@ Class | Method | HTTP request | Description
 *PatientsApi* | [**patient_imaging**](docs/PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
 *PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
 *PatientsApi* | [**patient_treatments**](docs/PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
+*PatientsApi* | [**patient_trial_eligibilities**](docs/PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
 *PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 *PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -344,6 +345,8 @@ Class | Method | HTTP request | Description
  - [PatientTherapy](docs/PatientTherapy.md)
  - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
  - [PatientTreatments](docs/PatientTreatments.md)
+ - [PatientTrialEligibilities](docs/PatientTrialEligibilities.md)
+ - [PatientTrialEligibility](docs/PatientTrialEligibility.md)
  - [PatientTrialEnrollment](docs/PatientTrialEnrollment.md)
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)

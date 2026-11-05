@@ -45,6 +45,9 @@
       "no_data": "No data",
       "open_franklin": "{{tier}}, open in Franklin (new tab)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Show the {{count}} compound het variants in {{gene}} in a new query"
+    },
     "data_table": {
       "collapse_row": "Collapse row",
       "column_settings": "Column settings",
@@ -958,7 +961,10 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Compound Het of",
+        "has_comphet": "Compound Het",
+        "has_comphet_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1114,6 +1120,10 @@
         "fathmm_pred": {
           "t": "Tolerated",
           "d": "Damaging"
+        },
+        "has_comphet": {
+          "0": "False",
+          "1": "True"
         },
         "lrt_pred": {
           "n": "Neutral",
@@ -1424,6 +1434,7 @@
     "timeline": {
       "title": "Clinical Timeline",
       "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "empty": "No clinical timeline for this patient.",
       "event_type": {
         "initial_cns_tumor": "Initial CNS Tumor",
         "progressive": "Progressive",
@@ -1476,16 +1487,30 @@
       }
     },
     "clinical_trials": {
-      "title_count_one": "Previous enrollment ({{count}} protocol)",
-      "title_count_other": "Previous enrollment ({{count}} protocols)",
+      "title": "Previous enrollment",
       "day_value": "Day {{day}}",
       "initial_badge": "Initial treatment",
-      "footer": "Protocols the patient was enrolled on, from the medical therapy records. Treatment that only followed a protocol is not listed.",
       "columns": {
         "protocol": "Protocol",
         "start": "Start",
         "stop": "Stop",
         "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Trial Eligibility",
+        "subtitle": "Verdicts extracted by BRIM from patient clinical notes.",
+        "empty": "This patient has not yet been screened in BRIM for clinical trial eligibility.",
+        "confidence": "Confidence",
+        "not_reviewed": "Not reviewed",
+        "date_tooltip": "Latest assessment",
+        "reasoning_label": "Reasoning:",
+        "view_in_brim": "Open in BRIM",
+        "phi_restricted": "Reasoning restricted to users with PHI access",
+        "verdict": {
+          "eligible": "Eligible",
+          "ineligible_modifiable": "Ineligible modifiable",
+          "ineligible_permanent": "Ineligible permanent"
+        }
       }
     },
     "laboratory": {
@@ -2052,6 +2077,8 @@
       "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
       "cmc_tier": "Tier",
       "cmc_tier_tooltip": "CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
+      "comphet_genes": "CH",
+      "comphet_genes_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
       "cn": "CN",
       "cn_tooltip": "Estimated copy number",
       "cytoband": "Cytoband",
@@ -2072,10 +2099,16 @@
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
       "genotype_quality_tooltip": "Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
-      "gnomad_sf": "gnomAD",
-      "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (Site Frequency)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (Allele Count)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (Site Count)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (Allele Frequency)",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -2202,7 +2235,15 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignment and variant"
+      "title": "Alignment and variant",
+      "chrm_hidden_reads": {
+        "title": "Reads hidden on chrM",
+        "description": "Some tracks are very deep on chrM. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      },
+      "failed_tracks": {
+        "title_one": "A track could not be loaded",
+        "title_other": "{{count}} tracks could not be loaded"
+      }
     },
     "interpretation_form": {
       "alert": {
@@ -2552,7 +2593,8 @@
       "sex": "Sex",
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
-      "title": "Patient Information"
+      "title": "Patient Information",
+      "view_patient": "View Patient"
     },
     "details": {
       "aliquot": "Aliquot",
@@ -2713,7 +2755,7 @@
       "patients": "Patients",
       "patients_tooltip": "Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gnom_ad": "gnomAD",
-      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (allele frequency)",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
       "exon": "Exon",
       "most_deleterious_consequence_notice": "This transcript was selected because it represents the most deleterious consequence.",
       "view_all_transcripts": "View all transcripts",
@@ -2830,7 +2872,7 @@
         "af": "Frequency",
         "af_tooltip": "Allele Frequency",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Genomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Genomes"
       }
     },
@@ -3029,8 +3071,13 @@
       "badge": "AI assistant",
       "description": "AI-driven predictive analytics for personalized cancer care",
       "frame_title": "D.A.V.I.D assistant",
+      "new_analysis": "New analysis",
       "not_configured": "D.A.V.I.D is not configured for this environment.",
-      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen"
+      "open_in_new_tab": "Open in a new tab",
+      "resume_history": "Resume history",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen",
+      "prompt_case": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
+      "prompt_patient": "Context: patient {{patientId}} (tenant {{tenant}}). Load this patient's context and give a brief clinical summary. Then wait for the user's questions."
     }
   }
 }

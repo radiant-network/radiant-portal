@@ -98,12 +98,18 @@
    cbtn_tenant needs the usual can_read_phi gate plus date suppression; see
    ../../access_controlled_views/.
 
-   SCHEMA DRIFT: the export format moved 25 -> 28 columns between 2026-09-11 and
-   2026-10-21, the 28 being a strict superset (adds the two offsets and patient_link,
-   shared columns keep their relative order). Expect further drift. The loader accepts
-   any ordered subset of the 28 and NULLs the rest, but a genuinely NEW column must be
-   added both to this table and to the loader's HEADER_MAP -- it refuses an
-   unrecognised column rather than guessing.
+   SCHEMA DRIFT, TWICE SO FAR, both times a strict superset keeping shared columns in
+   their relative order. 25 -> 28 between 2026-09-11 and 2026-10-21 (adds the two
+   offsets and patient_link); 28 -> 29 on 2026-11-04 (adds value_offset_type). Expect
+   more. The loader accepts any ordered subset and NULLs the rest, but a genuinely NEW
+   column must be added to this table AND to the loader's HEADER_MAP -- it refuses an
+   unrecognised column rather than guessing, which is how the 29th was caught.
+
+   ADD A NEW COLUMN IN ITS EXPORT POSITION, never appended. value_offset_type arrives
+   BETWEEN comment_last_edited and result_link, so it was added with
+   `alter table ... add column ... after comment_last_edited`. The loader checks the
+   header is an ORDERED subset of this table's data columns, so an appended column
+   makes a conforming export look out of order and be refused.
 */
 
 CREATE TABLE IF NOT EXISTS radiant_data_dev.brim_output (
@@ -133,6 +139,7 @@ CREATE TABLE IF NOT EXISTS radiant_data_dev.brim_output (
   `comment`                varchar(65533) NULL,
   `comment_last_edited_by` varchar(256)   NULL,
   `comment_last_edited`    varchar(64)    NULL,
+  `value_offset_type`      varchar(64)    NULL COMMENT "added by the 28 -> 29 export drift, 2026-11-04; offset basis for value_start/end_offset",
   `result_link`            varchar(512)   NULL,
   `patient_link`           varchar(512)   NULL,
   `source_file`            varchar(256)   NULL COMMENT "provenance: basename of the loaded BRIM export",

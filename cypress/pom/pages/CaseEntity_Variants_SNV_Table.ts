@@ -199,7 +199,7 @@ const tableGermlineSNVColumns = [
     isSortable: true,
     isPinnable: true,
     position: 15,
-    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
+    tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
     id: 'freq',
@@ -235,6 +235,17 @@ const tableGermlineSNVColumns = [
     tooltip: 'Zygosity',
   },
   {
+    id: 'comphet_genes',
+    name: 'CH',
+    apiField: 'comphet_genes',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 19,
+    tooltip: 'Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.',
+  },
+  {
     id: 'ad_ratio',
     name: 'AD Ratio',
     apiField: 'ad_ratio',
@@ -242,7 +253,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 19,
+    position: 20,
     tooltip: null,
   },
   {
@@ -253,7 +264,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 20,
+    position: 21,
     tooltip: null,
   },
 ];
@@ -444,7 +455,7 @@ const tableSomaticSNVColumns = [
     isSortable: true,
     isPinnable: true,
     position: 14,
-    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
+    tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
     id: 'freq_to',

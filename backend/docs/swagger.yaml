@@ -2706,6 +2706,11 @@ components:
       properties:
         field:
           type: string
+        overrideValuesName:
+          description: |-
+            OverrideValuesName is a display label for the values (e.g. a variant's HGVSg instead of its locus_id).
+            It is stored with saved filters and has no effect on the query.
+          type: string
         value:
           items: {}
           type: array
@@ -3916,6 +3921,55 @@ components:
       - surgeries
       - therapies
       - trial_enrollments
+      type: object
+    PatientTrialEligibilities:
+      description: Clinical trial eligibility verdicts of a patient, extracted from
+        the patient's notes by BRIM
+      properties:
+        assessments:
+          description: Most recently loaded first
+          items:
+            $ref: '#/components/schemas/PatientTrialEligibility'
+          type: array
+          uniqueItems: false
+      required:
+      - assessments
+      type: object
+    PatientTrialEligibility:
+      description: 'Eligibility verdict of a patient for one clinical trial. reasoning
+        and brim_url are PHI: null without PHI access.'
+      properties:
+        brim_url:
+          description: Re-identifies the patient in BRIM
+          type: string
+        confidence:
+          description: BRIM's score, as BRIM writes it
+          example: "0.95"
+          type: string
+        generated_verdict:
+          description: As BRIM produced it, before review
+          type: string
+        loaded_at:
+          description: When the BRIM export was loaded, not a clinical date
+          type: string
+        reasoning:
+          description: Quotes the patient's notes
+          type: string
+        review_status:
+          description: null when not reviewed
+          type: string
+        variable_name:
+          description: The BRIM variable assessed, naming the trial
+          example: 3.6 PNOC035 Eligibility
+          type: string
+        verdict:
+          description: After any human review edit, the operative value
+          example: Ineligible Permanent
+          type: string
+      required:
+      - loaded_at
+      - variable_name
+      - verdict
       type: object
     PatientTrialEnrollment:
       description: Treatment protocol arm the patient was enrolled on, its medical
@@ -10810,6 +10864,68 @@ paths:
       security:
       - bearerauth: []
       summary: Get PatientTreatments of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/trial_eligibilities:
+    get:
+      description: Retrieve PatientTrialEligibilities, the eligibility verdicts
+        BRIM extracted from the patient's notes, by its patient_key. 404 for an unknown
+        or malformed key, with no hint that the patient exists.
+      operationId: patientTrialEligibilities
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTrialEligibilities'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientTrialEligibilities of a patient
       tags:
       - patients
   /{tenant}/patients/autocomplete:

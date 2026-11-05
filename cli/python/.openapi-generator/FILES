@@ -145,6 +145,8 @@ docs/PatientSurvival.md
 docs/PatientTherapy.md
 docs/PatientTreatmentSummary.md
 docs/PatientTreatments.md
+docs/PatientTrialEligibilities.md
+docs/PatientTrialEligibility.md
 docs/PatientTrialEnrollment.md
 docs/PatientsApi.md
 docs/PatientsSearchResponse.md
@@ -370,6 +372,8 @@ radiant_python/models/patient_survival.py
 radiant_python/models/patient_therapy.py
 radiant_python/models/patient_treatment_summary.py
 radiant_python/models/patient_treatments.py
+radiant_python/models/patient_trial_eligibilities.py
+radiant_python/models/patient_trial_eligibility.py
 radiant_python/models/patient_trial_enrollment.py
 radiant_python/models/patients_search_response.py
 radiant_python/models/pubmed_citation.py

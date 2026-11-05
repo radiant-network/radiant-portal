@@ -45,6 +45,9 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Afficher les {{count}} variants hét. composés dans {{gene}} dans une nouvelle requête"
+    },
     "data_table": {
       "collapse_row": "Replier la ligne",
       "column_settings": "Paramètres des colonnes",
@@ -959,7 +962,10 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Hét. composé de",
+        "has_comphet": "Hét. composé",
+        "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1115,6 +1121,10 @@
         "fathmm_pred": {
           "t": "Toléré",
           "d": "Délétère"
+        },
+        "has_comphet": {
+          "0": "Faux",
+          "1": "Vrai"
         },
         "lrt_pred": {
           "n": "Neutre",
@@ -1425,6 +1435,7 @@
     "timeline": {
       "title": "Chronologie clinique",
       "description": "Événements de maladie, chirurgies, radiothérapie et traitement médical selon l'âge en jours depuis la naissance.",
+      "empty": "Aucune chronologie clinique pour ce patient.",
       "event_type": {
         "initial_cns_tumor": "Tumeur SNC initiale",
         "progressive": "Progression",
@@ -1477,16 +1488,30 @@
       }
     },
     "clinical_trials": {
-      "title_count_one": "Inscriptions antérieures ({{count}} protocole)",
-      "title_count_other": "Inscriptions antérieures ({{count}} protocoles)",
+      "title": "Inscriptions antérieures",
       "day_value": "Jour {{day}}",
       "initial_badge": "Traitement initial",
-      "footer": "Protocoles auxquels le patient a été inscrit, selon les dossiers de thérapie médicale. Les traitements qui n'ont fait que suivre un protocole ne sont pas listés.",
       "columns": {
         "protocol": "Protocole",
         "start": "Début",
         "stop": "Fin",
         "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Admissibilité aux essais",
+        "subtitle": "Verdicts extraits par BRIM des notes cliniques du patient.",
+        "empty": "Ce patient n'a pas encore été évalué dans BRIM afin de déterminer son admissibilité aux essais cliniques.",
+        "confidence": "Confiance",
+        "not_reviewed": "Non révisé",
+        "date_tooltip": "Dernière évaluation",
+        "reasoning_label": "Raisonnement :",
+        "view_in_brim": "Ouvrir dans BRIM",
+        "phi_restricted": "Raisonnement limité aux utilisateurs avec accès PHI",
+        "verdict": {
+          "eligible": "Admissible",
+          "ineligible_modifiable": "Non admissible modifiable",
+          "ineligible_permanent": "Non admissible permanent"
+        }
       }
     },
     "laboratory": {
@@ -2053,6 +2078,8 @@
       "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
       "cmc_tier": "Tier",
       "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
+      "comphet_genes": "HC",
+      "comphet_genes_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
       "cn": "CN",
       "cn_tooltip": "Nombre de copies estimé",
       "cytoband": "Cytobande",
@@ -2073,10 +2100,16 @@
       "gene_length_tooltip": "Longueur du gène en bases",
       "genotype_quality": "QG",
       "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences.",
-      "gnomad_sf": "gnomAD",
-      "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence de site)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (nombre d'allèles)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (nombre de sites)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -2203,7 +2236,15 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignement et variant"
+      "title": "Alignement et variant",
+      "chrm_hidden_reads": {
+        "title": "Lectures masquées sur chrM",
+        "description": "Certaines pistes sont très profondes sur chrM. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      },
+      "failed_tracks": {
+        "title_one": "Une piste n'a pas pu être chargée",
+        "title_other": "{{count}} pistes n'ont pas pu être chargées"
+      }
     },
     "interpretation_form": {
       "alert": {
@@ -2553,7 +2594,8 @@
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
       "submitter_patient_id_tooltip": "ID patient de l’organisation",
-      "title": "Information du patient"
+      "title": "Information du patient",
+      "view_patient": "Voir patient"
     },
     "details": {
       "aliquot": "Aliquot",
@@ -2714,7 +2756,7 @@
       "patients": "Patients",
       "patients_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "gnom_ad": "gnomAD",
-      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
       "exon": "Exon",
       "most_deleterious_consequence_notice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
       "view_all_transcripts": "Voir tous les transcrits",
@@ -2831,7 +2873,7 @@
         "af": "Fréquence",
         "af_tooltip": "Fréquence allélique",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Génomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Génomes"
       }
     },
@@ -3030,8 +3072,13 @@
       "badge": "Assistant IA",
       "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
       "frame_title": "Assistant D.A.V.I.D",
+      "new_analysis": "Nouvelle analyse",
       "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement.",
-      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran"
+      "open_in_new_tab": "Ouvrir dans un nouvel onglet",
+      "resume_history": "Reprendre l'historique",
+      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran",
+      "prompt_case": "Contexte : cas {{caseId}} (tenant {{tenant}}). Charge le contexte de ce cas et présente un bref résumé clinique (structure familiale, phénotypes HPO). Ensuite, attends les questions de l'utilisateur.",
+      "prompt_patient": "Contexte : patient {{patientId}} (tenant {{tenant}}). Charge le contexte de ce patient et présente un bref résumé clinique. Ensuite, attends les questions de l'utilisateur."
     }
   }
 }

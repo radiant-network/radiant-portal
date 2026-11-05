@@ -14,7 +14,7 @@ services:
   yac-agent:
     profiles: [yac]
     build:
-      context: ${YAC_BUILD_CONTEXT:-https://github.com/hms-dbmi/udi-yac.git#main}
+      context: ${YAC_BUILD_CONTEXT:-https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.1}
       dockerfile: packages/agent/Dockerfile
     image: radiant/yac-agent:local
     ports:

@@ -52,7 +52,7 @@ export const CommonSelectors = {
   hotspotOffIcon: '[class*="lucide-flame"][class*="text-muted-foreground/40"]',
   hotspotOnIcon: '[class*="lucide-flame"][class*="fill-indicator-red"]',
   igvContainer: '[id="igvContainer"]',
-  igvIcon: '[class*="lucide-flip-vertical2"]',
+  igvIcon: '[class*="lucide-flip-vertical-2"]',
   igvError: '[class*="igv-ui-alert-dialog"]:contains("Error")',
   igvTrack: '[class="igv-track-label"]',
   igvWindowSize: '[class="igv-windowsize-panel-container"]',

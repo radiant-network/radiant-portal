@@ -637,6 +637,7 @@ export const radiantConfig = {
             type: FilterTypes.MULTIPLE,
             withDictionary: true,
           },
+          { key: 'has_comphet', translation_key: 'has_comphet', type: FilterTypes.BOOLEAN },
           {
             key: 'occurrence_metrics_divider',
             translation_key: 'occurrence_metrics_divider',

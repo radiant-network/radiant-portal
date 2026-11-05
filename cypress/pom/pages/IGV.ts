@@ -3,23 +3,25 @@ import { data } from 'pom/shared/Data';
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
 
+// igv.js renders the browser in a shadow root of its container.
+const findInIGV = (selector: string) => cy.get(CommonSelectors.igvContainer).shadow().find(selector);
+
 export const IGV = {
   actions: {
     /**
      * Clicks on the zoom out button.
      */
     clickZoomOut() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(0).click({ force: true });
+      findInIGV(CommonSelectors.igvZoomButtons).eq(0).click({ force: true });
     },
     /**
      * Clicks on the zoom in button several times.
+     * @param clickCount The number of clicks needed to reach the max zoom (each click halves the window size).
      */
-    maxZoom() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(1).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(1).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(1).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(1).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvZoomButtons}`).eq(1).clickAndWait({ force: true });
+    maxZoom(clickCount: number = 5) {
+      for (let i = 0; i < clickCount; i++) {
+        findInIGV(CommonSelectors.igvZoomButtons).eq(1).clickAndWait({ force: true });
+      }
       IGV.validations.shouldBeMaxZoom();
     },
   },
@@ -29,7 +31,7 @@ export const IGV = {
      * Validates the window size value, which must be the minimum value.
      */
     shouldBeMaxZoom() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvWindowSize}`).contains(CommonTexts.en.igvMaxZoom).should('exist');
+      findInIGV(CommonSelectors.igvWindowSize).contains(CommonTexts.en.igvMaxZoom).should('exist');
     },
     /**
      * Validates the title of the modal.
@@ -41,23 +43,26 @@ export const IGV = {
      * Validates the display of the track order.
      */
     shouldHaveTracks() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvTrack}`).eq(0).contains(CommonTexts.en.igvTrackRefseq).should('exist');
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvTrack}`).eq(1).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.proband, 'proband')).should('exist');
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvTrack}`).eq(2).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.mother, 'mother')).should('exist');
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvTrack}`).eq(3).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.father, 'father')).should('exist');
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvTrack}`).eq(4).should('not.exist');
+      findInIGV(CommonSelectors.igvTrack).eq(0).contains(CommonTexts.en.igvTrackRefseq).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(1).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.proband, 'proband')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(2).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.proband, 'proband')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(3).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.mother, 'mother')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(4).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.mother, 'mother')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(5).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.father, 'father')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(6).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.father, 'father')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(7).should('not.exist');
     },
     /**
      * Validates the window size value, which must not be the minimum value.
      */
     shouldNotBeMaxZoom() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvWindowSize}`).contains(CommonTexts.en.igvMaxZoom).should('not.exist');
+      findInIGV(CommonSelectors.igvWindowSize).contains(CommonTexts.en.igvMaxZoom).should('not.exist');
     },
     /**
      * Validates the absence of an error message.
      */
     shouldNotHaveErrorMessage() {
-      cy.get(`${CommonSelectors.igvContainer} ${CommonSelectors.igvError}`).should('not.exist');
+      findInIGV(CommonSelectors.igvError).should('not.exist');
     },
   },
 };

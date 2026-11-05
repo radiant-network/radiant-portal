@@ -73,6 +73,7 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
       <QueryBuilder
         key={appId}
         appId={appId}
+        swrId={`${seqId}-${taskId}`}
         fetcher={{
           list: async (params: IListInput) => {
             if (taskId === undefined) return [];

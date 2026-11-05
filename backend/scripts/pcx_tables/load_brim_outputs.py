@@ -34,10 +34,14 @@ WHY IT IS BUILT THIS WAY
   (`source_file`, `loaded_at`) are load provenance, stamped here, and are deliberately
   NOT in the export. The 28 are the BRIM header verbatim, snake_cased, in order.
 
-* The BRIM export schema DRIFTS between versions. An older 25-column export exists
-  (`brim_output_20260911_notstructured.csv`); the current 28-column form is a strict
-  superset -- it adds `Value Start Offset`, `Value End Offset` and `Patient Link`, and
-  keeps the shared columns in the same relative order. This script therefore accepts
+* The BRIM export schema DRIFTS between versions -- twice so far, both times as a
+  strict superset keeping shared columns in the same relative order. 25 -> 28 added
+  `Value Start Offset`, `Value End Offset` and `Patient Link`; 28 -> 29 (seen
+  2026-11-04) added `Value Offset Type`, positioned BETWEEN `Comment last edited`
+  and `Result Link`. A new column must therefore be added to the target table in its
+  export position (`alter table ... add column ... after <prev>`), NOT appended:
+  the ordered-subset check below compares header position against the table's
+  column order, so an appended column makes a conforming export look out of order. This script therefore accepts
   any header that is an ordered subset of the 28, filling the absent columns with NULL,
   and reports which were missing. A header with an UNKNOWN column is refused.
 
@@ -60,8 +64,10 @@ TARGET_SCHEMA = "radiant_data_dev"
 TARGET_TABLE = "brim_output"
 PROVENANCE_COLS = ("source_file", "loaded_at")
 STARROCKS_ENV = Path.home() / ".radiant/starrocks-prod.env"
-STARROCKS_HOST = ("celerdata-private-nlb-hnsIFJjH-"
-                  "47198fe90f6ce7c2.elb.us-east-1.amazonaws.com")
+
+# The prod FE endpoint is deliberately NOT in the repo. It is read from
+# STARROCKS_PROD_HOST in the credential file above, beside the user and password that
+# file already supplies. Docs refer to it as <starrocks-prod-host>.
 
 # BRIM CSV header -> target column. Order is the export's order.
 HEADER_MAP = {
@@ -91,9 +97,19 @@ HEADER_MAP = {
     "Comment": "comment",
     "Comment last edited by": "comment_last_edited_by",
     "Comment last edited": "comment_last_edited",
+    "Value Offset Type": "value_offset_type",
     "Result Link": "result_link",
     "Patient Link": "patient_link",
 }
+
+
+def starrocks_host(cfg: dict[str, str]) -> str:
+    """The prod FE endpoint, from the credential file -- never hardcoded here."""
+    host = cfg.get("STARROCKS_PROD_HOST", "").strip()
+    if not host:
+        sys.exit(f"STARROCKS_PROD_HOST is not set in {STARROCKS_ENV}\n"
+                 f"  add:  export STARROCKS_PROD_HOST=<starrocks-prod-host>")
+    return host
 
 
 def read_env(path: Path) -> dict[str, str]:
@@ -118,7 +134,7 @@ def connect():
         sys.exit("pymysql is required -- use starrocks-dbt/.starrocks-dbt/bin/python3")
     cfg = read_env(STARROCKS_ENV)
     return pymysql.connect(
-        host=STARROCKS_HOST, port=80,
+        host=starrocks_host(cfg), port=80,
         user=cfg["STARROCKS_PROD_USER"], password=cfg["STARROCKS_PROD_PASSWORD"],
         autocommit=True, charset="utf8mb4", local_infile=False,
     )

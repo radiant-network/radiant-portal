@@ -64,6 +64,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     <>
       <QueryBuilder
         appId={appId}
+        swrId={`${seqId}-${taskId}`}
         fetcher={{
           list: async (params: IListInput) => {
             if (taskId === undefined) return [];

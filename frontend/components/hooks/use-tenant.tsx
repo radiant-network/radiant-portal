@@ -138,8 +138,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       key: TENANT_PREFERENCE_KEY,
       content: { tenant: code },
     });
-    // Hard navigation: entity ids do not carry across tenants, so land on the case list.
-    window.location.assign(`/${code}/case`);
+    // Hard navigation: entity ids do not carry across tenants, so land on the portal homepage.
+    window.location.assign(`/${code}`);
   };
 
   if (isLoading) {

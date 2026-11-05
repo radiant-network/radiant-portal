@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import Timeline from '@/components/base/timeline/timeline';
 
 const meta = {
-  title: 'Components/Timeline',
+  title: 'Features/Timeline',
   component: Timeline,
 } satisfies Meta<typeof Timeline>;
 
@@ -94,10 +94,7 @@ export const Default: Story = {
 export const Empty: Story = {
   render: () => (
     <div className="w-[720px]">
-      <Timeline
-        title="Clinical Timeline"
-        description="Disease events, surgeries, radiation and medical therapy by age in days since birth."
-      />
+      <Timeline title="Clinical Timeline" description="No clinical timeline for this patient." />
     </div>
   ),
 };

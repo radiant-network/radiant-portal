@@ -1,0 +1,4 @@
+organization_name	organization_code	patient_id	patient_id_type	radiant_patient_id	variable_name	generated_value	eligibility_value	reasoning	confidence	review_status	brim_scope	brim_url	source_file	brim_loaded_at	can_read_phi
+Children's Hospital of Philadelphia	CHOP	MRN-0002	mrn	3	3.6 PNOC035 Eligibility	Eligible	Ineligible Temporary	Note of 2019-03-02 for MRN-0002: progression on MRI.	0.82	review	One Label Per Patient	https://brim.example/p/1	batch02.csv	2026-10-30 09:15:00	true
+Children's Hospital of Philadelphia	CHOP	MRN-0001	mrn	11	3.6 PNOC035 Eligibility	Eligible	Eligible	Note of 2018-01-10 for MRN-0001.	0.9		One Label Per Patient	https://brim.example/p/2	batch01.csv	2026-10-20 10:00:00	true
+Boston Children's Hospital	BCH	C100004	research_id	22	3.6 PNOC035 Eligibility	Ineligible Permanent	Ineligible Permanent	NULL	0.95		One Label Per Patient	NULL	batch03.csv	2026-10-23 17:00:26	false

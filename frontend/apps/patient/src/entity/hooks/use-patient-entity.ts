@@ -10,6 +10,7 @@ import {
   fetchPatientImaging,
   fetchPatientLaboratory,
   fetchPatientTreatments,
+  fetchPatientTrialEligibilities,
 } from '../../api/patient';
 
 type PatientEntityInput = {
@@ -38,3 +39,5 @@ export const usePatientImaging = () => usePatientEntity('patient-imaging', fetch
 export const usePatientGenomics = () => usePatientEntity('patient-genomics', fetchPatientGenomics);
 export const usePatientExternalRecords = () =>
   usePatientEntity('patient-external-records', fetchPatientExternalRecords);
+export const usePatientTrialEligibilities = () =>
+  usePatientEntity('patient-trial-eligibilities', fetchPatientTrialEligibilities);
