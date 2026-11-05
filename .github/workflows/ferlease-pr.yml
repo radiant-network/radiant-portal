@@ -99,6 +99,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # The specs come from the merge with the base branch, the Ferlease image from the branch alone: they only match once rebased.
+      - name: Check the branch is rebased on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          BEHIND=$(gh api "repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.sha }}" --jq .behind_by)
+          if [ "$BEHIND" != "0" ]; then
+            curl -sf -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"attachments\":[{\"title\":\"Ferlease - Cypress Launch Attempt Failed (Radiant) 🚨\",\"text\":\"The branch is not rebased on last commit from main: ${BRANCH}\",\"color\":\"danger\"}]}"
+            exit 1
+          fi
+
       - name: Notify Slack launch
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -130,6 +145,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
           CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          FERLEASE_BUILD_SHA: ${{ github.event.pull_request.head.sha }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
           SG_ID=$(aws ec2 describe-security-groups \
@@ -154,13 +170,15 @@ jobs:
               --arg password "$CYPRESS_USER_PASSWORD" \
               --arg spec "${SHARDS[$i]}" \
               --arg shard_id "$i" \
+              --arg build_sha "$FERLEASE_BUILD_SHA" \
               '{containerOverrides:[{name:"ferlease-cypress",environment:[
                 {name:"RELEASE",value:$release},
                 {name:"CYPRESS_BASE_URL",value:$base_url},
                 {name:"CYPRESS_USER_USERNAME",value:$username},
                 {name:"CYPRESS_USER_PASSWORD",value:$password},
                 {name:"CYPRESS_SPEC",value:$spec},
-                {name:"SHARD_ID",value:$shard_id}
+                {name:"SHARD_ID",value:$shard_id},
+                {name:"FERLEASE_BUILD_SHA",value:$build_sha}
               ]}]}')
             ARN=$(aws ecs run-task \
               --cluster pipelines \
