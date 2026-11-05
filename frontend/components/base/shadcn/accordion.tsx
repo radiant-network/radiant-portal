@@ -50,7 +50,7 @@ export interface AccordionTriggerProps extends AccordionPrimitive.AccordionTrigg
 }
 function AccordionTrigger({ className, children, chevronPlacement = 'left', ...props }: AccordionTriggerProps) {
   return (
-    <AccordionPrimitive.Header className="flex justify-between items-center">
+    <AccordionPrimitive.Header className="flex min-w-0 justify-between items-center">
       <AccordionPrimitive.Trigger
         className={cn(
           'group w-full cursor-pointer rounded-md py-2 text-left transition-all',
@@ -60,7 +60,7 @@ function AccordionTrigger({ className, children, chevronPlacement = 'left', ...p
         )}
         {...props}
       >
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 min-w-0 items-center">
           {chevronPlacement === 'left' && (
             <ChevronRight className="size-4 text-muted-foreground shrink-0 group-data-[state=open]:rotate-90 transition-transform duration-200 mr-2" />
           )}
