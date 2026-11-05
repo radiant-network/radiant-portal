@@ -1497,6 +1497,22 @@
         "start": "Début",
         "stop": "Fin",
         "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Admissibilité aux essais",
+        "subtitle": "Verdicts extraits par BRIM des notes cliniques du patient.",
+        "empty": "Ce patient n'a pas encore été évalué dans BRIM afin de déterminer son admissibilité aux essais cliniques.",
+        "confidence": "Confiance",
+        "not_reviewed": "Non révisé",
+        "date_tooltip": "Dernière évaluation",
+        "reasoning_label": "Raisonnement :",
+        "view_in_brim": "Ouvrir dans BRIM",
+        "phi_restricted": "Raisonnement limité aux utilisateurs avec accès PHI",
+        "verdict": {
+          "eligible": "Admissible",
+          "ineligible_modifiable": "Non admissible modifiable",
+          "ineligible_permanent": "Non admissible permanent"
+        }
       }
     },
     "laboratory": {

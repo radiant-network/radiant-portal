@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import Timeline from '@/components/base/timeline/timeline';
 
 const meta = {
-  title: 'Components/Timeline',
+  title: 'Features/Timeline',
   component: Timeline,
 } satisfies Meta<typeof Timeline>;
 

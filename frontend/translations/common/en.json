@@ -1496,6 +1496,22 @@
         "start": "Start",
         "stop": "Stop",
         "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Trial Eligibility",
+        "subtitle": "Verdicts extracted by BRIM from patient clinical notes.",
+        "empty": "This patient has not yet been screened in BRIM for clinical trial eligibility.",
+        "confidence": "Confidence",
+        "not_reviewed": "Not reviewed",
+        "date_tooltip": "Latest assessment",
+        "reasoning_label": "Reasoning:",
+        "view_in_brim": "Open in BRIM",
+        "phi_restricted": "Reasoning restricted to users with PHI access",
+        "verdict": {
+          "eligible": "Eligible",
+          "ineligible_modifiable": "Ineligible modifiable",
+          "ineligible_permanent": "Ineligible permanent"
+        }
       }
     },
     "laboratory": {

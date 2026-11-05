@@ -131,7 +131,7 @@ export default function App() {
                 <ImagingTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
-                <ClinicalTrialsTab />
+                <ClinicalTrialsTab patient={data} />
               </TabsContent>
             </div>
           </div>
