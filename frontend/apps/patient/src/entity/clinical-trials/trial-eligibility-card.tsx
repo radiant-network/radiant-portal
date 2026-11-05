@@ -7,6 +7,7 @@ import { Badge, type BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
 
 type TrialEligibilityCardProps = {
@@ -16,6 +17,7 @@ type TrialEligibilityCardProps = {
 
 function TrialEligibilityCard({ assessment, canReadPhi }: TrialEligibilityCardProps) {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
 
   const protocolName = assessment.variable_name.replace(/\s*Eligibility\s*$/i, '').trim();
 
@@ -51,7 +53,7 @@ function TrialEligibilityCard({ assessment, canReadPhi }: TrialEligibilityCardPr
             <Badge variant={badgeVariant}>{verdictLabel}</Badge>
           </div>
           <div className="order-3 flex items-center gap-2 lg:order-2">
-            <ConfidenceGauge percent={percent} />
+            <ConfidenceGauge percent={percent} size={isMobile ? 32 : 24} />
             <div className="flex items-baseline gap-1">
               {percent != null && <span className="text-sm font-bold text-card-foreground">{percent}%</span>}
               <span className="text-xs text-muted-foreground">
@@ -102,7 +104,7 @@ function TrialEligibilityCard({ assessment, canReadPhi }: TrialEligibilityCardPr
             )}
           </div>
         ) : (
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
             <Lock className="size-4" aria-hidden />
             {t('patient_entity.clinical_trials.trial_eligibilities.phi_restricted')}
           </div>
