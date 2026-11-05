@@ -41,8 +41,20 @@ with pt_roster as (
 
 initial_events as (
     select * from {{ ref('int_pcx_30_initial_events') }}
-)
+),
 
+
+-- FIELD PROVENANCE AND REVIEWER OVERRIDES (added 2026-11-05)
+-- -----------------------------------------------------------------------
+-- `field_provenance` records, per row, which values an independent automated
+-- source produced: `field=source`, with `!` marking a value a clinical
+-- reviewer accepted IN PLACE OF the curator's. The rule is "provenance only,
+-- UNLESS a reviewer accepts an overriding value" (owner, 2026-11-05).
+-- Detail -- who decided, when, the original value, the case id -- lives in
+-- `pcx_30_field_provenance` and `pcx_30_promotion_decisions`, deliberately NOT
+-- in more columns here.
+
+published as (
 select distinct
     pt_roster.organization_name,
     pt_roster.research_id,
@@ -66,3 +78,96 @@ from {{ source('dwh_source', 'treatment') }} treatment
 inner join pt_roster on treatment.subject = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where treatment.radiation = 'Yes'
+
+)
+,
+
+keyed as (
+    -- pcx_row_uid -- md5 over every base column in DDL order, '|#|'-joined,
+    -- with a NUL-wrapped NULL sentinel so a NULL and the literal 'NULL' hash
+    -- differently. Reproduces promote_to_pcx30._uid EXACTLY: verified
+    -- 2026-11-05 against all five live release tables, 38,488 of 38,488 rows.
+    -- It is the only join key these tables have -- the models are
+    -- `select distinct` with no row identity of their own -- and being
+    -- content-addressed is the right failure mode: if an upstream value moves,
+    -- the uid moves, the provenance join misses, and a stamp measured against
+    -- the old value stops applying rather than being applied to a value nobody
+    -- reviewed.
+    select
+        published.*,
+        md5(concat(
+            coalesce(cast(organization_name as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(age_at_radiation_start_days as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(age_at_radiation_stop_days as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(radiation_site as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(radiation_site_other as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(radiation_type as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(radiation_type_other as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(total_radiation_dose as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(total_radiation_dose_unit as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(total_radiation_dose_focal as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(total_radiation_dose_focal_unit as string), concat(char(0), 'NULL', char(0))),
+            '|#|',
+            coalesce(cast(is_initial_treatment as string), concat(char(0), 'NULL', char(0)))
+        )) as pcx_row_uid
+    from published
+),
+
+prov as (
+    -- Field provenance, pivoted to one row per release row. `!` marks a
+    -- reviewer-accepted OVERRIDE (the value differs from what the curator
+    -- typed); no marker means corroborated, value unchanged.
+    select
+        pcx_row_uid,
+        max(case when field = 'age_at_radiation_start_days' then accepted_value end)
+            as ov_age_at_radiation_start_days,
+        max(case when field = 'age_at_radiation_stop_days' then accepted_value end)
+            as ov_age_at_radiation_stop_days,
+        max(case when field = 'radiation_site' then accepted_value end)
+            as ov_radiation_site,
+        max(case when field = 'radiation_type' then accepted_value end)
+            as ov_radiation_type,
+        max(case when field = 'total_radiation_dose' then accepted_value end)
+            as ov_total_radiation_dose,
+        max(case when field = 'total_radiation_dose_focal' then accepted_value end)
+            as ov_total_radiation_dose_focal,
+        group_concat(
+            concat(field, '=', source, if(kind = 'override', '!', ''))
+            order by field separator ';'
+        ) as field_provenance
+    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
+    where grain = 'radiation'
+    group by pcx_row_uid
+)
+
+-- Column order is the base table's, unchanged; field_provenance is appended
+-- LAST so a positional consumer (the CSV exports) sees only an added column.
+select
+    keyed.organization_name,
+    keyed.research_id,
+    coalesce(prov.ov_age_at_radiation_start_days, keyed.age_at_radiation_start_days) as age_at_radiation_start_days,
+    coalesce(prov.ov_age_at_radiation_stop_days, keyed.age_at_radiation_stop_days) as age_at_radiation_stop_days,
+    coalesce(prov.ov_radiation_site, keyed.radiation_site) as radiation_site,
+    keyed.radiation_site_other,
+    coalesce(prov.ov_radiation_type, keyed.radiation_type) as radiation_type,
+    keyed.radiation_type_other,
+    coalesce(prov.ov_total_radiation_dose, keyed.total_radiation_dose) as total_radiation_dose,
+    keyed.total_radiation_dose_unit,
+    coalesce(prov.ov_total_radiation_dose_focal, keyed.total_radiation_dose_focal) as total_radiation_dose_focal,
+    keyed.total_radiation_dose_focal_unit,
+    keyed.is_initial_treatment,
+    prov.field_provenance
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

@@ -2,9 +2,33 @@
 version: 2
 
 sources:
+  - name: radiant_prov
+    database: default_catalog
+    schema: radiant_data_dev
+    description: >
+      Field-level provenance for the pcx_30 release tables. Maintained OUTSIDE
+      dbt by `scripts/crf_coverage/promote_to_pcx30.py` in the
+      RADIANT-Timeline-Abstraction repo, which is the only place that both runs
+      the composite<->pcx_30 comparators and reads the reviewer decisions --
+      re-implementing those comparators in SQL would create a second, silently
+      divergent definition of "exact". A source rather than a ref for that
+      reason.
+    tables:
+      - name: pcx_30_field_provenance
+        description: >
+          One row per (pcx_row_uid, field) whose value is machine-corroborated
+          or reviewer-overridden. `kind='corroborated'` means an automated
+          source independently produced the same value, so the displayed value
+          does NOT change; `kind='override'` means a clinical reviewer accepted
+          a DIFFERENT value, which the deid models apply. Joined on
+          `pcx_row_uid`, an md5 over the release row's own base columns that the
+          models recompute -- the release tables have no row key of their own.
+          An absent or empty table leaves every `field_provenance` NULL and
+          every value as the curator typed it.
+
   - name: dwh_source
-    database: default_catalog 
-    schema: radiant_data_dev 
+    database: default_catalog
+    schema: radiant_data_dev
     description: "Raw data from d3b data warehouses."
     
     tables:
